@@ -831,18 +831,18 @@ namespace TagTool.Tags.Definitions
                     TopRight,
                     BottomRight,
                     BottomLeft,
-                    Center,
-                    TopEdge,
-                    GrenadeA,
-                    GrenadeB,
-                    GrenadeC,
-                    GrenadeD,
+                    Crosshair,
+                    TopCenter,
+                    GrenadeHuman,
+                    GrenadePlasma,
+                    GrenadeBrute,
+                    GrenadeFire,
                     ScoreboardFriendly,
                     ScoreboardEnemy,
-                    HealthAndShield,
-                    BottomEdge, //same as center
-                    EquipmentXY, //uses both x and y offsets
-                    EquipmentY, //x offset always 0
+                    Parent,
+                    Center, //same as crosshair
+                    BackpackWeapon, //uses both x and y offsets
+                    Equipment, //x offset always 0
                     Ddamge, //same as center
                     Territory1,
                     Territory2,
@@ -856,8 +856,8 @@ namespace TagTool.Tags.Definitions
                     StateMessageLeft,
                     MessageBottomState,
                     MessageBottomPrimary, //separate float for this in chgd
-                    GametypeFriendly,
-                    GametypeEnemy,
+                    ScoreboardFriendlyScoreOffset,
+                    ScoreboardEnemyScoreOffset,
                     MetagameBar,
                     MetagamePlayer1,
                     MetagamePlayer2,
@@ -1571,13 +1571,20 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public int RuntimeWidgetIndex;
 
-                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public WidgetBitmapFlags Flags;
-                [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
-                public byte[] Padding0;
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public WidgetBitmapFlagsH3 FlagsH3;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                public WidgetBitmapFlagsODST FlagsODST;
+
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
+                public WidgetBitmapFlagsHO Flags;
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public uint FlagsReach;
+                public WidgetBitmapFlagsReach FlagsReach;
+
+                [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.Halo3ODST)]
+                public byte[] Padding0;
 
                 public CachedTag Bitmap;
                 public byte BitmapSequenceIndex;
@@ -1589,7 +1596,7 @@ namespace TagTool.Tags.Definitions
                 public Rectangle2d ClipBounds;
 
                 [Flags]
-                public enum WidgetBitmapFlags : ushort
+                public enum WidgetBitmapFlagsH3 : ushort
                 {
                     None,
                     MirrorHorizontally = 1 << 0,
@@ -1603,11 +1610,89 @@ namespace TagTool.Tags.Definitions
                     Player3Emblem = 1 << 8,
                     Player4Emblem = 1 << 9,
                     ScaleAlphaByColOutA = 1 << 10,
-                    Stretch = 1 << 11,
-                    Bit12 = 1 << 12,					// not in H3
-                    Bit13 = 1 << 13,                    // not in H3
-                    InputControlsConsumable = 1 << 14,  // not in H3
-                    InputControlsWeapon = 1 << 15       // not in H3
+                    Stretch = 1 << 11, // NCC
+                }
+
+                [Flags]
+                public enum WidgetBitmapFlagsODST : ushort
+                {
+                    None,
+                    MirrorHorizontally = 1 << 0,
+                    MirrorVertically = 1 << 1,
+                    ExtendBorder = 1 << 2, // stretch edges
+                    UseTextureCam = 1 << 3,
+                    UseWrapSampling = 1 << 4, // looping
+                    SpriteFromPlayerCharacterType = 1 << 5,
+                    SpriteFromSurivalRounds = 1 << 6,
+                    SpriteFromUnknon1 = 1 << 7,
+                    SpriteFromUnknon2 = 1 << 8,
+                    Player1Emblem = 1 << 9,
+                    Player2Emblem = 1 << 10,
+                    Player3Emblem = 1 << 11,
+                    Player4Emblem = 1 << 12,
+                    ScaleAlphaByColOutA = 1 << 13,
+                    Stretch = 1 << 14, // MCC
+                }
+
+                [Flags]
+                public enum WidgetBitmapFlagsHO : uint
+                {
+                    None,
+                    MirrorHorizontally = 1 << 0,
+                    MirrorVertically = 1 << 1,
+                    ExtendBorder = 1 << 2, // stretch edges
+                    UseTextureCam = 1 << 3,
+                    UseWrapSampling = 1 << 4, // looping
+                    SpriteFromPlayerCharacterType = 1 << 5,
+                    SpriteFromSurivalRounds = 1 << 6,
+                    SpriteFromUnknon1 = 1 << 7,
+                    SpriteFromUnknon2 = 1 << 8,
+                    Player1Emblem = 1 << 9,
+                    Player2Emblem = 1 << 10,
+                    Player3Emblem = 1 << 11,
+                    Player4Emblem = 1 << 12,
+                    ScaleAlphaByColOutA = 1 << 13,
+                    SpriteFromConsumable = 1 << 14,
+                    SpriteFromWeapon = 1 << 15,
+                    Stretch = 1 << 16, // ED
+                }
+
+                [Flags]
+                public enum WidgetBitmapFlagsReach : uint
+                {
+                    None,
+                    MirrorHorizontally = 1 << 0,
+                    MirrorVertically = 1 << 1,
+                    ExtendBorder = 1 << 2, // stretch edges
+                    UseTextureCam = 1 << 3,
+                    UseWrapSampling = 1 << 4, // looping
+                    SpriteFromPlayerCharacterType = 1 << 5,
+                    SpriteFromSurivalRounds = 1 << 6,
+                    SpriteFromUnknon1 = 1 << 7,
+                    SpriteFromUnknon2 = 1 << 8,
+                    Player1Emblem = 1 << 9,
+                    Player2Emblem = 1 << 10,
+                    Player3Emblem = 1 << 11,
+                    Player4Emblem = 1 << 12,
+                    ScaleAlphaByColOutA = 1 << 13,
+                    Bit14 = 1 << 14,
+                    Bit15 = 1 << 15,
+                    Bit16 = 1 << 16,
+                    Bit17 = 1 << 17,
+                    Bit18 = 1 << 18,
+                    Bit19 = 1 << 19,
+                    Bit20 = 1 << 20,
+                    Bit21 = 1 << 21,
+                    Bit22 = 1 << 22,
+                    Bit23 = 1 << 23,
+                    Bit24 = 1 << 24,
+                    Bit25 = 1 << 25,
+                    Bit26 = 1 << 26,
+                    Bit27 = 1 << 27,
+                    Bit28 = 1 << 28,
+                    Bit29 = 1 << 29,
+                    Bit30 = 1 << 30,
+                    Bit31 = 1u << 31
                 }
             }
 

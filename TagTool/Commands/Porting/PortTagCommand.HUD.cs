@@ -69,6 +69,24 @@ namespace TagTool.Commands.Porting
             return renderData;
         }
 
+        private ChudDefinition.HudWidget.BitmapWidget ConvertBitmapWidget(ChudDefinition.HudWidget.BitmapWidget bitmapWidget)
+        {
+            switch (BlamCache.Version)
+            {
+                case CacheVersion.Halo3Retail:
+                    bitmapWidget.Flags = GetEquivalentFlags(bitmapWidget.Flags, bitmapWidget.FlagsH3);
+                    break;
+                case CacheVersion.Halo3ODST:
+                    bitmapWidget.Flags = GetEquivalentFlags(bitmapWidget.Flags, bitmapWidget.FlagsODST);
+                    break;
+                case CacheVersion.HaloReach:
+                    bitmapWidget.Flags = GetEquivalentFlags(bitmapWidget.Flags, bitmapWidget.FlagsReach);
+                    break;
+            }
+
+            return bitmapWidget;
+        }
+
         private ChudDefinition.HudWidget.TextWidget ConvertTextWidget(ChudDefinition.HudWidget.TextWidget textWidget)
         {
             switch (BlamCache.Version)
@@ -203,6 +221,11 @@ namespace TagTool.Commands.Porting
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.X *= 1.5f;
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].PlacementData[0].Scale.Y *= 1.5f;
                     }
+                }
+
+                for (int bitmapWidgetIndex = 0; bitmapWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets.Count; bitmapWidgetIndex++)
+                {
+                    chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex] = ConvertBitmapWidget(chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex]);
                 }
 
                 for (int textWidgetIndex = 0; textWidgetIndex < chudDefinition.HudWidgets[hudWidgetIndex].TextWidgets.Count; textWidgetIndex++)
