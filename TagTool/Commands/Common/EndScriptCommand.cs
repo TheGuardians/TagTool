@@ -39,7 +39,7 @@ namespace TagTool.Commands.Common
 			if (Program.ErrorCount > 0)
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
-				Console.Write($"{Program.ErrorCount} errors and ");
+				Console.Write($"{Program.ErrorCount} errors ");
 				Console.ResetColor();
 			}
 			else
