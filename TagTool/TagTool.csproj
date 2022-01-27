@@ -358,6 +358,7 @@
     <Compile Include="Commands\Common\BeginScriptCommand.cs" />
     <Compile Include="Commands\Common\EndScriptCommand.cs" />
     <Compile Include="Commands\Files\ConvertMapVariantCommand.cs" />
+    <Compile Include="Commands\Porting\ListBlamTagsCommand.cs" />
     <Compile Include="Commands\Porting\NameBlamTagCommand.cs" />
     <Compile Include="Commands\Porting\PortTagCommand.Damage.cs" />
     <Compile Include="Commands\Strings\VerifyStringsCommand.cs" />
