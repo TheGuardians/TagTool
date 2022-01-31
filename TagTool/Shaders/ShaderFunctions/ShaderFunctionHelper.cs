@@ -220,27 +220,32 @@ namespace TagTool.Shaders.ShaderFunctions
                     }
                     else // real
                     {
-                        bool PS = true;
-                        var parameterMapping = GetParameterMapping(cache, template, animParameter.Name, (EntryPoint)i, ParameterUsage.PS_Real);
-                        if (parameterMapping == null) // returns null if not found, so check for VS parameter (maybe need to store?)
-                        {
-                            PS = false;
-                            parameterMapping = GetParameterMapping(cache, template, animParameter.Name, (EntryPoint)i, ParameterUsage.VS_Real);
-                        }
+                        var psParameterMapping = GetParameterMapping(cache, template, animParameter.Name, (EntryPoint)i, ParameterUsage.PS_Real);
 
-                        if (parameterMapping != null)
+                        if (psParameterMapping != null)
                         {
                             var rmParam = new RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock
                             {
-                                RegisterIndex = (short)parameterMapping.DestinationIndex,
-                                SourceIndex = parameterMapping.SourceIndex,
+                                RegisterIndex = (short)psParameterMapping.DestinationIndex,
+                                SourceIndex = psParameterMapping.SourceIndex,
                                 FunctionIndex = (byte)animParameter.FunctionIndex
                             };
 
-                            if (PS)
-                                realPixelParameters.Add(rmParam);
-                            else
-                                realVertexParameters.Add(rmParam);
+                            realPixelParameters.Add(rmParam);
+                        }
+
+                        var vsParameterMapping = GetParameterMapping(cache, template, animParameter.Name, (EntryPoint)i, ParameterUsage.VS_Real);
+
+                        if (vsParameterMapping != null)
+                        {
+                            var rmParam = new RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock
+                            {
+                                RegisterIndex = (short)vsParameterMapping.DestinationIndex,
+                                SourceIndex = vsParameterMapping.SourceIndex,
+                                FunctionIndex = (byte)animParameter.FunctionIndex
+                            };
+
+                            realVertexParameters.Add(rmParam);
                         }
                     }
                 }
