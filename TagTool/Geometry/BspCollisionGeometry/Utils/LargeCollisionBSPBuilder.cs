@@ -1611,7 +1611,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             double plane_I = Coords2.Y - Coords1.Y;
             double plane_J = Coords1.X - Coords2.X;
 
-            double dist = (float)Math.Sqrt(plane_I * plane_I + plane_J * plane_J);
+            double dist = Math.Sqrt(plane_I * plane_I + plane_J * plane_J);
 
             if (Math.Abs(dist) < 0.00009999999747378752)
             {

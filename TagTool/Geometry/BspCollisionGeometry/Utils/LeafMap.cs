@@ -162,8 +162,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     {
                         int child_index = -1;
                         leaf new_leaf = new leaf();
-                        if (!bsp3d_split_manual(bsp_leaf, i, plane_index, ref new_leaf) ||
-                            !reconstruct_bsp_leaf(new_leaf, ref child_index))
+                        if (!bsp3d_split_manual(bsp_leaf, i, plane_index, ref new_leaf))
+                            return false;
+                        if(!reconstruct_bsp_leaf(new_leaf, ref child_index))
                             return false;
                         if (i == 0)
                             Bsp.Bsp3dNodes[new_leaf_index].BackChild = child_index;
@@ -203,7 +204,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 RealPlane3d plane_block = Bsp.Planes[plane_index].Value;
                 if (use_plane_margins == 1)
                     plane_block.D += split_side == 1 ? -0.00024414062f : 0.00024414062f;
-                List <polygon> polygonlist = use_plane_margins == 0 ? bsp_leaf.polygons : bsp_leaf.polygons2;
+                List<polygon> polygonlist = use_plane_margins == 0 ? bsp_leaf.polygons : bsp_leaf.polygons2;
                 foreach(var polygon in polygonlist)
                 {
                     List<RealPoint3d> polygon_points = new List<RealPoint3d>();
@@ -239,14 +240,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         new_leaf.polygons.Add(new_polygon);
                         new_leaf.polygon_counts[0, polygon_type]++;
                         new_leaf.polygon_areas_by_type[0, polygon_type] += polygon_area;
-                        new_leaf.polygon_area_sums[0] += polygon_area;
                     }
                     else
                     {
                         new_leaf.polygons2.Add(new_polygon);
                         new_leaf.polygon_counts[1, polygon_type]++;
                         new_leaf.polygon_areas_by_type[1, polygon_type] += polygon_area;
-                        new_leaf.polygon_area_sums[1] += polygon_area;
                     }                        
                 }
             }
@@ -456,6 +455,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     new RealPoint2d(-1536,1536)
                 };
                 int levels_up = 0;
+                int blah = 0;
                 while(result_vertices.Count > 0)
                 {
                     int current_node = leaf_map_node_stack[leaf_map_node_stack_count - levels_up];
@@ -471,7 +471,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         if (plane_intersection_result == 1)
                         {
                             //use this intersection line to cut the polygon down to size
-                            result_vertices = plane_cut_polygon_2d_new(intersection_plane, result_vertices, 0.00024414062d);
+                            result_vertices = plane_cut_polygon_2d(intersection_plane, result_vertices, 0.00024414062d);
                         }
                         else if (plane_intersection_result == 0)
                         {
@@ -769,7 +769,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 if (portal_point_index == 0)
                     last_portal_point_index = leaf_portal_points.Count - 1;
                 RealPlane2d plane2d = Bsp_Builder.generate_bsp2d_plane_parameters(leaf_portal_points[portal_point_index], leaf_portal_points[last_portal_point_index]).Plane;
-                polygon_points = plane_cut_polygon_2d_new(plane2d, polygon_points, margin);
+                polygon_points = plane_cut_polygon_2d(plane2d, polygon_points, margin);
                 if (polygon_points.Count <= 0)
                     break;
             }
@@ -777,9 +777,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         }
         public List<RealPoint2d> plane_cut_polygon_2d(RealPlane2d plane2d, List<RealPoint2d> polygon_points, double margin)
         {
-            List<RealPoint2d> output_points = new List<RealPoint2d>();
+            //List<RealPoint2d> output_points = new List<RealPoint2d>();
+            RealPoint2d[] output_points = new RealPoint2d[512];
             RealPoint2d previous_point = polygon_points[polygon_points.Count - 1];
-            double d0 = point_plane_dot_product_2d(previous_point, plane2d);
+            double d0 = point_get_plane_distance_2d(previous_point, plane2d);
 
             bool vertex_d_greater_than_margin = false;
             bool vertex_d_less_than_negative_margin = false;
@@ -799,16 +800,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 if (d1 >= 0 != d0 >= 0)
                 {
                     RealPoint2d vector = previous_point - current_point;
-                    double midpoint_d = point_plane_dot_product_2d(vector, plane2d);
+                    double dot_product = point_plane_dot_product_2d(vector, plane2d);
                     //protect from dividing by zero
-                    double dratio = midpoint_d == 0.0f ? 0.0f : -d1 / midpoint_d;
+                    double dratio = dot_product == 0.0f ? 0.0f : -d1 / dot_product;
                     //clamp to range of 0 and 1
                     dratio = Math.Min(Math.Max(dratio, 0.0d), 1.0d);
-                    output_points.Add(new RealPoint2d
-                    {
-                        X = (float)(vector.X * dratio + current_point.X),
-                        Y = (float)(vector.Y * dratio + current_point.Y),
-                    });
+                    output_points[current_output_index] = vertex_shift_to_plane_2d(current_point, vector, dratio, true);
                     current_output_index++;
                     //make sure distances between consecutive vertices and the first vertex are > margin
                     if (current_output_index != 1 &&
@@ -817,13 +814,12 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         margin > Math.Abs(output_points[current_output_index - 1].X - output_points[current_output_index - 2].X) &&
                         margin > Math.Abs(output_points[current_output_index - 1].Y - output_points[current_output_index - 2].Y)))
                     {
-                        output_points.RemoveAt(output_points.Count - 1);
                         current_output_index--;
                     }
                 }
                 if (d1 >= 0)
                 {
-                    output_points.Add(current_point);
+                    output_points[current_output_index] = current_point;
                     current_output_index++;
                     //make sure distances between consecutive vertices and the first vertex are > 0.0001
                     if (current_output_index != 1 &&
@@ -832,7 +828,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         margin > Math.Abs(output_points[current_output_index - 1].X - output_points[current_output_index - 2].X) &&
                         margin > Math.Abs(output_points[current_output_index - 1].Y - output_points[current_output_index - 2].Y)))
                     {
-                        output_points.RemoveAt(output_points.Count - 1);
                         current_output_index--;
                     }
                 }
@@ -840,11 +835,15 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 previous_point = current_point;
             }
 
-            if (output_points.Count < 3 || !vertex_d_greater_than_margin)
+            if (current_output_index < 3 || !vertex_d_greater_than_margin)
                 return new List<RealPoint2d>();
             if (!vertex_d_less_than_negative_margin)
                 return polygon_points;
-            return output_points;
+
+            List<RealPoint2d> outlist = new List<RealPoint2d>();
+            for (var i = 0; i < current_output_index; i++)
+                outlist.Add(output_points[i]);
+            return outlist;
         }
 
         public List<RealPoint2d> plane_cut_polygon_2d_new(RealPlane2d plane2d, List<RealPoint2d> polygon_points, double margin)
@@ -963,7 +962,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             return XIYJ;
         }
 
-        public RealPoint2d vertex_shift_to_plane_2d(RealPoint2d p0, RealPoint2d p1, double dratio)
+        public RealPoint2d vertex_shift_to_plane_2d(RealPoint2d p0, RealPoint2d p1, double dratio, bool is_additive = false)
         {
             //precision requires this function to use identical order of operations as the compiled version
             /*
@@ -973,11 +972,14 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             double p1x = p1.X;
             double p1xD = p1x * dratio;
             double xresult = p0.X - p1xD;
+            if (is_additive)
+                xresult = p0.X + p1xD;
 
             double p1y = p1.Y;
             double p1yD = p1y * dratio;
             double yresult = p0.Y - p1yD;
-
+            if(is_additive)
+                yresult = p0.Y + p1yD;
             return new RealPoint2d((float)xresult, (float)yresult);
         }
 
