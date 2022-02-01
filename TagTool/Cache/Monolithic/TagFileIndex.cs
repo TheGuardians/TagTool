@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Common;
@@ -33,6 +34,11 @@ namespace TagTool.Cache.Monolithic
                 entry.WideBlockIndex = new WideDatumHandle(compressedEntry.WideBlockIndex);
                 Files.Add(entry);
             }
+        }
+
+        internal int FindFileEntry(uint id)
+        {
+            return Files.FindIndex(x => x.Id == id);
         }
 
         // IReadOnlyList<T> Interface

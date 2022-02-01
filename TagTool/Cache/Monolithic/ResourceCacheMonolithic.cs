@@ -81,7 +81,11 @@ namespace TagTool.Cache.Monolithic
             if (xsyncState == null)
                 return null;
 
-            if (!Backend.TagFileIndex.GetCacheFilePartitionBlock((int)xsyncState.ResourceOwner, out PartitionBlock partitionBlock))
+            var entryIndex = Backend.TagFileIndex.Index.FindFileEntry(xsyncState.ResourceOwner);
+            if (entryIndex == -1)
+                return null;
+
+            if (!Backend.TagFileIndex.GetCacheFilePartitionBlock(entryIndex, out PartitionBlock partitionBlock))
                 return null;
 
             byte[] primaryData, secondaryData;
