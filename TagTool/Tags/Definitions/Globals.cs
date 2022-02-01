@@ -11,7 +11,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x608, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x618, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline571627)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x614, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "globals", Tag = "matg", Size = 0x714, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x714, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x7A8, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class Globals : TagStructure
 	{
@@ -1640,7 +1640,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x50, Align = 0x8, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public class LanguagePack : TagStructure
         {

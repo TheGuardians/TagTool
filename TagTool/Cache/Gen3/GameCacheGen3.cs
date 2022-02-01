@@ -52,7 +52,7 @@ namespace TagTool.Cache
             if(Platform == CachePlatform.MCC)
             {
                 ulong bucketOffset = 0;
-                if (Version == CacheVersion.HaloReach)
+                if (Version >= CacheVersion.HaloReach)
                     bucketOffset = address >> 28 << 28;
 
                 return (uint)((address << 2) - headerGen3.VirtualBaseAddress.Value + tagDataSectionOffset + bucketOffset);

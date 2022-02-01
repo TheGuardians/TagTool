@@ -1042,7 +1042,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.HaloReach11883)]
         public class Gear : TagStructure
         {
             public TorqueCurveStruct LoadedTorqueCurve;

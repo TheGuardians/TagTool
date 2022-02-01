@@ -51,7 +51,7 @@ namespace TagTool.Commands.Shaders
                     string disassembly = null;
                     if (Cache.GetType() == typeof(GameCacheGen3))
                     {
-                        if (Cache.Version == CacheVersion.HaloReach)
+                        if (Cache.Version >= CacheVersion.HaloReach)
                         {
                             using (var stream = Cache.OpenCacheRead())
                                 gpix = Cache.Deserialize<GlobalCacheFilePixelShaders>(stream, Cache.TagCache.FindFirstInGroup("gpix"));
@@ -79,7 +79,7 @@ namespace TagTool.Commands.Shaders
                 {
                     if (Cache.GetType() == typeof(GameCacheGen3))
                     {
-                        if (Cache.Version == CacheVersion.HaloReach)
+                        if (Cache.Version >= CacheVersion.HaloReach)
                         {
                             using (var stream = Cache.OpenCacheRead())
                                 gpix = Cache.Deserialize<GlobalCacheFilePixelShaders>(stream, Cache.TagCache.FindFirstInGroup("gpix"));

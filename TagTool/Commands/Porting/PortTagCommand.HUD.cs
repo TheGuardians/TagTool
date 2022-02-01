@@ -80,6 +80,7 @@ namespace TagTool.Commands.Porting
                     bitmapWidget.Flags = GetEquivalentFlags(bitmapWidget.Flags, bitmapWidget.FlagsODST);
                     break;
                 case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach11883:
                     bitmapWidget.Flags = GetEquivalentFlags(bitmapWidget.Flags, bitmapWidget.FlagsReach);
                     break;
             }
@@ -109,7 +110,7 @@ namespace TagTool.Commands.Porting
 
         private ChudDefinition ConvertChudDefinition(ChudDefinition chudDefinition)
         {
-            if (BlamCache.Version == CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
                 return chudDefinition;
 
             for (int hudWidgetIndex = 0; hudWidgetIndex < chudDefinition.HudWidgets.Count; hudWidgetIndex++)

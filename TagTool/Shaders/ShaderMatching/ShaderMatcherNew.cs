@@ -390,7 +390,7 @@ namespace TagTool.Shaders.ShaderMatching
 
                     if (methodName == "reach_compatibility")
                     {
-                        newOptions.Add(PortingCache.Version == CacheVersion.HaloReach ? (byte)1 : (byte)0);
+                        newOptions.Add(PortingCache.Version >= CacheVersion.HaloReach ? (byte)1 : (byte)0);
                         continue;
                     }
 

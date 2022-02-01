@@ -32,7 +32,7 @@ namespace TagTool.Commands.Porting
                 {
                     var buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.Gen3Info.VertexBufferIndex].Definition;
                         
-                    if(BlamCache.Version == CacheVersion.HaloReach)
+                    if(BlamCache.Version >= CacheVersion.HaloReach)
                     {
                         grid.HaloOnlineInfo = new ScenarioStructureBsp.Cluster.DecoratorGrid.HaloOnlineDecoratorInfo()
                         {
@@ -103,7 +103,7 @@ namespace TagTool.Commands.Porting
             // Without this 005_intro crash on cortana sbsp       
             sbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
 
-            if (BlamCache.Version == CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 // Temporary fix for collision - prior to sbsp version 3, instance buckets were used for collision
                 sbsp.ImportVersion = 2;

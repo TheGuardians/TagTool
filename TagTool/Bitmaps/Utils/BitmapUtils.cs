@@ -761,7 +761,7 @@ namespace TagTool.Bitmaps
         public static byte[] ConvertXboxFormats(byte[] data, uint width, uint height, BitmapFormat format, BitmapType type, bool requireDecompression, CacheVersion version)
         {
             // fix enum from reach
-            if (version == CacheVersion.HaloReach) 
+            if (version >= CacheVersion.HaloReach) 
             {
                 if (format >= (BitmapFormat)36)
                     format -= 5;

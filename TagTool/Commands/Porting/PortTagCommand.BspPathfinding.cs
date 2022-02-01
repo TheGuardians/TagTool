@@ -79,7 +79,7 @@ namespace TagTool.Commands.Porting
             // Convert reach instanced geometry instances
             //
 
-            if(BlamCache.Version == CacheVersion.HaloReach)
+            if(BlamCache.Version >= CacheVersion.HaloReach)
             {
                 bsp.InstancedGeometryInstances = new System.Collections.Generic.List<InstancedGeometryInstance>();
                 bsp.InstancedGeometryInstances.AddRange(resourceDefinition.InstancedGeometryInstances);

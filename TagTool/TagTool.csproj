@@ -393,6 +393,7 @@
     <Compile Include="Commands\Strings\VerifyStringsCommand.cs" />
     <Compile Include="Common\BitStream.cs" />
     <Compile Include="Common\ColorConversion.cs" />
+    <Compile Include="Common\GameTitle.cs" />
     <Compile Include="Common\MathHelper.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\VerifyBsp3d.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />

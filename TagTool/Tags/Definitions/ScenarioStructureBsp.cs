@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x394, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3B8, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x51C, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x51C, MinVersion = CacheVersion.HaloReach)]
     public class ScenarioStructureBsp : TagStructure
     {
         [TagField(Flags = TagFieldFlags.Padding, Length = 12, MaxVersion = CacheVersion.Halo2Vista)]
@@ -1011,7 +1011,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
         [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo4)]
         public class StructureInstanceGroupDefinition : TagStructure
         {

@@ -13,7 +13,7 @@ namespace TagTool.Commands.Porting
     {
         public DamageEffect ConvertDamageEffect(DamageEffect damageEffect)
         {
-            if (BlamCache.Version == CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 damageEffect.Flags = damageEffect.FlagsReach.ConvertLexical<DamageEffect.DamageFlags>();
 
@@ -26,7 +26,7 @@ namespace TagTool.Commands.Porting
 
         public DamageResponseDefinition ConvertDamageResponseDefinition(Stream blamCacheStream, DamageResponseDefinition damageResponse)
         {
-            if (BlamCache.Version == CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 foreach(var responseClass in damageResponse.Classes)
                 {
@@ -80,6 +80,7 @@ namespace TagTool.Commands.Porting
                         value = damageReportingType.Halo3Retail.ToString();
                     break;
                 case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach11883:
                     value = damageReportingType.HaloReach.ToString();
                     break;
             }

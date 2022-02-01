@@ -111,7 +111,8 @@ namespace TagTool.Geometry.BspCollisionGeometry
 
     [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x74, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x9C, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x9C, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0xA0, MinVersion = CacheVersion.HaloReach11883)]
     public class InstancedGeometryInstance : TagStructure
     {
         public float Scale;
@@ -178,6 +179,9 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public short CubemapBitmapIndex1;
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public float CubemapBlendFactor;
+
+        [TagField(Version = CacheVersion.HaloReach11883)]
+        public StringId NameReach;
 
 
         [Flags]

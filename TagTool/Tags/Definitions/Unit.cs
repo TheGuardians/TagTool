@@ -503,7 +503,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x4C, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x70, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x70, MaxVersion = CacheVersion.HaloReach11883)]
         public class UnitCameraAcceleration : TagStructure
         {
             [TagField(MinVersion = CacheVersion.HaloReach)]

@@ -38,7 +38,7 @@ namespace TagTool.Geometry
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
 
-                            if (inVersion == CacheVersion.HaloReach)
+                            if (inVersion >= CacheVersion.HaloReach)
                                 v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
                             else
                                 v.Binormal = ConvertVectorSpace(v.Binormal);
@@ -53,7 +53,7 @@ namespace TagTool.Geometry
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
 
-                            if (inVersion == CacheVersion.HaloReach)
+                            if (inVersion >= CacheVersion.HaloReach)
                                 v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
                             else
                                 v.Binormal = ConvertVectorSpace(v.Binormal);
@@ -68,7 +68,7 @@ namespace TagTool.Geometry
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
 
-                            if (inVersion == CacheVersion.HaloReach)
+                            if (inVersion >= CacheVersion.HaloReach)
                                 v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
                             else
                                 v.Binormal = ConvertVectorSpace(v.Binormal);
@@ -142,7 +142,7 @@ namespace TagTool.Geometry
                     case VertexBufferFormat.TinyPosition:
                         ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) =>
                         {
-                            if (inVersion == CacheVersion.HaloReach)
+                            if (inVersion >= CacheVersion.HaloReach)
                                 v.Position = v.Position * 1.0f / ushort.MaxValue;
                             else
                                 v.Position = ConvertPositionShort(v.Position);

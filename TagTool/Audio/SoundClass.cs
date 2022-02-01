@@ -433,6 +433,7 @@ namespace TagTool.Audio
                     break;
 
                 case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach11883:
                     value = HaloReach.ToString();
                     break;
             }

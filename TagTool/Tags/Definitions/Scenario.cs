@@ -20,7 +20,7 @@ namespace TagTool.Tags.Definitions
         [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
         public byte MapTypePadding;
 
-        [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.Original)]
         public byte MapTypePaddingReach;
 
         public ScenarioMapType MapType;
@@ -1692,7 +1692,7 @@ namespace TagTool.Tags.Definitions
                 public int MaximumAllowed;
                 public int PricePerInstance;
 
-                [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+                [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
                 [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo4)]
                 public class MapVariantObjectVariantBlock : TagStructure
                 {
@@ -1913,7 +1913,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
         [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo4)]
         public class ScenarioAcousticSectorBlockStruct : TagStructure
         {
@@ -2205,7 +2205,7 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x68, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloReach11883)]
         public class Squad : TagStructure
 		{
             /// <summary>
@@ -3754,7 +3754,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0xCC, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0xE8, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloReach)]
+            [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloReach11883)]
             public class Task : TagStructure
 			{
                 public TaskFlags Flags;
@@ -3795,7 +3795,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public float ExhaustionDelay;
 
-                [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+                [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
                 public uint Unknown23;
 
                 [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -4320,7 +4320,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown5;
         }
 
-        [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
         [TagStructure(Size = 0x30, MinVersion = CacheVersion.Halo4)]
         public class ScenarioCubemapBlock : TagStructure
         {

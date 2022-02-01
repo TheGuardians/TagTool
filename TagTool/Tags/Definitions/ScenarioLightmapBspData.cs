@@ -160,7 +160,7 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x48, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
     public class InstancedGeometryLightProbe : TagStructure
     {
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -170,7 +170,7 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
     public class Airprobe : TagStructure
     {
         public RealPoint3d Position;
@@ -183,7 +183,7 @@ namespace TagTool.Tags.Definitions
     }
 
     [TagStructure(Size = 0x50, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
     public class SceneryLightProbe : TagStructure
     {
         public ScenarioObjectIdentifier ObjectId;
@@ -201,7 +201,7 @@ namespace TagTool.Tags.Definitions
         public List<MachineLightProbe> LightProbes;
 
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
         public class MachineLightProbe : TagStructure
         {
             public RealPoint3d Position;

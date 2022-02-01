@@ -25,6 +25,7 @@ namespace TagTool.Audio
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach11883:
                     InitGen3Sound(sound, soundGestalt, permutationGestaltIndex, data);
                     break;
                 default:

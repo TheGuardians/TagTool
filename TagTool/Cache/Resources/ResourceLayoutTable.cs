@@ -5,7 +5,7 @@ using TagTool.Tags;
 
 namespace TagTool.Cache.Resources
 {
-    [TagStructure(Name = "cache_file_resource_layout_table", Tag = "play", Size = 0x3C, MaxVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "cache_file_resource_layout_table", Tag = "play", Size = 0x3C, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.Original)]
     [TagStructure(Name = "cache_file_resource_layout_table", Tag = "play", Size = 0x48, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class ResourceLayoutTable : TagStructure
     {

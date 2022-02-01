@@ -39,7 +39,7 @@ namespace TagTool.Commands.Porting
                     int CompressedDataSize = 0;
                     int StaticDataSize = 0;
                     int ExtraData = 0;
-                    if(BlamCache.Version == CacheVersion.HaloReach)
+                    if(BlamCache.Version >= CacheVersion.HaloReach)
                     {
                         MovementDataSize = member.PackedDataSizesReach.MovementData;
                         StaticNodeFlagsSize = member.PackedDataSizesReach.StaticNodeFlags;
@@ -439,7 +439,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            if (BlamCache.Version == CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 //convert animations
                 foreach (var animation in definition.Animations)

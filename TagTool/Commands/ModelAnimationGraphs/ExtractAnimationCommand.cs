@@ -60,7 +60,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             List<Node> renderModelNodes = GetNodeDefaultValues();
 
             //shift reach data into h3 fields
-            if (CacheContext.Version == CacheVersion.HaloReach)
+            if (CacheContext.Version >= CacheVersion.HaloReach)
             {
                 foreach(var animation in Animation.Animations)
                 {
@@ -121,9 +121,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
             if (resourcedata == null)
                 return null;
             var resourcemember = resourcedata.GroupMembers[animationblock.AnimationData.ResourceGroupMemberIndex];
-            var staticflagssize = CacheContext.Version == CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.StaticNodeFlags : resourcemember.PackedDataSizes.StaticNodeFlags;
-            var animatedflagssize = CacheContext.Version == CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.AnimatedNodeFlags : resourcemember.PackedDataSizes.AnimatedNodeFlags;
-            var staticdatasize = CacheContext.Version == CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.StaticDataSize : resourcemember.PackedDataSizes.StaticDataSize;
+            var staticflagssize = CacheContext.Version >= CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.StaticNodeFlags : resourcemember.PackedDataSizes.StaticNodeFlags;
+            var animatedflagssize = CacheContext.Version >= CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.AnimatedNodeFlags : resourcemember.PackedDataSizes.AnimatedNodeFlags;
+            var staticdatasize = CacheContext.Version >= CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.StaticDataSize : resourcemember.PackedDataSizes.StaticDataSize;
             AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount, 
                 resourcemember.NodeCount, CalculateNodeListChecksum(Animation.SkeletonNodes, 0), 
                 (FrameInfoType)resourcemember.MovementDataType, staticflagssize, animatedflagssize, staticdatasize);

@@ -36,7 +36,7 @@ namespace TagTool.Geometry
                 {
                     return ConvertHalo3(geometry, resourceDefinition);
                 }
-                else if(SourceCache.Version == CacheVersion.HaloReach)
+                else if(SourceCache.Version >= CacheVersion.HaloReach)
                 {
                     return ConvertHaloReach(geometry, resourceDefinition);
                 }
@@ -298,7 +298,7 @@ namespace TagTool.Geometry
                             var tesselatedParameters = h3WaterParameters[triangleIndices.WaterIndices[j]];
 
                             StaticPerPixelData spp;
-                            if (SourceCache.Version == CacheVersion.HaloReach && (triangleIndices.MeshIndices[j] >= staticPerPixel.Count || !currentPartData.Item3))
+                            if (SourceCache.Version >= CacheVersion.HaloReach && (triangleIndices.MeshIndices[j] >= staticPerPixel.Count || !currentPartData.Item3))
                                 spp = new StaticPerPixelData() { Texcoord = new RealVector2d(0, 0) };
                             else
                                 spp = staticPerPixel[triangleIndices.MeshIndices[j]];

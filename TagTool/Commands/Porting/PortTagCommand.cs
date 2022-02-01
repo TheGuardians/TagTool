@@ -570,9 +570,8 @@ namespace TagTool.Commands.Porting
                     if (!FlagIsSet(PortingFlags.Elites) && (blamTag.Name.Contains("elite") || blamTag.Name.Contains("dervish")))
                         return null;
                     break;
-                case "char" when BlamCache.Version == CacheVersion.HaloReach:
+                case "char" when BlamCache.Version >= CacheVersion.HaloReach:
                     return null;
-                    break;
 
                 case "sncl" when BlamCache.Version > CacheVersion.HaloOnline700123:
                     return CacheContext.TagCache.GetTag<SoundClasses>(@"sound\sound_classes");
@@ -708,7 +707,7 @@ namespace TagTool.Commands.Porting
 			// Perform pre-conversion fixups to the Blam tag definition
 			//
 
-            if(BlamCache.Version == CacheVersion.HaloReach)
+            if(BlamCache.Version >= CacheVersion.HaloReach)
             {
                 PreConvertReachDefinition(blamDefinition);
             }
@@ -759,7 +758,7 @@ namespace TagTool.Commands.Porting
 
             ((TagStructure)blamDefinition).PreConvert(BlamCache.Version, CacheContext.Version);
 
-            if (BlamCache.Version == CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 if (blamDefinition is Scenario scnr)
                 {
@@ -2074,7 +2073,7 @@ namespace TagTool.Commands.Porting
 				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
 					throw new FormatException(BlamCache.Version.ToString());
 
-            if (BlamCache.Version == CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
                 if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
                     throw new FormatException(BlamCache.Version.ToString());
 
@@ -2097,7 +2096,7 @@ namespace TagTool.Commands.Porting
 				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
 					throw new FormatException(BlamCache.Version.ToString());
 
-            if (BlamCache.Version == CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
                 if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
                     throw new FormatException(BlamCache.Version.ToString());
 

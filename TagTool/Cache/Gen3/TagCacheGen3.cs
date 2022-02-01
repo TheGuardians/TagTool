@@ -218,7 +218,7 @@ namespace TagTool.Cache.Gen3
                     ulong tagAddress = reader.ReadUInt32();
 
                     ulong bucketOffset = 0;
-                    if(Version == CacheVersion.HaloReach)
+                    if(Version >= CacheVersion.HaloReach)
                         bucketOffset = tagAddress >> 28 << 28;
 
                     offset = (uint)(((tagAddress << 2) - tagDataSectionOffset) + bucketOffset);

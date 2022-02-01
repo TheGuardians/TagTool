@@ -407,7 +407,7 @@ namespace TagTool.Commands.Porting
 					track.AlternateFadeOutMode = SoundLooping.Track.SoundFadeMode.None;
 				}
 			}
-			else if (BlamCache.Version == CacheVersion.HaloReach)
+			else if (BlamCache.Version >= CacheVersion.HaloReach)
 			{
 				foreach (var track in soundLooping.Tracks)
 				{

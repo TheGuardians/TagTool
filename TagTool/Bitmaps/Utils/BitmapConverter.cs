@@ -136,7 +136,7 @@ namespace TagTool.Bitmaps.Utils
             
 
             // fix enum from reach
-            if (version == CacheVersion.HaloReach)
+            if (version >= CacheVersion.HaloReach)
             {
                 if (bitmap.Images[imageIndex].Format >= (BitmapFormat)38)
                     bitmap.Images[imageIndex].Format -= 5;

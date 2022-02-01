@@ -9,7 +9,7 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x54, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "collision_model", Tag = "coll", Size = 0x50, MinVersion = CacheVersion.HaloReach)]
     public class CollisionModel : TagStructure
 	{
         public int CollisionModelChecksum;
@@ -28,8 +28,6 @@ namespace TagTool.Tags.Definitions
         public List<PathfindingSphere> PathfindingSpheres;
         public List<Node> Nodes;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint Unknown;
 
         [TagStructure(Size = 0x4)]
         public class Material : TagStructure

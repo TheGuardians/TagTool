@@ -389,7 +389,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
             }
-            else if (BlamCache.Version == CacheVersion.HaloReach)
+            else if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 finalRm.ShaderProperties[0].QueryableProperties = new short[8];
 

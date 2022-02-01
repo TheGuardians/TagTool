@@ -22,7 +22,7 @@ namespace TagTool.Commands.Porting
                 phmo.RigidBodies[1].Flags |= PhysicsModel.RigidBody.RigidBodyFlags.DoesNotInteractWithEnvironment;
             }
 
-            if (BlamCache.Version == CacheVersion.HaloReach)
+            if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 foreach (var rigidbody in phmo.RigidBodies)
                 {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TagTool.Common;
 using TagTool.Tags;
 
 namespace TagTool.Cache
@@ -261,6 +262,8 @@ namespace TagTool.Cache
                         return "12.1.700123 cert_ms30_oct19";
                     case CacheVersion.HaloReach:
                         return "11860.10.07.24.0147.omaha_relea";
+                    case CacheVersion.HaloReach11883:
+                        return "11883.10.10.25.1227.dlc_1_ship__tag_test";
                     case CacheVersion.Halo4:
                         return "20810.12.09.22.1647.main";
                     default:
@@ -287,6 +290,7 @@ namespace TagTool.Cache
 				case CacheVersion.Halo3Retail:
 				case CacheVersion.Halo3ODST:
 				case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach11883:
                 case CacheVersion.Halo4:
 					return false;
 
@@ -427,6 +431,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach11883:
                     return CacheGeneration.Third;
 
                 case CacheVersion.HaloOnlineED:
@@ -468,6 +473,49 @@ namespace TagTool.Cache
             }
         }
 
+        public static GameTitle GetGameTitle(CacheVersion version)
+        {
+            switch (version)
+            {
+                case CacheVersion.HaloXbox:
+                case CacheVersion.HaloPC:
+                case CacheVersion.HaloCustomEdition:
+                    return GameTitle.HaloCE;
+                case CacheVersion.Halo2Beta:
+                case CacheVersion.Halo2Xbox:
+                case CacheVersion.Halo2Vista:
+                    return GameTitle.Halo2;
+                case CacheVersion.Halo3Beta:
+                case CacheVersion.Halo3Retail:
+                    return GameTitle.Halo3;
+                case CacheVersion.Halo3ODST:
+                    return GameTitle.Halo3ODST;
+                case CacheVersion.HaloOnlineED:
+                case CacheVersion.HaloOnline106708:
+                case CacheVersion.HaloOnline235640:
+                case CacheVersion.HaloOnline301003:
+                case CacheVersion.HaloOnline327043:
+                case CacheVersion.HaloOnline372731:
+                case CacheVersion.HaloOnline416097:
+                case CacheVersion.HaloOnline430475:
+                case CacheVersion.HaloOnline454665:
+                case CacheVersion.HaloOnline449175:
+                case CacheVersion.HaloOnline498295:
+                case CacheVersion.HaloOnline530605:
+                case CacheVersion.HaloOnline532911:
+                case CacheVersion.HaloOnline554482:
+                case CacheVersion.HaloOnline571627:
+                case CacheVersion.HaloOnline700123:
+                    return GameTitle.HaloOnline;
+                case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach11883:
+                    return GameTitle.HaloReach;
+                case CacheVersion.Halo4:
+                    return GameTitle.Halo4;
+                default:
+                    return GameTitle.Unknown;
+            }
+        }
 
         /// <summary>
         /// tags.dat timestamps for each halo online game version.
@@ -558,6 +606,7 @@ namespace TagTool.Cache
         HaloOnline571627,
         HaloOnline700123,
         HaloReach,
+        HaloReach11883,
         Halo4
     }
 
