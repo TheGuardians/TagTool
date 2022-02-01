@@ -511,6 +511,24 @@ namespace TagTool.Commands.Porting
                     mode.Geometry.Meshes[0].Flags = MeshFlags.UseRegionIndexForSorting;
                     break;
             }
+
+            if (BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                // Fixup foliage material
+                foreach (var mesh in mode.Geometry.Meshes)
+                {
+                    foreach (var part in mesh.Parts)
+                    {
+                        if (part.MaterialIndex != -1 &&
+                            mode.Materials[part.MaterialIndex].RenderMethod != null &&
+                            mode.Materials[part.MaterialIndex].RenderMethod.Group.Tag == "rmfl")
+                        {
+                            part.FlagsNew |= Part.PartFlagsNew.PreventBackfaceCulling;
+                        }
+                    }
+                }
+            }
+
             return mode;
         }
 
