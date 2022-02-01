@@ -4,14 +4,15 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Monolithic;
 
 namespace TagTool.Commands.Tags
 {
     class ExtractTagCommand : Command
     {
-        private GameCacheHaloOnlineBase Cache { get; }
+        private GameCache Cache { get; }
 
-        public ExtractTagCommand(GameCacheHaloOnlineBase cache)
+        public ExtractTagCommand(GameCache cache)
             : base(true,
 
                   "ExtractTag",
@@ -35,15 +36,31 @@ namespace TagTool.Commands.Tags
             if (!file.Directory.Exists)
                 file.Directory.Create();
 
-            byte[] data;
-            using (var stream = Cache.OpenCacheRead())
-                data = Cache.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)instance);
-
-            using (var outStream = file.Create())
+            
+            if(Cache is GameCacheHaloOnlineBase hoCache)
             {
-                outStream.Write(data, 0, data.Length);
-                Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, file);
-                Console.WriteLine("The tag's definition will be at offset 0x{0:X}.", instance.DefinitionOffset);
+                byte[] data;
+                using (var stream = Cache.OpenCacheRead())
+                    data = hoCache.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)instance);
+
+                using (var outStream = file.Create())
+                {
+                    outStream.Write(data, 0, data.Length);
+                    Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, file);
+                    Console.WriteLine("The tag's definition will be at offset 0x{0:X}.", instance.DefinitionOffset);
+                }
+            }
+            else if (Cache is GameCacheMonolithic nonolithicCache)
+            {
+                byte[] data;
+                using (var stream = Cache.OpenCacheRead())
+                    data = nonolithicCache.Backend.ExtractTagRaw(instance.Index);
+
+                using (var outStream = file.Create())
+                {
+                    outStream.Write(data, 0, data.Length);
+                    Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, file);
+                }
             }
 
             return true;

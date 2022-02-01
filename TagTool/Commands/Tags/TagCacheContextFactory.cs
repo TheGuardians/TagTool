@@ -16,6 +16,7 @@ using TagTool.Commands.GUI;
 using TagTool.Commands.HUD;
 using TagTool.Cache.HaloOnline;
 using TagTool.Commands.Scenarios;
+using TagTool.Cache.Monolithic;
 
 namespace TagTool.Commands.Tags
 {
@@ -134,6 +135,11 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new UpdateDescriptionCommand(modCache));
                 context.AddCommand(new SetModTypeCommand(modCache));
                 context.AddCommand(new Modding.MapFileCommand(modCache));
+            }
+
+            if(cache is GameCacheMonolithic)
+            {
+                context.AddCommand(new ExtractTagCommand(cache));
             }
 
             // porting related
