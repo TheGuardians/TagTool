@@ -77,7 +77,7 @@ namespace TagTool.Cache
             var set = GetSet(stringId);
             var index = GetIndex(stringId);
 
-            if (set == 0 && (index < setMin || index > setMax))
+            if (SetBits == 0 || (set == 0 && (index < setMin || index > setMax)))
             {
                 // Value does not go into a set, so the index is the same as the ID
                 return index;
@@ -109,7 +109,7 @@ namespace TagTool.Cache
             var setOffsets = GetSetOffsets();
 
             // If the value is outside of a set, just return it
-            if (index < setMin || index > setMax)
+            if (SetBits == 0 || (index < setMin || index > setMax))
                 return MakeStringId(0, index);
 
             // Find the set which the index is closest to

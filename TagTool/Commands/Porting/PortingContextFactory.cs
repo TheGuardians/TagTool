@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using TagTool.Cache;
+using TagTool.Cache.Monolithic;
 using TagTool.Commands.Common;
 using TagTool.Commands.Porting.Gen2;
 using TagTool.Commands.Porting.Gen4;
@@ -47,7 +48,7 @@ namespace TagTool.Commands.Porting
 
             if (currentCache is GameCacheHaloOnlineBase hoCache)
             {
-                if (portingCache is GameCacheGen3)
+                if (portingCache is GameCacheGen3 || portingCache is GameCacheMonolithic)
                 {
                     var portTagCommand = new PortTagCommand(hoCache, portingCache);
                     context.AddCommand(portTagCommand);

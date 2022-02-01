@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using TagTool.BlamFile;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Monolithic;
 using TagTool.Cache.Resources;
 using TagTool.Common;
 using TagTool.IO;
@@ -40,6 +41,9 @@ namespace TagTool.Cache
 
         public static GameCache Open(FileInfo file)
         {
+            if(file.Name.Equals("blob_index.dat"))
+                return new GameCacheMonolithic(file);
+
             MapFile map = new MapFile();
             var estimatedVersion = CacheVersion.HaloOnlineED;
 

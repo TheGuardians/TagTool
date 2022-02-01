@@ -46,6 +46,15 @@ namespace TagTool.Serialization
             return (T)Convert.ChangeType(result, typeof(T));
         }
 
+        public IEnumerable<T> Deserialize<T>(ISerializationContext context, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                var result = Deserialize(context, typeof(T));
+                yield return (T)Convert.ChangeType(result, typeof(T));
+            }
+        }
+
         /// <summary>
         /// Deserializes tag data into an object.
         /// </summary>
@@ -56,6 +65,8 @@ namespace TagTool.Serialization
         {
 			var info = TagStructure.GetTagStructureInfo(structureType, Version, CachePlatform);
 			var reader = context.BeginDeserialize(info);
+            if (reader.Length == 0)
+                return null;
             var result = DeserializeStruct(reader, context, info);
             context.EndDeserialize(info, result);
             return result;

@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Cache.Monolithic;
 using TagTool.Common;
 
 namespace TagTool.Tags
@@ -26,5 +27,9 @@ namespace TagTool.Tags
 
         [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public int Unused;
+
+        // TODO: consider making storing in the existing PageableResource field
+        [TagField(Flags = TagFieldFlags.Runtime)]
+        public TagResourceXSyncState XSyncState;
     }
 }
