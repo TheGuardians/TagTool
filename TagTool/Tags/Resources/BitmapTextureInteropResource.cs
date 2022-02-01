@@ -24,10 +24,11 @@ namespace TagTool.Tags.Resources
         }
     }
 
-    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
+    
     [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
-    [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
     public class BitmapTextureInteropDefinition
     {
         public short Width;
