@@ -363,8 +363,8 @@ namespace TagTool.Geometry
             IsWaterSurface = 1 << 3,
             Unknown1 = 1 << 4, // set on only one ho mesh as far as I can tell, might have been a mistake
             Unknown2 = 1 << 5, // unused?
-            Unknown3 = 1 << 6, // unused?
-            PerVertexLightmapPart = 1 << 7 // used at runtime to fix reach static cluster per vertex
+            PreventBackfaceCulling = 1 << 6, // unused?
+            PerVertexLightmapPart = 1 << 7, // used at runtime to fix reach static cluster per vertex
         }
 
         [Flags]

@@ -515,6 +515,21 @@ namespace TagTool.Commands.Porting
                             }
                         }
                         Lbsp.Geometry.InstancedGeometryPerPixelLighting = newPerPixelLighting;
+
+                        // Fixup foliage material
+                        foreach (var mesh in Lbsp.Geometry.Meshes)
+                        {
+                            foreach (var part in mesh.Parts)
+                            {
+                                if (part.MaterialIndex != -1 && 
+                                    sbsp.Materials[part.MaterialIndex].RenderMethod != null &&
+                                    sbsp.Materials[part.MaterialIndex].RenderMethod.Group.Tag == "rmfl")
+                                {
+                                    part.FlagsNew |= Part.PartFlagsNew.PreventBackfaceCulling;
+                                }
+                            }
+                        }
+
                         CacheContext.Serialize(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData, Lbsp);
                     }
 
