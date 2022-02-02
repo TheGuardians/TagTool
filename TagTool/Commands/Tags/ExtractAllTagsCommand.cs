@@ -4,14 +4,17 @@ using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Monolithic;
+using TagTool.Tags;
+using TagTool.Common;
 
 namespace TagTool.Commands.Tags
 {
     class ExtractAllTagsCommand : Command
     {
-        public GameCacheHaloOnlineBase Cache { get; }
+        public GameCache Cache { get; }
 
-        public ExtractAllTagsCommand(GameCacheHaloOnlineBase cache)
+        public ExtractAllTagsCommand(GameCache cache)
             : base(false,
 
                   "ExtractAllTags",
@@ -52,6 +55,9 @@ namespace TagTool.Commands.Tags
                     if (instance == null)
                         continue;
 
+                    if (instance.Group.Tag == Tag.Null)
+                        continue;
+
                     var tagName = instance.Name + "." + instance.Group;
                     var tagPath = Path.Combine(directory, tagName);
                     var tagDirectory = Path.GetDirectoryName(tagPath);
@@ -62,7 +68,7 @@ namespace TagTool.Commands.Tags
                     using (var tagStream = File.Create(tagPath))
                     using (var writer = new BinaryWriter(tagStream))
                     {
-                        writer.Write(Cache.TagCacheGenHO.ExtractTagRaw(cacheStream, (CachedTagHaloOnline)instance));
+                        writer.Write(ExtractTag(cacheStream, instance));
                     }
 
                     Console.WriteLine($"Exported {tagName}");
@@ -71,6 +77,19 @@ namespace TagTool.Commands.Tags
 
             Console.WriteLine("Done!");
             return true;
+        }
+
+        private byte[] ExtractTag(Stream cacheStream, CachedTag instance)
+        {
+            switch(Cache)
+            {
+                case GameCacheHaloOnlineBase hoCache:
+                    return hoCache.TagCacheGenHO.ExtractTagRaw(cacheStream, (CachedTagHaloOnline)instance);
+                case GameCacheMonolithic monolithicCache:
+                    return monolithicCache.Backend.ExtractTagRaw(instance.Index);
+                default:
+                    throw new NotSupportedException();
+            }
         }
     }
 }

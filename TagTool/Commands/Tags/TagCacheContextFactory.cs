@@ -140,6 +140,7 @@ namespace TagTool.Commands.Tags
             if(cache is GameCacheMonolithic)
             {
                 context.AddCommand(new ExtractTagCommand(cache));
+                context.AddCommand(new ExtractAllTagsCommand(cache));
             }
 
             // porting related
