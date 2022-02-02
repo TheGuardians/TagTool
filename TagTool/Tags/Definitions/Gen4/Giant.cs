@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "giant", Tag = "gint", Size = 0x38)]
     public class Giant : Unit
     {
-        public GiantDefinitionFlags Flags;
+        public GiantDefinitionFlags GiantFlags;
         public float AccelTime; // acceleration time in seconds
         public float DecelTime; // deceleration time in seconds
         public float MinimumSpeedScale; // as slow as we get

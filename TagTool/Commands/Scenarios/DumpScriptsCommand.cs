@@ -229,7 +229,7 @@ namespace TagTool.Commands.Scenarios
                 if ((Definition.ScriptExpressions[index].Flags == HsSyntaxNodeFlags.ScriptReference) || (index > 0 && Definition.ScriptExpressions[index - 1].Flags == HsSyntaxNodeFlags.ScriptReference))
                     opcodeName = $"call {Definition.Scripts[Definition.ScriptExpressions[index].Opcode].ScriptName}";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 new TagToolError(CommandError.CustomError, "Out-of-range exception in Definition.Scripts! (?)");
             }

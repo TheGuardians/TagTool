@@ -1654,7 +1654,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data.Entity.Design" />
-    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -1692,10 +1691,7 @@
       <Version>1.0.15.93</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting">
-      <Version>3.10.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Numerics.Vectors">
-      <Version>4.5.0</Version>
+      <Version>4.0.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

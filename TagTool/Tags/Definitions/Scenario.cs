@@ -6,8 +6,6 @@ using TagTool.Tags.Definitions.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
-using static TagTool.Tags.Definitions.GameObject;
-using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Tags.Definitions
 {

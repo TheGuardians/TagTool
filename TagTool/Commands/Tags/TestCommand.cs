@@ -213,7 +213,7 @@ namespace TagTool.Commands
 
             return true;
 
-            if (args.Count > 0)
+            /*if (args.Count > 0)
                 return false;
 
             var destDirectory = "Sounds";
@@ -305,7 +305,7 @@ namespace TagTool.Commands
                 }
             }
 
-            return true;
+            return true;*/
         }
 
         /*

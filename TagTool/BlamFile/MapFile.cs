@@ -193,7 +193,6 @@ namespace TagTool.BlamFile
                         break;
                     default:
                         throw new NotSupportedException("Unsupported engine version");
-                        break;
                 }
                 cachePlatform = CachePlatform.MCC;
             }

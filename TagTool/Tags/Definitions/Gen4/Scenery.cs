@@ -11,7 +11,7 @@ namespace TagTool.Tags.Definitions.Gen4
     public class Scenery : GameObject
     {
         public PathfindingPolicyEnum PathfindingPolicy;
-        public SceneryFlags Flags;
+        public SceneryFlagsEnum SceneryFlags;
         public LightmappingPolicyEnum LightmappingPolicy;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
@@ -27,7 +27,7 @@ namespace TagTool.Tags.Definitions.Gen4
         }
         
         [Flags]
-        public enum SceneryFlags : ushort
+        public enum SceneryFlagsEnum : ushort
         {
             // has no havok representation; will not build physics from collision
             NotPhysical = 1 << 0,

@@ -38,8 +38,8 @@ namespace TagTool.Commands.Editing
 
         public override object Execute(List<string> args)
         {
-            ExportFlags flags = ExportFlags.None;
-            if (args.Count > 0 && !ParseExportFlags(args, out flags))
+            Flags = ExportFlags.None;
+            if (args.Count > 0 && !ParseExportFlags(args, out Flags))
                 return new TagToolError(CommandError.ArgInvalid, $"Unknown option specified '{args[0]}'");
 
             var strings = new HashSet<string>();

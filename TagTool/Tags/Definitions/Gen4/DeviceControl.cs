@@ -40,7 +40,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public CachedTag ActionDeniedSound;
         public TeamuseRestrictionEnum MpTeamUseRestriction;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
+        public byte[] Padding1;
         [TagField(ValidTags = new [] { "snd!","sndo","effe" })]
         public CachedTag On;
         [TagField(ValidTags = new [] { "snd!","sndo","effe" })]

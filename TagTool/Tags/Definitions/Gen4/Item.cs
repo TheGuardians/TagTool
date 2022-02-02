@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "item", Tag = "item", Size = 0xCC)]
     public class Item : GameObject
     {
-        public ItemDefinitionFlags Flags;
+        public ItemDefinitionFlags ItemFlags;
         public short OldMessageIndex;
         public short SortOrder;
         public float OldMultiplayerOnGroundScale;

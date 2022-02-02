@@ -437,8 +437,6 @@ namespace TagTool.Commands.Shaders
             {
                 return DisassemblePCShader(definition, shaderIndex, path);
             }
-
-            return null;
         }
 
         private string DisassembleGen3Shader(object definition, int shaderIndex, GameCache cache, Stream stream, string filename, GlobalCacheFilePixelShaders gpix)

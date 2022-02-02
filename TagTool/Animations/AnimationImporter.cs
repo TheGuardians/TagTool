@@ -660,7 +660,7 @@ namespace TagTool.Animations
             return size;
         }
 
-        private class MovementDataDxDyDzDyaw
+        public class MovementDataDxDyDzDyaw
         {
             public float X;
             public float Y;

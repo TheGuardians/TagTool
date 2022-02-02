@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "device", Tag = "devi", Size = 0xB0)]
     public class Device : GameObject
     {
-        public DeviceDefinitionFlags Flags;
+        public DeviceDefinitionFlags DeviceFlags;
         public float PowerTransitionTime; // seconds
         public float PowerAccelerationTime; // seconds
         public float PositionTransitionTime; // seconds

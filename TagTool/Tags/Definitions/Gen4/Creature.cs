@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "creature", Tag = "crea", Size = 0x198)]
     public class Creature : GameObject
     {
-        public CreatureDefinitionFlags Flags;
+        public CreatureDefinitionFlags CreatureFlags;
         public UnitDefaultTeams DefaultTeam;
         public GlobalChudBlipType MotionSensorBlipSize;
         public Angle TurningVelocityMaximum; // degrees per second

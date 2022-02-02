@@ -14,7 +14,7 @@ namespace TagTool.Tags.Definitions.Gen4
         // after deactivation, energy stays constant for this long before starting to change by 'inactive energy rate'
         public float EnergyRecoveryTime; // seconds
         public float InactiveEnergyRate; // energy/second
-        public EquipmentFlags Flags;
+        public EquipmentFlagsEnum EquipmentFlags;
         // the marker on the unit to attach this equipment to when it is stowed.
         // The equipment should have a marker named "equipment_stow_anchor"
         public StringId UnitStowMarkerName;
@@ -53,7 +53,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<EquipmentSoundSweetenerBlock> SoundSweeteners;
         
         [Flags]
-        public enum EquipmentFlags : uint
+        public enum EquipmentFlagsEnum : uint
         {
             PathfindingObstacle = 1 << 0,
             EquipmentIsDangerousToAi = 1 << 1,

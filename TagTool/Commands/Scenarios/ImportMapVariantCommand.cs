@@ -20,7 +20,7 @@ namespace TagTool.Commands.Scenarios
         private CachedTag Tag;
         private Scenario Definition;
 
-        public ImportMapVariantCommand(GameCacheHaloOnlineBase cache, CachedTag Tag, Scenario definition) :
+        public ImportMapVariantCommand(GameCacheHaloOnlineBase cache, CachedTag tag, Scenario definition) :
             base(false,
 
                 "ImportMapVariant",
@@ -29,6 +29,7 @@ namespace TagTool.Commands.Scenarios
                 "If optional argument MapFile is specified, the map variant will instead be stored directly in the .map file and become the default map.")
         {
             Cache = cache;
+            Tag = tag;
             Definition = definition;
         }
 
@@ -263,16 +264,16 @@ namespace TagTool.Commands.Scenarios
                 {
                     throw new NotSupportedException("Attached placements are not supported currently.");
 
-                    var objectName = _scenario.ObjectNames[multiplayerInstance.Multiplayer.MapVariantParent.NameIndex];
-                    var parentInstanceIndex = objectName.PlacementIndex;
-                    var parentInstance = _objectTypes[objectName.ObjectType.Halo3ODST].Instances[objectName.PlacementIndex] as ScenarioInstance;
-
-                    Vectors3dFromEulerAngles(parentInstance.Rotation, out RealVector3d parentForward, out RealVector3d parentUp);
-
-                    var parentSpaceFoward = TransformVector3d(parentForward, parentUp, placement.Forward);
-                    var parentSpaceUp = TransformVector3d(parentForward, parentUp, placement.Up);
-                    instance.Rotation = EulerAngles3dFromVectors3d(parentSpaceFoward, parentSpaceUp);
-                    instance.Position = TransformPoint3d(parentInstance.Position, parentForward, parentUp, placement.Position);
+                    // var objectName = _scenario.ObjectNames[multiplayerInstance.Multiplayer.MapVariantParent.NameIndex];
+                    // var parentInstanceIndex = objectName.PlacementIndex;
+                    // var parentInstance = _objectTypes[objectName.ObjectType.Halo3ODST].Instances[objectName.PlacementIndex] as ScenarioInstance;
+                    // 
+                    // Vectors3dFromEulerAngles(parentInstance.Rotation, out RealVector3d parentForward, out RealVector3d parentUp);
+                    // 
+                    // var parentSpaceFoward = TransformVector3d(parentForward, parentUp, placement.Forward);
+                    // var parentSpaceUp = TransformVector3d(parentForward, parentUp, placement.Up);
+                    // instance.Rotation = EulerAngles3dFromVectors3d(parentSpaceFoward, parentSpaceUp);
+                    // instance.Position = TransformPoint3d(parentInstance.Position, parentForward, parentUp, placement.Position);
                 }
                 else
                 {

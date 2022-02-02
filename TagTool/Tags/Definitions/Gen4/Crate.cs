@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "crate", Tag = "bloc", Size = 0x3C)]
     public class Crate : GameObject
     {
-        public CrateFlags Flags;
+        public CrateFlagsEnum CrateFlags;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
         public List<CampaignMetagameBucketBlock> CampaignMetagameBucket;
@@ -27,7 +27,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public CachedTag ProjectileBounceEffect;
         
         [Flags]
-        public enum CrateFlags : ushort
+        public enum CrateFlagsEnum : ushort
         {
             DoesNotBlockAoe = 1 << 0,
             AttachTextureCameraHack = 1 << 1,

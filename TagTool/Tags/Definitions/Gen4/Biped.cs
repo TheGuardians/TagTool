@@ -11,7 +11,7 @@ namespace TagTool.Tags.Definitions.Gen4
     public class Biped : Unit
     {
         public Angle MovingTurningSpeed; // degrees per second
-        public BipedDefinitionFlags Flags;
+        public BipedDefinitionFlags BipedFlags;
         public Angle StationaryTurningThreshold;
         [TagField(ValidTags = new [] { "bdpd" })]
         public CachedTag DeathProgramSelector;
@@ -51,7 +51,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public float AutoaimWidth; // world units
         public short RuntimePhysicsControlNodeIndex;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
+        public byte[] Padding1;
         public float RuntimeCosineStationaryTurningThreshold;
         public float RuntimeCrouchTransitionVelocity;
         public float RuntimeCameraHeightVelocity;
@@ -82,7 +82,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public CachedTag DeathSpawnCharacter;
         public short DeathSpawnCount;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
+        public byte[] Padding2;
         public BipedLeapingDataStruct LeapingData;
         public BipedVaultingDataStruct VaultingData;
         public BipedGrabBipedDataStruct GrabBipedData;

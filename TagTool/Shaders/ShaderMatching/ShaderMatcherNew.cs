@@ -518,7 +518,7 @@ namespace TagTool.Shaders.ShaderMatching
             return template;
         }
 
-        class Rmt2Pairing
+        public class Rmt2Pairing
         {
             public Rmt2ParameterMatch RealParams;
             public Rmt2ParameterMatch IntParams;
@@ -548,7 +548,7 @@ namespace TagTool.Shaders.ShaderMatching
                 + BoolParams.MissingFromDest;
         }
 
-        struct Rmt2ParameterMatch
+        public struct Rmt2ParameterMatch
         {
             public int MissingFromSource;
             public int MissingFromDest;
@@ -701,10 +701,6 @@ namespace TagTool.Shaders.ShaderMatching
                     matchLevelDictionary[template] = matchLevel;
                 } 
             }
-
-            CachedTag bestRmt2 = null;
-            var bestScore = -1;
-
         }
     }
 }

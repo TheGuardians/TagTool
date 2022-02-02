@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "device_dispenser", Tag = "dspn", Size = 0x5C)]
     public class DeviceDispenser : Device
     {
-        public DispenserDefinitionFlags Flags;
+        public DispenserDefinitionFlags DispenserFlags;
         public DispenserDefinitionTrigger TriggersWhen;
         // The number of seconds that must elapse before this dispenser is usable
         public byte UseCooldown; // seconds
@@ -19,7 +19,7 @@ namespace TagTool.Tags.Definitions.Gen4
         // The maximum number of objects that can come from this dispenser
         public byte MaxQuota; // (between 0 and 8)
         [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
+        public byte[] Padding1;
         // How many seconds the user must hold the interaction button before the dispenser triggers
         public float InteractionHoldTime; // seconds
         // A cui_screen to display when someone is using "interaction held"-type dispensers

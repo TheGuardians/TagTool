@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "projectile", Tag = "proj", Size = 0x24C)]
     public class Projectile : GameObject
     {
-        public ProjectileFlags Flags;
-        public SecondaryProjectileFlags SecondaryFlags;
+        public ProjectileFlagsEnum ProjectileFlags;
+        public SecondaryProjectileFlags ProjectileSecondaryFlags;
         public ProjectileDetonationTimerModes DetonationTimerStarts;
         public AiSoundVolumeEnum ImpactNoise;
         // if >0, both 'detonation timer starts' + a biped must be within this proximity for condition to be met; see 'biped
@@ -141,7 +141,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<ProjectileSoundRtpcblock> SoundRtpcs;
         
         [Flags]
-        public enum ProjectileFlags : uint
+        public enum ProjectileFlagsEnum : uint
         {
             OrientedAlongVelocity = 1 << 0,
             AiMustUseBallisticAiming = 1 << 1,

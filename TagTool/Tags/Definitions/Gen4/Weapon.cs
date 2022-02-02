@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x3C8)]
     public class Weapon : Item
     {
-        public WeaponDefinitionFlags Flags;
-        public WeaponDefinitionSecondaryFlags SecondaryFlags;
+        public WeaponDefinitionFlags WeaponFlags;
+        public WeaponDefinitionSecondaryFlags WeaponSecondaryFlags;
         public StringId UnusedLabel;
         public SecondaryTriggerModes SecondaryTriggerMode;
         // if the second trigger loads alternate ammunition, this is the maximum number of shots that can be loaded at a time
@@ -61,7 +61,7 @@ namespace TagTool.Tags.Definitions.Gen4
         [TagField(ValidTags = new [] { "sndo","effe" })]
         public CachedTag Detonation;
         [TagField(ValidTags = new [] { "jpt!","drdf" })]
-        public CachedTag DetonationDamageEffect;
+        public CachedTag WeaponDetonationDamageEffect;
         public List<MeleeDamageParametersBlock> MeleeDamageParameters;
         // effect that is played in the air between two players that clang with this weapon
         [TagField(ValidTags = new [] { "sndo","effe" })]
@@ -139,7 +139,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public WeaponTypes WeaponType;
         public short LowAmmoThreshold;
         public WeaponInterfaceStruct PlayerInterface;
-        public List<GNullBlock> PredictedResources;
+        public List<GNullBlock> WeaponPredictedResources;
         public List<Magazines> Magazines1;
         public List<WeaponTriggers> NewTriggers;
         public List<WeaponBarrels> Barrels;
@@ -650,11 +650,7 @@ namespace TagTool.Tags.Definitions.Gen4
             }
         }
         
-        [TagStructure(Size = 0x0)]
-        public class GNullBlock : TagStructure
-        {
-        }
-        
+
         [TagStructure(Size = 0x84)]
         public class Magazines : TagStructure
         {

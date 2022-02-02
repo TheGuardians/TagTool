@@ -152,7 +152,7 @@ namespace TagTool.Tags.Definitions
         public short DeathSpawnCount;
 
         [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
+        public byte[] Padding2;
 
         public BipedLeapingDataStruct BipedLeapingData;
         public BipedGroundFitting BipedGroundFittingData;

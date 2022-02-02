@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x1D4)]
     public class Vehicle : Unit
     {
-        public VehicleFlags Flags;
+        public VehicleFlagsEnum VehicleFlags;
         public VehiclePhysicsTypesStruct PhysicsTypes;
         public HavokVehiclePhysicsStruct HavokVehiclePhysics;
         public List<UnitTrickDefinitionBlock> Tricks;
@@ -20,7 +20,7 @@ namespace TagTool.Tags.Definitions.Gen4
         // How many additional raycasts to perform per side of a tire.
         public sbyte ComplexSuspensionSampleCount;
         [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
+        public byte[] Padding1;
         // 0-90 degrees of the wedge portion of the wheel to test suspension
         public Angle ComplexSuspensionDistributionAngle; // degrees
         public float ComplexSuspensionWheelDiameter;
@@ -62,7 +62,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public List<PhysicsTransitionsBlock> PhysicsTransitions;
         
         [Flags]
-        public enum VehicleFlags : uint
+        public enum VehicleFlagsEnum : uint
         {
             NoFrictionWDriver = 1 << 0,
             AutoaimWhenTeamless = 1 << 1,

@@ -11,7 +11,7 @@ namespace TagTool.Tags.Definitions.Gen4
     public class DeviceMachine : Device
     {
         public MachineTypes Type;
-        public MachineFlags Flags;
+        public MachineFlagsEnum MachineFlags;
         public float DoorOpenTime; // seconds
         // maps position [0,1] to occlusion
         public Bounds<float> DoorOcclusionBounds;
@@ -19,7 +19,7 @@ namespace TagTool.Tags.Definitions.Gen4
         public short ElevatorNode;
         public MachinePathfindingPolicyEnum PathfindingPolicy;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
+        public byte[] Padding1;
         // shield (or any damage section) to control
         public StringId ShieldName;
         // shield is on when this function is greater then 0.5f, off otherwise.
@@ -33,7 +33,7 @@ namespace TagTool.Tags.Definitions.Gen4
         }
         
         [Flags]
-        public enum MachineFlags : ushort
+        public enum MachineFlagsEnum : ushort
         {
             PathfindingObstacle = 1 << 0,
             ButNotWhenOpen = 1 << 1,

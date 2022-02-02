@@ -10,8 +10,8 @@ namespace TagTool.Tags.Definitions.Gen4
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x40C)]
     public class Unit : GameObject
     {
-        public UnitFlagsPart1 Flags;
-        public UnitFlagsPart2 Flags2;
+        public UnitFlagsPart1 UnitFlags;
+        public UnitFlagsPart2 UnitFlags2;
         public UnitDefaultTeams DefaultTeam;
         public AiSoundVolumeEnum ConstantSoundVolume;
         [TagField(ValidTags = new [] { "bipd","vehi" })]

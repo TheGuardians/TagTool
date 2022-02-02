@@ -455,7 +455,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     new RealPoint2d(-1536,1536)
                 };
                 int levels_up = 0;
-                int blah = 0;
+
                 while(result_vertices.Count > 0)
                 {
                     int current_node = leaf_map_node_stack[leaf_map_node_stack_count - levels_up];
