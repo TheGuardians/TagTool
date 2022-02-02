@@ -346,7 +346,29 @@ namespace TagTool.Cache
             return true;
         }
 
+        public static bool AttributeInCacheVersion(TagStructureAttribute attr, CacheVersion compare)
+        {
+            if (attr.Version != CacheVersion.Unknown)
+                if (attr.Version != compare)
+                    return false;
+
+            if (attr.Gen != CacheGeneration.Unknown)
+                if (!IsInGen(attr.Gen, compare))
+                    return false;
+
+            if (attr.MinVersion != CacheVersion.Unknown || attr.MaxVersion != CacheVersion.Unknown)
+                if (!IsBetween(compare, attr.MinVersion, attr.MaxVersion))
+                    return false;
+
+            return true;
+        }
+
         public static bool AttributeInPlatform(TagFieldAttribute attr, CachePlatform compare)
+        {
+            return ComparePlatform(attr.Platform, compare);
+        }
+
+        public static bool AttributeInPlatform(TagStructureAttribute attr, CachePlatform compare)
         {
             return ComparePlatform(attr.Platform, compare);
         }
@@ -397,15 +419,58 @@ namespace TagTool.Cache
         /// <returns></returns>
         public static bool IsInGen(CacheGeneration gen, CacheVersion compare)
         {
-            if (compare == CacheVersion.Unknown)
+            if (compare == CacheVersion.Unknown || gen == CacheGeneration.Unknown)
                 return true;
             else
+                return GetGeneration(compare) == gen;
+        }
+
+        public static bool InCacheBuildType(CacheBuildType buildType, CacheVersion compare)
+        {
+            if (compare == CacheVersion.Unknown || buildType == CacheBuildType.Unknown)
+                return true;
+            else
+                return GetCacheBuildType(compare) == buildType;
+        }
+
+        public static CacheBuildType GetCacheBuildType(CacheVersion version)
+        {
+            switch (version)
             {
-                if (GetGeneration(compare) == gen)
-                    return true;
-                else
-                    return false;
+                case CacheVersion.HaloReach11883:
+                    return CacheBuildType.TagsBuild;
             }
+
+            return CacheBuildType.ReleaseBuild;
+        }
+
+        public static bool TestAttribute(TagFieldAttribute a, CacheVersion version, CachePlatform platform)
+        {
+            if (!InCacheBuildType(a.BuildType, version))
+                return false;
+            if (!IsInGen(a.Gen, version))
+                return false;
+            if (!AttributeInPlatform(a, platform))
+                return false;
+            if (!AttributeInCacheVersion(a, version))
+                return false;
+
+            return true;
+        }
+
+        public static bool TestAttribute(TagStructureAttribute a, CacheVersion version, CachePlatform platform)
+        {
+            if (!InCacheBuildType(a.BuildType, version))
+                return false;
+           
+            if (!AttributeInPlatform(a, platform))
+                return false;
+            if (!IsInGen(a.Gen, version))
+                return false;
+            if (!AttributeInCacheVersion(a, version))
+                return false;
+
+            return true;
         }
 
         /// <summary>
@@ -642,5 +707,12 @@ namespace TagTool.Cache
     {
         _32Bit = 0,
         _64Bit = 1
+    }
+
+    public enum CacheBuildType
+    {
+        Unknown,
+        TagsBuild,
+        ReleaseBuild
     }
 }

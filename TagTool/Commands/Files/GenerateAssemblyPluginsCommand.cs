@@ -996,7 +996,7 @@ namespace TagTool.Commands.Files
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
 
-                    var fieldIsInVersion = CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion) && CacheVersionDetection.AttributeInPlatform(tagFieldAttribute, cachePlatform);
+                    var fieldIsInVersion = CacheVersionDetection.TestAttribute(tagFieldAttribute, cacheVersion, cachePlatform);
 
                     if (!fieldIsInVersion || tagFieldAttribute.Flags.HasFlag(Runtime))
                         continue;
@@ -1009,7 +1009,7 @@ namespace TagTool.Commands.Files
                     //If the field isn't present in this cache version move on.
                     TagFieldAttribute tagFieldAttribute = fieldInfo.GetCustomAttributes<TagFieldAttribute>().Count() > 0 ? fieldInfo.GetCustomAttributes<TagFieldAttribute>().ElementAt(0) : new TagFieldAttribute();
 
-                    var fieldIsInVersion = CacheVersionDetection.AttributeInCacheVersion(tagFieldAttribute, cacheVersion) && CacheVersionDetection.AttributeInPlatform(tagFieldAttribute, cachePlatform);
+                    var fieldIsInVersion = CacheVersionDetection.TestAttribute(tagFieldAttribute, cacheVersion, cachePlatform);
 
                     if (!fieldIsInVersion || tagFieldAttribute.Flags.HasFlag(Runtime))
                         continue;

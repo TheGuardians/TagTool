@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 
 namespace TagTool.Tags
 {
@@ -99,22 +100,9 @@ namespace TagTool.Tags
             {
                 TagStructureAttribute GetStructureAttribute()
                 {
-                    // First match against any TagStructureAttributes that have version restrictions
-                    var attrib = type.GetCustomAttributes(typeof(TagStructureAttribute), false)
-                        .Cast<TagStructureAttribute>()
-                        .Where(a => CacheVersionDetection.ComparePlatform(a.Platform, cachePlatform))
-                        .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
-
-                    if (attrib == null)
-                        attrib = type.GetCustomAttributes(typeof(TagStructureAttribute), false)
-                            .Cast<TagStructureAttribute>()
-                            .Where(a => a.MinVersion != CacheVersion.Unknown || a.MaxVersion != CacheVersion.Unknown)
-                            .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
-
-                    // If nothing was found, find the first attribute without any version restrictions
-                    return attrib ?? type.GetCustomAttributes(typeof(TagStructureAttribute), false)
-                        .Cast<TagStructureAttribute>()
-                        .FirstOrDefault(a => a.MinVersion == CacheVersion.Unknown && a.MaxVersion == CacheVersion.Unknown && a.Platform == CachePlatform.All);
+                    var attributes = type.GetCustomAttributes<TagStructureAttribute>(false);
+                    var matchingAttributes = attributes.Where(a => CacheVersionDetection.TestAttribute(a, version, cachePlatform));
+                    return matchingAttributes.FirstOrDefault();
                 }
 
                 if (!TagStructureAttributes.TryGetValue(type, out TagStructureAttribute attribute))
@@ -134,20 +122,9 @@ namespace TagTool.Tags
 
                 TagFieldAttribute GetFieldAttribute()
                 {
-                    // First match against any TagFieldAttributes that have version restrictions
-                    var attrib = field.GetCustomAttributes(typeof(TagFieldAttribute), false)
-                        .Cast<TagFieldAttribute>()
-                        .Where(a => CacheVersionDetection.ComparePlatform(a.Platform, cachePlatform))
-                        .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
-
-                    if (attrib == null)
-                        attrib = field.GetCustomAttributes(typeof(TagFieldAttribute), false)
-                            .Cast<TagFieldAttribute>()
-                            .Where(a => a.MinVersion != CacheVersion.Unknown || a.MaxVersion != CacheVersion.Unknown)
-                            .FirstOrDefault(a => CacheVersionDetection.IsBetween(version, a.MinVersion, a.MaxVersion));
-
-                    // If nothing was found, return the default attribute (other code is necessary down the line to check the return of this function
-                    return attrib ?? field.GetCustomAttributes<TagFieldAttribute>(false).DefaultIfEmpty(TagFieldAttribute.Default).First();
+                    var attributes = field.GetCustomAttributes<TagFieldAttribute>(false);
+                    var matchingAttributes = attributes.Where(a => CacheVersionDetection.TestAttribute(a, version, cachePlatform));
+                    return matchingAttributes.FirstOrDefault() ?? attributes.DefaultIfEmpty(TagFieldAttribute.Default).First();
                 }
 
                 if (!TagFieldAttributes.TryGetValue(field, out TagFieldAttribute attribute))

@@ -147,7 +147,7 @@ namespace TagTool.Commands.Porting.Gen4
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), Gen4Cache.Version, Gen4Cache.Platform))
             {
                 var attr = tagFieldInfo.Attribute;
-                if (!CacheVersionDetection.AttributeInCacheVersion(attr, Gen4Cache.Version))
+                if (!CacheVersionDetection.TestAttribute(attr, Gen4Cache.Version, Gen4Cache.Platform))
                     continue;
 
                 // skip the field if no conversion is needed

@@ -43,6 +43,11 @@ namespace TagTool.Tags
         public CachePlatform Platform { get; set; } = CachePlatform.All;
 
         /// <summary>
+		/// The cache build type the structure applies to.
+		/// </summary>
+        public CacheBuildType BuildType { get; set; } = CacheBuildType.Unknown;
+
+        /// <summary>
         /// The name of the field to upgrade to (if any).
         /// </summary>
         public string Upgrade { get; set; } = string.Empty;
@@ -115,7 +120,6 @@ namespace TagTool.Tags
         Padding = 1 << 2,
         Pointer = 1 << 3,
         Runtime = 1 << 4,
-        Relative = 1 << 5,
         Fraction = 1 << 6,
         Resource = 1 << 7,
         GlobalMaterial = 1 << 8

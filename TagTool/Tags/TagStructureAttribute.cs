@@ -35,6 +35,8 @@ namespace TagTool.Tags
 		/// </summary>
 		public string Tag { get; set; } = Common.Tag.Null.ToString();
 
+		public CacheVersion Version { get; set; } = CacheVersion.Unknown;
+
 		/// <summary>
 		/// The minimum engine version which the structure applies to.
 		/// Can be <see cref="CacheVersion.Unknown"/> (default) if unbounded.
@@ -51,5 +53,15 @@ namespace TagTool.Tags
 		/// The platforms that the structure is available on.
 		/// </summary>
 		public CachePlatform Platform { get; set; } = CachePlatform.All;
+
+		/// <summary>
+		/// The cache generation the structure applies to.
+		/// </summary>
+		public CacheGeneration Gen { get; set; } = CacheGeneration.Unknown;
+
+		/// <summary>
+		/// The cache build type the structure applies to.
+		/// </summary>
+		public CacheBuildType BuildType { get; set; } = CacheBuildType.Unknown;
 	}
 }

@@ -107,9 +107,7 @@ namespace TagTool.Serialization
         {
             var attr = tagFieldInfo.Attribute;
 
-            var isInVersion = CacheVersionDetection.AttributeInCacheVersion(attr, Version) && CacheVersionDetection.AttributeInPlatform(attr, CachePlatform);
-
-            if (attr.Flags.HasFlag(Runtime) || !isInVersion)
+            if (attr.Flags.HasFlag(Runtime) || !CacheVersionDetection.TestAttribute(attr, Version, CachePlatform))
                 return;
 
             uint align = TagFieldInfo.GetFieldAlignment(tagFieldInfo.FieldType, tagFieldInfo.Attribute, Version, CachePlatform);
@@ -117,23 +115,6 @@ namespace TagTool.Serialization
             {
                 var fieldOffset = (uint)(reader.BaseStream.Position - baseOffset);
                 reader.BaseStream.Position += -fieldOffset & (align - 1);
-            }
-
-            if (tagFieldInfo.FieldType.IsArray && attr.Flags.HasFlag(Relative))
-            {
-                var type = instance.GetType();
-                var field = type.GetField(
-                    attr.Field,
-                    BindingFlags.Instance | BindingFlags.Public);
-
-                var attr2 = TagStructure.GetTagFieldAttribute(type, field, Version, CachePlatform);
-
-                isInVersion = CacheVersionDetection.AttributeInCacheVersion(attr2, Version) && CacheVersionDetection.AttributeInPlatform(attr2, CachePlatform);
-                if (isInVersion)
-                {
-                    attr.Length = (int)Convert.ChangeType(field.GetValue(instance), typeof(int));
-                }
-                else throw new InvalidOperationException(attr2.Field);
             }
 
             if (attr.Flags.HasFlag(Padding))

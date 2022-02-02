@@ -77,7 +77,7 @@ namespace TagTool.Tags
 				{
 					var attr = TagStructure.GetTagFieldAttribute(type, field, Info.Version, Info.CachePlatform);
 
-                    if (CacheVersionDetection.AttributeInCacheVersion(attr, Info.Version) && CacheVersionDetection.AttributeInPlatform(attr, Info.CachePlatform))
+                    if (CacheVersionDetection.TestAttribute(attr, Info.Version, Info.CachePlatform))
                     {
 						CreateTagFieldInfo(field, attr, Info.Version, Info.CachePlatform, ref offset);
                     }
