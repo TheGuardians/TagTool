@@ -325,6 +325,7 @@
     <Compile Include="Cache\Monolithic\ResourceCacheMonolithic.cs" />
     <Compile Include="Cache\Monolithic\SingleTagFileDataReader.cs" />
     <Compile Include="Cache\Monolithic\StringIdResolverUnnamespaced.cs" />
+    <Compile Include="Cache\Monolithic\TagDepdendencyIndex.cs" />
     <Compile Include="Cache\Monolithic\TagResourceXSyncState.cs" />
     <Compile Include="Cache\Monolithic\MonolithicTagFileBackend.cs" />
     <Compile Include="Cache\Monolithic\MonolithicTagFileIndex.cs" />

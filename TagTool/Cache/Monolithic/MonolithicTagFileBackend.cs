@@ -8,6 +8,7 @@ namespace TagTool.Cache.Monolithic
     {
         public Guid SessionId;
         public MonolithicTagFileIndex TagFileIndex;
+        public TagDepdendencyIndex TagDependencyIndex;
         private FileInfo IndexFile;
         private DirectoryInfo Directory;
         private DirectoryInfo BlobDirectory;
@@ -72,6 +73,11 @@ namespace TagTool.Cache.Monolithic
                         break;
                     case "mtfi":
                         TagFileIndex = new MonolithicTagFileIndex(chunkReader);
+                        break;
+                    case "mtdp":
+                        TagDependencyIndex = new TagDepdendencyIndex(chunkReader);
+                        break;
+                    case "mreg":
                         break;
                     default:
                         break;
