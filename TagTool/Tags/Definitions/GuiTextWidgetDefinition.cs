@@ -17,9 +17,6 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
         public WidgetFontValue_H3Original CustomFont_H3;
 
-        [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original, Length = 2, Flags = TagFieldFlags.Padding)]
-        public byte[] TextWidgetH3OriginalPadding;
-
         [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public WidgetFontValue_H3MCC CustomFont_H3MCC;
 
@@ -28,6 +25,9 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public WidgetFontValue CustomFont;
+
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
 
         [Flags]
         public enum GuiTextFlags : int

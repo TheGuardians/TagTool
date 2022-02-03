@@ -1458,36 +1458,20 @@ namespace TagTool.Commands.Porting
 				case ScenarioObjectType scenarioObjectType:
 					return ConvertScenarioObjectType(scenarioObjectType);
 
-                case Scenario.MultiplayerObjectProperties scnrObj:
-                    if (BlamCache.Version >= CacheVersion.HaloReach)
-                    {
-                        scnrObj.BoundaryWidthRadius = scnrObj.BoundaryWidthRadiusReach;
-                        scnrObj.BoundaryBoxLength = scnrObj.BoundaryBoxLengthReach;
-                        scnrObj.BoundaryPositiveHeight = scnrObj.BoundaryPositiveHeightReach;
-                        scnrObj.BoundaryNegativeHeight = scnrObj.BoundaryNegativeHeightReach;
-                        scnrObj.RemappingPolicy = scnrObj.RemappingPolicyReach;
-                    }
+                case Scenario.MultiplayerObjectProperties scnrObj when BlamCache.Version >= CacheVersion.HaloReach:
+                    scnrObj = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, scnrObj, definition, blamTagName);
+                    scnrObj.BoundaryWidthRadius = scnrObj.BoundaryWidthRadiusReach;
+                    scnrObj.BoundaryBoxLength = scnrObj.BoundaryBoxLengthReach;
+                    scnrObj.BoundaryPositiveHeight = scnrObj.BoundaryPositiveHeightReach;
+                    scnrObj.BoundaryNegativeHeight = scnrObj.BoundaryNegativeHeightReach;
+                    scnrObj.RemappingPolicy = scnrObj.RemappingPolicyReach;
                     return data;
 
                 case SoundClass soundClass:
 					return soundClass.ConvertSoundClass(BlamCache.Version);
 
-				case TextWidget textWidget:
-                    switch (BlamCache.Version)
-                    {
-                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
-                            textWidget.Definition.CustomFont = GetEquivalentValue(textWidget.Definition.CustomFont, textWidget.Definition.CustomFont_H3);
-                            break;
-                        case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
-                            textWidget.Definition.CustomFont = GetEquivalentValue(textWidget.Definition.CustomFont, textWidget.Definition.CustomFont_H3MCC);
-                            break;
-                        case CacheVersion.Halo3ODST:
-                            textWidget.Definition.CustomFont = GetEquivalentValue(textWidget.Definition.CustomFont, textWidget.Definition.CustomFont_ODST);
-                            break;
-                    }
-                    return textWidget;
-
 				case GuiTextWidgetDefinition guiTextWidget:
+                    guiTextWidget = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, guiTextWidget, definition, blamTagName);
                     switch (BlamCache.Version)
                     {
                         case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:

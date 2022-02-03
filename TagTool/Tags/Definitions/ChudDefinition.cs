@@ -1707,25 +1707,35 @@ namespace TagTool.Tags.Definitions
 
                 // flags
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-                public WidgetTextFlags_H3Original TextFlags_H3Original;
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-                public WidgetTextFlags TextFlags;
-                [TagField(MinVersion = CacheVersion.HaloReach)]
-                public ushort FlagsReach;
+                public WidgetTextFlags_H3Original TextFlags_H3Original; // ushort
+
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-                public WidgetTextFlags_H3MCC TextFlags_H3MCC;
+                public WidgetTextFlags_H3MCC TextFlags_H3MCC; // uint
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+                public WidgetTextFlags TextFlags; // uint
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ushort FlagsReach; // ushort
 
                 // fonts
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-                public WidgetFontValue_H3Original Font_H3;
-                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-                public WidgetFontValue_H3MCC Font_H3MCC;
+                public WidgetFontValue_H3Original Font_H3; // short
+
+                [TagField(EnumType = typeof(int), MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                public WidgetFontValue_H3MCC Font_H3MCC; // int
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-                public WidgetFontValue_ODST Font_ODST;
+                public WidgetFontValue_ODST Font_ODST; // short
+
                 [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-                public WidgetFontValue Font;
+                public WidgetFontValue Font; // short
+
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public ushort FontReach;
+                public ushort FontReach; // short
+
+                [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+                public byte[] FontPadding;
 
                 public StringId InputString;
 

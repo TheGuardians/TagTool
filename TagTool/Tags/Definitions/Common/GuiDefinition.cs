@@ -28,7 +28,7 @@ namespace TagTool.Tags.Definitions.Common
         }
     }
 
-	public enum WidgetFontValue : int   // engine order bracketed
+	public enum WidgetFontValue : short   // engine order bracketed
 	{
 		BodyText,               // Conduit 16 [1]
 		Terminal,               // FixedSys 9 [0]
@@ -45,7 +45,7 @@ namespace TagTool.Tags.Definitions.Common
 		Value12
 	}
 
-	public enum WidgetFontValue_ODST : int
+	public enum WidgetFontValue_ODST : short
 	{
 		Terminal,               // Fixedsys 9
 		BodyText,               // Conduit 14 (?)
@@ -75,7 +75,7 @@ namespace TagTool.Tags.Definitions.Common
 		MainMenuFont            // Pragmata 14
 	}
 
-	public enum WidgetFontValue_H3MCC : int
+	public enum WidgetFontValue_H3MCC : short
 	{
 		Terminal,               // FixedSys 9 (terminal)
 		BodyText,               // Conduit 16 (button_key)
