@@ -7,7 +7,7 @@ using TagTool.Common;
 
 namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
-    class VerifyBsp3d
+    public class VerifyBsp3d
     {
 		private List<leaf> Leaves = new List<leaf>();
 		public LargeCollisionBspBlock Bsp { get; set; }
@@ -102,13 +102,11 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 			bool result = true;
 			for(int i = 0; i < Bsp.Leaves.Count; i++)
             {
-				/*
 				if(Leaves[i].surface_indices.Count != leafybsp.leaves[i].polygon_counts[0, 2])
                 {
 					Console.WriteLine($"Leaf Index {i} Mismatch!");
 					continue;
 				}
-				*/
 				int missing_count = 0;
 				foreach (var surface_index in Leaves[i].surface_indices)
                 {

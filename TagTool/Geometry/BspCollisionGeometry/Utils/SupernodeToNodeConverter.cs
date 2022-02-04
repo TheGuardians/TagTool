@@ -9,7 +9,7 @@ using TagTool.Tags;
 
 namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
-    class SupernodeToNodeConverter
+    public class SupernodeToNodeConverter
     {
         public bool useleafmap = false;
         public LargeCollisionBspBlock Bsp { get; set; }

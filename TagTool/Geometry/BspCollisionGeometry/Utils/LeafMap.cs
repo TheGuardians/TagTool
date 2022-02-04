@@ -76,6 +76,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     {
                         if (bsp_leaf.polygon_counts[1,0] > 0) //polygons2 type 0
                         {
+                            //abort if too many nodes to build out
+                            if (bsp_leaf.polygon_counts[1, 0] > 10)
+                                continue;
+
                             new TagToolWarning("Fixing phantom leaf!");
                             int new_leaf_index = -1;
                             if (reconstruct_bsp_leaf(bsp_leaf, ref new_leaf_index))
