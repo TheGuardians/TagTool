@@ -2,24 +2,26 @@
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x20)]
+    [TagStructure(Size = 0x10, MaxVersion = Cache.CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x20, MinVersion = Cache.CacheVersion.HaloReach)]
     public class SoundDistanceParameters : TagStructure
     {
-        // don't obstruct below this distance
-        public float DontObstructDistance; // world units
-                                           // don't play below this distance
-        public float DontPlayDistance; // world units
-                                       // start playing at full volume at this distance
-        public float AttackDistance; // world units
-                                     // start attenuating at this distance
-        public float MinimumDistance; // world units
-                                      // set attenuation to sustain db at this distance
-        public float SustainBeginDistance; // world units
-                                           // continue attenuating to silence at this distance
-        public float SustainEndDistance; // world units
-                                         // the distance beyond which this sound is no longer audible
-        public float MaximumDistance; // world units
-                                      // the amount of attenuation between sustain begin and end
-        public float SustainDb; // dB
+        [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
+        public float DontObstructDistance;  // don't obstruct below this distance (world units)
+
+        public float DontPlayDistance; //don't play below this distance (world units)
+        public float AttackDistance; //start playing at full volume at this distance (world units)
+        public float MinimumDistance; //start attenuating at this distance (world units)
+
+        [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
+        public float SustainBeginDistance; //set attenuation to sustain db at this distance (world units)
+
+        [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
+        public float SustainEndDistance; // continue attenuating to silence at this distance (world units)
+
+        public float MaximumDistance; //the distance beyond which this sound is no longer audible (world units)
+
+        [TagField(MinVersion = Cache.CacheVersion.HaloReach)]
+        public float SustainDB; // the amount of attenuation between sustain begin and end dB
     }
 }

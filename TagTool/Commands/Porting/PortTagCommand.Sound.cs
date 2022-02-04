@@ -112,7 +112,7 @@ namespace TagTool.Commands.Porting
             var promotion = sound.SoundReference.PromotionIndex != -1 ? BlamSoundGestalt.Promotions[sound.SoundReference.PromotionIndex] : new Promotion();
             var customPlayBack = sound.SoundReference.CustomPlaybackIndex != -1 ? new List<CustomPlayback> { BlamSoundGestalt.CustomPlaybacks[sound.SoundReference.CustomPlaybackIndex] } : new List<CustomPlayback>();
 
-            sound.PlaybackParameters = playbackParameters.DeepClone();
+            sound.Playback = playbackParameters.DeepClone();
             sound.Scale = scale;
             sound.PlatformCodec = platformCodec.DeepClone();
             sound.Promotion = promotion;
@@ -121,7 +121,6 @@ namespace TagTool.Commands.Porting
             //
             // Tag fixes
             //
-            sound.FlagsHO = sound.Flags.ConvertLexical<Sound.FlagsValueHaloOnline>();
             sound.SampleRate = platformCodec.SampleRate;
             sound.ImportType = ImportType.SingleLayer;
             // helps looping sound? there is another value, 10 for Unknown2 but I don't know when to activate it.
@@ -132,30 +131,29 @@ namespace TagTool.Commands.Porting
 
             if (BlamCache.Version >= CacheVersion.HaloReach)
             {
+                sound.Flags = sound.FlagsReach.ConvertLexical<Sound.FlagsValue>();
+
                 // Fix playback parameters for reach
 
-                sound.PlaybackParameters.MaximumBendPerSecond = sound.PlaybackParameters.MaximumBendPerSecondReach;
-                sound.PlaybackParameters.SkipFraction = sound.PlaybackParameters.SkipFractionReach;
+                sound.Playback.MaximumBendPerSecond = sound.Playback.MaximumBendPerSecondReach;
+                sound.Playback.SkipFraction = sound.Playback.SkipFractionReach;
 
-                sound.PlaybackParameters.DistanceB = sound.PlaybackParameters.DistanceC;
-                sound.PlaybackParameters.DistanceC = sound.PlaybackParameters.DistanceE;
-                sound.PlaybackParameters.DistanceD = sound.PlaybackParameters.DistanceG;
 
-                sound.PlaybackParameters.FieldDisableFlags = 0;
+                sound.Playback.FieldDisableFlags = 0;
 
-                if (sound.PlaybackParameters.DistanceA == 0)
-                    sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceA;
+                if (sound.Playback.DistanceParameters.DontPlayDistance == 0)
+                    sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceA;
 
-                if (sound.PlaybackParameters.DistanceB == 0)
-                    sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceB;
+                if (sound.Playback.DistanceParameters.AttackDistance == 0)
+                    sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceB;
 
-                if (sound.PlaybackParameters.DistanceC == 0)
-                    sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceC;
+                if (sound.Playback.DistanceParameters.MinimumDistance == 0)
+                    sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceC;
 
-                if (sound.PlaybackParameters.DistanceD == 0)
-                    sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceD;
+                if (sound.Playback.DistanceParameters.MaximumDistance == 0)
+                    sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceD;
 
-                sound.PlaybackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.Bit4;
+                sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.Bit4;
             }
 
             //
@@ -233,7 +231,7 @@ namespace TagTool.Commands.Porting
 
                     result.PostConversionOperations.Add(() => permutation.ImportName = ConvertStringId(BlamSoundGestalt.ImportNames[permutation.ImportNameIndex].Name));
                     permutation.SkipFraction = permutation.EncodedSkipFraction / 32767.0f;
-                    permutation.GainHO = (float)permutation.Gain;
+                    permutation.Gain = (float)permutation.EncodedGain;
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)permutationOrder[i];
                     permutation.IsNotFirstPermutation = (uint)(permutation.PermutationNumber == 0 ? 0 : 1);

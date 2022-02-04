@@ -60,7 +60,7 @@ namespace TagTool.Commands.Sounds
                 case 1:{
                     path = args[0].Trim('"');
                     ImportCustom();
-                    Definition.PlaybackParameters.GainBase = 0;
+                    Definition.Playback.GainBase = 0;
                     return true;
                 }
                 case 2:{

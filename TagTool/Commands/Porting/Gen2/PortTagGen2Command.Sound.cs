@@ -64,19 +64,20 @@ namespace TagTool.Commands.Porting.Gen2
             // convert playbackParameters to gen3 format
             //
 
-            if(playbackParameters.MininumDistance != 0)
+            playbackParameters.DistanceParameters = new SoundDistanceParameters();
+            if (playbackParameters.MininumDistance != 0)
             {
-                playbackParameters.DistanceA = playbackParameters.MininumDistance;
+                playbackParameters.DistanceParameters.MinimumDistance = playbackParameters.MininumDistance;
                 playbackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceA;
             }
 
             if (playbackParameters.MaximumDistance != 0)
             {
-                playbackParameters.DistanceB = playbackParameters.MaximumDistance;
+                playbackParameters.DistanceParameters.MaximumDistance = playbackParameters.MaximumDistance;
                 playbackParameters.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceB;
             }
 
-            sound.PlaybackParameters = playbackParameters;
+            sound.Playback = playbackParameters;
 
             //
             // Initialize other blocks
@@ -99,22 +100,22 @@ namespace TagTool.Commands.Porting.Gen2
             //
 
             if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.AlwaysSpatialize))
-                sound.FlagsHO |= Sound.FlagsValueHaloOnline.AlwaysSpatialize;
+                sound.Flags |= Sound.FlagsValue.AlwaysSpatialize;
 
             if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.NeverObstruct))
-                sound.FlagsHO |= Sound.FlagsValueHaloOnline.NeverObstruct;
+                sound.Flags |= Sound.FlagsValue.NeverObstruct;
 
             if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.LinkCountToOwnerUnit))
-                sound.FlagsHO |= Sound.FlagsValueHaloOnline.LinkToOwner;
+                sound.Flags |= Sound.FlagsValue.LinkCountToOwnerUnit ;
 
             if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.PitchRangeIsLanguage))
-                sound.FlagsHO |= Sound.FlagsValueHaloOnline.PitchRangeIsLanguage;
+                sound.Flags |= Sound.FlagsValue.PitchRangeIsLanguage;
 
             if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.DonTUseSoundClassSpeakerFlag))
-                sound.FlagsHO |= Sound.FlagsValueHaloOnline.DontUseSoundClassSpeakerFlag;
+                sound.Flags |= Sound.FlagsValue.DontUseSoundClassSpeakerFlag;
 
             if (gen2Sound.Flags.HasFlag(Gen2Sound.Gen2SoundFlags.DonTUseLipsyncData))
-                sound.FlagsHO |= Sound.FlagsValueHaloOnline.DontUseLipsyncData;
+                sound.Flags |= Sound.FlagsValue.DontUseLipsyncData;
 
             //
             // Convert tags and strings from ugh references (ugh is not ported)
@@ -177,7 +178,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                     permutation.ImportName = ConvertStringId(ugh.ImportNames[gen2Permutation.Name].Name);
                     permutation.SkipFraction = gen2Permutation.EncodedSkipFraction / 32767.0f;
-                    permutation.GainHO = gen2Permutation.EncodedGain * 127.0f;  // need proper sbyte decoding
+                    permutation.Gain = gen2Permutation.EncodedGain * 127.0f;  // need proper sbyte decoding
                     permutation.PermutationChunks = new List<PermutationChunk>();
                     permutation.PermutationNumber = (uint)i;
                     permutation.IsNotFirstPermutation = (uint)(i == 0 ? 0 : 1);

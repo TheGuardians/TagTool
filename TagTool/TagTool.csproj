@@ -265,6 +265,7 @@
     <Compile Include="Audio\Converter\XMA2.cs" />
     <Compile Include="Audio\FMOD.cs" />
     <Compile Include="Audio\FMODSoundCache.cs" />
+    <Compile Include="Audio\PermutationLanguage.cs" />
     <Compile Include="Audio\SoundConverter.cs" />
     <Compile Include="Audio\SoundDistanceParameters.cs" />
     <Compile Include="Audio\Utils\AudioUtils.cs" />

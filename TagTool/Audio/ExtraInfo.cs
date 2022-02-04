@@ -2,6 +2,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
+using TagTool.Tags.Definitions.Common;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Audio
@@ -13,6 +14,7 @@ namespace TagTool.Audio
     public class ExtraInfo : TagStructure
 	{
         [TagField(Gen = CacheGeneration.HaloOnline)]
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
         public List<LanguagePermutation> LanguagePermutations;
 
         [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -39,40 +41,45 @@ namespace TagTool.Audio
 		{
             public List<RawInfoBlock> RawInfo;
 
-            [TagStructure(Size = 0x7C)]
+            [TagStructure(Size = 0x7C, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x4C, MinVersion = CacheVersion.HaloReach)]
             public class RawInfoBlock : TagStructure
 			{
                 public StringId SkipFractionName;
-                public uint Unknown1;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
-                public uint Unknown10;
-                public uint Unknown11;
-                public uint Unknown12;
-                public uint Unknown13;
-                public uint Unknown14;
-                public uint Unknown15;
-                public uint Unknown16;
-                public uint Unknown17;
-                public uint Unknown18;
+                public byte[] Samples;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public byte[] MouthData;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public byte[] LipsyncData;
+                public List<SoundPermutationMarkerBlock> Markers;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public List<SoundPermutationMarkerBlock> LayerMarkers;
                 public List<SeekTableBlock> SeekTable;
                 public short Compression;
                 public byte Language;
-                public byte Unknown19;
-                public uint ResourceSampleSize;
-                public uint ResourceSampleOffset;
+                [TagField(Length = 1, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding1;
                 public uint SampleCount;
+                public uint ResourceSampleOffset;
+                public uint ResourceSampleSize;
+                [TagField(Gen = CacheGeneration.HaloOnline)]
                 public uint Unknown20;
+                [TagField(Gen = CacheGeneration.HaloOnline)]
                 public uint Unknown21;
+                [TagField(Gen = CacheGeneration.HaloOnline)]
                 public uint Unknown22;
+                [TagField(Gen = CacheGeneration.HaloOnline)]
                 public uint Unknown23;
+                [TagField(Gen = CacheGeneration.HaloOnline)]
                 public int Unknown24;
+
+                [TagStructure(Size = 0xC)]
+                public class SoundPermutationMarkerBlock : TagStructure
+                {
+                    public int MarkerId;
+                    public StringId Name;
+                    public int SampleOffset;
+                }
 
                 [TagStructure(Size = 0x18)]
                 public class SeekTableBlock : TagStructure

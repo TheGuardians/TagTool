@@ -33,22 +33,7 @@ namespace TagTool.Audio
         public float MaximumBendPerSecondReach;
 
         [TagField(MinVersion = CacheVersion.Halo3Beta)]
-        public float DistanceA;
-        [TagField(MinVersion = CacheVersion.Halo3Beta)]
-        public float DistanceB;
-        [TagField(MinVersion = CacheVersion.Halo3Beta)]
-        public float DistanceC;
-        [TagField(MinVersion = CacheVersion.Halo3Beta)]
-        public float DistanceD;
-
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float DistanceE;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float DistanceF;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float DistanceG;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float DistanceH;
+        public SoundDistanceParameters DistanceParameters;
 
 
         /// <summary>

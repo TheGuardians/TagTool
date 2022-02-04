@@ -4,9 +4,9 @@ using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x3, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x3, MaxVersion = CacheVersion.HaloReach11883)]
+    [TagStructure(Size = 0x4, Gen = CacheGeneration.HaloOnline)]
+    [TagStructure(Size = 0x4, Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
+    [TagStructure(Size = 0x3, Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
     public class PlatformCodec : TagStructure
 	{
         [TagField(Gen = CacheGeneration.HaloOnline)]
@@ -18,11 +18,14 @@ namespace TagTool.Audio
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public byte LoadMode;
 
-        [TagField(Gen = CacheGeneration.Third)]
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
         public SampleRate SampleRate;
 
         public EncodingValue Encoding;
 
         public Compression Compression;
+
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding, Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
+        public byte[] Padding1;
     }
 }
