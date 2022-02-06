@@ -774,7 +774,18 @@ namespace SimpleJSON
             {
                 if (result.Length > 2)
                     result += ", ";
-                result += "\"" + Escape(N.Key) + "\":" + N.Value.ToString();
+                result += "\"" + Escape(N.Key) + "\":";
+
+                var value = N.Value.ToString().Trim(new char[] {'\"'});
+
+                if (double.TryParse(value, out double compDouble))
+                {
+                    result += value;
+                }
+                else if (value == N.Value.AsBool.ToString())
+                    result += N.Value.AsBool.ToString();
+                else
+                    result += N.Value.ToString();
             }
             result += "}";
             return result;
