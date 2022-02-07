@@ -180,11 +180,14 @@ namespace TagTool.Commands.Porting
 
                     if (BlamCache.Platform != CachePlatform.MCC)
                     {
-                        var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount, BlamCache.Platform);
-                        if (xmaFileSize < 0)
-                            return false;
+                        if (sound.SoundReference != null)
+                        {
+                            var xmaFileSize = BlamSoundGestalt.GetFileSize(sound.SoundReference.PitchRangeIndex, sound.SoundReference.PitchRangeCount, BlamCache.Platform);
+                            if (xmaFileSize < 0)
+                                return false;
+                        }
 
-                        var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource);
+                        var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.GetResource(BlamCache.Version, BlamCache.Platform));
                         if (soundResource == null)
                             return false;
 

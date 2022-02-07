@@ -10,7 +10,8 @@ namespace TagTool.Audio
     [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.ReleaseBuild)]
+    [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.TagsBuild)]
     public class ExtraInfo : TagStructure
 	{
         [TagField(Gen = CacheGeneration.HaloOnline)]
@@ -18,6 +19,7 @@ namespace TagTool.Audio
         public List<LanguagePermutation> LanguagePermutations;
 
         [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
         public List<FacialAnimationInfoBlock> FacialAnimationInfo;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
@@ -29,7 +31,7 @@ namespace TagTool.Audio
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown4;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.ReleaseBuild)]
         public TagResourceReference FacialAnimationResource;
 
         [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,11 +8,7 @@ using TagTool.Audio;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Common;
-using TagTool.IO;
-using TagTool.Serialization;
-using TagTool.Tags;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Porting
 {
@@ -85,7 +80,12 @@ namespace TagTool.Commands.Porting
             {
                 try
                 {
-                    SoundConversionResult result = ConvertSoundInternal(sound, blamTag_Name);
+                    SoundConversionResult result;
+                    if (sound.SoundReference == null)
+                        result = ConvertSoundInternalTagsBuild(sound, blamTag_Name);
+                    else
+                        result = ConvertSoundInternal(sound, blamTag_Name);
+
                     callback(result);
                 }
                 finally
@@ -95,6 +95,65 @@ namespace TagTool.Commands.Porting
             }));
 
             return sound;
+        }
+
+        private SoundConversionResult ConvertSoundInternalTagsBuild(Sound sound, string blamTag_Name)
+        {
+            var newData = new MemoryStream();
+
+            var result = new SoundConversionResult();
+            result.Definition = sound;
+            var resourceReference = sound.GetResource(BlamCache.Version, BlamCache.Platform);
+            var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(resourceReference);
+            if(soundResource == null)
+                return null;
+
+
+            var useCache = Sounds.UseAudioCacheCommand.AudioCacheDirectory != null;
+            var soundCachePath = useCache ? Sounds.UseAudioCacheCommand.AudioCacheDirectory.FullName : "";
+
+            byte[] xmaData = null;
+            if (soundResource != null)
+            {
+                xmaData = soundResource.Data.Data;
+                if (xmaData == null)
+                    return null;
+            }
+
+            var targetFormat = PortingOptions.Current.AudioCodec;
+
+
+            for (int pitchRangeIndex = 0; pitchRangeIndex < sound.PitchRanges.Count; pitchRangeIndex++)
+            {
+                var pitchRange = sound.PitchRanges[pitchRangeIndex];
+                pitchRange.RuntimePermutationFlags = -1;
+                pitchRange.RuntimeDiscardedPermutationIndex = -1;
+                pitchRange.PermutationCount = (short)pitchRange.Permutations.Count;
+                pitchRange.RuntimeLastPermutationIndex = -1;
+
+                for (int permutationIndex = 0; permutationIndex < pitchRange.Permutations.Count; permutationIndex++)
+                {
+                    var permutation = pitchRange.Permutations[permutationIndex];
+
+                    BlamSound blamSound = SoundConverter.ConvertGen3Sound(BlamCache, null, sound, pitchRangeIndex, permutationIndex, xmaData, targetFormat, useCache, soundCachePath, blamTag_Name);
+                    byte[] permutationData = blamSound.Data;
+                    permutation.SampleCount = blamSound.SampleCount;
+                    permutation.FirstSample = blamSound.FirstSample;
+                    permutation.PermutationChunks = new List<PermutationChunk>();
+                    permutation.PermutationChunks.Add(new PermutationChunk((int)newData.Position, permutationData.Length, permutation.FirstSample + permutation.SampleCount, permutation.FirstSample));
+                    newData.Write(permutationData, 0, permutationData.Length);
+                }
+            }
+
+            if(CacheVersionDetection.GetGameTitle(BlamCache.Version) == GameTitle.HaloReach)
+            {
+                sound.Flags = sound.FlagsReach.ConvertLexical<Sound.FlagsValue>();
+                sound.Playback = ConvertPlaybackReach(sound.Playback);
+            }
+                
+            sound.PlatformCodec.Compression = targetFormat;
+            result.Data = newData.ToArray();
+            return result;
         }
 
         private SoundConversionResult ConvertSoundInternal(Sound sound, string blamTag_Name)
@@ -132,28 +191,7 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 sound.Flags = sound.FlagsReach.ConvertLexical<Sound.FlagsValue>();
-
-                // Fix playback parameters for reach
-
-                sound.Playback.MaximumBendPerSecond = sound.Playback.MaximumBendPerSecondReach;
-                sound.Playback.SkipFraction = sound.Playback.SkipFractionReach;
-
-
-                sound.Playback.FieldDisableFlags = 0;
-
-                if (sound.Playback.DistanceParameters.DontPlayDistance == 0)
-                    sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceA;
-
-                if (sound.Playback.DistanceParameters.AttackDistance == 0)
-                    sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceB;
-
-                if (sound.Playback.DistanceParameters.MinimumDistance == 0)
-                    sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceC;
-
-                if (sound.Playback.DistanceParameters.MaximumDistance == 0)
-                    sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceD;
-
-                sound.Playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.Bit4;
+                sound.Playback = ConvertPlaybackReach(playbackParameters);
             }
 
             //
@@ -165,7 +203,7 @@ namespace TagTool.Commands.Porting
             if (xmaFileSize < 0)
                 return null;
 
-            var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource);
+            var soundResource = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.GetResource(BlamCache.Version, BlamCache.Platform));
 
             byte[] xmaData = null;
             if (soundResource != null)
@@ -380,6 +418,32 @@ namespace TagTool.Commands.Porting
 
             result.Data = soundDataAggregate.ToArray();
             return result;
+        }
+
+        private PlaybackParameter ConvertPlaybackReach(PlaybackParameter playback)
+        {
+            // Fix playback parameters for reach
+
+            playback.MaximumBendPerSecond = playback.MaximumBendPerSecondReach;
+            playback.SkipFraction = playback.SkipFractionReach;
+
+            playback.FieldDisableFlags = 0;
+
+            if (playback.DistanceParameters.DontPlayDistance == 0)
+                playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceA;
+
+            if (playback.DistanceParameters.AttackDistance == 0)
+                playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceB;
+
+            if (playback.DistanceParameters.MinimumDistance == 0)
+                playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceC;
+
+            if (playback.DistanceParameters.MaximumDistance == 0)
+                playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.DistanceD;
+
+            playback.FieldDisableFlags |= PlaybackParameter.FieldDisableFlagsValue.Bit4;
+
+            return playback;
         }
 
         private SoundLooping ConvertSoundLooping(SoundLooping soundLooping)

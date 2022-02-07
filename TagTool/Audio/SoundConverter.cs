@@ -178,8 +178,9 @@ namespace TagTool.Audio
             }
         }
 
+
         public static BlamSound ConvertGen3Sound(GameCache cache, SoundCacheFileGestalt soundGestalt, Sound sound, int pitchRangeIndex, int permutationIndex, byte[] data, Compression targetFormat, bool useSoundCache, string soundCachePath, string tagName)
-        {      
+        {
             var id = Guid.NewGuid();
             var baseFileName = $"{id}";
             var targetFileExt = AudioUtils.GetFormtFileExtension(targetFormat);
@@ -187,9 +188,19 @@ namespace TagTool.Audio
             var WAVFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.wav");
             var targetFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.{targetFileExt}");
 
-            try
+            BlamSound blamSound;
+
+
+            if (CacheVersionDetection.GetCacheBuildType(cache.Version) == CacheBuildType.TagsBuild)
             {
-                BlamSound blamSound;
+                var permutation = sound.PitchRanges[pitchRangeIndex].Permutations[permutationIndex];
+                var rawInfo = sound.ExtraInfo[0].LanguagePermutations[permutation.RawInfoIndex].RawInfo[0];
+                var permutationData = new byte[rawInfo.ResourceSampleSize];
+                Buffer.BlockCopy(data, (int)rawInfo.ResourceSampleOffset, permutationData, 0, (int)rawInfo.ResourceSampleSize);
+                blamSound = new BlamSound(sound.SampleRate, sound.PlatformCodec.Encoding, sound.PlatformCodec.Compression, rawInfo.SampleCount, permutationData);
+            }
+            else
+            {
                 if (cache.Platform == CachePlatform.MCC)
                 {
                     var gen3Cache = (GameCacheGen3)cache;
@@ -202,10 +213,10 @@ namespace TagTool.Audio
                 {
                     blamSound = GetXMA(cache, soundGestalt, sound, pitchRangeIndex, permutationIndex, data);
                 }
-              
-                var channelCount = Encoding.GetChannelCount(blamSound.Encoding);
-                var sampleRate = blamSound.SampleRate.GetSampleRateHz();
-                
+            }
+
+            try
+            {
                 bool cachedSoundExists = false;
 
                 if (useSoundCache)
@@ -217,6 +228,9 @@ namespace TagTool.Audio
                 if (!cachedSoundExists && blamSound.Compression == Compression.XMA)
                 {
                     WriteXMAFile(blamSound, XMAFileName);
+
+                    var channelCount = Encoding.GetChannelCount(blamSound.Encoding);
+                    var sampleRate = blamSound.SampleRate.GetSampleRateHz();
 
                     if (channelCount > 2)
                     {

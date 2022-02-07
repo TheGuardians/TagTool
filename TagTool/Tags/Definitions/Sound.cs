@@ -92,6 +92,17 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline449175)]
         public uint Unknown12;
 
+        public TagResourceReference GetResource(CacheVersion version, CachePlatform platform)
+        {
+            switch(version)
+            {
+                case CacheVersion.HaloReach11883:
+                    return ResourceReachTagsBuild;
+                default:
+                    return Resource;
+            }
+        }
+
         [Flags]
         public enum FlagsValue : ushort
         {

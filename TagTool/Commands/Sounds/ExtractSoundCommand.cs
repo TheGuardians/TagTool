@@ -8,6 +8,7 @@ using TagTool.Audio;
 using TagTool.IO;
 using TagTool.Audio.Converter;
 using TagTool.Commands.Porting;
+using TagTool.Cache.Monolithic;
 
 namespace TagTool.Commands.Sounds
 {
@@ -71,7 +72,7 @@ namespace TagTool.Commands.Sounds
             byte[] soundData = null;
             if (Cache.Platform != CachePlatform.MCC)
             {
-                var resourceReference = Definition.Resource;
+                var resourceReference = Definition.GetResource(Cache.Version, Cache.Platform);
                 var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(resourceReference);
 
                 if (resourceDefinition == null || resourceDefinition.Data == null)
@@ -92,12 +93,38 @@ namespace TagTool.Commands.Sounds
                 case GameCacheGen3 _:
                     ExportGen3Sound(outDirectory, soundData, targetFormat);
                     break;
+                case GameCacheMonolithic cache:
+                    ExportSoundMonolithic(outDirectory, soundData, targetFormat);
+                    break;
                 default:
                     throw new NotSupportedException("Cache not supported");
             }
 
             Console.WriteLine("Done!");
             return true;
+        }
+
+        private void ExportSoundMonolithic(string outDirectory, byte[] soundData, Compression? targetFormat)
+        {
+            if (targetFormat == null)
+                targetFormat = Definition.PlatformCodec.Compression;
+
+            for (int pitchRangeIndex = 0; pitchRangeIndex < Definition.PitchRanges.Count; pitchRangeIndex++)
+            {
+                var range = Definition.PitchRanges[pitchRangeIndex];
+
+                for (int i = 0; i < range.Permutations.Count; i++)
+                {
+                    var filename = GetExportFileName(targetFormat.Value, pitchRangeIndex, i);
+                    var outPath = Path.Combine(outDirectory, filename);
+                    BlamSound blamSound = SoundConverter.ConvertGen3Sound(Cache, null, Definition, pitchRangeIndex, i, soundData, targetFormat.Value, false, "", Tag.Name);
+                    Console.WriteLine($"{filename}: pitch range {pitchRangeIndex}, permutation {i} sample count: {blamSound.SampleCount}");
+                    using (EndianWriter output = new EndianWriter(new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None), EndianFormat.BigEndian))
+                    {
+                        output.WriteBlock(blamSound.Data);
+                    }
+                }
+            }
         }
 
         private void ExportGen3Sound(string outDirectory, byte[] soundData, Compression? targetFormat)

@@ -34,7 +34,7 @@ namespace TagTool.Audio
         public float Gain;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(Version = CacheVersion.HaloReach)]
         public uint SampleCount;
 
         [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
