@@ -114,7 +114,7 @@ namespace TagTool.Cache.Monolithic
                 }
                 else if (field.FieldType == TagFieldType.OldStringId)
                 {
-                    ReadOldStringId(chunkReader);
+                    ReadStringId(dataReader, chunkReader);
                 }
                 else if (field.FieldType == TagFieldType.Data)
                 {
@@ -174,7 +174,7 @@ namespace TagTool.Cache.Monolithic
             if (chunk.Header.Signature != "tgsi")
                 throw new Exception("Invalid tag reference chunk signature");
 
-            if (chunk.Header.Size > 0)
+            if (chunk.Header.Size == 0)
                 return;
 
             var chunkReader = new EndianReader(chunk.Stream, reader.Format);

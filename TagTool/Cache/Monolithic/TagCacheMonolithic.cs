@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TagTool.Cache.Gen3;
 using TagTool.Cache.Gen4;
 using TagTool.Common;
@@ -12,6 +13,9 @@ namespace TagTool.Cache.Monolithic
         public MonolithicTagFileBackend Backend;
 
         public List<CachedTagMonolithic> Tags = new List<CachedTagMonolithic>();
+
+        private Dictionary<uint, CachedTagMonolithic> TagsByID = new Dictionary<uint, CachedTagMonolithic>();
+
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
 
 
@@ -52,6 +56,7 @@ namespace TagTool.Cache.Monolithic
                 tag.ID = entry.Id;
                 tag.WideBlockIndex = entry.WideBlockIndex;
                 Tags.Add(tag);
+                TagsByID.Add(entry.Id, tag);
             }
         }
 
@@ -70,7 +75,7 @@ namespace TagTool.Cache.Monolithic
             throw new NotImplementedException();
         }
 
-        public override CachedTag GetTag(uint ID) => GetTag((int)ID);
+        public override CachedTag GetTag(uint ID) => TagsByID.TryGetValue(ID, out var tag) ? tag : null;
 
         public override CachedTag GetTag(int index)
         {

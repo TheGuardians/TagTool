@@ -5,6 +5,7 @@ using TagTool.Cache.Resources;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache.Monolithic
 {
@@ -62,12 +63,30 @@ namespace TagTool.Cache.Monolithic
         public override object Deserialize(Stream stream, CachedTag instance)
         {
             var definitionType = TagCache.TagDefinitions.GetTagDefinitionType(instance.Group);
-            return Deserializer.Deserialize(new TagSerializationContextMonolithic(stream, this, (CachedTagMonolithic)instance), definitionType);
+            return DeserializeInternal(stream, instance, definitionType);
         }
 
         public override T Deserialize<T>(Stream stream, CachedTag instance)
         {
-            return Deserializer.Deserialize<T>(new TagSerializationContextMonolithic(stream, this, (CachedTagMonolithic)instance));
+            return (T)DeserializeInternal(stream, instance, typeof(T));
+        }
+
+        private object DeserializeInternal(Stream stream, CachedTag instance, Type definitionType)
+        {
+            var data = Deserializer.Deserialize(new TagSerializationContextMonolithic(stream, this, (CachedTagMonolithic)instance), definitionType);
+
+            // fixups for convenience
+            switch(data)
+            {
+                case Bitmap bitmap when bitmap.XenonImages != null && bitmap.XenonImages.Count > 0:
+                    bitmap.Images = bitmap.XenonImages;
+                    break;
+                case Sound sound when sound.ResourceReachTagsBuild != null:
+                    sound.Resource = sound.ResourceReachTagsBuild;
+                    break;
+            }
+
+            return data;
         }
 
         public override Stream OpenCacheRead()
