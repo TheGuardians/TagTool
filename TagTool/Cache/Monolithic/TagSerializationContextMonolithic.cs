@@ -37,8 +37,8 @@ namespace TagTool.Cache.Monolithic
             var singleFileTagReader = new SingleTagFileReader(new PersistChunkReader(new MemoryStream(tagData), Cache.Endianness));
 
             // read the lauyout
-            if (!Cache.TagLayoutCache.TryGetValue(info.GroupTag, out TagLayout layout))
-                Cache.TagLayoutCache.Add(info.GroupTag, layout = singleFileTagReader.ReadLayout());
+            if (!Cache.TagLayouts.TryGetValue(info.GroupTag, out TagLayout layout))
+                Cache.TagLayouts.Add(info.GroupTag, layout = singleFileTagReader.ReadLayout());
             else
                 singleFileTagReader.Reader.ReadNextChunk(); // skip the next chunk
 

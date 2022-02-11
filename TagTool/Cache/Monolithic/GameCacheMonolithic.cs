@@ -16,22 +16,23 @@ namespace TagTool.Cache.Monolithic
         public TagCacheMonolithic TagCacheMono;
         public StringTableMonolithic StringTableMono;
         public ResourceCacheMonolithic ResourceCacheMono;
-        public Dictionary<Tag, TagLayout> TagLayoutCache;
+        public Dictionary<Tag, TagLayout> TagLayouts;
 
         public GameCacheMonolithic(FileInfo file, CacheVersion version = CacheVersion.Unknown, CachePlatform platform = CachePlatform.All)
         {
             if (version == CacheVersion.Unknown)
                 DetectCacheVersion(file, out version, out platform);
 
+            DisplayName = file.Name;
             Version = version;
             Platform = platform;
             Endianness = CacheVersionDetection.IsLittleEndian(version, Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian;
-            Backend = new MonolithicTagFileBackend(file, Endianness);
+            Backend = new MonolithicTagFileBackend(file, Endianness, MonolithicTagFileBackend.LoadFlags.TagIndex);
             Deserializer = new TagDeserializer(version, platform);
             TagCacheMono = new TagCacheMonolithic(Backend, version, platform);
             StringTableMono = new StringTableMonolithic();
             ResourceCacheMono = new ResourceCacheMonolithic(this);
-            TagLayoutCache = new Dictionary<Tag, TagLayout>();
+            TagLayouts = new Dictionary<Tag, TagLayout>();
         }
 
         private void DetectCacheVersion(FileInfo file, out CacheVersion version, out CachePlatform platform)
@@ -105,5 +106,11 @@ namespace TagTool.Cache.Monolithic
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
             => throw new NotImplementedException();
+
+        public void LoadTagLayouts()
+        {
+            Backend.LoadAdditional(MonolithicTagFileBackend.LoadFlags.TagLayouts);
+            TagLayouts = Backend.TagLayouts;
+        }
     }
 }

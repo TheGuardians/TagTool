@@ -5,6 +5,8 @@ namespace TagTool.Cache.Monolithic
 {
     public class TagPersistLayout
     {
+        public Guid LayoutId;
+        public int LayoutVersion;
         public TagPersistLayoutHeader LayoutHeader;
 
         public StringBuffer StringBuffer;
@@ -19,6 +21,26 @@ namespace TagTool.Cache.Monolithic
         public TagPersistInteropDefinition[] InteropDefinitions;
         public int[] CustomSearchBlockNames;
         public int[] DataDefinitionNames;
+
+        public TagPersistLayout(PersistChunkReader reader)
+        {
+            var chunk = reader.ReadNextChunk();
+            if (chunk.Header.Signature != "blay")
+                throw new Exception("Invalid tag layout chunk signature");
+
+            var chunkReader = new PersistChunkReader(chunk.Stream, reader.Format);
+
+            var layoutId = chunkReader.Deserialize<TagPersistLayoutIdentifier>();
+            LayoutVersion = chunkReader.ReadInt32();
+            LayoutId = new Guid(layoutId.Id);
+            LayoutHeader = chunkReader.Deserialize<TagPersistLayoutHeader>();
+
+            var layoutChunk = chunkReader.ReadNextChunk();
+            if (layoutChunk.Header.Signature != "tgly")
+                throw new Exception("Invalid tag layout chunk siganture");
+
+            ReadChunks(new PersistChunkReader(layoutChunk.Stream, chunkReader.Format));
+        }
 
         public TagPersistLayout(TagPersistLayoutHeader layoutHeader, PersistChunkReader reader)
         {
@@ -267,6 +289,14 @@ namespace TagTool.Cache.Monolithic
                 Unknown14 = reader.ReadInt32();
             }
         }
+    }
+
+    [TagStructure(Size = 0x14)]
+    public class TagPersistLayoutIdentifier : TagStructure
+    {
+        public int Unknown;
+        [TagField(Length = 0x10)]
+        public byte[] Id;
     }
 
     [TagStructure(Size = 0x34)]

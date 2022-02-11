@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using TagTool.Common;
 using TagTool.IO;
 
 namespace TagTool.Cache.Monolithic
@@ -9,12 +11,21 @@ namespace TagTool.Cache.Monolithic
         public Guid SessionId;
         public MonolithicTagFileIndex TagFileIndex;
         public TagDepdendencyIndex TagDependencyIndex;
+        public Dictionary<Tag, TagLayout> TagLayouts;
         private FileInfo IndexFile;
         private DirectoryInfo Directory;
         private DirectoryInfo BlobDirectory;
         public EndianFormat Format;
 
-        public MonolithicTagFileBackend(FileInfo indexFile, EndianFormat format)
+        [Flags]
+        public enum LoadFlags
+        {
+            TagIndex = 1 << 0,
+            TagDependencyIndex = 1 << 1,
+            TagLayouts = 1 << 2,
+        }
+
+        public MonolithicTagFileBackend(FileInfo indexFile, EndianFormat format, LoadFlags loadFlags)
         {
             IndexFile = indexFile;
             Directory = IndexFile.Directory;
@@ -22,13 +33,19 @@ namespace TagTool.Cache.Monolithic
             Format = format;
 
             using (var reader = new PersistChunkReader(IndexFile.OpenRead(), format))
-                Load(reader);
+                Load(reader, loadFlags);
         }
 
-        private void Load(PersistChunkReader reader)
+        public void LoadAdditional(LoadFlags loadFlags)
+        {
+            using (var reader = new PersistChunkReader(IndexFile.OpenRead(), Format))
+                Load(reader, loadFlags);
+        }
+
+        private void Load(PersistChunkReader reader, LoadFlags loadFlags)
         {
             SessionId = new Guid(reader.ReadBytes(16));
-            ReadChunks(reader);
+            ReadChunks(reader, loadFlags);
         }
 
         public FileInfo GetTagPartitionFile(int index)
@@ -61,7 +78,7 @@ namespace TagTool.Cache.Monolithic
             return ExtractTagRaw(TagFileIndex.Index[entryIndex]);
         }
 
-        private void ReadChunks(PersistChunkReader reader)
+        private void ReadChunks(PersistChunkReader reader, LoadFlags loadFlags)
         {
             foreach (var chunk in reader.ReadChunks())
             {
@@ -69,20 +86,34 @@ namespace TagTool.Cache.Monolithic
                 switch (chunk.Header.Signature.ToString())
                 {
                     case "tgin":
-                        ReadChunks(chunkReader);
+                        ReadChunks(chunkReader, loadFlags);
                         break;
-                    case "mtfi":
+                    case "mtfi" when loadFlags.HasFlag(LoadFlags.TagIndex):
                         TagFileIndex = new MonolithicTagFileIndex(chunkReader);
                         break;
-                    case "mtdp":
+                    case "mtdp" when loadFlags.HasFlag(LoadFlags.TagDependencyIndex):
                         TagDependencyIndex = new TagDepdendencyIndex(chunkReader);
                         break;
-                    case "mreg":
+                    case "mreg" when loadFlags.HasFlag(LoadFlags.TagLayouts):
+                        TagLayouts = ReadTagGroupLayouts(chunkReader);
                         break;
                     default:
                         break;
                 }
             }
+        }
+
+        private Dictionary<Tag, TagLayout> ReadTagGroupLayouts(PersistChunkReader rootReader)
+        {
+            var result = new Dictionary<Tag, TagLayout>();
+            foreach (var chunk in rootReader.ReadChunks())
+            {
+                var chunkReader = new PersistChunkReader(chunk.Stream, rootReader.Format);
+                var layoutReader = new TagPersistLayout(chunkReader);
+                var layout = new TagLayout(layoutReader);
+                result.Add(chunk.Header.Signature, layout);
+            }
+            return result;
         }
     }
 }
