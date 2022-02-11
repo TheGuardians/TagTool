@@ -31,7 +31,8 @@ namespace TagTool.Commands.Common
 
             // Allow inline comments
 
-            if (commandLine.IndexOf('#') > 0)
+            var poundIndex = commandLine.IndexOf('#');
+            if (poundIndex > 0 && char.IsWhiteSpace(commandLine[poundIndex - 1]))
                 commandLine = commandLine.Split('#')[0];
             else
                 commandLine = commandLine.Split(new[] {"//"}, StringSplitOptions.None)[0];
