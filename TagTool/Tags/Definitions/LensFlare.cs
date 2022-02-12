@@ -8,7 +8,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x98, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x9C, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
-    [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x9C, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "lens_flare", Tag = "lens", Size = 0x9C, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     public class LensFlare : TagStructure
 	{
         public Angle FalloffAngle;
