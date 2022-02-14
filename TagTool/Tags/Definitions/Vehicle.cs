@@ -1008,7 +1008,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x330, Align = 0x10, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x340, Align = 0x10, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x3C0, Align = 0x10, Platform = CachePlatform.MCC)]
         public class PhantomShape : TagStructure
         {
             public HkListShape ListShape;
@@ -1031,13 +1031,15 @@ namespace TagTool.Tags.Definitions
             public ChildInfo[] ChildShapes;
 
             [TagStructure(Size = 0x10, Platform = CachePlatform.Original)]
-            [TagStructure(Size = 0x18, Platform = CachePlatform.MCC)]
+            [TagStructure(Size = 0x20, Platform = CachePlatform.MCC)]
             public class ChildInfo : TagStructure
             {
                 public Havok.HavokShapeReference Shape;
                 public uint CollisionFilterInfo;
                 public int ChildShapeSize;
                 public int ChildShapeCount;
+                [TagField(Length = 0xC, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+                public byte[] Padding1;
             }
         }
 

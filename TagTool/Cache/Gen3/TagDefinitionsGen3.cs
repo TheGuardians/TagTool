@@ -153,7 +153,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("styl", "style"), typeof(Style) },
             { new TagGroupGen3("sus!", "sound_ui_sounds"), typeof(SoundUiSounds) },
             { new TagGroupGen3("term", "devi", "obje", "device_terminal"), typeof(Terminal) },
-            { new TagGroupGen3("test", "test_blah"), typeof(TestDefinition) },
+            //{ new TagGroupGen3("test", "test_blah"), typeof(TestDefinition) },
             { new TagGroupGen3("trak", "camera_track"), typeof(CameraTrack) },
             { new TagGroupGen3("trdf", "texture_render_list"), typeof(TextureRenderList) },
             { new TagGroupGen3("txt3", "gui_text_widget_definition"), typeof(GuiTextWidgetDefinition) },

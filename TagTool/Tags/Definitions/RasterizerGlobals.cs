@@ -7,7 +7,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "rasterizer_globals", Size = 0xA4, Tag = "rasg", MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "rasterizer_globals", Size = 0xAC, Tag = "rasg", MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "rasterizer_globals", Size = 0xBC, Tag = "rasg", MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "rasterizer_globals", Size = 0xBC, Tag = "rasg", MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "rasterizer_globals", Size = 0xB0, Tag = "rasg", MinVersion = CacheVersion.HaloReach)]
     public class RasterizerGlobals : TagStructure
 	{
         public List<DefaultBitmap> DefaultBitmaps;
@@ -37,6 +38,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public MotionBlurParametersBlock MotionBlurParameters;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float CheapAlbedoBlend; // for all screen space light without shader reference
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown1;
@@ -147,7 +151,7 @@ namespace TagTool.Tags.Definitions
             public float ExpectedTimePerTick;
         }
 
-        [TagStructure(Size = 0x18)]
+        [TagStructure(Size = 0x14)]
         public class MotionBlurParametersBlock : TagStructure
         {
             public float MaxBlur;
@@ -155,7 +159,6 @@ namespace TagTool.Tags.Definitions
             public float CenterFalloffX;
             public float CenterFalloffY;
             public float ExpectedTimePerTick;
-            public float Unknown;
         }
     }
 }

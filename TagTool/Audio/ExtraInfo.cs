@@ -33,6 +33,9 @@ namespace TagTool.Audio
         [TagField(MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.ReleaseBuild)]
         public TagResourceReference FacialAnimationResource;
 
+        [TagField(MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.TagsBuild)]
+        public List<FacialAnimationLanguageBlockStruct> FacialAnimationResources;
+
         [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
         public GlobalGeometryBlockInfoStruct GeometryBlockInfo;
 
@@ -237,6 +240,34 @@ namespace TagTool.Audio
                     VertexBuffer
                 }
             }
+        }
+    }
+
+    [TagStructure(Size = 0xC)]
+    public class FacialAnimationLanguageBlockStruct : TagStructure
+    {
+        public TagResourceReference FacialAnimationResource;
+        public SoundLanguageEnum Language;
+
+        public enum SoundLanguageEnum : int
+        {
+            English,
+            Japanese,
+            German,
+            French,
+            Spanish,
+            MexicanSpanish,
+            Italian,
+            Korean,
+            ChineseTraditional,
+            ChineseSimplified,
+            Portuguese,
+            Polish,
+            Russian,
+            Danish,
+            Finnish,
+            Dutch,
+            Norwegian
         }
     }
 }

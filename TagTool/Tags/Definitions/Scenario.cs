@@ -489,6 +489,9 @@ namespace TagTool.Tags.Definitions
         [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused;
 
+        [TagField(Platform = CachePlatform.MCC)]
+        public List<NullBlock> ScavengerHuntObjects;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public CachedTag MissionVisionModeEffect;
 

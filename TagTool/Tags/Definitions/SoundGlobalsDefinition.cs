@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TagTool.Cache;
 
 namespace TagTool.Tags.Definitions
@@ -29,7 +30,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag SoundGlobalPropagation;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public FireTeamSound FireTeamSounds;
+        public List<FireTeamSound> FireTeamSounds;
 
         [TagField(ValidTags = new[] { "sus!" }, Gen = CacheGeneration.HaloOnline)]
         public CachedTag GfxUiSounds;

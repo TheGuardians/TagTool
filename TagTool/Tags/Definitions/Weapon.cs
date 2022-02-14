@@ -994,6 +994,13 @@ namespace TagTool.Tags.Definitions
         public CachedTag ClangMeleeDamage;
         // this is only important for the energy sword
         public CachedTag ClangMeleeResponse;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag ClangMeleeAgainstMeleeWeaponDamage;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag ClangMeleeAgainstMeleeWeaponDamageResponse;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag LungeMeleeExplosiveDamage;
     }
 
     [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST)]

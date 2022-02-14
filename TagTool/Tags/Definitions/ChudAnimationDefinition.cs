@@ -79,8 +79,8 @@ namespace TagTool.Tags.Definitions
             public List<AnimationBlock> Keyframes;
             public TagFunction Function = new TagFunction { Data = new byte[0] };
 
-            [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnlineED)]
+            [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
             [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             public class AnimationBlock : TagStructure
 			{

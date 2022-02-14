@@ -7,7 +7,9 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "globals", Tag = "matg", Size = 0x600, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x554, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x5F8, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x5AC, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x608, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x618, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline571627)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x614, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -167,6 +169,9 @@ namespace TagTool.Tags.Definitions
 
         [TagField(ValidTags = new[] { "effg" })]
         public CachedTag EffectGlobals;
+
+        [TagField(Platform = CachePlatform.MCC)]
+        public CachedTag RenderObjectSkins;
 
         [TagField(ValidTags = new[] { "hcfd" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag CollisionFilter;
@@ -1450,11 +1455,11 @@ namespace TagTool.Tags.Definitions
 
             public List<UnderwaterProxy> UnderwaterProxies;
 
-            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown2;
-            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public short Unknown3;
-            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public short Unknown4;
 
             [TagStructure(Size = 0x28, MaxVersion = CacheVersion.HaloOnline700123)]

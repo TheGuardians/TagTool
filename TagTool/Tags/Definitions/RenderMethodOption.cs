@@ -51,10 +51,14 @@ namespace TagTool.Tags.Definitions
             public FunctionTypeEnum ForceFunctionType;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public ColorGraphTypeEnum ForceFunctionColorCount;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float SuggestedRealMin;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float SuggestedRealMax;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public int TicksFromMinToMax;
 

@@ -88,9 +88,12 @@ namespace TagTool.Tags
 			uint expectedSize = TagStructure.GetStructureSize(Info.Types[0], Info.Version, Info.CachePlatform);
 			if(Info.Structure.Align > 0)
 				offset = offset + (Info.Structure.Align - 1) & ~(Info.Structure.Align - 1);
+			if (Info.Structure.Align > 0)
+				expectedSize = expectedSize + (Info.Structure.Align - 1) & ~(Info.Structure.Align - 1);
 
+			var typename = Info.Types[0].FullName.Replace("TagTool.", "").Replace("Tags.Definitions.", "");
 			if (offset != expectedSize)
-				new TagToolWarning($"TagStructure size incorrect for '{Info.Types[0].FullName}', Version: '{Info.Version}'. Expected: 0x{expectedSize:X}, Got: 0x{offset:X}");
+				new TagToolWarning($"Bad Size. Version: {Info.Version}:{Info.CachePlatform}, Type: '{typename}', Expected: 0x{expectedSize:X}, Actual: 0x{offset:X}");
 #endif
 		}
 

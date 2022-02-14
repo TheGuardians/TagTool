@@ -126,8 +126,8 @@ namespace TagTool.Tags.Definitions
             public ShieldImpactFunction PlasmaEdgeIntensity;
         }
 
-        [TagStructure(Size = 0xA8, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0xA4, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0xAC, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public class H3ValuesBlock : TagStructure
         {
             public CachedTag ShieldImpactNoiseTexture1;
@@ -158,6 +158,8 @@ namespace TagTool.Tags.Definitions
             public float ImpactIntensity2;
             public RealRgbColor ImpactAmbientColor;
             public float ImpactAmbientIntensity;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public float AlphaBlackOffset;
         }
 
         /// <summary>

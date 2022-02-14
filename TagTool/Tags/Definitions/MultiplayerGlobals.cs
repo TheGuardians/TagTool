@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
         public List<MultiplayerUniversalBlock> Universal;
         public List<MultiplayerRuntimeBlock> Runtime;
 
-        [TagStructure(Size = 0xB4, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0xB4, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0xD8, MaxVersion = CacheVersion.HaloOnline449175)]
         [TagStructure(Size = 0xD0, MinVersion = CacheVersion.HaloOnline498295)]
         public class MultiplayerUniversalBlock : TagStructure
@@ -236,7 +236,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x20C, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x20C, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x2A8, MaxVersion = CacheVersion.HaloOnline449175)]
         [TagStructure(Size = 0x308, MinVersion = CacheVersion.HaloOnline498295)]
         public class MultiplayerRuntimeBlock : TagStructure
