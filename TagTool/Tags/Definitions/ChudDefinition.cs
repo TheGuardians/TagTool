@@ -976,11 +976,9 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public ChudRenderExternalInput_H3MCC RangeInput_H3MCC;
 
-                [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
                 public ChudRenderExternalInput_ODST ExternalInput_ODST;
 
-                [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public ChudRenderExternalInput_ODST RangeInput_ODST;
 

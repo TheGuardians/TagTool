@@ -13,9 +13,10 @@ namespace TagTool.Tags.Resources
 	{
         public D3DStructure<BitmapDefinition> Texture;
 
-        [TagStructure(Size = 0x34, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x34, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
         public class BitmapDefinition : TagStructure
 		{
             public TagData PrimaryResourceData;
@@ -25,10 +26,11 @@ namespace TagTool.Tags.Resources
     }
 
     
+  
+    [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
     [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-    [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
     public class BitmapTextureInteropDefinition
     {
         public short Width;
@@ -55,7 +57,6 @@ namespace TagTool.Tags.Resources
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public BitmapFlags Flags;
 
-        [TagField(Platform = CachePlatform.MCC)]
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public int Unknown1;
 

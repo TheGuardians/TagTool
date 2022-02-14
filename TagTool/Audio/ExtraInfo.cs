@@ -14,13 +14,12 @@ namespace TagTool.Audio
     [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.TagsBuild)]
     public class ExtraInfo : TagStructure
 	{
+        [TagField(BuildType = CacheBuildType.TagsBuild)]
         [TagField(Gen = CacheGeneration.HaloOnline)]
-        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
         public List<LanguagePermutation> LanguagePermutations;
 
-        [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
-        public List<FacialAnimationInfoBlock> FacialAnimationInfo;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public List<SoundEncodedDialogueSectionBlock> EncodedPermutationSection;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown1;
@@ -97,11 +96,11 @@ namespace TagTool.Audio
         }
 
         [TagStructure(Size = 0x2C)]
-        public class FacialAnimationInfoBlock : TagStructure
+        public class SoundEncodedDialogueSectionBlock : TagStructure
 		{
             public byte[] EncodedData; // legacy CE-H2 data, apparently can still be used
             public List<PermutationDialogueInfo> SoundDialogueInfo; // ditto
-            public List<FacialAnimationPermutation> FacialAnimationPermutations;
+            public List<SoundPermutationDialogueInfoNewBlock> SoundDialogueInfoNew;
 			
             [TagStructure(Size = 0x10)]
             public class PermutationDialogueInfo : TagStructure
@@ -114,10 +113,10 @@ namespace TagTool.Audio
 
             [TagStructure(Size = 0xC, Platform = CachePlatform.Original)]
             [TagStructure(Size = 0x3C, Platform = CachePlatform.MCC)]
-            public class FacialAnimationPermutation : TagStructure
+            public class SoundPermutationDialogueInfoNewBlock : TagStructure
 			{
                 [TagField(Platform = CachePlatform.MCC)]
-                public UnknownData Unknown1;
+                public LaguageIndicesStruct LanguageIndices;
 
                 public List<FacialAnimationBlock> FacialAnimation;
 
@@ -184,20 +183,20 @@ namespace TagTool.Audio
                 }
 
                 [TagStructure(Size = 0x30, Platform = CachePlatform.MCC)]
-                public class UnknownData : TagStructure
+                public class LaguageIndicesStruct : TagStructure
                 {
-                    public uint Unknown1;
-                    public uint Unknown2;
-                    public uint Unknown3;
-                    public uint Unknown4;
-                    public uint Unknown5;
-                    public uint Unknown6;
-                    public uint Unknown7;
-                    public uint Unknown8;
-                    public uint Unknown9;
-                    public uint Unknown10;
-                    public uint Unknown11;
-                    public uint Unknown12;
+                    public int EnglishIndex;
+                    public int JapaneseIndex;
+                    public int GermanIndex;
+                    public int FrenchIndex;
+                    public int SpanishIndex;
+                    public int MexicanSpanishIndex;
+                    public int ItalianIndex;
+                    public int KoreanIndex;
+                    public int ChinesetraditionalIndex;
+                    public int ChinesesimplifiedIndex;
+                    public int PortugueseIndex;
+                    public int PolishIndex;
                 }
             }
         }

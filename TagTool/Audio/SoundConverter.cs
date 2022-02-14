@@ -293,6 +293,7 @@ namespace TagTool.Audio
             int permutationGestaltIndex = soundGestalt.GetFirstPermutationIndex(pitchRangeGestaltIndex, cache.Platform) + permutationIndex;
             var permutation = soundGestalt.GetPermutation(permutationGestaltIndex);
             byte[] permutationData = fmodSoundCache.ExtractSound(permutation.FsbSoundHash);
+            // TODO: update the rest of tagtool to handle pcm32
             permutationData = ConvertToPCM16(permutationData);
             var blamSound = new BlamSound(sound, permutationGestaltIndex, permutationData, cache.Version, soundGestalt);
             blamSound.UpdateFormat(Compression.PCM, permutationData);
@@ -308,7 +309,7 @@ namespace TagTool.Audio
             using (var writer = new EndianWriter(outputStream))
             {
                 while(!reader.EOF)
-                    writer.Write((short)(reader.ReadSingle() * short.MaxValue));
+                    writer.Write((short)(reader.ReadSingle() / 1.414f * short.MaxValue));
             }
             return newData;
         }

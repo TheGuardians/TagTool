@@ -127,7 +127,8 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "gmeg" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag MedalGlobals;
 
-        [TagField(Length = 12)]
+        [TagField(Length = 12, Align = 0x4, Platform = CachePlatform.Original)]
+        [TagField(Length = 12, Align = 0x8, Platform = CachePlatform.MCC)]
         public LanguagePack[] LanguagePacks = new LanguagePack[12];
 
         [TagField(ValidTags = new[] { "rasg" })]

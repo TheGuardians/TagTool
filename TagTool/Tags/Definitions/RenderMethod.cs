@@ -79,13 +79,15 @@ namespace TagTool.Tags.Definitions
             public float RealValue;
             public int IntBoolValue;
             public short BitmapFlags;
+            [TagField(Platform = CachePlatform.MCC)]
+            public short BitmapComparisonFunction;
             public short BitmapFilterMode;
             public short BitmapAddressMode;
             public short BitmapAddressModeX;
             public short BitmapAddressModeY;
             public short BitmapAnisotropyAmount;
             public short BitmapExternRTTMode;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0x2)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0x2, Platform = CachePlatform.Original)]
             public byte[] Padding;
             public List<RenderMethodAnimatedParameterBlock> AnimatedParameters;
         }
