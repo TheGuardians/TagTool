@@ -195,6 +195,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A8Y8:
                 case BitmapFormat.Y16:
                 case BitmapFormat.A16B16G16R16F:
+                case BitmapFormat.A2R10G10B10:
                 case BitmapFormat.A32B32G32R32F:
                 case BitmapFormat.A8R8G8B8_reach:
                 case BitmapFormat.A4R4G4B4:
@@ -257,6 +258,7 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.A8R8G8B8_reach:
+                case BitmapFormat.A2R10G10B10:
                 case BitmapFormat.V16U16:
                     compressionFactor = 0.25;
                     break;

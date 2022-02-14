@@ -325,6 +325,10 @@ namespace TagTool.Bitmaps.DDS
                         Flags |= DDSPixelFormatFlags.FourCC;
                         FourCC = 0x71;
                         break;
+                    case BitmapFormat.A2R10G10B10:
+                        Flags |= DDSPixelFormatFlags.RGBA;
+                        RBitMask = 0x000003ff; GBitMask = 0x000ffc00; BBitMask = 0x3ff00000; ABitMask = 0xc0000000;
+                        break;
                     default:
                         throw new Exception($"Unsupported bitmap format {format}");
                 }

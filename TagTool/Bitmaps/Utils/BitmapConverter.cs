@@ -205,7 +205,7 @@ namespace TagTool.Bitmaps.Utils
             return resultBitmap;     
         }
 
-        private static void ConvertGen3BitmapDataMCC(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, CacheVersion version)
+        private unsafe static void ConvertGen3BitmapDataMCC(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, CacheVersion version)
         {
             var pixelDataOffset = BitmapUtilsPC.GetTextureOffset(bitmap.Images[imageIndex], level);
             var pixelDataSize = BitmapUtilsPC.GetMipmapPixelDataSize(bitmap.Images[imageIndex], level);
@@ -245,6 +245,24 @@ namespace TagTool.Bitmaps.Utils
                 int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 var rgba = BitmapDecoder.DecodeV16U16(pixelData, width, height, true);
                 pixelData = EncodeDXN(rgba, width, height);
+            }
+            else if (bitmap.Images[imageIndex].Format == BitmapFormat.A2R10G10B10)
+            {
+                // convert DXGI_FORMAT_R10G10B10A2_UNORM to A2R10G10B10
+                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
+                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
+                fixed(byte *ptr = pixelData)
+                {
+                    for (int i = 0; i < width * height; i++)
+                    {
+                        uint* pixel = (uint*)&ptr[i*4];
+                        uint R = (*pixel & 0x3ff00000) >> 20;
+                        uint G = (*pixel & 0x000ffc00);
+                        uint B = (*pixel & 0x000003ff) << 20;
+                        uint A = (*pixel & 0xC0000000);
+                        *pixel = B | G | R | A;
+                    }
+                }
             }
 
             resultStream.Write(pixelData, 0, pixelData.Length);
