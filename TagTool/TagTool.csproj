@@ -58,7 +58,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
+    <DefineConstants>DEBUG;_x64</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>CS1591</NoWarn>
     <PlatformTarget>x64</PlatformTarget>
@@ -263,8 +263,11 @@
     <Compile Include="Audio\Converter\WAV.cs" />
     <Compile Include="Audio\Converter\XMA.cs" />
     <Compile Include="Audio\Converter\XMA2.cs" />
-    <Compile Include="Audio\FMOD.cs" />
-    <Compile Include="Audio\FMODSoundCache.cs" />
+    <Compile Include="Audio\FMOD\FMOD.cs" />
+    <Compile Include="Audio\FMOD\FMODSoundBank.cs" />
+    <Compile Include="Audio\FMOD\FMODSoundCache.cs" />
+    <Compile Include="Audio\FMOD\FMODSoundIndex.cs" />
+    <Compile Include="Audio\FMOD\FMODTagTool.cs" />
     <Compile Include="Audio\PermutationLanguage.cs" />
     <Compile Include="Audio\SoundConverter.cs" />
     <Compile Include="Audio\SoundDistanceParameters.cs" />
@@ -397,6 +400,7 @@
     <Compile Include="Common\ColorConversion.cs" />
     <Compile Include="Common\GameTitle.cs" />
     <Compile Include="Common\MathHelper.cs" />
+    <Compile Include="Common\NativeInterop.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\VerifyBsp3d.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />

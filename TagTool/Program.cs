@@ -8,6 +8,7 @@ using System.Reflection;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Commands.Tags;
+using TagTool.Common;
 using TagTool.IO;
 
 namespace TagTool.Commands
@@ -21,6 +22,7 @@ namespace TagTool.Commands
 
         static void Main(string[] args)
         {
+            SetDirectories();
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
             ConsoleHistory.Initialize();
 
@@ -160,6 +162,14 @@ namespace TagTool.Commands
             }
 
             end: return;
+        }
+
+        public static void SetDirectories()
+        {
+            // Needed to use AddDllDirectory
+            NativeInterop.SetDefaultDllDirectories(0x1000u); // LOAD_LIBRARY_SEARCH_DEFAULT_DIRS
+            // Add the tools directory to the search path to simplify usage of [DllImport]
+            NativeInterop.AddDllDirectory(Path.Combine(TagToolDirectory, "Tools"));
         }
     }
 }

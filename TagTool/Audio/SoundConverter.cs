@@ -204,6 +204,9 @@ namespace TagTool.Audio
                 if (cache.Platform == CachePlatform.MCC)
                 {
                     var gen3Cache = (GameCacheGen3)cache;
+                    if (!gen3Cache.FMODSoundCacheDirectory.Exists)
+                        throw new DirectoryNotFoundException($"FMOD sound banks directory not found \"{gen3Cache.FMODSoundCacheDirectory.FullName}\"");
+
                     blamSound = GetSoundBankData(cache, soundGestalt, gen3Cache.FMODSoundCache, sound, pitchRangeIndex, permutationIndex);
                     var waveFile = new WAVFile(blamSound.Data, TagTool.Audio.Encoding.GetChannelCount(blamSound.Encoding), blamSound.SampleRate.GetSampleRateHz());
                     using (var output = new EndianWriter(File.Create(WAVFileName)))
