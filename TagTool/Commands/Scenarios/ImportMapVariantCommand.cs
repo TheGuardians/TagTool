@@ -401,8 +401,8 @@ namespace TagTool.Commands.Scenarios
                 instance.UniqueHandle = DatumHandle.None;
                 instance.ObjectType = new ScenarioObjectType() { Halo3ODST = type };
                 instance.Source = ScenarioInstance.SourceValue.Editor;
-                instance.ParentNameIndex = -1;
-                instance.AllowedZoneSets = 1;
+                instance.ParentId.NameIndex = -1;
+                instance.CanAttachToBspFlags = 1;
 
                 var multiplayerInstance = instance as IMultiplayerInstance;
                 var multiplayer = multiplayerInstance.Multiplayer = new MultiplayerObjectProperties();

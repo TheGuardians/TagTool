@@ -329,7 +329,7 @@ namespace TagTool.Commands.Porting
                 // check each object
                 foreach (ScenarioInstance obj in type.instances)
                 {
-                    if (obj.ParentNameIndex != -1 || obj.PaletteIndex < 0)
+                    if (obj.ParentId.NameIndex != -1 || obj.PaletteIndex < 0)
                         continue;
 
                     if (IsSafePointToSpawn(scnr, obj.Position))
@@ -537,8 +537,8 @@ namespace TagTool.Commands.Porting
             var instance = new SceneryInstance();
             instance.PaletteIndex = (short)scnr.SceneryPalette.Count;
             instance.NameIndex = -1;
-            instance.EditorFolderIndex = -1;
-            instance.ParentNameIndex = -1;
+            instance.EditorFolder = -1;
+            instance.ParentId.NameIndex = -1;
             instance.Position = position;
             instance.Rotation = rotation;
             instance.ObjectType = new ScenarioObjectType() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
@@ -546,7 +546,7 @@ namespace TagTool.Commands.Porting
             instance.BspPolicy = ScenarioInstance.BspPolicyValue.Default;
             instance.UniqueHandle = new DatumHandle(0xffffffff);
             instance.OriginBspIndex = -1;
-            instance.AllowedZoneSets = (ushort)(1u << bspIndex);
+            instance.CanAttachToBspFlags = (ushort)(1u << bspIndex);
             instance.Multiplayer = new MultiplayerObjectProperties();
             instance.Multiplayer.Team = MultiplayerTeamDesignator.Neutral;
             scnr.Scenery.Add(instance);
@@ -848,7 +848,7 @@ namespace TagTool.Commands.Porting
                     var placement = placements[placementIndex];
 
                     // check if the object is supposed to be spawned on any of the desired bsps
-                    if (((placement.AllowedZoneSets & IncludeBspMask) == 0))
+                    if (((placement.CanAttachToBspFlags & IncludeBspMask) == 0))
                         continue;
                     // check the palette index is valid
                     if (placement.PaletteIndex < 0 || placement.PaletteIndex >= palette.Count)
@@ -884,7 +884,7 @@ namespace TagTool.Commands.Porting
                     }
 
                     // fixup the allowed bsps
-                    placement.AllowedZoneSets = (ushort)mask;
+                    placement.CanAttachToBspFlags = (ushort)mask;
                     // tell it to always spawn
                     placement.PlacementFlags &= ~ObjectPlacementFlags.NotAutomatically;
 

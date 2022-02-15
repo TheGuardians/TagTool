@@ -639,7 +639,7 @@ namespace TagTool.Tags.Definitions
                 public HkpMoppBvTreeShape Shape;
                 public List<TagHkpMoppCode> MoppCodes;
                 [TagField(Length = 0x4, Platform = CachePlatform.MCC)]
-                public byte[] Padding1;
+                public byte[] Padding6;
             }
 
             [TagStructure(Size = 0x1)]

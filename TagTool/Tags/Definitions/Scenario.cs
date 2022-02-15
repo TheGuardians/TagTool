@@ -1119,35 +1119,44 @@ namespace TagTool.Tags.Definitions
             public RealEulerAngles3d Rotation;
             public float Scale;
             public List<ObjectNodeOrientation> NodeOrientations;
-            public short Unknown2;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public byte Unknown21;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public ObjectTransformFlags TransformFlags;
+
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Padding1;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public BspPolicyValue BspPolicyReach;
 
-            public ushort OldManualBspFlagsNowZoneSets;
+            public ushort ManualBspFlags;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public ObjectTransformFlags TransformFlags;
+            public ObjectTransformFlags TransformFlagsReach;
 
-            public StringId UniqueName;
+            public StringId LightAirprobeName;
+
+            // object id
             public DatumHandle UniqueHandle;
             public short OriginBspIndex;
             public ScenarioObjectType ObjectType;
             public SourceValue Source; // sbyte
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public BspPolicyValue BspPolicy; // sbyte
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown3;
-            public short EditorFolderIndex;
-            public short Unknown4;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short Unknown5;
-            public short ParentNameIndex;
-            public StringId ChildName;
-            public StringId Unknown6;
-            public ushort AllowedZoneSets;
-            public short Unknown61;
+            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Padding2;
+
+            public short EditorFolder;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Padding3;
+
+            public ScenarioObjectParentStruct ParentId;
+
+            public ushort CanAttachToBspFlags;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding4;
+
 
             public enum SourceValue : sbyte
             {
@@ -1236,10 +1245,7 @@ namespace TagTool.Tags.Definitions
         public class PermutationInstance : ScenarioInstance
         {
             public StringId Variant;
-            public byte ActiveChangeColors;
-            public sbyte Unknown8;
-            public sbyte Unknown9;
-            public sbyte Unknown10;
+            public uint ActiveChangeColors;
             public ArgbColor PrimaryColor;
             public ArgbColor SecondaryColor;
             public ArgbColor TertiaryColor;
@@ -3647,7 +3653,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x0)]
-        public class CreatureInstance : PermutationInstance
+        public class CreatureInstance : ScenarioInstance
         {
         }
 
