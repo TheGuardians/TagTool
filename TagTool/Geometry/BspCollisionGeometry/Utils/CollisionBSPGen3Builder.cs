@@ -12,6 +12,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
     {
         public List<leaf> initial_leaves = new List<leaf>();
         public LargeCollisionBspBlock Bsp { get; set; }
+        private float[,] Bounds = new float[3,2];
+        private List<float> BoundingCoords = new List<float>();
 
         public class polygon
         {
@@ -61,12 +63,56 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             Bsp.Bsp2dReferences.Clear();
             Bsp.Bsp3dNodes.Clear();
 
+            get_geometry_bounds();
+
             List<polygon_plane> polygon_planes = build_polygon_planes();
 
             return true;
         }
 
-        public void build_bsp3d_node(List<polygon_plane> polygon_planes, ref int node_index)
+        public void get_geometry_bounds()
+        {
+            for(var i = 0; i < 2; i++)
+            {
+                Bounds[i, 0] = float.MaxValue;
+                Bounds[i, 1] = float.MinValue;
+            }
+
+            //get object bounds
+            foreach (var vertex in Bsp.Vertices)
+            {
+                RealPoint3d vert = vertex.Point;
+                if (vert.X < Bounds[0, 0])
+                    Bounds[0, 0] = vert.X;
+                if (vert.X > Bounds[0, 1])
+                    Bounds[0, 1] = vert.X;
+                if (vert.Y < Bounds[1, 0])
+                    Bounds[1, 0] = vert.Y;
+                if (vert.Y > Bounds[1, 1])
+                    Bounds[1, 1] = vert.Y;
+                if (vert.Z < Bounds[2, 0])
+                    Bounds[2, 0] = vert.Z;
+                if (vert.Z > Bounds[2, 1])
+                    Bounds[2, 1] = vert.Z;
+            }
+
+            //create a list of 48 floats that consist of 2d points that compose each face of a bounding box surrounding the geometry
+            int[,] coordinate_pairs = new int[,] 
+            { { 2, 1 }, { 1, 2 }, { 0, 2 }, { 2, 0 }, { 1, 0 }, { 0, 1 }  };
+            for(var i = 0; i < coordinate_pairs.Length; i++)
+            {
+                BoundingCoords.Add(Bounds[coordinate_pairs[i, 0], 0]);
+                BoundingCoords.Add(Bounds[coordinate_pairs[i, 1], 0]);
+                BoundingCoords.Add(Bounds[coordinate_pairs[i, 0], 1]);
+                BoundingCoords.Add(Bounds[coordinate_pairs[i, 1], 0]);
+                BoundingCoords.Add(Bounds[coordinate_pairs[i, 0], 1]);
+                BoundingCoords.Add(Bounds[coordinate_pairs[i, 1], 1]);
+                BoundingCoords.Add(Bounds[coordinate_pairs[i, 0], 0]);
+                BoundingCoords.Add(Bounds[coordinate_pairs[i, 1], 1]);
+            }
+        }
+
+        public void build_bsp3d_node(ref int node_index, List<polygon_plane> polygon_planes, List<polygon_plane> polygon_planes_no_margin)
         {
             if(polygon_planes.Count <= 0)
             {
@@ -81,7 +127,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 List<polygon_plane> back_array_no_margin = new List<polygon_plane>();
                 List<polygon_plane> front_array_no_margin = new List<polygon_plane>();
                 polygon_planes_split(polygon_planes, splitting_plane_index, ref back_array, ref front_array, true);
-                polygon_planes_split(polygon_planes, splitting_plane_index, ref back_array_no_margin, ref front_array_no_margin, false);
+                polygon_planes_split(polygon_planes_no_margin, splitting_plane_index, ref back_array_no_margin, ref front_array_no_margin, false);
+                
                 LargeBsp3dNode new_node = new LargeBsp3dNode
                 {
                     Plane = splitting_plane_index
@@ -89,6 +136,13 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 Bsp.Bsp3dNodes.Add(new_node);
                 node_index = Bsp.Bsp3dNodes.Count - 1;
 
+                build_bsp3d_node(ref Bsp.Bsp3dNodes[node_index].BackChild, back_array, back_array_no_margin);
+                build_bsp3d_node(ref Bsp.Bsp3dNodes[node_index].FrontChild, front_array, front_array_no_margin);
+
+                List<polygon> node_polygons = new List<polygon>();
+                int node_poly_plane_index = polygon_planes_no_margin.FindIndex(p => p.plane_index == splitting_plane_index);
+                if (node_poly_plane_index != -1)
+                    node_polygons = polygon_planes_no_margin[node_poly_plane_index].polygons;
             }
         }
 
@@ -172,7 +226,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         polygon_planes_add_polygon(front_array, front_poly);
                     }
                     List<RealPoint3d> back_points = plane_cut_polygon(poly.vertices, back_plane, false);
-                    if (front_points.Count > 0)
+                    if (back_points.Count > 0)
                     {
                         polygon back_poly = poly.DeepClone();
                         back_poly.vertices = back_points;
@@ -549,6 +603,76 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             double Zmul = Zdiff2 * Ddiv2;
             result.Z = (float)(Zmul + p0.Z);
             return result;
+        }
+
+        public void connection_polygon_add_new()
+        {
+            //maximally sized face will be cut down by bsp planes
+            List<RealPoint2d> result_vertices = new List<RealPoint2d>
+                {
+                    new RealPoint2d(-1536,-1536),
+                    new RealPoint2d(1536,-1536),
+                    new RealPoint2d(1536,1536),
+                    new RealPoint2d(-1536,1536)
+                };
+        }
+
+        public RealPoint3d point2d_and_plane_to_point3d(RealPlane3d plane, RealPoint2d point)
+        {
+            int projection_axis = plane_get_projection_coefficient(plane);
+            int projection_sign = plane_get_projection_sign(plane, projection_axis) ? 1 : 0;
+            float[] planecoords = new float[3] { plane.I, plane.J, plane.K };
+            float[] result_coords = new float[3];
+            int v4 = 2 * (projection_sign + 2 * projection_axis);
+            List<int> coordinate_list = new List<int> { 2, 1, 1, 2, 0, 2, 2, 0, 1, 0, 0, 1 };
+            int vertex_X_coord_index = coordinate_list[v4];
+            int vertex_Y_coord_index = coordinate_list[v4 + 1];
+
+            //assign X and Y coords
+            result_coords[vertex_X_coord_index] = point.X;
+            result_coords[vertex_Y_coord_index] = point.Y;
+
+            //calculate projection axis coordinate
+            //otherwise result coord at projection axis defaults to 0.0
+            if (Math.Abs(planecoords[projection_axis]) >= 0.00009999999747378752d)
+            {
+                result_coords[projection_axis] =
+                    (plane.D - planecoords[vertex_X_coord_index] * point.X - planecoords[vertex_Y_coord_index] * point.Y) /
+                    planecoords[projection_axis];
+            }
+            return new RealPoint3d(result_coords[0], result_coords[1], result_coords[2]);
+        }
+
+        public int plane_get_projection_coefficient(RealPlane3d plane)
+        {
+            int minimum_coefficient;
+            float plane_I = Math.Abs(plane.I);
+            float plane_J = Math.Abs(plane.J);
+            float plane_K = Math.Abs(plane.K);
+            if (plane_K < plane_J || plane_K < plane_I)
+            {
+                if (plane_J >= plane_I)
+                    minimum_coefficient = 1;
+                else
+                    minimum_coefficient = 0;
+            }
+            else
+                minimum_coefficient = 2;
+            return minimum_coefficient;
+        }
+
+        public bool plane_get_projection_sign(RealPlane3d plane, int projection_axis)
+        {
+            switch (projection_axis)
+            {
+                case 0: //x axis
+                    return plane.I > 0.0f;
+                case 1: //y axis
+                    return plane.J > 0.0f;
+                case 2: //z axis
+                    return plane.K > 0.0f;
+            }
+            return false;
         }
     }
 }
