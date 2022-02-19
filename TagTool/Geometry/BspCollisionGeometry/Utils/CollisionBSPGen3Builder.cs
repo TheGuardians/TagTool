@@ -35,8 +35,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public class leaf_connection
         {
-            public int leaf_above = -1;
-            public int leaf_below = -1;
+            public int above = -1;
+            public int below = -1;
             public float connection_total;
             public float connection_vs_nonconnection;
             public float nonconnection_total;
@@ -165,6 +165,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     node_polygons = polygon_planes_no_margin[node_poly_plane_index].polygons;
 
                 connection_polygon_add_new(initial_nodes[node_index], ref node_polygons);
+                polygons_clip_to_leaves(initial_nodes[node_index], ref node_polygons);
+                build_leaf_connections(node_polygons);
             }
         }
 
@@ -694,6 +696,63 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 }
             }
         }
+
+        public void build_leaf_connections(List<polygon> polygon_array)
+        {
+            foreach(var poly in polygon_array)
+            {
+                RealPlane3d poly_plane = Bsp.Planes[poly.plane_index & 0x7FFFFFFF].Value;
+                double polygon_area = polygon_get_area(poly);
+                double polygon_area_signed = polygon_area;
+                if (poly.plane_index < 0)
+                    polygon_area_signed = -polygon_area_signed;
+                leaf above_leaf = initial_leaves[poly.above];
+
+                //find matching leaf connection if it exists
+                int leaf_connection_index = -1;
+                for(var i = 0; i < above_leaf.leaf_connections.Count; i++)
+                {
+                    if (above_leaf.leaf_connections[i].above == poly.above ||
+                       above_leaf.leaf_connections[i].below == poly.above)
+                    {
+                        leaf_connection_index = i;
+                        break;
+                    }
+                }
+                //if none are found, create a new one
+                if (leaf_connection_index == -1)
+                {
+                    above_leaf.leaf_connections.Add(new leaf_connection
+                    {
+                        plane_index = poly.plane_index & 0x7FFFFFFF,
+                        below = poly.below,
+                        above = poly.above,
+                        polygons = new List<polygon> { poly }
+                    });
+                    leaf_connection_index = above_leaf.leaf_connections.Count - 1;
+                }
+                //otherwise just add polygon
+                else
+                {
+                    above_leaf.leaf_connections[leaf_connection_index].polygons.Add(poly);
+                }
+
+                //add to area sum fields of leaf connection with polygon area
+                if (!poly.is_double_sided)
+                {
+                    if (poly.is_connection)
+                    {
+                        above_leaf.leaf_connections[leaf_connection_index].connection_total = (float)polygon_area_signed;
+                        above_leaf.leaf_connections[leaf_connection_index].connection_vs_nonconnection += (float)polygon_area_signed;
+                    }
+                    else
+                    {
+                        above_leaf.leaf_connections[leaf_connection_index].connection_vs_nonconnection -= (float)polygon_area_signed;
+                        above_leaf.leaf_connections[leaf_connection_index].nonconnection_total += (float)polygon_area;
+                    }
+                }
+            }
+        }
         public double polygon_get_area(polygon poly)
         {
             RealPlane3d poly_plane = Bsp.Planes[poly.plane_index].Value;
@@ -703,7 +762,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 RealPoint3d v21 = poly.vertices[i + 1] - poly.vertices[0];
                 RealPoint3d v31 = poly.vertices[i + 2] - poly.vertices[0];
 
-                RealVector3d vector = cross_product_3d(point_to_vector(v21), point_to_vector(v31));
+                RealVector3d vector = cross_product_3d(point_to_vector(v31), point_to_vector(v21));
 
                 //cross product of two vectors times 0.5
                 area = area + (vector.I * poly_plane.I + vector.J * poly_plane.J + vector.K * poly_plane.K) * 0.5d;
