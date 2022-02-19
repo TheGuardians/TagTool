@@ -22,8 +22,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             public int surface_index = -1;
             public int plane_index = -1;
             public bool is_connection = false;
-            public int leaf_above = -1;
-            public int leaf_below = -1;
+            public bool is_double_sided = false;
+            public int above = -1;
+            public int below = -1;
         }
 
         public class polygon_plane
@@ -186,7 +187,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
                 if (surface.Flags.HasFlag(SurfaceFlags.PlaneNegated))
                     new_polygon.plane_index = (int)(new_polygon.plane_index | 0x80000000);
-
+                if (surface.Flags.HasFlag(SurfaceFlags.TwoSided))
+                    new_polygon.is_double_sided = true;
+                
                 int matching_index = polygon_planes.FindIndex(p => p.plane_index == (surface.Plane & 0x7FFFFFFF));
                 if (matching_index == -1)
                 {
@@ -274,6 +277,17 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             if (result < min_margin)
                 return min_margin;
             return result;            
+        }
+
+        public RealVector3d cross_product_3d(RealVector3d a, RealVector3d b)
+        {
+            RealVector3d vector = new RealVector3d()
+            {
+                I = a.J * b.K - a.K * b.J,
+                J = a.K * b.I - a.I * b.K,
+                K = a.I * b.J - a.J * b.I
+            };
+            return vector;
         }
 
         public int find_surface_splitting_plane(List<polygon_plane> polygon_planes)
@@ -579,52 +593,18 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public double point_get_plane_distance(RealPoint3d point, RealPlane3d plane)
         {
-            //precision requires this function to use identical order of operations as the compiled version
-            //point.X * plane.I + point.Y * plane.J + point.Z * plane.K - plane.D
-            double Z = point.Z;
-            double ZK = Z * plane.K;
-            double Y = point.Y;
-            double YJ = Y * plane.J;
-            double YJZK = YJ + ZK;
-            double I = plane.I;
-            double XI = I * point.X;
-            double XIYJZK = XI + YJZK;
-            return XIYJZK - plane.D;
+            return point.X * plane.I + point.Y * plane.J + point.Z * plane.K - plane.D;
         }
 
         public RealPoint3d vertex_shift_to_plane(RealPoint3d p0, RealPoint3d p1, double d0, double d1)
         {
-            //precision requires this function to use identical order of operations as the compiled version
-            /*
-                double dratio = d0 / (d0 - d1);
-                RealPoint3d result = new RealPoint3d
-                {
-                    X = (float)((p1.X - p0.X) * dratio + p0.X),
-                    Y = (float)((p1.Y - p0.Y) * dratio + p0.Y),
-                    Z = (float)((p1.Z - p0.Z) * dratio + p0.Z),
-                };
-            */
-            RealPoint3d result = new RealPoint3d();
-            double X1 = p1.X;
-            double Xdiff = X1 - p0.X;
-            double Y1 = p1.Y;
-            double Ydiff = Y1 - p0.Y;
-            double Z1 = p1.Z;
-            float Zdiff = (float)(Z1 - p0.Z); //value is stored as float temporarily
-
-            double Ddiff = d0 - d1;
-            float Ddiv = (float)(d0 / Ddiff);
-
-            double Xmul = Xdiff * Ddiv;
-            result.X = (float)(Xmul + p0.X);
-
-            double Ddiv2 = Ddiv;
-            double Ymul = Ydiff * Ddiv2;
-            result.Y = (float)(Ymul + p0.Y);
-
-            double Zdiff2 = Zdiff;
-            double Zmul = Zdiff2 * Ddiv2;
-            result.Z = (float)(Zmul + p0.Z);
+            double dratio = d0 / (d0 - d1);
+            RealPoint3d result = new RealPoint3d
+            {
+                X = (float)((p1.X - p0.X) * dratio + p0.X),
+                Y = (float)((p1.Y - p0.Y) * dratio + p0.Y),
+                Z = (float)((p1.Z - p0.Z) * dratio + p0.Z),
+            };           
             return result;
         }
 
@@ -667,6 +647,74 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             polygon_array.Add(connection_polygon);
         }
 
+        public void polygons_clip_to_leaves(node current_node, ref List<polygon> polygon_array)
+        {
+            List<polygon> clipped_array = new List<polygon>();
+            foreach(var poly in polygon_array)
+            {
+                polygon_clip_to_leaves(current_node.back_child, poly, ref clipped_array);
+            }
+            foreach (var poly in clipped_array)
+            {
+                polygon_clip_to_leaves(current_node.front_child, poly, ref polygon_array);
+            }
+        }
+
+        public void polygon_clip_to_leaves(int node_index, polygon poly, ref List<polygon> polygon_array)
+        {
+            //clip polygon into its multiple components that end up in leaves
+            //in addition, keep track of what two leaves each polygon eventually belongs to
+            if(node_index < 0)
+            {
+                if (poly.below != -1)
+                    poly.above = node_index;
+                else
+                    poly.below = node_index;
+                polygon_array.Add(poly);
+            }
+            else
+            {
+                node current_node = initial_nodes[node_index];
+                RealPlane3d node_plane = Bsp.Planes[current_node.plane_index].Value;
+
+                List<RealPoint3d> back_polygon_points = plane_cut_polygon(poly.vertices, node_plane, false);
+                if(back_polygon_points.Count > 0)
+                {
+                    polygon back_polygon = poly.DeepClone();
+                    back_polygon.vertices = back_polygon_points;
+                    polygon_clip_to_leaves(current_node.back_child, back_polygon, ref polygon_array);
+                }
+
+                List<RealPoint3d> front_polygon_points = plane_cut_polygon(poly.vertices, node_plane, true);
+                if (front_polygon_points.Count > 0)
+                {
+                    polygon front_polygon = poly.DeepClone();
+                    front_polygon.vertices = front_polygon_points;
+                    polygon_clip_to_leaves(current_node.front_child, front_polygon, ref polygon_array);
+                }
+            }
+        }
+        public double polygon_get_area(polygon poly)
+        {
+            RealPlane3d poly_plane = Bsp.Planes[poly.plane_index].Value;
+            double area = 0.0f;
+            for (var i = 0; i < poly.vertices.Count - 2; i++)
+            {
+                RealPoint3d v21 = poly.vertices[i + 1] - poly.vertices[0];
+                RealPoint3d v31 = poly.vertices[i + 2] - poly.vertices[0];
+
+                RealVector3d vector = cross_product_3d(point_to_vector(v21), point_to_vector(v31));
+
+                //cross product of two vectors times 0.5
+                area = area + (vector.I * poly_plane.I + vector.J * poly_plane.J + vector.K * poly_plane.K) * 0.5d;
+            }
+            return Math.Abs(area);
+        }
+
+        public RealVector3d point_to_vector(RealPoint3d point)
+        {
+            return new RealVector3d(point.X, point.Y, point.Z);
+        }
         public RealPoint3d point2d_and_plane_to_point3d(RealPlane3d plane, RealPoint2d point)
         {
             int projection_axis = plane_get_projection_coefficient(plane);
