@@ -18,7 +18,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public class polygon
         {
-            public List<RealPoint3d> vertices;
+            public List<RealPoint3d> vertices = new List<RealPoint3d>();
             public int surface_index = -1;
             public int plane_index = -1;
             public bool is_connection = false;
@@ -80,6 +80,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             List<polygon_plane> polygon_planes = build_polygon_planes();
             int blank = 0;
             build_bsp3d_node(-1, ref blank, polygon_planes, polygon_planes);
+            color_leaves();
 
             return true;
         }
@@ -110,10 +111,18 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     Bounds[2, 1] = vert.Z;
             }
 
+            //the used bounds are essentially twice as large as the object for some reason
+            for(var i = 0; i < 3; i++)
+            {
+                float radius = (Bounds[i, 1] - Bounds[i, 0]) * 0.5f;
+                Bounds[i, 0] -= radius;
+                Bounds[i, 1] += radius;
+            }
+
             //create a list of 48 floats that consist of 2d points that compose each face of a bounding box surrounding the geometry
             int[,] coordinate_pairs = new int[,] 
             { { 2, 1 }, { 1, 2 }, { 0, 2 }, { 2, 0 }, { 1, 0 }, { 0, 1 }  };
-            for(var i = 0; i < coordinate_pairs.Length; i++)
+            for(var i = 0; i < 6; i++)
             {
                 BoundingCoords.Add(Bounds[coordinate_pairs[i, 0], 0]);
                 BoundingCoords.Add(Bounds[coordinate_pairs[i, 1], 0]);
@@ -123,6 +132,59 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 BoundingCoords.Add(Bounds[coordinate_pairs[i, 1], 1]);
                 BoundingCoords.Add(Bounds[coordinate_pairs[i, 0], 0]);
                 BoundingCoords.Add(Bounds[coordinate_pairs[i, 1], 1]);
+            }
+        }
+
+        public void color_leaves()
+        {
+            for(var i = 0; i < 1024; i++)
+            {
+                double delta = 0.0;
+                Console.WriteLine($"Coloring Leaves (iteration {i}, delta {delta}");
+                for(var j = 0; j < initial_leaves.Count; j++)
+                {
+                    leaf initial_leaf = initial_leaves[j];
+
+                    float connection_total_sum = 0.0f;
+                    float nonconnection_total_sum = 0.0f;
+
+                    foreach(var connection in initial_leaf.leaf_connections)
+                    {
+                        bool leaf_is_above = connection.above == j;
+                        int other_leaf_index = leaf_is_above ? connection.below : connection.above;
+                        float other_leaf_ratio = initial_leaves[other_leaf_index].float10;
+
+                        connection_total_sum += connection.connection_total;
+
+                        float nonconnection_total = connection.nonconnection_total;
+                        if (!leaf_is_above)
+                            nonconnection_total = -nonconnection_total;
+
+                        nonconnection_total_sum = nonconnection_total_sum + other_leaf_ratio * connection.connection_vs_nonconnection + nonconnection_total;
+                    }
+
+                    float result = 0.0f;
+                    if(connection_total_sum != 0.0)
+                    {
+                        result = nonconnection_total_sum / connection_total_sum;
+                        //restrict to range of -1 to 1
+                        result = Math.Max(result, -1.0f);
+                        result = Math.Min(result, 1.0f);
+                    }
+
+                    //keep highest delta for cycle through leaves
+                    float temp_delta = Math.Abs(result - initial_leaf.float10);
+                    if (temp_delta > delta)
+                        delta = temp_delta;
+
+                    //write result to leaf
+                    initial_leaf.float10 = result;
+                }
+
+                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                //stop iterating if highest delta in iteration below threshold
+                if (delta < 0.0078125)
+                    break;
             }
         }
 
@@ -571,6 +633,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
         public List<RealPoint3d> plane_cut_polygon(List<RealPoint3d> points, RealPlane3d plane, bool plane_side)
         {
+            if (points.Count == 0)
+                return points;
             List<RealPoint3d> output_points = new List<RealPoint3d>();
             RealPoint3d previous_point = points[points.Count - 1];
             double d0 = point_get_plane_distance(previous_point, plane);
@@ -627,8 +691,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 RealPoint2d point2d = new RealPoint2d
                 {
-                    X = BoundingCoords[4 * projection_axis + 2 * projection_sign + i],
-                    Y = BoundingCoords[4 * projection_axis + 2 * projection_sign + i + 1]
+                    X = BoundingCoords[16 * projection_axis + 8 * projection_sign + i],
+                    Y = BoundingCoords[16 * projection_axis + 8 * projection_sign + i + 1]
                 };
                 connection_polygon.vertices.Add(point2d_and_plane_to_point3d(splitting_plane, point2d));
             }
@@ -669,9 +733,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             if(node_index < 0)
             {
                 if (poly.below != -1)
-                    poly.above = node_index;
+                    poly.above = node_index & 0x7FFFFFFF;
                 else
-                    poly.below = node_index;
+                    poly.below = node_index & 0x7FFFFFFF;
                 polygon_array.Add(poly);
             }
             else
