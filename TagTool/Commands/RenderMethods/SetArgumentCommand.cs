@@ -22,7 +22,7 @@ namespace TagTool.Commands.RenderMethods
                  "Sets the value(s) of the specified argument in the render_method.",
 
                  "SetArgument <Name> [Arg1 Arg2 Arg3 Arg4]\n"+
-				 "SetArgument Booleans flag,flag,flag,flag...",
+				 "SetArgument Booleans flag,flag,flag,flag... or none",
 
                  "Sets the value(s) of the specified argument in the render_method.")
         {
@@ -149,12 +149,12 @@ namespace TagTool.Commands.RenderMethods
                     Console.WriteLine(nameStr);
                 }
 
-                if (names.Count > 0)
+                if (names.Count > 0 && args[1].ToLower() != "none")
                 {
                     Console.WriteLine();
                     new TagToolWarning($"Flag(s) not found: {String.Join(", ", names)}");
                 }
-
+                
                 properties.BooleanConstants = (uint)accumulator;
 
                 return true;
