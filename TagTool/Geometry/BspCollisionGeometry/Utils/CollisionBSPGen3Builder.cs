@@ -151,14 +151,14 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
                     foreach(var connection in initial_leaf.leaf_connections)
                     {
-                        bool leaf_is_above = connection.above == j;
-                        int other_leaf_index = leaf_is_above ? connection.below : connection.above;
+                        bool leaf_is_below = connection.below == j;
+                        int other_leaf_index = leaf_is_below ? connection.above : connection.below;
                         float other_leaf_ratio = initial_leaves[other_leaf_index].float10;
 
                         connection_total_sum += connection.connection_total;
 
                         float nonconnection_total = connection.nonconnection_total;
-                        if (!leaf_is_above)
+                        if (leaf_is_below)
                             nonconnection_total = -nonconnection_total;
 
                         nonconnection_total_sum = nonconnection_total_sum + other_leaf_ratio * connection.connection_vs_nonconnection + nonconnection_total;
@@ -181,12 +181,19 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     //write result to leaf
                     initial_leaf.float10 = result;
                 }
+                ConsoleClearLine();
 
-                Console.SetCursorPosition(0, Console.CursorTop - 1);
                 //stop iterating if highest delta in iteration below threshold
                 if (delta < 0.0078125)
                     break;
             }
+        }
+
+        public void ConsoleClearLine()
+        {
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.Write(new String(' ', Console.BufferWidth));
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
         }
 
         public void build_bsp3d_node(int parent_node_index, ref int node_index, List<polygon_plane> polygon_planes, List<polygon_plane> polygon_planes_no_margin)
@@ -204,6 +211,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             else
             {
                 int splitting_plane_index = find_surface_splitting_plane(polygon_planes);
+
+                if (parent_node_index != -1 && splitting_plane_index == initial_nodes[parent_node_index].plane_index)
+                    Console.WriteLine("Error Failed Split!");
 
                 node new_node = new node
                 {
@@ -280,7 +290,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             {
                 polygon_planes.Add(new polygon_plane
                 {
-                    plane_index = poly.plane_index,
+                    plane_index = poly.plane_index & 0x7FFFFFFF,
                     polygons = new List<polygon> { poly }
                 });
             }
@@ -292,6 +302,10 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         {
             foreach(var poly_plane in polygon_planes)
             {
+                if (poly_plane.plane_index == plane_index)
+                    continue;
+                if (plane_index < 0 || plane_index >= Bsp.Planes.Count)
+                    Console.WriteLine("ERROR: Invalid splitting plane index!");
                 RealPlane3d plane = Bsp.Planes[plane_index].Value;
                 foreach (var poly in poly_plane.polygons)
                 {
@@ -410,7 +424,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 if (current_plane_splitting_effectiveness < lowest_plane_splitting_effectiveness)
                 {
                     lowest_plane_splitting_effectiveness = current_plane_splitting_effectiveness;
-                    best_plane_index = polygon_plane.plane_index;
+                    best_plane_index = polygon_plane.plane_index & 0x7FFFFFFF;
                 }
             }
             return best_plane_index;
@@ -809,56 +823,62 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 double polygon_area_signed = polygon_area;
                 if (poly.plane_index < 0)
                     polygon_area_signed = -polygon_area_signed;
-                leaf above_leaf = initial_leaves[poly.above];
 
-                //find matching leaf connection if it exists
-                int leaf_connection_index = -1;
-                for(var i = 0; i < above_leaf.leaf_connections.Count; i++)
+                for(var i = 0; i < 2; i++)
                 {
-                    if (above_leaf.leaf_connections[i].above == poly.above ||
-                       above_leaf.leaf_connections[i].below == poly.above)
-                    {
-                        leaf_connection_index = i;
-                        break;
-                    }
-                }
-                //if none are found, create a new one
-                if (leaf_connection_index == -1)
-                {
-                    above_leaf.leaf_connections.Add(new leaf_connection
-                    {
-                        plane_index = poly.plane_index & 0x7FFFFFFF,
-                        below = poly.below,
-                        above = poly.above,
-                        polygons = new List<polygon> { poly }
-                    });
-                    leaf_connection_index = above_leaf.leaf_connections.Count - 1;
-                }
-                //otherwise just add polygon
-                else
-                {
-                    above_leaf.leaf_connections[leaf_connection_index].polygons.Add(poly);
-                }
+                    leaf target_leaf = i == 0 ? initial_leaves[poly.below] : initial_leaves[poly.above];
 
-                //add to area sum fields of leaf connection with polygon area
-                if (!poly.is_double_sided)
-                {
-                    if (poly.is_connection)
+                    //find matching leaf connection if it exists
+                    int leaf_connection_index = -1;
+                    for (var j = 0; j < target_leaf.leaf_connections.Count; j++)
                     {
-                        above_leaf.leaf_connections[leaf_connection_index].connection_total = (float)polygon_area_signed;
-                        above_leaf.leaf_connections[leaf_connection_index].connection_vs_nonconnection += (float)polygon_area_signed;
+                        int test_leaf_index = i == 0 ? poly.above : poly.below;
+                        if (target_leaf.leaf_connections[j].above == test_leaf_index ||
+                           target_leaf.leaf_connections[j].below == test_leaf_index)
+                        {
+                            leaf_connection_index = j;
+                            break;
+                        }
                     }
+                    //if none are found, create a new one
+                    if (leaf_connection_index == -1)
+                    {
+                        target_leaf.leaf_connections.Add(new leaf_connection
+                        {
+                            plane_index = poly.plane_index & 0x7FFFFFFF,
+                            below = poly.below,
+                            above = poly.above,
+                            polygons = new List<polygon> { poly }
+                        });
+                        leaf_connection_index = target_leaf.leaf_connections.Count - 1;
+                        target_leaf.leaf_connections[leaf_connection_index].polygons.Add(poly);
+                    }
+                    //otherwise just add polygon
                     else
                     {
-                        above_leaf.leaf_connections[leaf_connection_index].connection_vs_nonconnection -= (float)polygon_area_signed;
-                        above_leaf.leaf_connections[leaf_connection_index].nonconnection_total += (float)polygon_area;
+                        target_leaf.leaf_connections[leaf_connection_index].polygons.Add(poly);
                     }
-                }
+
+                    //add to area sum fields of leaf connection with polygon area
+                    if (!poly.is_double_sided)
+                    {
+                        if (poly.is_connection)
+                        {
+                            target_leaf.leaf_connections[leaf_connection_index].connection_total = (float)polygon_area_signed;
+                            target_leaf.leaf_connections[leaf_connection_index].connection_vs_nonconnection += (float)polygon_area_signed;
+                        }
+                        else
+                        {
+                            target_leaf.leaf_connections[leaf_connection_index].connection_vs_nonconnection -= (float)polygon_area_signed;
+                            target_leaf.leaf_connections[leaf_connection_index].nonconnection_total += (float)polygon_area;
+                        }
+                    }
+                }                
             }
         }
         public double polygon_get_area(polygon poly)
         {
-            RealPlane3d poly_plane = Bsp.Planes[poly.plane_index].Value;
+            RealPlane3d poly_plane = Bsp.Planes[poly.plane_index & 0x7FFFFFFF].Value;
             double area = 0.0f;
             for (var i = 0; i < poly.vertices.Count - 2; i++)
             {
@@ -867,7 +887,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
 
                 RealVector3d vector = cross_product_3d(point_to_vector(v31), point_to_vector(v21));
 
-                //cross product of two vectors times 0.5
+                //dot product of two vectors times 0.5
                 area = area + (vector.I * poly_plane.I + vector.J * poly_plane.J + vector.K * poly_plane.K) * 0.5d;
             }
             return Math.Abs(area);
