@@ -49,8 +49,8 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             public int parent_node = -1;
             public float float10;
             public List<leaf_connection> leaf_connections = new List<leaf_connection>();
-            public List<polygon_plane> polygons = new List<polygon_plane>();
-            public List<polygon_plane> polygons_no_margin = new List<polygon_plane>();
+            public List<polygon> polygons = new List<polygon>();
+            public List<int> surface_indices = new List<int>();
         }
         public class node
         {
@@ -82,7 +82,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             int blank = 0;
             build_bsp3d_node(-1, ref blank, polygon_planes, polygon_planes);
             color_leaves();
-
+            populate_nodes_leaves();
             return true;
         }
 
@@ -136,12 +136,71 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
         }
 
+        public void populate_nodes_leaves()
+        {
+            LargeCollisionBSPBuilder bspbuilder = new LargeCollisionBSPBuilder();
+            bspbuilder.Bsp = Bsp;
+            foreach (var node in initial_nodes)
+            {
+                LargeBsp3dNode newnode = new LargeBsp3dNode
+                {
+                    Plane = node.plane_index
+                };
+
+                if(node.back_child < 0)
+                {
+                    if (initial_leaves[node.back_child & 0x7FFFFFFF].float10 < 0)
+                        newnode.BackChild = -1;
+                    else
+                    {
+                        newnode.BackChild = build_leaves_external(bspbuilder, initial_leaves[node.back_child & 0x7FFFFFFF]);
+                    }
+                }
+                else
+                {
+                    newnode.BackChild = node.back_child;
+                }
+                if(node.front_child < 0)
+                {
+                    if (initial_leaves[node.front_child & 0x7FFFFFFF].float10 < 0)
+                        newnode.FrontChild = -1;
+                    else
+                    {
+                        newnode.FrontChild = build_leaves_external(bspbuilder, initial_leaves[node.front_child & 0x7FFFFFFF]);
+                    }
+                }
+                else
+                {
+                    newnode.FrontChild = node.front_child;
+                }
+                Bsp.Bsp3dNodes.Add(newnode);
+            }
+        }
+
+        public int build_leaves_external(LargeCollisionBSPBuilder bspbuilder, leaf initial_leaf)
+        {
+            LargeCollisionBSPBuilder.surface_array_definition surface_array = new LargeCollisionBSPBuilder.surface_array_definition
+            {
+                used_count = initial_leaf.surface_indices.Count,
+                surface_array = new List<int>()
+            };
+
+            foreach(var surface in initial_leaf.surface_indices)
+            {
+                surface_array.surface_array.Add((int)(surface | 0x80000000));
+            }
+
+            int leaf_index = -1;
+            bspbuilder.build_leaves(ref surface_array, ref leaf_index);
+            return leaf_index;
+        }
+
         public void color_leaves()
         {
             for(var i = 0; i < 1024; i++)
             {
                 double delta = 0.0;
-                Console.WriteLine($"Coloring Leaves (iteration {i}, delta {delta}");
+                //Console.WriteLine($"Coloring Leaves (iteration {i}, delta {delta}");
                 for(var j = 0; j < initial_leaves.Count; j++)
                 {
                     leaf initial_leaf = initial_leaves[j];
@@ -181,7 +240,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                     //write result to leaf
                     initial_leaf.float10 = result;
                 }
-                ConsoleClearLine();
+                //ConsoleClearLine();
 
                 //stop iterating if highest delta in iteration below threshold
                 if (delta < 0.0078125)
@@ -203,8 +262,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 initial_leaves.Add(new leaf 
                 { 
                     parent_node = parent_node_index,
-                    polygons = polygon_planes,
-                    polygons_no_margin = polygon_planes_no_margin           
                 });
                 node_index = (int)((initial_leaves.Count - 1) | 0x80000000);
             }
@@ -818,7 +875,6 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         {
             foreach(var poly in polygon_array)
             {
-                RealPlane3d poly_plane = Bsp.Planes[poly.plane_index & 0x7FFFFFFF].Value;
                 double polygon_area = polygon_get_area(poly);
                 double polygon_area_signed = polygon_area;
                 if (poly.plane_index < 0)
@@ -852,11 +908,17 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                         });
                         leaf_connection_index = target_leaf.leaf_connections.Count - 1;
                         target_leaf.leaf_connections[leaf_connection_index].polygons.Add(poly);
+                        target_leaf.polygons.Add(poly);
+                        if (poly.surface_index != -1 && !target_leaf.surface_indices.Contains(poly.surface_index))
+                            target_leaf.surface_indices.Add(poly.surface_index);
                     }
                     //otherwise just add polygon
                     else
                     {
                         target_leaf.leaf_connections[leaf_connection_index].polygons.Add(poly);
+                        target_leaf.polygons.Add(poly);
+                        if (poly.surface_index != -1 && !target_leaf.surface_indices.Contains(poly.surface_index))
+                            target_leaf.surface_indices.Add(poly.surface_index);
                     }
 
                     //add to area sum fields of leaf connection with polygon area

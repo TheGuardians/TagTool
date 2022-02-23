@@ -623,7 +623,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 }
                 else
                 {
-                    if (!warning_posted)
+                    if (!warning_posted && debug)
                     {
                         Console.WriteLine("###ERROR Overlapping surfaces found!");
                         foreach (int surface_index in plane_matched_surface_array.surface_array)

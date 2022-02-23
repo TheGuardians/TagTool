@@ -24,6 +24,8 @@ namespace TagTool.Commands.Porting
         [Description("Enable experimental collision leaf mapping")]
         public bool CollisionLeafMapping = false;
 
+        [Description("Enable experimental Gen3 collision BSP generator")]
+        public bool Gen3Collision = false;
 
         public static PortingOptions Current = new PortingOptions();
     }
