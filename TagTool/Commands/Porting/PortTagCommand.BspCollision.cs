@@ -55,19 +55,16 @@ namespace TagTool.Commands.Porting
 
                 Console.WriteLine($"Converting cluster collision...");
 
-                if (PortingOptions.Current.CollisionLeafMapping)
+                if (resourceDefinition.LargeCollisionBsps == null)
+                    resourceDefinition.LargeCollisionBsps = new TagBlock<LargeCollisionBspBlock>();
+                for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
                 {
-                    if (resourceDefinition.LargeCollisionBsps == null)
-                        resourceDefinition.LargeCollisionBsps = new TagBlock<LargeCollisionBspBlock>();
-                    for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
-                    {
-                        ResizeCollisionBSP resizer = new ResizeCollisionBSP();
-                        LargeCollisionBspBlock largeblock = resizer.GrowCollisionBsp(resourceDefinition.CollisionBsps[i]);
-                        resourceDefinition.LargeCollisionBsps.Add(largeblock);
-                        resourceDefinition.LargeCollisionBsps.AddressType = CacheAddressType.Definition;
-                    }
-                    resourceDefinition.CollisionBsps.Clear();
+                    ResizeCollisionBSP resizer = new ResizeCollisionBSP();
+                    LargeCollisionBspBlock largeblock = resizer.GrowCollisionBsp(resourceDefinition.CollisionBsps[i]);
+                    resourceDefinition.LargeCollisionBsps.Add(largeblock);
+                    resourceDefinition.LargeCollisionBsps.AddressType = CacheAddressType.Definition;
                 }
+                resourceDefinition.CollisionBsps.Clear();
 
                 for (int i = 0; i < resourceDefinition.CollisionBsps.Count; i++)
                     resourceDefinition.CollisionBsps[i] = ConvertCollisionBsp(resourceDefinition.CollisionBsps[i]);
