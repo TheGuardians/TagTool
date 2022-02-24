@@ -15,6 +15,7 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
         public LargeCollisionBspBlock Bsp { get; set; }
         public float[,] Bounds = new float[3,2];
         public List<float> BoundingCoords = new List<float>();
+        public List<RealPlane3d> BoundingPlanes = new List<RealPlane3d>();
         public bool debug = false;
 
         public class polygon
@@ -120,6 +121,17 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 Bounds[i, 0] -= radius;
                 Bounds[i, 1] += radius;
             }
+
+            //bounding planes
+            BoundingPlanes = new List<RealPlane3d>
+            {
+                new RealPlane3d(-1.0f, 0.0f, 0.0f, -Bounds[0,1]), //-max
+                new RealPlane3d(1.0f, 0.0f, 0.0f, Bounds[0,0]), //+min
+                new RealPlane3d(0.0f, -1.0f, 0.0f, -Bounds[1,1]), //-max
+                new RealPlane3d(0.0f, 1.0f, 0.0f, Bounds[1,0]), //+min
+                new RealPlane3d(0.0f, 0.0f, -1.0f, -Bounds[2,1]), //-max
+                new RealPlane3d(0.0f, 0.0f, 1.0f, Bounds[2,0]), //+min
+            };
 
             //create a list of 48 floats that consist of 2d points that compose each face of a bounding box surrounding the geometry
             int[,] coordinate_pairs = new int[,] 
@@ -804,7 +816,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
                 connection_polygon.vertices.Add(point2d_and_plane_to_point3d(splitting_plane, point2d));
             }
 
-            //TODO: cut by axis aligned planes w/ min and max bounds on projection axis
+            //cut by axis aligned planes w/ min and max bounds on projection axis
+            connection_polygon.vertices = plane_cut_polygon(connection_polygon.vertices, BoundingPlanes[projection_axis * 2], true);
+            connection_polygon.vertices = plane_cut_polygon(connection_polygon.vertices, BoundingPlanes[projection_axis * 2 + 1], true);
 
             //cut polygon by all parent node planes
             node bsp_node = current_node;
