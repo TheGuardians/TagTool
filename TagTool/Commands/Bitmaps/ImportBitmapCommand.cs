@@ -41,7 +41,7 @@ namespace TagTool.Commands.Bitmaps
             if (args.Count > 3 || args.Count < 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            if (!int.TryParse(args[0], NumberStyles.HexNumber, null, out int imageIndex))
+            if (!int.TryParse(args[0], NumberStyles.Integer, null, out int imageIndex))
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             if (Bitmap.Images.Count == 0)
