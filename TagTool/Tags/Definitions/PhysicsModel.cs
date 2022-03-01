@@ -926,7 +926,7 @@ namespace TagTool.Tags.Definitions
             public short Unknown;
             public uint Unknown2;
             public float LimitFriction;
-            public Bounds<Angle> LimitAngleBounds;
+            public Bounds<float> LimitAngleBounds;
         }
 
         [TagStructure(Size = 0x2C, Align = 0x10, Platform = CachePlatform.Original)]

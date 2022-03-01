@@ -17,6 +17,7 @@ namespace TagTool.Commands.Porting.Gen4
                 Mass = gen4PhysicsModel.Mass,
                 LowFrequencyDeactivationScale = gen4PhysicsModel.LowFreqDeactivationScale,
                 HighFrequencyDeactivationScale = gen4PhysicsModel.HighFreqDeactivationScale,
+                PositionMotors = new List<PhysicsModel.PositionMotor>(),
                 PhantomTypes = new List<PhysicsModel.PhantomType>(),
                 NodeEdges = new List<PhysicsModel.NodeEdge>(),
                 RigidBodies = new List<PhysicsModel.RigidBody>(),
@@ -37,6 +38,24 @@ namespace TagTool.Commands.Porting.Gen4
                 LimitedHingeConstraints = new List<PhysicsModel.LimitedHingeConstraint>(),
                 Phantoms = new List<PhysicsModel.Phantom>()
             };
+
+            //convert position motors
+            foreach (var gen4motor in gen4PhysicsModel.PositionMotors)
+            {
+                PhysicsModel.PositionMotor newMotor = new PhysicsModel.PositionMotor
+                {
+                    Name = gen4motor.Name,
+                    MaximumForce = gen4motor.MaximumForce,
+                    MinimumForce = gen4motor.MinimumForce,
+                    Tau = gen4motor.Tau,
+                    Damping = gen4motor.Damping,
+                    ProportionRecoverVelocity = gen4motor.ProportionRecoverVel,
+                    ConstantRecoverVelocity = gen4motor.ConsantRecoverVel,
+                    InitialPosition = gen4motor.InitialPosition
+                };
+                //ConvertHavokShape(newPhantom, gen4phantom);
+                physicsModel.PositionMotors.Add(newMotor);
+            }
 
             //convert phantom types
             foreach (var gen4phantomtype in gen4PhysicsModel.PhantomTypes)
@@ -80,6 +99,72 @@ namespace TagTool.Commands.Porting.Gen4
                 };
                 //ConvertHavokShape(newPhantom, gen4phantom);
                 physicsModel.Phantoms.Add(newPhantom);
+            }
+
+            //convert node edges
+            foreach(var gen4edge in gen4PhysicsModel.NodeEdges)
+            {
+                PhysicsModel.NodeEdge newEdge = new PhysicsModel.NodeEdge
+                {
+                    NodeAGlobalMaterialIndex = gen4edge.RuntimeMaterialTypeA,
+                    NodeBGlobalMaterialIndex = gen4edge.RuntimeMaterialTypeB,
+                    NodeA = gen4edge.NodeA,
+                    NodeB = gen4edge.NodeB,
+                    Constraints = new List<PhysicsModel.NodeEdge.Constraint>(),
+                    NodeAMaterial = gen4edge.NodeAMaterial,
+                    NodeBMaterial = gen4edge.NodeBMaterial
+                };
+
+                //constraints
+                foreach(var gen4constraint in gen4edge.Constraints)
+                {
+                    PhysicsModel.NodeEdge.Constraint newConstraint = new PhysicsModel.NodeEdge.Constraint
+                    {
+                        Type = (PhysicsModel.ConstraintType)gen4constraint.Type,
+                        Index = gen4constraint.Index,
+                        Flags = (PhysicsModel.NodeEdge.Constraint.ConstraintFlags)gen4constraint.Flags,
+                        Friction = gen4constraint.Friction,
+                        RagdollMotors = new List<PhysicsModel.NodeEdge.Constraint.RagdollMotor>(),
+                        LimitedHingeMotors = new List<PhysicsModel.NodeEdge.Constraint.LimitedHingeMotor>()
+                    };
+
+                    //ragdoll motors
+                    foreach(var gen4ragdoll in gen4constraint.RagdollMotors)
+                    {
+                        newConstraint.RagdollMotors.Add(new PhysicsModel.NodeEdge.Constraint.RagdollMotor
+                        {
+                            TwistMotor = new PhysicsModel.Motor
+                            {
+                                Type = (PhysicsModel.MotorType)gen4ragdoll.TwistMotor.MotorType,
+                                Index = gen4ragdoll.TwistMotor.Index
+                            },
+                            ConeMotor = new PhysicsModel.Motor
+                            {
+                                Type = (PhysicsModel.MotorType)gen4ragdoll.ConeMotor.MotorType,
+                                Index = gen4ragdoll.ConeMotor.Index
+                            },
+                            PlaneMotor = new PhysicsModel.Motor
+                            {
+                                Type = (PhysicsModel.MotorType)gen4ragdoll.PlaneMotor.MotorType,
+                                Index = gen4ragdoll.PlaneMotor.Index
+                            }
+                        });
+                    }
+                    //Limited hinge motors
+                    foreach(var gen4hinge in gen4constraint.LimitedHingeMotors)
+                    {
+                        newConstraint.LimitedHingeMotors.Add(new PhysicsModel.NodeEdge.Constraint.LimitedHingeMotor
+                        {
+                            Motor = new PhysicsModel.Motor
+                            {
+                                Type = (PhysicsModel.MotorType)gen4hinge.Motor.MotorType,
+                                Index = gen4hinge.Motor.Index
+                            }
+                        });
+                    }
+                    newEdge.Constraints.Add(newConstraint);
+                }
+                physicsModel.NodeEdges.Add(newEdge);
             }
 
             //convert rigid bodies
@@ -188,7 +273,8 @@ namespace TagTool.Commands.Porting.Gen4
                     NumVertices = gen4poly.NumVertices,
                     AnotherFieldPointerSkip = new PlatformUnsignedValue((uint)gen4poly.AnotherFieldPointerSkip),
                     PlaneEquationsSize = gen4poly.PlaneEquationsSize,
-                    PlaneEquationsCapacity = (uint)gen4poly.PlaneEquationsSize | 0x80000000
+                    PlaneEquationsCapacity = (uint)gen4poly.PlaneEquationsSize | 0x80000000,
+                    Connectivity = (uint)gen4poly.Connectivity
                 };
 
                 ConvertHavokShape(newPoly, gen4poly.Base);
@@ -311,6 +397,74 @@ namespace TagTool.Commands.Porting.Gen4
                     Sibling = gen4node.Sibling,
                     Child = gen4node.Child
                 });
+            }
+
+            //convert ragdoll constraints
+            foreach (var gen4ragdoll in gen4PhysicsModel.RagdollConstraints)
+            {
+                PhysicsModel.RagdollConstraint newRagdoll = new PhysicsModel.RagdollConstraint
+                {
+                    Name = gen4ragdoll.ConstraintBodies.Name,
+                    NodeA = gen4ragdoll.ConstraintBodies.NodeA,
+                    NodeB = gen4ragdoll.ConstraintBodies.NodeB,
+                    AScale = gen4ragdoll.ConstraintBodies.AScale,
+                    AForward = gen4ragdoll.ConstraintBodies.AForward,
+                    ALeft = gen4ragdoll.ConstraintBodies.ALeft,
+                    AUp = gen4ragdoll.ConstraintBodies.AUp,
+                    APosition = gen4ragdoll.ConstraintBodies.APosition,
+                    BScale = gen4ragdoll.ConstraintBodies.BScale,
+                    BForward = gen4ragdoll.ConstraintBodies.BForward,
+                    BLeft = gen4ragdoll.ConstraintBodies.BLeft,
+                    BUp = gen4ragdoll.ConstraintBodies.BUp,
+                    BPosition = gen4ragdoll.ConstraintBodies.BPosition,
+                    EdgeIndex = gen4ragdoll.ConstraintBodies.EdgeIndex,
+                    TwistRange = new TagTool.Common.Bounds<float>
+                    {
+                        Lower = gen4ragdoll.MinTwist,
+                        Upper = gen4ragdoll.MaxTwist
+                    },
+                    ConeRange = new TagTool.Common.Bounds<float>
+                    {
+                        Lower = gen4ragdoll.MinCone,
+                        Upper = gen4ragdoll.MaxCone
+                    },
+                    PlaneRange = new TagTool.Common.Bounds<float>
+                    {
+                        Lower = gen4ragdoll.MinPlane,
+                        Upper = gen4ragdoll.MaxPlane
+                    },
+                    MaxFrictionTorque = gen4ragdoll.MaxFricitonTorque
+                };
+                physicsModel.RagdollConstraints.Add(newRagdoll);
+            }
+
+            //convert limited hinge constraints
+            foreach (var gen4hinge in gen4PhysicsModel.LimitedHingeConstraints)
+            {
+                PhysicsModel.LimitedHingeConstraint newHinge = new PhysicsModel.LimitedHingeConstraint
+                {
+                    Name = gen4hinge.ConstraintBodies.Name,
+                    NodeA = gen4hinge.ConstraintBodies.NodeA,
+                    NodeB = gen4hinge.ConstraintBodies.NodeB,
+                    AScale = gen4hinge.ConstraintBodies.AScale,
+                    AForward = gen4hinge.ConstraintBodies.AForward,
+                    ALeft = gen4hinge.ConstraintBodies.ALeft,
+                    AUp = gen4hinge.ConstraintBodies.AUp,
+                    APosition = gen4hinge.ConstraintBodies.APosition,
+                    BScale = gen4hinge.ConstraintBodies.BScale,
+                    BForward = gen4hinge.ConstraintBodies.BForward,
+                    BLeft = gen4hinge.ConstraintBodies.BLeft,
+                    BUp = gen4hinge.ConstraintBodies.BUp,
+                    BPosition = gen4hinge.ConstraintBodies.BPosition,
+                    EdgeIndex = gen4hinge.ConstraintBodies.EdgeIndex,
+                    LimitFriction = gen4hinge.LimitFriction,
+                    LimitAngleBounds = new TagTool.Common.Bounds<float>
+                    {
+                        Lower = gen4hinge.LimitMinAngle,
+                        Upper = gen4hinge.LimitMaxAngle
+                    }
+                };
+                physicsModel.LimitedHingeConstraints.Add(newHinge);
             }
 
             if (gen4PhysicsModel.Mopps.Count > 0)
