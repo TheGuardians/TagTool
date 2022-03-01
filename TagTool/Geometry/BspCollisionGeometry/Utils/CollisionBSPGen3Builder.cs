@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TagTool.Common;
 using TagTool.Tags;
+using TagTool.Commands.Common;
 
 namespace TagTool.Geometry.BspCollisionGeometry.Utils
 {
@@ -84,7 +85,9 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             int blank = 0;
             build_bsp3d_node(-1, ref blank, polygon_planes, polygon_planes);
             color_leaves();
-            populate_nodes_leaves();
+            if(debug)
+                leaves_check_connection_quality();
+            populate_nodes_leaves(0);
             return true;
         }
 
@@ -149,45 +152,33 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             }
         }
 
-        public void populate_nodes_leaves()
+        public int populate_nodes_leaves(int node_index)
         {
-            foreach (var node in initial_nodes)
+            if(node_index < 0)
             {
+                if (initial_leaves[node_index & 0x7FFFFFFF].float10 < 0)
+                    return -1;
+                else
+                {
+                    int new_leaf_index = build_leaves_external(initial_leaves[node_index & 0x7FFFFFFF]);
+                    return (int)(new_leaf_index | 0x80000000);
+                }
+            }
+            else
+            {
+                node initial_node = initial_nodes[node_index];
                 LargeBsp3dNode newnode = new LargeBsp3dNode
                 {
-                    Plane = node.plane_index
+                    Plane = initial_node.plane_index,
                 };
-
-                if(node.back_child < 0)
-                {
-                    if (initial_leaves[node.back_child & 0x7FFFFFFF].float10 < 0)
-                        newnode.BackChild = -1;
-                    else
-                    {
-                        int new_leaf_index = build_leaves_external(initial_leaves[node.back_child & 0x7FFFFFFF]);
-                        newnode.BackChild = (int)(new_leaf_index | 0x80000000);                           
-                    }
-                }
-                else
-                {
-                    newnode.BackChild = node.back_child;
-                }
-                if(node.front_child < 0)
-                {
-                    if (initial_leaves[node.front_child & 0x7FFFFFFF].float10 < 0)
-                        newnode.FrontChild = -1;
-                    else
-                    {
-                        int new_leaf_index = build_leaves_external(initial_leaves[node.front_child & 0x7FFFFFFF]);
-                        newnode.FrontChild = (int)(new_leaf_index | 0x80000000);
-                    }
-                }
-                else
-                {
-                    newnode.FrontChild = node.front_child;
-                }
                 Bsp.Bsp3dNodes.Add(newnode);
-            }
+                int result_index = Bsp.Bsp3dNodes.Count - 1;
+
+                Bsp.Bsp3dNodes[result_index].BackChild = populate_nodes_leaves(initial_node.back_child);
+                Bsp.Bsp3dNodes[result_index].FrontChild = populate_nodes_leaves(initial_node.front_child);
+
+                return result_index;
+            }       
         }
 
         public int build_leaves_external(leaf initial_leaf)
@@ -206,6 +197,83 @@ namespace TagTool.Geometry.BspCollisionGeometry.Utils
             int leaf_index = -1;
             build_leaves(ref surface_array, ref leaf_index);
             return leaf_index;
+        }
+
+        public bool polygon_array_on_plane(polygon_plane poly_plane, RealPlane3d test_plane, float margin)
+        {
+            //margin = 0.00050000002
+            RealPlane3d polygon_array_plane = Bsp.Planes[poly_plane.plane_index].Value;
+            bool planes_are_similar = Math.Abs(test_plane.I * polygon_array_plane.I +
+                test_plane.J * polygon_array_plane.J +
+                test_plane.K * polygon_array_plane.K) > (1.0f - margin);
+            foreach(var poly in poly_plane.polygons)
+            {
+                float max_fit = float.MinValue;
+                float min_fit = float.MaxValue;
+                polygon_get_plane_distance_min_max(poly, test_plane, ref min_fit, ref max_fit);
+                if (planes_are_similar && (Math.Abs(min_fit) < 0.00048828125 || Math.Abs(max_fit) < 0.00048828125))
+                    return true;
+                if(Math.Abs(min_fit) < 0.00048828125 && Math.Abs(max_fit) < 0.00048828125)
+                    return true;
+            }
+            return false;
+        }
+
+        public void leaves_check_connection_quality()
+        {
+            for(var i = 0; i < initial_leaves.Count; i++)
+            {
+                leaf initial_leaf = initial_leaves[i];
+                for(var j = 0; j < initial_leaf.leaf_connections.Count; j++)
+                {
+                    float connection_quality = 0.0f;
+                    if (connection_quality_is_bad(i, j, ref connection_quality))
+                        new TagToolWarning($"leaf {i} had bad connection {j} ({connection_quality})");
+                }
+            }
+        }
+
+        public bool connection_quality_is_bad(int initial_leaf_index, int connection_index, ref float quality)
+        {
+            leaf initial_leaf = initial_leaves[initial_leaf_index];
+            leaf_connection connection = initial_leaf.leaf_connections[connection_index];
+            int other_leaf_index = connection.below == initial_leaf_index ? connection.above : connection.below;
+
+            float float10sum = 0.0f;
+            foreach(var connect in initial_leaf.leaf_connections)
+            {
+                float10sum += initial_leaves[connect.below].float10;
+            }
+            if (float10sum <= 0.001)
+                return false;
+
+            float v16 = float10sum / 30.0f;
+            float excess_connection_area = Math.Max(connection.connection_vs_nonconnection, 0.0f);
+            if (excess_connection_area > connection.connection_total)
+                excess_connection_area = connection.connection_total;
+            float v17 = connection.connection_total - excess_connection_area;
+
+            bool leaf_float10_positive = initial_leaf.float10 > 0.0f;
+            bool other_leaf_float10_positive = initial_leaves[other_leaf_index].float10 > 0.0f;
+            bool is_transition = leaf_float10_positive != other_leaf_float10_positive;
+
+            if (is_transition)
+            {
+                if (excess_connection_area > v16)
+                {
+                    quality = excess_connection_area / float10sum;
+                    return true;
+                }
+                else
+                    return false;
+            }
+            if (v17 > v16)
+            {
+                quality = v17 / float10sum;
+                return true;
+            }
+            else
+                return false;
         }
 
         public void color_leaves()

@@ -8,6 +8,7 @@ using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags;
 using CollisionModelGen4 = TagTool.Tags.Definitions.Gen4.CollisionModel;
+using PhysicsModelGen4 = TagTool.Tags.Definitions.Gen4.PhysicsModel;
 
 namespace TagTool.Commands.Porting.Gen4
 {
@@ -72,6 +73,9 @@ namespace TagTool.Commands.Porting.Gen4
             {
                 case CollisionModelGen4 collisionModel:
                     definition = ConvertCollisionModel(tag, collisionModel);
+                    break;
+                case PhysicsModelGen4 physicsModel:
+                    definition = ConvertPhysicsModel(tag, physicsModel);
                     break;
                 default:
                     throw new NotSupportedException($"{tag.Group} not supported");

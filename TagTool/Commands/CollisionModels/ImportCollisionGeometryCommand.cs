@@ -738,6 +738,18 @@ namespace TagTool.Commands.CollisionModels
                                     Vertex vertex_block_B = Bsp.Vertices[vertex_B_index];
                                     RealPoint2d coordsB = vertex_get_projection_relevant_coords(vertex_block_B, projection_axis, plane_mirror_check);
 
+                                    /*
+                                    //gen3 method
+                                    RealPoint2d coordsdiffA1 = coordsA - coords1;
+                                    RealPoint2d coordsdiffBA = coordsB - coordsA;
+                                    double v35 = point_point_cross_product_2d(coordsB - coordsA, coordsA - coords1);
+                                    double v36 = Math.Sqrt((coordsdiffA1.Y * coordsdiffA1.Y) + (coordsdiffA1.X * coordsdiffA1.X));
+                                    double v37 = Math.Sqrt((coordsdiffBA.Y * coordsdiffBA.Y) + (coordsdiffBA.X * coordsdiffBA.X));
+                                    double v38 = v36 * v37 * 0.087155744;
+                                    if (v38 > v35)
+                                        break;
+                                    */
+
                                     if ((coordsB.Y - coordsA.Y) * (coordsA.X - coords1.X) - (coordsA.Y - coords1.Y) * (coordsB.X - coordsA.X) <= 0.000099999997)
                                         break;
 
@@ -813,6 +825,11 @@ namespace TagTool.Commands.CollisionModels
             }
             new TagToolError(CommandError.CustomError, "Failed to reduce collision geometry");
             return false;
+        }
+
+        public double point_point_cross_product_2d(RealPoint2d pointA, RealPoint2d pointB)
+        {
+            return pointA.Y * pointB.X - pointA.X * pointB.Y;
         }
 
         public struct edge_array_element

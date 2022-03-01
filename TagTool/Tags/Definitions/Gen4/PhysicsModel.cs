@@ -341,9 +341,9 @@ namespace TagTool.Tags.Definitions.Gen4
         {
             public short Node;
             public short Region;
-            public short Permutattion;
+            public short Permutation;
             public short SerializedShapes;
-            public RealPoint3d BoudingSphereOffset;
+            public RealPoint3d BoundingSphereOffset;
             public float BoundingSphereRadius;
             public RigidBodyFlags Flags;
             public short NoPhantomPowerAlt;
@@ -559,76 +559,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public byte[] Padding;
             public HavokConvexTranslateShapeStruct TranslateShape;
             
-            [TagStructure(Size = 0x20)]
-            public class HavokPrimitiveStruct : TagStructure
-            {
-                public StringId Name;
-                public sbyte Material;
-                public PhysicsMaterialFlags MaterialFlags;
-                public short RuntimeMaterialType;
-                public float RelativeMassScale;
-                public float Friction;
-                public float Restitution;
-                public float Volume;
-                public float Mass;
-                public short MassDistributionIndex;
-                public sbyte Phantom;
-                public PhysicsMaterialProxyCollisionGroups ProxyCollisionGroup;
-                
-                [Flags]
-                public enum PhysicsMaterialFlags : byte
-                {
-                    SupressesEffects = 1 << 0,
-                    // enables collision with the player regardless of the collision group
-                    ForceEnableCollisionWithPlayer = 1 << 1
-                }
-                
-                public enum PhysicsMaterialProxyCollisionGroups : sbyte
-                {
-                    None,
-                    SmallCrate,
-                    Crate,
-                    HugeCrate,
-                    Item,
-                    Projectile,
-                    Biped,
-                    Machine,
-                    EarlyMoverMachine,
-                    OnlyCollideWithEnvironment,
-                    TechArtCustom,
-                    SmallExpensivePlant,
-                    IgnoreEnvironment,
-                    HugeVehicle,
-                    Ragdoll,
-                    SuperCollidableRagdoll,
-                    ItemBlocker,
-                    User00,
-                    User01,
-                    Everything,
-                    Creatures
-                }
-            }
-            
-            [TagStructure(Size = 0x14)]
-            public class HavokConvexShapeStruct : TagStructure
-            {
-                public HavokShapeStruct Base;
-                public float Radius;
-                
-                [TagStructure(Size = 0x10)]
-                public class HavokShapeStruct : TagStructure
-                {
-                    public int FieldPointerSkip;
-                    public short Size;
-                    public short Count;
-                    public sbyte Type;
-                    public sbyte Dispatchtype;
-                    public sbyte BitsperKey;
-                    public sbyte Codectype;
-                    public int UserData;
-                }
-            }
-            
             [TagStructure(Size = 0x30)]
             public class HavokConvexTranslateShapeStruct : TagStructure
             {
@@ -679,69 +609,6 @@ namespace TagTool.Tags.Definitions.Gen4
             [TagField(Length = 8)]
             public MultiSphereVectorStorage[]  FourVectorsStorage;
             
-            [TagStructure(Size = 0x20)]
-            public class HavokPrimitiveStruct : TagStructure
-            {
-                public StringId Name;
-                public sbyte Material;
-                public PhysicsMaterialFlags MaterialFlags;
-                public short RuntimeMaterialType;
-                public float RelativeMassScale;
-                public float Friction;
-                public float Restitution;
-                public float Volume;
-                public float Mass;
-                public short MassDistributionIndex;
-                public sbyte Phantom;
-                public PhysicsMaterialProxyCollisionGroups ProxyCollisionGroup;
-                
-                [Flags]
-                public enum PhysicsMaterialFlags : byte
-                {
-                    SupressesEffects = 1 << 0,
-                    // enables collision with the player regardless of the collision group
-                    ForceEnableCollisionWithPlayer = 1 << 1
-                }
-                
-                public enum PhysicsMaterialProxyCollisionGroups : sbyte
-                {
-                    None,
-                    SmallCrate,
-                    Crate,
-                    HugeCrate,
-                    Item,
-                    Projectile,
-                    Biped,
-                    Machine,
-                    EarlyMoverMachine,
-                    OnlyCollideWithEnvironment,
-                    TechArtCustom,
-                    SmallExpensivePlant,
-                    IgnoreEnvironment,
-                    HugeVehicle,
-                    Ragdoll,
-                    SuperCollidableRagdoll,
-                    ItemBlocker,
-                    User00,
-                    User01,
-                    Everything,
-                    Creatures
-                }
-            }
-            
-            [TagStructure(Size = 0x10)]
-            public class HavokShapeStruct : TagStructure
-            {
-                public int FieldPointerSkip;
-                public short Size;
-                public short Count;
-                public sbyte Type;
-                public sbyte Dispatchtype;
-                public sbyte BitsperKey;
-                public sbyte Codectype;
-                public int UserData;
-            }
-            
             [TagStructure(Size = 0x10)]
             public class MultiSphereVectorStorage : TagStructure
             {
@@ -761,76 +628,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public float HavokWBottom;
             public RealVector3d Top;
             public float HavokWTop;
-            
-            [TagStructure(Size = 0x20)]
-            public class HavokPrimitiveStruct : TagStructure
-            {
-                public StringId Name;
-                public sbyte Material;
-                public PhysicsMaterialFlags MaterialFlags;
-                public short RuntimeMaterialType;
-                public float RelativeMassScale;
-                public float Friction;
-                public float Restitution;
-                public float Volume;
-                public float Mass;
-                public short MassDistributionIndex;
-                public sbyte Phantom;
-                public PhysicsMaterialProxyCollisionGroups ProxyCollisionGroup;
-                
-                [Flags]
-                public enum PhysicsMaterialFlags : byte
-                {
-                    SupressesEffects = 1 << 0,
-                    // enables collision with the player regardless of the collision group
-                    ForceEnableCollisionWithPlayer = 1 << 1
-                }
-                
-                public enum PhysicsMaterialProxyCollisionGroups : sbyte
-                {
-                    None,
-                    SmallCrate,
-                    Crate,
-                    HugeCrate,
-                    Item,
-                    Projectile,
-                    Biped,
-                    Machine,
-                    EarlyMoverMachine,
-                    OnlyCollideWithEnvironment,
-                    TechArtCustom,
-                    SmallExpensivePlant,
-                    IgnoreEnvironment,
-                    HugeVehicle,
-                    Ragdoll,
-                    SuperCollidableRagdoll,
-                    ItemBlocker,
-                    User00,
-                    User01,
-                    Everything,
-                    Creatures
-                }
-            }
-            
-            [TagStructure(Size = 0x14)]
-            public class HavokConvexShapeStruct : TagStructure
-            {
-                public HavokShapeStruct Base;
-                public float Radius;
-                
-                [TagStructure(Size = 0x10)]
-                public class HavokShapeStruct : TagStructure
-                {
-                    public int FieldPointerSkip;
-                    public short Size;
-                    public short Count;
-                    public sbyte Type;
-                    public sbyte Dispatchtype;
-                    public sbyte BitsperKey;
-                    public sbyte Codectype;
-                    public int UserData;
-                }
-            }
         }
         
         [TagStructure(Size = 0xB0)]
@@ -843,76 +640,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public RealVector3d HalfExtents;
             public float HavokWHalfExtents;
             public HavokConvexTransformShapeStruct ConvexTransformShape;
-            
-            [TagStructure(Size = 0x20)]
-            public class HavokPrimitiveStruct : TagStructure
-            {
-                public StringId Name;
-                public sbyte Material;
-                public PhysicsMaterialFlags MaterialFlags;
-                public short RuntimeMaterialType;
-                public float RelativeMassScale;
-                public float Friction;
-                public float Restitution;
-                public float Volume;
-                public float Mass;
-                public short MassDistributionIndex;
-                public sbyte Phantom;
-                public PhysicsMaterialProxyCollisionGroups ProxyCollisionGroup;
-                
-                [Flags]
-                public enum PhysicsMaterialFlags : byte
-                {
-                    SupressesEffects = 1 << 0,
-                    // enables collision with the player regardless of the collision group
-                    ForceEnableCollisionWithPlayer = 1 << 1
-                }
-                
-                public enum PhysicsMaterialProxyCollisionGroups : sbyte
-                {
-                    None,
-                    SmallCrate,
-                    Crate,
-                    HugeCrate,
-                    Item,
-                    Projectile,
-                    Biped,
-                    Machine,
-                    EarlyMoverMachine,
-                    OnlyCollideWithEnvironment,
-                    TechArtCustom,
-                    SmallExpensivePlant,
-                    IgnoreEnvironment,
-                    HugeVehicle,
-                    Ragdoll,
-                    SuperCollidableRagdoll,
-                    ItemBlocker,
-                    User00,
-                    User01,
-                    Everything,
-                    Creatures
-                }
-            }
-            
-            [TagStructure(Size = 0x14)]
-            public class HavokConvexShapeStruct : TagStructure
-            {
-                public HavokShapeStruct Base;
-                public float Radius;
-                
-                [TagStructure(Size = 0x10)]
-                public class HavokShapeStruct : TagStructure
-                {
-                    public int FieldPointerSkip;
-                    public short Size;
-                    public short Count;
-                    public sbyte Type;
-                    public sbyte Dispatchtype;
-                    public sbyte BitsperKey;
-                    public sbyte Codectype;
-                    public int UserData;
-                }
-            }
             
             [TagStructure(Size = 0x60)]
             public class HavokConvexTransformShapeStruct : TagStructure
@@ -977,57 +704,7 @@ namespace TagTool.Tags.Definitions.Gen4
             public float HavokWPointC;
             public RealVector3d Extrusion;
             public float HavokWExtrusion;
-            
-            [TagStructure(Size = 0x20)]
-            public class HavokPrimitiveStruct : TagStructure
-            {
-                public StringId Name;
-                public sbyte Material;
-                public PhysicsMaterialFlags MaterialFlags;
-                public short RuntimeMaterialType;
-                public float RelativeMassScale;
-                public float Friction;
-                public float Restitution;
-                public float Volume;
-                public float Mass;
-                public short MassDistributionIndex;
-                public sbyte Phantom;
-                public PhysicsMaterialProxyCollisionGroups ProxyCollisionGroup;
-                
-                [Flags]
-                public enum PhysicsMaterialFlags : byte
-                {
-                    SupressesEffects = 1 << 0,
-                    // enables collision with the player regardless of the collision group
-                    ForceEnableCollisionWithPlayer = 1 << 1
-                }
-                
-                public enum PhysicsMaterialProxyCollisionGroups : sbyte
-                {
-                    None,
-                    SmallCrate,
-                    Crate,
-                    HugeCrate,
-                    Item,
-                    Projectile,
-                    Biped,
-                    Machine,
-                    EarlyMoverMachine,
-                    OnlyCollideWithEnvironment,
-                    TechArtCustom,
-                    SmallExpensivePlant,
-                    IgnoreEnvironment,
-                    HugeVehicle,
-                    Ragdoll,
-                    SuperCollidableRagdoll,
-                    ItemBlocker,
-                    User00,
-                    User01,
-                    Everything,
-                    Creatures
-                }
-            }
-            
+
             [TagStructure(Size = 0x14)]
             public class HavokConvexShapeStruct20102 : TagStructure
             {
@@ -1070,76 +747,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public int Connectivity;
             [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
-            
-            [TagStructure(Size = 0x20)]
-            public class HavokPrimitiveStruct : TagStructure
-            {
-                public StringId Name;
-                public sbyte Material;
-                public PhysicsMaterialFlags MaterialFlags;
-                public short RuntimeMaterialType;
-                public float RelativeMassScale;
-                public float Friction;
-                public float Restitution;
-                public float Volume;
-                public float Mass;
-                public short MassDistributionIndex;
-                public sbyte Phantom;
-                public PhysicsMaterialProxyCollisionGroups ProxyCollisionGroup;
-                
-                [Flags]
-                public enum PhysicsMaterialFlags : byte
-                {
-                    SupressesEffects = 1 << 0,
-                    // enables collision with the player regardless of the collision group
-                    ForceEnableCollisionWithPlayer = 1 << 1
-                }
-                
-                public enum PhysicsMaterialProxyCollisionGroups : sbyte
-                {
-                    None,
-                    SmallCrate,
-                    Crate,
-                    HugeCrate,
-                    Item,
-                    Projectile,
-                    Biped,
-                    Machine,
-                    EarlyMoverMachine,
-                    OnlyCollideWithEnvironment,
-                    TechArtCustom,
-                    SmallExpensivePlant,
-                    IgnoreEnvironment,
-                    HugeVehicle,
-                    Ragdoll,
-                    SuperCollidableRagdoll,
-                    ItemBlocker,
-                    User00,
-                    User01,
-                    Everything,
-                    Creatures
-                }
-            }
-            
-            [TagStructure(Size = 0x14)]
-            public class HavokConvexShapeStruct : TagStructure
-            {
-                public HavokShapeStruct Base;
-                public float Radius;
-                
-                [TagStructure(Size = 0x10)]
-                public class HavokShapeStruct : TagStructure
-                {
-                    public int FieldPointerSkip;
-                    public short Size;
-                    public short Count;
-                    public sbyte Type;
-                    public sbyte Dispatchtype;
-                    public sbyte BitsperKey;
-                    public sbyte Codectype;
-                    public int UserData;
-                }
-            }
         }
         
         [TagStructure(Size = 0x30)]
@@ -1274,19 +881,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public float Scale;
             [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
             public byte[] Padding3;
-            
-            [TagStructure(Size = 0x10)]
-            public class HavokShapeStruct : TagStructure
-            {
-                public int FieldPointerSkip;
-                public short Size;
-                public short Count;
-                public sbyte Type;
-                public sbyte Dispatchtype;
-                public sbyte BitsperKey;
-                public sbyte Codectype;
-                public int UserData;
-            }
             
             [TagStructure(Size = 0x4)]
             public class HavokShapeReferenceStruct : TagStructure
@@ -1839,19 +1433,6 @@ namespace TagTool.Tags.Definitions.Gen4
             public int ChildShapePointer;
             public HavokShapeStruct PhantomShape;
             
-            [TagStructure(Size = 0x10)]
-            public class HavokShapeStruct : TagStructure
-            {
-                public int FieldPointerSkip;
-                public short Size;
-                public short Count;
-                public sbyte Type;
-                public sbyte Dispatchtype;
-                public sbyte BitsperKey;
-                public sbyte Codectype;
-                public int UserData;
-            }
-            
             [TagStructure(Size = 0x4)]
             public class HavokShapeReferenceStruct : TagStructure
             {
@@ -1943,6 +1524,76 @@ namespace TagTool.Tags.Definitions.Gen4
                         Creatures
                     }
                 }
+            }
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class HavokShapeStruct : TagStructure
+        {
+            public int FieldPointerSkip;
+            public short Size;
+            public short Count;
+            public sbyte Type;
+            public sbyte Dispatchtype;
+            public sbyte BitsperKey;
+            public sbyte Codectype;
+            public int UserData;
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class HavokConvexShapeStruct : TagStructure
+        {
+            public HavokShapeStruct Base;
+            public float Radius;
+        }
+
+        [TagStructure(Size = 0x20)]
+        public class HavokPrimitiveStruct : TagStructure
+        {
+            public StringId Name;
+            public sbyte Material;
+            public PhysicsMaterialFlags MaterialFlags;
+            public short RuntimeMaterialType;
+            public float RelativeMassScale;
+            public float Friction;
+            public float Restitution;
+            public float Volume;
+            public float Mass;
+            public short MassDistributionIndex;
+            public sbyte Phantom;
+            public PhysicsMaterialProxyCollisionGroups ProxyCollisionGroup;
+
+            [Flags]
+            public enum PhysicsMaterialFlags : byte
+            {
+                SupressesEffects = 1 << 0,
+                // enables collision with the player regardless of the collision group
+                ForceEnableCollisionWithPlayer = 1 << 1
+            }
+
+            public enum PhysicsMaterialProxyCollisionGroups : sbyte
+            {
+                None,
+                SmallCrate,
+                Crate,
+                HugeCrate,
+                Item,
+                Projectile,
+                Biped,
+                Machine,
+                EarlyMoverMachine,
+                OnlyCollideWithEnvironment,
+                TechArtCustom,
+                SmallExpensivePlant,
+                IgnoreEnvironment,
+                HugeVehicle,
+                Ragdoll,
+                SuperCollidableRagdoll,
+                ItemBlocker,
+                User00,
+                User01,
+                Everything,
+                Creatures
             }
         }
     }
