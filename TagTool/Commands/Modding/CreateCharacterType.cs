@@ -4,6 +4,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
+using System.Linq;
 
 namespace TagTool.Commands.Modding
 {
@@ -12,67 +13,86 @@ namespace TagTool.Commands.Modding
         private GameCache Cache { get; }
         private ModGlobalsDefinition ModGlobals;
         private Globals Globals;
+        private CachedTag UnitTag;
+        private bool Simple = true;
+        private int MpRepIndex = 0;
+        private int CampRepIndex = 0;
+        private string CharacterName;
+        private StringId CharacterStringID;
 
         public CreateCharacterType(GameCache cache) :
             base(true,
 
                 "CreateCharacterType",
-                "Builds a character type from the current biped tag.",
+                "Builds a character type from a biped tag.",
 
-                "CreateCharacterType",
+                "CreateCharacterType [CampaignDistinct] <bipd tagname>",
 
-                "Builds a character type from the current biped tag")
+                "Builds a character type from the provided biped tag."
+                + "\nThe \"CampaignDistinct\" argument enables creation of separate Campaign and Multiplayer representations."
+                + "By default, they are the same.")
         {
             Cache = cache;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 0)
-                return new TagToolError(CommandError.ArgCount);
+            if (!Cache.TagCache.TryGetCachedTag(args.Last(), out UnitTag))
+                return new TagToolError(CommandError.TagInvalid);
+
+            bool campaignDistinct = false;
+
+            switch (args.Count)
+            {
+                case 1:
+                    break;
+                case 2:
+                    {
+                        if (args[0].ToLower() == "campaigndistinct")
+                        {
+                            campaignDistinct = true;
+                            Simple = false;
+                        }
+                        else
+                            return new TagToolError(CommandError.CustomError, $"{args[0]} is not a recognized argument.");
+                    }
+                    break;
+                default:
+                    return new TagToolError(CommandError.ArgCount);
+            }
 
             OpenGlobalTags();
 
-            //
+
             // Wizard to set up a new playable character
-            //
+
+            SectionBreak();
+            Console.WriteLine("Enter the character name for display: ");
+            CharacterName = Console.ReadLine().Trim();
 
             SectionBreak();
 
-            Console.Write("Create new campaign representation? [y/n] ");
-
-            var answer = Console.ReadLine().ToLower();
-            if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                return new TagToolError(CommandError.YesNoSyntax);
-            if (answer.StartsWith("y"))
+            if (Simple)
             {
-                CreatePlayerRepresentation();
+                MpRepIndex = CreatePlayerRepresentation(null);
+                CampRepIndex = MpRepIndex;
                 SectionBreak();
             }
-
-            Console.Write("Create new multiplayer representation? [y/n] ");
-
-            answer = Console.ReadLine().ToLower();
-            if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                return new TagToolError(CommandError.YesNoSyntax);
-            if (answer.StartsWith("y"))
+            else
             {
-                CreatePlayerRepresentation();
-                SectionBreak();
+                if (campaignDistinct)
+                {
+                    CampRepIndex = CreatePlayerRepresentation("campaign");
+                    SectionBreak();
+                    MpRepIndex = CreatePlayerRepresentation("multiplayer");
+                    SectionBreak();
+                }
             }
 
-            Console.Write("Create new character type? [y/n] ");
+            CreateNewCharacterType();
+            SectionBreak();
 
-            answer = Console.ReadLine().ToLower();
-            if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                return new TagToolError(CommandError.YesNoSyntax);
-            if (answer.StartsWith("y"))
-            {
-                CreateNewCharacterType();
-                SectionBreak();
-            }
-
-            int setIndex = GetIntFromUser("Enter the character set index (-1 for new block): ");
+            int setIndex = Simple ? 0 : GetIntFromUser("Enter the character set index (-1 to create new): ");
 
             ModGlobalsDefinition.PlayerCharacterSet current_set;
 
@@ -114,34 +134,46 @@ namespace TagTool.Commands.Modding
             }
         }
 
-        private void CreatePlayerRepresentation()
+        private int CreatePlayerRepresentation(string type)
         {
             Globals.PlayerRepresentationBlock rep = new Globals.PlayerRepresentationBlock();
 
-            rep.Name = GetStringId("Enter the representation name: ");
+            if (!string.IsNullOrEmpty(type))
+                type += " ";
+
+            if (Simple)
+            {
+                rep.Name = GetStringId(CharacterName.ToLower().Replace(' ','_'));
+                CharacterStringID = rep.Name;
+            }
+            else
+                rep.Name = GetStringIdFromUser($"Enter the {type}representation name: ");
+
             rep.FirstPersonHands = GetTag("Enter the first person hands render model tag (press enter for null): ");
             rep.FirstPersonBody = GetTag("Enter the first person body render model tag (press enter for null): ");
-            rep.ThirdPersonUnit = GetTag("Enter the third person unit biped tag (press enter for null): ");
-            rep.ThirdPersonVariant = GetStringId("Enter the third person variant name (press enter for none): ");
+            rep.ThirdPersonUnit = (type == "campaign ") ? GetTag("Enter the third person unit biped tag (press enter for null): ") : UnitTag;
+            rep.ThirdPersonVariant = GetStringIdFromUser("Enter the third person variant name (press enter for none): ");
             rep.BinocularsZoomInSound = GetTag("Enter the binocular zoom in sound tag (press enter for null): ");
             rep.BinocularsZoomOutSound = GetTag("Enter the binocular zoom out sound tag (press enter for null): ");
             rep.CombatDialogue = GetTag("Enter the first person combat dialogue (udlg) tag (press enter for null): ");
 
             Globals.PlayerRepresentation.Add(rep);
+
+            return Globals.PlayerRepresentation.Count - 1;
         }
 
         private void CreateNewCharacterType()
         {
             Globals.PlayerCharacterType type = new Globals.PlayerCharacterType();
 
-            type.Name = GetStringId("Enter the representation name: ");
+            type.Name = Simple ? CharacterStringID : GetStringIdFromUser("Enter the character type name: ");
             type.PlayerInformation = (sbyte)GetIntFromUser("Enter the player information block index: ");
             type.PlayerControl = (sbyte)GetIntFromUser("Enter the player control block index: ");
-            type.CampaignRepresentation = (sbyte)GetIntFromUser("Enter the campaign player representation block index: ");
-            type.MultiplayerRepresentation = (sbyte)GetIntFromUser("Enter the multiplayer player representation block index: ");
-            type.MultiplayerArmorCustomization = (sbyte)GetIntFromUser("Enter the multiplayer player customization block index: ");
-            type.ChudGlobals = (sbyte)GetIntFromUser("Enter the chud globals block index: ");
-            type.FirstPersonInterface = (sbyte)GetIntFromUser("Enter the first person interface block index: ");
+            type.CampaignRepresentation = (sbyte)CampRepIndex;
+            type.MultiplayerRepresentation = (sbyte)MpRepIndex;
+            type.MultiplayerArmorCustomization = 0;
+            type.ChudGlobals = 0;
+            type.FirstPersonInterface = 0;
 
             Globals.PlayerCharacterTypes.Add(type);
         }
@@ -152,7 +184,7 @@ namespace TagTool.Commands.Modding
             string value = Console.ReadLine().Trim();
             set.DisplayName = value.Substring(0, Math.Max(0, value.Length));
 
-            set.Name = GetStringId("Enter the character set name (stringid): ");
+            set.Name = GetStringIdFromUser("Enter the character set name (stringid): ");
             set.RandomChance = GetFloatFromUser("Enter the random chance (float): ");
             set.Characters = new List<ModGlobalsDefinition.PlayerCharacterSet.PlayerCharacter>();
         }
@@ -160,11 +192,20 @@ namespace TagTool.Commands.Modding
         private void CreateNewPlayerCharacter(ModGlobalsDefinition.PlayerCharacterSet set)
         {
             ModGlobalsDefinition.PlayerCharacterSet.PlayerCharacter character = new ModGlobalsDefinition.PlayerCharacterSet.PlayerCharacter();
-            Console.WriteLine("Enter the character display name: ");
-            string value = Console.ReadLine().Trim();
-            character.DisplayName = value.Substring(0, Math.Max(0, value.Length));
 
-            character.Name = GetStringId("Enter the character name (stringid): ");
+            if (Simple)
+            {
+                character.DisplayName = CharacterName;
+                character.Name = CharacterStringID;
+            }
+            else
+            {
+                Console.WriteLine("Enter the character display name: ");
+                string value = Console.ReadLine().Trim();
+                character.DisplayName = value.Substring(0, Math.Max(0, value.Length));
+                character.Name = GetStringIdFromUser("Enter the character name (stringid): ");
+            }
+
             character.RandomChance = GetFloatFromUser("Enter the random chance (float): ");
             set.Characters.Add(character);
         }
@@ -174,16 +215,23 @@ namespace TagTool.Commands.Modding
             Console.WriteLine(message);
             string tagName = Console.ReadLine().Trim();
 
-            if (tagName == "\n")
-                return null;
-
-            if (Cache.TagCache.TryGetTag(tagName, out CachedTag tag))
-                return tag;
-            else
-                return null;
+            switch(tagName)
+            {
+                case "\n":
+                case "null":
+                case "skip":
+                    return null;
+                default:
+                    {
+                        if (Cache.TagCache.TryGetTag(tagName, out CachedTag tag))
+                            return tag;
+                        else
+                            return null;
+                    }
+            }
         }
 
-        private StringId GetStringId(string message)
+        private StringId GetStringIdFromUser(string message)
         {
             StringId stringId;
             Console.WriteLine(message);
@@ -192,12 +240,18 @@ namespace TagTool.Commands.Modding
             if (value == "\n")
                 return StringId.Invalid;
 
-            stringId = Cache.StringTable.GetStringId(value);
-            if(stringId == StringId.Invalid && value != Cache.StringTable.GetString(StringId.Invalid))
+            return GetStringId(value);
+        }
+
+        private StringId GetStringId(string value)
+        {
+            StringId stringId = Cache.StringTable.GetStringId(value);
+            if (stringId == StringId.Invalid && value != Cache.StringTable.GetString(StringId.Invalid))
             {
                 stringId = Cache.StringTable.AddString(value);
                 Cache.SaveStrings();
             }
+
             return stringId;
         }
 
