@@ -91,6 +91,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("mdl3", "gui_model_widget_definition"), typeof(GuiModelWidgetDefinition) },
             { new TagGroupGen3("mdlg", "ai_mission_dialogue"), typeof(AiMissionDialogue) },
             { new TagGroupGen3("mffn", "muffin"), typeof(Muffin) },
+            { new TagGroupGen3("mlib", "emblem_library"), typeof(EmblemLibrary) },
             { new TagGroupGen3("mlst", "map_list"), typeof(MapList) },
             { new TagGroupGen3("mode", "render_model"), typeof(RenderModel) },
             { new TagGroupGen3("modg", "mod_globals"), typeof(ModGlobalsDefinition) },
