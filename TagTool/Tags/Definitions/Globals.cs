@@ -314,9 +314,9 @@ namespace TagTool.Tags.Definitions
             public float SprintPeggedAngularThreshold; // how far off straight up (in degrees) we consider pegged
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float PaddingUnused3;
+            public float StaminaDepleteRestoreTime;       // time to restore stamina from empty or deplete from full (seconds)
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float PaddingUnused4;
+            public float SprintCooldownTime;       // time between sprint end and next available use (seconds)
 
             [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown6_HO;
