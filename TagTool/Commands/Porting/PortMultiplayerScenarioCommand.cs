@@ -538,7 +538,7 @@ namespace TagTool.Commands.Porting
             instance.PaletteIndex = (short)scnr.SceneryPalette.Count;
             instance.NameIndex = -1;
             instance.EditorFolder = -1;
-            instance.ParentId.NameIndex = -1;
+            instance.ParentId = new ScenarioObjectParentStruct() { NameIndex = -1 };
             instance.Position = position;
             instance.Rotation = rotation;
             instance.ObjectType = new ScenarioObjectType() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
@@ -547,8 +547,7 @@ namespace TagTool.Commands.Porting
             instance.UniqueHandle = new DatumHandle(0xffffffff);
             instance.OriginBspIndex = -1;
             instance.CanAttachToBspFlags = (ushort)(1u << bspIndex);
-            instance.Multiplayer = new MultiplayerObjectProperties();
-            instance.Multiplayer.Team = MultiplayerTeamDesignator.Neutral;
+            instance.Multiplayer = new MultiplayerObjectProperties() { Team = MultiplayerTeamDesignator.Neutral };
             scnr.Scenery.Add(instance);
 
             scnr.SceneryPalette.Add(new ScenarioPaletteEntry()
