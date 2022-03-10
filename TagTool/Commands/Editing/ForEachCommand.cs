@@ -179,7 +179,16 @@ namespace TagTool.Commands.Editing
 
                     Console.Write(label == null ? $"[{i}] " : $"[{label} ({i})] ");
                     foreach (var command in commandsToExecute)
-                        ContextStack.Context.GetCommand(command[0]).Execute(command.Skip(1).ToList());
+                    {
+                        var cmd = ContextStack.Context.GetCommand(command[0]);
+                        if (cmd != null)
+                            cmd.Execute(command.Skip(1).ToList());
+                        else
+                        {
+                            ContextReturn(previousContext, previousOwner, previousStructure);
+                            return new TagToolError(CommandError.ArgInvalid);
+                        }
+                    }
                 }
             }
             else
