@@ -12,6 +12,7 @@ using TagTool.Commands.Porting;
 using CollisionModelGen2 = TagTool.Tags.Definitions.Gen2.CollisionModel;
 using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGraph;
 using PhysicsModelGen2 = TagTool.Tags.Definitions.Gen2.PhysicsModel;
+using RenderModelGen2 = TagTool.Tags.Definitions.Gen2.RenderModel;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -83,6 +84,12 @@ namespace TagTool.Commands.Porting.Gen2
                 case PhysicsModelGen2 physicsModel:
                     definition = ConvertPhysicsModel(tag, physicsModel);
                     break;
+                case RenderModelGen2 renderModel:
+                    definition = ConvertRenderModel(tag, renderModel);
+                    break;
+                default:
+                    Console.WriteLine($"Porting tag group '{gen2Tag.Group}' not yet supported!");
+                    return tag;
             }
 
             if (definition != null)

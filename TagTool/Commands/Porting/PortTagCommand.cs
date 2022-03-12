@@ -1099,10 +1099,7 @@ namespace TagTool.Commands.Porting
                     break;
 
                 case RenderModel mode:
-                    if (BlamCache.Version < CacheVersion.Halo3Retail)
-                        blamDefinition = ConvertGen2RenderModel(edTag, mode, resourceStreams);
-                    else
-                        blamDefinition = ConvertGen3RenderModel(edTag, blamTag, mode);
+                    blamDefinition = ConvertGen3RenderModel(edTag, blamTag, mode);
 					break;
 
 				case Scenario scnr:

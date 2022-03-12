@@ -233,7 +233,6 @@ namespace TagTool.Commands.Modding
 
         private StringId GetStringIdFromUser(string message)
         {
-            StringId stringId;
             Console.WriteLine(message);
             string value = Console.ReadLine().Trim();
 

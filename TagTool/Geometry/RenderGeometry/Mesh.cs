@@ -47,9 +47,8 @@ namespace TagTool.Geometry
 
         public List<NodeMapping> NodeMap;
 
-        [TagField(Flags = Padding, Length = 4, MaxVersion = Halo2Vista)]
-        public byte[] Unused2 = new byte[4];
-
+        [TagField(Length = 4, MaxVersion = Halo2Vista)]
+        public int Unused2 = new byte[4];
 
         [TagStructure(Size = 0x14)]
         public class VisibilityBinding : TagStructure

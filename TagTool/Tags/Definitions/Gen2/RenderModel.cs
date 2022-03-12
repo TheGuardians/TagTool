@@ -160,7 +160,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public SectionLightingFlags LightingFlags;
             public short RigidNode;
             public SectionFlags Flags;
-            public List<Mesh> Meshes;
+            public List<Gen2ResourceMesh> Meshes;
             public CacheFileResourceGen2 Resource;
 
             [TagField(Flags = Short)]
