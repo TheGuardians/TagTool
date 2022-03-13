@@ -319,7 +319,7 @@ namespace TagTool.Geometry
         [TagField(MaxVersion = Halo2Vista)]
         public float LodMipmapMagicNumber;
 
-        [TagField(Flags = Padding, Length = 24, MaxVersion = Halo2Vista)]
+        [TagField(Length = 24, MaxVersion = Halo2Vista)]
         public byte[] Unused2 = new byte[24];
 
         public enum PartTypeOld : short
