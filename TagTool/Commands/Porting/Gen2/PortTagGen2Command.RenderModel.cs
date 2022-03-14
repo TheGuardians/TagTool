@@ -133,7 +133,12 @@ namespace TagTool.Commands.Porting.Gen2
                                             case VertexDeclarationUsage.Position:
                                                 vertex.Point.Position = element.XYZ;
                                                 if (section.GeometryCompressionFlags.HasFlag(RenderGeometryCompressionFlags.CompressedPosition))
+                                                {
+                                                    //halo 2 vista compression appears to be between -1 and 1. Normalize to 0 to 1 range.
+                                                    if(Gen2Cache.Version == CacheVersion.Halo2Vista)
+                                                        vertex.Point.Position = new RealPoint3d((vertex.Point.Position.X + 1)/2, (vertex.Point.Position.Y + 1)/2, (vertex.Point.Position.Z + 1)/2);
                                                     vertex.Point.Position = compressor.DecompressPosition(new RealQuaternion(vertex.Point.Position.ToArray())).XYZ;
+                                                }
                                                 break;
 
                                             case VertexDeclarationUsage.BlendIndices:
