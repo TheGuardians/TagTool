@@ -291,8 +291,23 @@ namespace TagTool.Commands.Porting.Gen2
                         var rigidVertices = new List<RigidVertex>();
                         var skinnedVertices = new List<SkinnedVertex>();
 
-                        foreach (var vertex in mesh.RawVertices)
+                        for (var vertex_index = 0; vertex_index < mesh.RawVertices.Count; vertex_index++)
                         {
+                            var vertex = mesh.RawVertices[vertex_index];
+
+                            //get the part index of the vertex, necessary for H2v only
+                            int part_index = 0;
+                            if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                            {
+                                while (true)
+                                {
+                                    var part = mesh.Parts[part_index];
+                                    if (part.FirstIndex <= vertex_index && vertex_index < part.FirstIndex + part.IndexCount)
+                                        break;
+                                    part_index++;
+                                }
+                            }
+
                             switch (section.GeometryClassification)
                             {
                                 case RenderGeometryClassification.Worldspace:
@@ -319,7 +334,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                                 case RenderGeometryClassification.RigidBoned:
                                 case RenderGeometryClassification.Skinned:
-                                    skinnedVertices.Add(new SkinnedVertex
+                                    SkinnedVertex newskinned = new SkinnedVertex
                                     {
                                         Position = new RealQuaternion(vertex.Point.Position.ToArray()),
                                         Texcoord = vertex.Texcoord.IJ,
@@ -330,7 +345,20 @@ namespace TagTool.Commands.Porting.Gen2
                                         BlendWeights = section.GeometryClassification == RenderGeometryClassification.RigidBoned ?
                                             new[] { 1.0f, 0.0f, 0.0f, 0.0f } :
                                             vertex.Point.NodeWeights
-                                    });
+                                    };
+                                    //fixup node indices for part
+                                    if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                                    {
+                                        var part = mesh.Parts[part_index];
+                                        newskinned.BlendIndices = new byte[]
+                                        {
+                                            part.MaxNodesPerVertex > 0 ? part.NodeIndex[0] : (byte)0,
+                                            part.MaxNodesPerVertex > 1 ? part.NodeIndex[1] : (byte)0,
+                                            part.MaxNodesPerVertex > 2 ? part.NodeIndex[2] : (byte)0,
+                                            part.MaxNodesPerVertex > 3 ? part.NodeIndex[3] : (byte)0,
+                                        };
+                                    }
+                                    skinnedVertices.Add(newskinned);
                                     break;
                                     
                                 default:
@@ -1240,6 +1268,11 @@ namespace TagTool.Commands.Porting.Gen2
             int size = 0;
             for(var i = 0; i < vertex.Length; i++)
             {
+                if(vertex[i].Item3 == VertexDeclarationType.Skip)
+                {
+                    size += vertex[i].Item4;
+                    continue;
+                }
                 size += GetVertexElementSize(vertex[i].Item3);
             }
             return size;
