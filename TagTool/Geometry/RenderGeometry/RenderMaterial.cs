@@ -10,7 +10,7 @@ namespace TagTool.Geometry
     /// A material describing how a mesh part should be rendered.
     /// </summary>
     [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline571627)]
+    [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline604673)]
     [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
     public class RenderMaterial : TagStructure

@@ -1300,6 +1300,7 @@
     <Compile Include="Tags\Definitions\Rumble.cs" />
     <Compile Include="Tags\Definitions\ShaderGlass.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
+    <Compile Include="Tags\Definitions\Hf2pGlobals.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInterleavedInteropResource.cs" />
     <Compile Include="Tags\Resources\BitmapTextureInteropResource.cs" />
     <Compile Include="Tags\Resources\Gen4\BinkResource.cs" />
