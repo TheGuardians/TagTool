@@ -9,7 +9,7 @@ using TagTool.Tags.Resources;
 
 namespace TagTool.Geometry
 {
-    [TagStructure(Size = 0xB4, MinVersion = Halo2Xbox, MaxVersion = Halo2Vista)]
+    [TagStructure(Size = 0x70, MinVersion = Halo2Xbox, MaxVersion = Halo2Vista)]
     public class Gen2ResourceMesh : TagStructure
     {
         public List<Part> Parts;
@@ -47,7 +47,7 @@ namespace TagTool.Geometry
 
         public List<NodeMapping> NodeMap;
 
-        [TagField(Length = 4, MaxVersion = Halo2Vista)]
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding, MaxVersion = Halo2Vista)]
         public byte[] Unused2 = new byte[4];
 
         [TagStructure(Size = 0x14)]
@@ -110,7 +110,7 @@ namespace TagTool.Geometry
             public byte TypeIndex;
             public byte StrideIndex;
 
-            [TagField(Length = 30)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 30)]
             public byte[] Unknown = new byte[30];
         }
 
@@ -136,10 +136,6 @@ namespace TagTool.Geometry
 
 
     }
-
-
-
-
 
     /// <summary>
     /// A 3D mesh which can be rendered.
@@ -319,8 +315,8 @@ namespace TagTool.Geometry
         [TagField(MaxVersion = Halo2Vista)]
         public float LodMipmapMagicNumber;
 
-        [TagField(Length = 24, MaxVersion = Halo2Vista)]
-        public byte[] Unused2 = new byte[24];
+        [TagField(Length = 6, MaxVersion = Halo2Vista)]
+        public float[] Unused2 = new float[6];
 
         public enum PartTypeOld : short
         {

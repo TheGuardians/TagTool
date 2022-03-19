@@ -42,6 +42,7 @@ namespace TagTool.Commands.Porting.Gen2
                 using (var reader = new EndianReader(stream))
                 using (var writer = new EndianWriter(stream))
                 {
+                    //fix up pointers within the resource so it deserializes properly
                     foreach (var resource in section.Resource.TagResources)
                     {
                         stream.Position = resource.FieldOffset;
@@ -49,12 +50,16 @@ namespace TagTool.Commands.Porting.Gen2
                         switch (resource.Type)
                         {
                             case TagResourceTypeGen2.TagBlock:
+                                //count
                                 writer.Write(resource.ResoureDataSize / resource.SecondaryLocator);
+                                //address
                                 writer.Write(8 + section.Resource.SectionDataSize + resource.ResourceDataOffset);
                                 break;
 
                             case TagResourceTypeGen2.TagData:
+                                //size
                                 writer.Write(resource.ResoureDataSize);
+                                //address
                                 writer.Write(8 + section.Resource.SectionDataSize + resource.ResourceDataOffset);
                                 break;
 
@@ -105,6 +110,8 @@ namespace TagTool.Commands.Porting.Gen2
                         (string, VertexDeclarationUsage, VertexDeclarationType, int)[] declaration = Gen2Cache.Version == CacheVersion.Halo2Vista ?
                             VertexDeclarationsVista[vertexBuffer.TypeIndex] : VertexDeclarations[vertexBuffer.TypeIndex];
 
+                        //Console.WriteLine($"Vertex type index {vertexBuffer.TypeIndex} of stride {vertexBuffer.StrideIndex} of class {section.GeometryClassification.ToString()}");
+
                         int calculated_size = CalculateVertexSize(declaration);
                         if (calculated_size != vertexBuffer.StrideIndex)
                             Console.WriteLine($"WARNING: vertex type {vertexBuffer.TypeIndex} of declared size {vertexBuffer.StrideIndex} didn't match defined size of {calculated_size}");
@@ -143,6 +150,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                                             case VertexDeclarationUsage.BlendIndices:
                                                 vertex.Point.NodeIndices = element.ToArray().Select(x => (int)x).ToArray();
+                                                //Console.WriteLine($"Boned/Skinned Vertex with blendindices {vertex.Point.NodeIndices[0]},{vertex.Point.NodeIndices[1]},{vertex.Point.NodeIndices[2]},{vertex.Point.NodeIndices[3]}");
                                                 break;
 
                                             case VertexDeclarationUsage.BlendWeight:
@@ -294,20 +302,6 @@ namespace TagTool.Commands.Porting.Gen2
                         for (var vertex_index = 0; vertex_index < mesh.RawVertices.Count; vertex_index++)
                         {
                             var vertex = mesh.RawVertices[vertex_index];
-
-                            //get the part index of the vertex, necessary for H2v only
-                            int part_index = 0;
-                            if (Gen2Cache.Version == CacheVersion.Halo2Vista)
-                            {
-                                while (true)
-                                {
-                                    var part = mesh.Parts[part_index];
-                                    if (part.FirstIndex <= vertex_index && vertex_index < part.FirstIndex + part.IndexCount)
-                                        break;
-                                    part_index++;
-                                }
-                            }
-
                             switch (section.GeometryClassification)
                             {
                                 case RenderGeometryClassification.Worldspace:
@@ -346,18 +340,18 @@ namespace TagTool.Commands.Porting.Gen2
                                             new[] { 1.0f, 0.0f, 0.0f, 0.0f } :
                                             vertex.Point.NodeWeights
                                     };
-                                    //fixup node indices for part
-                                    if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+
+                                    if(mesh.NodeMap.Count > 0)
                                     {
-                                        var part = mesh.Parts[part_index];
                                         newskinned.BlendIndices = new byte[]
                                         {
-                                            part.MaxNodesPerVertex > 0 ? part.NodeIndex[0] : (byte)0,
-                                            part.MaxNodesPerVertex > 1 ? part.NodeIndex[1] : (byte)0,
-                                            part.MaxNodesPerVertex > 2 ? part.NodeIndex[2] : (byte)0,
-                                            part.MaxNodesPerVertex > 3 ? part.NodeIndex[3] : (byte)0,
+                                            section.OpaqueMaxNodesVertex > 0 ? mesh.NodeMap[newskinned.BlendIndices[0]].NodeIndex : (byte)0,
+                                            section.OpaqueMaxNodesVertex > 1 ? mesh.NodeMap[newskinned.BlendIndices[1]].NodeIndex : (byte)0,
+                                            section.OpaqueMaxNodesVertex > 2 ? mesh.NodeMap[newskinned.BlendIndices[2]].NodeIndex : (byte)0,
+                                            section.OpaqueMaxNodesVertex > 3 ? mesh.NodeMap[newskinned.BlendIndices[3]].NodeIndex : (byte)0,
                                         };
                                     }
+
                                     skinnedVertices.Add(newskinned);
                                     break;
                                     
@@ -902,144 +896,144 @@ namespace TagTool.Commands.Porting.Gen2
                 ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
-            new[] // 0x0A
+            new[] // 0x09
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
             },
-            new[] // 0x0B
+            new[] // 0x0A
             {
                 ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
             },
-            new[] // 0x0C
+            new[] // 0x0B
             {
                 ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2N, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte2N, 0),
             },
-            new[] // 0x0D
+            new[] // 0x0C
             {
                 ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3N, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte3N, 0),
             },
-            new[] // 0x0E
+            new[] // 0x0D
             {
                 ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
-            new[] // 0x0F
+            new[] // 0x0E
             {
                 ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 1),
+            },
+            new[] // 0x0F
+            {
+                ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 1),
             },
             new[] // 0x10
             {
-                ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 1),
-            },
-            new[] // 0x11
-            {
                 ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 1),
                 ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 1),
             },
-            new[] // 0x12
+            new[] // 0x11
             {
                 ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 1),
                 ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 1),
                 ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
-            new[] // 0x13
+            new[] // 0x12
             {
                 ("SecondaryIsqSelect", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.UByteN, 2),
             },
-            new[] // 0x14
+            new[] // 0x13
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
             },
-            new[] // 0x15
+            new[] // 0x14
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
             },
-            new[] // 0x16
+            new[] // 0x15
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
                 ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
             },
-            new[] // 0x17
+            new[] // 0x16
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
                 ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
                 ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
-            new[] // 0x18
+            new[] // 0x17
             {
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
             },
-            new[] // 0x19
+            new[] // 0x18
             {
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
             },
-            new[] // 0x1A
+            new[] // 0x19
             {
                 ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.Float3, 0),
                 ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float3, 0),
                 ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.Float3, 0),
             },
-            new[] // 0x1B
+            new[] // 0x1A
             {
                 ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
                 ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 0),
                 ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.HenD3N, 0),
             },
-            new[] // 0x1C
+            new[] // 0x1B
             {
                 ("AnisoBinormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float3, 1),
             },
-            new[] // 0x1D
+            new[] // 0x1C
             {
                 ("AnisoBinormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 1),
             },
-            new[] // 0x1E
+            new[] // 0x1D
             {
                 ("SecondaryTexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 1),
             },
-            new[] // 0x1F
+            new[] // 0x1E
             {
                 ("SecondaryTexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 1),
             },
-            new[] // 0x20
+            new[] // 0x1F
             {
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
                 ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
             },
-            new[] // 0x21
+            new[] // 0x20
             {
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
                 ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
             },
-            new[] // 0x22
+            new[] // 0x21
             {
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.HenD3N, 0),
+            },
+            new[] // 0x22
+            {
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
                 ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
                 ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 0),
                 ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.HenD3N, 0),
             },
             new[] // 0x23
             {
-                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
-                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.HenD3N, 0),
-                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.HenD3N, 0),
-                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.HenD3N, 0),
-            },
-            new[] // 0x24
-            {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float2, 0),
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
                 ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
-            new[] // 0x25
+            new[] // 0x24
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
                 ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
-            new[] // 0x26
+            new[] // 0x25
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
                 ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.Float2, 0),
@@ -1047,25 +1041,25 @@ namespace TagTool.Commands.Porting.Gen2
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
                 ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.Float2, 0),
             },
-            new[] // 0x27
+            new[] // 0x26
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
                 ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
-            new[] // 0x28
+            new[] // 0x27
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
                 ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
-            new[] // 0x29
+            new[] // 0x28
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float3, 0),
                 ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
-            new[] // 0x2A dynamic_vertex
+            new[] // 0x29 dynamic_vertex
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
                 ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.Float3, 0),
@@ -1077,33 +1071,33 @@ namespace TagTool.Commands.Porting.Gen2
                 ("AnisoBinormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float4, 1),
                 ("SecondaryTexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Color, 1),
             },
-            new[] // 0x2B
+            new[] // 0x2A
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.UShort4N, 0),
+            },
+            new[] // 0x2B
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
             new[] // 0x2C
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
-            },
-            new[] // 0x2D
-            {
-                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Short2N, 0),
             },
-            new[] // 0x2E lightmap_bucket_vertex.color::uncompressed
+            new[] // 0x2D lightmap_bucket_vertex.color::uncompressed
             {
                 ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.Color, 0),
             },
-            new[] // 0x2F lightmap_bucket_vertex.color::compressed
+            new[] // 0x2E lightmap_bucket_vertex.color::compressed
             {
                 ("Color", VertexDeclarationUsage.Color, VertexDeclarationType.UByte3N, 0),
             },
-            new[] // 0x30 lightmap_bucket_vertex.incident_direction
+            new[] // 0x2F lightmap_bucket_vertex.incident_direction
             {
                 ("IncidentRadiosity", VertexDeclarationUsage.Color, VertexDeclarationType.HenD3N, 1),
             },
-            new[] // 0x31
+            new[] // 0x30
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
