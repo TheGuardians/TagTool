@@ -142,7 +142,7 @@ namespace TagTool.Commands.Shaders
                                 AddressV = (TextureConstant.SamplerAddressModeEnum)option.DefaultAddressMode
                             };
                             textureConstant.FilterMode = (TextureConstant.SamplerFilterMode)option.DefaultFilterMode;
-                            textureConstant.ExternTextureMode = (sbyte)option.RenderMethodExtern;
+                            textureConstant.ExternTextureMode = TextureConstant.RenderMethodExternTextureMode.UseBitmapAsNormal;
 
                             found = true;
                             break;
