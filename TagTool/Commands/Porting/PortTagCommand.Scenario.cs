@@ -708,6 +708,17 @@ namespace TagTool.Commands.Porting
 
                     scnr.SkyParameters = skyTag;
                 }
+
+                // set Game Object Reset Height
+
+                scnr.SpawnData = new List<Scenario.SpawnDatum>
+                {
+                        new Scenario.SpawnDatum
+                        {
+                            GameObjectResetHeight = -20f
+                        }
+                };
+
             }
 
             return scnr;
