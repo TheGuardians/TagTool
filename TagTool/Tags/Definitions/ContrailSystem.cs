@@ -19,7 +19,7 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Label)]
             public StringId Name;
 
-            public float OriginFadeRangeoriginFadeDistance;
+            public float OriginFadeRange;
             public float OriginFadeCutoff;
             public float EdgeFadeRange;
             public float EdgeFadeCutoff;
@@ -45,10 +45,8 @@ namespace TagTool.Tags.Definitions
 
             public RenderMethod RenderMethod;
 
-            public float TileX;
-            public float TileY;
-            public float ScrollSpeedX;
-            public float ScrollSpeedY;
+            public RealPoint2d Tiling;
+            public RealPoint2d ScrollSpeed;
 
             public ContrailPropertyColor ProfileColor;
             public ContrailPropertyScalar ProfileAlpha;

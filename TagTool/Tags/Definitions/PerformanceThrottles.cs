@@ -7,6 +7,11 @@ namespace TagTool.Tags.Definitions
 	[TagStructure(Name = "performance_throttles", Tag = "perf", Size = 0xC)]
 	public class PerformanceThrottles : TagStructure
 	{
+        // block 0: default non-splitscreen
+        // block 1: two-way splitscreen
+        // block 2: three-way splitscreen
+        // block 3: four-way splitscreen
+
 		public List<PerformanceThrottleBlock> PerformanceThrottle;
 		
 		[TagStructure(Size = 0x38, MinVersion = CacheVersion.Halo3Beta, Platform = CachePlatform.Original)]

@@ -748,20 +748,15 @@ namespace TagTool.Tags.Definitions
         public class ChudSuckProfile : TagStructure
         {
             public float EffectRadius;
-            public float VertexNoiseMin;
-            public float VertexNoiseMax;
+            public Bounds<float> VertexNoiseBounds;
             public float VertexNoisePower;
-            public float PixelNoiseMin;
-            public float PixelNoiseMax;
+            public Bounds<float> PixelNoiseBounds;
             public float PixelNoisePower;
-            public float WarpRadiusMin;
-            public float WarpRadiusMax;
+            public Bounds<float> WarpRadiusBounds;
             public float WarpRadiusPower;
-            public float WarpIntensityMin;
-            public float WarpIntensityMax;
+            public Bounds<float> WarpIntensityBounds;
             public float WarpIntensityPower;
-            public float NoiseSharpnessMin;
-            public float NoiseSharpnessMax;
+            public Bounds<float> NoiseSharpnessBounds;
             public float NoiseSharpnessPower;
         }
 

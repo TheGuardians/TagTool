@@ -10,11 +10,8 @@ namespace TagTool.Tags.Definitions
         public float Rarely;
         public float Somewhat;
         public float Often;
-        public uint Unknown;
-        public uint Unknown2;
-        public uint Unknown3;
-        public uint Unknown4;
-        public uint Unknown5;
-        public uint Unknown6;
+
+        [TagField(Length = 24, Flags = Padding)]
+        public byte[] Pad0;
     }
 }
