@@ -1292,6 +1292,9 @@ namespace TagTool.Commands.Porting
                                 new TagToolWarning($"Unsupported particle emitter shape '{emitter.EmissionShape}'. Using default.");
                                 emitter.EmissionShape = Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Sprayer;
                             }
+
+                            if (!Enum.TryParse(emitter.ParticleMovement.FlagsReach.ToString(), out emitter.ParticleMovement.Flags))
+                                throw new FormatException(BlamCache.Version.ToString());
                         }
                     }
 
