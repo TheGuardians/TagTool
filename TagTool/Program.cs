@@ -66,16 +66,16 @@ namespace TagTool.Commands
                 
 
             var fileInfo = new FileInfo((args.Length > 0) ? args[0] : "tags.dat");
-            bool defaultCacheSet = fileInfo.Exists ? true : false;
+            bool defaultCacheIsSet = fileInfo.Exists;
 
             if (args.Length > 0 && !fileInfo.Exists && !autoExecFile.Exists)
                 new TagToolError(CommandError.CustomError, "Invalid path to a tag cache!");
             else if (fileInfo.Exists)
-                defaultCacheSet = true;
+                defaultCacheIsSet = true;
 
             while (!fileInfo.Exists)
             {
-                Console.WriteLine("\nEnter the path to a Halo cache file (.map or tags.dat):");
+                Console.WriteLine("\nEnter the path to a Halo cache file (.map/.dat):");
                 Console.Write("> ");
 				var tagCacheFile = Console.ReadLine();
 
@@ -94,7 +94,7 @@ namespace TagTool.Commands
                 //sometimes drag&drop files have quotes placed around them, remove the quotes
                 tagCacheFile = tagCacheFile.Replace("\"", "").Replace("\'", "");
 
-                if (!tagCacheFile.Contains(".map") && !tagCacheFile.Contains("\\tags.dat"))
+                if (!tagCacheFile.Contains(".map") && !tagCacheFile.EndsWith(".dat"))
                     tagCacheFile += "\\tags.dat";
 
                 if (File.Exists(tagCacheFile))
@@ -141,7 +141,7 @@ namespace TagTool.Commands
                 var autoExecLines = File.ReadAllLines(autoExecFile.FullName);
 
                 // if cache path provided at the start of autoexec.cmds, ignore it when executing
-                autoExecLines = defaultCacheSet ? autoExecLines.Skip(1).ToArray() : autoExecLines;
+                autoExecLines = defaultCacheIsSet ? autoExecLines.Skip(1).ToArray() : autoExecLines;
 
                 foreach (var line in autoExecLines)
                     commandRunner.RunCommand(line);
