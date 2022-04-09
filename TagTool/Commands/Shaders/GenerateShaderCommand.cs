@@ -123,6 +123,80 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
+        public object ExecuteWithStream(List<string> args, Stream stream)
+        {
+            if (args.Count < 2)
+                return new TagToolError(CommandError.ArgCount);
+
+            string shaderType = args[0].ToLower();
+
+            if (shaderType == "explicit")
+                return GenerateExplicitShader(args[1].ToLower(), args.Count > 2 ? args[2].ToLower() : "default", args.Count > 3 ? args[3].ToLower() : "");
+            else if (shaderType == "chud")
+                return GenerateChudShader(args[1].ToLower());
+            else if (shaderType == "glvs" || shaderType == "glps")
+                return GenerateGlobalShader(args[1].ToLower(), shaderType == "glps");
+
+            if (UnsupportedShaderTypes.Contains(shaderType))
+                return new TagToolError(CommandError.CustomMessage, $"Shader type \"{shaderType}\" is unsupported");
+
+            args.RemoveAt(0); // we should only have options from this point
+
+                // get relevant rmdf
+                if (!Cache.TagCache.TryGetTag($"shaders\\{shaderType}.rmdf", out CachedTag rmdfTag))
+                {
+                    // don't need actual options yet - we just need to initialize the generator (input option indices are verified using rmdf, which we don't have yet)
+                    List<byte> fakeOptions = new List<byte>();
+                    for (int i = 0; i < args.Count; i++)
+                        fakeOptions.Add(0);
+
+                    rmdfTag = GenerateRmdf(stream, shaderType, fakeOptions.ToArray());
+                    if (rmdfTag == null)
+                        return new TagToolError(CommandError.TagInvalid, $"Could not find or generate rmdf tag for \"{shaderType}\"");
+                }
+
+                var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, rmdfTag);
+
+                if (rmdf.GlobalVertexShader == null || rmdf.GlobalPixelShader == null)
+                    return new TagToolError(CommandError.TagInvalid, "A global shader was missing from rmdf");
+
+                List<byte> options = new List<byte>();
+                for (int i = 0; i < args.Count; i++)
+                {
+                    // parse options as int, if fails try finding in rmdf string
+                    if (!byte.TryParse(args[i].ToLower(), out byte optionInteger))
+                    {
+                        bool found = false;
+
+                        for (byte j = 0; j < rmdf.Categories[i].ShaderOptions.Count; j++)
+                        {
+                            if (Cache.StringTable.GetString(rmdf.Categories[i].ShaderOptions[j].Name) == args[i].ToLower())
+                            {
+                                found = true;
+                                options.Add(j);
+                            }
+                        }
+
+                        if (!found)
+                            return new TagToolError(CommandError.ArgInvalid, $"Shader option \"{args[i]}\" not found");
+                    }
+
+                    else
+                    {
+                        options.Add(optionInteger);
+                    }
+                }
+
+                // make up options count, may not work very well
+                while (options.Count != rmdf.Categories.Count)
+                    options.Add(0);
+
+                GenerateRenderMethodTemplate(stream, shaderType, options.ToArray(), rmdf);
+
+            return true;
+        }
+
+
         HaloShaderGenerator.Generator.IShaderGenerator GetShaderGenerator(string shaderType, byte[] options, bool applyFixes = false)
         {
             switch (shaderType)

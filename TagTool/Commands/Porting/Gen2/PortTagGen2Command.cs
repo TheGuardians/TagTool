@@ -14,6 +14,7 @@ using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGrap
 using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;
 using PhysicsModelGen2 = TagTool.Tags.Definitions.Gen2.PhysicsModel;
 using RenderModelGen2 = TagTool.Tags.Definitions.Gen2.RenderModel;
+using ShaderGen2 = TagTool.Tags.Definitions.Gen2.Shader;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -21,6 +22,7 @@ namespace TagTool.Commands.Porting.Gen2
     {
         private readonly GameCacheHaloOnlineBase Cache;
         private readonly GameCacheGen2 Gen2Cache;
+        string shader_template;
 
         public PortTagGen2Command(GameCacheHaloOnlineBase cache, GameCacheGen2 gen2Cache) : base(false, "PortTag", "", "", "")
         {
@@ -41,7 +43,8 @@ namespace TagTool.Commands.Porting.Gen2
                 using (var gen2CacheStream = Gen2Cache.OpenCacheRead())
                 {
                     foreach (var gen2Tag in ParseLegacyTag(args.Last()))
-                        ConvertTag(cacheStream, gen2CacheStream, resourceStreams, gen2Tag);
+                        if (gen2Tag.Group.Tag == "shad") ConvertTagInternal(cacheStream, gen2CacheStream, resourceStreams, gen2Tag);
+                        else ConvertTag(cacheStream, gen2CacheStream, resourceStreams, gen2Tag);
                 }
             }
             finally
@@ -72,7 +75,10 @@ namespace TagTool.Commands.Porting.Gen2
             object definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
             definition = ConvertData(cacheStream, gen2CacheStream, resourceStreams, definition, definition, gen2Tag.Name);
 
-            var tag = Cache.TagCache.AllocateTag(definition.GetType(), gen2Tag.Name);
+            TagTool.Cache.CachedTag tag;
+
+            if (gen2Tag.Group.Tag == "shad") tag = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("rmsh"), gen2Tag.Name);
+            else tag = Cache.TagCache.AllocateTag(definition.GetType(), gen2Tag.Name);
 
             switch (definition)
             {
@@ -90,6 +96,9 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
                 case RenderModelGen2 renderModel:
                     definition = ConvertRenderModel(tag, renderModel);
+                    break;
+                case ShaderGen2 shader:
+                    definition = ConvertShader(tag, shader, cacheStream, shader_template);
                     break;
                 default:
                     Console.WriteLine($"Porting tag group '{gen2Tag.Group}' not yet supported!");
@@ -117,8 +126,8 @@ namespace TagTool.Commands.Porting.Gen2
                     return data;
                 case CachedTag tag:
                     return null;
-                    //FOR NOW, RETURN NULL INSTEAD OF PORTING DEPS, AS TAG SUPPORT IS LIMITED
-                    //return ConvertTag(cacheStream, gen2CacheStream, resourceStreams, tag);
+                //FOR NOW, RETURN NULL INSTEAD OF PORTING DEPS, AS TAG SUPPORT IS LIMITED
+                //return ConvertTag(cacheStream, gen2CacheStream, resourceStreams, tag);
                 case Array _:
                 case IList _: // All arrays and List<T> implement IList, so we should just use that
                     data = ConvertCollection(cacheStream, gen2CacheStream, resourceStreams, data as IList, definition, blamTagName);
@@ -166,6 +175,7 @@ namespace TagTool.Commands.Porting.Gen2
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), Gen2Cache.Version, Gen2Cache.Platform))
             {
                 var attr = tagFieldInfo.Attribute;
+
                 if (!CacheVersionDetection.TestAttribute(attr, Gen2Cache.Version, Gen2Cache.Platform))
                     continue;
 
@@ -177,6 +187,17 @@ namespace TagTool.Commands.Porting.Gen2
                 var oldValue = tagFieldInfo.GetValue(data);
                 if (oldValue is null)
                     continue;
+
+                // Grab name of shader template
+                if (oldValue.GetType() == typeof(TagTool.Cache.Gen2.CachedTagGen2))
+                {
+                    TagTool.Cache.Gen2.CachedTagGen2 tag = oldValue as TagTool.Cache.Gen2.CachedTagGen2;
+                    if (tag.Group.ToString().Equals("stem"))
+                    {
+                        shader_template = tag.Name.ToString();
+                        shader_template = shader_template.Split('\\').Last();
+                    }
+                }
 
                 // convert the field
                 var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
@@ -226,6 +247,15 @@ namespace TagTool.Commands.Porting.Gen2
             // find the CacheFile.IndexItem(s)
             if (tagName == "*") result = Gen2Cache.TagCache.TagTable.ToList().FindAll(
                 item => item != null && item.IsInGroup(groupTag));
+
+            // Only execute if attempting to port a shader from halo 2
+            else if (groupTag == "rmsh" && this is TagTool.Commands.Porting.Gen2.PortTagGen2Command)
+            {
+                groupTag = "shad";
+                result.Add(Gen2Cache.TagCache.TagTable.ToList().Find(
+                item => item != null && item.IsInGroup(groupTag) && tagName == item.Name));
+            }
+
             else result.Add(Gen2Cache.TagCache.TagTable.ToList().Find(
                 item => item != null && item.IsInGroup(groupTag) && tagName == item.Name));
 

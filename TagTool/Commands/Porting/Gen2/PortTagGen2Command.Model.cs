@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System;
 using TagTool.Cache;
-using TagTool.Commands.Common;
-using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;
 
