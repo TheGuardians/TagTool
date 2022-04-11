@@ -800,7 +800,7 @@ namespace TagTool.Cache
             catch(ArgumentException e)
             {
                 Console.WriteLine(e.Message);
-                new TagToolError(CommandError.CustomError, "Failed to parse version number, setting it to default");
+                new TagToolError(CommandError.CustomError, "Failed to parse version number, using default (1.0)");
                 Metadata.VersionMajor = 1;
                 Metadata.VersionMinor = 0;
             }
