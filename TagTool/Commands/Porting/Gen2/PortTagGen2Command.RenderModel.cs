@@ -340,18 +340,6 @@ namespace TagTool.Commands.Porting.Gen2
                                             new[] { 1.0f, 0.0f, 0.0f, 0.0f } :
                                             vertex.Point.NodeWeights
                                     };
-
-                                    if(mesh.NodeMap.Count > 0)
-                                    {
-                                        newskinned.BlendIndices = new byte[]
-                                        {
-                                            section.OpaqueMaxNodesVertex > 0 ? mesh.NodeMap[newskinned.BlendIndices[0]].NodeIndex : (byte)0,
-                                            section.OpaqueMaxNodesVertex > 1 ? mesh.NodeMap[newskinned.BlendIndices[1]].NodeIndex : (byte)0,
-                                            section.OpaqueMaxNodesVertex > 2 ? mesh.NodeMap[newskinned.BlendIndices[2]].NodeIndex : (byte)0,
-                                            section.OpaqueMaxNodesVertex > 3 ? mesh.NodeMap[newskinned.BlendIndices[3]].NodeIndex : (byte)0,
-                                        };
-                                    }
-
                                     skinnedVertices.Add(newskinned);
                                     break;
                                     
