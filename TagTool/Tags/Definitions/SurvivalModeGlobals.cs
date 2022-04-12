@@ -5,14 +5,15 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-	[TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x4C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-	[TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x48, MinVersion = CacheVersion.HaloOnlineED)]
+    [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x4C, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x64, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x48, MinVersion = CacheVersion.HaloOnlineED)]
     public class SurvivalModeGlobals : TagStructure
-	{
+    {
         public uint Unknown;
-        public CachedTag InGameStrings;
-        public CachedTag TimerSound;
-        public CachedTag TimerSoundZero;
+        [TagField(ValidTags = new [] { "unic" })] public CachedTag SurvivalModeStrings;
+        [TagField(ValidTags = new [] { "snd!" })] public CachedTag CountdownSound;
+        [TagField(ValidTags = new [] { "snd!" })] public CachedTag RespawnSound;
         public List<SurvivalEvent> SurvivalEvents;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]

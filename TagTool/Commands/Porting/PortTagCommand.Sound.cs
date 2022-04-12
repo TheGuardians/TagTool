@@ -563,7 +563,7 @@ namespace TagTool.Commands.Porting
         private SoundMix ConvertSoundMix(SoundMix soundMix)
         {
             if (BlamCache.Version == CacheVersion.Halo3Retail)
-                soundMix.GlobalMix.Unknown = 0;
+                soundMix.GlobalMix.QuadRouteToLfeGain = 0;
 
             return soundMix;
         }

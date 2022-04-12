@@ -78,17 +78,12 @@ namespace TagTool.Ai
         public Bounds<float> VaultStep; // wus
         public Bounds<float> VaultCrouch; // wus
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float SearchRangeInfantry; // 30
+        // Pathfinding Search Ranges
+        // The maximum ranges to whcih firing point evaluations will do pathfinding searches.
+        // Increasing these will almost certainly have a negative impact on performance
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float SearchRangeFlying; // 40
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float SearchRangeVehicle; // 40
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float SearchRangeGiant; // 200
+        public PathfindingSearchRangeStruct PathfindingSearchRanges;
 
         [TagField(Flags = TagFieldFlags.Padding, Length = 48, MaxVersion = CacheVersion.Halo3Retail)]
         public byte[] Padding7;
@@ -136,34 +131,15 @@ namespace TagTool.Ai
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<UnknownBlock1> UnknownBlock;
 
+        // Clump Throttling: helps you control how much guys will throttle when they want to stick with their squad
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown11;
+        public ClumpThrottlingStruct ClumpThrottling;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown12;
+        public SquadPatrollingStruct SquadPatrolling;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown13;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown14;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown15;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown16;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown17;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown18;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown19;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown20;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown21;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown22;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown23;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float Unknown24;
+        public float KungFuDeactivationDelay;   // control how the kungfu circle works
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public short Unknown25;
@@ -325,6 +301,37 @@ namespace TagTool.Ai
             public float Unknown5;
             public float Unknown6;
             public float Unknown7;
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class PathfindingSearchRangeStruct : TagStructure
+        {
+            public float Infantry; // 30
+            public float Flying; // 40
+            public float Vehicle; // 40
+            public float Giant; // 200
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class ClumpThrottlingStruct : TagStructure
+        {
+            public float StopDistance;
+            public float ResumeDistance;
+            public Bounds<float> DistanceBounds; // world units
+            public float MinimumScale;   // 0-1
+        }
+
+        [TagStructure(Size = 0x20)]
+        public class SquadPatrollingStruct : TagStructure
+        {
+
+            public float PassthroughChance;
+            public float SearchPhaseSkipChance;
+            public float PatrolTransitionTimeout;
+            public float PatrolManeuverTImeout;
+            public Bounds<float> PatrolSearchFiringPointTime;
+            public float PatrolIsolationDistance;
+            public float PatrolIsolationTime;
         }
     }
 }

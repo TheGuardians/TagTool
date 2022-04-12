@@ -16,7 +16,7 @@ namespace TagTool.Tags.Definitions
         public float CoverCurseChance;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float FaceFriendlyPlayerDistance;
+        public float PlayerVocalizationStaminaThreshold;
 
         public List<VocalizationDefinition> Vocalizations;
 

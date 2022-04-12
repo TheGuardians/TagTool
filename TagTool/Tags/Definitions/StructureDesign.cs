@@ -41,8 +41,8 @@ namespace TagTool.Tags.Definitions
         public List<TagHkpMoppCode> RainBlockerMoppCodeBlock;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        public uint Unknown2;
-        
+        public float PdaZPlaneMin; // meters
+
         public enum SoftCeilingType : short
         {
             Acceleration,

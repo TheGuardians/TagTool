@@ -14,10 +14,10 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "model", Tag = "hlmt", Size = 0x220, MinVersion = CacheVersion.HaloReach)]
     public partial class Model : TagStructure
 	{
-        public CachedTag RenderModel;
-        public CachedTag CollisionModel;
-        public CachedTag Animation;
-        public CachedTag PhysicsModel;
+        [TagField(ValidTags = new[] { "mode" })] public CachedTag RenderModel;
+        [TagField(ValidTags = new[] { "coll" })] public CachedTag CollisionModel;
+        [TagField(ValidTags = new[] { "jmad" })] public CachedTag Animation;
+        [TagField(ValidTags = new[] { "phmo" })] public CachedTag PhysicsModel;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public CachedTag ImpostorModel;
@@ -29,7 +29,7 @@ namespace TagTool.Tags.Definitions
         public float DisappearDistance;
         public float BeginFadeDistance;
         public float AnimationDistance;
-        public float ShadowFadeDistance;
+        public float ShadowFadeDistance; // (ReduceToL1) world units
         public float InstanceDisappearDistance;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -50,9 +50,12 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag LodModel;
+
         public List<Variant> Variants;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<RegionName> RegionSort;
+
         public List<InstanceGroup> InstanceGroups;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -66,9 +69,11 @@ namespace TagTool.Tags.Definitions
         //Halo Reach preserves an old H3/ODST style targets block here, but we will ignore it in favor of unifying the blocks between versions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<Target> ReachTargetsOld;
+
         public List<Target> Targets;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownTarget> UnknownTargets;
+        public List<GrenadeTarget> GrenadeTargets;
         
         public List<CollisionRegion> CollisionRegions;
         public List<Node> Nodes;
@@ -77,8 +82,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<ModelObjectDatum> ModelObjectData;
 
-        public CachedTag PrimaryDialogue;       
-        public CachedTag SecondaryDialogue;
+        [TagField(ValidTags = new[] { "udlg" })] public CachedTag PrimaryDialogue;
+        [TagField(ValidTags = new[] { "udlg" })] public CachedTag SecondaryDialogue;
+
         public FlagsValue Flags;
         public StringId DefaultDialogueEffect;
 
@@ -106,7 +112,7 @@ namespace TagTool.Tags.Definitions
 
         public PRTShadowDetail ShadowDetail;
         public PRTShadowBounces ShadowBounces;
-        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        [TagField(Flags = Padding, Length = 2)]
         public byte[] Pad = new byte[2];
       
         public List<ShadowCastOverride> ShadowCastOverrides;
@@ -159,23 +165,17 @@ namespace TagTool.Tags.Definitions
 		{
             public StringId Name;
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public CachedTag VariantDialogue;
+            [TagField(ValidTags = new[] { "udlg" }, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            public CachedTag Voice; // The dialogue tag for this model variant
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public StringId DefaultDialogEffect;
+            public StringId DialogueEffect;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown;
+            public OdstReconVariantEnum AiCharacter;
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown2;
-
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown3;
-
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public sbyte Unknown4;
+            [TagField(Length = 0x3, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Padding0;
 
             [TagField(MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
             public StringId SkinName;
@@ -187,9 +187,9 @@ namespace TagTool.Tags.Definitions
             public List<Object> Objects;
 
             public int InstanceGroupIndex;
-            
-            public uint Unknown6;
-            public uint Unknown7;
+
+            [TagField(Length = 0x8, Flags = Padding)]
+            public byte[] Padding1;
 
             [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
             public class Region : TagStructure
@@ -213,7 +213,7 @@ namespace TagTool.Tags.Definitions
 
                     public FlagsValue Flags;
 
-                    [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+                    [TagField(Flags = Padding, Length = 2)]
                     public byte[] Pad = new byte[2];
 
                     public float Probability;
@@ -299,8 +299,20 @@ namespace TagTool.Tags.Definitions
                 public short DamageSection;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public byte EnablePhysics;
-                [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 1)]
+                [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 1)]
                 public byte[] Pad;
+            }
+
+            public enum OdstReconVariantEnum : sbyte
+            {
+                None,
+                Rookie,
+                Buck,
+                Dare,
+                Dutch,
+                Johnson,
+                Mickey,
+                Romeo
             }
         }
 
@@ -328,9 +340,9 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
             public class InstanceMember : TagStructure
 			{
-                public int SubgroupIndex;
-                public StringId InstanceName;
-                public float Probability;
+                public int SubgroupIndex; // if this member is chosen, this subgroup will be chosen as well
+                public StringId InstanceName; // instance name, a partial name will choose all matching instances, leave blank for NONE
+                public float Probability; // higher numbers make it more likely (> 0.0)
 
                 public int InstancePlacementMask1;
                 public int InstancePlacementMask2;
@@ -350,13 +362,13 @@ namespace TagTool.Tags.Definitions
             public short DamageSectionIndex;
             public short RuntimeCollisionMaterialIndex;
             public short RuntimeDamagerMaterialIndex;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId MaterialName;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public short GlobalMaterialIndex;
 
             [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused = new byte[2];
+            public byte[] Padding0 = new byte[2];
 
             public enum MaterialTypeValue : short
             {
@@ -402,7 +414,7 @@ namespace TagTool.Tags.Definitions
             public FlagsValue Flags;
             public float MaxVitality;
 
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId GlobalIndirectMaterialName;
             public short IndirectDamageSection;
             public short ShieldedStateDamageSection;
@@ -410,16 +422,16 @@ namespace TagTool.Tags.Definitions
             public DamageReportingType CollisionDamageReportingType;
             public DamageReportingType ResponseDamageReportingType;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] pad0 = new byte[2];
 
             public List<OmahaDamageSection> DamageSections;
             public List<DamageConstraint> DamageConstraints;
             public List<Node> Nodes;
 
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public short RuntimeIndirectMaterialIndex;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] pad1 = new byte[2];
 
             [TagStructure(Size = 0x10)]
@@ -457,7 +469,7 @@ namespace TagTool.Tags.Definitions
                 public StringId Name;
                 public FlagsValue Flags;
                 public float VitalityPercentage;
-                [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+                [TagField(Flags = GlobalMaterial)]
                 public StringId ShieldMaterialName;
 
                 public float StunTime;
@@ -486,7 +498,7 @@ namespace TagTool.Tags.Definitions
                 public float RuntimeRechargeVelocity;
                 public float RuntimeOverchargeVelocity;
                 public short RuntimeResurrectionRestoredRegionIndex;
-                [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+                [TagField(Flags = GlobalMaterial)]
                 public short RuntimeGlobalShieldMaterialType;
 
                 [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach)]
@@ -733,7 +745,7 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// Absorbes AOE or child damage
             /// </summary>
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId GlobalIndirectMaterialName;
 
             /// <summary>
@@ -762,7 +774,7 @@ namespace TagTool.Tags.Definitions
             public byte[] Unused6 = new byte[64];
 
             public float MaxShieldVitality;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId GlobalShieldMaterialName;
             public float ShieldMinStunDamage;
             public float ShieldStunTime;
@@ -779,9 +791,9 @@ namespace TagTool.Tags.Definitions
             public CachedTag ShieldRechargingEffect;
             public List<DamageSection> DamageSections;
             public List<Node> Nodes;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public short GlobalShieldMaterialIndex;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public short GlobalIndirectMaterialIndex;
             public float RuntimeShieldRechargeVelocity;
 
@@ -1079,7 +1091,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public ByteFlags Flags;
-            [TagField(MinVersion = CacheVersion.HaloOnlineED, Flags = TagFieldFlags.Padding, Length = 3)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, Flags = Padding, Length = 3)]
             public byte[] pad = new byte[3];
 
             public StringId MarkerName;
@@ -1148,7 +1160,7 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public sbyte CollisionRegionIndex;
             public sbyte PhysicsRegionIndex;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2)]
             public byte[] Pad1 = new byte[2];
             public List<Permutation> Permutations;
 
@@ -1159,7 +1171,7 @@ namespace TagTool.Tags.Definitions
                 public FlagsValue Flags;
                 public sbyte CollisionPermutationIndex;
                 public sbyte PhysicsPermutationIndex;
-                [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+                [TagField(Flags = Padding, Length = 1)]
                 public byte[] Pad = new byte[1];
 
                 [Flags]
@@ -1189,8 +1201,10 @@ namespace TagTool.Tags.Definitions
         public class ModelObjectDatum : TagStructure
 		{
             public TypeValue Type;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
+
+            [TagField(Length = 0x2, Flags = Padding)]
+            public byte[] Padding0;
+
             public RealPoint3d Offset;
             public float Radius;
 
@@ -1264,10 +1278,10 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x8)]
-        public class UnknownTarget : TagStructure
+        public class GrenadeTarget : TagStructure
 		{
-            public StringId MarkerName;
-            public float Unknown;
+            public StringId MarkerName; // 1 marker == sphere, 2 markers == pill, >2 markers == multi sphere
+            public float Size; // sphere or pill radius
         }
     }
 }

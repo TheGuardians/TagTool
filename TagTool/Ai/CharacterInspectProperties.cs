@@ -8,21 +8,12 @@ namespace TagTool.Ai
     [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST)]
     public class CharacterInspectProperties : TagStructure
 	{
-        /// <summary>
-        /// World Units; Distance from object at which to stop and turn on the inspection light.
-        /// </summary>
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float StopDistance;
+        public float StopDistance; // distance from object at which to stop and turn on the inspection light (wu)
 
-        /// <summary>
-        /// Seconds; The time which we should inspect each object for.
-        /// </summary>
-        public Bounds<float> InspectTime;
+        public Bounds<float> InspectTime; // time which we should inspect each object for (seconds)
 
-        /// <summary>
-        /// World Units; Range in which we should search for objects to inspect
-        /// </summary>
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public Bounds<float> SearchRange;
+        public Bounds<float> SearchRange; // range in which we should search for objects to inspect (wu)
     }
 }

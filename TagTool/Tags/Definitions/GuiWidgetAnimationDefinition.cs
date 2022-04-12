@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
         public WidgetAnimationFlags Flags;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public CachedTag Unknown;
+        public CachedTag ScreenEffect;
 
         public CachedTag ColorAnimation;
         public CachedTag PositionAnimation;

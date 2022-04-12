@@ -181,8 +181,10 @@ namespace TagTool.Tags.Definitions
         [TagField(Flags = Padding, Length = 16, MaxVersion = CacheVersion.Halo3ODST)]
         [TagField(Flags = Padding, Length = 16, MinVersion = CacheVersion.HaloReach)]
         public byte[] SharedInterface;
+
         public List<FirstPersonBlock> FirstPerson;
         public CachedTag HudInterface;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public CachedTag AlternateHudInterface;
 
@@ -225,9 +227,11 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> SupportThirdPersonCameraRange;  // degrees
         public float WeaponZoomTime; // seconds
         public float WeaponReadyForUseTime; // seconds
+
         // e.g. - 2.0 makes playspeed twice as fast
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        public float WeaponReadyFirstPersonAnimationPlaybackScale;
+        public float WeaponReadyFirstPersonAnimationPlaybackScale;  // TargetObstructedMaxDistance?
+
         public StringId UnitStowAnchorName;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
