@@ -35,42 +35,40 @@ namespace TagTool.Commands.Porting.Gen2
                 "0"
             };
 
-            // Default order for bitmaps referenced in shader
-            var h2_bitmap_order = new List<string>
-            {
-                "bump_map",
-                "alpha_test_map",
-                "base_map",
-                "detail_map",
-                "",
-                "",
-                "",
+            // Declare string lists that contain the order and contents for each of these tagblocks
+            var h2_bitmap_order = new List<string> {
+                "\0",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
                 "\0"
             };
-
-            // Default order for pixel constants
-            var h2_pixel_constants = new List<string>
-            {
-                "normal_specular_tint",
-                "glancing_specular_tint",
-                "",
-                "",
-                "",
-                "",
-                "",
+            var h2_pixel_constants = new List<string> {
+                "\0",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
                 "\0"
             };
-
-            // Default order for vertex constants
             var h2_vertex_constants = new List<string>
             {
-                "bump_map",
-                "base_map",
-                "detail_map",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
+                "\0",
                 "\0"
             };
 
-            // Setup different layouts for fields depending on the h2 template used
+            // Change the contents of lists depending on the h2 template used
             switch (shader_template)
             {
                 case "tex_bump":
@@ -83,13 +81,47 @@ namespace TagTool.Commands.Porting.Gen2
                     args[5] = "2";
                     args[6] = "1";
 
+                    if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                    {
+                        h2_vertex_constants[0] = "bump_map";
+                        h2_vertex_constants[1] = "base_map";
+                        h2_vertex_constants[2] = "detail_map";
+                        h2_vertex_constants[3] = "\0";
+                    }
+                    else
+                    {
+                        h2_vertex_constants[0] = "detail_map";
+                        h2_vertex_constants[1] = "base_map";
+                        h2_vertex_constants[2] = "bump_map";
+                        h2_vertex_constants[3] = "\0";
+                    }
+
+                    if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                    {
+                        h2_pixel_constants[0] = "normal_specular_tint";
+                        h2_pixel_constants[1] = "glancing_specular_tint";
+                        h2_pixel_constants[2] = "environment_map_specular_contribution";
+                        h2_pixel_constants[3] = "";                     // Env Glancing Tint Brightness dosent exist in h3
+                        h2_pixel_constants[4] = "env_tint_color";
+                        h2_pixel_constants[5] = "\0";                   // Env Glancing Tint Colour dosent exist in h3
+                    }
+                    else
+                    {
+                        h2_pixel_constants[0] = "";                     // Blank value
+                        h2_pixel_constants[1] = "normal_specular_tint";
+                        h2_pixel_constants[2] = "glancing_specular_tint";
+                        h2_pixel_constants[3] = "environment_map_specular_contribution";
+                        h2_pixel_constants[4] = "";                     // Env Glancing Tint Brightness dosent exist in h3
+                        h2_pixel_constants[5] = "env_tint_color";
+                        h2_pixel_constants[6] = "\0";                   // Env Glancing Tint Colour dosent exist in h3
+                    }
+
+                    h2_bitmap_order[0] = "bump_map";
+                    h2_bitmap_order[1] = "alpha_test_map";
+                    h2_bitmap_order[2] = "base_map";
+                    h2_bitmap_order[3] = "detail_map";
                     h2_bitmap_order[4] = "environment_map";
-
-                    h2_pixel_constants[2] = "environment_map_specular_contribution";
-                    h2_pixel_constants[3] = "";                     // Env Glancing Tint Brightness dosent exist in h3
-                    h2_pixel_constants[4] = "env_tint_color";
-                    h2_pixel_constants[5] = "\0";                   // Env Glancing Tint Colour dosent exist in h3
-
+                    h2_bitmap_order[5] = "\0";
                     break;
                 default:
                     break;
@@ -197,12 +229,37 @@ namespace TagTool.Commands.Porting.Gen2
                     if (h2_pixel_constants[i] == current_type)
                     {
                         found = true;
+                        float r = -1, g = -1, b = -1, a = -1;
+
+                        // Convert values in h2 pixel constant block to the layout and values it expects in h3
+                        // (For numeric values in shader)
+                        // Set (rgba) to value of (a) in h3 shader if only (a) has a value and (rgb) dosent in h2
+                        if
+                        (h2pixel_constant[i].Color.Red == 0 && h2pixel_constant[i].Color.Green == 0 && h2pixel_constant[i].Color.Blue == 0 && h2pixel_constant[i].Color.Alpha > 0)
+                        {
+                            r = (float)h2pixel_constant[i].Color.Alpha / (float)255;
+                            g = (float)h2pixel_constant[i].Color.Alpha / (float)255;
+                            b = (float)h2pixel_constant[i].Color.Alpha / (float)255;
+                            a = (float)h2pixel_constant[i].Color.Alpha / (float)255;
+                        }
+
+                        // (For colours in shader)
+                        // Set (a) to value of 1 if any (rgb) values are above 0 and (a) is 0
+                        else if
+                        (h2pixel_constant[i].Color.Red > 0 || h2pixel_constant[i].Color.Green > 0 || h2pixel_constant[i].Color.Blue > 0 && h2pixel_constant[i].Color.Alpha == 0)
+                        {
+                            r = (float)h2pixel_constant[i].Color.Red / (float)255;
+                            g = (float)h2pixel_constant[i].Color.Green / (float)255;
+                            b = (float)h2pixel_constant[i].Color.Blue / (float)255;
+                            a = 1;
+                        }
+
                         Shader.RenderMethodPostprocessBlock.RealConstant newfloatconstant = new Shader.RenderMethodPostprocessBlock.RealConstant
                         {
-                            Arg0 = h2pixel_constant[i].Color.Red / 255,
-                            Arg1 = h2pixel_constant[i].Color.Green / 255,
-                            Arg2 = h2pixel_constant[i].Color.Blue / 255,
-                            Arg3 = h2pixel_constant[i].Color.Alpha / 255
+                            Arg0 = r,
+                            Arg1 = g,
+                            Arg2 = b,
+                            Arg3 = a
                         };
                         newPostprocessBlock.RealConstants.Add(newfloatconstant);
                     }
@@ -230,7 +287,7 @@ namespace TagTool.Commands.Porting.Gen2
                 }
 
                 // Set all to 0 if no matches are found
-                if (found == false) 
+                if (found == false)
                 {
                     Shader.RenderMethodPostprocessBlock.RealConstant newfloatconstant = new Shader.RenderMethodPostprocessBlock.RealConstant
                     {
