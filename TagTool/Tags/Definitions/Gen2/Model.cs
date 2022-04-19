@@ -56,8 +56,8 @@ namespace TagTool.Tags.Definitions.Gen2
         public List<ModelMaterialBlock> Materials;
         public List<GlobalDamageInfoBlock> NewDamageInfo;
         public List<ModelTargetBlock> Targets;
-        public List<ModelRegionBlock> Unknown1;
-        public List<ModelNodeBlock> Unknown2;
+        public List<ModelRegionBlock> CollisionRegions;
+        public List<ModelNodeBlock> Nodes;
         [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
         public byte[] Padding2;
         public List<ModelObjectDataBlock> ModelObjectData;
@@ -73,10 +73,10 @@ namespace TagTool.Tags.Definitions.Gen2
         /// The default dialogue tag for this model (overriden by variants)
         /// </summary>
         public StringId DefaultDialogueEffect;
-        [TagField(Length = 32)]
-        public sbyte[] Unknown3;
-        [TagField(Length = 32)]
-        public sbyte[] Unknown4;
+        [TagField(Length = 8)]
+        public int[] RenderOnlyNodeFlags;
+        [TagField(Length = 8)]
+        public int[] RenderOnlySectionFlags;
         public RuntimeFlagsValue RuntimeFlags;
         public List<GlobalScenarioLoadParametersBlock> ScenarioLoadParameters;
         /// <summary>
@@ -766,11 +766,8 @@ namespace TagTool.Tags.Definitions.Gen2
             public byte[] Padding;
             public RealPoint3d DefaultTranslation;
             public RealQuaternion DefaultRotation;
-            public float DefaultInverseScale;
-            public RealVector3d DefaultInverseForward;
-            public RealVector3d DefaultInverseLeft;
-            public RealVector3d DefaultInverseUp;
-            public RealPoint3d DefaultInversePosition;
+            public float DefaultScale;
+            public RealMatrix4x3 Inverse;
         }
         
         [TagStructure(Size = 0x14)]

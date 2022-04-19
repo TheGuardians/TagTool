@@ -17,7 +17,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
 	{
-        public RenderModel ConvertRenderModel(CachedTag tag, RenderModelGen2 gen2RenderModel)
+        public RenderModel ConvertRenderModel(RenderModelGen2 gen2RenderModel)
         {
             foreach (var section in gen2RenderModel.Sections)
             {
