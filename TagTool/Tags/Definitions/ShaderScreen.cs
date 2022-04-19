@@ -1,3 +1,4 @@
+using System;
 using TagTool.Cache;
 using TagTool.Common;
 using static TagTool.Tags.TagFieldFlags;
@@ -9,11 +10,24 @@ namespace TagTool.Tags.Definitions
     {
         [TagField(Flags = TagFieldFlags.GlobalMaterial)]
         public StringId Material;
-        public byte Layer;
+        public GlobalScreenShaderRenderLayerEnum RenderLayer;
         public byte SortingOrder;
-        public byte Flags;
+        public GlobalScreenShaderFlagsDefinition ScreenRenderFlags;
 
         [TagField(Flags = TagFieldFlags.Padding, Length = 0x1)]
         public byte[] Padding;
+
+
+        public enum GlobalScreenShaderRenderLayerEnum : sbyte
+        {
+            PreUi,
+            PostUi
+        }
+
+        [Flags]
+        public enum GlobalScreenShaderFlagsDefinition : byte
+        {
+            ResolveScreen = 1 << 0
+        }
     }
 }
