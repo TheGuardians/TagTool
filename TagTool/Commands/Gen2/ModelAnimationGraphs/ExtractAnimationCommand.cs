@@ -55,6 +55,18 @@ namespace TagTool.Commands.Gen2.ModelAnimationGraphs
 
             List<Node> renderModelNodes = GetNodeDefaultValues();
 
+            //fixup for h2x, get raw resource data and place it in the animation blocks
+            if (CacheContext.Version < CacheVersion.Halo2Vista)
+                foreach (var animationindex in AnimationIndices)
+                {
+                    ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationPoolBlock animationblock = Animation.Resources.AnimationsAbcdcc[animationindex];
+                    GameCacheGen2 gen2Cache = (GameCacheGen2)CacheContext;
+                    byte[] rawdata = gen2Cache.GetCacheRawData(Animation.AnimationData[animationblock.ResourceIndex].RawDataOffset, Animation.AnimationData[animationblock.ResourceIndex].DataSize);
+                    int total_animation_data_size = animationblock.DataSizes.CompressedDataSize + animationblock.DataSizes.UncompressedDataSize + animationblock.DataSizes.StaticDataSize + animationblock.DataSizes.StaticNodeFlags + animationblock.DataSizes.AnimatedNodeFlags + animationblock.DataSizes.MovementData + animationblock.DataSizes.PillOffsetData;
+                    animationblock.AnimationData = new byte[total_animation_data_size];
+                    Buffer.BlockCopy(rawdata, animationblock.ResourceBlockOffset, animationblock.AnimationData, 0, total_animation_data_size);
+                };
+
             foreach (var animationindex in AnimationIndices)
             {
                 ModelAnimationGraph.AnimationGraphResourcesStructBlock.AnimationPoolBlock animationblock = Animation.Resources.AnimationsAbcdcc[animationindex];

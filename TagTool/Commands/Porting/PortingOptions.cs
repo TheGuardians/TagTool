@@ -15,17 +15,11 @@ namespace TagTool.Commands.Porting
         [Description("Path to reach lightmap cache directory")]
         public string ReachLightmapCache = null;
 
-        [Description("Enable experimental super node conversion")]
-        public bool ReachSuperNodeConversion = false;
-
         [Description("Enable reach decorator porting (WIP)")]
         public bool ReachDecorators = false;
 
-        [Description("Enable experimental collision leaf mapping")]
-        public bool CollisionLeafMapping = false;
-
-        [Description("Enable experimental Gen3 collision BSP generator")]
-        public bool Gen3Collision = false;
+        [Description("Enable legacy Gen1 collision BSP generator")]
+        public bool Gen1Collision = false;
 
         public static PortingOptions Current = new PortingOptions();
     }

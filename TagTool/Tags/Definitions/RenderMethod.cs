@@ -161,7 +161,7 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(Platform = CachePlatform.MCC)]
                 public byte ComparisonFunction;
-                public sbyte ExternTextureMode;
+                public RenderMethodExternTextureMode ExternTextureMode;
                 public sbyte TextureTransformConstantIndex;
 
                 [TagField(Flags = Padding, Length = 0x1, Platform = CachePlatform.MCC)]
@@ -184,6 +184,17 @@ namespace TagTool.Tags.Definitions
                     LightprobeTextureArray,
                     ComparisonPoint,
                     ComparisonBilinear
+                }
+
+                public enum RenderMethodExternTextureMode : byte
+                {
+                    UseBitmapAsNormal,
+                    TextureCamera,
+                    ZCamera,
+                    Mirror,
+                    Refraction,
+                    Unused,
+                    Scope
                 }
 
                 [TagStructure(Size = 0x1)]

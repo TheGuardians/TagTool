@@ -1456,11 +1456,11 @@ namespace TagTool.Tags.Definitions
             public List<UnderwaterProxy> UnderwaterProxies;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown2;
+            public StringId FootstepsInRainMaterial;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public short Unknown3;
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public short Unknown4;
+            public short RuntimeRainMaterialIndex;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Padding;
 
             [TagStructure(Size = 0x28, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
@@ -1473,7 +1473,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float DragE;
 
-                [TagField(Length = 4, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(Length = 4, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
                 public byte[] Padding0;
 
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1487,7 +1487,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float SuperSinker;
 
-                [TagField(Length = 4, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(Length = 4, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
                 public byte[] Padding1;
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -1579,11 +1579,11 @@ namespace TagTool.Tags.Definitions
             public float EmpKillWindow; // time after taking a guys shields down with emp damage you have to get the emp kill bonus (seconds)
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Unknown3;
+            public float HijackKillWindowPeriod;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Unknown4;
+            public float SkyjackKillWindowPeriod;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown5;
+            public uint KillFromTheGraveRequiredPeriod;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public int FirstWeaponSpree;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]

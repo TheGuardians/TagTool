@@ -40,14 +40,14 @@ namespace TagTool.Tags.Definitions
             public float StereoUnspatializedGain; // dB
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown;
+            public float QuadRouteToLfeGain;
 
             public float SoloPlayerFadeOutDelay; // seconds
             public float SoloPlayerFadeOutTime; // seconds
             public float SoloPlayerFadeInTime; // seconds
             public float GameMusicFadeOutTime; // seconds
             public CachedTag PlayOnUnplayableSound;
-            public float LeftrightBleed; // [0 = no bleed, 1 = swap left/right, 0.5 = mono
+            public float LeftRightBleed; // [0 = no bleed, 1 = swap left/right, 0.5 = mono
             public float RemoteVoiceBoost; // output= (1 + boost)*input
 
             [TagStructure(Size = 0x8)]

@@ -24,10 +24,10 @@ namespace TagTool.Commands.Porting
                 };
                 foreach (var value in matg.AiGlobals)
                 {
-                    value.SearchRangeInfantry = 30;
-                    value.SearchRangeFlying = 40;
-                    value.SearchRangeVehicle = 40;
-                    value.SearchRangeGiant = 200;
+                    value.PathfindingSearchRanges.Infantry = 30;
+                    value.PathfindingSearchRanges.Flying = 40;
+                    value.PathfindingSearchRanges.Vehicle = 40;
+                    value.PathfindingSearchRanges.Giant = 200;
 
                     //Something may need to be done about squad and formation tags
 

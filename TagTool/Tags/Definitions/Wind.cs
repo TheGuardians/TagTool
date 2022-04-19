@@ -14,10 +14,10 @@ namespace TagTool.Tags.Definitions
         public TagFunction Oscillation = new TagFunction { Data = new byte[0] };
         public TagFunction Frequency = new TagFunction { Data = new byte[0] };
 
-        public float GustSize;
-        public CachedTag GustNoiseBitmap;
+        public float GustSize; // world units
+        [TagField(ValidTags = new[] { "bitm" })] public CachedTag GustNoiseBitmap;
 
         [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public byte[] Unused;
+        public byte[] PadHO;
     }
 }

@@ -434,7 +434,16 @@ namespace TagTool.Tags.Definitions
 					{
                         public CachedTag Template;
 
-                        public FlagsValue Flags;
+                        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                        public PhysicsFlags Flags;
+
+                        [TagField(MinVersion = CacheVersion.HaloReach)]
+                        public PhysicsFlagsReach FlagsReach;
+
+                        [TagField(MinVersion = CacheVersion.HaloReach)]
+                        public byte CollisionControllerIndex;
+                        [TagField(MinVersion = CacheVersion.HaloReach)]
+                        public byte TurbulenceControllerIndex;
 
                         public List<Movement> Movements;
 
@@ -442,7 +451,25 @@ namespace TagTool.Tags.Definitions
                         public CachedTag TurbulenceTexture;
 
                         [Flags]
-                        public enum FlagsValue : int
+                        public enum PhysicsFlags : int
+                        {
+                            None,
+                            Physics = 1 << 0,
+                            CollideWithStructure = 1 << 1,
+                            CollideWithWater = 1 << 2,
+                            CollideWithScenery = 1 << 3,
+                            CollideWithVehicles = 1 << 4,
+                            CollideWithBipeds = 1 << 5,
+                            AlwaysCollideEveryFrame = 1 << 6,
+                            Swarm = 1 << 7,
+                            Wind = 1 << 8,
+                            Turbulence = 1 << 9,
+                            GlobalForce = 1 << 10,
+                            DisableSwarmCollision = 1 << 11,
+                        }
+
+                        [Flags]
+                        public enum PhysicsFlagsReach : short
                         {
                             None,
                             Physics = 1 << 0,

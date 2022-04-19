@@ -165,7 +165,7 @@
     <Compile Include="Ai\CharacterBehaviorTreeRoot.cs" />
     <Compile Include="Ai\CharacterBoardingFlags.cs" />
     <Compile Include="Ai\CharacterBoardingProperties.cs" />
-    <Compile Include="Ai\CharacterBunkerProperties.cs" />
+    <Compile Include="Ai\CharacterKungfuProperties.cs" />
     <Compile Include="Ai\CharacterChangeDirectionPause.cs" />
     <Compile Include="Ai\CharacterChargeDifficultyLimit.cs" />
     <Compile Include="Ai\CharacterChargeFlags.cs" />

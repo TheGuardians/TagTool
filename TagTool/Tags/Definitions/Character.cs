@@ -40,7 +40,7 @@ namespace TagTool.Tags.Definitions
         public List<CharacterBoardingProperties> BoardingProperties;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<CharacterBunkerProperties> BunkerProperties;
+        public List<CharacterKungfuProperties> KungfuProperties;
 
         public List<CharacterGuardianProperties> GuardianProperties;       
         public List<CharacterCombatformProperties> CombatformProperties;

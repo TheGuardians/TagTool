@@ -168,13 +168,13 @@ namespace TagTool.Tags.Definitions
         public float MotionTrackerRangeModifier; //If the player is in a seat in this unit, modify the motion tracker range by this amount. (see base value in player globals)
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public Angle GrenadeAngle;
+        public Angle GrenadeAngle; // degrees
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public Angle GrenadeAngleMaxElevation;
+        public Angle GrenadeAngleMaxElevation; // degrees
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public Angle GrenadeAngleMinElevation;
+        public Angle GrenadeAngleMinElevation; // degrees
 
         public float GrenadeVelocity; // world units per second
         public GrenadeTypeValue GrenadeType; // short

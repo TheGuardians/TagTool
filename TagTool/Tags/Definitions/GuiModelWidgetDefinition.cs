@@ -15,7 +15,10 @@ namespace TagTool.Tags.Definitions
         public List<CameraSettingsBlock> CameraSettings;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ModelWidgetData ModelData;
+        public ModelWidgetGlobalsDefinition ModelWidgetGlobals;
+
+        [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        public List<ModelWidgetCameraSliceBlock> TextureCameraSlices;
 
         [Flags]
         public enum ModelWidgetFlags : int
@@ -23,20 +26,17 @@ namespace TagTool.Tags.Definitions
             DoNotApplyOldContentUpscaling = 1 << 0,
             OverrideTemplateFlags = 1 << 1,
             EnableAnimationDebugging = 1 << 2,
-            UNUSED = 1 << 3
+            AllowListItemToOverrideAnimationSkin = 1 << 3
         }
 
-        [TagStructure(Size = 0x4C, MinVersion = CacheVersion.Halo3ODST)]
-        public class ModelWidgetData : TagStructure
+        [TagStructure(Size = 0x40, MinVersion = CacheVersion.Halo3ODST)]
+        public class ModelWidgetGlobalsDefinition : TagStructure
         {
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-            public float FOV;
-            public uint Unknown10;
-            public List<ZoomFunctionBlock> ZoomFunction;
+            public RealArgbColor TronShaderColor;
+            public float TronShaderIntensity;
+            public float FOV; // degrees
+            public float ZoomSpeed; // wu per tick
+            public List<KeyframeTransitionFunctionBlock> ZoomTransitionFunction;
             public GamepadButtonDefinition MovementLeft;
             public GamepadButtonDefinition MovementRight;
             public GamepadButtonDefinition MovementUp;
@@ -47,23 +47,8 @@ namespace TagTool.Tags.Definitions
             public GamepadButtonDefinition ZoomOut;
             public GamepadButtonDefinition RotateLeft;
             public GamepadButtonDefinition RotateRight;
-            public GamepadButtonDefinition Unknown22;
-            public GamepadButtonDefinition Unknown23;
-            public List<TexCamBlock> TextureCameraSections;
-
-            [TagStructure(Size = 0x14)]
-            public class TexCamBlock : TagStructure
-            {
-                public StringId Name;
-                public Bounds<float> BoundsX;
-                public Bounds<float> BoundsY;
-            }
-
-            [TagStructure(Size = 0x14)]
-            public class ZoomFunctionBlock : TagStructure
-            {
-                public TagFunction Function;
-            }
+            public GamepadButtonDefinition RotateUp;
+            public GamepadButtonDefinition RotateDown;
         }
 
         [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.Halo3Retail)]
@@ -71,56 +56,69 @@ namespace TagTool.Tags.Definitions
         public class CameraSettingsBlock : TagStructure
 		{
             public StringId Name;
+
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public float Fov;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public float InitialRadialOffset;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public float FinalRadialOffset;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public float CameraRadialStepSize;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public float InitialVerticalOffset;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public float FinalVerticalOffset;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public float CameraVerticalStepSize;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
             public float CameraRotationalStep;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float BaseOffsetNew;
+            public RealPoint3d ModelWorldPosition; // arbitrary location in the world to place the model (wu)
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown10;
+            public RealPoint3d MinimumWorldPosition;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown13;
+            public RealPoint3d MaximumWorldPosition;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown16;
+            public RealPoint3d MinimumCameraOffset; // wu
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown19;
+            public RealPoint3d MinimumCameraFocalOffset; // wu
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown22;
+            public RealPoint3d MaximumCameraOffset; // wu
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public RealPoint3d MaximumCameraFocalOffset; // wu
 
-            public List<ZoomData> RadialTransitionFxn;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float InitialZoom; // [0,1]
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float MovementSpeed;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float MagnetismConstant;
+
+            public List<KeyframeTransitionFunctionBlock> RadialTransitionFxn; // MovementScaleFxn?
+
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public List<ZoomData> VerticalTransitionFxn;
+            public List<KeyframeTransitionFunctionBlock> VerticalTransitionFxn;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown26;
+            public RealEulerAngles2d InitialRotation; // degrees
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown27;
+            public RealEulerAngles2d MinimumRotation; // degrees
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public Angle Unknown28;
+            public RealEulerAngles2d MaximumRotation; // degrees
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown29;
+            public float RotationSpeed;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, ValidTags = new[] { "obje", "scen" })]
+            public CachedTag Model;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public Angle Unknown30;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown31;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown32;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTag Unknown33;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown34;
+            public StringId Variant;
+        }
 
-            [TagStructure(Size = 0x14)]
-            public class ZoomData : TagStructure
-			{
-                public TagFunction Unknown;
-            }
+        [TagStructure(Size = 0x14)]
+        public class KeyframeTransitionFunctionBlock : TagStructure
+        {
+            public TagFunction CustomFunction;
         }
 
         [TagStructure(Size = 0x14)]
@@ -164,6 +162,16 @@ namespace TagTool.Tags.Definitions
             RightStickUp,
             RightStickDown,
             Unknown
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class ModelWidgetCameraSliceBlock : TagStructure
+        {
+            public StringId Name; // use empty name for default
+            public float Left;
+            public float Right;
+            public float Top;
+            public float Bottom;
         }
     }
 }

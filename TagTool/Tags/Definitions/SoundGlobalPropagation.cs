@@ -7,9 +7,9 @@ namespace TagTool.Tags.Definitions
 	{
         public CachedTag UnderwaterEnvironment;
         public CachedTag UnderwaterLoop;
-        public uint Unknown;
-        public uint Unknown2;
-        public CachedTag EnterUnderater;
-        public CachedTag ExitUnderwater;
+        public float BackgroundSoundGain; // scale for fog background sound (dB)
+        public float EnvironmentDuckingAmount; // scales the surrounding background sound by this much (dB)
+        public CachedTag EnterWaterSound;
+        public CachedTag ExitWaterSound;
     }
 }

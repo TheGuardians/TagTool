@@ -14,14 +14,25 @@ namespace TagTool.Tags.Definitions
         public float DepoweredPositionTransitionTime;
         public float DepoweredPositionAccelerationTime;
         public LightmapFlagBits LightmapFlags;
+
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag OpenUp;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag CloseDown;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag Opened;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag Closed;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag Depowered;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag Repowered;
+
         public float DelayTime;
+
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag DelayEffect;
+
         public float AutomaticActivationRadius;
 
         [Flags]

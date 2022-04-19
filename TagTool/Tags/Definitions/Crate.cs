@@ -7,14 +7,13 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "crate", Tag = "bloc", Size = 0x14)]
     public class Crate : GameObject
     {
-        public CrateFlagsValue Flags2;
+        public CrateFlagsValue CrateFlags;
+
         [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
         public byte[] Pad = new byte[2];
+
         public List<CharacterMetagameProperties> MetagameProperties;
-        public sbyte Unknown7;
-        public sbyte Unknown8;
-        public sbyte Unknown9;
-        public sbyte Unknown10;
+        public int SelfDestructionTimer; // seconds
 
         [Flags]
         public enum CrateFlagsValue : ushort

@@ -29,13 +29,9 @@ namespace TagTool.Commands.Common
             if (commandLine == null)
                 return null;
 
-            // Allow inline comments
+            // Allow inline comments beginning with "//"
 
-            var poundIndex = commandLine.IndexOf('#');
-            if (poundIndex > 0 && char.IsWhiteSpace(commandLine[poundIndex - 1]))
-                commandLine = commandLine.Split('#')[0];
-            else
-                commandLine = commandLine.Split(new[] {"//"}, StringSplitOptions.None)[0];
+            commandLine = commandLine.Split(new[] {"//"}, StringSplitOptions.None)[0];
 
             return commandLine;
         }

@@ -19,8 +19,11 @@ namespace TagTool.Tags.Definitions
 			{
                 public byte Flags;
                 public ExpectedValueTypeValue ExpectedValueType;
-                public short Unknown;
-                public int IntValue;
+
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Pad;
+
+                public int EnumeratedValue;
                 public StringId RefName;
                 public StringId Name;
                 public StringId Description;

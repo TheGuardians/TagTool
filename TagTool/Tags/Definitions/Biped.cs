@@ -18,39 +18,43 @@ namespace TagTool.Tags.Definitions
         public Angle StationaryTurningThreshold;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        public uint Unknown;
+        public float RagdollThresholdVelocity; // if the biped dies while moving faster than this velocity, immediately transition to ragdoll.  Use 0 for 'never' (wu/s)
 
         [TagField(ValidTags = new[] { "bdpd" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag DeathProgramSelector;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId RagdollRegionName;
+        public StringId RagdollRegionName; // when the biped transitions to ragdoll, this region will change to the destroyed state
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public StringId AssassinationChudText;
 
-        public float JumpVelocity;
+        public float JumpVelocity; // world units per second
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<UnitTrickDefinitionBlock> Tricks;
-        public float MaximumSoftLandingTime;
-        public float MinimumHardLandingTime;
-        public float MinimumSoftLandingVelocity;
-        public float MinimumHardLandingVelocity;
-        public float MaximumHardLandingVelocity;
+
+        public float MaximumSoftLandingTime; // the longest amount of time the biped can take to recover from a soft landing (seconds)
+        public float MinimumHardLandingTime; // the longest amount of time the biped can take to recover from a hard landing (seconds)
+        public float MinimumSoftLandingVelocity; // below this velocity the biped does not react when landing (world units per second)
+        public float MinimumHardLandingVelocity; // below this velocity the biped will not do a soft landing when returning to the ground (world units per second)
+        public float MaximumHardLandingVelocity; // the velocity corresponding to the maximum landing time (world units per second)
+
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public float DeathHardLandingVelocity;
+        public float DeathHardLandingVelocity; // the maximum velocity with which a character can strike the ground and live (world units per second)
+
         public float StunDuration;
-        public float StationaryStandingCameraHeight;
+        public float StandingCameraHeight; // (world units, default 0) Bipeds are stuned when damaged by vehicle collisions, also some are when they take emp damage
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float MovingStandingCameraHeight;
+        public float RunningCameraHeight; // world units
 
-        public float StationaryCrouchingCameraHeight;
+        public float CrouchingCameraHeight; // world units
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float MovingCrouchingCameraHeight;
+        public float CrouchWalkingCameraHeight; // world units
 
-        public float CrouchTransitionTime;
+        public float CrouchTransitionTime; // seconds
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public TagFunction CrouchingCameraFunction = new TagFunction
@@ -83,6 +87,7 @@ namespace TagTool.Tags.Definitions
         public float LockonDistance;
 
         public short PhysicsControlNodeIndex;
+
         [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
 
@@ -96,14 +101,16 @@ namespace TagTool.Tags.Definitions
         public short HeadNodeIndex;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        public uint Unknown2;
+        public uint FpCrouchMovingAnimationSpeedMultiplier;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<BipedWallProximityBlock> WallProximityFeelers;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float HeadshotAccelerationScale; // when the biped ragdolls from a headshot it acceleartes based on this value.  0 defaults to the standard acceleration scale
+
         public CachedTag AreaDamageEffect;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public CachedTag HealthStationRechargeEffect;
 

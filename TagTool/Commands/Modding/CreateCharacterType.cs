@@ -15,6 +15,7 @@ namespace TagTool.Commands.Modding
         private Globals Globals;
         private CachedTag UnitTag;
         private bool Simple = true;
+        private bool Binocs = false;
         private int MpRepIndex = 0;
         private int CampRepIndex = 0;
         private string CharacterName;
@@ -26,10 +27,10 @@ namespace TagTool.Commands.Modding
                 "CreateCharacterType",
                 "Builds a character type from a biped tag.",
 
-                "CreateCharacterType [CampaignDistinct] <bipd tagname>",
+                "CreateCharacterType [campaigndistinct] [binocs] <bipd tagname>",
 
                 "Builds a character type from the provided biped tag."
-                + "\nThe \"CampaignDistinct\" argument enables creation of separate Campaign and Multiplayer representations."
+                + "\nThe \"campaigndistinct\" argument enables creation of separate Campaign and Multiplayer representations."
                 + "By default, they are the same.")
         {
             Cache = cache;
@@ -37,32 +38,25 @@ namespace TagTool.Commands.Modding
 
         public override object Execute(List<string> args)
         {
-            if (!Cache.TagCache.TryGetCachedTag(args.Last(), out UnitTag))
-                return new TagToolError(CommandError.TagInvalid);
-
             bool campaignDistinct = false;
-
-            switch (args.Count)
+            
+            if (args.Count > 0)
             {
-                case 1:
-                    break;
-                case 2:
-                    {
-                        if (args[0].ToLower() == "campaigndistinct")
-                        {
-                            campaignDistinct = true;
-                            Simple = false;
-                        }
-                        else
-                            return new TagToolError(CommandError.CustomError, $"{args[0]} is not a recognized argument.");
-                    }
-                    break;
-                default:
-                    return new TagToolError(CommandError.ArgCount);
+                if (!Cache.TagCache.TryGetCachedTag(args.Last(), out UnitTag))
+                    return new TagToolError(CommandError.TagInvalid);
+
+                if (args.Contains("campaigndistinct"))
+                {
+                    campaignDistinct = true;
+                    Simple = false;
+                }
+                if (args.Contains("binocs"))
+                    Binocs = true;
             }
+            else
+                return new TagToolError(CommandError.ArgCount);
 
             OpenGlobalTags();
-
 
             // Wizard to set up a new playable character
 
@@ -149,12 +143,17 @@ namespace TagTool.Commands.Modding
             else
                 rep.Name = GetStringIdFromUser($"Enter the {type}representation name: ");
 
-            rep.FirstPersonHands = GetTag("Enter the first person hands render model tag (press enter for null): ");
-            rep.FirstPersonBody = GetTag("Enter the first person body render model tag (press enter for null): ");
-            rep.ThirdPersonUnit = (type == "campaign ") ? GetTag("Enter the third person unit biped tag (press enter for null): ") : UnitTag;
-            rep.ThirdPersonVariant = GetStringIdFromUser("Enter the third person variant name (press enter for none): ");
-            rep.BinocularsZoomInSound = GetTag("Enter the binocular zoom in sound tag (press enter for null): ");
-            rep.BinocularsZoomOutSound = GetTag("Enter the binocular zoom out sound tag (press enter for null): ");
+            rep.FirstPersonHands = GetTag("Enter the first person hands render model tag (use \"skip\" or hit enter to skip): ");
+            rep.FirstPersonBody = GetTag("Enter the first person body render model tag (use \"skip\" or hit enter to skip): ");
+            rep.ThirdPersonUnit = (type == "campaign ") ? GetTag("Enter the third person unit biped tag (use \"skip\" or hit enter to skip): ") : UnitTag;
+            rep.ThirdPersonVariant = GetStringIdFromUser("Enter the third person variant name (use \"skip\" or hit enter to skip): ");
+            
+            if (Binocs)
+            {
+                rep.BinocularsZoomInSound = GetTag("Enter the binocular zoom in sound tag (press enter for null): ");
+                rep.BinocularsZoomOutSound = GetTag("Enter the binocular zoom out sound tag (press enter for null): ");
+            }
+            
             rep.CombatDialogue = GetTag("Enter the first person combat dialogue (udlg) tag (press enter for null): ");
 
             Globals.PlayerRepresentation.Add(rep);
@@ -164,16 +163,17 @@ namespace TagTool.Commands.Modding
 
         private void CreateNewCharacterType()
         {
-            Globals.PlayerCharacterType type = new Globals.PlayerCharacterType();
-
-            type.Name = Simple ? CharacterStringID : GetStringIdFromUser("Enter the character type name: ");
-            type.PlayerInformation = (sbyte)GetIntFromUser("Enter the player information block index: ");
-            type.PlayerControl = (sbyte)GetIntFromUser("Enter the player control block index: ");
-            type.CampaignRepresentation = (sbyte)CampRepIndex;
-            type.MultiplayerRepresentation = (sbyte)MpRepIndex;
-            type.MultiplayerArmorCustomization = 0;
-            type.ChudGlobals = 0;
-            type.FirstPersonInterface = 0;
+            Globals.PlayerCharacterType type = new Globals.PlayerCharacterType
+            {
+                Name = Simple ? CharacterStringID : GetStringIdFromUser("Enter the character type name: "),
+                PlayerInformation = (sbyte)(Simple ? 0 : GetIntFromUser("Enter the player information block index: ")),
+                PlayerControl = (sbyte)(Simple ? 0 : GetIntFromUser("Enter the player control block index: ")),
+                CampaignRepresentation = (sbyte)CampRepIndex,
+                MultiplayerRepresentation = (sbyte)MpRepIndex,
+                MultiplayerArmorCustomization = 0,
+                ChudGlobals = 0,
+                FirstPersonInterface = 0
+            };
 
             Globals.PlayerCharacterTypes.Add(type);
         }
@@ -206,7 +206,7 @@ namespace TagTool.Commands.Modding
                 character.Name = GetStringIdFromUser("Enter the character name (stringid): ");
             }
 
-            character.RandomChance = GetFloatFromUser("Enter the random chance (float): ");
+            character.RandomChance = Simple ? 0.1f : GetFloatFromUser("Enter the random chance (float): ");
             set.Characters.Add(character);
         }
 
@@ -236,7 +236,7 @@ namespace TagTool.Commands.Modding
             Console.WriteLine(message);
             string value = Console.ReadLine().Trim();
 
-            if (value == "\n")
+            if (value == "\n" || value == "skip")
                 return StringId.Invalid;
 
             return GetStringId(value);

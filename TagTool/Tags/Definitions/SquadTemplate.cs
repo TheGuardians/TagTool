@@ -23,13 +23,11 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Padding, Length = 2)]
             public byte[] Padding1;
 
-            public short MinimumRound;
-            public short MaximumRound;
-            public short Unknown2;
+            public Bounds<short> RoundRange;
+            public Bounds<short> SetRange;
 
-            public short Unknown3;
-            public short Count;
-            public short Unknown4;
+            public short NormalDiffCount; // initial number of actors on normal difficulty
+            public MajorUpgradeEnum MajorUpgrade;
 
             public List<ObjectBlock> Characters;
             public List<ObjectBlock> InitialWeapons;
@@ -43,7 +41,6 @@ namespace TagTool.Tags.Definitions
 
             public CachedTag Vehicle;
             public StringId VehicleVariant;
-
             public StringId ActivityName;
 
             [Flags]
@@ -56,6 +53,15 @@ namespace TagTool.Tags.Definitions
                 Legendary = 1 << 3
             }
 
+            public enum MajorUpgradeEnum : short
+            {
+                Normal,
+                Few,
+                Many,
+                None,
+                All
+            }
+
             [TagStructure(Size = 0x20)]
             public class ObjectBlock : TagStructure
 			{
@@ -64,9 +70,8 @@ namespace TagTool.Tags.Definitions
                 [TagField(Flags = Padding, Length = 2)]
                 public byte[] Padding1;
 
-                public short MinimumRound;
-                public short MaximumRound;
-                public uint Unknown3;
+                public Bounds<short> RoundRange;
+                public Bounds<short> SetRange;
 
                 public CachedTag Object;
                 public short Probability;
