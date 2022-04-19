@@ -11,6 +11,7 @@ using TagTool.Serialization;
 using TagTool.Cache.Gen2;
 using RenderModelGen2 = TagTool.Tags.Definitions.Gen2.RenderModel;
 using System.IO;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -149,6 +150,13 @@ namespace TagTool.Commands.Porting.Gen2
                                                 break;
 
                                             case VertexDeclarationUsage.BlendIndices:
+                                                if (element.I != Math.Floor(element.I) ||
+                                                    element.J != Math.Floor(element.J) ||
+                                                    element.K != Math.Floor(element.K) ||
+                                                    element.W != Math.Floor(element.W))
+                                                {
+                                                    new TagToolError(CommandError.OperationFailed, "Blend Index with Non Integer Value!");
+                                                }
                                                 vertex.Point.NodeIndices = element.ToArray().Select(x => (int)x).ToArray();
                                                 //Console.WriteLine($"Boned/Skinned Vertex with blendindices {vertex.Point.NodeIndices[0]},{vertex.Point.NodeIndices[1]},{vertex.Point.NodeIndices[2]},{vertex.Point.NodeIndices[3]}");
                                                 break;
@@ -340,6 +348,18 @@ namespace TagTool.Commands.Porting.Gen2
                                             new[] { 1.0f, 0.0f, 0.0f, 0.0f } :
                                             vertex.Point.NodeWeights
                                     };
+                                    //nodemap blend index fixups
+                                    if (mesh.NodeMap.Count > 0)
+                                    {
+                                        var temp = newskinned.BlendIndices;
+                                        newskinned.BlendIndices = new byte[4]
+                                        {
+                                            section.OpaqueMaxNodesVertex > 0 ? mesh.NodeMap[temp[0]].NodeIndex : (byte)0,
+                                            section.OpaqueMaxNodesVertex > 1 ? mesh.NodeMap[temp[1]].NodeIndex : (byte)0,
+                                            section.OpaqueMaxNodesVertex > 2 ? mesh.NodeMap[temp[2]].NodeIndex : (byte)0,
+                                            section.OpaqueMaxNodesVertex > 3 ? mesh.NodeMap[temp[3]].NodeIndex : (byte)0,
+                                        };
+                                    }
                                     skinnedVertices.Add(newskinned);
                                     break;
                                     
@@ -485,7 +505,10 @@ namespace TagTool.Commands.Porting.Gen2
             Short2N,
             Short3N,
             Short4N,
-            HenD3N
+            HenD3N,
+            UByte, //added because they are necessary for blend indices (NOT normalized)
+            UByte2,
+            UByte3,
         }
 
         private (string, VertexDeclarationUsage, VertexDeclarationType, int)[][] VertexDeclarations = new[]
@@ -502,18 +525,18 @@ namespace TagTool.Commands.Porting.Gen2
             new[] // 0x03 model_rigid_boned1::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 0),
             },
             new[] // 0x04 model_rigid_boned1::compressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 0),
                 ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
             new[] // 0x05 model_skinned2::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte2N, 0),
             },
             new[] // 0x06
@@ -523,18 +546,18 @@ namespace TagTool.Commands.Porting.Gen2
             new[] // 0x07 model_rigid_boned3::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3, 0),
             },
             new[] // 0x08 model_skinned3::compressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte3N, 0),
             },
             new[] // 0x09 model_skinned4::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
             new[] // 0x0A
@@ -543,21 +566,21 @@ namespace TagTool.Commands.Porting.Gen2
             },
             new[] // 0x0B
             {
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 0),
             },
             new[] // 0x0C
             {
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte2N, 0),
             },
             new[] // 0x0D
             {
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte3N, 0),
             },
             new[] // 0x0E
             {
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
             new[] // 0x0F
@@ -571,12 +594,12 @@ namespace TagTool.Commands.Porting.Gen2
             new[] // 0x11
             {
                 ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 1),
-                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 1),
+                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 1),
             },
             new[] // 0x12
             {
                 ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 1),
-                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 1),
+                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 1),
                 ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
             new[] // 0x13
@@ -594,12 +617,12 @@ namespace TagTool.Commands.Porting.Gen2
             new[] // 0x16
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 0),
             },
             new[] // 0x17
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 0),
                 ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
             new[] // 0x18
@@ -847,41 +870,41 @@ namespace TagTool.Commands.Porting.Gen2
             new[] // 0x02 model_skinned2::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte2N, 0),
             },
             new[] // 0x03 model_rigid_boned1::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 0),
             },
             new[] // 0x04 model_skinned4::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
             new[] // 0x05 model_skinned2::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte2N, 0),
             },
             new[] // 0x06 model_skinned4::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
             new[] // 0x07 model_rigid_boned3::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3, 0),
             },
             new[] // 0x08 model_skinned4::uncompressed
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
             new[] // 0x09
@@ -890,21 +913,21 @@ namespace TagTool.Commands.Porting.Gen2
             },
             new[] // 0x0A
             {
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 0),
             },
             new[] // 0x0B
             {
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte2N, 0),
             },
             new[] // 0x0C
             {
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte3N, 0),
             },
             new[] // 0x0D
             {
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4, 0),
                 ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
             },
             new[] // 0x0E
@@ -918,12 +941,12 @@ namespace TagTool.Commands.Porting.Gen2
             new[] // 0x10
             {
                 ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 1),
-                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 1),
+                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 1),
             },
             new[] // 0x11
             {
                 ("SecondaryPosition", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 1),
-                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 1),
+                ("SecondaryNodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 1),
                 ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
             new[] // 0x12
@@ -941,12 +964,12 @@ namespace TagTool.Commands.Porting.Gen2
             new[] // 0x15
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 0),
             },
             new[] // 0x16
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
-                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByteN, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte, 0),
                 ("None", VertexDeclarationUsage.Sample, VertexDeclarationType.Skip, 1),
             },
             new[] // 0x17
@@ -1196,6 +1219,12 @@ namespace TagTool.Commands.Porting.Gen2
                     return new RealQuaternion(stream.ReadFloat3().ToArray());
                 case VertexDeclarationType.Float4:
                     return new RealQuaternion(stream.ReadFloat4().ToArray());
+                case VertexDeclarationType.UByte:
+                    return new RealQuaternion(stream.ReadUByte());
+                case VertexDeclarationType.UByte2:
+                    return new RealQuaternion(stream.ReadUByte(), stream.ReadUByte());
+                case VertexDeclarationType.UByte3:
+                    return new RealQuaternion(stream.ReadUByte(), stream.ReadUByte(), stream.ReadUByte());
                 case VertexDeclarationType.UByte4:
                     return new RealQuaternion(stream.ReadUByte4().Select(i => (float)i));
                 case VertexDeclarationType.UByte4N:
@@ -1272,6 +1301,12 @@ namespace TagTool.Commands.Porting.Gen2
                     return 0xC;
                 case VertexDeclarationType.Float4:
                     return 0x10;
+                case VertexDeclarationType.UByte:
+                    return 0x1;
+                case VertexDeclarationType.UByte2:
+                    return 0x2;
+                case VertexDeclarationType.UByte3:
+                    return 0x3;
                 case VertexDeclarationType.UByte4:
                     return 0x4;
                 case VertexDeclarationType.UByte4N:
