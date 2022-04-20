@@ -306,6 +306,9 @@ namespace TagTool.Tags.Definitions
                     [TagField(Format = "Degrees")]
                     public ParticlePropertyScalar EmissionAngle;
 
+
+                    public ParticlePropertyScalar EmissionAxisAngle;
+
                     /// <summary>
                     /// Number of particles that are spawned at the birth of the effect.
                     /// </summary>
@@ -324,12 +327,6 @@ namespace TagTool.Tags.Definitions
                     public ParticlePropertyScalar ParticleEmissionRate;
 
                     /// <summary>
-                    /// Number of particles that are spawned every world unit of motion from the emitters.
-                    /// </summary>
-                    [TagField(Format = "Particles Per World Unit")]
-                    public ParticlePropertyScalar ParticleEmissionPerDistance;
-
-                    /// <summary>
                     /// Number of seconds a particle will live after emission.
                     /// </summary>
                     [TagField(Format = "Seconds")]
@@ -341,16 +338,17 @@ namespace TagTool.Tags.Definitions
                     public ParticleSelfAccelerationData ParticleSelfAcceleration;
 
                     [TagField(Format = "World Units Per Second")]
-                    public ParticlePropertyScalar ParticleVelocity;
+                    public ParticlePropertyScalar ParticleInitialVelocity;
 
                     [TagField(Format = "360 Degree Rotations Per Second")]
-                    public ParticlePropertyScalar ParticleAngularVelocity;
+                    public ParticlePropertyScalar ParticleRotation;
 
-                    public ParticlePropertyScalar ParticleMass;
-                    public ParticlePropertyScalar ParticleDragCoefficient;
+                    public ParticlePropertyScalar ParticleInitialRotationRate;
 
                     [TagField(Format = "World Units")]
                     public ParticlePropertyScalar ParticleSize;
+
+                    public ParticlePropertyScalar ParticleScale;
 
                     [TagField(Format = "RGB")]
                     public ParticlePropertyScalar ParticleTint;
