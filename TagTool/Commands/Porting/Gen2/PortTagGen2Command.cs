@@ -97,7 +97,7 @@ namespace TagTool.Commands.Porting.Gen2
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
-                new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported!");
+                new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null!");
                 return null;
             }
 

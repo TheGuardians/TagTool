@@ -16,7 +16,7 @@ namespace TagTool.Commands.Porting.Gen2
             Bitmap newBitmap = new Bitmap
             {
                 Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource,
-                SpriteSpacing = 4, //this seems to be a default value
+                SpriteSpacing = gen2Bitmap.SpriteSpacing, //this seems to be a default value
                 BumpMapHeight = gen2Bitmap.BumpHeight,
                 FadeFactor = gen2Bitmap.DetailFadeFactor,
                 Sequences = new List<Bitmap.Sequence>(),
