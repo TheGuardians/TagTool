@@ -13,11 +13,11 @@ namespace TagTool.Commands.Porting.Gen2
 {
     partial class PortTagGen2Command : Command
     {
-        public ModelAnimationGraph ConvertModelAnimationGraph(CachedTag tag, ModelAnimationGraphGen2 gen2Animation)
+        public ModelAnimationGraph ConvertModelAnimationGraph(ModelAnimationGraphGen2 gen2Animation)
         {
             var Animation = new ModelAnimationGraph()
             {
-                ParentAnimationGraph = null,
+                ParentAnimationGraph = gen2Animation.Resources.ParentAnimationGraph,
                 InheritanceFlags = (ModelAnimationGraph.AnimationInheritanceFlags)gen2Animation.Resources.InheritanceFlags,
                 PrivateFlags = (ModelAnimationGraph.AnimationPrivateFlags)gen2Animation.Resources.PrivateFlags,
                 AnimationCodecPack = gen2Animation.Resources.AnimationCodecPack,
@@ -387,7 +387,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 var newInherit = new ModelAnimationGraph.Inheritance()
                 {
-                    InheritedGraph = null,
+                    InheritedGraph = gen2inht.InheritedGraph,
                     NodeMap = new List<ModelAnimationGraph.Inheritance.NodeMapBlock>(),
                     NodeMapFlags = new List<ModelAnimationGraph.Inheritance.NodeMapFlag>(),
                     RootZOffset = gen2inht.RootZOffset,

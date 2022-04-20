@@ -11,7 +11,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
 	{
-		public CollisionModel ConvertCollisionModel(CachedTag tag, CollisionModelGen2 gen2CollisionModel)
+		public CollisionModel ConvertCollisionModel(CollisionModelGen2 gen2CollisionModel)
 		{
 			var collisionModel = new CollisionModel()
 			{
@@ -52,7 +52,7 @@ namespace TagTool.Commands.Porting.Gen2
 					for (int i = 0; i < gen2Permutation.BspPhysics.Count; i++)
 					{
 						permutation.BspMoppCodes.Add(ConvertTagMoppCode(gen2Permutation.BspPhysics[i].MoppCodes.ToList()));
-						permutation.BspPhysics.Add(ConvertCollisionBspPhysics(tag, gen2Permutation.BspPhysics[0]));
+						permutation.BspPhysics.Add(ConvertCollisionBspPhysics(gen2Permutation.BspPhysics[0]));
 					}
 
 					// Convert Bsps
@@ -118,7 +118,7 @@ namespace TagTool.Commands.Porting.Gen2
 			return collisionGeometry;
 		}
 
-		public CollisionBspPhysicsDefinition ConvertCollisionBspPhysics(CachedTag tag, CollisionBspPhysicsDefinitionGen2 gen2BspPhysics)
+		public CollisionBspPhysicsDefinition ConvertCollisionBspPhysics(CollisionBspPhysicsDefinitionGen2 gen2BspPhysics)
 		{
 			var bspPhysics = new CollisionBspPhysicsDefinition()
 			{

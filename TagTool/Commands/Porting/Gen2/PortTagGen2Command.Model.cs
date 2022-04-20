@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Tags.Definitions;
 using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;

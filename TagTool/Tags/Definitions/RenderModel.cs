@@ -129,8 +129,9 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// A permutation of a region, associating a specific mesh with it.
             /// </summary>
-            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail)]
+            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
             [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             public class Permutation : TagStructure
 			{
                 /// <summary>
@@ -164,9 +165,11 @@ namespace TagTool.Tags.Definitions
                 public int UnknownC;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public int Unknown10;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public int Unknown14;
             }
         }

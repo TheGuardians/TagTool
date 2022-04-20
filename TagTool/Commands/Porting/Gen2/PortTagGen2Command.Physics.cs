@@ -10,7 +10,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
     partial class PortTagGen2Command : Command
     {
-        public PhysicsModel ConvertPhysicsModel(CachedTag tag, PhysicsModelGen2 gen2PhysicsModel)
+        public PhysicsModel ConvertPhysicsModel(PhysicsModelGen2 gen2PhysicsModel)
         {
             var physicsModel = new PhysicsModel()
             {
