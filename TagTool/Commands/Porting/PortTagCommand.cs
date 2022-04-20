@@ -1298,6 +1298,28 @@ namespace TagTool.Commands.Porting
                         }
                     }
 
+                    // hack -- for some reason these emitters are killed when using gpu
+                    if (BlamCache.Version == CacheVersion.Halo3Retail &&
+                        (blamTagName == @"fx\cinematics\070la_waypoint_arrival\01\slipspace_rupture" ||
+                        blamTagName == @"fx\cinematics\070la_waypoint_arrival\01\slipspace_rupture_carrier" ||
+                        blamTagName == @"fx\cinematics\040lb_cov_flee\08\shot_1\slipspace_rupture" ||
+                        blamTagName == @"fx\cinematics\100lb_hc_crash\shot_4\slipspace_rupture"))
+                    {
+                        particleSystem.Emitters[0].EmitterFlags &= ~Effect.Event.ParticleSystem.Emitter.FlagsValue.IsGpu;
+                        particleSystem.Emitters[0].EmitterFlags |= Effect.Event.ParticleSystem.Emitter.FlagsValue.IsCpu;
+                    }
+                    if (BlamCache.Version == CacheVersion.Halo3ODST)
+                    {
+                        switch (blamTagName)
+                        {
+                            case @"fx\cinematics\c200\slipspace\slipspace_rupture" when CacheContext.StringTable.GetString(effectEvent.Name) == "rupture":
+                            case @"fx\cinematics\l200_out\slipspace\slipspace_rupture" when CacheContext.StringTable.GetString(effectEvent.Name) == "rupture":
+                                particleSystem.Emitters[0].EmitterFlags &= ~Effect.Event.ParticleSystem.Emitter.FlagsValue.IsGpu;
+                                particleSystem.Emitters[0].EmitterFlags |= Effect.Event.ParticleSystem.Emitter.FlagsValue.IsCpu;
+                                break;
+                        }
+                    }
+
                     if (particleSystem.Particle != null)// yucky hack-fix for some particles taking over the screen
                     {
                         var prt3Definition = CacheContext.Deserialize<Particle>(cacheStream, particleSystem.Particle);
