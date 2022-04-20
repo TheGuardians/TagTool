@@ -14,6 +14,7 @@ using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGrap
 using PhysicsModelGen2 = TagTool.Tags.Definitions.Gen2.PhysicsModel;
 using RenderModelGen2 = TagTool.Tags.Definitions.Gen2.RenderModel;
 using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;
+using BitmapGen2 = TagTool.Tags.Definitions.Gen2.Bitmap;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -91,7 +92,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "jmad",
                 "phmo",
                 "mode",
-                "hlmt"
+                "hlmt",
+                "bitm"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -129,6 +131,9 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
                 case ModelGen2 Model:
                     definition = ConvertModel(Model);
+                    break;
+                case BitmapGen2 Bitmap:
+                    definition = ConvertBitmap(Bitmap);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported!");
