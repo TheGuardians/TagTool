@@ -593,8 +593,29 @@ namespace TagTool.Commands.Shaders
                     }
                 }
 
-
-                Cache.Serialize(stream, dependent.Tag, dependent.Definition);
+                if (dependent.Tag.IsInGroup("rm  "))
+                {
+                    Cache.Serialize(stream, dependent.Tag, dependent.Definition);
+                }
+                else
+                {
+                    switch (dependent.Tag.Group.Tag.ToString())
+                    {
+                        case "prt3":
+                            var prt3 = Cache.Deserialize<Particle>(stream, dependent.Tag);
+                            prt3.RenderMethod = (RenderMethod)dependent.Definition;
+                            Cache.Serialize(stream, dependent.Tag, prt3);
+                            break;
+                            //case "decs":
+                            //    break;
+                            //case "beam":
+                            //    break;
+                            //case "ltvl":
+                            //    break;
+                            //case "cntl":
+                            //    break;
+                    }
+                }
             }
 
             if (dependentRenderMethods.Count > 0)
