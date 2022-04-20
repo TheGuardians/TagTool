@@ -185,7 +185,7 @@ namespace TagTool.Bitmaps.Utils
 
             resultBitmap.Data = resultData;
                 
-            if(resultBitmap.Format == BitmapFormat.Dxn) // wouldn't be required if d3d9 supported non power of two DXN and with mips less than 8x8
+            if(resultBitmap.Format == BitmapFormat.Dxn) // wouldn't be required if d3d9 supported non power of two DXN and with mips less than 4x4
             {
                 if(resultBitmap.Type == BitmapType.Array || resultBitmap.Type == BitmapType.Texture3D)
                 {
@@ -193,7 +193,44 @@ namespace TagTool.Bitmaps.Utils
                 }
                 else
                 {
-                    GenerateCompressedMipMaps(resultBitmap);
+                    // Avoid having nvcompress touch the image data if we don't need to
+                    if (!Direct3D.D3D9x.D3D.IsPowerOfTwo(resultBitmap.Width) ||
+                        !Direct3D.D3D9x.D3D.IsPowerOfTwo(resultBitmap.Height))
+                    {
+                        GenerateCompressedMipMaps(resultBitmap);
+                    }
+                    else
+                    {
+                        // Remove lowest DXN mipmaps to prevent issues with D3D memory allocation.
+
+                        int dataSize = BitmapUtils.RoundSize(resultBitmap.Width, 4) * BitmapUtils.RoundSize(resultBitmap.Height, 4);
+
+                        int mipMapCount = resultBitmap.MipMapCount;
+                        if (mipMapCount > 0)
+                        {
+                            if (resultBitmap.Format == BitmapFormat.Dxn)
+                            {
+                                var width = resultBitmap.Width;
+                                var height = resultBitmap.Height;
+
+                                dataSize = BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
+
+                                mipMapCount = 0;
+                                while ((width >= 8) && (height >= 8))
+                                {
+                                    width /= 2;
+                                    height /= 2;
+                                    dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
+                                    mipMapCount++;
+                                }
+                            }
+                        }
+
+                        resultBitmap.MipMapCount = mipMapCount;
+                        byte[] raw = new byte[dataSize];
+                        Array.Copy(resultBitmap.Data, raw, dataSize);
+                        resultBitmap.Data = raw;
+                    }
                 }
                     
             }
@@ -560,7 +597,7 @@ namespace TagTool.Bitmaps.Utils
             switch (bitmap.Format)
             {
                 case BitmapFormat.Dxn:
-                    args += "-bc5 -resize -normal";
+                    args += "-bc5 -resize -normal -tonormal";
                     break;
 
                 case BitmapFormat.Dxt1:
