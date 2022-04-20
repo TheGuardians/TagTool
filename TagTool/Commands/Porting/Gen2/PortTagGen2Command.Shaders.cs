@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Shaders;
@@ -16,7 +17,8 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 // TODO create/reuse strings for material names
 
-                ShaderProperties = new List<Shader.RenderMethodPostprocessBlock>()
+                ShaderProperties = new List<Shader.RenderMethodPostprocessBlock>(),
+                Options = new List<Shader.RenderMethodOptionIndex>()
             };
 
             // Default shader arguments
@@ -145,6 +147,16 @@ namespace TagTool.Commands.Porting.Gen2
                 RealConstants = new List<RenderMethod.RenderMethodPostprocessBlock.RealConstant>()
             };
             shader.ShaderProperties.Add(newPostprocessBlock);
+
+            // Populate options block
+            for (short i = 0; i < 11; i++)
+            {
+                Shader.RenderMethodOptionIndex option = new Shader.RenderMethodOptionIndex
+                {
+                    OptionIndex = Convert.ToInt16(args[i + 1])
+                };
+                shader.Options.Add(option);
+            }
 
             // Add all the texture maps
             foreach (var shadermap in UsedRenderMethodDef.TextureParameterNames)
