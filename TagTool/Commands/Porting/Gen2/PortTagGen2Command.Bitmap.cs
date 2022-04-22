@@ -105,8 +105,7 @@ namespace TagTool.Commands.Porting.Gen2
         private BitmapFormat ConvertBitmapFormat(BitmapGen2.BitmapDataBlock.FormatValue format)
         {
             BitmapFormat result;
-            if(Enum.TryParse(format.ToString().ToUpper(), out result) ||
-                Enum.TryParse(format.ToString(), out result))
+            if(Enum.TryParse(format.ToString(), true, out result))
                 return result;
             else
             {

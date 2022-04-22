@@ -17,7 +17,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
 	{
-        public Model ConvertModel(ModelGen2 gen2Model)
+        public Model ConvertModel(ModelGen2 gen2Model, Stream cacheStream)
         {
             var model = new Model
             {
@@ -47,12 +47,9 @@ namespace TagTool.Commands.Porting.Gen2
                     DamageSectionIndex = gen2mat.DamageSection,
                     MaterialName = gen2mat.GlobalMaterialName,
                 };
-                using (var cacheStream = Cache.OpenCacheReadWrite())
-                {
-                    var globals = Cache.Deserialize<Globals>(cacheStream, Cache.TagCache.FindFirstInGroup("matg"));
-                    int globalmaterialindex = globals.Materials.FindIndex(m => m.Name == newMaterial.MaterialName);
-                    newMaterial.GlobalMaterialIndex = globalmaterialindex == -1 ? (short)0 : (short)globalmaterialindex;
-                }
+                var globals = Cache.Deserialize<Globals>(cacheStream, Cache.TagCache.FindFirstInGroup("matg"));
+                int globalmaterialindex = globals.Materials.FindIndex(m => m.Name == newMaterial.MaterialName);
+                newMaterial.GlobalMaterialIndex = globalmaterialindex == -1 ? (short)0 : (short)globalmaterialindex;
                 model.Materials.Add(newMaterial);
             }
 

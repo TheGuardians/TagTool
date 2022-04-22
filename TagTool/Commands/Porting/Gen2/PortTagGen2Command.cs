@@ -9,12 +9,6 @@ using TagTool.Commands.Common;
 using TagTool.Commands.Porting;
 using TagTool.IO;
 using TagTool.Tags;
-using CollisionModelGen2 = TagTool.Tags.Definitions.Gen2.CollisionModel;
-using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGraph;
-using PhysicsModelGen2 = TagTool.Tags.Definitions.Gen2.PhysicsModel;
-using RenderModelGen2 = TagTool.Tags.Definitions.Gen2.RenderModel;
-using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;
-using BitmapGen2 = TagTool.Tags.Definitions.Gen2.Bitmap;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -93,7 +87,10 @@ namespace TagTool.Commands.Porting.Gen2
                 "phmo",
                 "mode",
                 "hlmt",
-                "bitm"
+                "bitm",
+                "bloc",
+                "vehi",
+                "weap"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -117,23 +114,32 @@ namespace TagTool.Commands.Porting.Gen2
 
             switch (definition)
             {
-                case CollisionModelGen2 collisionModel:
+                case TagTool.Tags.Definitions.Gen2.CollisionModel collisionModel:
                     definition = ConvertCollisionModel(collisionModel);
                     break;
-                case ModelAnimationGraphGen2 modelAnimationGraph:
+                case TagTool.Tags.Definitions.Gen2.ModelAnimationGraph modelAnimationGraph:
                     definition = ConvertModelAnimationGraph(modelAnimationGraph);
                     break;
-                case PhysicsModelGen2 physicsModel:
+                case TagTool.Tags.Definitions.Gen2.PhysicsModel physicsModel:
                     definition = ConvertPhysicsModel(physicsModel);
                     break;
-                case RenderModelGen2 renderModel:
+                case TagTool.Tags.Definitions.Gen2.RenderModel renderModel:
                     definition = ConvertRenderModel(renderModel);
                     break;
-                case ModelGen2 Model:
-                    definition = ConvertModel(Model);
+                case TagTool.Tags.Definitions.Gen2.Model model:
+                    definition = ConvertModel(model, cacheStream);
                     break;
-                case BitmapGen2 Bitmap:
-                    definition = ConvertBitmap(Bitmap);
+                case TagTool.Tags.Definitions.Gen2.Bitmap bitmap:
+                    definition = ConvertBitmap(bitmap);
+                    break;
+                case TagTool.Tags.Definitions.Gen2.Crate crate:
+                    definition = ConvertObject(crate);
+                    break;
+                case TagTool.Tags.Definitions.Gen2.Weapon weapon:
+                    definition = ConvertObject(weapon);
+                    break;
+                case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
+                    definition = ConvertObject(vehicle);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported!");
