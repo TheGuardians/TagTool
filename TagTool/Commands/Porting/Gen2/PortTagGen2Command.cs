@@ -11,12 +11,11 @@ using TagTool.IO;
 using TagTool.Tags;
 using CollisionModelGen2 = TagTool.Tags.Definitions.Gen2.CollisionModel;
 using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGraph;
-using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;
 using PhysicsModelGen2 = TagTool.Tags.Definitions.Gen2.PhysicsModel;
 using RenderModelGen2 = TagTool.Tags.Definitions.Gen2.RenderModel;
-using ShaderGen2 = TagTool.Tags.Definitions.Gen2.Shader;
 using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;
 using BitmapGen2 = TagTool.Tags.Definitions.Gen2.Bitmap;
+using ShaderGen2 = TagTool.Tags.Definitions.Gen2.Shader;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -97,7 +96,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "phmo",
                 "mode",
                 "hlmt",
-                "bitm"
+                "bitm",
+                "shad"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -119,18 +119,10 @@ namespace TagTool.Commands.Porting.Gen2
             object definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
             definition = ConvertData(cacheStream, gen2CacheStream, resourceStreams, definition, definition, gen2Tag.Name);
 
-            TagTool.Cache.CachedTag tag;
-
-            if (gen2Tag.Group.Tag == "shad") tag = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("rmsh"), gen2Tag.Name);
-            else tag = Cache.TagCache.AllocateTag(definition.GetType(), gen2Tag.Name);
-
             switch (definition)
             {
                 case CollisionModelGen2 collisionModel:
                     definition = ConvertCollisionModel(collisionModel);
-                    break;
-                case ModelGen2 model:
-                    definition = ConvertModel(tag, model);
                     break;
                 case ModelAnimationGraphGen2 modelAnimationGraph:
                     definition = ConvertModelAnimationGraph(modelAnimationGraph);
@@ -148,7 +140,7 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertBitmap(Bitmap);
                     break;
                 case ShaderGen2 shader:
-                    definition = ConvertShader(tag, shader, cacheStream, shader_template);
+                    definition = ConvertShader(shader, cacheStream, shader_template);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported!");
@@ -156,7 +148,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //allocate and serialize tag after conversion
-            if(destinationTag == null)
+            if (destinationTag == null)
                 destinationTag = Cache.TagCache.AllocateTag(definition.GetType(), gen2Tag.Name);
 
             if (definition != null)
@@ -243,7 +235,6 @@ namespace TagTool.Commands.Porting.Gen2
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), Gen2Cache.Version, Gen2Cache.Platform))
             {
                 var attr = tagFieldInfo.Attribute;
-
                 if (!CacheVersionDetection.TestAttribute(attr, Gen2Cache.Version, Gen2Cache.Platform))
                     continue;
 
@@ -323,7 +314,6 @@ namespace TagTool.Commands.Porting.Gen2
                 result.Add(Gen2Cache.TagCache.TagTable.ToList().Find(
                 item => item != null && item.IsInGroup(groupTag) && tagName == item.Name));
             }
-
             else result.Add(Gen2Cache.TagCache.TagTable.ToList().Find(
                 item => item != null && item.IsInGroup(groupTag) && tagName == item.Name));
 

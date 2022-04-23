@@ -11,12 +11,15 @@ namespace TagTool.Commands.Porting.Gen2
 {
     partial class PortTagGen2Command : Command
     {
-        public Shader ConvertShader(CachedTag tag, ShaderGen2 gen2Shader, Stream stream, string shader_template)
+        public Shader ConvertShader(ShaderGen2 gen2Shader, Stream stream, string shader_template)
         {
+            // Temporary tag
+            TagTool.Cache.CachedTag tag;
+            short i = 1;
+
             var shader = new Shader()
             {
-                // TODO create/reuse strings for material names
-
+                Material = gen2Shader.MaterialName,
                 ShaderProperties = new List<Shader.RenderMethodPostprocessBlock>(),
                 Options = new List<Shader.RenderMethodOptionIndex>()
             };
@@ -132,7 +135,12 @@ namespace TagTool.Commands.Porting.Gen2
                 + args[5] + "_" + args[6] + "_" + args[7] + "_" + args[8] + "_" + args[9] + "_" + args[10] + "_" + args[11];
 
             // Generate if the template dosent exist yet
-            if (!Cache.TagCacheGenHO.TryGetTag(shader_path + ".rmt2", out tag)) new GenerateShaderCommand(Cache).ExecuteWithStream(args, stream);
+            if (!Cache.TagCacheGenHO.TryGetTag(shader_path + ".rmt2", out tag))
+            {
+                new GenerateShaderCommand(Cache).ExecuteWithStream(args, stream);
+                i--;
+            }
+
             shader.BaseRenderMethod = Cache.TagCacheGenHO.GetTag(@"shaders\shader.rmdf");
 
             // Get Tag of the used render method template and deserialize
@@ -149,11 +157,11 @@ namespace TagTool.Commands.Porting.Gen2
             shader.ShaderProperties.Add(newPostprocessBlock);
 
             // Populate options block
-            for (short i = 0; i < 11; i++)
+            for (; i < 11; i++)
             {
                 Shader.RenderMethodOptionIndex option = new Shader.RenderMethodOptionIndex
                 {
-                    OptionIndex = Convert.ToInt16(args[i + 1])
+                    OptionIndex = Convert.ToInt16(args[i])
                 };
                 shader.Options.Add(option);
             }
@@ -161,7 +169,6 @@ namespace TagTool.Commands.Porting.Gen2
             // Add all the texture maps
             foreach (var shadermap in UsedRenderMethodDef.TextureParameterNames)
             {
-                byte i;
                 var h2_texture_reference = gen2Shader.PredictedResources;
                 string current_type = Cache.StringTable[((int)shadermap.Name.Value)];   // Gets the current type of bitmap in the template
 
@@ -236,7 +243,7 @@ namespace TagTool.Commands.Porting.Gen2
                 }
 
                 // Convert Pixel Constants to Float Constants if matches are found
-                for (byte i = 0; h2_pixel_constants[i] != "\0"; i++)
+                for (i = 0; h2_pixel_constants[i] != "\0"; i++)
                 {
                     if (h2_pixel_constants[i] == current_type)
                     {
@@ -281,7 +288,7 @@ namespace TagTool.Commands.Porting.Gen2
                 // try to find and convert Vertex Constants to Float Constants
                 if (found == false)
                 {
-                    for (byte i = 0; h2_vertex_constants[i] != "\0"; i++)
+                    for (i = 0; h2_vertex_constants[i] != "\0"; i++)
                     {
                         if (h2_vertex_constants[i] == current_type)
                         {
