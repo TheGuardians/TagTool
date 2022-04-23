@@ -393,7 +393,9 @@
     <Compile Include="Commands\Common\BeginScriptCommand.cs" />
     <Compile Include="Commands\Common\EndScriptCommand.cs" />
     <Compile Include="Commands\Files\ConvertMapVariantCommand.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.AutoConvert.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Bitmap.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Objects.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Model.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.RenderModel.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Shaders.cs" />

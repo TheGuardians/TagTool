@@ -54,12 +54,12 @@ namespace TagTool.Animations
                 RealEulerAngles3d angles = new RealEulerAngles3d();
                 for (int index = 0; index < animationData.FrameCount; ++index)
                 {
-                    RealPoint3d += animationData.Movement_Data.Translations[index];
+                    RealPoint3d = animationData.Movement_Data.Translations[index];
                     angles = new RealEulerAngles3d 
                     { 
-                        YawValue = angles.YawValue + animationData.Movement_Data.Rotations[index].YawValue,
-                        PitchValue = angles.PitchValue + animationData.Movement_Data.Rotations[index].PitchValue,
-                        RollValue = angles.RollValue + animationData.Movement_Data.Rotations[index].RollValue,
+                        YawValue = animationData.Movement_Data.Rotations[index].YawValue,
+                        PitchValue = animationData.Movement_Data.Rotations[index].PitchValue,
+                        RollValue = animationData.Movement_Data.Rotations[index].RollValue,
                     };
                     RealPoint3dListList[0][index] += RealPoint3d;
                     QuaternionListList[0][index] = Quaternion.Conjugate(Quaternion.Conjugate(QuaternionListList[0][index]) * Quaternion.Conjugate(Quaternion.CreateFromYawPitchRoll(angles.Yaw.Degrees, angles.Pitch.Degrees, angles.Roll.Degrees)));

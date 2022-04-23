@@ -162,16 +162,6 @@ namespace TagTool.Tags.Definitions.Gen2
             public SectionFlags Flags;
             public List<Gen2ResourceMesh> Meshes;
             public CacheFileResourceGen2 Resource;
-
-            [TagField(Flags = Short)]
-            public CachedTag Original;
-
-            public short OwnerTagSectionOffset;
-            public byte RuntimeLinked;
-            public byte RuntimeLoaded;
-
-            [TagField(Flags = Short)]
-            public CachedTag Runtime;
         }
 
         [TagStructure(Size = 0xC)]

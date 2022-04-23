@@ -9,13 +9,6 @@ using TagTool.Commands.Common;
 using TagTool.Commands.Porting;
 using TagTool.IO;
 using TagTool.Tags;
-using CollisionModelGen2 = TagTool.Tags.Definitions.Gen2.CollisionModel;
-using ModelAnimationGraphGen2 = TagTool.Tags.Definitions.Gen2.ModelAnimationGraph;
-using PhysicsModelGen2 = TagTool.Tags.Definitions.Gen2.PhysicsModel;
-using RenderModelGen2 = TagTool.Tags.Definitions.Gen2.RenderModel;
-using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;
-using BitmapGen2 = TagTool.Tags.Definitions.Gen2.Bitmap;
-using ShaderGen2 = TagTool.Tags.Definitions.Gen2.Shader;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -97,11 +90,14 @@ namespace TagTool.Commands.Porting.Gen2
                 "mode",
                 "hlmt",
                 "bitm",
+                "bloc",
+                "vehi",
+                "weap",
                 "shad"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
-                new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported!");
+                new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null!");
                 return null;
             }
 
@@ -110,34 +106,43 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 if (instance == null || !instance.IsInGroup(gen2Tag.Group.Tag) || instance.Name == null || instance.Name != gen2Tag.Name)
                     continue;
-                if (!PortFlags.HasFlag(PortingFlags.Replace))
+                if (!PortingFlagIsSet(PortingFlags.Replace))
                     return instance;
                 else
                     destinationTag = instance;
             }
 
             object definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
-            definition = ConvertData(cacheStream, gen2CacheStream, resourceStreams, definition, definition, gen2Tag.Name);
+            definition = ConvertData(cacheStream, gen2CacheStream, resourceStreams, definition, definition, gen2Tag);
 
             switch (definition)
             {
-                case CollisionModelGen2 collisionModel:
+                case TagTool.Tags.Definitions.Gen2.CollisionModel collisionModel:
                     definition = ConvertCollisionModel(collisionModel);
                     break;
-                case ModelAnimationGraphGen2 modelAnimationGraph:
+                case TagTool.Tags.Definitions.Gen2.ModelAnimationGraph modelAnimationGraph:
                     definition = ConvertModelAnimationGraph(modelAnimationGraph);
                     break;
-                case PhysicsModelGen2 physicsModel:
+                case TagTool.Tags.Definitions.Gen2.PhysicsModel physicsModel:
                     definition = ConvertPhysicsModel(physicsModel);
                     break;
-                case RenderModelGen2 renderModel:
+                case TagTool.Tags.Definitions.Gen2.RenderModel renderModel:
                     definition = ConvertRenderModel(renderModel);
                     break;
-                case ModelGen2 Model:
-                    definition = ConvertModel(Model);
+                case TagTool.Tags.Definitions.Gen2.Model model:
+                    definition = ConvertModel(model, cacheStream);
                     break;
-                case BitmapGen2 Bitmap:
-                    definition = ConvertBitmap(Bitmap);
+                case TagTool.Tags.Definitions.Gen2.Bitmap bitmap:
+                    definition = ConvertBitmap(bitmap);
+                    break;
+                case TagTool.Tags.Definitions.Gen2.Crate crate:
+                    definition = ConvertObject(crate);
+                    break;
+                case TagTool.Tags.Definitions.Gen2.Weapon weapon:
+                    definition = ConvertObject(weapon);
+                    break;
+                case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
+                    definition = ConvertObject(vehicle);
                     break;
                 case ShaderGen2 shader:
                     definition = ConvertShader(shader, cacheStream, shader_template);
@@ -159,7 +164,7 @@ namespace TagTool.Commands.Porting.Gen2
             return destinationTag;
         }
 
-        public object ConvertData(Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, string blamTagName)
+        public object ConvertData(Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, CachedTag gen2Tag)
         {
             switch (data)
             {
@@ -171,7 +176,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case string _:  // no conversion necessary
                     return data;
                 case CachedTag tag:
-                    if (!PortFlags.HasFlag(PortingFlags.Recursive))
+                    if (!PortingFlagIsSet(PortingFlags.Recursive))
                     {
                         foreach (var instance in Cache.TagCache.FindAllInGroup(tag.Group.Tag))
                         {
@@ -185,15 +190,15 @@ namespace TagTool.Commands.Porting.Gen2
                         return null;
                     }
                     //prevent stack overflow from self-referencing tags
-                    if (tag.Name == blamTagName)
+                    if (tag.Name == gen2Tag.Name && tag.Group.Tag == gen2Tag.Group.Tag)
                         return null;
                     return ConvertTag(cacheStream, gen2CacheStream, resourceStreams, tag);
                 case Array _:
                 case IList _: // All arrays and List<T> implement IList, so we should just use that
-                    data = ConvertCollection(cacheStream, gen2CacheStream, resourceStreams, data as IList, definition, blamTagName);
+                    data = ConvertCollection(cacheStream, gen2CacheStream, resourceStreams, data as IList, definition, gen2Tag);
                     return data;
                 case TagStructure tagStructure: // much faster to pattern match a type than to check for custom attributes.
-                    return ConvertStructure(cacheStream, gen2CacheStream, resourceStreams, tagStructure, definition, blamTagName);
+                    return ConvertStructure(cacheStream, gen2CacheStream, resourceStreams, tagStructure, definition, gen2Tag);
                 case PlatformSignedValue _:
                 case PlatformUnsignedValue _:
                     return data;
@@ -205,7 +210,7 @@ namespace TagTool.Commands.Porting.Gen2
             return data;
         }
 
-        private IList ConvertCollection(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, IList data, object definition, string blamTagName)
+        private IList ConvertCollection(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, IList data, object definition, CachedTag gen2Tag)
         {
             // return early where possible
             if (data is null || data.Count == 0)
@@ -223,14 +228,14 @@ namespace TagTool.Commands.Porting.Gen2
             for (var i = 0; i < data.Count; i++)
             {
                 var oldValue = data[i];
-                var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
+                var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, gen2Tag);
                 data[i] = newValue;
             }
 
             return data;
         }
 
-        private T ConvertStructure<T>(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, string blamTagName) where T : TagStructure
+        private T ConvertStructure<T>(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, T data, object definition, CachedTag gen2Tag) where T : TagStructure
         {
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), Gen2Cache.Version, Gen2Cache.Platform))
             {
@@ -259,7 +264,7 @@ namespace TagTool.Commands.Porting.Gen2
                 }
 
                 // convert the field
-                var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
+                var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, gen2Tag);
                 tagFieldInfo.SetValue(data, newValue);
             }
 
@@ -370,7 +375,6 @@ namespace TagTool.Commands.Porting.Gen2
 		[Flags]
         public enum PortingFlags
         {
-            None = 0,
             /// <summary>
             /// Replace tags of the same name when porting.
             /// </summary>
@@ -382,7 +386,8 @@ namespace TagTool.Commands.Porting.Gen2
             Recursive = 1 << 1,
 
             // No [PortingFlagDescription] here means we'll flag names as the description.
-            Default = None
+            Default = Recursive
         }
+        public bool PortingFlagIsSet(PortingFlags flag) => (PortFlags & flag) != 0;
     }
 }
