@@ -9,9 +9,6 @@ using TagTool.Tags.Definitions;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Cache.Gen2;
-using VehicleGen2 = TagTool.Tags.Definitions.Gen2.Vehicle;
-using WeaponGen2 = TagTool.Tags.Definitions.Gen2.Weapon;
-using CrateGen2 = TagTool.Tags.Definitions.Gen2.Crate;
 using System.IO;
 using TagTool.Commands.Common;
 
@@ -23,24 +20,28 @@ namespace TagTool.Commands.Porting.Gen2
         {
             switch (gen2Tag)
             {
-                case CrateGen2 crate:
+                case TagTool.Tags.Definitions.Gen2.Crate crate:
                     Crate newcrate = new Crate();
-                    ConvertStructure(crate, newcrate, typeof(CrateGen2), typeof(Crate));
+                    TranslateTagStructure(crate, newcrate, typeof(TagTool.Tags.Definitions.Gen2.Crate), typeof(Crate));
                     return newcrate;
-                case WeaponGen2 weapon:
+                case TagTool.Tags.Definitions.Gen2.Scenery scenery:
+                    Scenery newscenery = new Scenery();
+                    TranslateTagStructure(scenery, newscenery, typeof(TagTool.Tags.Definitions.Gen2.Scenery), typeof(Scenery));
+                    return newscenery;
+                case TagTool.Tags.Definitions.Gen2.Weapon weapon:
                     Weapon newweapon = new Weapon();
-                    ConvertStructure(weapon, newweapon, typeof(WeaponGen2), typeof(Weapon));
+                    TranslateTagStructure(weapon, newweapon, typeof(TagTool.Tags.Definitions.Gen2.Weapon), typeof(Weapon));
                     return newweapon;
-                case VehicleGen2 vehicle:
+                case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                     Vehicle newvehicle = new Vehicle();
-                    ConvertStructure(vehicle, newvehicle, typeof(VehicleGen2), typeof(Vehicle));
+                    TranslateTagStructure(vehicle, newvehicle, typeof(TagTool.Tags.Definitions.Gen2.Vehicle), typeof(Vehicle));
                     return newvehicle;
                 default:
                     return null;
             }
         }
 
-        public Weapon ConvertWeapon(WeaponGen2 gen2Tag)
+        public Weapon ConvertWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag)
         {
             Weapon gameObject = new Weapon
             {

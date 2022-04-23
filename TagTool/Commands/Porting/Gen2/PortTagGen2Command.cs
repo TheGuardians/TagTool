@@ -93,6 +93,7 @@ namespace TagTool.Commands.Porting.Gen2
                 "bloc",
                 "vehi",
                 "weap",
+                "scen",
                 "shad"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
@@ -137,6 +138,9 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
                 case TagTool.Tags.Definitions.Gen2.Crate crate:
                     definition = ConvertObject(crate);
+                    break;
+                case TagTool.Tags.Definitions.Gen2.Scenery scenery:
+                    definition = ConvertObject(scenery);
                     break;
                 case TagTool.Tags.Definitions.Gen2.Weapon weapon:
                     definition = ConvertObject(weapon);

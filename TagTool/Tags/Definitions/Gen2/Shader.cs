@@ -151,7 +151,8 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagStructure(Size = 0xC)]
             public class ShaderPostprocessBitmapNewBlock : TagStructure
             {
-                public int BitmapGroup;
+                [TagField(Flags = TagFieldFlags.Short)]
+                public CachedTag Bitmap;
                 public int BitmapIndex;
                 public float LogBitmapDimension;
             }

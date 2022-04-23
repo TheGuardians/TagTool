@@ -7,7 +7,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
     {
-        public void ConvertStructure(TagStructure input, TagStructure output, Type inputtype, Type outputtype)
+        public void TranslateTagStructure(TagStructure input, TagStructure output, Type inputtype, Type outputtype)
         {
             var inputinfo = TagStructure.GetTagStructureInfo(inputtype, Gen2Cache.Version, Gen2Cache.Platform);
             var outputinfo = TagStructure.GetTagStructureInfo(outputtype, Cache.Version, Cache.Platform);
@@ -26,14 +26,14 @@ namespace TagTool.Commands.Porting.Gen2
                         else if (tagFieldInfo.FieldType == typeof(TagStructure) &&
                             outputFieldInfo.FieldType == typeof(TagStructure))
                         {
-                            ConvertStructure((TagStructure)tagFieldInfo.GetValue(input), (TagStructure)outputFieldInfo.GetValue(output), tagFieldInfo.FieldType, outputFieldInfo.FieldType);
+                            TranslateTagStructure((TagStructure)tagFieldInfo.GetValue(input), (TagStructure)outputFieldInfo.GetValue(output), tagFieldInfo.FieldType, outputFieldInfo.FieldType);
                         }
                         //if its a tagblock, call convertlist to iterate through and convert each one and return a converted list
                         else if (tagFieldInfo.FieldType.IsGenericType && tagFieldInfo.FieldType.GetGenericTypeDefinition() == typeof(List<>) &&
                             outputFieldInfo.FieldType.IsGenericType && tagFieldInfo.FieldType.GetGenericTypeDefinition() == typeof(List<>))
                         {
                             object inputlist = tagFieldInfo.GetValue(input);
-                            outputFieldInfo.SetValue(output, ConvertList(inputlist, tagFieldInfo, outputFieldInfo));
+                            outputFieldInfo.SetValue(output, TranslateList(inputlist, tagFieldInfo, outputFieldInfo));
                         }
                         //if its an enum, try to parse the value
                         else if (tagFieldInfo.FieldType.BaseType == typeof(Enum) &&
@@ -50,7 +50,7 @@ namespace TagTool.Commands.Porting.Gen2
                 }
             }
         }
-        public object ConvertList(object inputlist, TagFieldInfo inputFieldInfo, TagFieldInfo outputFieldInfo)
+        private object TranslateList(object inputlist, TagFieldInfo inputFieldInfo, TagFieldInfo outputFieldInfo)
         {
             IEnumerable<object> enumerable = inputlist as IEnumerable<object>;
             if (enumerable == null)
@@ -63,12 +63,12 @@ namespace TagTool.Commands.Porting.Gen2
             foreach (object item in enumerable.OfType<object>())
             {
                 var outputelement = Activator.CreateInstance(outputelementType);
-                ConvertStructure((TagStructure)item, (TagStructure)outputelement, inputelementType, outputelementType);
+                TranslateTagStructure((TagStructure)item, (TagStructure)outputelement, inputelementType, outputelementType);
                 addMethod.Invoke(outputlist, new[] { outputelement });
             }
             return outputlist;
         }
-        public static bool EnumTryParse<T>(string input, out T theEnum, Type enumType)
+        private static bool EnumTryParse<T>(string input, out T theEnum, Type enumType)
         {
             string setstring = "";
             bool result = false;
