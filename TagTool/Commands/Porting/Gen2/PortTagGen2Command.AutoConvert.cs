@@ -23,10 +23,12 @@ namespace TagTool.Commands.Porting.Gen2
                             outputFieldInfo.SetValue(output, tagFieldInfo.GetValue(input));
                         }
                         //if its a sub-tagstructure, iterate into it
-                        else if (tagFieldInfo.FieldType == typeof(TagStructure) &&
-                            outputFieldInfo.FieldType == typeof(TagStructure))
+                        else if (tagFieldInfo.FieldType.BaseType == typeof(TagStructure) &&
+                            outputFieldInfo.FieldType.BaseType == typeof(TagStructure))
                         {
-                            TranslateTagStructure((TagStructure)tagFieldInfo.GetValue(input), (TagStructure)outputFieldInfo.GetValue(output), tagFieldInfo.FieldType, outputFieldInfo.FieldType);
+                            var outstruct = Activator.CreateInstance(outputFieldInfo.FieldType);
+                            TranslateTagStructure((TagStructure)tagFieldInfo.GetValue(input), (TagStructure)outstruct, tagFieldInfo.FieldType, outputFieldInfo.FieldType);
+                            outputFieldInfo.SetValue(output, outstruct);
                         }
                         //if its a tagblock, call convertlist to iterate through and convert each one and return a converted list
                         else if (tagFieldInfo.FieldType.IsGenericType && tagFieldInfo.FieldType.GetGenericTypeDefinition() == typeof(List<>) &&

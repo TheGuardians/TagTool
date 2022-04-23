@@ -23,40 +23,46 @@ namespace TagTool.Commands.Porting.Gen2
                 case TagTool.Tags.Definitions.Gen2.Crate crate:
                     Crate newcrate = new Crate();
                     TranslateTagStructure(crate, newcrate, typeof(TagTool.Tags.Definitions.Gen2.Crate), typeof(Crate));
+                    newcrate.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Crate };
                     return newcrate;
                 case TagTool.Tags.Definitions.Gen2.Scenery scenery:
                     Scenery newscenery = new Scenery();
                     TranslateTagStructure(scenery, newscenery, typeof(TagTool.Tags.Definitions.Gen2.Scenery), typeof(Scenery));
+                    newscenery.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
                     return newscenery;
                 case TagTool.Tags.Definitions.Gen2.Weapon weapon:
                     Weapon newweapon = new Weapon();
                     TranslateTagStructure(weapon, newweapon, typeof(TagTool.Tags.Definitions.Gen2.Weapon), typeof(Weapon));
-                    return newweapon;
+                    newweapon.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Weapon };
+                    return FixupWeapon(weapon, newweapon);
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                     Vehicle newvehicle = new Vehicle();
                     TranslateTagStructure(vehicle, newvehicle, typeof(TagTool.Tags.Definitions.Gen2.Vehicle), typeof(Vehicle));
+                    newvehicle.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle };
                     return newvehicle;
+                case TagTool.Tags.Definitions.Gen2.Projectile projectile:
+                    Projectile newprojectile = new Projectile();
+                    TranslateTagStructure(projectile, newprojectile, typeof(TagTool.Tags.Definitions.Gen2.Projectile), typeof(Projectile));
+                    newprojectile.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Projectile };
+                    return newprojectile;
                 default:
                     return null;
             }
         }
 
-        public Weapon ConvertWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag)
+        public Weapon FixupWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag, Weapon newweapon)
         {
-            Weapon gameObject = new Weapon
+            newweapon.FirstPerson = new List<Weapon.FirstPersonBlock>();
+            foreach(var firstperson in gen2Tag.PlayerInterface.FirstPerson)
             {
-                ObjectFlags = (ObjectDefinitionFlags)gen2Tag.Flags,
-                BoundingOffset = gen2Tag.BoundingOffset,
-                BoundingRadius = gen2Tag.BoundingRadius,
-                AccelerationScale = gen2Tag.AccelerationScale,
-                LightmapShadowMode = (GameObject.LightmapShadowModeValue)gen2Tag.LightmapShadowMode,
-                SweetenerSize = (GameObject.SweetenerSizeValue)gen2Tag.SweetenerSize, //TODO: default enum value added need to account for this
-                DynamicLightSphereRadius = gen2Tag.DynamicLightSphereRadius,
-                DynamicLightSphereOffset = gen2Tag.DynamicLightSphereOffset,
+                newweapon.FirstPerson.Add(new Weapon.FirstPersonBlock
+                {
+                    FirstPersonModel = firstperson.FirstPersonModel,
+                    FirstPersonAnimations = firstperson.FirstPersonAnimations
+                });
+            }
 
-            };
-
-            return gameObject;
+            return newweapon;
         }
 
         

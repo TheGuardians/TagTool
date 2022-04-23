@@ -277,8 +277,8 @@ namespace TagTool.Tags.Definitions.Gen2
         public WeaponTrackingStructBlock Tracking;
         public WeaponInterfaceStructBlock PlayerInterface;
         public List<PredictedResourceBlock1> PredictedResources1;
-        public List<Magazines> Magazines1;
-        public List<WeaponTriggers> NewTriggers;
+        public List<Magazine> Magazines;
+        public List<WeaponTrigger> Triggers;
         public List<WeaponBarrels> Barrels;
         [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
         public byte[] Padding6;
@@ -802,7 +802,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x5C)]
-        public class Magazines : TagStructure
+        public class Magazine : TagStructure
         {
             public FlagsValue Flags;
             public short RoundsRecharged; // per second
@@ -834,7 +834,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public CachedTag ChamberingEffect;
             [TagField(ValidTags = new [] { "jpt!" })]
             public CachedTag ChamberingDamageEffect;
-            public List<MagazineObjects> Magazines1;
+            public List<MagazineObject> MagazineObjects;
             
             [Flags]
             public enum FlagsValue : uint
@@ -844,7 +844,7 @@ namespace TagTool.Tags.Definitions.Gen2
             }
             
             [TagStructure(Size = 0xC)]
-            public class MagazineObjects : TagStructure
+            public class MagazineObject : TagStructure
             {
                 public short Rounds;
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
@@ -855,7 +855,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [TagStructure(Size = 0x40)]
-        public class WeaponTriggers : TagStructure
+        public class WeaponTrigger : TagStructure
         {
             public FlagsValue Flags;
             public InputValue Input;
