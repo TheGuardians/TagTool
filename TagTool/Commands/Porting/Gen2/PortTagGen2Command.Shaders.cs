@@ -78,56 +78,116 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 case "tex_bump":
                 case "tex_bump_active_camo":
-                    args[2] = "1";
-                    args[5] = "2";
-                    break;
-                case "tex_bump_env":
-                    args[2] = "1";
-                    args[5] = "2";
-                    args[6] = "1";
-
-                    if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                case "tex_bump_shiny":
                     {
+                        args[2] = "1";
+                        args[5] = "2";
+
                         h2_vertex_constants[0] = "bump_map";
                         h2_vertex_constants[1] = "base_map";
                         h2_vertex_constants[2] = "detail_map";
                         h2_vertex_constants[3] = "\0";
-                    }
-                    else
-                    {
-                        h2_vertex_constants[0] = "detail_map";
-                        h2_vertex_constants[1] = "base_map";
-                        h2_vertex_constants[2] = "bump_map";
-                        h2_vertex_constants[3] = "\0";
-                    }
 
-                    if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+
+                        h2_pixel_constants[0] = "normal_specular_tint";
+                        h2_pixel_constants[1] = "glancing_specular_tint";
+                        h2_pixel_constants[2] = "\0";
+
+                        h2_bitmap_order[0] = "bump_map";
+                        h2_bitmap_order[1] = "alpha_test_map";
+                        h2_bitmap_order[2] = "base_map";
+                        h2_bitmap_order[3] = "detail_map";
+                        h2_bitmap_order[4] = "\0";
+                    }
+                    break;
+                case "tex_bump_env":
                     {
+                        args[2] = "1";
+                        args[5] = "2";
+                        args[6] = "1";
+
+                        if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                        {
+                            h2_vertex_constants[0] = "bump_map";
+                            h2_vertex_constants[1] = "base_map";
+                            h2_vertex_constants[2] = "detail_map";
+                            h2_vertex_constants[3] = "\0";
+                        }
+                        else
+                        {
+                            h2_vertex_constants[0] = "detail_map";
+                            h2_vertex_constants[1] = "base_map";
+                            h2_vertex_constants[2] = "bump_map";
+                            h2_vertex_constants[3] = "\0";
+                        }
+
+                        if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                        {
+                            h2_pixel_constants[0] = "normal_specular_tint";
+                            h2_pixel_constants[1] = "glancing_specular_tint";
+                            h2_pixel_constants[2] = "environment_map_specular_contribution";
+                            h2_pixel_constants[3] = "";                     // Env Glancing Tint Brightness dosent exist in h3
+                            h2_pixel_constants[4] = "env_tint_color";
+                            h2_pixel_constants[5] = "\0";                   // Env Glancing Tint Colour dosent exist in h3
+                        }
+                        else
+                        {
+                            h2_pixel_constants[0] = "";                     // Blank value
+                            h2_pixel_constants[1] = "normal_specular_tint";
+                            h2_pixel_constants[2] = "glancing_specular_tint";
+                            h2_pixel_constants[3] = "environment_map_specular_contribution";
+                            h2_pixel_constants[4] = "";                     // Env Glancing Tint Brightness dosent exist in h3
+                            h2_pixel_constants[5] = "env_tint_color";
+                            h2_pixel_constants[6] = "\0";                   // Env Glancing Tint Colour dosent exist in h3
+                        }
+
+                        h2_bitmap_order[0] = "bump_map";
+                        h2_bitmap_order[1] = "alpha_test_map";
+                        h2_bitmap_order[2] = "base_map";
+                        h2_bitmap_order[3] = "detail_map";
+                        h2_bitmap_order[4] = "environment_map";
+                        h2_bitmap_order[5] = "\0";
+                        break;
+                    }
+                case "tex_bump_env_two_change_color_indexed":
+                    {
+                        args[1] = "3";
+                        args[2] = "1";
+                        args[5] = "2";
+                        args[6] = "1";
+
+                        if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                        {
+                            h2_vertex_constants[0] = "bump_map";
+                            h2_vertex_constants[1] = "base_map";
+                            h2_vertex_constants[2] = "detail_map";
+                            h2_vertex_constants[3] = "change_color_map";
+                            h2_vertex_constants[4] = "\0";
+                        }
+                        else
+                        {
+                            h2_vertex_constants[0] = "detail_map";
+                            h2_vertex_constants[1] = "base_map";
+                            h2_vertex_constants[2] = "bump_map";
+                            h2_vertex_constants[3] = "change_color_map";
+                            h2_vertex_constants[4] = "\0";
+                        }
+
                         h2_pixel_constants[0] = "normal_specular_tint";
                         h2_pixel_constants[1] = "glancing_specular_tint";
                         h2_pixel_constants[2] = "environment_map_specular_contribution";
-                        h2_pixel_constants[3] = "";                     // Env Glancing Tint Brightness dosent exist in h3
+                        h2_pixel_constants[3] = "";                     // Env Midrange Tint Colour dosent exist in h3
                         h2_pixel_constants[4] = "env_tint_color";
                         h2_pixel_constants[5] = "\0";                   // Env Glancing Tint Colour dosent exist in h3
-                    }
-                    else
-                    {
-                        h2_pixel_constants[0] = "";                     // Blank value
-                        h2_pixel_constants[1] = "normal_specular_tint";
-                        h2_pixel_constants[2] = "glancing_specular_tint";
-                        h2_pixel_constants[3] = "environment_map_specular_contribution";
-                        h2_pixel_constants[4] = "";                     // Env Glancing Tint Brightness dosent exist in h3
-                        h2_pixel_constants[5] = "env_tint_color";
-                        h2_pixel_constants[6] = "\0";                   // Env Glancing Tint Colour dosent exist in h3
-                    }
 
-                    h2_bitmap_order[0] = "bump_map";
-                    h2_bitmap_order[1] = "alpha_test_map";
-                    h2_bitmap_order[2] = "base_map";
-                    h2_bitmap_order[3] = "detail_map";
-                    h2_bitmap_order[4] = "environment_map";
-                    h2_bitmap_order[5] = "\0";
-                    break;
+                        h2_bitmap_order[0] = "bump_map";
+                        h2_bitmap_order[1] = "base_map";
+                        h2_bitmap_order[2] = "detail_map";
+                        h2_bitmap_order[3] = "change_color_map";
+                        h2_bitmap_order[4] = "environment_map";
+                        h2_bitmap_order[5] = "\0";
+                        break;
+                    }
                 default:
                     break;
             }
@@ -183,25 +243,11 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 }
 
-                // Assignment Code
-                // If tag with the same name exists in cache assign it to the bitmap field,
-                // If it dosent exist just use the default grid texture
-                if (Cache.TagCache.TryGetTag(current_type, out tag))
+                Shader.RenderMethodPostprocessBlock.TextureConstant newTextureConstant = new Shader.RenderMethodPostprocessBlock.TextureConstant
                 {
-                    Shader.RenderMethodPostprocessBlock.TextureConstant newTextureConstant = new Shader.RenderMethodPostprocessBlock.TextureConstant
-                    {
-                        Bitmap = Cache.TagCacheGenHO.GetTag(current_type)
-                    };
-                    newPostprocessBlock.TextureConstants.Add(newTextureConstant);
-                }
-                else
-                {
-                    Shader.RenderMethodPostprocessBlock.TextureConstant newTextureConstant = new Shader.RenderMethodPostprocessBlock.TextureConstant
-                    {
-                        Bitmap = Cache.TagCacheGenHO.GetTag(@"objects\bitmaps\default\grid_256x256.bitm")
-                    };
-                    newPostprocessBlock.TextureConstants.Add(newTextureConstant);
-                }
+                    Bitmap = Cache.TagCacheGenHO.GetTag(current_type)
+                };
+                newPostprocessBlock.TextureConstants.Add(newTextureConstant);
             }
 
             // Declare Real Parameters and "try" to convert the similar counterparts in h2 to h3 equivalents

@@ -148,7 +148,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                     definition = ConvertObject(vehicle);
                     break;
-                case ShaderGen2 shader:
+                case TagTool.Tags.Definitions.Gen2.Shader shader:
                     definition = ConvertShader(shader, cacheStream, shader_template);
                     break;
                 default:
