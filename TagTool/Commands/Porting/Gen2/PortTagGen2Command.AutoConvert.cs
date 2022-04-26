@@ -43,7 +43,9 @@ namespace TagTool.Commands.Porting.Gen2
                         outputFieldInfo.FieldType.IsGenericType && tagFieldInfo.FieldType.GetGenericTypeDefinition() == typeof(List<>))
                     {
                         object inputlist = tagFieldInfo.GetValue(input);
-                        outputFieldInfo.SetValue(output, TranslateList(inputlist, tagFieldInfo, outputFieldInfo));
+                        object outputlist = Activator.CreateInstance(outputFieldInfo.FieldType);
+                        TranslateList(inputlist, outputlist, tagFieldInfo.FieldType, outputFieldInfo.FieldType);
+                        outputFieldInfo.SetValue(output, outputlist);
                     }
                     //if its an enum, try to parse the value
                     else if (tagFieldInfo.FieldType.BaseType == typeof(Enum) &&
@@ -62,23 +64,21 @@ namespace TagTool.Commands.Porting.Gen2
                 }
             }
         }
-        private object TranslateList(object inputlist, TagFieldInfo inputFieldInfo, TagFieldInfo outputFieldInfo)
+        public void TranslateList(object input, object output, Type inputtype, Type outputtype)
         {
-            IEnumerable<object> enumerable = inputlist as IEnumerable<object>;
+            IEnumerable<object> enumerable = input as IEnumerable<object>;
             if (enumerable == null)
                 throw new InvalidOperationException("listData must be enumerable");
 
-            var outputlist = Activator.CreateInstance(outputFieldInfo.FieldType);
-            Type outputelementType = outputFieldInfo.FieldType.GenericTypeArguments[0];
-            Type inputelementType = inputFieldInfo.FieldType.GenericTypeArguments[0];
-            var addMethod = outputFieldInfo.FieldType.GetMethod("Add");
+            Type outputelementType = outputtype.GenericTypeArguments[0];
+            Type inputelementType = inputtype.GenericTypeArguments[0];
+            var addMethod = outputtype.GetMethod("Add");
             foreach (object item in enumerable.OfType<object>())
             {
                 var outputelement = Activator.CreateInstance(outputelementType);
                 TranslateTagStructure((TagStructure)item, (TagStructure)outputelement, inputelementType, outputelementType);
-                addMethod.Invoke(outputlist, new[] { outputelement });
+                addMethod.Invoke(output, new[] { outputelement });
             }
-            return outputlist;
         }
         private static bool EnumTryParse<T>(string input, out T theEnum, Type enumType)
         {

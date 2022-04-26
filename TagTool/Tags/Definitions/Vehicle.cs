@@ -7,7 +7,6 @@ using TagTool.Havok;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x114, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x140, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x148, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "vehicle", Tag = "vehi", Size = 0x17C, MinVersion = CacheVersion.HaloReach)]
@@ -15,65 +14,17 @@ namespace TagTool.Tags.Definitions
     {
         public VehicleFlagBits VehicleFlags; // int
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public VehiclePhysicsType PhysicsType; // short
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public VehiclePhysicsControlType ControlType; // short
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float MaximumForwardSpeed;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float MaximumReverseSpeed;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float SpeedAcceleration;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float SpeedDeceleration;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float MaximumLeftTurn;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float MaximumRightTurn;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float WheelCircumference;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float TurnRate;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float BlurSpeed;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public VehiclePhysicsSpecificType PhysicsSpecificType;
-
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public VehiclePhysicsTypes PhysicsTypes;
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public HavokVehiclePhysics HavokPhysicsNew;
+        public HavokVehiclePhysicsBlock HavokVehiclePhysics;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<UnitTrickDefinitionBlock> Tricks;
 
         public PlayerTrainingVehicleTypeValue PlayerTrainingVehicleType;
-        [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
-        public byte[] Unused2 = new byte[1];
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public StringId FlipOverMessageOld;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float FlipTimeOld;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float SpeedTurnPenaltyPower;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float SpeedTurnPenalty;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float MaximumLeftSlide;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float MaximumRightSlide;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float SlideAcceleration;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float SlideDeceleration;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public Bounds<float> FlippingAngularVelocityRangeOld;
 
         public VehicleSizeValue VehicleSize;
-        [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo2Vista)]
-        public byte[] Unused3 = new byte[1];
 
         [TagField(Flags = Padding, Length = 2, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused4 = new byte[2];
@@ -86,34 +37,13 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public Bounds<float> FlippingAngularVelocityRangeNew;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public RealEulerAngles2d FixedGunOffset;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public VehicleSteeringControl Steering;
-
         public float CrouchTransitionTime; // seconds
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float EngineUnknown;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float EngineMomentum;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float EngineMaximumAngularVelocity;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<Gear> Gears;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float FlyingTorqueScale;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float Hoojytsu;
 
         public float SeatEntranceAccelerationScale; // how much do we scale the force the vehicle the applies down on the seat when he enters. 0 == no acceleration
         public float SeatExitAccelerationScale; // how much do we scale the force the vehicle the applies down on the seat when he exits. 0 == no acceleration
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float AirFrictionDeceleration;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public float ThrustScale;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public float FlipTimeNew;
@@ -123,77 +53,33 @@ namespace TagTool.Tags.Definitions
 
         public CachedTag SuspensionSound;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public CachedTag CrashSound;
-
         public CachedTag SpecialEffect;
         public CachedTag DriverBoostDamageEffectOrResponse;
         public CachedTag RiderBoostDamageEffectOrResponse;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public HavokVehiclePhysics HavokPhysicsOld;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown31;
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown32;
 
-        [TagStructure(Size = 0x4)]
-        public class VehicleFlagBits : TagStructure
+        [Flags]
+        public enum VehicleFlagBits : int
         {
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public Gen2Bits Gen2;
-
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
-            public Gen3Bits Gen3;
-
-            [Flags]
-            public enum Gen2Bits : int
-            {
-                None,
-                SpeedWakesPhysics = 1 << 0,
-                TurnWakesPhysics = 1 << 1,
-                DriverPowerWakesPhysics = 1 << 2,
-                GunnerPowerWakesPhysics = 1 << 3,
-                ControlOppositeSpeedSetsBrake = 1 << 4,
-                SlideWakesPhysics = 1 << 5,
-                KillsRidersAtTerminalVelocity = 1 << 6,
-                CausesCollisionDamage = 1 << 7,
-                AiWeaponCannotRotate = 1 << 8,
-                AiDoesNotRequireDriver = 1 << 9,
-                AiUnused = 1 << 10,
-                AiDriverEnable = 1 << 11,
-                AiDriverFlying = 1 << 12,
-                AiDriverCanSidestep = 1 << 13,
-                AiDriverHovering = 1 << 14,
-                VehicleSteersDirectly = 1 << 15,
-                Bit16 = 1 << 16,
-                HasEBrake = 1 << 17,
-                NoncombatVehicle = 1 << 18,
-                NoFrictionWithDriver = 1 << 19,
-                CanTriggerAutomaticOpeningDoors = 1 << 20,
-                AutoaimWhenTeamless = 1 << 21
-            }
-
-            [Flags]
-            public enum Gen3Bits : int
-            {
-                None,
-                NoFrictionWdriver = 1 << 0,
-                CanTriggerAutomaticOpeningDoors = 1 << 1,
-                AutoaimWhenTeamless = 1 << 2,
-                AiWeaponCannotRotate = 1 << 3,
-                AiDoesNotRequireDriver = 1 << 4,
-                AiDriverEnable = 1 << 5,
-                AiDriverFlying = 1 << 6,
-                AiDriverCansidestep = 1 << 7,
-                AiDriverHovering = 1 << 8,
-                NoncombatVehicle = 1 << 9,
-                CausesCollisionDamage = 1 << 10,
-                HugeVehiclePhysicsGroup = 1 << 11,
-                EnableWheeliepoppingHack = 1 << 12,
-                AiAutoTurret = 1 << 13
-            }
+            None,
+            NoFrictionWdriver = 1 << 0,
+            CanTriggerAutomaticOpeningDoors = 1 << 1,
+            AutoaimWhenTeamless = 1 << 2,
+            AiWeaponCannotRotate = 1 << 3,
+            AiDoesNotRequireDriver = 1 << 4,
+            AiDriverEnable = 1 << 5,
+            AiDriverFlying = 1 << 6,
+            AiDriverCansidestep = 1 << 7,
+            AiDriverHovering = 1 << 8,
+            NoncombatVehicle = 1 << 9,
+            CausesCollisionDamage = 1 << 10,
+            HugeVehiclePhysicsGroup = 1 << 11,
+            EnableWheeliepoppingHack = 1 << 12,
+            AiAutoTurret = 1 << 13
         }
 
         public enum VehiclePhysicsType : short
@@ -252,21 +138,11 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x4)]
         public class HavokVehiclePhysicsFlags : TagStructure
         {
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public Halo2Bits Halo2;
-
             [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
             public Halo3Bits Halo3;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public ReachBits Reach;
-
-            [Flags]
-            public enum Halo2Bits : uint
-            {
-                None,
-                Invalid = 1 << 0
-            }
 
             [Flags]
             public enum Halo3Bits : uint
@@ -284,10 +160,9 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x54, MinVersion = CacheVersion.HaloReach)]
-        public class HavokVehiclePhysics : TagStructure
+        public class HavokVehiclePhysicsBlock : TagStructure
         {
             public HavokVehiclePhysicsFlags Flags; // int
 
@@ -297,15 +172,6 @@ namespace TagTool.Tags.Definitions
             public float GroundMovingFriction;  // this sucks.  for friction based vehicles only
             public float GroundMaximumSlope0;  // degrees 0-90
             public float GroundMaximumSlope1;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public float Unknown1;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public float Unknown2;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public float Unknown3;
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public float Unknown4;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public float MaximumNormalForceContribution; // 0 defaults to 3, this prevents the physics from becoming unstable when hucked against a surface
@@ -1099,11 +965,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x8)]
         public class VehicleSteeringControl : TagStructure
         {
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-            public float OverdampenCuspAngleOld;
-            [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public Angle OverdampenCuspAngle;
-
             public float OverdampenExponent;
         }
 

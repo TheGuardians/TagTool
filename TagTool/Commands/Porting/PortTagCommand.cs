@@ -1463,12 +1463,6 @@ namespace TagTool.Commands.Porting
                 case BarrelFlags barrelflags:
                     return ConvertBarrelFlags(barrelflags);
 
-                case Vehicle.VehicleFlagBits vehicleFlags:
-                    return ConvertVehicleFlags(vehicleFlags);
-
-                case Vehicle.HavokVehiclePhysicsFlags havokVehicleFlags:
-                    return ConvertHavokVehicleFlags(havokVehicleFlags);
-
                 case Model.Target.TargetLockOnFlags targetflags:
                     return ConvertTargetFlags(targetflags);
 
@@ -1592,10 +1586,6 @@ namespace TagTool.Commands.Porting
 
                 case RenderMaterial.Property property:
                     property.IntValue = property.ShortValue;
-                    break;
-
-                case Vehicle.VehicleSteeringControl steering:
-                    steering.OverdampenCuspAngle = Angle.FromDegrees(steering.OverdampenCuspAngleOld);
                     break;
             }
 
@@ -1835,49 +1825,6 @@ namespace TagTool.Commands.Porting
 		{
 			return TagFunction.ConvertTagFunction(CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian, function);
 		}
-
-        private Vehicle.VehicleFlagBits ConvertVehicleFlags(Vehicle.VehicleFlagBits flags)
-        {
-            if (BlamCache.Version <= CacheVersion.Halo2Vista)
-            {
-                var gen2Values = Enum.GetValues(typeof(Vehicle.VehicleFlagBits.Gen2Bits));
-                var gen3Values = Enum.GetValues(typeof(Vehicle.VehicleFlagBits.Gen3Bits));
-
-                flags.Gen3 = flags.Gen2.ConvertLexical<Vehicle.VehicleFlagBits.Gen3Bits>();
-
-                foreach (var gen2 in gen2Values)
-                {
-                    if (!flags.Gen2.HasFlag((Enum)gen2))
-                        continue;
-
-                    var wasSet = false;
-
-                    foreach (var gen3 in gen3Values)
-                    {
-                        if (gen2.ToString() == gen3.ToString())
-                        {
-                            flags.Gen3 |= (dynamic)gen3;
-                            wasSet = true;
-                            break;
-                        }
-                    }
-
-                    if (!wasSet)
-                        new TagToolWarning($"Vehicle flag not found in gen3: {gen2}");
-                }  
-            }
-
-            return flags;
-        }
-
-        private Vehicle.HavokVehiclePhysicsFlags ConvertHavokVehicleFlags(Vehicle.HavokVehiclePhysicsFlags flags)
-        {
-            if (BlamCache.Version <= CacheVersion.Halo2Vista)
-                if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            return flags;
-        }
 
         private GameObjectType ConvertGameObjectType(GameObjectType objectType)
 		{

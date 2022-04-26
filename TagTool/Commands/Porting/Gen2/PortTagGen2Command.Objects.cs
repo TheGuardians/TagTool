@@ -39,7 +39,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Vehicle newvehicle = new Vehicle();
                     TranslateTagStructure(vehicle, newvehicle, typeof(TagTool.Tags.Definitions.Gen2.Vehicle), typeof(Vehicle));
                     newvehicle.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle };
-                    return newvehicle;
+                    return FixupVehicle(vehicle, newvehicle);
                 case TagTool.Tags.Definitions.Gen2.Projectile projectile:
                     Projectile newprojectile = new Projectile();
                     TranslateTagStructure(projectile, newprojectile, typeof(TagTool.Tags.Definitions.Gen2.Projectile), typeof(Projectile));
@@ -67,94 +67,96 @@ namespace TagTool.Commands.Porting.Gen2
 
         public Vehicle FixupVehicle(TagTool.Tags.Definitions.Gen2.Vehicle gen2Tag, Vehicle vehi)
         {
-            vehi.FlipOverMessageNew = ConvertStringId(vehi.FlipOverMessageOld);
-            vehi.FlipTimeNew = vehi.FlipTimeOld;
-            vehi.FlippingAngularVelocityRangeNew = vehi.FlippingAngularVelocityRangeOld;
-            vehi.HavokPhysicsNew = vehi.HavokPhysicsOld;
-
+            vehi.FlipOverMessageNew = gen2Tag.FlipMessage;
+            vehi.FlipTimeNew = gen2Tag.TurnScale;
+            vehi.FlippingAngularVelocityRangeNew = new Bounds<float> ( gen2Tag.MinimumFlippingAngularVelocity, gen2Tag.MaximumFlippingAngularVelocity );
             vehi.PhysicsTypes = new Vehicle.VehiclePhysicsTypes();
 
-            switch (vehi.PhysicsType)
+            switch (gen2Tag.PhysicsType)
             {
-                case Vehicle.VehiclePhysicsType.HumanTank:
-                    vehi.PhysicsTypes.HumanTank = new List<Vehicle.HumanTankPhysics>
-                            {
-                                new Vehicle.HumanTankPhysics
-                                {
-                                    ForwardArc = Angle.FromDegrees(100.0f),
-                                    ForwardTurnScale = 0.4f,
-                                    ReverseTurnScale = 1.0f,
-                                    MaximumLeftDifferential = vehi.MaximumLeftSlide,
-                                    MaximumRightDifferential = vehi.MaximumRightSlide,
-                                    DifferentialAcceleration = vehi.SlideAcceleration,
-                                    DifferentialDeceleration = vehi.SlideDeceleration,
-                                    MaximumLeftReverseDifferential = vehi.MaximumLeftSlide,
-                                    MaximumRightReverseDifferential = vehi.MaximumRightSlide,
-                                    DifferentialReverseAcceleration = vehi.SlideAcceleration,
-                                    DifferentialReverseDeceleration = vehi.SlideDeceleration,
-                                    Engine = new Vehicle.EnginePhysics
-                                    {
-                                        EngineMomentum = vehi.EngineMomentum,
-                                        EngineMaximumAngularVelocity = vehi.EngineMaximumAngularVelocity,
-                                        Gears = vehi.Gears,
-                                        GearShiftSound = null
-                                    },
-                                    WheelCircumference = vehi.WheelCircumference,
-                                    GravityAdjust = 0.45f
-                                }
-                            };
+                case TagTool.Tags.Definitions.Gen2.Vehicle.TypeValue.HumanTank:
+                    vehi.PhysicsTypes.HumanTank = new List<Vehicle.HumanTankPhysics>();
+                    var newtank = new Vehicle.HumanTankPhysics
+                    {
+                        ForwardArc = Angle.FromDegrees(100.0f),
+                        ForwardTurnScale = 0.4f,
+                        ReverseTurnScale = 1.0f,
+                        MaximumLeftDifferential = gen2Tag.MaximumLeftSlide,
+                        MaximumRightDifferential = gen2Tag.MaximumRightSlide,
+                        DifferentialAcceleration = gen2Tag.SlideAcceleration,
+                        DifferentialDeceleration = gen2Tag.SlideDeceleration,
+                        MaximumLeftReverseDifferential = gen2Tag.MaximumLeftSlide,
+                        MaximumRightReverseDifferential = gen2Tag.MaximumRightSlide,
+                        DifferentialReverseAcceleration = gen2Tag.SlideAcceleration,
+                        DifferentialReverseDeceleration = gen2Tag.SlideDeceleration,
+                        Engine = new Vehicle.EnginePhysics
+                        {
+                            EngineMomentum = gen2Tag.EngineMoment,
+                            EngineMaximumAngularVelocity = gen2Tag.EngineMaxAngularVelocity,
+                            Gears = new List<Vehicle.Gear>(),
+                            GearShiftSound = null
+                        },
+                        WheelCircumference = gen2Tag.WheelCircumference,
+                        GravityAdjust = 0.45f
+                    };
+                    TranslateList(gen2Tag.Gears, newtank.Engine.Gears, gen2Tag.Gears.GetType(), newtank.Engine.Gears.GetType());
+                    vehi.PhysicsTypes.HumanTank.Add(newtank);
                     break;
 
-                case Vehicle.VehiclePhysicsType.HumanJeep:
-                    vehi.PhysicsTypes.HumanJeep = new List<Vehicle.HumanJeepPhysics>
-                            {
-                                new Vehicle.HumanJeepPhysics
-                                {
-                                    Steering = vehi.Steering,
-                                    Turning = new Vehicle.VehicleTurningControl
-                                    {
-                                        MaximumLeftTurn = vehi.MaximumLeftTurn,
-                                        MaximumRightTurn = vehi.MaximumRightTurn,
-                                        TurnRate = vehi.TurnRate
-                                    },
-                                    Engine = new Vehicle.EnginePhysics
-                                    {
-                                        EngineMomentum = vehi.EngineMomentum,
-                                        EngineMaximumAngularVelocity = vehi.EngineMaximumAngularVelocity,
-                                        Gears = vehi.Gears
-                                    },
-                                    WheelCircumference = vehi.WheelCircumference,
-                                    GravityAdjust = 0.8f
-                                }
-                            };
+                case TagTool.Tags.Definitions.Gen2.Vehicle.TypeValue.HumanJeep:
+                    vehi.PhysicsTypes.HumanJeep = new List<Vehicle.HumanJeepPhysics>();
+                    var newjeep = new Vehicle.HumanJeepPhysics
+                    {
+                        Steering = new Vehicle.VehicleSteeringControl 
+                        { 
+                            OverdampenCuspAngle = gen2Tag.OverdampenCuspAngle,
+                            OverdampenExponent = gen2Tag.OverdampenExponent
+                        },
+                        Turning = new Vehicle.VehicleTurningControl
+                        {
+                            MaximumLeftTurn = gen2Tag.MaximumLeftTurn,
+                            MaximumRightTurn = gen2Tag.MaximumRightTurnNegative,
+                            TurnRate = gen2Tag.TurnRate
+                        },
+                        Engine = new Vehicle.EnginePhysics
+                        {
+                            EngineMomentum = gen2Tag.EngineMoment,
+                            EngineMaximumAngularVelocity = gen2Tag.EngineMaxAngularVelocity,
+                            Gears = new List<Vehicle.Gear>()
+                        },
+                        WheelCircumference = gen2Tag.WheelCircumference,
+                        GravityAdjust = 0.8f
+                    };
+                    TranslateList(gen2Tag.Gears, newjeep.Engine.Gears, gen2Tag.Gears.GetType(), newjeep.Engine.Gears.GetType());
+                    vehi.PhysicsTypes.HumanJeep.Add(newjeep);
                     break;
 
-                case Vehicle.VehiclePhysicsType.HumanBoat:
-                    throw new NotSupportedException(vehi.PhysicsType.ToString());
+                case TagTool.Tags.Definitions.Gen2.Vehicle.TypeValue.HumanBoat:
+                    throw new NotSupportedException(gen2Tag.PhysicsType.ToString());
 
-                case Vehicle.VehiclePhysicsType.HumanPlane:
+                case TagTool.Tags.Definitions.Gen2.Vehicle.TypeValue.HumanPlane:
                     vehi.PhysicsTypes.HumanPlane = new List<Vehicle.HumanPlanePhysics>
                             {
                                 new Vehicle.HumanPlanePhysics
                                 {
                                     VelocityControl = new Vehicle.VehicleVelocityControl
                                     {
-                                        MaximumForwardSpeed = vehi.MaximumForwardSpeed,
-                                        MaximumReverseSpeed = vehi.MaximumReverseSpeed,
-                                        SpeedAcceleration = vehi.SpeedAcceleration,
-                                        SpeedDeceleration = vehi.SpeedDeceleration,
-                                        MaximumLeftSlide = vehi.MaximumLeftSlide,
-                                        MaximumRightSlide = vehi.MaximumRightSlide,
-                                        SlideAcceleration = vehi.SlideAcceleration,
-                                        SlideDeceleration = vehi.SlideDeceleration,
+                                        MaximumForwardSpeed = gen2Tag.MaximumForwardSpeed,
+                                        MaximumReverseSpeed = gen2Tag.MaximumReverseSpeed,
+                                        SpeedAcceleration = gen2Tag.SpeedAcceleration,
+                                        SpeedDeceleration = gen2Tag.SpeedDeceleration,
+                                        MaximumLeftSlide = gen2Tag.MaximumLeftSlide,
+                                        MaximumRightSlide = gen2Tag.MaximumRightSlide,
+                                        SlideAcceleration = gen2Tag.SlideAcceleration,
+                                        SlideDeceleration = gen2Tag.SlideDeceleration,
                                     },
-                                    MaximumUpRise = vehi.MaximumForwardSpeed,
-                                    MaximumDownRise = vehi.MaximumForwardSpeed,
-                                    RiseAcceleration = vehi.SpeedAcceleration,
-                                    RiseDeceleration = vehi.SpeedDeceleration,
-                                    FlyingTorqueScale = vehi.FlyingTorqueScale,
-                                    AirFrictionDeceleration = vehi.AirFrictionDeceleration,
-                                    ThrustScale = vehi.ThrustScale,
+                                    MaximumUpRise = gen2Tag.MaximumForwardSpeed,
+                                    MaximumDownRise = gen2Tag.MaximumForwardSpeed,
+                                    RiseAcceleration = gen2Tag.SpeedAcceleration,
+                                    RiseDeceleration = gen2Tag.SpeedDeceleration,
+                                    FlyingTorqueScale = gen2Tag.FlyingTorqueScale,
+                                    AirFrictionDeceleration = gen2Tag.AirFrictionDeceleration,
+                                    ThrustScale = gen2Tag.ThrustScale,
                                     TurnRateScaleWhenBoosting = 1.0f,
                                     MaximumRoll = Angle.FromDegrees(90.0f),
                                     SteeringAnimation = new Vehicle.VehicleSteeringAnimation
@@ -166,22 +168,26 @@ namespace TagTool.Commands.Porting.Gen2
                             };
                     break;
 
-                case Vehicle.VehiclePhysicsType.AlienScout:
+                case TagTool.Tags.Definitions.Gen2.Vehicle.TypeValue.AlienScout:
                     vehi.PhysicsTypes.AlienScout = new List<Vehicle.AlienScoutPhysics>
                             {
                                 new Vehicle.AlienScoutPhysics
                                 {
-                                    Steering = vehi.Steering,
+                                    Steering = new Vehicle.VehicleSteeringControl
+                                    {
+                                        OverdampenCuspAngle = gen2Tag.OverdampenCuspAngle,
+                                        OverdampenExponent = gen2Tag.OverdampenExponent
+                                    },
                                     VelocityControl = new Vehicle.VehicleVelocityControl
                                     {
-                                        MaximumForwardSpeed = vehi.MaximumForwardSpeed,
-                                        MaximumReverseSpeed = vehi.MaximumReverseSpeed,
-                                        SpeedAcceleration = vehi.SpeedAcceleration,
-                                        SpeedDeceleration = vehi.SpeedDeceleration,
-                                        MaximumLeftSlide = vehi.MaximumLeftSlide,
-                                        MaximumRightSlide = vehi.MaximumRightSlide,
-                                        SlideAcceleration = vehi.SlideAcceleration,
-                                        SlideDeceleration = vehi.SlideDeceleration,
+                                        MaximumForwardSpeed = gen2Tag.MaximumForwardSpeed,
+                                        MaximumReverseSpeed = gen2Tag.MaximumReverseSpeed,
+                                        SpeedAcceleration = gen2Tag.SpeedAcceleration,
+                                        SpeedDeceleration = gen2Tag.SpeedDeceleration,
+                                        MaximumLeftSlide = gen2Tag.MaximumLeftSlide,
+                                        MaximumRightSlide = gen2Tag.MaximumRightSlide,
+                                        SlideAcceleration = gen2Tag.SlideAcceleration,
+                                        SlideDeceleration = gen2Tag.SlideDeceleration,
                                     },
                                     Flags = Vehicle.AlienScoutPhysics.AlienScoutFlags.None, // TODO
                                     DragCoefficient = 0.0f,
@@ -211,32 +217,36 @@ namespace TagTool.Commands.Porting.Gen2
                             };
                     break;
 
-                case Vehicle.VehiclePhysicsType.AlienFighter:
+                case TagTool.Tags.Definitions.Gen2.Vehicle.TypeValue.AlienFighter:
                     vehi.PhysicsTypes.AlienFighter = new List<Vehicle.AlienFighterPhysics>
                             {
                                 new Vehicle.AlienFighterPhysics
                                 {
-                                    Steering = vehi.Steering,
+                                    Steering = new Vehicle.VehicleSteeringControl
+                                    {
+                                        OverdampenCuspAngle = gen2Tag.OverdampenCuspAngle,
+                                        OverdampenExponent = gen2Tag.OverdampenExponent
+                                    },
                                     Turning = new Vehicle.VehicleTurningControl
                                     {
-                                        MaximumLeftTurn = vehi.MaximumLeftTurn,
-                                        MaximumRightTurn = vehi.MaximumRightTurn,
-                                        TurnRate = vehi.TurnRate
+                                        MaximumLeftTurn = gen2Tag.MaximumLeftTurn,
+                                        MaximumRightTurn = gen2Tag.MaximumRightTurnNegative,
+                                        TurnRate = gen2Tag.TurnRate
                                     },
                                     VelocityControl = new Vehicle.VehicleVelocityControl
                                     {
-                                        MaximumForwardSpeed = vehi.MaximumForwardSpeed,
-                                        MaximumReverseSpeed = vehi.MaximumReverseSpeed,
-                                        SpeedAcceleration = vehi.SpeedAcceleration,
-                                        SpeedDeceleration = vehi.SpeedDeceleration,
-                                        MaximumLeftSlide = vehi.MaximumLeftSlide,
-                                        MaximumRightSlide = vehi.MaximumRightSlide,
-                                        SlideAcceleration = vehi.SlideAcceleration,
-                                        SlideDeceleration = vehi.SlideDeceleration,
+                                        MaximumForwardSpeed = gen2Tag.MaximumForwardSpeed,
+                                        MaximumReverseSpeed = gen2Tag.MaximumReverseSpeed,
+                                        SpeedAcceleration = gen2Tag.SpeedAcceleration,
+                                        SpeedDeceleration = gen2Tag.SpeedDeceleration,
+                                        MaximumLeftSlide = gen2Tag.MaximumLeftSlide,
+                                        MaximumRightSlide = gen2Tag.MaximumRightSlide,
+                                        SlideAcceleration = gen2Tag.SlideAcceleration,
+                                        SlideDeceleration = gen2Tag.SlideDeceleration,
                                     },
                                     MaximumTrickFrequency = 1.0f,
-                                    FlyingTorqueScale = vehi.FlyingTorqueScale,
-                                    FixedGunOffset = vehi.FixedGunOffset,
+                                    FlyingTorqueScale = gen2Tag.FlyingTorqueScale,
+                                    FixedGunOffset = gen2Tag.FixedGunOffset,
                                     LoopTrickDuration = 1.8f,
                                     RollTrickDuration = 1.8f,
                                     ZeroGravitySpeed = 4.0f,
@@ -249,7 +259,7 @@ namespace TagTool.Commands.Porting.Gen2
                             };
                     break;
 
-                case Vehicle.VehiclePhysicsType.Turret:
+                case TagTool.Tags.Definitions.Gen2.Vehicle.TypeValue.Turret:
                     vehi.PhysicsTypes.Turret = new List<Vehicle.TurretPhysics>
                             {// TODO: Determine if these fields are used
                                 new Vehicle.TurretPhysics()
