@@ -174,7 +174,7 @@ namespace TagTool.Tags.Definitions.Gen2
         public UnitBoostStructBlock Boost;
         public UnitLipsyncScalesStructBlock Lipsync;
         public FlagsValue2 Flags2;
-        public TypeValue Type;
+        public TypeValue PhysicsType;
         public ControlValue Control;
         public float MaximumForwardSpeed;
         public float MaximumReverseSpeed;
@@ -206,8 +206,7 @@ namespace TagTool.Tags.Definitions.Gen2
         public VehicleSizeValue VehicleSize;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding5;
-        public float FixedGunYaw;
-        public float FixedGunPitch;
+        public RealEulerAngles2d FixedGunOffset;
         /// <summary>
         /// when the steering is off by more than the cusp angle
         /// the steering will overcompensate more and more.  when it
@@ -216,7 +215,7 @@ namespace TagTool.Tags.Definitions.Gen2
         /// should be something in the neighborhood of 2.0
         /// 
         /// </summary>
-        public float OverdampenCuspAngle; // degrees
+        public Angle OverdampenCuspAngle; // degrees
         public float OverdampenExponent;
         public float CrouchTransitionTime; // seconds
         [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]

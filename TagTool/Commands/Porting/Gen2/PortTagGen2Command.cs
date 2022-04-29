@@ -94,6 +94,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "vehi",
                 "weap",
                 "scen",
+                "jpt!",
+                "proj",
                 "shad"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
@@ -137,22 +139,20 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertBitmap(bitmap);
                     break;
                 case TagTool.Tags.Definitions.Gen2.Crate crate:
-                    definition = ConvertObject(crate);
-                    break;
                 case TagTool.Tags.Definitions.Gen2.Scenery scenery:
-                    definition = ConvertObject(scenery);
-                    break;
                 case TagTool.Tags.Definitions.Gen2.Weapon weapon:
-                    definition = ConvertObject(weapon);
-                    break;
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
-                    definition = ConvertObject(vehicle);
+                case TagTool.Tags.Definitions.Gen2.Projectile projectile:
+                    definition = ConvertObject(definition);
+                    break;
+                case TagTool.Tags.Definitions.Gen2.DamageEffect damage:
+                    definition = ConvertEffect(damage);
                     break;
                 case TagTool.Tags.Definitions.Gen2.Shader shader:
                     definition = ConvertShader(shader, cacheStream, shader_template);
                     break;
                 default:
-                    new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported!");
+                    new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
                     return null;
             }
 

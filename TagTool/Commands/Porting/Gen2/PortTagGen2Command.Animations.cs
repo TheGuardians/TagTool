@@ -95,6 +95,16 @@ namespace TagTool.Commands.Porting.Gen2
             };
             animationTagResource.GroupMembers.AddressType = CacheAddressType.Definition;
 
+            //fixup for h2x, get raw resource data and place it in the animation blocks
+            if (Gen2Cache.Version < CacheVersion.Halo2Vista)
+                foreach (var gen2anim in gen2Animation.Resources.AnimationsAbcdcc)
+                {
+                    byte[] rawdata = Gen2Cache.GetCacheRawData(gen2Animation.AnimationData[gen2anim.ResourceIndex].RawDataOffset, gen2Animation.AnimationData[gen2anim.ResourceIndex].DataSize);
+                    int total_animation_data_size = gen2anim.DataSizes.CompressedDataSize + gen2anim.DataSizes.UncompressedDataSize + gen2anim.DataSizes.StaticDataSize + gen2anim.DataSizes.StaticNodeFlags + gen2anim.DataSizes.AnimatedNodeFlags + gen2anim.DataSizes.MovementData + gen2anim.DataSizes.PillOffsetData;
+                    gen2anim.AnimationData = new byte[total_animation_data_size];
+                    System.Buffer.BlockCopy(rawdata, gen2anim.ResourceBlockOffset, gen2anim.AnimationData, 0, total_animation_data_size);
+                };
+
             //convert Animations
             foreach (var gen2anim in gen2Animation.Resources.AnimationsAbcdcc)
             {
