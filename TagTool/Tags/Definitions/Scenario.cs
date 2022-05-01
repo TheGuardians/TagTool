@@ -1112,8 +1112,10 @@ namespace TagTool.Tags.Definitions
         public class ScenarioInstance : TagStructure
 		{
             public short PaletteIndex;
+
             [TagField(Flags = Label)]
             public short NameIndex;
+
             public ObjectPlacementFlags PlacementFlags; // int
             public RealPoint3d Position;
             public RealEulerAngles3d Rotation;
@@ -1123,7 +1125,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public ObjectTransformFlags TransformFlags;
 
-            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            [TagField(Length = 0x3, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding1;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -1144,17 +1146,18 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public BspPolicyValue BspPolicy; // sbyte
-            [TagField(Length = 0x1, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Length = 0x1, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Padding2;
 
             public short EditorFolder;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+
+            [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding3;
 
             public ScenarioObjectParentStruct ParentId;
-
             public ushort CanAttachToBspFlags;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+
+            [TagField(Length = 0x2, Flags = Padding)]
             public byte[] Padding4;
 
 
@@ -1191,24 +1194,32 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Length = 32, MinVersion = CacheVersion.HaloReach)]
             public string MegaloLabel;
+
             public GameEngineSymmetry Symmetry;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public GameEngineSubTypeFlags EngineFlags;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public GameEngineFlagsReach EngineFlagsReach;
+
             [TagField(EnumType = typeof(short), MaxVersion = CacheVersion.HaloOnline700123)]
             [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.HaloReach)]
             public MultiplayerTeamDesignator Team;
-            [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
-            public byte[] Unused;
+
+            [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
+            public byte[] PaddingReach;
+
             public sbyte SpawnOrder;
             public sbyte QuotaMinimum;
             public sbyte QuotaMaximum;
             public MultiplayerObjectPlacementSpawnFlags SpawnFlags;
             public short SpawnTime;
             public short AbandonTime;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public MultiplayerObjectRemappingPolicy RemappingPolicy;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float BoundaryWidthRadiusReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -1217,17 +1228,25 @@ namespace TagTool.Tags.Definitions
             public float BoundaryPositiveHeightReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float BoundaryNegativeHeightReach;
+
             public MultiplayerObjectBoundaryShape Shape;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public MultiplayerObjectRemappingPolicy RemappingPolicyReach;
+
             public sbyte TeleporterChannel;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public TeleporterPassabilityFlags TeleporterPassability;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public StringId LocationName;
-            [TagField(Length = 1, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
-            public byte[] Padding1;
+
+            [TagField(Length = 1, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Pad0;
+
             public ScenarioObjectParentStruct MapVariantParent;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float BoundaryWidthRadius;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1236,6 +1255,7 @@ namespace TagTool.Tags.Definitions
             public float BoundaryPositiveHeight;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float BoundaryNegativeHeight;
+
             public float RespawnWeight;
         }
 
@@ -1245,13 +1265,23 @@ namespace TagTool.Tags.Definitions
         public class PermutationInstance : ScenarioInstance
         {
             public StringId Variant;
-            public uint ActiveChangeColors;
+            public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
             public ArgbColor PrimaryColor;
             public ArgbColor SecondaryColor;
             public ArgbColor TertiaryColor;
             public ArgbColor QuaternaryColor;
+
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint QuinaryColor;
+            public ArgbColor QuinaryColor;
+
+            [Flags]
+            public enum ScenarioObjectActiveChangeColorFlags : uint
+            {
+                Primary = 1 << 0,
+                Secondary = 1 << 1,
+                Tertiary = 1 << 2,
+                Quaternary = 1 << 3
+            }
         }
 
         [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1295,17 +1325,33 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x8)]
         public class BipedInstance : PermutationInstance
         {
-            public float BodyVitalityPercentage;
-            public uint Flags;
+            public float BodyVitalityFraction; // [0,1]
+            public ScenarioUnitDatumFlags Flags;
+
+            [Flags]
+            public enum ScenarioUnitDatumFlags : uint
+            {
+                Dead = 1 << 0,
+                Closed = 1 << 1,
+                NotEnterableByPlayer = 1 << 2
+            }
         }
 
         [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
         public class VehicleInstance : PermutationInstance, IMultiplayerInstance
         {
-            public float BodyVitalityPercentage;
-            public uint Flags;
+            public float BodyVitalityFraction; // [0,1]
+            public ScenarioUnitDatumFlags Flags;
             public MultiplayerObjectProperties Multiplayer;
+
+            [Flags]
+            public enum ScenarioUnitDatumFlags : uint
+            {
+                Dead = 1 << 0,
+                Closed = 1 << 1,
+                NotEnterableByPlayer = 1 << 2
+            }
 
             MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
         }
@@ -1337,8 +1383,16 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x5C, MinVersion = CacheVersion.HaloReach)]
         public class EquipmentInstance : ScenarioInstance, IMultiplayerInstance
         {
-            public uint EquipmentFlags;
+            public ScenarioEquipmentFlagsDefinition EquipmentFlags;
             public MultiplayerObjectProperties Multiplayer;
+
+            [Flags]
+            public enum ScenarioEquipmentFlagsDefinition : uint
+            {
+                OBSOLETE0 = 1 << 0,
+                OBSOLETE1 = 1 << 1,
+                DoesAcceleratemovesDueToExplosions = 1 << 2
+            }
 
             MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
         }
@@ -1349,8 +1403,16 @@ namespace TagTool.Tags.Definitions
         {
             public short RoundsLeft;
             public short RoundsLoaded;
-            public uint WeaponFlags;
+            public ScenarioWeaponDatumFlags WeaponFlags;
             public MultiplayerObjectProperties Multiplayer;
+
+            [Flags]
+            public enum ScenarioWeaponDatumFlags : uint
+            {
+                InitiallyAtRestdoesntFall = 1 << 0,
+                Obsolete = 1 << 1,
+                DoesAcceleratemovesDueToExplosions = 1 << 2
+            }
 
             MultiplayerObjectProperties IMultiplayerInstance.Multiplayer { get => Multiplayer; set => Multiplayer = value; }
         }
@@ -1370,10 +1432,11 @@ namespace TagTool.Tags.Definitions
             public string Name;
             public float InitialValue;
             public DeviceGroupFlags Flags;
+
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public short EditorFolderIndex;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public short Unknown;
+            [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST)]
+            public byte[] Pad0;
         }
 
         [Flags]
@@ -1407,13 +1470,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public StringId Variant;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public byte ActiveChangeColors;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public sbyte Unknown7;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public sbyte Unknown8;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public sbyte Unknown9;
+            public ScenarioObjectActiveChangeColorFlags ActiveChangeColors;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public ArgbColor PrimaryColor;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -1422,8 +1479,18 @@ namespace TagTool.Tags.Definitions
             public ArgbColor TertiaryColor;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public ArgbColor QuaternaryColor;
+
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown10;
+            public ArgbColor QuinaryColor;
+
+            [Flags]
+            public enum ScenarioObjectActiveChangeColorFlags : uint
+            {
+                Primary = 1 << 0,
+                Secondary = 1 << 1,
+                Tertiary = 1 << 2,
+                Quaternary = 1 << 3
+            }
 
             public short PowerGroup;
             public short PositionGroup;
@@ -1431,7 +1498,9 @@ namespace TagTool.Tags.Definitions
             public ScenarioMachineFlags MachineFlags;
             public List<PathfindingReference> PathfindingReferences;
             public PathfindingPolicyValue PathfindingPolicy;
-            public short Unknown11;
+
+            [TagField(Length = 2, Flags = Padding)]
+            public byte[] Pad0;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public MultiplayerObjectProperties Multiplayer;

@@ -169,7 +169,7 @@ namespace TagTool.Tags.Definitions.Common
     {
         None = 0,
         Sandbox = 1 << 0,
-        Megalogamengine = 1 << 1,
+        Megalo = 1 << 1,
         Campaign = 1 << 2,
         Survival = 1 << 3,
         Firefight = 1 << 4

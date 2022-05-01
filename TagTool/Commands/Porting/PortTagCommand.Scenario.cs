@@ -719,9 +719,137 @@ namespace TagTool.Commands.Porting
                         }
                 };
 
+                // gametype object processing
+
+                AddGametypeObjects(scnr.SceneryPalette, scnr.Scenery);
+                AddGametypeObjects(scnr.CratePalette, scnr.Crates);
             }
 
             return scnr;
+        }
+
+        public void AddGametypeObjects<T>(List<Scenario.ScenarioPaletteEntry> palette, List<T> instanceList)
+        {
+            if (instanceList[0] is Scenario.CrateInstance)
+            {
+                palette.AddRange(new List<Scenario.ScenarioPaletteEntry>
+                    {
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\assault\assault_bomb_goal_area", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\assault\assault_bomb_spawn_point", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_flag_spawn_point", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\infection\infection_haven_static", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\juggernaut\juggernaut_destination_static", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\vip\vip_destination_static", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\territories\territory_static", "bloc") }
+                    });
+            }
+            else if (instanceList[0] is Scenario.SceneryInstance)
+            {
+                palette.AddRange(new List<Scenario.ScenarioPaletteEntry>
+                    {
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\assault\assault_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_flag_at_home_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_flag_away_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\infection\infection_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\koth\koth_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\oddball\oddball_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\territories\territories_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\vip\vip_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\assault\assault_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\infection\infection_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\koth\koth_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\oddball\oddball_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\territories\territories_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\vip\vip_initial_spawn_point", "scen") }
+                    });
+            }
+
+            if (palette.Count() > 0)
+            {
+                List<Scenario.CrateInstance> flagSpawns = new List<Scenario.CrateInstance>();
+
+                foreach (var instance in instanceList)
+                {
+                    var mpProperties = (Scenario.MultiplayerObjectProperties)(instance.GetType().GetField("Multiplayer").GetValue(instance));
+
+                    switch (mpProperties.MegaloLabel)
+                    {
+                        case "ctf_res_zone_away":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_away_respawn_zone");
+                            break;
+                        case "ctf_res_zone":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_at_home_respawn_zone");
+                            break;
+                        case "ctf_flag_return":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_return_area");
+                            flagSpawns.Add(instance.DeepClone() as Scenario.CrateInstance);
+                            break;
+                        case "terr_object":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\territories\territory_static");
+                            break;
+                        case "as_goal": // assault plant point
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\assault\assault_bomb_goal_area");
+                            break;
+                        case "as_bomb": // assault bomb spawn
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\assault\assault_bomb_spawn_point");
+                            break;
+                        case "stp_goal": // substitute stockpile goal for juggernaut destination
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\juggernaut\juggernaut_destination_static");
+                            break;
+                        case "stp_flag": // substitute stockpile flag spawn for VIP destination
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\vip\vip_destination_static");
+                            break;
+                        case "assault":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\assault\assault_respawn_zone");
+                            break;
+                        case "inf_spawn":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_initial_spawn_point");
+                            break;
+                        case "ffa_only":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = -1;
+                            break;
+                        case "inf_haven":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_respawn_zone");
+                            break;
+                        case "stockpile":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\vip\vip_initial_spawn_point");
+                            break;
+                        case "ctf":
+                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_initial_spawn_point");
+                            break;
+                        case "oddball_ball":
+                        case "koth_hill":
+                        case "team_only":
+                        case "hh_drop_point":
+                        case "none":
+                            break;
+                        default:
+                            if (!string.IsNullOrEmpty(mpProperties.MegaloLabel))
+                                new TagToolWarning($"unknown megalo label: {mpProperties.MegaloLabel}");
+                            break;
+                    }
+                }
+
+                // Reach uses a unified CTF spawn and return object. A duplicate of these instances will be used for flag spawn locations
+
+                foreach (var flagSpawn in flagSpawns)
+                {
+                    flagSpawn.PaletteIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_spawn_point");
+                    flagSpawn.NameIndex = -1;
+                }
+
+                if (instanceList[0] is Scenario.CrateInstance)
+                    (instanceList as List<Scenario.CrateInstance>).AddRange(flagSpawns);
+            }
+        }
+
+        public short GetPaletteIndex(List<Scenario.ScenarioPaletteEntry> palette, string name)
+        {
+            var itemIndex = palette.FindIndex(x => (x.Object != null && x.Object.Name == name));
+
+            return (short)itemIndex;
         }
 
         private void AddPrematchCamera(Stream cacheStream, Scenario scnr, string tagName)
