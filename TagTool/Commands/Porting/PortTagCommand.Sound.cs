@@ -169,7 +169,8 @@ namespace TagTool.Commands.Porting
             var playbackParameters = BlamSoundGestalt.PlaybackParameters[sound.SoundReference.PlaybackParameterIndex];
             var scale = BlamSoundGestalt.Scales[sound.SoundReference.ScaleIndex];
             var promotion = sound.SoundReference.PromotionIndex != -1 ? BlamSoundGestalt.Promotions[sound.SoundReference.PromotionIndex] : new Promotion();
-            var customPlayBack = sound.SoundReference.CustomPlaybackIndex != -1 ? new List<CustomPlayback> { BlamSoundGestalt.CustomPlaybacks[sound.SoundReference.CustomPlaybackIndex] } : new List<CustomPlayback>();
+            var customPlayBack = (sound.SoundReference.CustomPlaybackIndex != -1 && BlamSoundGestalt.CustomPlaybacks != null) 
+                ? new List<CustomPlayback> { BlamSoundGestalt.CustomPlaybacks[sound.SoundReference.CustomPlaybackIndex] } : new List<CustomPlayback>();
 
             sound.Playback = playbackParameters.DeepClone();
             sound.Scale = scale;
