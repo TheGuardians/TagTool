@@ -1031,7 +1031,7 @@ namespace TagTool.Commands.Porting
 
                 case Light ligh when BlamCache.Version >= CacheVersion.HaloReach:
                     {
-                        ligh.DistanceDiffusion = ligh.FrustumMinimumViewDistanceReach;
+                        ligh.DistanceDiffusion = 0.01f;
                         ligh.AngularSmoothness = ligh.MaxIntensityRangeReach;
 
                         if (ligh.GelBitmap != null)
@@ -1503,6 +1503,7 @@ namespace TagTool.Commands.Porting
                             case "ctf_res_zone_away":
                             case "ctf_res_zone":
                             case "ctf_flag_return":
+                            case "ctf":
                                 scnrObj.EngineFlags |= GameEngineSubTypeFlags.CaptureTheFlag;
                                 break;
                             case "slayer":
@@ -1530,6 +1531,7 @@ namespace TagTool.Commands.Porting
                                 scnrObj.EngineFlags |= GameEngineSubTypeFlags.Juggernaut;
                                 break;
                             case "stp_flag": // use these for VIP points
+                            case "stockpile":
                                 scnrObj.EngineFlags |= GameEngineSubTypeFlags.Vip;
                                 break;
                             case "ffa_only":
