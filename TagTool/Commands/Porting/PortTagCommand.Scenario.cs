@@ -711,13 +711,7 @@ namespace TagTool.Commands.Porting
 
                 // set Game Object Reset Height
 
-                scnr.SpawnData = new List<Scenario.SpawnDatum>
-                {
-                        new Scenario.SpawnDatum
-                        {
-                            GameObjectResetHeight = -20f
-                        }
-                };
+                scnr.SpawnData = new List<Scenario.SpawnDatum> { new Scenario.SpawnDatum { GameObjectResetHeight = -20f } };
 
                 // gametype object processing
 
@@ -742,6 +736,17 @@ namespace TagTool.Commands.Porting
                         new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\vip\vip_destination_static", "bloc") },
                         new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\territories\territory_static", "bloc") }
                     });
+
+                // teleporters must be neutral
+
+                for (int i = 0; i < palette.Count(); i++)
+                {
+                    if (palette[i].Object.Name.Contains("teleporter"))
+                    {
+                        foreach (var instance in instanceList.Where(n => (n as Scenario.CrateInstance).PaletteIndex == i))
+                            (instance as Scenario.CrateInstance).Multiplayer.Team = TagTool.Tags.Definitions.Common.MultiplayerTeamDesignator.Neutral;
+                    }
+                }
             }
             else if (instanceList[0] is Scenario.SceneryInstance)
             {
