@@ -1696,9 +1696,9 @@ namespace TagTool.Commands.Porting
 
             var materials = globals.Materials;
             var blamMaterials = BlamCache.Version >= CacheVersion.HaloReach ? blamGlobals.AlternateMaterials : blamGlobals.Materials;
-            return ConvertInteral(value);
+            return ConvertInternal(value);
 
-            object ConvertInteral(object val)
+            object ConvertInternal(object val)
             {
                 switch (val)
                 {
@@ -1722,11 +1722,11 @@ namespace TagTool.Commands.Porting
                         break;
                     case short[] indices:
                         for (int i = 0; i < indices.Length; i++)
-                            indices[i] = (short)ConvertInteral(indices[i]);
+                            indices[i] = (short)ConvertInternal(indices[i]);
                         break;
                     case StringId[] stringIds:
                         for (int i = 0; i < stringIds.Length; i++)
-                            stringIds[i] = (StringId)ConvertInteral(stringIds[i]);
+                            stringIds[i] = (StringId)ConvertInternal(stringIds[i]);
                         break;
                 }
                 return val;
@@ -1734,7 +1734,7 @@ namespace TagTool.Commands.Porting
 
             short FindMatchingMaterial(string name)
             {
-                var origianlName = name;
+                var originalName = name;
 
                 // we don't have wet materials
                 if (name.StartsWith("wet_"))
@@ -1744,21 +1744,25 @@ namespace TagTool.Commands.Porting
                 var matchIndex = (short)materials.FindIndex(x => CacheContext.StringTable.GetString(x.Name) == name);
                 if (matchIndex != -1)
                 {
-                    if(name != origianlName)
-                        new TagToolWarning($"Failed to find global material type '{origianlName}', using '{name}' instead");
+                    if(name != originalName)
+                        new TagToolWarning($"Failed to find global material type '{originalName}', using '{name}' instead");
 
                     return matchIndex;
                 }
                     
                 // we couldn't find it, find the index in the source materials
-                var blamIndex = blamMaterials.FindIndex(x => BlamCache.StringTable.GetString(x.Name) == origianlName);
+                var blamIndex = blamMaterials.FindIndex(x => BlamCache.StringTable.GetString(x.Name) == originalName);
                 if (blamIndex == -1)
-                    return -1;
+                {
+                    if (!originalName.StartsWith("default"))
+                        new TagToolWarning($"Failed to find global material type '{originalName}', using 'default_material'");
+                    return 0;
+                }
 
                 // if it has a parent search for its name
                 StringId parentName = blamMaterials[blamIndex].ParentName;
                 if (parentName == StringId.Invalid)
-                    return -1;
+                    return 0;
 
                 // recurse
                 matchIndex = FindMatchingMaterial(BlamCache.StringTable.GetString(parentName));
@@ -1768,7 +1772,7 @@ namespace TagTool.Commands.Porting
                     matchIndex = 0;
 
                 name = CacheContext.StringTable.GetString(materials[matchIndex].Name);
-                new TagToolWarning($"Failed to find global material type '{origianlName}', using '{name}' instead");
+                new TagToolWarning($"Failed to find global material type '{originalName}', using '{name}' instead");
                 return matchIndex;
             }
         }
