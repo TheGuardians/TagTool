@@ -8,11 +8,11 @@ using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Scripting;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 using TagTool.Tags.Resources;
-using TagTool.Tags;
 using TagTool.Geometry;
+
 namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
@@ -741,10 +741,11 @@ namespace TagTool.Commands.Porting
 
                 for (int i = 0; i < palette.Count(); i++)
                 {
-                    if (palette[i].Object.Name.Contains("teleporter"))
+                    var obj = palette[i].Object;
+                    if (obj != null && obj.Name.Contains("teleporter"))
                     {
                         foreach (var instance in instanceList.Where(n => (n as Scenario.CrateInstance).PaletteIndex == i))
-                            (instance as Scenario.CrateInstance).Multiplayer.Team = TagTool.Tags.Definitions.Common.MultiplayerTeamDesignator.Neutral;
+                            (instance as Scenario.CrateInstance).Multiplayer.Team = MultiplayerTeamDesignator.Neutral;
                     }
                 }
             }
@@ -778,51 +779,58 @@ namespace TagTool.Commands.Porting
                 foreach (var instance in instanceList)
                 {
                     var mpProperties = (Scenario.MultiplayerObjectProperties)(instance.GetType().GetField("Multiplayer").GetValue(instance));
+                    var permutationInstance = (instance as Scenario.PermutationInstance);
+                    var newPaletteIndex = permutationInstance.PaletteIndex;
 
                     switch (mpProperties.MegaloLabel)
                     {
                         case "ctf_res_zone_away":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_away_respawn_zone");
+                            newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_away_respawn_zone") : -1);
                             break;
                         case "ctf_res_zone":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_at_home_respawn_zone");
+                            newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_at_home_respawn_zone") : -1);
                             break;
                         case "ctf_flag_return":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_return_area");
-                            flagSpawns.Add(instance.DeepClone() as Scenario.CrateInstance);
+                            {
+                                newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_return_area") : -1);
+                                permutationInstance.PaletteIndex = newPaletteIndex;
+
+                                if (newPaletteIndex != -1)
+                                    flagSpawns.Add(instance.DeepClone() as Scenario.CrateInstance);
+                            }
                             break;
                         case "terr_object":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\territories\territory_static");
+                            newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\territories\territory_static");
                             break;
                         case "as_goal": // assault plant point
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\assault\assault_bomb_goal_area");
+                            newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\assault\assault_bomb_goal_area") : -1);
                             break;
                         case "as_bomb": // assault bomb spawn
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\assault\assault_bomb_spawn_point");
+                            newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\assault\assault_bomb_spawn_point") : -1);
                             break;
                         case "stp_goal": // substitute stockpile goal for juggernaut destination
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\juggernaut\juggernaut_destination_static");
+                            newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\juggernaut\juggernaut_destination_static");
                             break;
                         case "stp_flag": // substitute stockpile flag spawn for VIP destination
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\vip\vip_destination_static");
+                            newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\vip\vip_destination_static");
                             break;
                         case "assault":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\assault\assault_respawn_zone");
+                            newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\assault\assault_respawn_zone") : -1);
                             break;
                         case "inf_spawn":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_initial_spawn_point");
+                            newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_initial_spawn_point");
                             break;
                         case "ffa_only":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = -1;
+                            newPaletteIndex = -1;
                             break;
                         case "inf_haven":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_respawn_zone");
+                            newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_respawn_zone");
                             break;
                         case "stockpile":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\vip\vip_initial_spawn_point");
+                            newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\vip\vip_initial_spawn_point");
                             break;
                         case "ctf":
-                            (instance as Scenario.PermutationInstance).PaletteIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_initial_spawn_point");
+                            newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\ctf\ctf_initial_spawn_point") : -1);
                             break;
                         case "oddball_ball":
                         case "koth_hill":
@@ -835,6 +843,8 @@ namespace TagTool.Commands.Porting
                                 new TagToolWarning($"unknown megalo label: {mpProperties.MegaloLabel}");
                             break;
                     }
+
+                    permutationInstance.PaletteIndex = newPaletteIndex;
                 }
 
                 // Reach uses a unified CTF spawn and return object. A duplicate of these instances will be used for flag spawn locations
@@ -855,6 +865,19 @@ namespace TagTool.Commands.Porting
             var itemIndex = palette.FindIndex(x => (x.Object != null && x.Object.Name == name));
 
             return (short)itemIndex;
+        }
+
+        public bool CheckTeamValue(Scenario.PermutationInstance instance)
+        {
+            bool validforRvB = false;
+            var validTeams = new List<string> { "Red", "Blue", "Neutral" };
+
+            if (instance is Scenario.CrateInstance && validTeams.Contains((instance as Scenario.CrateInstance).Multiplayer.Team.ToString()))
+                validforRvB = true;
+            else if (instance is Scenario.SceneryInstance && validTeams.Contains((instance as Scenario.SceneryInstance).Multiplayer.Team.ToString()))
+                validforRvB = true;
+
+            return validforRvB;
         }
 
         private void AddPrematchCamera(Stream cacheStream, Scenario scnr, string tagName)
