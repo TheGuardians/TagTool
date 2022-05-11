@@ -71,7 +71,7 @@ namespace TagTool.Tags.Definitions
         public StringId AiDialogueEquipmentType;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public List<Unit.UnitCamera> OverrideCamera;
+        public List<Unit.UnitCameraBlock> OverrideCamera;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SuperShieldBlock> SuperShield;

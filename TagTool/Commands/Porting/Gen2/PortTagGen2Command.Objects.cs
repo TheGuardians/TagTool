@@ -45,6 +45,10 @@ namespace TagTool.Commands.Porting.Gen2
                     TranslateTagStructure(projectile, newprojectile, typeof(TagTool.Tags.Definitions.Gen2.Projectile), typeof(Projectile));
                     newprojectile.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Projectile };
                     return newprojectile;
+                case TagTool.Tags.Definitions.Gen2.CameraTrack track:
+                    CameraTrack newtrack = new CameraTrack();
+                    TranslateTagStructure(track, newtrack, typeof(TagTool.Tags.Definitions.Gen2.CameraTrack), typeof(CameraTrack));
+                    return newtrack;
                 default:
                     return null;
             }

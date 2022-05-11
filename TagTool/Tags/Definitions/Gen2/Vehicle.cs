@@ -674,7 +674,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public FlagsValue Flags;
             public StringId Label;
             public StringId MarkerName;
-            public StringId EntryMarkerSName;
+            public StringId EntryMarkerName;
             public StringId BoardingGrenadeMarker;
             public StringId BoardingGrenadeString;
             public StringId BoardingMeleeString;
