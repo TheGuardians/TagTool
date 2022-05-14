@@ -31,16 +31,16 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public Angle CameraFieldOfView; // degrees
         public float CameraStiffness;
-        public UnitCamera Camera;
+        public UnitCameraBlock UnitCamera;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public UnitCamera SyncActionCamera;
+        public UnitCameraBlock SyncActionCamera;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public UnitAssassination Assassination;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public UnitSeatAcceleration SeatAcceleration;
+        public UnitSeatAcceleration Acceleration;
         [TagField(ValidTags = new[] { "sadt" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag SeatAccelerationReference;
 
@@ -199,28 +199,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public CachedTag EmpEffect;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public CachedTag BoostCollisionDamage;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public BoostFlagsValue BoostFlags;
-        public float BoostPeakPower;
-        public float BoostRisePower;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public float BoostPeakTime;
-        public float BoostFallPower;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public float BoostDeadTime;
-        // 1, means you burn all your power in one sec.  .1 means you can boost for 10 seconds.
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float BoostPowerPerSecond;
-        // 1 means you recharge fully in 1 second.  .1 means you rechage fully in 10 seconds
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float BoostRechargeRate;
-        // how long do you have to be off the tirgger for before boost starts recharging
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float BoostRechargeDelay; // s
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public TagFunction BoostTrigger;
+        public BoostBlock Boost;
 
         public float LipsyncAttackWeight;
         public float LipsyncDecayWeight;
@@ -305,6 +284,33 @@ namespace TagTool.Tags.Definitions
         {
             DefaultClass,
             EliteClass
+        }
+
+        [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
+        public class BoostBlock : TagStructure
+        {
+            public CachedTag BoostCollisionDamage;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public BoostFlagsValue BoostFlags;
+            public float BoostPeakPower;
+            public float BoostRisePower;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public float BoostPeakTime;
+            public float BoostFallPower;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public float BoostDeadTime;
+            // 1, means you burn all your power in one sec.  .1 means you can boost for 10 seconds.
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float BoostPowerPerSecond;
+            // 1 means you recharge fully in 1 second.  .1 means you rechage fully in 10 seconds
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float BoostRechargeRate;
+            // how long do you have to be off the tirgger for before boost starts recharging
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float BoostRechargeDelay; // s
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public TagFunction BoostTrigger;
         }
 
         [TagStructure(Size = 0x8)]
@@ -394,7 +400,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach)]
-        public class UnitCamera : TagStructure
+        public class UnitCameraBlock : TagStructure
         {
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public UnitCameraFlagBits CameraFlags;
@@ -691,7 +697,7 @@ namespace TagTool.Tags.Definitions
 		{
             public UnitSeatFlags Flags; // int
             public StringId Label; // formerly SeatAnimation
-            public StringId SeatMarkerName;
+            public StringId MarkerName;
             public StringId EntryMarkerName;
             public StringId BoardingGrenadeMarker;
             public StringId BoardingGrenadeString;
@@ -704,7 +710,7 @@ namespace TagTool.Tags.Definitions
             public float FlippedEvictionTime; // how much time it takes to evict a rider from a flipped vehicle
             
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public UnitSeatAcceleration SeatAcceleration;
+            public UnitSeatAcceleration Acceleration;
             [TagField(ValidTags = new[] { "sadt" }, MinVersion = CacheVersion.HaloReach)]
             public CachedTag SeatAccelerationReference;
 
@@ -723,12 +729,14 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public float PitchInterpolationTime; // (seconds) 0 means use default 17
 
-            public Bounds<float> SpeedReferenceBounds;
+            public float MinSpeedReference;
+            public float MaxSpeedReference;
             public float SpeedExponent;
-            public UnitCamera Camera;
+            public UnitCameraBlock UnitCamera;
             public List<UnitHudInterfaceBlock> UnitHudInterface;
             public StringId EnterSeatString;
-            public Bounds<Angle> YawRange;
+            public Angle YawMinimum;
+            public Angle YawMaximum;
             public CachedTag BuiltInGunner;
             public float EntryRadius; // how close to the entry marker a unit must be
             public Angle EntryMarkerConeAngle; // angle from marker forward the unit must be

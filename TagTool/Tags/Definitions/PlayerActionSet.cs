@@ -51,7 +51,7 @@ namespace TagTool.Tags
 
             public ActionFlags Flags;
 
-            public List<Unit.UnitCamera> OverrideCamera;
+            public List<Unit.UnitCameraBlock> OverrideCamera;
 
             [Flags]
             public enum ActionFlags : int

@@ -199,7 +199,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 List<StringId> jmadnodenames = jmadnodes.Select(n => n.Name).ToList();
                 int bestmatchcount = 0;
 
-                foreach (CachedTag tag in CacheContext.TagCache.TagTable)
+                foreach (CachedTag tag in CacheContext.TagCache.NonNull())
                 {
                     if (!tag.IsInGroup(new Tag("mode")))
                         continue;

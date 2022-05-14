@@ -296,8 +296,8 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagStructure(Size = 0x4)]
             public class ShaderPostprocessAnimatedParameterReferenceNewBlock : TagStructure
             {
-                [TagField(Length = 0x3)]
-                public byte[] Unknown;
+                public short Unknown;
+                public sbyte Unknown2;
                 public sbyte ParameterIndex;
             }
             

@@ -208,21 +208,18 @@ namespace TagTool.Bitmaps.Utils
                         int mipMapCount = resultBitmap.MipMapCount;
                         if (mipMapCount > 0)
                         {
-                            if (resultBitmap.Format == BitmapFormat.Dxn)
+                            var width = resultBitmap.Width;
+                            var height = resultBitmap.Height;
+
+                            for (mipMapCount = 0; mipMapCount < resultBitmap.MipMapCount; mipMapCount++)
                             {
-                                var width = resultBitmap.Width;
-                                var height = resultBitmap.Height;
+                                width /= 2;
+                                height /= 2;
 
-                                dataSize = BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
+                                if (width < 4 || height < 4)
+                                    break;
 
-                                mipMapCount = 0;
-                                while ((width >= 8) && (height >= 8))
-                                {
-                                    width /= 2;
-                                    height /= 2;
-                                    dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
-                                    mipMapCount++;
-                                }
+                                dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
                             }
                         }
 

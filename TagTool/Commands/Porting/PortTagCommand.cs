@@ -393,9 +393,11 @@ namespace TagTool.Commands.Porting
                 Dictionary<string, string> reachObjectives = new Dictionary<string, string>()
                 {
                     {"objects\\multi\\models\\mp_hill_beacon\\mp_hill_beacon", "objects\\multi\\koth\\koth_hill_static"},
-                    {"objects\\multi\\models\\mp_flag_base\\mp_flag_base", "objects\\multi\\ctf\\ctf_flag_spawn_point"},
+                    {"objects\\multi\\models\\mp_flag_base\\mp_flag_base", "objects\\multi\\ctf\\ctf_flag_return_area"},
                     {"objects\\multi\\models\\mp_circle\\mp_circle", "objects\\multi\\oddball\\oddball_ball_spawn_point"},
-                    {"objects\\multi\\archive\\vip\\vip_boundary", "objects\\multi\\vip\\vip_destination_static"}
+                    {"objects\\multi\\archive\\vip\\vip_boundary", "objects\\multi\\vip\\vip_destination_static"},
+                    {"objects\\multi\\spawning\\respawn_zone","objects\\multi\\slayer\\slayer_respawn_zone"},
+                    {"objects\\multi\\spawning\\initial_spawn_point","objects\\multi\\slayer\\slayer_initial_spawn_point"}
                 };
 
                 Dictionary<string, string> reachVehicles = new Dictionary<string, string>()
@@ -417,20 +419,22 @@ namespace TagTool.Commands.Porting
                     {"objects\\equipment\\hologram\\hologram", "objects\\equipment\\hologram_equipment\\hologram_equipment"},
                     {"objects\\equipment\\active_camouflage\\active_camouflage", "objects\\equipment\\invisibility_equipment\\invisibility_equipment"}
                 };
-		
+
                 ReplaceObjects(scenario.SceneryPalette, reachObjectives);
                 ReplaceObjects(scenario.CratePalette, reachObjectives);
                 ReplaceObjects(scenario.VehiclePalette, reachVehicles);
                 ReplaceObjects(scenario.EquipmentPalette, reachEquipment);
 
+                if (!FlagIsSet(PortingFlags.ReachMisc))
+                {
+                    CullNewObjects(scenario.SceneryPalette, scenario.Scenery, reachObjectives);
+                    CullNewObjects(scenario.CratePalette, scenario.Crates, reachObjectives);
+                }
 
-                CullNewObjects(scenario.SceneryPalette, scenario.Scenery, reachObjectives);
-                CullNewObjects(scenario.CratePalette, scenario.Crates, reachObjectives);
                 CullNewObjects(scenario.VehiclePalette, scenario.Vehicles, reachObjectives);
                 CullNewObjects(scenario.WeaponPalette, scenario.Weapons, reachObjectives);
                 CullNewObjects(scenario.EquipmentPalette, scenario.Equipment, reachObjectives);
 
-				
                 RemoveNullPlacements(scenario.SceneryPalette, scenario.Scenery);
                 RemoveNullPlacements(scenario.CratePalette, scenario.Crates);
             }
@@ -493,8 +497,6 @@ namespace TagTool.Commands.Porting
         {
             if (palette.Count() > 0)
             {
-                ReplaceObjects(palette, replacements);
-
                 foreach (Scenario.ScenarioPaletteEntry block in palette)
                     if (block.Object != null && !CacheContext.TagCache.TryGetTag($"{block.Object.Name}.{block.Object.Group}", out _))
                         block.Object = null;
@@ -506,16 +508,16 @@ namespace TagTool.Commands.Porting
         public void ReplaceObjects(List<Scenario.ScenarioPaletteEntry> palette, Dictionary<string, string> replacements)
         {
             foreach (var block in palette)
+            {
                 if (block.Object != null)
                 {
                     string name = block.Object.Name;
                     if (replacements.TryGetValue(name, out string result))
                         block.Object.Name = result;
-                    else if (name.Contains("zone") || name.Contains("ca_temp"))
-                        block.Object = null;
-                    else if (name.Contains("initial_spawn_point") && FlagIsSet(PortingFlags.ReachMisc)) // keeps me sane
+                    else if (name.Contains("weak_anti_respawn_zone") || name.Contains("weak_respawn_zone"))
                         block.Object = null;
                 }
+            }
         }
 
         public void RemoveNullPlacements<T>(List<Scenario.ScenarioPaletteEntry> palette, List<T> instanceList)
@@ -1028,8 +1030,18 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case Light ligh when BlamCache.Version >= CacheVersion.HaloReach:
-                    ligh.DistanceDiffusion = ligh.FrustumMinimumViewDistanceReach;
-                    ligh.AngularSmoothness = ligh.MaxIntensityRangeReach;
+                    {
+                        ligh.DistanceDiffusion = 0.01f;
+                        ligh.AngularSmoothness = ligh.MaxIntensityRangeReach;
+
+                        if (ligh.GelBitmap != null)
+                        {
+                            ligh.Flags |= Light.LightFlags.AllowShadowsAndGels;
+                            ligh.FrustumHeightScale = 1;
+                            ligh.DistanceDiffusion = 0.0001f;
+                            ligh.AngularSmoothness = 0;
+                        }
+                    }
                     break;
 
                 case Model hlmt:
@@ -1478,13 +1490,63 @@ namespace TagTool.Commands.Porting
 					return ConvertScenarioObjectType(scenarioObjectType);
 
                 case Scenario.MultiplayerObjectProperties scnrObj when BlamCache.Version >= CacheVersion.HaloReach:
-                    scnrObj = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, scnrObj, definition, blamTagName);
-                    scnrObj.BoundaryWidthRadius = scnrObj.BoundaryWidthRadiusReach;
-                    scnrObj.BoundaryBoxLength = scnrObj.BoundaryBoxLengthReach;
-                    scnrObj.BoundaryPositiveHeight = scnrObj.BoundaryPositiveHeightReach;
-                    scnrObj.BoundaryNegativeHeight = scnrObj.BoundaryNegativeHeightReach;
-                    scnrObj.RemappingPolicy = scnrObj.RemappingPolicyReach;
-                    return data;
+                    {
+                        scnrObj = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, scnrObj, definition, blamTagName);
+                        scnrObj.BoundaryWidthRadius = scnrObj.BoundaryWidthRadiusReach;
+                        scnrObj.BoundaryBoxLength = scnrObj.BoundaryBoxLengthReach;
+                        scnrObj.BoundaryPositiveHeight = scnrObj.BoundaryPositiveHeightReach;
+                        scnrObj.BoundaryNegativeHeight = scnrObj.BoundaryNegativeHeightReach;
+                        scnrObj.RemappingPolicy = scnrObj.RemappingPolicyReach;
+
+                        switch (scnrObj.MegaloLabel)
+                        {
+                            case "ctf_res_zone_away":
+                            case "ctf_res_zone":
+                            case "ctf_flag_return":
+                            case "ctf":
+                                scnrObj.EngineFlags |= GameEngineSubTypeFlags.CaptureTheFlag;
+                                break;
+                            case "slayer":
+                                scnrObj.EngineFlags |= GameEngineSubTypeFlags.Slayer;
+                                break;
+                            case "oddball_ball":
+                                scnrObj.EngineFlags |= GameEngineSubTypeFlags.Oddball;
+                                break;
+                            case "koth_hill":
+                                scnrObj.EngineFlags |= GameEngineSubTypeFlags.KingOfTheHill;
+                                break;
+                            case "terr_object":
+                                scnrObj.EngineFlags |= GameEngineSubTypeFlags.Territories;
+                                break;
+                            case "as_goal": // assault plant point
+                            case "as_bomb": // assault bomb spawn
+                            case "assault":
+                                scnrObj.EngineFlags |= GameEngineSubTypeFlags.Assault;
+                                break;
+                            case "inf_spawn":
+                            case "inf_haven":
+                                scnrObj.EngineFlags |= GameEngineSubTypeFlags.Infection;
+                                break;
+                            case "stp_goal": // use these for juggernaut points
+                                scnrObj.EngineFlags |= GameEngineSubTypeFlags.Juggernaut;
+                                break;
+                            case "stp_flag": // use these for VIP points
+                            case "stockpile":
+                                scnrObj.EngineFlags |= GameEngineSubTypeFlags.Vip;
+                                break;
+                            case "ffa_only":
+                            case "team_only":
+                            case "hh_drop_point":
+                            case "none":
+                                break;
+                            default:
+                                if (!string.IsNullOrEmpty(scnrObj.MegaloLabel))
+                                    new TagToolWarning($"unknown megalo label: {scnrObj.MegaloLabel}");
+                                break;
+                        }
+
+                        return data;
+                    }
 
                 case SoundClass soundClass:
 					return soundClass.ConvertSoundClass(BlamCache.Version);
@@ -1634,9 +1696,9 @@ namespace TagTool.Commands.Porting
 
             var materials = globals.Materials;
             var blamMaterials = BlamCache.Version >= CacheVersion.HaloReach ? blamGlobals.AlternateMaterials : blamGlobals.Materials;
-            return ConvertInteral(value);
+            return ConvertInternal(value);
 
-            object ConvertInteral(object val)
+            object ConvertInternal(object val)
             {
                 switch (val)
                 {
@@ -1660,11 +1722,11 @@ namespace TagTool.Commands.Porting
                         break;
                     case short[] indices:
                         for (int i = 0; i < indices.Length; i++)
-                            indices[i] = (short)ConvertInteral(indices[i]);
+                            indices[i] = (short)ConvertInternal(indices[i]);
                         break;
                     case StringId[] stringIds:
                         for (int i = 0; i < stringIds.Length; i++)
-                            stringIds[i] = (StringId)ConvertInteral(stringIds[i]);
+                            stringIds[i] = (StringId)ConvertInternal(stringIds[i]);
                         break;
                 }
                 return val;
@@ -1672,7 +1734,7 @@ namespace TagTool.Commands.Porting
 
             short FindMatchingMaterial(string name)
             {
-                var origianlName = name;
+                var originalName = name;
 
                 // we don't have wet materials
                 if (name.StartsWith("wet_"))
@@ -1682,21 +1744,25 @@ namespace TagTool.Commands.Porting
                 var matchIndex = (short)materials.FindIndex(x => CacheContext.StringTable.GetString(x.Name) == name);
                 if (matchIndex != -1)
                 {
-                    if(name != origianlName)
-                        new TagToolWarning($"Failed to find global material type '{origianlName}', using '{name}' instead");
+                    if(name != originalName)
+                        new TagToolWarning($"Failed to find global material type '{originalName}', using '{name}' instead");
 
                     return matchIndex;
                 }
                     
                 // we couldn't find it, find the index in the source materials
-                var blamIndex = blamMaterials.FindIndex(x => BlamCache.StringTable.GetString(x.Name) == origianlName);
+                var blamIndex = blamMaterials.FindIndex(x => BlamCache.StringTable.GetString(x.Name) == originalName);
                 if (blamIndex == -1)
-                    return -1;
+                {
+                    if (!originalName.StartsWith("default"))
+                        new TagToolWarning($"Failed to find global material type '{originalName}', using 'default_material'");
+                    return 0;
+                }
 
                 // if it has a parent search for its name
                 StringId parentName = blamMaterials[blamIndex].ParentName;
                 if (parentName == StringId.Invalid)
-                    return -1;
+                    return 0;
 
                 // recurse
                 matchIndex = FindMatchingMaterial(BlamCache.StringTable.GetString(parentName));
@@ -1706,7 +1772,7 @@ namespace TagTool.Commands.Porting
                     matchIndex = 0;
 
                 name = CacheContext.StringTable.GetString(materials[matchIndex].Name);
-                new TagToolWarning($"Failed to find global material type '{origianlName}', using '{name}' instead");
+                new TagToolWarning($"Failed to find global material type '{originalName}', using '{name}' instead");
                 return matchIndex;
             }
         }

@@ -96,6 +96,7 @@ namespace TagTool.Commands.Porting.Gen2
                 "scen",
                 "jpt!",
                 "proj",
+                "trak",
                 "shad"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
@@ -143,6 +144,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case TagTool.Tags.Definitions.Gen2.Weapon weapon:
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                 case TagTool.Tags.Definitions.Gen2.Projectile projectile:
+                case TagTool.Tags.Definitions.Gen2.CameraTrack track:
                     definition = ConvertObject(definition);
                     break;
                 case TagTool.Tags.Definitions.Gen2.DamageEffect damage:
