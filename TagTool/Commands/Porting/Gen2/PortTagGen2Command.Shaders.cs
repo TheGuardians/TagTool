@@ -53,42 +53,51 @@ namespace TagTool.Commands.Porting.Gen2
                 "\0"
             };
             var h2_pixel_constants = new List<string> {
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
                 "\0"
             };
             var h2_vertex_constants = new List<string>
             {
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
+                " ",
                 "\0"
             };
+
+            // MODIFIERS FOR VERTEX CONSTANTS
+            // ! = Flip the orientation of the constant values
+            // 
+            var modifiers = new List<char>
+            {
+                '!'
+            };
+
 
             // Change the contents of lists depending on the h2 template used
             switch (shader_template)
@@ -165,7 +174,6 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order[5] = "\0";
                         break;
                     }
-                // Not done
                 case "tex_bump_env_illum_3_channel":
                     {
                         args[2] = "1";
@@ -243,8 +251,8 @@ namespace TagTool.Commands.Porting.Gen2
                         {
                             h2_vertex_constants[0] = "detail_map";
                             h2_vertex_constants[1] = "base_map";
-                            h2_vertex_constants[2] = "change_color_map";
-                            h2_vertex_constants[3] = "bump_map";
+                            h2_vertex_constants[2] = "!bump_map";
+                            h2_vertex_constants[3] = "change_color_map";
                             h2_vertex_constants[4] = "\0";
                         }
 
@@ -484,16 +492,33 @@ namespace TagTool.Commands.Porting.Gen2
                     {
                         for (i = 0; h2_vertex_constants[i] != "\0"; i++)
                         {
+                            char[] symbol = h2_vertex_constants[i].Substring(0, 1).ToCharArray();
+                            foreach (var modifier in modifiers)
+                            {
+                                if (symbol[0] == modifier) h2_vertex_constants[i].Remove(0);
+                            }
+
                             if (h2_vertex_constants[i] == current_type)
                             {
+                                Shader.RenderMethodPostprocessBlock.RealConstant newfloatconstant = new Shader.RenderMethodPostprocessBlock.RealConstant();
                                 found = true;
-                                Shader.RenderMethodPostprocessBlock.RealConstant newfloatconstant = new Shader.RenderMethodPostprocessBlock.RealConstant
+                                switch (symbol[0])
                                 {
-                                    Arg0 = h2vertex_constant[i].Vector3.I,
-                                    Arg1 = h2vertex_constant[i].Vector3.J,
-                                    Arg2 = h2vertex_constant[i].Vector3.K,
-                                    Arg3 = h2vertex_constant[i].W
-                                };
+                                    case '!':
+                                        {
+                                            newfloatconstant.Arg0 = h2vertex_constant[i].W;
+                                            newfloatconstant.Arg1 = h2vertex_constant[i].Vector3.K;
+                                            newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.J;
+                                            newfloatconstant.Arg3 = h2vertex_constant[i].Vector3.I;
+                                        };
+                                        break;
+                                    default:
+                                        newfloatconstant.Arg0 = h2vertex_constant[i].Vector3.I;
+                                        newfloatconstant.Arg1 = h2vertex_constant[i].Vector3.J;
+                                        newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.K;
+                                        newfloatconstant.Arg3 = h2vertex_constant[i].W;
+                                        break;
+                                }
                                 newPostprocessBlock.RealConstants.Add(newfloatconstant);
                             }
                         }
