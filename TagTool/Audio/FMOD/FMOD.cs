@@ -422,11 +422,7 @@ namespace TagTool.Audio
 
         #region Imports
 
-#if _x64
-        public const string DllPath = "fmod64.dll";
-#else
         public const string DllPath = "fmod.dll";
-#endif
 
         [DllImport(DllPath)]
         private static extern FMOD_RESULT FMOD_System_Create(out IntPtr system);
