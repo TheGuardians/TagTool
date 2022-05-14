@@ -1712,18 +1712,32 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>cd $(ProjectDir)
-xcopy "$(ProjectDir)..\Physics" "$(ProjectDir)$(OutDir)Physics" /e /i /h /Y
-xcopy "$(ProjectDir)..\Tools" "$(ProjectDir)$(OutDir)Tools" /e /i /h /Y
+    <PostBuildEvent>cd $(ProjectDir)$(OutDir)
+xcopy "$(ProjectDir)..\Physics" "Physics" /e /i /h /Y
+xcopy "$(ProjectDir)..\Tools" "Tools" /e /i /h /Y
 
 IF "$(PlatformName)" == "x64" (
-    del "$(ProjectDir)$(OutDir)Tools\meshoptimizer32.dll"
-    ren "$(ProjectDir)$(OutDir)Tools\meshoptimizer64.dll" meshoptimizer.dll
+    del "Tools\meshoptimizer32.dll"
+    ren "Tools\meshoptimizer64.dll" meshoptimizer.dll
+    del "Tools\fmod.dll"
+    ren "Tools\fmod64.dll" fmod.dll
 ) ELSE (
-    del "$(ProjectDir)$(OutDir)Tools\meshoptimizer64.dll"
-    ren "$(ProjectDir)$(OutDir)Tools\meshoptimizer32.dll" meshoptimizer.dll
+    del "Tools\meshoptimizer64.dll"
+    ren "Tools\meshoptimizer32.dll" meshoptimizer.dll
+    del "Tools\fmod64.dll"
 )
 
+del "JsonMoppNet.dll"
+move "LZ4.dll" "Tools"
+move "assimp.dll" "Tools"
+move "AssimpNet.dll" "Tools"
+
+md  "Tools\system"
+for /f "eol=: delims=" %25%25F in ('dir /b^|find "System"') do move /Y "%25%25F" "Tools\system"
+md  "Tools\analysis"
+for /f "eol=: delims=" %25%25F in ('dir /b^|find "Microsoft.CodeAnalysis"') do move /Y "%25%25F" "Tools\analysis"
+
+cd $(ProjectDir)
 if ERRORLEVEL == 0 (
     xcopy "$(ProjectDir)..\Tools\HaloShaderGenerator.dll" "$(ProjectDir)$(OutDir)" /e /i /h /Y 2&gt;nul 1&gt;nul
     SET ERRORLEVEL=0
