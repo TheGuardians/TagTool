@@ -24,7 +24,7 @@ namespace TagTool.Commands.Modding
             if (args.Count > 0)
                 return new TagToolError(CommandError.ArgCount);
 
-            Cache.BaseModPackage.CreateDescription(IgnoreArgumentVariables);
+            Cache.BaseModPackage.CreateDescription(IgnoreArgumentVariables,  true);
 
             return true;
 
