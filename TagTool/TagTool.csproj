@@ -399,6 +399,7 @@
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Objects.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Model.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.RenderModel.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Shaders.cs" />
     <Compile Include="Commands\Porting\Gen4\PortTagGen4Command.Physics.cs" />
     <Compile Include="Commands\Porting\ListBlamTagsCommand.cs" />
     <Compile Include="Commands\Porting\NameBlamTagCommand.cs" />

@@ -19,7 +19,6 @@ namespace TagTool.Commands.Porting.Gen2
         string[] argParameters = new string[0];
         PortingFlags PortFlags;
         private Dictionary<int, CachedTag> PortedTags = new Dictionary<int, CachedTag>();
-        private Dictionary<Tag, List<string>> ReplacedTags = new Dictionary<Tag, List<string>>();
 
         public PortTagGen2Command(GameCacheHaloOnlineBase cache, GameCacheGen2 gen2Cache) : base(false, "PortTag", "", "", "")
         {
@@ -94,7 +93,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "scen",
                 "jpt!",
                 "proj",
-                "trak"
+                "trak",
+                "shad"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -105,7 +105,19 @@ namespace TagTool.Commands.Porting.Gen2
             CachedTag destinationTag = null;
             foreach (var instance in Cache.TagCache.TagTable)
             {
-                if (instance == null || !instance.IsInGroup(gen2Tag.Group.Tag) || instance.Name == null || instance.Name != gen2Tag.Name)
+                var grouptag = gen2Tag.Group.Tag;
+
+                //method for finding tags with altered tag groups
+                switch (grouptag.ToString())
+                {
+                    case "shad":
+                        grouptag = new Tag("rmsh");
+                        break;
+                    default:
+                        break;
+                }
+
+                if (instance == null || !instance.IsInGroup(grouptag) || instance.Name == null || instance.Name != gen2Tag.Name)
                     continue;
                 if (!PortingFlagIsSet(PortingFlags.Replace))
                     return instance;
@@ -147,17 +159,24 @@ namespace TagTool.Commands.Porting.Gen2
                 case TagTool.Tags.Definitions.Gen2.DamageEffect damage:
                     definition = ConvertEffect(damage);
                     break;
+                case TagTool.Tags.Definitions.Gen2.Shader shader:
+                    //preserve a copy of unconverted data
+                    object h2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
+                    definition = ConvertShader(shader, (TagTool.Tags.Definitions.Gen2.Shader)h2definition, cacheStream);
+                    break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
                     return null;
             }
 
+            if (definition == null)
+                return null;
+
             //allocate and serialize tag after conversion
-            if(destinationTag == null)
+            if (destinationTag == null)
                 destinationTag = Cache.TagCache.AllocateTag(definition.GetType(), gen2Tag.Name);
 
-            if (definition != null)
-                Cache.Serialize(cacheStream, destinationTag, definition);
+            Cache.Serialize(cacheStream, destinationTag, definition);
 
             Console.WriteLine($"['{destinationTag.Group.Tag}', 0x{destinationTag.Index:X4}] {destinationTag}");
 

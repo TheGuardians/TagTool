@@ -71,10 +71,29 @@ namespace TagTool.Commands.Porting.Gen2
 
         public Vehicle FixupVehicle(TagTool.Tags.Definitions.Gen2.Vehicle gen2Tag, Vehicle vehi)
         {
+            byte i;
+            byte j;
+            vehi.Boost.BoostDeadTime = 0.1f;
             vehi.FlipOverMessageNew = gen2Tag.FlipMessage;
             vehi.FlipTimeNew = gen2Tag.TurnScale;
-            vehi.FlippingAngularVelocityRangeNew = new Bounds<float> ( gen2Tag.MinimumFlippingAngularVelocity, gen2Tag.MaximumFlippingAngularVelocity );
+            vehi.FlippingAngularVelocityRangeNew = new Bounds<float>(gen2Tag.MinimumFlippingAngularVelocity, gen2Tag.MaximumFlippingAngularVelocity);
             vehi.PhysicsTypes = new Vehicle.VehiclePhysicsTypes();
+            vehi.UnitFlags = (TagTool.Tags.Definitions.Unit.UnitFlagBits)gen2Tag.Flags1;
+
+            // Set Camera tracks
+            for (i = 0; i < gen2Tag.UnitCamera.CameraTracks.Count; i++)
+            {
+                vehi.UnitCamera.CameraTracks[i].CameraTrack = gen2Tag.UnitCamera.CameraTracks[i].Track;
+            }
+
+            // Set Camera tracks inside seat block
+            for (i = 0; i < gen2Tag.Seats[i].UnitCamera.CameraTracks.Count; i++)
+            {
+                for (j = 0; j < gen2Tag.UnitCamera.CameraTracks.Count; j++)
+                {
+                    vehi.Seats[i].UnitCamera.CameraTracks[j].CameraTrack = gen2Tag.Seats[i].UnitCamera.CameraTracks[j].Track;
+                }
+            }
 
             switch (gen2Tag.PhysicsType)
             {
@@ -222,20 +241,34 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
 
                 case TagTool.Tags.Definitions.Gen2.Vehicle.TypeValue.AlienFighter:
+
+                    // Convert Gravity Scale from H2 to the speed the vehicle
+                    float GravitySpeed = (float)9.8 - (float)9.8 * gen2Tag.HavokVehiclePhysics.GravityScale;
+
+                    // Convert Degrees to Radians (H2's fields use degrees while HO uses radians)
+                    float Converted_LeftTurn = gen2Tag.MaximumLeftTurn * (float)3.14 / (float)180;
+                    float Converted_RightTurn = gen2Tag.MaximumRightTurnNegative * (float)3.14 / (float)180;
+                    float Converted_TurnRate = gen2Tag.TurnRate * (float)3.14 / (float)180;
+                    Angle Converted_OverdampenCuspAngle = Angle.FromDegrees(gen2Tag.OverdampenCuspAngle.Radians);
+                    RealEulerAngles2d Converted_FixedGunOffset = new RealEulerAngles2d
+                    {
+                        PitchValue = (gen2Tag.FixedGunOffset.PitchValue * (float)3.14 / (float)180) / -10
+                    };
+
                     vehi.PhysicsTypes.AlienFighter = new List<Vehicle.AlienFighterPhysics>
                             {
                                 new Vehicle.AlienFighterPhysics
                                 {
                                     Steering = new Vehicle.VehicleSteeringControl
                                     {
-                                        OverdampenCuspAngle = gen2Tag.OverdampenCuspAngle,
+                                        OverdampenCuspAngle = Converted_OverdampenCuspAngle,
                                         OverdampenExponent = gen2Tag.OverdampenExponent
                                     },
                                     Turning = new Vehicle.VehicleTurningControl
                                     {
-                                        MaximumLeftTurn = gen2Tag.MaximumLeftTurn,
-                                        MaximumRightTurn = gen2Tag.MaximumRightTurnNegative,
-                                        TurnRate = gen2Tag.TurnRate
+                                        MaximumLeftTurn = (int)Converted_LeftTurn,
+                                        MaximumRightTurn = (int)Converted_RightTurn,
+                                        TurnRate = (int)Converted_TurnRate
                                     },
                                     VelocityControl = new Vehicle.VehicleVelocityControl
                                     {
@@ -248,13 +281,13 @@ namespace TagTool.Commands.Porting.Gen2
                                         SlideAcceleration = gen2Tag.SlideAcceleration,
                                         SlideDeceleration = gen2Tag.SlideDeceleration,
                                     },
-                                    MaximumTrickFrequency = 1.0f,
+                                    MaximumTrickFrequency = 2.0f,
                                     FlyingTorqueScale = gen2Tag.FlyingTorqueScale,
-                                    FixedGunOffset = gen2Tag.FixedGunOffset,
-                                    LoopTrickDuration = 1.8f,
-                                    RollTrickDuration = 1.8f,
-                                    ZeroGravitySpeed = 4.0f,
-                                    FullGravitySpeed = 3.7f,
+                                    FixedGunOffset = Converted_FixedGunOffset,
+                                    LoopTrickDuration = 2.0f,
+                                    RollTrickDuration = 2.0f,
+                                    ZeroGravitySpeed = GravitySpeed,
+                                    FullGravitySpeed = GravitySpeed,
                                     StrafeBoostScale = 7.5f,
                                     OffStickDecelerationScale = 0.1f,
                                     CruisingThrottle = 0.75f,

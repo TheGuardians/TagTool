@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
@@ -32,7 +32,7 @@ namespace TagTool.Commands.Porting.Gen2
                 NewDamageInfo = new List<Model.GlobalDamageInfoBlock>(),
                 CollisionRegions = new List<Model.CollisionRegion>(),
                 Nodes = new List<Model.Node>(),
-                ModelObjectData = new List<Model.ModelObjectDatum>(),                
+                ModelObjectData = new List<Model.ModelObjectDatum>(),
                 RenderOnlyNodeFlags = gen2Model.RenderOnlyNodeFlags,
                 RenderOnlySectionFlags = gen2Model.RenderOnlySectionFlags
             };
@@ -54,14 +54,14 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //variants
-            foreach(var gen2var in gen2Model.Variants)
+            foreach (var gen2var in gen2Model.Variants)
             {
                 var variant = new Model.Variant
                 {
                     Name = gen2var.Name,
                     Regions = new List<Model.Variant.Region>()
                 };
-                foreach(var gen2reg in gen2var.Regions)
+                foreach (var gen2reg in gen2var.Regions)
                 {
                     var region = new Model.Variant.Region
                     {
@@ -85,7 +85,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //collision regions
-            foreach(var gen2coll in gen2Model.CollisionRegions)
+            foreach (var gen2coll in gen2Model.CollisionRegions)
             {
                 var coll = new Model.CollisionRegion
                 {
@@ -94,7 +94,7 @@ namespace TagTool.Commands.Porting.Gen2
                     PhysicsRegionIndex = gen2coll.PhysicsRegionIndex,
                     Permutations = new List<Model.CollisionRegion.Permutation>()
                 };
-                foreach(var gen2perm in gen2coll.Permutations)
+                foreach (var gen2perm in gen2coll.Permutations)
                 {
                     coll.Permutations.Add(new Model.CollisionRegion.Permutation
                     {
@@ -107,7 +107,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //nodes
-            foreach(var gen2node in gen2Model.Nodes)
+            foreach (var gen2node in gen2Model.Nodes)
             {
                 model.Nodes.Add(new Model.Node
                 {
@@ -123,7 +123,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //model object data
-            foreach(var gen2mod in gen2Model.ModelObjectData)
+            foreach (var gen2mod in gen2Model.ModelObjectData)
             {
                 model.ModelObjectData.Add(new Model.ModelObjectDatum
                 {
