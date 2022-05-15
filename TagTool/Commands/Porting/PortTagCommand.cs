@@ -514,7 +514,7 @@ namespace TagTool.Commands.Porting
                     string name = block.Object.Name;
                     if (replacements.TryGetValue(name, out string result))
                         block.Object.Name = result;
-                    else if (name.Contains("weak_anti_respawn_zone") || name.Contains("weak_respawn_zone"))
+                    else if (name.EndsWith("weak_anti_respawn_zone") || name.EndsWith("weak_respawn_zone") || name.EndsWith("danger_zone"))
                         block.Object = null;
                 }
             }

@@ -20,11 +20,13 @@ namespace TagTool.Commands.Modding
             base(true,
 
                 "CreateModPackage",
-                "Create context for a mod package. Optional argument: number of tag caches: integer, large: uses unmanaged streams for 2gb + resources",
+                "Create context for a mod package. Optionally have more than one tag cache and use unmanaged streams for 2gb + resources.",
 
-                "CreateModPackage [Number of tag caches, [large]]",
+                "CreateModPackage [# of tag caches, [large]] [testname]",
 
-                "Create context for a mod package. Optional argument: number of tag caches: integer, large: uses unmanaged streams for 2gb + resources")
+                "\t- [# of tag caches]: An integer used for when you want more than one isolated tag cache."
+                + "\n\t- [large]: Used with a tag cache count to allow unmanaged streams for 2GB + resources."
+                + "\n\t- [testname]: A name for a test mod package. Skips the standard dialog, used without other arguments.")
         {
             ContextStack = contextStack;
             Cache = cache;
@@ -37,11 +39,22 @@ namespace TagTool.Commands.Modding
 
             int tagCacheCount = 1;
             bool useLargeStreams = false;
+            bool useDialog = true;
+
             if (args.Count > 0)
             {
                 if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheCount))
-                    return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
-                if (args.Count == 2)
+                {
+                    if (args.Count == 1 && !string.IsNullOrEmpty(args[0]))
+                    {
+                        useDialog = false;
+                        tagCacheCount = 1;
+                    }
+                    else
+                        return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
+                }
+
+                if (args.Count == 2 && args[1].ToLower() == "large")
                     useLargeStreams = true;
             }
                 
@@ -51,7 +64,10 @@ namespace TagTool.Commands.Modding
             GameCacheModPackage modCache = new GameCacheModPackage(Cache, useLargeStreams);
 
             // create metadata here
-            modCache.BaseModPackage.CreateDescription(IgnoreArgumentVariables);
+            modCache.BaseModPackage.CreateDescription(IgnoreArgumentVariables, useDialog);
+
+            if (!useDialog)
+                modCache.BaseModPackage.Metadata.Name = args[0];
 
             // initialze mod package with current HO cache
             Console.WriteLine($"Building initial tag cache from reference...");
@@ -99,12 +115,14 @@ namespace TagTool.Commands.Modding
             for (int i = 0; i < tagCacheCount; i++)
             {
                 string name = "default";
-                if (tagCacheCount > 1 || args.Count == 1)
+                if (tagCacheCount > 1 || (args.Count == 1 && useLargeStreams))
                 {
                     Console.WriteLine($"Enter the name of tag cache {i} (32 chars max):");
                     name = Console.ReadLine().Trim();
                     name = name.Length <= 32 ? name : name.Substring(0, 32);
                 }
+                else if (!useDialog)
+                    name = modCache.BaseModPackage.Metadata.Name;
 
                 Dictionary<int, string> tagNames = new Dictionary<int, string>();
 
