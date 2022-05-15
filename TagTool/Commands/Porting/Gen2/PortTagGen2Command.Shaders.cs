@@ -5,18 +5,17 @@ using TagTool.Cache;
 using TagTool.Commands.Shaders;
 using TagTool.Tags.Definitions;
 using TagTool.Commands.Common;
-using RenderMethodTemplate = TagTool.Tags.Definitions.RenderMethodTemplate;
 using ShaderGen2 = TagTool.Tags.Definitions.Gen2.Shader;
+using System.Linq;
 
 namespace TagTool.Commands.Porting.Gen2
 {
     partial class PortTagGen2Command : Command
     {
-        public Shader ConvertShader(ShaderGen2 gen2Shader, Stream stream, string shader_template)
+        public Shader ConvertShader(ShaderGen2 gen2Shader, ShaderGen2 gen2ShaderH2, Stream stream)
         {
-            // Temporary tag
-            TagTool.Cache.CachedTag tag;
-            short i = 1;
+            string shader_template = gen2ShaderH2.Template.Name;
+            shader_template = shader_template.Split('\\').Last();
 
             var shader = new Shader()
             {
@@ -185,7 +184,7 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_vertex_constants[0] = "bump_map";
                         h2_vertex_constants[1] = "base_map";
                         h2_vertex_constants[2] = "detail_map";
-                        h2_vertex_constants[9] = "environment_map_specular_contribution"; 
+                        h2_vertex_constants[9] = "environment_map_specular_contribution";
                         h2_vertex_constants[11] = "self_illum_map";
                         h2_vertex_constants[12] = "\0";
 
@@ -296,10 +295,9 @@ namespace TagTool.Commands.Porting.Gen2
                 + args[5] + "_" + args[6] + "_" + args[7] + "_" + args[8] + "_" + args[9] + "_" + args[10] + "_" + args[11];
 
             // Generate if the template dosent exist yet
-            if (!Cache.TagCacheGenHO.TryGetTag(shader_path + ".rmt2", out tag))
+            if (!Cache.TagCacheGenHO.TryGetTag(shader_path + ".rmt2", out CachedTag result))
             {
-                new GenerateShaderCommand(Cache).ExecuteWithStream(args, stream);
-                i--;
+                new GenerateShaderCommand(Cache).ExecuteWithStream(args.DeepClone(), stream);
             }
 
             shader.BaseRenderMethod = Cache.TagCacheGenHO.GetTag(@"shaders\shader.rmdf");
@@ -320,7 +318,7 @@ namespace TagTool.Commands.Porting.Gen2
             shader.ShaderProperties.Add(newPostprocessBlock);
 
             // Populate options block
-            for (; i < 11; i++)
+            for (var i = 1; i < 11; i++)
             {
                 Shader.RenderMethodOptionIndex option = new Shader.RenderMethodOptionIndex
                 {
@@ -339,7 +337,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                 // If the string in the bitmap order list matches the current_type in the rmt2,
                 // Then set current_type to the bitmap path
-                for (i = 0; h2_bitmap_order[i] != "\0"; i++)
+                for (var i = 0; h2_bitmap_order[i] != "\0"; i++)
                 {
                     if (h2_bitmap_order[i] == current_type)
                     {
@@ -350,7 +348,7 @@ namespace TagTool.Commands.Porting.Gen2
                 }
 
                 // If bitmap type is not found in list just give it a default bitmap
-                if(found == false) current_type = "shaders\\default_bitmaps\\bitmaps\\alpha_grey50.bitmap";
+                if (found == false) current_type = "shaders\\default_bitmaps\\bitmaps\\alpha_grey50.bitmap";
 
                 Shader.RenderMethodPostprocessBlock.TextureConstant newTextureConstant = new Shader.RenderMethodPostprocessBlock.TextureConstant
                 {
@@ -397,7 +395,7 @@ namespace TagTool.Commands.Porting.Gen2
                     };
                     newPostprocessBlock.RealConstants.Add(newfloatconstant);
 
-                }    
+                }
 
                 // Set diffuse_coefficient to 1 default for all shaders
                 else if (current_type == "diffuse_coefficient")
@@ -445,7 +443,7 @@ namespace TagTool.Commands.Porting.Gen2
                 else
                 {
                     // Convert Pixel Constants to Float Constants if matches are found
-                    for (i = 0; h2_pixel_constants[i] != "\0"; i++)
+                    for (var i = 0; h2_pixel_constants[i] != "\0"; i++)
                     {
                         if (h2_pixel_constants[i] == current_type)
                         {
@@ -490,7 +488,7 @@ namespace TagTool.Commands.Porting.Gen2
                     // try to find and convert Vertex Constants to Float Constants
                     if (found == false)
                     {
-                        for (i = 0; h2_vertex_constants[i] != "\0"; i++)
+                        for (var i = 0; h2_vertex_constants[i] != "\0"; i++)
                         {
                             char[] symbol = h2_vertex_constants[i].Substring(0, 1).ToCharArray();
                             foreach (var modifier in modifiers)
