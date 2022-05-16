@@ -393,6 +393,7 @@
     <Compile Include="Commands\Common\BeginScriptCommand.cs" />
     <Compile Include="Commands\Common\EndScriptCommand.cs" />
     <Compile Include="Commands\Files\ConvertMapVariantCommand.cs" />
+    <Compile Include="Commands\Porting\Gen2\Gen2VertexDefinitions.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.AutoConvert.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Bitmap.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Effects.cs" />
