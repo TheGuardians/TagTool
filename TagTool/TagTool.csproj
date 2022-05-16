@@ -16,6 +16,9 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -28,11 +31,8 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>TagTool.ico</ApplicationIcon>
@@ -1711,6 +1711,11 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemDefinitionGroup>
+    <ReferenceCopyLocalPaths>
+      <DestinationSubDirectory>Tools\</DestinationSubDirectory>
+    </ReferenceCopyLocalPaths>
+  </ItemDefinitionGroup>
   <PropertyGroup>
     <PostBuildEvent>cd $(ProjectDir)$(OutDir)
 xcopy "$(ProjectDir)..\Physics" "Physics" /e /i /h /Y
@@ -1732,10 +1737,9 @@ move "LZ4.dll" "Tools"
 move "assimp.dll" "Tools"
 move "AssimpNet.dll" "Tools"
 
-md  "Tools\system"
-for /f "eol=: delims=" %25%25F in ('dir /b^|find "System"') do move /Y "%25%25F" "Tools\system"
-md  "Tools\analysis"
-for /f "eol=: delims=" %25%25F in ('dir /b^|find "Microsoft.CodeAnalysis"') do move /Y "%25%25F" "Tools\analysis"
+:: md  "Tools\scripting"
+:: for /f "eol=: delims=" %25%25F in ('dir /b^|find "System"') do move /Y "%25%25F" "Tools\scripting"
+:: for /f "eol=: delims=" %25%25F in ('dir /b^|find "Microsoft.CodeAnalysis"') do move /Y "%25%25F" "Tools\scripting"
 
 cd $(ProjectDir)
 if ERRORLEVEL == 0 (
