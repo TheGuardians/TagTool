@@ -5,6 +5,7 @@ using TagTool.Shaders;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using TagTool.Tags;
 using static System.Runtime.InteropServices.CharSet;
@@ -416,9 +417,8 @@ namespace TagTool.Serialization
                 referencedTag = null;
 
             if (referencedTag != null && valueInfo != null && valueInfo.ValidTags != null)
-                foreach (string tag in valueInfo.ValidTags)
-                    if (!referencedTag.IsInGroup(tag))
-                        new TagToolWarning($"ERROR: Tag reference with invalid group found during serialization: {referencedTag.Name}.{referencedTag.Group.Tag}");
+                if (!valueInfo.ValidTags.Contains(referencedTag.Group.Tag.ToString()))
+                    new TagToolWarning($"Tag reference with invalid group found during serialization: {referencedTag.Name}.{referencedTag.Group.Tag}");
 
             block.AddTagReference(referencedTag, valueInfo == null ? false : valueInfo.Flags.HasFlag(Short));
 
