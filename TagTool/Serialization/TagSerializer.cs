@@ -417,8 +417,18 @@ namespace TagTool.Serialization
                 referencedTag = null;
 
             if (referencedTag != null && valueInfo != null && valueInfo.ValidTags != null)
-                if (!valueInfo.ValidTags.Contains(referencedTag.Group.Tag.ToString()))
-                    new TagToolWarning($"Tag reference with invalid group found during serialization: {referencedTag.Name}.{referencedTag.Group.Tag}");
+            {
+                bool invalid = true;
+
+                while (invalid)
+                {
+                    foreach (string tag in valueInfo.ValidTags)
+                        if (referencedTag.IsInGroup(tag))
+                            invalid = false;
+                }
+                if (invalid)
+                    new TagToolWarning($"ERROR: Tag reference with invalid group found during serialization: {referencedTag.Name}.{referencedTag.Group.Tag}");
+            }
 
             block.AddTagReference(referencedTag, valueInfo == null ? false : valueInfo.Flags.HasFlag(Short));
 
