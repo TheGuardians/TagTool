@@ -71,29 +71,12 @@ namespace TagTool.Commands.Porting.Gen2
 
         public Vehicle FixupVehicle(TagTool.Tags.Definitions.Gen2.Vehicle gen2Tag, Vehicle vehi)
         {
-            byte i;
-            byte j;
             vehi.Boost.BoostDeadTime = 0.1f;
             vehi.FlipOverMessageNew = gen2Tag.FlipMessage;
             vehi.FlipTimeNew = gen2Tag.TurnScale;
             vehi.FlippingAngularVelocityRangeNew = new Bounds<float>(gen2Tag.MinimumFlippingAngularVelocity, gen2Tag.MaximumFlippingAngularVelocity);
             vehi.PhysicsTypes = new Vehicle.VehiclePhysicsTypes();
             vehi.UnitFlags = (TagTool.Tags.Definitions.Unit.UnitFlagBits)gen2Tag.Flags1;
-
-            // Set Camera tracks
-            for (i = 0; i < gen2Tag.UnitCamera.CameraTracks.Count; i++)
-            {
-                vehi.UnitCamera.CameraTracks[i].CameraTrack = gen2Tag.UnitCamera.CameraTracks[i].Track;
-            }
-
-            // Set Camera tracks inside seat block
-            for (i = 0; i < gen2Tag.Seats[i].UnitCamera.CameraTracks.Count; i++)
-            {
-                for (j = 0; j < gen2Tag.UnitCamera.CameraTracks.Count; j++)
-                {
-                    vehi.Seats[i].UnitCamera.CameraTracks[j].CameraTrack = gen2Tag.Seats[i].UnitCamera.CameraTracks[j].Track;
-                }
-            }
 
             switch (gen2Tag.PhysicsType)
             {

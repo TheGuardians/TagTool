@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System;
 using System.Collections.Generic;
+using TagTool.Geometry.BspCollisionGeometry;
 using System.Runtime.InteropServices;
 using static TagTool.Tags.TagFieldFlags;
 
@@ -14,7 +15,7 @@ namespace TagTool.Tags.Definitions.Gen2
         [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
         public List<StructureCollisionMaterialsBlock> CollisionMaterials;
-        public List<GlobalCollisionBspBlock> CollisionBsp;
+        public List<CollisionGeometry> CollisionBsp;
         /// <summary>
         /// Height below which vehicles get pushed up by an unstoppable force.
         /// </summary>
@@ -394,7 +395,7 @@ namespace TagTool.Tags.Definitions.Gen2
         public class StructureBspClusterBlock : TagStructure
         {
             public GlobalGeometrySectionInfoStructBlock SectionInfo;
-            public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
+            public CacheFileResourceGen2 GeometryBlockInfo;
             public List<StructureBspClusterDataBlockNew> ClusterData;
             public Bounds<float> BoundsX;
             public Bounds<float> BoundsY;
@@ -439,7 +440,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public short ShadowCastingRigidTriangleCount;
                 public GeometryClassificationValue GeometryClassification;
                 public GeometryCompressionFlagsValue GeometryCompressionFlags;
-                public List<GlobalGeometryCompressionInfoBlock> Unknown;
+                public List<GlobalGeometryCompressionInfoBlock> Compression;
                 public sbyte HardwareNodeCount;
                 public sbyte NodeMapSize;
                 public short SoftwarePlaneCount;
@@ -1470,7 +1471,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public int Checksum;
             public RealPoint3d BoundingSphereCenter;
             public float BoundingSphereRadius;
-            public GlobalCollisionBspStructBlock CollisionInfo;
+            public CollisionGeometry CollisionInfo;
             public List<CollisionBspPhysicsBlock> BspPhysics;
             public List<StructureBspLeafBlock> RenderLeaves;
             public List<StructureBspSurfaceReferenceBlock> SurfaceReferences;
@@ -1479,7 +1480,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public class StructureInstancedGeometryRenderInfoStructBlock : TagStructure
             {
                 public GlobalGeometrySectionInfoStructBlock SectionInfo;
-                public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
+                public CacheFileResourceGen2 GeometryBlockInfo;
                 public List<StructureBspClusterDataBlockNew> RenderData;
                 public List<GlobalGeometrySectionStripIndexBlock> IndexReorderTable;
                 
@@ -1499,7 +1500,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public short ShadowCastingRigidTriangleCount;
                     public GeometryClassificationValue GeometryClassification;
                     public GeometryCompressionFlagsValue GeometryCompressionFlags;
-                    public List<GlobalGeometryCompressionInfoBlock> Unknown;
+                    public List<GlobalGeometryCompressionInfoBlock> Compression;
                     public sbyte HardwareNodeCount;
                     public sbyte NodeMapSize;
                     public short SoftwarePlaneCount;

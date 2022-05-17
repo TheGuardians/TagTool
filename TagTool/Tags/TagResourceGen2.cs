@@ -11,7 +11,7 @@ namespace TagTool.Tags
         public short FieldOffset;
         public short PrimaryLocator;
         public short SecondaryLocator;
-        public int ResoureDataSize;
+        public int ResourceDataSize;
         public int ResourceDataOffset;
     }
 

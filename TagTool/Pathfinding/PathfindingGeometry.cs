@@ -194,10 +194,9 @@ namespace TagTool.Pathfinding
             HoistLink,
             WallJumpLink,
             BreakableFloor,
-            Unknown8,
-            Unknown9,
-            UnknownA,
-            // TODO: Add more?
+            RailLink,
+            SeamLink,
+            DoorLink,
         }
 
         [Flags]
@@ -206,12 +205,6 @@ namespace TagTool.Pathfinding
             None = 0,
             Bidirectional = 1 << 0,
             Closed = 1 << 1,
-            Unknown2 = 1 << 2,
-            Unknown3 = 1 << 3,
-            Unknown4 = 1 << 4,
-            Unknown5 = 1 << 5,
-            Unknown6 = 1 << 6,
-            Unknown7 = 1 << 7
         }
 
         [Flags]

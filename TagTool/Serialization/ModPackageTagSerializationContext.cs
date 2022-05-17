@@ -16,7 +16,7 @@ namespace TagTool.Serialization
 
         public override CachedTag GetTagByIndex(int index)
         {
-            if (index < 0)
+            if (index < 0 || index >= ModPackageTagCache.Tags.Count)
                 return null;
 
             return ModPackageTagCache.Tags[index];

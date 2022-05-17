@@ -19,6 +19,13 @@ namespace TagTool.Commands.Porting.Gen2
 
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(inputinfo.Types[0], inputinfo.Version, inputinfo.CachePlatform))
             {
+                //don't bother converting the value if it is null, padding, or runtime
+                if (tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Padding) ||
+                    tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Runtime) ||
+                    tagFieldInfo.GetValue(input) == null)
+                    continue;
+
+                //binary search to find a field in the output with a matching name
                 string query = tagFieldInfo.Name.ToUpper();
                 int matchindex = outputnamelist.BinarySearch(query);
                 if (matchindex >= 0)

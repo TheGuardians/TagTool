@@ -5,22 +5,21 @@ using System.IO;
 using System.Linq;
 using TagTool.Audio;
 using TagTool.Cache;
+using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Gen3;
 using TagTool.Common;
 using TagTool.Commands.Common;
 using TagTool.Damage;
 using TagTool.Geometry;
 using TagTool.Havok;
-using TagTool.Tags;
 using TagTool.Shaders;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 using System.Text.RegularExpressions;
 using TagTool.IO;
-using TagTool.Cache.HaloOnline;
-using TagTool.Cache.Gen3;
-using TagTool.Commands.CollisionModels;
 using System.Collections.Concurrent;
 using TagTool.Geometry.BspCollisionGeometry;
-using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Commands.Porting
 {
@@ -1301,8 +1300,16 @@ namespace TagTool.Commands.Porting
                             // Needs to be implemented in the engine
                             if(emitter.EmissionShape >= Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.BoatHullSurface)
                             {
-                                new TagToolWarning($"Unsupported particle emitter shape '{emitter.EmissionShape}'. Using default.");
-                                emitter.EmissionShape = Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Sprayer;
+                                switch (emitter.EmissionShape)
+                                {
+                                    case Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Cylinder:
+                                        emitter.EmissionShape = Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Tube;
+                                        break;
+                                    default:
+                                        new TagToolWarning($"Unsupported particle emitter shape '{emitter.EmissionShape}'. Using default.");
+                                        emitter.EmissionShape = Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Sprayer;
+                                        break;
+                                }
                             }
 
                             if (!Enum.TryParse(emitter.ParticleMovement.FlagsReach.ToString(), out emitter.ParticleMovement.Flags))

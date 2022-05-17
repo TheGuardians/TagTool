@@ -505,7 +505,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class UnitCameraTrack : TagStructure
         {
-            public CachedTag CameraTrack;
+            public CachedTag Track;
         }
 
         [TagStructure(Size = 0x4C, MaxVersion = CacheVersion.HaloOnline700123)]

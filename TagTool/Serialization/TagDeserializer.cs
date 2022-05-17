@@ -119,6 +119,12 @@ namespace TagTool.Serialization
 
             if (attr.Flags.HasFlag(Padding))
             {
+                //disable padding warnings for gen2 defs
+                if (Version <= CacheVersion.Halo2Vista)
+                {
+                    reader.BaseStream.Position += attr.Length;
+                    return;
+                }
 #if DEBUG
                 var unused = reader.ReadBytes(attr.Length);
 
