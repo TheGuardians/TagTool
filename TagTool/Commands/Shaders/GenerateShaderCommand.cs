@@ -24,6 +24,35 @@ namespace TagTool.Commands.Shaders
             public List<string> OrderedIntParameters;
             public List<string> OrderedBoolParameters;
             public List<string> OrderedTextures;
+            public int EffectIndex;
+
+            public static void AddDependant(List<SDependentRenderMethodData> dependentRenderMethods, GameCache cache, CachedTag dependent, RenderMethod renderMethod, RenderMethodTemplate origRmt2, int effectIndex = -1)
+            {
+                var animatedParams = ShaderFunctionHelper.GetAnimatedParameters(cache, renderMethod, origRmt2);
+
+                SDependentRenderMethodData dpData = new SDependentRenderMethodData
+                {
+                    Tag = dependent,
+                    Definition = renderMethod,
+                    AnimatedParameters = animatedParams.ToArray(),
+                    OrderedRealParameters = new List<string>(),
+                    OrderedIntParameters = new List<string>(),
+                    OrderedBoolParameters = new List<string>(),
+                    OrderedTextures = new List<string>(),
+                    EffectIndex = effectIndex,
+                };
+
+                foreach (var realP in origRmt2.RealParameterNames)
+                    dpData.OrderedRealParameters.Add(cache.StringTable.GetString(realP.Name));
+                foreach (var intP in origRmt2.IntegerParameterNames)
+                    dpData.OrderedIntParameters.Add(cache.StringTable.GetString(intP.Name));
+                foreach (var boolP in origRmt2.BooleanParameterNames)
+                    dpData.OrderedBoolParameters.Add(cache.StringTable.GetString(boolP.Name));
+                foreach (var textureP in origRmt2.TextureParameterNames)
+                    dpData.OrderedTextures.Add(cache.StringTable.GetString(textureP.Name));
+
+                dependentRenderMethods.Add(dpData);
+            }
         }
 
         GameCache Cache;
@@ -122,80 +151,6 @@ namespace TagTool.Commands.Shaders
 
             return true;
         }
-
-        public object ExecuteWithStream(List<string> args, Stream stream)
-        {
-            if (args.Count < 2)
-                return new TagToolError(CommandError.ArgCount);
-
-            string shaderType = args[0].ToLower();
-
-            if (shaderType == "explicit")
-                return GenerateExplicitShader(args[1].ToLower(), args.Count > 2 ? args[2].ToLower() : "default", args.Count > 3 ? args[3].ToLower() : "");
-            else if (shaderType == "chud")
-                return GenerateChudShader(args[1].ToLower());
-            else if (shaderType == "glvs" || shaderType == "glps")
-                return GenerateGlobalShader(args[1].ToLower(), shaderType == "glps");
-
-            if (UnsupportedShaderTypes.Contains(shaderType))
-                return new TagToolError(CommandError.CustomMessage, $"Shader type \"{shaderType}\" is unsupported");
-
-            args.RemoveAt(0); // we should only have options from this point
-
-                // get relevant rmdf
-                if (!Cache.TagCache.TryGetTag($"shaders\\{shaderType}.rmdf", out CachedTag rmdfTag))
-                {
-                    // don't need actual options yet - we just need to initialize the generator (input option indices are verified using rmdf, which we don't have yet)
-                    List<byte> fakeOptions = new List<byte>();
-                    for (int i = 0; i < args.Count; i++)
-                        fakeOptions.Add(0);
-
-                    rmdfTag = GenerateRmdf(stream, shaderType, fakeOptions.ToArray());
-                    if (rmdfTag == null)
-                        return new TagToolError(CommandError.TagInvalid, $"Could not find or generate rmdf tag for \"{shaderType}\"");
-                }
-
-                var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, rmdfTag);
-
-                if (rmdf.GlobalVertexShader == null || rmdf.GlobalPixelShader == null)
-                    return new TagToolError(CommandError.TagInvalid, "A global shader was missing from rmdf");
-
-                List<byte> options = new List<byte>();
-                for (int i = 0; i < args.Count; i++)
-                {
-                    // parse options as int, if fails try finding in rmdf string
-                    if (!byte.TryParse(args[i].ToLower(), out byte optionInteger))
-                    {
-                        bool found = false;
-
-                        for (byte j = 0; j < rmdf.Categories[i].ShaderOptions.Count; j++)
-                        {
-                            if (Cache.StringTable.GetString(rmdf.Categories[i].ShaderOptions[j].Name) == args[i].ToLower())
-                            {
-                                found = true;
-                                options.Add(j);
-                            }
-                        }
-
-                        if (!found)
-                            return new TagToolError(CommandError.ArgInvalid, $"Shader option \"{args[i]}\" not found");
-                    }
-
-                    else
-                    {
-                        options.Add(optionInteger);
-                    }
-                }
-
-                // make up options count, may not work very well
-                while (options.Count != rmdf.Categories.Count)
-                    options.Add(0);
-
-                GenerateRenderMethodTemplate(stream, shaderType, options.ToArray(), rmdf);
-
-            return true;
-        }
-
 
         HaloShaderGenerator.Generator.IShaderGenerator GetShaderGenerator(string shaderType, byte[] options, bool applyFixes = false)
         {
@@ -440,44 +395,34 @@ namespace TagTool.Commands.Shaders
                                 var prt3 = Cache.Deserialize<Particle>(stream, dependent);
                                 definition = prt3.RenderMethod;
                                 break;
-                            //case "decs":
-                            //    break;
-                            //case "beam":
-                            //    break;
-                            //case "ltvl":
-                            //    break;
-                            //case "cntl":
-                            //    break;
+                            case "decs":
+                                var decs = Cache.Deserialize<DecalSystem>(stream, dependent);
+                                for (int i = 0; i < decs.Decal.Count; i++)
+                                    if (decs.Decal[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, decs.Decal[i].RenderMethod, origRmt2, i);
+                                continue;
+                            case "beam":
+                                var beam = Cache.Deserialize<BeamSystem>(stream, dependent);
+                                for (int i = 0; i < beam.Beams.Count; i++)
+                                    if (beam.Beams[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, beam.Beams[i].RenderMethod, origRmt2, i);
+                                continue;
+                            case "ltvl":
+                                var ltvl = Cache.Deserialize<LightVolumeSystem>(stream, dependent);
+                                for (int i = 0; i < ltvl.LightVolumes.Count; i++)
+                                    if (ltvl.LightVolumes[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, ltvl.LightVolumes[i].RenderMethod, origRmt2, i);
+                                continue;
+                            case "cntl":
+                                var cntl = Cache.Deserialize<ContrailSystem>(stream, dependent);
+                                for (int i = 0; i < cntl.Contrails.Count; i++)
+                                    if (cntl.Contrails[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, cntl.Contrails[i].RenderMethod, origRmt2, i);
+                                continue;
                         }
                     }
 
-                    var renderMethod = (RenderMethod)definition;
-                    if (definition == null)
-                        continue;
-
-                    var animatedParams = ShaderFunctionHelper.GetAnimatedParameters(Cache, renderMethod, origRmt2);
-
-                    SDependentRenderMethodData dpData = new SDependentRenderMethodData
-                    {
-                        Tag = dependent,
-                        Definition = definition,
-                        AnimatedParameters = animatedParams.ToArray(),
-                        OrderedRealParameters = new List<string>(),
-                        OrderedIntParameters = new List<string>(),
-                        OrderedBoolParameters = new List<string>(),
-                        OrderedTextures = new List<string>()
-                    };
-
-                    foreach (var realP in origRmt2.RealParameterNames)
-                        dpData.OrderedRealParameters.Add(Cache.StringTable.GetString(realP.Name));
-                    foreach (var intP in origRmt2.IntegerParameterNames)
-                        dpData.OrderedIntParameters.Add(Cache.StringTable.GetString(intP.Name));
-                    foreach (var boolP in origRmt2.BooleanParameterNames)
-                        dpData.OrderedBoolParameters.Add(Cache.StringTable.GetString(boolP.Name));
-                    foreach (var textureP in origRmt2.TextureParameterNames)
-                        dpData.OrderedTextures.Add(Cache.StringTable.GetString(textureP.Name));
-
-                    dependentRenderMethods.Add(dpData);
+                    SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, (RenderMethod)definition, origRmt2);
                 }
             }
 
@@ -680,14 +625,26 @@ namespace TagTool.Commands.Shaders
                             prt3.RenderMethod = (RenderMethod)dependent.Definition;
                             Cache.Serialize(stream, dependent.Tag, prt3);
                             break;
-                            //case "decs":
-                            //    break;
-                            //case "beam":
-                            //    break;
-                            //case "ltvl":
-                            //    break;
-                            //case "cntl":
-                            //    break;
+                        case "decs":
+                            var decs = Cache.Deserialize<DecalSystem>(stream, dependent.Tag);
+                            decs.Decal[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
+                            Cache.Serialize(stream, dependent.Tag, decs);
+                            break;
+                        case "beam":
+                            var beam = Cache.Deserialize<BeamSystem>(stream, dependent.Tag);
+                            beam.Beams[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
+                            Cache.Serialize(stream, dependent.Tag, beam);
+                            break;
+                        case "ltvl":
+                            var ltvl = Cache.Deserialize<LightVolumeSystem>(stream, dependent.Tag);
+                            ltvl.LightVolumes[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
+                            Cache.Serialize(stream, dependent.Tag, ltvl);
+                            break;
+                        case "cntl":
+                            var cntl = Cache.Deserialize<ContrailSystem>(stream, dependent.Tag);
+                            cntl.Contrails[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
+                            Cache.Serialize(stream, dependent.Tag, cntl);
+                            break;
                     }
                 }
             }
