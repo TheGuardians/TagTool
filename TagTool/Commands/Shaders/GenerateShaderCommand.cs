@@ -24,6 +24,35 @@ namespace TagTool.Commands.Shaders
             public List<string> OrderedIntParameters;
             public List<string> OrderedBoolParameters;
             public List<string> OrderedTextures;
+            public int EffectIndex;
+
+            public static void AddDependant(List<SDependentRenderMethodData> dependentRenderMethods, GameCache cache, CachedTag dependent, RenderMethod renderMethod, RenderMethodTemplate origRmt2, int effectIndex = -1)
+            {
+                var animatedParams = ShaderFunctionHelper.GetAnimatedParameters(cache, renderMethod, origRmt2);
+
+                SDependentRenderMethodData dpData = new SDependentRenderMethodData
+                {
+                    Tag = dependent,
+                    Definition = renderMethod,
+                    AnimatedParameters = animatedParams.ToArray(),
+                    OrderedRealParameters = new List<string>(),
+                    OrderedIntParameters = new List<string>(),
+                    OrderedBoolParameters = new List<string>(),
+                    OrderedTextures = new List<string>(),
+                    EffectIndex = effectIndex,
+                };
+
+                foreach (var realP in origRmt2.RealParameterNames)
+                    dpData.OrderedRealParameters.Add(cache.StringTable.GetString(realP.Name));
+                foreach (var intP in origRmt2.IntegerParameterNames)
+                    dpData.OrderedIntParameters.Add(cache.StringTable.GetString(intP.Name));
+                foreach (var boolP in origRmt2.BooleanParameterNames)
+                    dpData.OrderedBoolParameters.Add(cache.StringTable.GetString(boolP.Name));
+                foreach (var textureP in origRmt2.TextureParameterNames)
+                    dpData.OrderedTextures.Add(cache.StringTable.GetString(textureP.Name));
+
+                dependentRenderMethods.Add(dpData);
+            }
         }
 
         GameCache Cache;
@@ -366,44 +395,34 @@ namespace TagTool.Commands.Shaders
                                 var prt3 = Cache.Deserialize<Particle>(stream, dependent);
                                 definition = prt3.RenderMethod;
                                 break;
-                            //case "decs":
-                            //    break;
-                            //case "beam":
-                            //    break;
-                            //case "ltvl":
-                            //    break;
-                            //case "cntl":
-                            //    break;
+                            case "decs":
+                                var decs = Cache.Deserialize<DecalSystem>(stream, dependent);
+                                for (int i = 0; i < decs.Decal.Count; i++)
+                                    if (decs.Decal[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, decs.Decal[i].RenderMethod, origRmt2, i);
+                                continue;
+                            case "beam":
+                                var beam = Cache.Deserialize<BeamSystem>(stream, dependent);
+                                for (int i = 0; i < beam.Beams.Count; i++)
+                                    if (beam.Beams[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, beam.Beams[i].RenderMethod, origRmt2, i);
+                                continue;
+                            case "ltvl":
+                                var ltvl = Cache.Deserialize<LightVolumeSystem>(stream, dependent);
+                                for (int i = 0; i < ltvl.LightVolumes.Count; i++)
+                                    if (ltvl.LightVolumes[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, ltvl.LightVolumes[i].RenderMethod, origRmt2, i);
+                                continue;
+                            case "cntl":
+                                var cntl = Cache.Deserialize<ContrailSystem>(stream, dependent);
+                                for (int i = 0; i < cntl.Contrails.Count; i++)
+                                    if (cntl.Contrails[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, cntl.Contrails[i].RenderMethod, origRmt2, i);
+                                continue;
                         }
                     }
 
-                    var renderMethod = (RenderMethod)definition;
-                    if (definition == null)
-                        continue;
-
-                    var animatedParams = ShaderFunctionHelper.GetAnimatedParameters(Cache, renderMethod, origRmt2);
-
-                    SDependentRenderMethodData dpData = new SDependentRenderMethodData
-                    {
-                        Tag = dependent,
-                        Definition = definition,
-                        AnimatedParameters = animatedParams.ToArray(),
-                        OrderedRealParameters = new List<string>(),
-                        OrderedIntParameters = new List<string>(),
-                        OrderedBoolParameters = new List<string>(),
-                        OrderedTextures = new List<string>()
-                    };
-
-                    foreach (var realP in origRmt2.RealParameterNames)
-                        dpData.OrderedRealParameters.Add(Cache.StringTable.GetString(realP.Name));
-                    foreach (var intP in origRmt2.IntegerParameterNames)
-                        dpData.OrderedIntParameters.Add(Cache.StringTable.GetString(intP.Name));
-                    foreach (var boolP in origRmt2.BooleanParameterNames)
-                        dpData.OrderedBoolParameters.Add(Cache.StringTable.GetString(boolP.Name));
-                    foreach (var textureP in origRmt2.TextureParameterNames)
-                        dpData.OrderedTextures.Add(Cache.StringTable.GetString(textureP.Name));
-
-                    dependentRenderMethods.Add(dpData);
+                    SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, (RenderMethod)definition, origRmt2);
                 }
             }
 
@@ -606,14 +625,26 @@ namespace TagTool.Commands.Shaders
                             prt3.RenderMethod = (RenderMethod)dependent.Definition;
                             Cache.Serialize(stream, dependent.Tag, prt3);
                             break;
-                            //case "decs":
-                            //    break;
-                            //case "beam":
-                            //    break;
-                            //case "ltvl":
-                            //    break;
-                            //case "cntl":
-                            //    break;
+                        case "decs":
+                            var decs = Cache.Deserialize<DecalSystem>(stream, dependent.Tag);
+                            decs.Decal[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
+                            Cache.Serialize(stream, dependent.Tag, decs);
+                            break;
+                        case "beam":
+                            var beam = Cache.Deserialize<BeamSystem>(stream, dependent.Tag);
+                            beam.Beams[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
+                            Cache.Serialize(stream, dependent.Tag, beam);
+                            break;
+                        case "ltvl":
+                            var ltvl = Cache.Deserialize<LightVolumeSystem>(stream, dependent.Tag);
+                            ltvl.LightVolumes[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
+                            Cache.Serialize(stream, dependent.Tag, ltvl);
+                            break;
+                        case "cntl":
+                            var cntl = Cache.Deserialize<ContrailSystem>(stream, dependent.Tag);
+                            cntl.Contrails[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
+                            Cache.Serialize(stream, dependent.Tag, cntl);
+                            break;
                     }
                 }
             }
