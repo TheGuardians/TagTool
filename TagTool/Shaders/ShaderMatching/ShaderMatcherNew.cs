@@ -567,10 +567,26 @@ namespace TagTool.Shaders.ShaderMatching
             [Flags]
             public enum DescriptorFlags
             {
+                None = 0,
                 Ms30 = (1 << 0)
             }
 
+            public Rmt2Descriptor(string type, byte[] options)
+            {
+                Type = type;
+                Options = options;
+                HasParsed = true;
+                Flags = DescriptorFlags.None;
+            }
+
             public bool IsMs30 => Flags.HasFlag(DescriptorFlags.Ms30);
+
+            public string GetRmdfName()
+            {
+                if (!HasParsed)
+                    return null;
+                return $"{(IsMs30 ? "ms30\\" : "")}shaders\\{Type}";
+            }
 
             public static bool TryParse(string name, out Rmt2Descriptor descriptor)
             {
