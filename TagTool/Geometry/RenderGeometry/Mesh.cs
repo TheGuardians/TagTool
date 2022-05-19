@@ -137,6 +137,95 @@ namespace TagTool.Geometry
 
     }
 
+    [TagStructure(Size = 0x44, MinVersion = Halo2Xbox, MaxVersion = Halo2Vista)]
+    public class Gen2BSPResourceMesh : TagStructure
+    {
+        public List<Part> Parts;
+        public List<SubPart> SubParts;
+
+        public List<VisibilityBinding> VisibilityBounds;
+
+        public List<RawVertex> RawVertices;
+
+        public List<StripIndex> StripIndices;
+
+
+        public byte[] VisibilityMoppCodeData;
+
+
+        public List<StripIndex> MoppReorderTable;
+
+
+        public List<VertexBuffer> VertexBuffers;
+
+        [TagField(Flags = Padding, Length = 4, MaxVersion = Halo2Vista)]
+        public byte[] Unused1;
+
+        [TagStructure(Size = 0x14)]
+        public class VisibilityBinding : TagStructure
+        {
+            public RealPoint3d Position;
+            public float Radius;
+            public byte NodeIndex;
+
+            [TagField(Flags = Padding, Length = 3)]
+            public byte[] Unused = new byte[3];
+        }
+
+        [TagStructure(Size = 0x44)]
+        public class RawPoint : TagStructure
+        {
+            public RealPoint3d Position;
+
+            [TagField(Length = 4)]
+            public int[] NodeIndicesOld = new int[4];
+
+            [TagField(Length = 4)]
+            public float[] NodeWeights = new float[4];
+
+            [TagField(Length = 4)]
+            public int[] NodeIndices = new int[4];
+
+            public int UseNewNodeIndices;
+            public int AdjustedCompoundNodeIndex;
+        }
+
+        [TagStructure(Size = 0xC4)]
+        public class RawVertex : TagStructure
+        {
+            public RawPoint Point = new RawPoint();
+            public RealPoint2d Texcoord;
+            public RealVector3d Normal;
+            public RealVector3d Binormal;
+            public RealVector3d Tangent;
+            public RealVector3d AnisotropicBinormal;
+            public RealPoint2d SecondaryTexcoord;
+            public RealRgbColor PrimaryLightmapColor;
+            public RealPoint2d PrimaryLightmapTexcoord;
+            public RealVector3d PrimaryLightmapIncidentDirection;
+            public RealRgbColor SecondaryLightmapColor;
+            public RealPoint2d SecondaryLightmapTexcoord;
+            public RealVector3d SecondaryLightmapIncidentDirection;
+        }
+
+        [TagStructure(Size = 0x2)]
+        public class StripIndex : TagStructure
+        {
+            public short Index;
+        }
+
+
+        [TagStructure(Size = 0x20)]
+        public class VertexBuffer : TagStructure
+        {
+            public byte TypeIndex;
+            public byte StrideIndex;
+
+            [TagField(Flags = TagFieldFlags.Padding, Length = 30)]
+            public byte[] Unknown = new byte[30];
+        }
+    }
+
     /// <summary>
     /// A 3D mesh which can be rendered.
     /// </summary>

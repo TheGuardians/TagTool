@@ -94,7 +94,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "jpt!",
                 "proj",
                 "trak",
-                "shad"
+                "shad",
+                "sbsp"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -163,6 +164,9 @@ namespace TagTool.Commands.Porting.Gen2
                     //preserve a copy of unconverted data
                     object h2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
                     definition = ConvertShader(shader, (TagTool.Tags.Definitions.Gen2.Shader)h2definition, cacheStream);
+                    break;
+                case TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp sbsp:
+                    definition = ConvertStructureBSP(sbsp);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
