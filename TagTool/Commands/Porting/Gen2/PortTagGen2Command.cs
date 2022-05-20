@@ -166,7 +166,7 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertShader(shader, (TagTool.Tags.Definitions.Gen2.Shader)h2definition, cacheStream);
                     break;
                 case TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp sbsp:
-                    definition = ConvertStructureBSP(sbsp);
+                    definition = ConvertStructureBSP(sbsp, cacheStream, gen2Tag.Name);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");

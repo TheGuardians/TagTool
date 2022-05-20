@@ -11,6 +11,8 @@ using static TagTool.Commands.Porting.Gen2.Gen2BspGeometryConverter;
 using TagTool.Commands.Common;
 using TagTool.Havok;
 using TagTool.Cache;
+using System.IO;
+using TagTool.IO;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -25,7 +27,7 @@ namespace TagTool.Commands.Porting.Gen2
             return newScenario;
         }
 
-        public object ConvertStructureBSP(TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp gen2Tag)
+        public object ConvertStructureBSP(TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp gen2Tag, Stream cacheStream, string tagname)
         {
             ScenarioStructureBsp newSbsp = new ScenarioStructureBsp();
             newSbsp.UseResourceItems = 1; // use CollisionBspResource
@@ -82,12 +84,17 @@ namespace TagTool.Commands.Porting.Gen2
                 MoppBoundsMin = gen2Tag.StructurePhysics.MoppBoundsMin,
                 MoppBoundsMax = gen2Tag.StructurePhysics.MoppBoundsMax
             };
+
+            byte[] moppdata = gen2Tag.StructurePhysics.MoppCode;
+            newSbsp.Physics.CollisionMoppCodes = ConvertH2MOPP(moppdata);
+
+            /*
             var moppCode = HavokMoppGenerator.GenerateMoppCode(gen2Tag.CollisionBsp[0]);
             if (moppCode == null)
                 new TagToolError(CommandError.OperationFailed, "Failed to generate mopp code!");
             moppCode.Data.AddressType = CacheAddressType.Data;
-            newSbsp.Physics.CollisionMoppCodes = new List<TagHkpMoppCode>();
             newSbsp.Physics.CollisionMoppCodes.Add(moppCode);
+            */
 
             //world bounds
             newSbsp.WorldBoundsX = gen2Tag.WorldBoundsX;
@@ -256,12 +263,17 @@ namespace TagTool.Commands.Porting.Gen2
                 //build mopp codes from collision info and add
                 if (instanced.BspPhysics != null && instanced.BspPhysics.Count > 0)
                 {
+                    var mopps = ConvertH2MOPP(instanced.BspPhysics[0].MoppCodeData);
+                    newinstance.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition, mopps);
+
+                    /*
                     var mopp = HavokMoppGenerator.GenerateMoppCode(newinstance.CollisionInfo);
                     if (mopp == null)
                         new TagToolError(CommandError.OperationFailed, "Failed to generate mopp code!");
                     mopp.Data.AddressType = CacheAddressType.Data;
                     newinstance.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition);
                     newinstance.CollisionMoppCodes.Add(mopp);
+                    */
                 }
 
                 CollisionResource.InstancedGeometry.Add(newinstance);
@@ -328,9 +340,53 @@ namespace TagTool.Commands.Porting.Gen2
             //write collision resource
             newSbsp.CollisionBspResource = Cache.ResourceCache.CreateStructureBspResource(CollisionResource);
             //write meshes and render model resource
+
+            /*
+            var lbsp = new ScenarioLightmapBspData();
+            lbsp.Geometry = meshbuild.Geometry;
+            var destinationTag = Cache.TagCache.AllocateTag(lbsp.GetType(), tagname);
+            Cache.Serialize(cacheStream, destinationTag, lbsp);
+            */
+
             newSbsp.Geometry = meshbuild.Geometry;
 
             return newSbsp;
+        }
+
+        public List<TagHkpMoppCode> ConvertH2MOPP(byte[] moppdata)
+        {
+            RealQuaternion moppoffset;
+            using (var moppStream = new MemoryStream(moppdata))
+            using (var moppReader = new EndianReader(moppStream, Gen2Cache.Endianness))
+            {
+                moppoffset = new RealQuaternion(moppReader.ReadSingle(), moppReader.ReadSingle(), 
+                    moppReader.ReadSingle(), moppReader.ReadSingle());
+            };
+
+            byte[] newmoppdata = new byte[moppdata.Length - 48];
+            Array.Copy(moppdata, 48, newmoppdata, 0, newmoppdata.Length);
+
+            var result = new List<TagHkpMoppCode>
+            {
+                new TagHkpMoppCode
+                {
+                    Info = new CodeInfo
+                    {
+                        Offset = moppoffset
+                    },
+                    ArrayBase = new HkArrayBase
+                    {
+                        Size = (uint)newmoppdata.Length,
+                        CapacityAndFlags = (uint)(newmoppdata.Length | 0x80000000)
+                    },
+                    Data = new TagBlock<byte>()
+                    {
+                        Elements = newmoppdata.ToList()
+                    }
+                }
+            };
+
+            return result;
         }
     }
 }
