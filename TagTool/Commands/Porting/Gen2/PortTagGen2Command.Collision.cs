@@ -51,8 +51,8 @@ namespace TagTool.Commands.Porting.Gen2
 					// Convert Bsp Physics
 					for (int i = 0; i < gen2Permutation.BspPhysics.Count; i++)
 					{
-						permutation.BspMoppCodes.Add(ConvertTagMoppCode(gen2Permutation.BspPhysics[i].MoppCodes.ToList()));
-						permutation.BspPhysics.Add(ConvertCollisionBspPhysics(gen2Permutation.BspPhysics[0]));
+						permutation.BspMoppCodes = ConvertH2MOPP(gen2Permutation.BspPhysics[i].MoppCodes);
+						permutation.BspPhysics.Add(ConvertCollisionBspPhysics(gen2Permutation.BspPhysics[i]));
 					}
 
 					// Convert Bsps
@@ -133,7 +133,7 @@ namespace TagTool.Commands.Porting.Gen2
 				},
 				MoppBvTreeShape = new Havok.CMoppBvTreeShape()
 				{
-					Type = 27
+					Type = 27,
 				}
 			};
 

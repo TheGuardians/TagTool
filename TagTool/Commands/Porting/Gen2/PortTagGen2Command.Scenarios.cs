@@ -192,7 +192,8 @@ namespace TagTool.Commands.Porting.Gen2
                     Portals = new List<ScenarioStructureBsp.Cluster.Portal>(),
                     InstancedGeometryPhysics = new ScenarioStructureBsp.Cluster.InstancedGeometryPhysicsData
                     {
-                        ClusterIndex = gen2Tag.Clusters.IndexOf(cluster)
+                        ClusterIndex = gen2Tag.Clusters.IndexOf(cluster),
+                        MoppCodes = cluster.CollisionMoppCode.Length > 0 ? ConvertH2MOPP(cluster.CollisionMoppCode) : null
                     }
                 };
 
@@ -245,7 +246,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Checksum = instanced.Checksum,
                     BoundingSphereOffset = instanced.BoundingSphereCenter,
                     BoundingSphereRadius = instanced.BoundingSphereRadius,
-                    //index of mesh just built
+                    //index of mesh just builts
                     MeshIndex = (short)(builder.Meshes.Count - 1),
                 };
 
@@ -291,7 +292,6 @@ namespace TagTool.Commands.Porting.Gen2
                     instanced.Up.I, instanced.Up.J, instanced.Up.K,
                     instanced.Position.X, instanced.Position.Y, instanced.Position.Z),
                     DefinitionIndex = instanced.InstanceDefinition,
-                    Flags = (InstancedGeometryInstance.FlagsValue)instanced.Flags,
                     LodDataIndex = -1,
                     CompressionIndex = -1,
                     Name = instanced.Name,
@@ -305,15 +305,21 @@ namespace TagTool.Commands.Porting.Gen2
                 var instancedef = gen2Tag.InstancedGeometriesDefinitions[instanced.InstanceDefinition];
                 if(instancedef.BspPhysics != null && instancedef.BspPhysics.Count > 0)
                 {
+                    newinstance.Flags |= InstancedGeometryInstance.FlagsValue.Collidable;
                     newinstance.BspPhysics = new List<CollisionBspPhysicsDefinition>
                     {
                         new CollisionBspPhysicsDefinition
                         {
-                            MoppBvTreeShape = new CMoppBvTreeShape(),
+                            MoppBvTreeShape = new CMoppBvTreeShape
+                            {
+                                Scale = 1.0f,
+                                Type = 27
+                            },
                             GeometryShape = new CollisionGeometryShape
                             {
                                 AABB_Center = instancedef.BspPhysics[0].AABB_Center,
-                                AABB_Half_Extents = instancedef.BspPhysics[0].AABB_Half_Extents
+                                AABB_Half_Extents = instancedef.BspPhysics[0].AABB_Half_Extents,
+                                Scale = 1.0f
                             }
                         }
                     };
@@ -341,12 +347,10 @@ namespace TagTool.Commands.Porting.Gen2
             newSbsp.CollisionBspResource = Cache.ResourceCache.CreateStructureBspResource(CollisionResource);
             //write meshes and render model resource
 
-            /*
             var lbsp = new ScenarioLightmapBspData();
             lbsp.Geometry = meshbuild.Geometry;
             var destinationTag = Cache.TagCache.AllocateTag(lbsp.GetType(), tagname);
             Cache.Serialize(cacheStream, destinationTag, lbsp);
-            */
 
             newSbsp.Geometry = meshbuild.Geometry;
 
@@ -379,7 +383,7 @@ namespace TagTool.Commands.Porting.Gen2
                         Size = (uint)newmoppdata.Length,
                         CapacityAndFlags = (uint)(newmoppdata.Length | 0x80000000)
                     },
-                    Data = new TagBlock<byte>()
+                    Data = new TagBlock<byte>(CacheAddressType.Data)
                     {
                         Elements = newmoppdata.ToList()
                     }

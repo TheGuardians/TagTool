@@ -16,7 +16,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
 	{
-        public object ConvertObject(object gen2Tag)
+        public object ConvertObject(object gen2Tag, Stream cacheStream)
         {
             switch (gen2Tag)
             {
@@ -29,6 +29,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Scenery newscenery = new Scenery();
                     TranslateTagStructure(scenery, newscenery, typeof(TagTool.Tags.Definitions.Gen2.Scenery), typeof(Scenery));
                     newscenery.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
+                    newscenery = FixupScenery(scenery, newscenery, cacheStream);
                     return newscenery;
                 case TagTool.Tags.Definitions.Gen2.Weapon weapon:
                     Weapon newweapon = new Weapon();
@@ -67,6 +68,34 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             return newweapon;
+        }
+
+        public Scenery FixupScenery(TagTool.Tags.Definitions.Gen2.Scenery gen2Tag, Scenery newscenery, Stream cacheStream)
+        {
+            //fixup for coll model reference in bsp physics
+            if(newscenery.Model != null)
+            {
+                Model model = Cache.Deserialize<Model>(cacheStream, newscenery.Model);
+                if(model.CollisionModel != null)
+                {
+                    CollisionModel coll = Cache.Deserialize<CollisionModel>(cacheStream, model.CollisionModel);
+                    foreach(var region in coll.Regions)
+                    {
+                        foreach(var perm in region.Permutations)
+                        {
+                            if(perm.BspPhysics != null)
+                            {
+                                foreach (var bsp in perm.BspPhysics)
+                                {
+                                    bsp.GeometryShape.Model = newscenery.Model;
+                                }
+                            }
+                        }
+                    }
+                    Cache.Serialize(cacheStream, model.CollisionModel, coll);
+                }
+            }
+            return newscenery;
         }
 
         public Vehicle FixupVehicle(TagTool.Tags.Definitions.Gen2.Vehicle gen2Tag, Vehicle vehi)

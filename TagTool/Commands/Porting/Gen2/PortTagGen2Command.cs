@@ -19,6 +19,7 @@ namespace TagTool.Commands.Porting.Gen2
         string[] argParameters = new string[0];
         PortingFlags PortFlags;
         private Dictionary<int, CachedTag> PortedTags = new Dictionary<int, CachedTag>();
+        private List<int> InProgressTags = new List<int>();
 
         public PortTagGen2Command(GameCacheHaloOnlineBase cache, GameCacheGen2 gen2Cache) : base(false, "PortTag", "", "", "")
         {
@@ -71,7 +72,17 @@ namespace TagTool.Commands.Porting.Gen2
 
             if (PortedTags.ContainsKey(gen2Tag.Index))
                 return PortedTags[gen2Tag.Index];
+
+            //keep track of tags currently being ported to handle child tags that reference the parent (infinite loop)
+            if (InProgressTags.Contains(gen2Tag.Index))
+                return null;
+            InProgressTags.Add(gen2Tag.Index);
+
             CachedTag result = ConvertTagInternal(cacheStream, gen2CacheStream, resourceStreams, gen2Tag);
+
+            //tag is now done porting
+            InProgressTags.Remove(gen2Tag.Index);
+
             PortedTags[gen2Tag.Index] = result;
             return result;
         }
@@ -155,7 +166,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                 case TagTool.Tags.Definitions.Gen2.Projectile projectile:
                 case TagTool.Tags.Definitions.Gen2.CameraTrack track:
-                    definition = ConvertObject(definition);
+                    definition = ConvertObject(definition, cacheStream);
                     break;
                 case TagTool.Tags.Definitions.Gen2.DamageEffect damage:
                     definition = ConvertEffect(damage);
@@ -212,9 +223,6 @@ namespace TagTool.Commands.Porting.Gen2
 
                         return null;
                     }
-                    //prevent stack overflow from self-referencing tags
-                    if (tag.Name == gen2Tag.Name && tag.Group.Tag == gen2Tag.Group.Tag)
-                        return null;
                     return ConvertTag(cacheStream, gen2CacheStream, resourceStreams, tag);
                 case Array _:
                 case IList _: // All arrays and List<T> implement IList, so we should just use that
