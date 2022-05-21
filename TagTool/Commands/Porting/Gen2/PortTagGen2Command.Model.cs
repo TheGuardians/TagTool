@@ -30,6 +30,7 @@ namespace TagTool.Commands.Porting.Gen2
                 Variants = new List<Model.Variant>(),
                 Materials = new List<Model.Material>(),
                 NewDamageInfo = new List<Model.GlobalDamageInfoBlock>(),
+                Targets = new List<Model.Target>(),
                 CollisionRegions = new List<Model.CollisionRegion>(),
                 Nodes = new List<Model.Node>(),
                 ModelObjectData = new List<Model.ModelObjectDatum>(),
@@ -59,8 +60,10 @@ namespace TagTool.Commands.Porting.Gen2
                 var variant = new Model.Variant
                 {
                     Name = gen2var.Name,
-                    Regions = new List<Model.Variant.Region>()
+                    Regions = new List<Model.Variant.Region>(),
+                    Objects = new List<Model.Variant.Object>()
                 };
+                TranslateList(gen2var.Objects, variant.Objects);
                 foreach (var gen2reg in gen2var.Regions)
                 {
                     var region = new Model.Variant.Region
@@ -83,6 +86,9 @@ namespace TagTool.Commands.Porting.Gen2
                 }
                 model.Variants.Add(variant);
             }
+
+            TranslateList(gen2Model.Targets, model.Targets);
+            TranslateList(gen2Model.NewDamageInfo, model.NewDamageInfo);
 
             //collision regions
             foreach (var gen2coll in gen2Model.CollisionRegions)

@@ -51,8 +51,8 @@ namespace TagTool.Commands.Porting.Gen2
 					// Convert Bsp Physics
 					for (int i = 0; i < gen2Permutation.BspPhysics.Count; i++)
 					{
-						permutation.BspMoppCodes.Add(ConvertTagMoppCode(gen2Permutation.BspPhysics[i].MoppCodes.ToList()));
-						permutation.BspPhysics.Add(ConvertCollisionBspPhysics(gen2Permutation.BspPhysics[0]));
+						permutation.BspMoppCodes = ConvertH2MOPP(gen2Permutation.BspPhysics[i].MoppCodes);
+						permutation.BspPhysics.Add(ConvertCollisionBspPhysics(gen2Permutation.BspPhysics[i]));
 					}
 
 					// Convert Bsps
@@ -133,31 +133,11 @@ namespace TagTool.Commands.Porting.Gen2
 				},
 				MoppBvTreeShape = new Havok.CMoppBvTreeShape()
 				{
-					Type = 27
+					Type = 27,
 				}
 			};
 
 			return bspPhysics;
-		}
-
-		public Havok.TagHkpMoppCode ConvertTagMoppCode(List<byte> moppCodes)
-		{
-			return new Havok.TagHkpMoppCode()
-			{
-				Info = new Havok.CodeInfo { Offset = new RealQuaternion(0, 0, 0, 0) },
-				ArrayBase = new Havok.HkArrayBase()
-				{
-					Size = (uint)moppCodes.Count,
-					CapacityAndFlags = (uint)(moppCodes.Count | 0x80000000)
-				},
-				Data = new TagBlock<byte>(CacheAddressType.Definition, ConvertMoppCodes(moppCodes))
-			};
-		}
-
-		public List<byte> ConvertMoppCodes(List<byte> moppCodes)
-		{
-			// TODO
-			return moppCodes;
 		}
 	}
 }

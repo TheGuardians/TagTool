@@ -86,7 +86,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public byte[] Padding;
         public Havok.Gen2.CConvexWelderShape WelderShape;
         public Havok.Gen2.CMoppBvTreeShape BvTreeShape;
-        public List<byte> MoppCodes;
+        public byte[] MoppCodes;
         [TagField(Length = 4, Flags = TagFieldFlags.Padding)]
         public byte[] Padding2;
     }

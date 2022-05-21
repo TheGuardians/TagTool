@@ -440,7 +440,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public short ShadowCastingRigidTriangleCount;
                 public GeometryClassificationValue GeometryClassification;
                 public GeometryCompressionFlagsValue GeometryCompressionFlags;
-                public List<GlobalGeometryCompressionInfoBlock> Compression;
+                public List<TagTool.Geometry.RenderGeometryCompression> Compression;
                 public sbyte HardwareNodeCount;
                 public sbyte NodeMapSize;
                 public short SoftwarePlaneCount;
@@ -1500,7 +1500,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public short ShadowCastingRigidTriangleCount;
                     public GeometryClassificationValue GeometryClassification;
                     public GeometryCompressionFlagsValue GeometryCompressionFlags;
-                    public List<GlobalGeometryCompressionInfoBlock> Compression;
+                    public List<TagTool.Geometry.RenderGeometryCompression> Compression;
                     public sbyte HardwareNodeCount;
                     public sbyte NodeMapSize;
                     public short SoftwarePlaneCount;
@@ -1827,8 +1827,10 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Unknown1;
                 [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
-                [TagField(Length = 0x20)]
-                public byte[] Unknown2;
+
+                public RealQuaternion AABB_Center;
+                public RealQuaternion AABB_Half_Extents;
+
                 [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
                 [TagField(Length = 0x4)]
@@ -1881,10 +1883,10 @@ namespace TagTool.Tags.Definitions.Gen2
             public FlagsValue Flags;
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            [TagField(Length = 0xC)]
-            public byte[] Unknown;
-            [TagField(Length = 0x4)]
-            public byte[] Unknown1;
+
+            public RealPoint3d WorldBoundingSphereCenter;
+            public float BoundingSphereRadius;
+
             public int Checksum;
             public StringId Name;
             public PathfindingPolicyValue PathfindingPolicy;

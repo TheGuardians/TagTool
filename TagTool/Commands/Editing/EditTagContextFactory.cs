@@ -21,6 +21,7 @@ using TagTool.Commands.ScenarioLightmaps;
 using TagTool.Commands.Files;
 using TagTool.Commands.ScenarioStructureBSPs;
 using TagTool.Commands.Scenarios;
+using TagTool.Commands.StructureDesigns;
 using TagTool.Cache.HaloOnline;
 using DefinitionsGen2 = TagTool.Tags.Definitions.Gen2;
 using CommandsGen2 = TagTool.Commands.Gen2;
@@ -149,6 +150,10 @@ namespace TagTool.Commands.Editing
 
                     case "scnr":
                         ScnrContextFactory.Populate(commandContext, cache, tag, (Scenario)definition);
+                        break;
+
+                    case "sddt":
+                        StructureDesignContextFactory.Populate(commandContext, cache, tag, (StructureDesign)definition);
                         break;
                 }
             }
