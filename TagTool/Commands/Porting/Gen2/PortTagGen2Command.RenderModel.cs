@@ -95,7 +95,7 @@ namespace TagTool.Commands.Porting.Gen2
                 });
 
             foreach (var material in gen2RenderModel.Materials)
-                builder.AddMaterial(new RenderMaterial { RenderMethod = material.RenderMethod});
+                builder.AddMaterial(new RenderMaterial { RenderMethod = material.RenderMethod == null ? Cache.TagCache.GetTag(@"shaders\invalid.shader") : material.RenderMethod });
 
             foreach (var region in gen2RenderModel.Regions)
             {

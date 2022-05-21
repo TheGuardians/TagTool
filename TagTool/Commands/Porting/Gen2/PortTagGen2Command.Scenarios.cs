@@ -27,7 +27,7 @@ namespace TagTool.Commands.Porting.Gen2
             return newScenario;
         }
 
-        public object ConvertStructureBSP(TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp gen2Tag, Stream cacheStream, string tagname)
+        public TagStructure ConvertStructureBSP(TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp gen2Tag, Stream cacheStream, string tagname)
         {
             ScenarioStructureBsp newSbsp = new ScenarioStructureBsp();
             newSbsp.UseResourceItems = 1; // use CollisionBspResource

@@ -3,6 +3,7 @@ using System;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Tags;
+using System.Linq;
 using TagTool.Tags.Definitions;
 using PhysicsModelGen2 = TagTool.Tags.Definitions.Gen2.PhysicsModel;
 
@@ -36,7 +37,8 @@ namespace TagTool.Commands.Porting.Gen2
                 Regions = new List<PhysicsModel.Region>(),
                 Nodes = new List<PhysicsModel.Node>(),
                 LimitedHingeConstraints = new List<PhysicsModel.LimitedHingeConstraint>(),
-                Phantoms = new List<PhysicsModel.Phantom>()
+                Phantoms = new List<PhysicsModel.Phantom>(),
+                Mopps = new List<Havok.CMoppBvTreeShape>()
             };
 
             //convert phantom types
@@ -366,9 +368,15 @@ namespace TagTool.Commands.Porting.Gen2
                 });
             }
 
-            //throw a warning if there are mopps (rare, maybe never?), because they can't be converted
-            if (gen2PhysicsModel.Mopps.Count > 0)
-                new TagToolWarning("Cannot convert Halo 2 mopps!");
+            //convert mopp block and moppcodes
+            foreach(var gen2mopp in gen2PhysicsModel.Mopps)
+            {
+                physicsModel.Mopps.Add(new Havok.CMoppBvTreeShape());
+            }
+            if (gen2PhysicsModel.MoppCodes.Length > 0)
+            {
+                physicsModel.MoppData = ConvertH2MOPP(gen2PhysicsModel.MoppCodes)[0].Data.ToArray();
+            }
 
             return physicsModel;
         }

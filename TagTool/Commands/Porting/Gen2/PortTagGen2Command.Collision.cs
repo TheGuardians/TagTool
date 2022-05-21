@@ -139,25 +139,5 @@ namespace TagTool.Commands.Porting.Gen2
 
 			return bspPhysics;
 		}
-
-		public Havok.TagHkpMoppCode ConvertTagMoppCode(List<byte> moppCodes)
-		{
-			return new Havok.TagHkpMoppCode()
-			{
-				Info = new Havok.CodeInfo { Offset = new RealQuaternion(0, 0, 0, 0) },
-				ArrayBase = new Havok.HkArrayBase()
-				{
-					Size = (uint)moppCodes.Count,
-					CapacityAndFlags = (uint)(moppCodes.Count | 0x80000000)
-				},
-				Data = new TagBlock<byte>(CacheAddressType.Definition, ConvertMoppCodes(moppCodes))
-			};
-		}
-
-		public List<byte> ConvertMoppCodes(List<byte> moppCodes)
-		{
-			// TODO
-			return moppCodes;
-		}
 	}
 }

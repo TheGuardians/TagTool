@@ -16,39 +16,39 @@ namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
 	{
-        public object ConvertObject(object gen2Tag, Stream cacheStream)
+        public TagStructure ConvertObject(object gen2Tag, Stream cacheStream)
         {
             switch (gen2Tag)
             {
                 case TagTool.Tags.Definitions.Gen2.Crate crate:
                     Crate newcrate = new Crate();
-                    TranslateTagStructure(crate, newcrate, typeof(TagTool.Tags.Definitions.Gen2.Crate), typeof(Crate));
+                    TranslateTagStructure(crate, newcrate);
                     newcrate.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Crate };
                     return newcrate;
                 case TagTool.Tags.Definitions.Gen2.Scenery scenery:
                     Scenery newscenery = new Scenery();
-                    TranslateTagStructure(scenery, newscenery, typeof(TagTool.Tags.Definitions.Gen2.Scenery), typeof(Scenery));
+                    TranslateTagStructure(scenery, newscenery);
                     newscenery.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
                     newscenery = FixupScenery(scenery, newscenery, cacheStream);
                     return newscenery;
                 case TagTool.Tags.Definitions.Gen2.Weapon weapon:
                     Weapon newweapon = new Weapon();
-                    TranslateTagStructure(weapon, newweapon, typeof(TagTool.Tags.Definitions.Gen2.Weapon), typeof(Weapon));
+                    TranslateTagStructure(weapon, newweapon);
                     newweapon.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Weapon };
                     return FixupWeapon(weapon, newweapon);
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                     Vehicle newvehicle = new Vehicle();
-                    TranslateTagStructure(vehicle, newvehicle, typeof(TagTool.Tags.Definitions.Gen2.Vehicle), typeof(Vehicle));
+                    TranslateTagStructure(vehicle, newvehicle);
                     newvehicle.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle };
                     return FixupVehicle(vehicle, newvehicle);
                 case TagTool.Tags.Definitions.Gen2.Projectile projectile:
                     Projectile newprojectile = new Projectile();
-                    TranslateTagStructure(projectile, newprojectile, typeof(TagTool.Tags.Definitions.Gen2.Projectile), typeof(Projectile));
+                    TranslateTagStructure(projectile, newprojectile);
                     newprojectile.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Projectile };
                     return newprojectile;
                 case TagTool.Tags.Definitions.Gen2.CameraTrack track:
                     CameraTrack newtrack = new CameraTrack();
-                    TranslateTagStructure(track, newtrack, typeof(TagTool.Tags.Definitions.Gen2.CameraTrack), typeof(CameraTrack));
+                    TranslateTagStructure(track, newtrack);
                     return newtrack;
                 default:
                     return null;
@@ -107,6 +107,12 @@ namespace TagTool.Commands.Porting.Gen2
             vehi.PhysicsTypes = new Vehicle.VehiclePhysicsTypes();
             vehi.UnitFlags = (TagTool.Tags.Definitions.Unit.UnitFlagBits)gen2Tag.Flags1;
 
+            vehi.HavokVehiclePhysics.PhantomShapes = new List<Vehicle.PhantomShape>();
+            TranslateList(gen2Tag.HavokVehiclePhysics.ShapePhantomShape, vehi.HavokVehiclePhysics.PhantomShapes);
+            //this makes the antigravity work
+            if (vehi.HavokVehiclePhysics.PhantomShapes.Count > 0)
+                vehi.HavokVehiclePhysics.PhantomShapes[0].Flags = 1;
+
             switch (gen2Tag.PhysicsType)
             {
                 case TagTool.Tags.Definitions.Gen2.Vehicle.TypeValue.HumanTank:
@@ -134,7 +140,7 @@ namespace TagTool.Commands.Porting.Gen2
                         WheelCircumference = gen2Tag.WheelCircumference,
                         GravityAdjust = 0.45f
                     };
-                    TranslateList(gen2Tag.Gears, newtank.Engine.Gears, gen2Tag.Gears.GetType(), newtank.Engine.Gears.GetType());
+                    TranslateList(gen2Tag.Gears, newtank.Engine.Gears);
                     vehi.PhysicsTypes.HumanTank.Add(newtank);
                     break;
 
@@ -162,7 +168,7 @@ namespace TagTool.Commands.Porting.Gen2
                         WheelCircumference = gen2Tag.WheelCircumference,
                         GravityAdjust = 0.8f
                     };
-                    TranslateList(gen2Tag.Gears, newjeep.Engine.Gears, gen2Tag.Gears.GetType(), newjeep.Engine.Gears.GetType());
+                    TranslateList(gen2Tag.Gears, newjeep.Engine.Gears);
                     vehi.PhysicsTypes.HumanJeep.Add(newjeep);
                     break;
 
@@ -230,17 +236,17 @@ namespace TagTool.Commands.Porting.Gen2
                                     TorqueScale = 1.0f,
                                     EngineGravityFunction = new Vehicle.AnitGravityEngineFunctionStruct
                                     {// TODO
-                                        ObjectFunctionDamageRegion = StringId.Invalid,
-                                        AntiGravityEngineSpeedRange = new Bounds<float>(0.0f, 0.0f),
-                                        EngineSpeedAcceleration = 0.0f,
-                                        MaximumVehicleSpeed = 0.0f
+                                        ObjectFunctionDamageRegion = Cache.StringTable.GetStringId("hull"),
+                                        AntiGravityEngineSpeedRange = new Bounds<float>(0.5f, 2.0f), //ghost values
+                                        EngineSpeedAcceleration = 0.5f,
+                                        MaximumVehicleSpeed = 4.0f
                                     },
                                     ContrailObjectFunction = new Vehicle.AnitGravityEngineFunctionStruct
                                     {// TODO
-                                        ObjectFunctionDamageRegion = StringId.Invalid,
-                                        AntiGravityEngineSpeedRange = new Bounds<float>(0.0f, 0.0f),
-                                        EngineSpeedAcceleration = 0.0f,
-                                        MaximumVehicleSpeed = 0.0f
+                                        ObjectFunctionDamageRegion = Cache.StringTable.GetStringId("hull"),
+                                        AntiGravityEngineSpeedRange = new Bounds<float>(0.5f, 2.0f), //ghost values
+                                        EngineSpeedAcceleration = 2.5f,
+                                        MaximumVehicleSpeed = 8.0f
                                     },
                                     GearRotationSpeed = new Bounds<float>(0.0f, 0.0f), // TODO
                                     SteeringAnimation = new Vehicle.VehicleSteeringAnimation

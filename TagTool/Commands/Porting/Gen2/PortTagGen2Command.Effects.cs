@@ -16,13 +16,13 @@ namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
 	{
-        public object ConvertEffect(object gen2Tag)
+        public TagStructure ConvertEffect(object gen2Tag)
         {
             switch (gen2Tag)
             {
                 case TagTool.Tags.Definitions.Gen2.DamageEffect damage:
                     DamageEffect newdamage = new DamageEffect();
-                    TranslateTagStructure(damage, newdamage, typeof(TagTool.Tags.Definitions.Gen2.DamageEffect), typeof(DamageEffect));
+                    TranslateTagStructure(damage, newdamage);
                     return newdamage;
                 default:
                     return null;

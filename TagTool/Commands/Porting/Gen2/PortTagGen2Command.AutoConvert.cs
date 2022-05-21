@@ -2,13 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Tags;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
     {
-        public void TranslateTagStructure(TagStructure input, TagStructure output, Type inputtype, Type outputtype)
+        public void TranslateTagStructure(TagStructure input, TagStructure output)
         {
+            if (input == null || output == null)
+            {
+                new TagToolError(CommandError.OperationFailed, $"TagStructure translation failed due to null input/output!");
+                return;
+            }
+
+            Type inputtype = input.GetType();
+            Type outputtype = output.GetType();
+
             var inputinfo = TagStructure.GetTagStructureInfo(inputtype, Gen2Cache.Version, Gen2Cache.Platform);
             var outputinfo = TagStructure.GetTagStructureInfo(outputtype, Cache.Version, Cache.Platform);
 
@@ -42,7 +52,7 @@ namespace TagTool.Commands.Porting.Gen2
                         outputFieldInfo.FieldType.BaseType == typeof(TagStructure))
                     {
                         var outstruct = Activator.CreateInstance(outputFieldInfo.FieldType);
-                        TranslateTagStructure((TagStructure)tagFieldInfo.GetValue(input), (TagStructure)outstruct, tagFieldInfo.FieldType, outputFieldInfo.FieldType);
+                        TranslateTagStructure((TagStructure)tagFieldInfo.GetValue(input), (TagStructure)outstruct);
                         outputFieldInfo.SetValue(output, outstruct);
                     }
                     //if its a tagblock, call convertlist to iterate through and convert each one and return a converted list
@@ -51,7 +61,7 @@ namespace TagTool.Commands.Porting.Gen2
                     {
                         object inputlist = tagFieldInfo.GetValue(input);
                         object outputlist = Activator.CreateInstance(outputFieldInfo.FieldType);
-                        TranslateList(inputlist, outputlist, tagFieldInfo.FieldType, outputFieldInfo.FieldType);
+                        TranslateList(inputlist, outputlist);
                         outputFieldInfo.SetValue(output, outputlist);
                     }
                     //if its an enum, try to parse the value
@@ -71,19 +81,27 @@ namespace TagTool.Commands.Porting.Gen2
                 }
             }
         }
-        public void TranslateList(object input, object output, Type inputtype, Type outputtype)
+        public void TranslateList(object input, object output)
         {
+            if (input == null || output == null)
+            {
+                new TagToolError(CommandError.OperationFailed, $"List translation failed due to null input/output!");
+                return;
+            }
+
+            Type inputtype = input.GetType();
+            Type outputtype = output.GetType();
+
             IEnumerable<object> enumerable = input as IEnumerable<object>;
             if (enumerable == null)
                 throw new InvalidOperationException("listData must be enumerable");
 
             Type outputelementType = outputtype.GenericTypeArguments[0];
-            Type inputelementType = inputtype.GenericTypeArguments[0];
             var addMethod = outputtype.GetMethod("Add");
             foreach (object item in enumerable.OfType<object>())
             {
                 var outputelement = Activator.CreateInstance(outputelementType);
-                TranslateTagStructure((TagStructure)item, (TagStructure)outputelement, inputelementType, outputelementType);
+                TranslateTagStructure((TagStructure)item, (TagStructure)outputelement);
                 addMethod.Invoke(output, new[] { outputelement });
             }
         }

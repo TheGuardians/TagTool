@@ -137,10 +137,11 @@ namespace TagTool.Commands.Porting.Gen2
                     destinationTag = instance;
             }
 
-            object definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
-            definition = ConvertData(cacheStream, gen2CacheStream, resourceStreams, definition, definition, gen2Tag);
+            object gen2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
+            gen2definition = ConvertData(cacheStream, gen2CacheStream, resourceStreams, gen2definition, gen2definition, gen2Tag);
+            TagStructure definition;
 
-            switch (definition)
+            switch (gen2definition)
             {
                 case TagTool.Tags.Definitions.Gen2.CollisionModel collisionModel:
                     definition = ConvertCollisionModel(collisionModel);
@@ -166,7 +167,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                 case TagTool.Tags.Definitions.Gen2.Projectile projectile:
                 case TagTool.Tags.Definitions.Gen2.CameraTrack track:
-                    definition = ConvertObject(definition, cacheStream);
+                    definition = ConvertObject(gen2definition, cacheStream);
                     break;
                 case TagTool.Tags.Definitions.Gen2.DamageEffect damage:
                     definition = ConvertEffect(damage);
