@@ -9,6 +9,7 @@ using TagTool.Commands.Common;
 using TagTool.Commands.Porting;
 using TagTool.IO;
 using TagTool.Tags;
+using TagTool.Tags.Definitions.Gen2;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -143,41 +144,41 @@ namespace TagTool.Commands.Porting.Gen2
 
             switch (gen2definition)
             {
-                case TagTool.Tags.Definitions.Gen2.CollisionModel collisionModel:
+                case CollisionModel collisionModel:
                     definition = ConvertCollisionModel(collisionModel);
                     break;
-                case TagTool.Tags.Definitions.Gen2.ModelAnimationGraph modelAnimationGraph:
+                case ModelAnimationGraph modelAnimationGraph:
                     definition = ConvertModelAnimationGraph(modelAnimationGraph);
                     break;
-                case TagTool.Tags.Definitions.Gen2.PhysicsModel physicsModel:
+                case PhysicsModel physicsModel:
                     definition = ConvertPhysicsModel(physicsModel);
                     break;
-                case TagTool.Tags.Definitions.Gen2.RenderModel renderModel:
+                case RenderModel renderModel:
                     definition = ConvertRenderModel(renderModel);
                     break;
-                case TagTool.Tags.Definitions.Gen2.Model model:
+                case Model model:
                     definition = ConvertModel(model, cacheStream);
                     break;
-                case TagTool.Tags.Definitions.Gen2.Bitmap bitmap:
+                case Bitmap bitmap:
                     definition = ConvertBitmap(bitmap);
                     break;
-                case TagTool.Tags.Definitions.Gen2.Crate crate:
-                case TagTool.Tags.Definitions.Gen2.Scenery scenery:
-                case TagTool.Tags.Definitions.Gen2.Weapon weapon:
-                case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
-                case TagTool.Tags.Definitions.Gen2.Projectile projectile:
-                case TagTool.Tags.Definitions.Gen2.CameraTrack track:
+                case Crate crate:
+                case Scenery scenery:
+                case Weapon weapon:
+                case Vehicle vehicle:
+                case Projectile projectile:
+                case CameraTrack track:
                     definition = ConvertObject(gen2definition, cacheStream);
                     break;
-                case TagTool.Tags.Definitions.Gen2.DamageEffect damage:
+                case DamageEffect damage:
                     definition = ConvertEffect(damage);
                     break;
-                case TagTool.Tags.Definitions.Gen2.Shader shader:
+                case Shader shader:
                     //preserve a copy of unconverted data
                     object h2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
-                    definition = ConvertShader(shader, (TagTool.Tags.Definitions.Gen2.Shader)h2definition, cacheStream);
+                    definition = ConvertShader(shader, (Shader)h2definition, cacheStream);
                     break;
-                case TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp sbsp:
+                case ScenarioStructureBsp sbsp:
                     definition = ConvertStructureBSP(sbsp, cacheStream, gen2Tag.Name);
                     break;
                 default:
@@ -192,11 +193,26 @@ namespace TagTool.Commands.Porting.Gen2
             if (destinationTag == null)
                 destinationTag = Cache.TagCache.AllocateTag(definition.GetType(), gen2Tag.Name);
 
+            definition = PostFixups(definition, destinationTag);
+
             Cache.Serialize(cacheStream, destinationTag, definition);
 
             Console.WriteLine($"['{destinationTag.Group.Tag}', 0x{destinationTag.Index:X4}] {destinationTag}");
 
             return destinationTag;
+        }
+
+        public TagStructure PostFixups(TagStructure definition, CachedTag destinationTag)
+        {
+            switch (definition)
+            {
+                case TagTool.Tags.Definitions.ScenarioStructureBsp sbsp:
+                    foreach (var cluster in sbsp.Clusters)
+                        cluster.InstancedGeometryPhysics.StructureBsp = destinationTag;
+                    return definition;
+                default:
+                    return definition;
+            }
         }
 
         public object ConvertData(Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, object data, object definition, CachedTag gen2Tag)
