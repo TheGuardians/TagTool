@@ -64,7 +64,7 @@ namespace TagTool.Commands.Porting.Gen2
                     AlignmentMaxVelocity = gen2phantomtype.AlignmentMaxVel
                 };
                 //fix up phantom type flags
-                TranslateEnum(gen2phantomtype.Flags, newPhantomType.Flags.Halo3ODST);
+                TranslateEnum(gen2phantomtype.Flags, out newPhantomType.Flags.Halo3ODST, newPhantomType.Flags.Halo3ODST.GetType());
 
                 physicsModel.PhantomTypes.Add(newPhantomType);
             }
