@@ -46,10 +46,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 PhysicsModel.PhantomType newPhantomType = new PhysicsModel.PhantomType
                 {
-                    Flags = new PhysicsModel.PhantomTypeFlags
-                    {
-                        Halo2 = (PhysicsModel.PhantomTypeFlags.Halo2Bits)gen2phantomtype.Flags
-                    },
+                    Flags = new PhysicsModel.PhantomTypeFlags(),
                     MinimumSize = (PhysicsModel.PhantomTypeSize)gen2phantomtype.MinimumSize,
                     MaximumSize = (PhysicsModel.PhantomTypeSize)gen2phantomtype.MaximumSize,
                     MarkerName = gen2phantomtype.MarkerName,
@@ -67,15 +64,7 @@ namespace TagTool.Commands.Porting.Gen2
                     AlignmentMaxVelocity = gen2phantomtype.AlignmentMaxVel
                 };
                 //fix up phantom type flags
-                PhysicsModel.PhantomTypeFlags flags = newPhantomType.Flags;
-                if (flags.Halo2.ToString().Contains("Unknown"))
-                {
-                    foreach (var flag in Enum.GetValues(typeof(PhysicsModel.PhantomTypeFlags.Halo2Bits)))
-                        if (flag.ToString().StartsWith("Unknown") && flags.Halo2.HasFlag((PhysicsModel.PhantomTypeFlags.Halo2Bits)flag))
-                            flags.Halo2 &= ~(PhysicsModel.PhantomTypeFlags.Halo2Bits)flag;
-                }
-                if (!Enum.TryParse(flags.Halo2.ToString(), out flags.Halo3ODST))
-                    new TagToolWarning($"Some phantom type flags failed to convert!");
+                TranslateEnum(gen2phantomtype.Flags, newPhantomType.Flags.Halo3ODST);
 
                 physicsModel.PhantomTypes.Add(newPhantomType);
             }

@@ -12,7 +12,6 @@ namespace TagTool.Commands.Porting.Gen2
         {
             if (input == null || output == null)
             {
-                new TagToolError(CommandError.OperationFailed, $"TagStructure translation failed due to null input/output!");
                 return;
             }
 
@@ -69,7 +68,7 @@ namespace TagTool.Commands.Porting.Gen2
                         outputFieldInfo.FieldType.BaseType == typeof(Enum))
                     {
                         var outenum = Activator.CreateInstance(outputFieldInfo.FieldType);
-                        if (EnumTryParse(tagFieldInfo.GetValue(input).ToString(), out outenum, outputFieldInfo.FieldType))
+                        if (TranslateEnum(tagFieldInfo.GetValue(input), outenum))
                         {
                             outputFieldInfo.SetValue(output, outenum);
                         }
@@ -85,11 +84,9 @@ namespace TagTool.Commands.Porting.Gen2
         {
             if (input == null || output == null)
             {
-                new TagToolError(CommandError.OperationFailed, $"List translation failed due to null input/output!");
                 return;
             }
 
-            Type inputtype = input.GetType();
             Type outputtype = output.GetType();
 
             IEnumerable<object> enumerable = input as IEnumerable<object>;
@@ -105,13 +102,23 @@ namespace TagTool.Commands.Porting.Gen2
                 addMethod.Invoke(output, new[] { outputelement });
             }
         }
+        public bool TranslateEnum(object input, object output)
+        {
+            if (input == null || output == null)
+            {
+                return false;
+            }
+            return EnumTryParse(input.ToString(), out output, output.GetType());
+        }
+
         private static bool EnumTryParse<T>(string input, out T theEnum, Type enumType)
         {
             string setstring = "";
             bool result = false;
+            string[] inputlist = input.ToUpper().Split(',');
             foreach (string en in Enum.GetNames(enumType))
             {
-                if (input.ToUpper().Contains(en.ToUpper()))
+                if (inputlist.Contains(en.ToUpper()))
                 {
                     if(result)
                         setstring += $",{en}";

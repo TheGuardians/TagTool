@@ -21,6 +21,7 @@ namespace TagTool.Commands.Gen2.ScenarioStructureBSPs
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, ScenarioStructureBsp bsp)
         {
             commandContext.AddCommand(new ExtractCollisionGeometryCommand(cache, bsp));
+            commandContext.AddCommand(new ExtractRenderGeometryCommand(cache, bsp));
         }
     }
 }
