@@ -111,6 +111,18 @@ namespace TagTool.Commands.Porting.Gen2
                 });
             };
 
+            //transparent planes
+            newSbsp.TransparentPlanes = new List<ScenarioStructureBsp.TransparentPlane>();
+            foreach(var plane in gen2Tag.TransparentPlanes)
+            {
+                newSbsp.TransparentPlanes.Add(new ScenarioStructureBsp.TransparentPlane
+                {
+                    MeshIndex = plane.SectionIndex,
+                    PartIndex = plane.PartIndex,
+                    Plane = plane.Plane
+                });
+            }
+
             //acoustic sound clusters (needed to prevent crash)
             newSbsp.AcousticsSoundClusters = new List<ScenarioStructureBsp.StructureBspSoundClusterBlock>() {
                     new ScenarioStructureBsp.StructureBspSoundClusterBlock() {

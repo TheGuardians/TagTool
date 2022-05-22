@@ -115,7 +115,7 @@ namespace TagTool.Commands.Porting.Gen2
         {
             string setstring = "";
             bool result = false;
-            string[] inputlist = input.ToUpper().Split(',');
+            string[] inputlist = input.ToUpper().Split(new string[]{", "}, StringSplitOptions.RemoveEmptyEntries);
             foreach (string en in Enum.GetNames(enumType))
             {
                 if (inputlist.Contains(en.ToUpper()))
