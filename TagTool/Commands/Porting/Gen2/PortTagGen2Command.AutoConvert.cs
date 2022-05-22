@@ -67,8 +67,8 @@ namespace TagTool.Commands.Porting.Gen2
                     else if (tagFieldInfo.FieldType.BaseType == typeof(Enum) &&
                         outputFieldInfo.FieldType.BaseType == typeof(Enum))
                     {
-                        var outenum = Activator.CreateInstance(outputFieldInfo.FieldType);
-                        if (TranslateEnum(tagFieldInfo.GetValue(input), outenum))
+                        object outenum = Activator.CreateInstance(outputFieldInfo.FieldType);
+                        if (TranslateEnum(tagFieldInfo.GetValue(input), out outenum, outenum.GetType()))
                         {
                             outputFieldInfo.SetValue(output, outenum);
                         }
@@ -102,20 +102,16 @@ namespace TagTool.Commands.Porting.Gen2
                 addMethod.Invoke(output, new[] { outputelement });
             }
         }
-        public bool TranslateEnum(object input, object output)
-        {
-            if (input == null || output == null)
-            {
-                return false;
-            }
-            return EnumTryParse(input.ToString(), out output, output.GetType());
-        }
 
-        private static bool EnumTryParse<T>(string input, out T theEnum, Type enumType)
+        public bool TranslateEnum<T>(object input, out T output, Type enumType)
         {
+            output = default(T);
+            if (input == null)
+                return false;
+
             string setstring = "";
             bool result = false;
-            string[] inputlist = input.ToUpper().Split(new string[]{", "}, StringSplitOptions.RemoveEmptyEntries);
+            string[] inputlist = input.ToString().ToUpper().Split(new string[]{", "}, StringSplitOptions.RemoveEmptyEntries);
             foreach (string en in Enum.GetNames(enumType))
             {
                 if (inputlist.Contains(en.ToUpper()))
@@ -128,10 +124,9 @@ namespace TagTool.Commands.Porting.Gen2
                 }
             }
 
-            if(result)
-                theEnum = (T)Enum.Parse(enumType, setstring, true);
-            else
-                theEnum = default(T);
+            if (result)
+                output = (T)Enum.Parse(enumType, setstring, true);
+
             return result;
         }
     }

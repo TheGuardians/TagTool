@@ -105,7 +105,7 @@ namespace TagTool.Commands.Porting.Gen2
             vehi.FlipTimeNew = gen2Tag.TurnScale;
             vehi.FlippingAngularVelocityRangeNew = new Bounds<float>(gen2Tag.MinimumFlippingAngularVelocity, gen2Tag.MaximumFlippingAngularVelocity);
             vehi.PhysicsTypes = new Vehicle.VehiclePhysicsTypes();
-            TranslateEnum(gen2Tag.Flags1, vehi.UnitFlags);
+            TranslateEnum(gen2Tag.Flags1, out vehi.UnitFlags, vehi.UnitFlags.GetType());
 
             vehi.HavokVehiclePhysics.PhantomShapes = new List<Vehicle.PhantomShape>();
             TranslateList(gen2Tag.HavokVehiclePhysics.ShapePhantomShape, vehi.HavokVehiclePhysics.PhantomShapes);
