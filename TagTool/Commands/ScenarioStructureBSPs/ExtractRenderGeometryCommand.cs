@@ -49,7 +49,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             // Deserialize the resource definition
             //
 
-
+            var collresource = CacheContext.ResourceCache.GetStructureBspTagResources(Definition.CollisionBspResource);
             var definition = CacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
             Definition.Geometry.SetResourceBuffers(definition);
 
@@ -75,7 +75,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     foreach (var instance in Definition.InstancedGeometryInstances)
                     {
                         var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
-                        var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, Definition.Geometry.Meshes[instance.DefinitionIndex]);
+                        var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, Definition.Geometry.Meshes[collresource.InstancedGeometry[instance.DefinitionIndex].MeshIndex]);
                         objExtractor.ExtractMesh(meshReader, vertexCompressor, CacheContext.StringTable.GetString(instance.Name));
                     }
 

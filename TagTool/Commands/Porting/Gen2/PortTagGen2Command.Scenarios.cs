@@ -173,6 +173,15 @@ namespace TagTool.Commands.Porting.Gen2
                 BuildMeshes(builder, clustermeshes, (RenderGeometryClassification)cluster.SectionInfo.GeometryClassification,
                     cluster.SectionInfo.OpaqueMaxNodesVertex, 0);
 
+                //fixup mesh part fields
+                var newmesh = builder.Meshes.Last();
+                for (var i = 0; i < newmesh.Mesh.Parts.Count; i++)
+                {
+                    newmesh.Mesh.Parts[i].FirstSubPartIndex = clustermeshes[0].Parts[i].FirstSubPartIndex;
+                    newmesh.Mesh.Parts[i].SubPartCount = clustermeshes[0].Parts[i].SubPartCount;
+                    newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)clustermeshes[0].Parts[i].TypeOld;
+                }
+
                 //block values
                 var newcluster = new ScenarioStructureBsp.Cluster
                 {
@@ -239,6 +248,15 @@ namespace TagTool.Commands.Porting.Gen2
                 
                 BuildMeshes(builder, instancemeshes, (RenderGeometryClassification)instanced.RenderInfo.SectionInfo.GeometryClassification, 
                     instanced.RenderInfo.SectionInfo.OpaqueMaxNodesVertex, 0);
+
+                //fixup mesh part fields
+                var newmesh = builder.Meshes.Last();
+                for(var i = 0; i < newmesh.Mesh.Parts.Count; i++)
+                {
+                    newmesh.Mesh.Parts[i].FirstSubPartIndex = instancemeshes[0].Parts[i].FirstSubPartIndex;
+                    newmesh.Mesh.Parts[i].SubPartCount = instancemeshes[0].Parts[i].SubPartCount;
+                    newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)instancemeshes[0].Parts[i].TypeOld;
+                }
 
                 //block values
                 var newinstance = new InstancedGeometryBlock
@@ -347,10 +365,12 @@ namespace TagTool.Commands.Porting.Gen2
             newSbsp.CollisionBspResource = Cache.ResourceCache.CreateStructureBspResource(CollisionResource);
             //write meshes and render model resource
 
+            /*
             var lbsp = new ScenarioLightmapBspData();
             lbsp.Geometry = meshbuild.Geometry;
             var destinationTag = Cache.TagCache.AllocateTag(lbsp.GetType(), tagname);
             Cache.Serialize(cacheStream, destinationTag, lbsp);
+            */
 
             newSbsp.Geometry = meshbuild.Geometry;
 
