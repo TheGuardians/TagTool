@@ -151,6 +151,10 @@ namespace TagTool.Cache
                     version = CacheVersion.HaloOnline571627;
                     cachePlatform = CachePlatform.Original;
                     break;
+                case "11.1.601838 Live":
+                    version = CacheVersion.HaloOnline604673;
+                    cachePlatform = CachePlatform.Original;
+                    break;
                 case "12.1.700123 cert_ms30_oct19":
                     version = CacheVersion.HaloOnline700123;
                     cachePlatform = CachePlatform.Original;
@@ -258,6 +262,8 @@ namespace TagTool.Cache
                         return "11.1.554482 Live";
                     case CacheVersion.HaloOnline571627:
                         return "11.1.571627 Live";
+                    case CacheVersion.HaloOnline604673:
+                        return "11.1.604673 cert_ms29 Live";
                     case CacheVersion.HaloOnline700123:
                         return "12.1.700123 cert_ms30_oct19";
                     case CacheVersion.HaloReach:
@@ -314,8 +320,9 @@ namespace TagTool.Cache
 				case CacheVersion.HaloOnline530605:
 				case CacheVersion.HaloOnline532911:
 				case CacheVersion.HaloOnline554482:
-				case CacheVersion.HaloOnline571627:
-				case CacheVersion.HaloOnline700123:
+                case CacheVersion.HaloOnline571627:
+                case CacheVersion.HaloOnline604673:
+                case CacheVersion.HaloOnline700123:
                     return true;
 
 				default:
@@ -514,6 +521,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline532911:
                 case CacheVersion.HaloOnline554482:
                 case CacheVersion.HaloOnline571627:
+                case CacheVersion.HaloOnline604673:
                 case CacheVersion.HaloOnline700123:
                     return CacheGeneration.HaloOnline;
 
@@ -570,6 +578,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline532911:
                 case CacheVersion.HaloOnline554482:
                 case CacheVersion.HaloOnline571627:
+                case CacheVersion.HaloOnline604673:
                 case CacheVersion.HaloOnline700123:
                     return GameTitle.HaloOnline;
                 case CacheVersion.HaloReach:
@@ -603,6 +612,7 @@ namespace TagTool.Cache
             [130869644198634503] = CacheVersion.HaloOnline532911,
             [130879952719550501] = CacheVersion.HaloOnline554482,
             [130881889330693956] = CacheVersion.HaloOnline571627,
+            [130893802351772672] = CacheVersion.HaloOnline604673,
             [130930071628935939] = CacheVersion.HaloOnline700123
         };
 
@@ -636,6 +646,7 @@ namespace TagTool.Cache
             130869644198634503, // V11_1_532911_Live
             130879952719550501, // V11_1_554482_Live
             130881889330693956, // HaloOnline571627
+            130893802351772672, // HaloOnline604673
             130930071628935939, // HaloOnline700123
             -1, // HaloReach
             -1  // Halo 4
@@ -669,6 +680,7 @@ namespace TagTool.Cache
         HaloOnline532911,
         HaloOnline554482,
         HaloOnline571627,
+        HaloOnline604673,
         HaloOnline700123,
         HaloReach,
         HaloReach11883,

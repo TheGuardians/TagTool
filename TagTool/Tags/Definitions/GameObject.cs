@@ -49,6 +49,7 @@ namespace TagTool.Tags.Definitions
 
         public StringId DefaultModelVariant;
         public CachedTag Model;
+        [TagField(MaxVersion = CacheVersion.HaloOnline416097)]
         public CachedTag CrateObject;
         public CachedTag CollisionDamage;
 

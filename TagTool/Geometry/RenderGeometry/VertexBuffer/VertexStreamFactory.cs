@@ -42,6 +42,7 @@ namespace TagTool.Geometry
                     case CacheVersion.HaloOnline532911:
                     case CacheVersion.HaloOnline554482:
                     case CacheVersion.HaloOnline571627:
+                    case CacheVersion.HaloOnline604673:
                     case CacheVersion.HaloOnline700123:
                         return new VertexStreamMS25(stream);
 
