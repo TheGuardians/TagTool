@@ -325,6 +325,19 @@ namespace TagTool.Commands.Porting.Gen2
             return stringId;
         }
 
+        public Damage.DamageReportingType ConvertDamageReportingType(Damage.DamageReportingType damageReportingType)
+        {
+            string value = damageReportingType.Halo2Retail.ToString();
+
+            if (value == null || !Enum.TryParse(value, out damageReportingType.HaloOnline))
+            {
+                new TagToolWarning($"Unsupported Damage reporting type '{value}'. Using default.");
+                damageReportingType.HaloOnline = Damage.DamageReportingType.HaloOnlineValue.GuardiansUnknown;
+            }
+
+            return damageReportingType;
+        }
+
         private List<CachedTag> ParseLegacyTag(string tagSpecifier)
         {
             List<CachedTag> result = new List<CachedTag>();

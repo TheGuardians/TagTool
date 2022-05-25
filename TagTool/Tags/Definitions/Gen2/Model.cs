@@ -47,19 +47,18 @@ namespace TagTool.Tags.Definitions.Gen2
         public float ReduceToL3; // world units (medium)
         public float ReduceToL4; // world units (high)
         public float ReduceToL5; // world units (super high)
-        [TagField(Length = 0x4)]
-        public byte[] Unknown;
+        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding1;
         public ShadowFadeDistanceValue ShadowFadeDistance;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding1;
+        public byte[] Padding2;
         public List<ModelVariantBlock> Variants;
         public List<ModelMaterialBlock> Materials;
         public List<GlobalDamageInfoBlock> NewDamageInfo;
         public List<ModelTargetBlock> Targets;
         public List<ModelRegionBlock> CollisionRegions;
         public List<ModelNodeBlock> Nodes;
-        [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding2;
+        public int RuntimeNodeListChecksum;
         public List<ModelObjectDataBlock> ModelObjectData;
         /// <summary>
         /// The default dialogue tag for this model (overriden by variants)
@@ -73,10 +72,11 @@ namespace TagTool.Tags.Definitions.Gen2
         /// The default dialogue tag for this model (overriden by variants)
         /// </summary>
         public StringId DefaultDialogueEffect;
-        [TagField(Length = 8)]
-        public int[] RenderOnlyNodeFlags;
-        [TagField(Length = 8)]
-        public int[] RenderOnlySectionFlags;
+        [TagField(Length = 32)]
+        public byte[] RenderOnlyNodeFlags = new byte[32];
+        [TagField(Length = 32)]
+        public byte[] RenderOnlySectionFlags = new byte[32];
+
         public RuntimeFlagsValue RuntimeFlags;
         public List<GlobalScenarioLoadParametersBlock> ScenarioLoadParameters;
         /// <summary>
@@ -100,8 +100,8 @@ namespace TagTool.Tags.Definitions.Gen2
         public class ModelVariantBlock : TagStructure
         {
             public StringId Name;
-            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
+            [TagField(Length = 16)]
+            public sbyte[] ModelRegionIndices = new sbyte[16];
             public List<ModelVariantRegionBlock> Regions;
             public List<ModelVariantObjectBlock> Objects;
             [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
@@ -114,10 +114,8 @@ namespace TagTool.Tags.Definitions.Gen2
             public class ModelVariantRegionBlock : TagStructure
             {
                 public StringId RegionName; // must match region name in render_model
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
+                public sbyte ModelRegionIndex;
+                public sbyte RuntimeFlags;
                 public short ParentVariant;
                 public List<ModelVariantPermutationBlock> Permutations;
                 /// <summary>
@@ -126,23 +124,20 @@ namespace TagTool.Tags.Definitions.Gen2
                 public SortOrderValue SortOrder;
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding2;
-                
+
                 [TagStructure(Size = 0x20)]
                 public class ModelVariantPermutationBlock : TagStructure
                 {
                     public StringId PermutationName;
-                    [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding;
+                    public sbyte ModelPermutationIndex;
                     public FlagsValue Flags;
                     [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                     public byte[] Padding1;
                     public float Probability; // (0,+inf)
                     public List<ModelVariantStateBlock> States;
-                    [TagField(Length = 0x5, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding2;
-                    [TagField(Length = 0x7, Flags = TagFieldFlags.Padding)]
-                    public byte[] Padding3;
-                    
+                    [TagField(Length = 12)]
+                    public sbyte[] RuntimePermutationIndex = new sbyte[12];
+
                     [Flags]
                     public enum FlagsValue : byte
                     {
@@ -152,11 +147,10 @@ namespace TagTool.Tags.Definitions.Gen2
                     [TagStructure(Size = 0x18)]
                     public class ModelVariantStateBlock : TagStructure
                     {
-                        public StringId PermutationName;
-                        [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                        public byte[] Padding;
+                        public StringId Name;
+                        public sbyte ModelPermutationIndex;
                         public PropertyFlagsValue PropertyFlags;
-                        public StateValue State;
+                        public StateValue State2;
                         /// <summary>
                         /// played while the model is in this state
                         /// </summary>
@@ -164,15 +158,16 @@ namespace TagTool.Tags.Definitions.Gen2
                         public CachedTag LoopingEffect;
                         public StringId LoopingEffectMarkerName;
                         public float InitialProbability;
-                        
+
                         [Flags]
                         public enum PropertyFlagsValue : byte
                         {
                             Blurred = 1 << 0,
                             HellaBlurred = 1 << 1,
-                            Shielded = 1 << 2
+                            Shielded = 1 << 2,
+                            BatteryDepleted = 1 << 3
                         }
-                        
+
                         public enum StateValue : short
                         {
                             Default,
@@ -216,15 +211,16 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             public StringId MaterialName;
             public MaterialTypeValue MaterialType;
-            public short DamageSection;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
+            public short DamageSectionIndex;
+            public short RuntimeCollisionMaterialIndex;
+            public short RuntimeDamagerMaterialIndex;
+            [TagField(Flags = GlobalMaterial)]
             public StringId GlobalMaterialName;
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding2;
-            
+            [TagField(Flags = GlobalMaterial)]
+            public short GlobalMaterialIndex;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding = new byte[2];
+
             public enum MaterialTypeValue : short
             {
                 Dirt,
@@ -279,8 +275,8 @@ namespace TagTool.Tags.Definitions.Gen2
             public byte[] Padding;
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
-            public CollisionDamageReportingTypeValue CollisionDamageReportingType;
-            public ResponseDamageReportingTypeValue ResponseDamageReportingType;
+            public Damage.DamageReportingType CollisionDamageReportingType;
+            public Damage.DamageReportingType ResponseDamageReportingType;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
             [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
@@ -334,14 +330,12 @@ namespace TagTool.Tags.Definitions.Gen2
             public CachedTag ShieldRechargingEffect;
             public List<GlobalDamageSectionBlock> DamageSections;
             public List<GlobalDamageNodesBlock> Nodes;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding5;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding6;
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding7;
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding8;
+            [TagField(Flags = GlobalMaterial)]
+            public short GlobalShieldMaterialIndex;
+            [TagField(Flags = GlobalMaterial)]
+            public short GlobalIndirectMaterialIndex;
+            public float RuntimeShieldRechargeVelocity;
+            public float RuntimeHealthRechargeVelocity;
             public List<DamageSeatInfoBlock> DamageSeats;
             public List<DamageConstraintInfoBlock> DamageConstraints;
             [TagField(ValidTags = new [] { "shad" })]
@@ -478,22 +472,25 @@ namespace TagTool.Tags.Definitions.Gen2
                 [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
                 public StringId ResurrectionRestoredRegionName;
-                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public short ResurrectionRegionRuntimeIndex;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding1;
-                
+
                 [Flags]
-                public enum FlagsValue : uint
+                public enum FlagsValue : int
                 {
+                    None,
                     AbsorbsBodyDamage = 1 << 0,
-                    TakesFullDmgWhenObjectDies = 1 << 1,
+                    TakesFullDamageWhenObjectDies = 1 << 1,
                     CannotDieWithRiders = 1 << 2,
-                    TakesFullDmgWhenObjDstryd = 1 << 3,
+                    TakesFullDamageWhenObjectDestroyed = 1 << 3,
                     RestoredOnRessurection = 1 << 4,
                     Unused = 1 << 5,
                     Unused1 = 1 << 6,
                     Heatshottable = 1 << 7,
                     IgnoresShields = 1 << 8
                 }
+
                 
                 [TagStructure(Size = 0x50)]
                 public class InstantaneousDamageRepsonseBlock : TagStructure
@@ -648,12 +645,10 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagStructure(Size = 0x10)]
             public class GlobalDamageNodesBlock : TagStructure
             {
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
+                public short RuntimeDamagePart;
+                public short Unknown;
                 [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding2;
+                public byte[] Padding;
             }
             
             [TagStructure(Size = 0x14)]
@@ -744,9 +739,10 @@ namespace TagTool.Tags.Definitions.Gen2
                 public StringId Name;
                 public FlagsValue Flags;
                 public sbyte CollisionPermutationIndex;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public sbyte PhysicsRegionIndex;
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
-                
+
                 [Flags]
                 public enum FlagsValue : byte
                 {
@@ -762,8 +758,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public short ParentNode;
             public short FirstChildNode;
             public short NextSiblingNode;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
+            public short ImportNodeIndex;
             public RealPoint3d DefaultTranslation;
             public RealQuaternion DefaultRotation;
             public float DefaultScale;

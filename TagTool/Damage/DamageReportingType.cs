@@ -25,9 +25,9 @@ namespace TagTool.Damage
         {
             Guardians,
             FallingDamage,
-            CollisionDamage,
-            MeleeEdamage,
-            Explosion,
+            GenericCollision,
+            GenericMelee,
+            GenericExplosion,
             MagnumPistol,
             PlasmaPistol,
             Needler,

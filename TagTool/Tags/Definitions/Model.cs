@@ -88,10 +88,10 @@ namespace TagTool.Tags.Definitions
         public FlagsValue Flags;
         public StringId DefaultDialogueEffect;
 
-        [TagField(Length = 8)]
-        public int[] RenderOnlyNodeFlags = new int[8];
-        [TagField(Length = 8)]
-        public int[] RenderOnlySectionFlags = new int[8];
+        [TagField(Length = 32)]
+        public byte[] RenderOnlyNodeFlags = new byte[32];
+        [TagField(Length = 32)]
+        public byte[] RenderOnlySectionFlags = new byte[32];
 
         public RuntimeFlagsValue RuntimeFlags;
         [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -234,7 +234,7 @@ namespace TagTool.Tags.Definitions
                     public class State : TagStructure
 					{
                         public StringId Name;
-                        public byte ModelPermutationIndex;
+                        public sbyte ModelPermutationIndex;
                         public PropertyFlagsValue PropertyFlags;
                         public StateValue State2;
                         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -357,16 +357,15 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class Material : TagStructure
 		{
-            public StringId Name;
+            public StringId MaterialName;
             public MaterialTypeValue MaterialType;
             public short DamageSectionIndex;
             public short RuntimeCollisionMaterialIndex;
             public short RuntimeDamagerMaterialIndex;
             [TagField(Flags = GlobalMaterial)]
-            public StringId MaterialName;
+            public StringId GlobalMaterialName;
             [TagField(Flags = GlobalMaterial)]
             public short GlobalMaterialIndex;
-
             [TagField(Flags = Padding, Length = 2)]
             public byte[] Padding0 = new byte[2];
 
@@ -412,7 +411,7 @@ namespace TagTool.Tags.Definitions
         public class OmahaDamageInfoBlock : TagStructure
         {
             public FlagsValue Flags;
-            public float MaxVitality;
+            public float MaximumVitality;
 
             [TagField(Flags = GlobalMaterial)]
             public StringId GlobalIndirectMaterialName;
@@ -438,8 +437,9 @@ namespace TagTool.Tags.Definitions
             public class Node : TagStructure
             {
                 public short RuntimeDamagePart;
-                [TagField(Flags = Padding, Length = 14)]
-                public byte[] Unused1 = new byte[14];
+                public short Unknown;
+                [TagField(Flags = Padding, Length = 12)]
+                public byte[] Unused1 = new byte[12];
             }
 
             [TagStructure(Size = 0x14)]
@@ -764,7 +764,7 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Padding, Length = 20)]
             public byte[] Unused5 = new byte[20];
 
-            public float MaxVitality;
+            public float MaximumVitality;
             public float MinStunDamage;
             public float StunTime;
             public float RechargeTime;
@@ -842,8 +842,8 @@ namespace TagTool.Tags.Definitions
                 public float RechargeTime;             
                 public float RuntimeRechargeVelocity;
 
-                public StringId ResurrectionRegionName;
-                public short RessurectionRegionRuntimeIndex;
+                public StringId ResurrectionRestoredRegionName;
+                public short ResurrectionRegionRuntimeIndex;
 
                 [TagField(Flags = Padding, Length = 2)]
                 public byte[] Unused2 = new byte[2];
