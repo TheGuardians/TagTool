@@ -127,7 +127,10 @@ namespace TagTool.Shaders.ShaderMatching
     
             Rmt2Descriptor sourceRmt2Desc;
             if (!Rmt2Descriptor.TryParse(sourceRmt2Tag.Name, out sourceRmt2Desc))
-                throw new ArgumentException($"Invalid rmt2 name '{sourceRmt2Tag.Name}'", nameof(sourceRmt2Tag));
+            {
+                new TagToolError(CommandError.OperationFailed, $"Invalid rmt2 name '{sourceRmt2Tag.Name}'");
+                return null;
+            }
 
             if (!UpdatedRmdf.Contains(sourceRmt2Desc.Type)) // will update or generate rmdf as needed
             {
@@ -600,6 +603,8 @@ namespace TagTool.Shaders.ShaderMatching
                 if (prefixParts.Length > 0 && prefixParts[0] == "ms30")
                     descriptor.Flags |= DescriptorFlags.Ms30;
 
+                if (parts.Length < 2)
+                    return false;
                 var nameParts = parts[1].Split('\\');
                 if (nameParts.Length < 2)
                     return false;

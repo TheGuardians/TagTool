@@ -32,11 +32,13 @@ namespace TagTool.Geometry
         {
             if(CacheVersionDetection.IsBetween(DestCache.Version, CacheVersion.HaloOnlineED, CacheVersion.HaloOnline106708))
             {
-                if(CacheVersionDetection.IsBetween(SourceCache.Version, CacheVersion.Halo3Beta, CacheVersion.Halo3ODST))
+                if (CacheVersionDetection.IsBetween(SourceCache.Version, CacheVersion.Halo3Beta, CacheVersion.Halo3ODST))
                 {
                     return ConvertHalo3(geometry, resourceDefinition);
                 }
-                else if(SourceCache.Version >= CacheVersion.HaloReach)
+                else if (CacheVersionDetection.IsBetween(SourceCache.Version, CacheVersion.HaloOnlineED, CacheVersion.HaloOnline700123))
+                    return resourceDefinition;
+                else if (SourceCache.Version >= CacheVersion.HaloReach)
                 {
                     return ConvertHaloReach(geometry, resourceDefinition);
                 }
