@@ -1928,6 +1928,10 @@ namespace TagTool.Commands.Porting
 				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
 					throw new FormatException(BlamCache.Version.ToString());
 
+            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                if (!Enum.TryParse(objectType.HaloOnline.ToString(), out objectType.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
+
             if (BlamCache.Version >= CacheVersion.HaloReach)
                 if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
                     throw new FormatException(BlamCache.Version.ToString());
