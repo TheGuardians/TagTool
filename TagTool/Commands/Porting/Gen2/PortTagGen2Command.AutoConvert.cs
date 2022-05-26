@@ -22,8 +22,8 @@ namespace TagTool.Commands.Porting.Gen2
             var outputinfo = TagStructure.GetTagStructureInfo(outputtype, Cache.Version, Cache.Platform);
 
             //use an ordered list so we can use binary searches to decrease iterations
-            List<TagFieldInfo> outputfieldlist = TagStructure.GetTagFieldEnumerable(outputinfo.Types[0], outputinfo.Version, outputinfo.CachePlatform).ToList();
-            outputfieldlist = outputfieldlist.OrderBy(n => n.Name).ToList();
+            List<TagFieldInfo> outputfieldlist = TagStructure.GetTagFieldEnumerable(outputinfo.Types[0], outputinfo.Version, outputinfo.CachePlatform)
+                .OrderBy(n => n.Name).ToList();
             List<string> outputnamelist = outputfieldlist.Select(n => n.Name.ToUpper()).ToList();
 
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(inputinfo.Types[0], inputinfo.Version, inputinfo.CachePlatform))

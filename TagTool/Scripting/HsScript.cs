@@ -12,7 +12,7 @@ namespace TagTool.Scripting
 	{
         [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
         public string ScriptName;
-        [TagField(MinVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public StringId ScriptNameReach;
         public HsScriptType Type;
         public HsType ReturnType;
