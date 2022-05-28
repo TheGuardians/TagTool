@@ -124,7 +124,7 @@ namespace TagTool.Commands.Porting.Gen2
                         throw new NotSupportedException(geometrytype.ToString());
                 }
 
-                builder.BindIndexBuffer(mesh.StripIndices.Select(i => (ushort)i.Index), IndexBufferFormat.TriangleStrip);
+                builder.BindIndexBuffer(mesh.StripIndices.Select(i => (ushort)i.Index), IndexBufferFormat.TriangleList);
 
                 builder.EndMesh();
             }
