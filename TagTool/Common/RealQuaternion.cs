@@ -64,7 +64,12 @@ namespace TagTool.Common
             this(ijk.I, ijk.J, ijk.K, w)
         {
         }
-        
+
+        public RealQuaternion(RealQuaternion ijkw) :
+            this(ijkw.I, ijkw.J, ijkw.K, ijkw.W)
+        {
+        }
+
         public RealQuaternion(IEnumerable<float> enumerable)
         {
             var components = enumerable.ToArray();
@@ -107,7 +112,10 @@ namespace TagTool.Common
 
         public static RealQuaternion operator -(RealQuaternion lhs, RealQuaternion rhs) =>
             new RealQuaternion(lhs.I - rhs.I, lhs.J - rhs.J, lhs.K - rhs.K, lhs.W - rhs.W);
-        
+
+        public static RealQuaternion operator -(RealQuaternion lhs, float rhs) =>
+            new RealQuaternion(lhs.I - rhs, lhs.J - rhs, lhs.K - rhs, lhs.W - rhs);
+
         public static RealQuaternion operator *(RealQuaternion vec, float scale) =>
             new RealQuaternion(vec.I * scale, vec.J * scale, vec.K * scale, vec.W * scale);
         

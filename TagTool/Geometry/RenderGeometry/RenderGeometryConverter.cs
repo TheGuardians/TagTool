@@ -32,17 +32,97 @@ namespace TagTool.Geometry
         {
             if(CacheVersionDetection.IsBetween(DestCache.Version, CacheVersion.HaloOnlineED, CacheVersion.HaloOnline106708))
             {
-                if(CacheVersionDetection.IsBetween(SourceCache.Version, CacheVersion.Halo3Beta, CacheVersion.Halo3ODST))
+                if (CacheVersionDetection.IsBetween(SourceCache.Version, CacheVersion.Halo3Beta, CacheVersion.Halo3ODST))
                 {
                     return ConvertHalo3(geometry, resourceDefinition);
                 }
-                else if(SourceCache.Version >= CacheVersion.HaloReach)
+                else if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, SourceCache.Version))
+                {
+                    return ConvertHaloOnline(geometry, resourceDefinition);
+                }
+                else if (SourceCache.Version >= CacheVersion.HaloReach)
                 {
                     return ConvertHaloReach(geometry, resourceDefinition);
                 }
             }
 
             return null;
+        }
+
+        private RenderGeometryApiResourceDefinition ConvertHaloOnline(RenderGeometry geometry, RenderGeometryApiResourceDefinition resourceDefinition)
+        {
+            // The format changed starting with version 235640
+            if (SourceCache.Version <= CacheVersion.HaloOnline106708)
+                return resourceDefinition;
+            foreach(var buffer in resourceDefinition.VertexBuffers)
+            {
+                using (MemoryStream inStream = new MemoryStream(buffer.Definition.Data.Data), outStream = new MemoryStream())
+                {
+                    var inVertexStream = VertexStreamFactory.Create(SourceCache.Version, SourceCache.Platform, inStream);
+                    var outVertexStream = VertexStreamFactory.Create(DestCache.Version, DestCache.Platform, outStream);
+                    switch (buffer.Definition.Format)
+                    {
+                        case VertexBufferFormat.World:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadWorldVertex, v =>
+                            {
+                                //v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
+                                outVertexStream.WriteWorldVertex(v);
+                            });
+                            break;
+                        case VertexBufferFormat.Rigid:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadRigidVertex, v =>
+                            {
+                                //v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
+                                outVertexStream.WriteRigidVertex(v);
+                            });
+                            break;
+                        case VertexBufferFormat.Skinned:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadSkinnedVertex, v =>
+                            {
+                                //v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
+                                outVertexStream.WriteSkinnedVertex(v);
+                            });
+                            break;
+                        case VertexBufferFormat.StaticPerPixel:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadStaticPerPixelData, outVertexStream.WriteStaticPerPixelData);
+                            break;
+                        case VertexBufferFormat.StaticPerVertex:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadStaticPerVertexData, outVertexStream.WriteStaticPerVertexData);
+                            break;
+                        case VertexBufferFormat.AmbientPrt:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadAmbientPrtData, outVertexStream.WriteAmbientPrtData);
+                            break;
+                        case VertexBufferFormat.LinearPrt:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadLinearPrtData, outVertexStream.WriteLinearPrtData);
+                            break;
+                        case VertexBufferFormat.QuadraticPrt:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadQuadraticPrtData, outVertexStream.WriteQuadraticPrtData);
+                            break;
+                        case VertexBufferFormat.StaticPerVertexColor:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadStaticPerVertexColorData, outVertexStream.WriteStaticPerVertexColorData);
+                            break;
+                        case VertexBufferFormat.Decorator:
+                            ConvertVertices(buffer.Definition.Count, inVertexStream.ReadDecoratorVertex, outVertexStream.WriteDecoratorVertex);
+                            break;
+                        case VertexBufferFormat.World2:
+                            buffer.Definition.Format = VertexBufferFormat.World;
+                            goto default;
+                        default:
+                            // Just copy the raw buffer over and pray that it works...
+                            var bufferData = new byte[buffer.Definition.Data.Size];
+                            inStream.Read(bufferData, 0, bufferData.Length);
+                            outStream.Write(bufferData, 0, bufferData.Length);
+                            break;
+                    }
+                    buffer.Definition.Data.Data = outStream.ToArray();
+                }
+            }
+            return resourceDefinition;
+        }
+        private void ConvertVertices<T>(int count, Func<T> readFunc, Action<T> writeFunc)
+        {
+            for (var i = 0; i < count; i++)
+                writeFunc(readFunc());
         }
 
         private RenderGeometryApiResourceDefinition ConvertHalo3(RenderGeometry geometry, RenderGeometryApiResourceDefinition resourceDefinition)

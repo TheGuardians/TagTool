@@ -485,21 +485,21 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x34)]
         public class AmmoPackBlock : TagStructure
 		{
-            public uint Unknown;
-            public int Unknown2;
-            public int Unknown3;
-            public uint Unknown4;
-            public int Unknown5;
+            public float Radius;
+            public int ClipCount;
+            public int MaxUseTime;
+            public int DelayBetweenClips;
+            public int DeploymentDelay;
             public int Unknown6;
             public List<Weapon> Weapons;
-            public CachedTag Unknown7;
+            public CachedTag AmmoDeliverySound;
 
             [TagStructure(Size = 0x18)]
             public class Weapon : TagStructure
 			{
                 public StringId Name;
                 public CachedTag WeaponObject;
-                public int Unknown;
+                public int ClipSize;
             }
         }
 

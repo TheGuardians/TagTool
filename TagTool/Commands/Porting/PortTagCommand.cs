@@ -236,18 +236,18 @@ namespace TagTool.Commands.Porting
                 RenderMethod renderMethod = BlamCache.Deserialize<RenderMethod>(blamCacheStream, blamTag);
 
                 string templateName = renderMethod.ShaderProperties[0].Template.Name;
-                TagTool.Shaders.ShaderMatching.ShaderMatcherNew.Rmt2Descriptor.TryParse(templateName, out var rmt2Descriptor);
+                if(TagTool.Shaders.ShaderMatching.ShaderMatcherNew.Rmt2Descriptor.TryParse(templateName, out var rmt2Descriptor))
+                {
+                    foreach (var tag in CacheContext.TagCacheGenHO.TagTable)
+                        if (tag != null && tag.Group.Tag == "rmt2" && (tag.Name.Contains(rmt2Descriptor.Type) || FlagIsSet(PortingFlags.GenerateShaders)))
+                        {
+                            if ((FlagIsSet(PortingFlags.Ms30) && tag.Name.StartsWith("ms30\\")) || (!FlagIsSet(PortingFlags.Ms30) && !tag.Name.StartsWith("ms30\\")))
+                                return true;
 
-                foreach (var tag in CacheContext.TagCacheGenHO.TagTable)
-                    if (tag != null && tag.Group.Tag == "rmt2" && (tag.Name.Contains(rmt2Descriptor.Type) || FlagIsSet(PortingFlags.GenerateShaders)))
-                    {
-                        if ((FlagIsSet(PortingFlags.Ms30) && tag.Name.StartsWith("ms30\\")) || (!FlagIsSet(PortingFlags.Ms30) && !tag.Name.StartsWith("ms30\\")))
-                            return true;
-
-                        else if (tag.Name.StartsWith("ms30\\"))
-                            continue;
-                    }
-
+                            else if (tag.Name.StartsWith("ms30\\"))
+                                continue;
+                        }
+                };
                 // TODO: add code for "!MatchShaders" -- if a perfect match isnt found a null tag will be left in the cache
 
                 // "ConvertTagInternal" isnt called so the default shader needs to be set here
@@ -826,7 +826,18 @@ namespace TagTool.Commands.Porting
                     break;
 
 				case Bitmap bitm:
-					blamDefinition = ConvertBitmap(blamTag, bitm, resourceStreams);
+                    //support bitmap conversion for HO generation caches
+                    if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                    {
+                        for(var tex = 0; tex < bitm.HardwareTextures.Count; tex++)
+                        {
+                            var blamResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInteropResource(bitm.HardwareTextures[tex]);
+                            bitm.HardwareTextures[tex] = CacheContext.ResourceCache.CreateBitmapResource(blamResourceDefinition);
+                        }
+                        blamDefinition = bitm;
+                        break;
+                    }
+                    blamDefinition = ConvertBitmap(blamTag, bitm, resourceStreams);
 					break;
 
 				case CameraFxSettings cfxs:
@@ -1145,6 +1156,14 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case Sound sound:
+                    //support sound conversion for HO generation caches
+                    if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                    {
+                        var blamResourceDefinition = BlamCache.ResourceCache.GetSoundResourceDefinition(sound.Resource);
+                        sound.Resource = CacheContext.ResourceCache.CreateSoundResource(blamResourceDefinition);
+                        blamDefinition = sound;
+                        break;
+                    }
                     isDeferred = true;
                     blamDefinition = ConvertSound(cacheStream, blamCacheStream, resourceStreams, sound, edTag, blamTag.Name, (SoundConversionResult result) =>
                     {
@@ -1908,6 +1927,10 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version == CacheVersion.Halo3Retail)
 				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
 					throw new FormatException(BlamCache.Version.ToString());
+
+            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                if (!Enum.TryParse(objectType.HaloOnline.ToString(), out objectType.Halo3ODST))
+                    throw new FormatException(BlamCache.Version.ToString());
 
             if (BlamCache.Version >= CacheVersion.HaloReach)
                 if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))

@@ -438,6 +438,9 @@ namespace TagTool.Audio
                     break;
             }
 
+            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, from))
+                value = HaloOnline.ToString();
+
             // Fix class to match to equivalent ones
 
             if (value.Equals("Unused1Impacts") || value.Equals("WaterTransition"))

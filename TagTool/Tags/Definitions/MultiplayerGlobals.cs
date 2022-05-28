@@ -19,8 +19,11 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTag RandomPlayerNameStrings;
             public CachedTag TeamNameStrings;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
             public List<MultiplayerColor> TeamColors;
 
+            [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
             public List<CustomizedModelCharacter> CustomizableCharacters;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]

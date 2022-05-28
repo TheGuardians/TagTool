@@ -82,7 +82,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline571627)]
+            [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline604673)]
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline700123)]
             public class StateDatum : TagStructure
             {

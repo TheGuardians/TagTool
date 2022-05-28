@@ -13,6 +13,7 @@ using TagTool.Havok;
 using TagTool.Cache;
 using System.IO;
 using TagTool.IO;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -31,6 +32,7 @@ namespace TagTool.Commands.Porting.Gen2
         {
             ScenarioStructureBsp newSbsp = new ScenarioStructureBsp();
             newSbsp.UseResourceItems = 1; // use CollisionBspResource
+            newSbsp.ImportVersion = 7;
 
             //materials
             newSbsp.Materials = new List<RenderMaterial>();
@@ -65,17 +67,20 @@ namespace TagTool.Commands.Porting.Gen2
             //main collision geometry
             CollisionResource.CollisionBsps = new TagBlock<CollisionGeometry>(CacheAddressType.Definition);
 
+            int collisionEdgeCount = 0;
             foreach (var bsp in gen2Tag.CollisionBsp)
             {
-                bsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
-                bsp.Planes.AddressType = CacheAddressType.Data;
-                bsp.Leaves.AddressType = CacheAddressType.Data;
-                bsp.Bsp2dReferences.AddressType = CacheAddressType.Data;
-                bsp.Bsp2dNodes.AddressType = CacheAddressType.Data;
-                bsp.Surfaces.AddressType = CacheAddressType.Data;
-                bsp.Edges.AddressType = CacheAddressType.Data;
-                bsp.Vertices.AddressType = CacheAddressType.Data;
-                CollisionResource.CollisionBsps.Add(bsp);
+                var newBsp = ConvertCollisionGeometry(bsp);
+                newBsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
+                newBsp.Planes.AddressType = CacheAddressType.Data;
+                newBsp.Leaves.AddressType = CacheAddressType.Data;
+                newBsp.Bsp2dReferences.AddressType = CacheAddressType.Data;
+                newBsp.Bsp2dNodes.AddressType = CacheAddressType.Data;
+                newBsp.Surfaces.AddressType = CacheAddressType.Data;
+                newBsp.Edges.AddressType = CacheAddressType.Data;
+                newBsp.Vertices.AddressType = CacheAddressType.Data;
+                collisionEdgeCount = newBsp.Edges.Count;
+                CollisionResource.CollisionBsps.Add(newBsp);
             }
 
             //structure physics
@@ -154,6 +159,8 @@ namespace TagTool.Commands.Porting.Gen2
                 newSbsp.ClusterPortals.Add(newportal);
             }
 
+            List<Gen2BSPResourceMesh> Gen2Meshes = new List<Gen2BSPResourceMesh>();
+
             //cluster data
             newSbsp.Clusters = new List<ScenarioStructureBsp.Cluster>();
             foreach (var cluster in gen2Tag.Clusters)
@@ -193,6 +200,7 @@ namespace TagTool.Commands.Porting.Gen2
                     newmesh.Mesh.Parts[i].SubPartCount = clustermeshes[0].Parts[i].SubPartCount;
                     newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)clustermeshes[0].Parts[i].TypeOld;
                 }
+                Gen2Meshes.AddRange(clustermeshes);
 
                 //block values
                 var newcluster = new ScenarioStructureBsp.Cluster
@@ -269,6 +277,7 @@ namespace TagTool.Commands.Porting.Gen2
                     newmesh.Mesh.Parts[i].SubPartCount = instancemeshes[0].Parts[i].SubPartCount;
                     newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)instancemeshes[0].Parts[i].TypeOld;
                 }
+                Gen2Meshes.AddRange(instancemeshes);
 
                 //block values
                 var newinstance = new InstancedGeometryBlock
@@ -280,7 +289,7 @@ namespace TagTool.Commands.Porting.Gen2
                     MeshIndex = (short)(builder.Meshes.Count - 1),
                 };
 
-                var bsp = instanced.CollisionInfo;
+                var bsp = ConvertCollisionGeometry(instanced.CollisionInfo);
                 bsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
                 bsp.Planes.AddressType = CacheAddressType.Data;
                 bsp.Leaves.AddressType = CacheAddressType.Data;
@@ -326,7 +335,7 @@ namespace TagTool.Commands.Porting.Gen2
                     CompressionIndex = -1,
                     Name = instanced.Name,
                     WorldBoundingSphereCenter = instanced.WorldBoundingSphereCenter,
-                    BoundingSphereRadiusBounds = new Bounds<float>(0, instanced.BoundingSphereRadius),
+                    BoundingSphereRadiusBounds = new Bounds<float>(instanced.BoundingSphereRadius, instanced.BoundingSphereRadius),
                     PathfindingPolicy = (Scenery.PathfindingPolicyValue)instanced.PathfindingPolicy,
                     LightmappingPolicy = (InstancedGeometryInstance.InstancedGeometryLightmappingPolicy)instanced.LightmappingPolicy,
                 };
@@ -367,7 +376,10 @@ namespace TagTool.Commands.Porting.Gen2
             var pathfindingresource = new StructureBspCacheFileTagResources();
             pathfindingresource.Planes = new TagBlock<StructureSurfaceToTriangleMapping>(CacheAddressType.Data);
             pathfindingresource.SurfacePlanes = new TagBlock<StructureSurface>(CacheAddressType.Data);
-            pathfindingresource.EdgeToSeams = new TagBlock<EdgeToSeamMapping>(CacheAddressType.Data) { new EdgeToSeamMapping() { SeamIndex = -1, SeamEdgeIndex = -1 } };
+            pathfindingresource.EdgeToSeams = new TagBlock<EdgeToSeamMapping>(CacheAddressType.Data);
+            for (int i = 0; i < collisionEdgeCount; i++)
+                pathfindingresource.EdgeToSeams.Add(new EdgeToSeamMapping() { SeamIndex = -1, SeamEdgeIndex = -1 });
+
             pathfindingresource.PathfindingData = new TagBlock<Pathfinding.ResourcePathfinding>(CacheAddressType.Data);
 
             //write pathfinding resource
@@ -386,43 +398,234 @@ namespace TagTool.Commands.Porting.Gen2
 
             newSbsp.Geometry = meshbuild.Geometry;
 
+            //fixup per mesh visibility mopp
+            newSbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
+            newSbsp.Geometry.PerMeshSubpartVisibility = new List<RenderGeometry.PerMeshSubpartVisibilityBlock>();
+            for(var i = 0; i < Gen2Meshes.Count; i++)
+            {
+                Gen2BSPResourceMesh gen2mesh = Gen2Meshes[i];
+                //mesh visibility mopp and mopp reorder table
+                if(gen2mesh.VisibilityMoppCodeData.Length > 0 && gen2mesh.MoppReorderTable != null)
+                {
+                    newSbsp.Geometry.MeshClusterVisibility.Add(new RenderGeometry.MoppClusterVisiblity
+                    {
+                        MoppData = ConvertH2MoppData(gen2mesh.VisibilityMoppCodeData),
+                        UnknownMeshPartIndicesCount = gen2mesh.MoppReorderTable.Select(m => m.Index).ToList()
+                    });
+                }
+                //visibility bounds (approximate conversion)
+                for(var j = 0; j < gen2mesh.VisibilityBounds.Count; j++)
+                {
+                    newSbsp.Geometry.PerMeshSubpartVisibility.Add(new RenderGeometry.PerMeshSubpartVisibilityBlock
+                    {
+                        BoundingSpheres = new List<RenderGeometry.BoundingSphere> { new RenderGeometry.BoundingSphere
+                    {
+                        Position = gen2mesh.VisibilityBounds[j].Position,
+                        Radius = gen2mesh.VisibilityBounds[j].Radius,
+                        NodeIndices = new sbyte[]{ (sbyte)gen2mesh.VisibilityBounds[j].NodeIndex, 0, 0, 0}
+                    } }
+                    });
+                }
+
+            }
+
+            ConvertGen2EnvironmentMopp(newSbsp);
             return newSbsp;
         }
 
         public List<TagHkpMoppCode> ConvertH2MOPP(byte[] moppdata)
         {
-            RealQuaternion moppoffset;
+            var result = new List<TagHkpMoppCode>();
+
             using (var moppStream = new MemoryStream(moppdata))
             using (var moppReader = new EndianReader(moppStream, Gen2Cache.Endianness))
             {
-                moppoffset = new RealQuaternion(moppReader.ReadSingle(), moppReader.ReadSingle(), 
-                    moppReader.ReadSingle(), moppReader.ReadSingle());
-            };
-
-            byte[] newmoppdata = new byte[moppdata.Length - 48];
-            Array.Copy(moppdata, 48, newmoppdata, 0, newmoppdata.Length);
-
-            var result = new List<TagHkpMoppCode>
-            {
-                new TagHkpMoppCode
+                var context = new DataSerializationContext(moppReader);
+                var deserializer = new TagDeserializer(Gen2Cache.Version, Gen2Cache.Platform);
+                while(!moppReader.EOF)
                 {
-                    Info = new CodeInfo
+                    long startOffset = moppReader.Position;
+                    Havok.Gen2.MoppCodeHeader moppHeader = deserializer.Deserialize<Havok.Gen2.MoppCodeHeader>(context);
+                    byte[] moppCode = moppReader.ReadBytes((int)(moppHeader.Size - 0x30));
+                    moppReader.SeekTo((startOffset + moppHeader.Size) + 0xF & ~0xF);
+
+                    result.Add(new TagHkpMoppCode
                     {
-                        Offset = moppoffset
-                    },
-                    ArrayBase = new HkArrayBase
-                    {
-                        Size = (uint)newmoppdata.Length,
-                        CapacityAndFlags = (uint)(newmoppdata.Length | 0x80000000)
-                    },
-                    Data = new TagBlock<byte>(CacheAddressType.Data)
-                    {
-                        Elements = newmoppdata.ToList()
-                    }
+                        Info = new CodeInfo
+                        {
+                            Offset = moppHeader.Offset
+                        },
+                        ArrayBase = new HkArrayBase
+                        {
+                            Size = (uint)moppCode.Length,
+                            CapacityAndFlags = (uint)(moppCode.Length | 0x80000000)
+                        },
+                        Data = new TagBlock<byte>(CacheAddressType.Data)
+                        {
+                            Elements = moppCode.ToList()
+                        }
+                    });
                 }
-            };
+            }
 
             return result;
+        }
+
+        public byte[] ConvertH2MoppData(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+                return data;
+
+            byte[] result;
+            using (var inputReader = new EndianReader(new MemoryStream(data), CacheVersionDetection.IsLittleEndian(Gen2Cache.Version, Gen2Cache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+            using (var outputStream = new MemoryStream())
+            using (var outputWriter = new EndianWriter(outputStream, CacheVersionDetection.IsLittleEndian(Cache.Version, Cache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+            {
+                var dataContext = new DataSerializationContext(inputReader, outputWriter);
+                var deserializer = new TagDeserializer(Gen2Cache.Version, Gen2Cache.Platform);
+                var serializer = new TagSerializer(Cache.Version, Cache.Platform);
+                while (!inputReader.EOF)
+                {
+                    var header = deserializer.Deserialize<Havok.Gen2.MoppCodeHeader>(dataContext);
+                    var dataSize = header.Size - 0x30;
+                    var nextOffset = (inputReader.Position + dataSize) + 0xf & ~0xf;
+                    
+
+                    List<byte> moppCodes = new List<byte>();
+                    for (int j = 0; j < dataSize; j++)
+                    {
+                        moppCodes.Add(inputReader.ReadByte());
+                    }
+                    inputReader.SeekTo(nextOffset);
+
+                    var newHeader = new HkpMoppCode
+                    {
+                        Info = new CodeInfo
+                        {
+                            Offset = header.Offset
+                        },
+                        ArrayBase = new HkArrayBase
+                        {
+                            Size = (uint)moppCodes.Count,
+                            CapacityAndFlags = (uint)(moppCodes.Count | 0x80000000)
+                        }
+                    };
+
+                    serializer.Serialize(dataContext, newHeader);
+                    for (int j = 0; j < moppCodes.Count; j++)
+                        outputWriter.Write(moppCodes[j]);
+
+                    StreamUtil.Align(outputStream, 0x10);
+                }
+                result = outputStream.ToArray();
+            }
+            return result;
+        }
+
+        void ConvertGen2EnvironmentMopp(ScenarioStructureBsp sbsp)
+        {
+            if (sbsp.Physics.CollisionMoppCodes.Count == 0)
+                return;
+
+            var data = sbsp.Physics.CollisionMoppCodes[0].Data;
+            for (int i = 0; i < data.Count; i++)
+            {
+                switch (data[i])
+                {
+                    case 0x00: // HK_MOPP_RETURN
+                        break;
+                    case 0x05: // HK_MOPP_JUMP8
+                    case 0x09: // HK_MOPP_TERM_REOFFSET8
+                    case 0x50: // HK_MOPP_TERM8
+                    case 0x54: // HK_MOPP_NTERM_8
+                    case 0x60: // HK_MOPP_PROPERTY8_0
+                    case 0x61: // HK_MOPP_PROPERTY8_1
+                    case 0x62: // HK_MOPP_PROPERTY8_2
+                    case 0x63: // HK_MOPP_PROPERTY8_3
+                        i += 1;
+                        break;
+                    case 0x06: // HK_MOPP_JUMP16
+                    case 0x0A: // HK_MOPP_TERM_REOFFSET16
+                    case 0x0C: // HK_MOPP_JUMP_CHUNK
+                    case 0x20: // HK_MOPP_SINGLE_SPLIT_X
+                    case 0x21: // HK_MOPP_SINGLE_SPLIT_Y
+                    case 0x22: // HK_MOPP_SINGLE_SPLIT_Z
+                    case 0x26: // HK_MOPP_DOUBLE_CUT_X
+                    case 0x27: // HK_MOPP_DOUBLE_CUT_Y
+                    case 0x28: // HK_MOPP_DOUBLE_CUT_Z
+                    case 0x51: // HK_MOPP_TERM16
+                    case 0x55: // HK_MOPP_NTERM_16
+                    case 0x64: // HK_MOPP_PROPERTY16_0
+                    case 0x65: // HK_MOPP_PROPERTY16_1
+                    case 0x66: // HK_MOPP_PROPERTY16_2
+                    case 0x67: // HK_MOPP_PROPERTY16_3
+                        i += 2;
+                        break;
+                    case 0x01: // HK_MOPP_SCALE1
+                    case 0x02: // HK_MOPP_SCALE2
+                    case 0x03: // HK_MOPP_SCALE3
+                    case 0x04: // HK_MOPP_SCALE4
+                    case 0x07: // HK_MOPP_JUMP24
+                    case 0x10: // HK_MOPP_SPLIT_X
+                    case 0x11: // HK_MOPP_SPLIT_Y
+                    case 0x12: // HK_MOPP_SPLIT_Z
+                    case 0x13: // HK_MOPP_SPLIT_YZ
+                    case 0x14: // HK_MOPP_SPLIT_YMZ
+                    case 0x15: // HK_MOPP_SPLIT_XZ
+                    case 0x16: // HK_MOPP_SPLIT_XMZ
+                    case 0x17: // HK_MOPP_SPLIT_XY
+                    case 0x18: // HK_MOPP_SPLIT_XMY
+                    case 0x19: // HK_MOPP_SPLIT_XYZ
+                    case 0x1A: // HK_MOPP_SPLIT_XYMZ
+                    case 0x1B: // HK_MOPP_SPLIT_XMYZ
+                    case 0x1C: // HK_MOPP_SPLIT_XMYMZ
+                    case 0x52: // HK_MOPP_TERM24
+                    case 0x56: // HK_MOPP_NTERM_24
+                        i += 3;
+                        break;
+                    case 0x57: // HK_MOPP_NTERM_32
+                    case 0x68: // HK_MOPP_PROPERTY32_0
+                    case 0x69: // HK_MOPP_PROPERTY32_1
+                    case 0x6A: // HK_MOPP_PROPERTY32_2
+                    case 0x6B: // HK_MOPP_PROPERTY32_3
+                        i += 4;
+                        break;
+                    case 0x0D: // HK_MOPP_DATA_OFFSET
+                        i += 5;
+                        break;
+                    case 0x23: // HK_MOPP_SPLIT_JUMP_X
+                    case 0x24: // HK_MOPP_SPLIT_JUMP_Y
+                    case 0x25: // HK_MOPP_SPLIT_JUMP_Z
+                    case 0x29: // HK_MOPP_DOUBLE_CUT24_X
+                    case 0x2A: // HK_MOPP_DOUBLE_CUT24_Y
+                    case 0x2B: // HK_MOPP_DOUBLE_CUT24_Z
+                        i += 6;
+                        break;
+                    case byte op when op >= 0x30 && op <= 0x4F:
+                        break;
+                    case 0x0B: // HK_MOPP_TERM_REOFFSET32
+                    case 0x53: // HK_MOPP_TERM32
+                        int key = data[i + 4] + ((data[i + 3] + ((data[i + 2] + (data[i + 1] << 8)) << 8)) << 8);
+                        Console.WriteLine(key);
+                        key = ConvertShapeKey(key);
+                        data[i + 1] = (byte)((key & 0x7F000000) >> 24);
+                        data[i + 2] = (byte)((key & 0x00FF0000) >> 16);
+                        data[i + 3] = (byte)((key & 0x0000FF00) >> 8);
+                        data[i + 4] = (byte)(key & 0x000000FF);
+                        i += 4;
+                        break;
+                    default:
+                        throw new NotSupportedException($"Opcode 0x{data[i]:X2}");
+                }
+            }
+
+            int ConvertShapeKey(int key)
+            {
+                int type = key >> 29;
+                if (type == 1)
+                    key |= (5 << 26); // needed to pass group filter
+                return key;
+            }
         }
     }
 }
