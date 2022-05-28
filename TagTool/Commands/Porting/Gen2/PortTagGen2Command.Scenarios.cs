@@ -154,6 +154,8 @@ namespace TagTool.Commands.Porting.Gen2
                 newSbsp.ClusterPortals.Add(newportal);
             }
 
+            List<Gen2BSPResourceMesh> Gen2Meshes = new List<Gen2BSPResourceMesh>();
+
             //cluster data
             newSbsp.Clusters = new List<ScenarioStructureBsp.Cluster>();
             foreach (var cluster in gen2Tag.Clusters)
@@ -193,6 +195,7 @@ namespace TagTool.Commands.Porting.Gen2
                     newmesh.Mesh.Parts[i].SubPartCount = clustermeshes[0].Parts[i].SubPartCount;
                     newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)clustermeshes[0].Parts[i].TypeOld;
                 }
+                Gen2Meshes.AddRange(clustermeshes);
 
                 //block values
                 var newcluster = new ScenarioStructureBsp.Cluster
@@ -269,6 +272,7 @@ namespace TagTool.Commands.Porting.Gen2
                     newmesh.Mesh.Parts[i].SubPartCount = instancemeshes[0].Parts[i].SubPartCount;
                     newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)instancemeshes[0].Parts[i].TypeOld;
                 }
+                Gen2Meshes.AddRange(instancemeshes);
 
                 //block values
                 var newinstance = new InstancedGeometryBlock
@@ -385,6 +389,37 @@ namespace TagTool.Commands.Porting.Gen2
             */
 
             newSbsp.Geometry = meshbuild.Geometry;
+
+            //fixup per mesh visibility mopp
+            newSbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
+            newSbsp.Geometry.PerMeshSubpartVisibility = new List<RenderGeometry.PerMeshSubpartVisibilityBlock>();
+            for(var i = 0; i < Gen2Meshes.Count; i++)
+            {
+                Gen2BSPResourceMesh gen2mesh = Gen2Meshes[i];
+                //mesh visibility mopp and mopp reorder table
+                if(gen2mesh.VisibilityMoppCodeData.Length > 0 && gen2mesh.MoppReorderTable != null)
+                {
+                    newSbsp.Geometry.MeshClusterVisibility.Add(new RenderGeometry.MoppClusterVisiblity
+                    {
+                        MoppData = gen2mesh.VisibilityMoppCodeData,
+                        UnknownMeshPartIndicesCount = gen2mesh.MoppReorderTable.Select(m => m.Index).ToList()
+                    });
+                }
+                //visibility bounds (approximate conversion)
+                for(var j = 0; j < gen2mesh.VisibilityBounds.Count; j++)
+                {
+                    newSbsp.Geometry.PerMeshSubpartVisibility.Add(new RenderGeometry.PerMeshSubpartVisibilityBlock
+                    {
+                        BoundingSpheres = new List<RenderGeometry.BoundingSphere> { new RenderGeometry.BoundingSphere
+                    {
+                        Position = gen2mesh.VisibilityBounds[j].Position,
+                        Radius = gen2mesh.VisibilityBounds[j].Radius,
+                        NodeIndices = new sbyte[]{ (sbyte)gen2mesh.VisibilityBounds[j].NodeIndex, 0, 0, 0}
+                    } }
+                    });
+                }
+
+            }
 
             return newSbsp;
         }
