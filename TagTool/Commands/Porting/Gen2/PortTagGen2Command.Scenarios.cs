@@ -32,6 +32,7 @@ namespace TagTool.Commands.Porting.Gen2
         {
             ScenarioStructureBsp newSbsp = new ScenarioStructureBsp();
             newSbsp.UseResourceItems = 1; // use CollisionBspResource
+            newSbsp.ImportVersion = 7;
 
             //materials
             newSbsp.Materials = new List<RenderMaterial>();
@@ -288,7 +289,7 @@ namespace TagTool.Commands.Porting.Gen2
                     MeshIndex = (short)(builder.Meshes.Count - 1),
                 };
 
-                var bsp = instanced.CollisionInfo;
+                var bsp = ConvertCollisionGeometry(instanced.CollisionInfo);
                 bsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
                 bsp.Planes.AddressType = CacheAddressType.Data;
                 bsp.Leaves.AddressType = CacheAddressType.Data;
