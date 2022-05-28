@@ -429,6 +429,7 @@ namespace TagTool.Commands.Porting.Gen2
 
             }
 
+            ConvertGen2EnvironmentMopp(newSbsp);
             return newSbsp;
         }
 
@@ -519,6 +520,115 @@ namespace TagTool.Commands.Porting.Gen2
                 result = outputStream.ToArray();
             }
             return result;
+        }
+
+        void ConvertGen2EnvironmentMopp(ScenarioStructureBsp sbsp)
+        {
+            if (sbsp.InstancedGeometryInstances == null)
+                return;
+
+            if (sbsp.Physics.CollisionMoppCodes.Count == 0)
+                return;
+
+            var data = sbsp.Physics.CollisionMoppCodes[0].Data;
+            for (int i = 0; i < data.Count; i++)
+            {
+                switch (data[i])
+                {
+                    case 0x00: // HK_MOPP_RETURN
+                        break;
+                    case 0x05: // HK_MOPP_JUMP8
+                    case 0x09: // HK_MOPP_TERM_REOFFSET8
+                    case 0x50: // HK_MOPP_TERM8
+                    case 0x54: // HK_MOPP_NTERM_8
+                    case 0x60: // HK_MOPP_PROPERTY8_0
+                    case 0x61: // HK_MOPP_PROPERTY8_1
+                    case 0x62: // HK_MOPP_PROPERTY8_2
+                    case 0x63: // HK_MOPP_PROPERTY8_3
+                        i += 1;
+                        break;
+                    case 0x06: // HK_MOPP_JUMP16
+                    case 0x0A: // HK_MOPP_TERM_REOFFSET16
+                    case 0x0C: // HK_MOPP_JUMP_CHUNK
+                    case 0x20: // HK_MOPP_SINGLE_SPLIT_X
+                    case 0x21: // HK_MOPP_SINGLE_SPLIT_Y
+                    case 0x22: // HK_MOPP_SINGLE_SPLIT_Z
+                    case 0x26: // HK_MOPP_DOUBLE_CUT_X
+                    case 0x27: // HK_MOPP_DOUBLE_CUT_Y
+                    case 0x28: // HK_MOPP_DOUBLE_CUT_Z
+                    case 0x51: // HK_MOPP_TERM16
+                    case 0x55: // HK_MOPP_NTERM_16
+                    case 0x64: // HK_MOPP_PROPERTY16_0
+                    case 0x65: // HK_MOPP_PROPERTY16_1
+                    case 0x66: // HK_MOPP_PROPERTY16_2
+                    case 0x67: // HK_MOPP_PROPERTY16_3
+                        i += 2;
+                        break;
+                    case 0x01: // HK_MOPP_SCALE1
+                    case 0x02: // HK_MOPP_SCALE2
+                    case 0x03: // HK_MOPP_SCALE3
+                    case 0x04: // HK_MOPP_SCALE4
+                    case 0x07: // HK_MOPP_JUMP24
+                    case 0x10: // HK_MOPP_SPLIT_X
+                    case 0x11: // HK_MOPP_SPLIT_Y
+                    case 0x12: // HK_MOPP_SPLIT_Z
+                    case 0x13: // HK_MOPP_SPLIT_YZ
+                    case 0x14: // HK_MOPP_SPLIT_YMZ
+                    case 0x15: // HK_MOPP_SPLIT_XZ
+                    case 0x16: // HK_MOPP_SPLIT_XMZ
+                    case 0x17: // HK_MOPP_SPLIT_XY
+                    case 0x18: // HK_MOPP_SPLIT_XMY
+                    case 0x19: // HK_MOPP_SPLIT_XYZ
+                    case 0x1A: // HK_MOPP_SPLIT_XYMZ
+                    case 0x1B: // HK_MOPP_SPLIT_XMYZ
+                    case 0x1C: // HK_MOPP_SPLIT_XMYMZ
+                    case 0x52: // HK_MOPP_TERM24
+                    case 0x56: // HK_MOPP_NTERM_24
+                        i += 3;
+                        break;
+                    case 0x57: // HK_MOPP_NTERM_32
+                    case 0x68: // HK_MOPP_PROPERTY32_0
+                    case 0x69: // HK_MOPP_PROPERTY32_1
+                    case 0x6A: // HK_MOPP_PROPERTY32_2
+                    case 0x6B: // HK_MOPP_PROPERTY32_3
+                        i += 4;
+                        break;
+                    case 0x0D: // HK_MOPP_DATA_OFFSET
+                        i += 5;
+                        break;
+                    case 0x23: // HK_MOPP_SPLIT_JUMP_X
+                    case 0x24: // HK_MOPP_SPLIT_JUMP_Y
+                    case 0x25: // HK_MOPP_SPLIT_JUMP_Z
+                    case 0x29: // HK_MOPP_DOUBLE_CUT24_X
+                    case 0x2A: // HK_MOPP_DOUBLE_CUT24_Y
+                    case 0x2B: // HK_MOPP_DOUBLE_CUT24_Z
+                        i += 6;
+                        break;
+                    case byte op when op >= 0x30 && op <= 0x4F:
+                        break;
+                    case 0x0B: // HK_MOPP_TERM_REOFFSET32
+                    case 0x53: // HK_MOPP_TERM32
+                        int key = data[i + 4] + ((data[i + 3] + ((data[i + 2] + (data[i + 1] << 8)) << 8)) << 8);
+                        Console.WriteLine(key);
+                        key = ConvertShapeKey(key);
+                        data[i + 1] = (byte)((key & 0x7F000000) >> 24);
+                        data[i + 2] = (byte)((key & 0x00FF0000) >> 16);
+                        data[i + 3] = (byte)((key & 0x0000FF00) >> 8);
+                        data[i + 4] = (byte)(key & 0x000000FF);
+                        i += 4;
+                        break;
+                    default:
+                        throw new NotSupportedException($"Opcode 0x{data[i]:X2}");
+                }
+            }
+
+            int ConvertShapeKey(int key)
+            {
+                int type = key >> 29;
+                if (type == 1)
+                    key |= (5 << 26); // needed to pass group filter
+                return key;
+            }
         }
     }
 }
