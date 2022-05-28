@@ -429,6 +429,7 @@ namespace TagTool.Commands.Porting.Gen2
 
             }
 
+            GenerateInstanceBuckets(newSbsp);
             ConvertGen2EnvironmentMopp(newSbsp);
             return newSbsp;
         }
@@ -625,6 +626,41 @@ namespace TagTool.Commands.Porting.Gen2
                 if (type == 1)
                     key |= (5 << 26); // needed to pass group filter
                 return key;
+            }
+        }
+
+        void GenerateInstanceBuckets(ScenarioStructureBsp sbsp)
+        {
+            if (sbsp.InstancedGeometryInstances == null)
+                return;
+
+            for (int i = 0; i < sbsp.Clusters.Count; i++)
+            {
+                var cluster = sbsp.Clusters[i];
+                var clusterBounds = new RealRectangle3d(
+                    cluster.BoundsX.Lower, cluster.BoundsX.Upper,
+                    cluster.BoundsY.Lower, cluster.BoundsY.Upper,
+                    cluster.BoundsZ.Lower, cluster.BoundsZ.Upper);
+
+                var instanceBucket = new Mesh.InstancedBucketBlock() { Instances = new List<Mesh.InstancedBucketBlock.InstanceIndexBlock>() };
+                instanceBucket.MeshIndex = cluster.MeshIndex;
+                instanceBucket.DefinitionIndex = cluster.MeshIndex;
+
+                sbsp.Geometry.Meshes[cluster.MeshIndex].InstanceBuckets = new List<Mesh.InstancedBucketBlock>();
+                for (int j = 0; j < sbsp.InstancedGeometryInstances.Count; j++)
+                {
+                    var instance = sbsp.InstancedGeometryInstances[j];
+                    if (!instance.Flags.HasFlag(InstancedGeometryInstance.FlagsValue.Collidable))
+                        continue;
+                    // probably would be better to do a more accurate intersection test, but this is fine for now
+                    if (!MathHelper.SphereIntersectsRectangle3d(instance.WorldBoundingSphereCenter, instance.BoundingSphereRadiusBounds.Upper, clusterBounds))
+                        continue;
+
+                    instanceBucket.Instances.Add(new Mesh.InstancedBucketBlock.InstanceIndexBlock() { InstanceIndex = (short)j });
+                }
+
+                if (instanceBucket.Instances.Count > 0)
+                    sbsp.Geometry.Meshes[cluster.MeshIndex].InstanceBuckets.Add(instanceBucket);
             }
         }
     }
