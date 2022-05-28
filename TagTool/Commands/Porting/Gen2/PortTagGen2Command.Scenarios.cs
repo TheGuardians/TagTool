@@ -429,7 +429,7 @@ namespace TagTool.Commands.Porting.Gen2
 
             }
 
-            GenerateInstanceBuckets(newSbsp);
+            GenerateInstanceBuckets(newSbsp, CollisionResource);
             ConvertGen2EnvironmentMopp(newSbsp);
             return newSbsp;
         }
@@ -629,38 +629,39 @@ namespace TagTool.Commands.Porting.Gen2
             }
         }
 
-        void GenerateInstanceBuckets(ScenarioStructureBsp sbsp)
+        void GenerateInstanceBuckets(ScenarioStructureBsp sbsp, StructureBspTagResources resources)
         {
-            if (sbsp.InstancedGeometryInstances == null)
-                return;
-
             for (int i = 0; i < sbsp.Clusters.Count; i++)
             {
                 var cluster = sbsp.Clusters[i];
+                var clusterMesh = sbsp.Geometry.Meshes[cluster.MeshIndex];
                 var clusterBounds = new RealRectangle3d(
                     cluster.BoundsX.Lower, cluster.BoundsX.Upper,
                     cluster.BoundsY.Lower, cluster.BoundsY.Upper,
                     cluster.BoundsZ.Lower, cluster.BoundsZ.Upper);
 
-                var instanceBucket = new Mesh.InstancedBucketBlock() { Instances = new List<Mesh.InstancedBucketBlock.InstanceIndexBlock>() };
-                instanceBucket.MeshIndex = cluster.MeshIndex;
-                instanceBucket.DefinitionIndex = cluster.MeshIndex;
-
-                sbsp.Geometry.Meshes[cluster.MeshIndex].InstanceBuckets = new List<Mesh.InstancedBucketBlock>();
+                clusterMesh.InstanceBuckets = new List<Mesh.InstancedBucketBlock>();
                 for (int j = 0; j < sbsp.InstancedGeometryInstances.Count; j++)
                 {
                     var instance = sbsp.InstancedGeometryInstances[j];
-                    if (!instance.Flags.HasFlag(InstancedGeometryInstance.FlagsValue.Collidable))
-                        continue;
+                    var defintion = resources.InstancedGeometry[instance.DefinitionIndex];
+
                     // probably would be better to do a more accurate intersection test, but this is fine for now
                     if (!MathHelper.SphereIntersectsRectangle3d(instance.WorldBoundingSphereCenter, instance.BoundingSphereRadiusBounds.Upper, clusterBounds))
                         continue;
 
+                    var instanceBucket = clusterMesh.InstanceBuckets.FirstOrDefault(x => x.MeshIndex == defintion.MeshIndex && x.DefinitionIndex == instance.DefinitionIndex);
+                    if (instanceBucket == null)
+                    {
+                        instanceBucket = new Mesh.InstancedBucketBlock();
+                        instanceBucket.MeshIndex = defintion.MeshIndex;
+                        instanceBucket.DefinitionIndex = instance.DefinitionIndex;
+                        instanceBucket.Instances = new List<Mesh.InstancedBucketBlock.InstanceIndexBlock>();
+                        clusterMesh.InstanceBuckets.Add(instanceBucket);
+                    }
+
                     instanceBucket.Instances.Add(new Mesh.InstancedBucketBlock.InstanceIndexBlock() { InstanceIndex = (short)j });
                 }
-
-                if (instanceBucket.Instances.Count > 0)
-                    sbsp.Geometry.Meshes[cluster.MeshIndex].InstanceBuckets.Add(instanceBucket);
             }
         }
     }
