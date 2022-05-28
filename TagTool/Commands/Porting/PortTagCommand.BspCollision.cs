@@ -22,9 +22,10 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private TagResourceReference ConvertStructureBspTagResources(ScenarioStructureBsp bsp)
+        private TagResourceReference ConvertStructureBspTagResources(ScenarioStructureBsp bsp, out StructureBspTagResources outResourceDefinition)
         {
             StructureBspTagResources resourceDefinition = BlamCache.ResourceCache.GetStructureBspTagResources(bsp.CollisionBspResource);
+            outResourceDefinition = resourceDefinition;
 
             if (resourceDefinition == null)
                 return null;

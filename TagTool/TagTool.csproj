@@ -419,6 +419,7 @@
     <Compile Include="Common\NativeInterop.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\CollisionBSPGen3Builder.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\VerifyBsp3d.cs" />
+    <Compile Include="Geometry\Utils\InstanceBucketGenerator.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RealVector4d.cs" />

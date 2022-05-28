@@ -5,6 +5,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Geometry.BspCollisionGeometry;
+using TagTool.Geometry.Utils;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
@@ -82,7 +83,7 @@ namespace TagTool.Commands.Porting
             sbsp.DecoratorGeometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(decoratorGeometry);
             sbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(geometry);
 
-            sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp);
+            sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp, out StructureBspTagResources sbspTagResources);
             sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, instance);
             sbsp.UseResourceItems = 1;
 
@@ -107,7 +108,7 @@ namespace TagTool.Commands.Porting
             {
                 // Temporary fix for collision - prior to sbsp version 3, instance buckets were used for collision
                 sbsp.ImportVersion = 2;
-                GenerateInstanceBuckets(sbsp);
+                InstanceBucketGenerator.Generate(sbsp, sbspTagResources);
 
                 ConvertReachEnvironmentMopp(sbsp);
             }
@@ -144,40 +145,6 @@ namespace TagTool.Commands.Porting
             }
 
             return bspPhysics;
-        }
-
-        void GenerateInstanceBuckets(ScenarioStructureBsp sbsp)
-        {
-            if (sbsp.InstancedGeometryInstances == null)
-                return;
-
-            for (int i = 0; i < sbsp.Clusters.Count; i++)
-            {
-                var cluster = sbsp.Clusters[i];
-                var clusterBounds = new RealRectangle3d(
-                    cluster.BoundsX.Lower, cluster.BoundsX.Upper,
-                    cluster.BoundsY.Lower, cluster.BoundsY.Upper,
-                    cluster.BoundsZ.Lower, cluster.BoundsZ.Upper);
-
-                var instanceBucket = new Mesh.InstancedBucketBlock() { Instances = new List<Mesh.InstancedBucketBlock.InstanceIndexBlock>() };
-                instanceBucket.MeshIndex = cluster.MeshIndex;
-                instanceBucket.DefinitionIndex = cluster.MeshIndex;
-
-                for (int j = 0; j < sbsp.InstancedGeometryInstances.Count; j++)
-                {
-                    var instance = sbsp.InstancedGeometryInstances[j];
-                    if (!instance.Flags.HasFlag(InstancedGeometryInstance.FlagsValue.Collidable))
-                        continue;
-                    // probably would be better to do a more accurate intersection test, but this is fine for now
-                    if (!MathHelper.SphereIntersectsRectangle3d(instance.WorldBoundingSphereCenter, instance.BoundingSphereRadiusBounds.Upper, clusterBounds))
-                        continue;
-
-                    instanceBucket.Instances.Add(new Mesh.InstancedBucketBlock.InstanceIndexBlock() { InstanceIndex = (short)j });
-                }
-
-                if (instanceBucket.Instances.Count > 0)
-                    sbsp.Geometry.Meshes[cluster.MeshIndex].InstanceBuckets.Add(instanceBucket);
-            }
         }
 
         List<ScenarioStructureBsp.Cluster.DecoratorGrid> ConvertDecoratorGrid(List<TinyPositionVertex> vertices, ScenarioStructureBsp.Cluster.DecoratorGrid grid)
