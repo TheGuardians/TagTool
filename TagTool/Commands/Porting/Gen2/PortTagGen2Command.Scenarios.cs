@@ -408,7 +408,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     newSbsp.Geometry.MeshClusterVisibility.Add(new RenderGeometry.MoppClusterVisiblity
                     {
-                        MoppData = gen2mesh.VisibilityMoppCodeData,
+                        MoppData = ConvertH2MoppData(gen2mesh.VisibilityMoppCodeData),
                         UnknownMeshPartIndicesCount = gen2mesh.MoppReorderTable.Select(m => m.Index).ToList()
                     });
                 }
@@ -433,38 +433,90 @@ namespace TagTool.Commands.Porting.Gen2
 
         public List<TagHkpMoppCode> ConvertH2MOPP(byte[] moppdata)
         {
-            Havok.Gen2.MoppCodeHeader moppHeader;
-            byte[] moppData;
+            var result = new List<TagHkpMoppCode>();
 
             using (var moppStream = new MemoryStream(moppdata))
             using (var moppReader = new EndianReader(moppStream, Gen2Cache.Endianness))
             {
                 var context = new DataSerializationContext(moppReader);
                 var deserializer = new TagDeserializer(Gen2Cache.Version, Gen2Cache.Platform);
-                moppHeader = deserializer.Deserialize<Havok.Gen2.MoppCodeHeader>(context);
-                moppData = moppReader.ReadBytes((int)(moppHeader.Size - 0x30));
-            };
-
-            var result = new List<TagHkpMoppCode>
-            {
-                new TagHkpMoppCode
+                while(!moppReader.EOF)
                 {
-                    Info = new CodeInfo
-                    {
-                        Offset = moppHeader.Offset
-                    },
-                    ArrayBase = new HkArrayBase
-                    {
-                        Size = (uint)moppData.Length,
-                        CapacityAndFlags = (uint)(moppData.Length | 0x80000000)
-                    },
-                    Data = new TagBlock<byte>(CacheAddressType.Data)
-                    {
-                        Elements = moppData.ToList()
-                    }
-                }
-            };
+                    long startOffset = moppReader.Position;
+                    Havok.Gen2.MoppCodeHeader moppHeader = deserializer.Deserialize<Havok.Gen2.MoppCodeHeader>(context);
+                    byte[] moppCode = moppReader.ReadBytes((int)(moppHeader.Size - 0x30));
+                    moppReader.SeekTo((startOffset + moppHeader.Size) + 0xF & ~0xF);
 
+                    result.Add(new TagHkpMoppCode
+                    {
+                        Info = new CodeInfo
+                        {
+                            Offset = moppHeader.Offset
+                        },
+                        ArrayBase = new HkArrayBase
+                        {
+                            Size = (uint)moppCode.Length,
+                            CapacityAndFlags = (uint)(moppCode.Length | 0x80000000)
+                        },
+                        Data = new TagBlock<byte>(CacheAddressType.Data)
+                        {
+                            Elements = moppCode.ToList()
+                        }
+                    });
+                }
+            }
+
+            return result;
+        }
+
+        public byte[] ConvertH2MoppData(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+                return data;
+
+            byte[] result;
+            using (var inputReader = new EndianReader(new MemoryStream(data), CacheVersionDetection.IsLittleEndian(Gen2Cache.Version, Gen2Cache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+            using (var outputStream = new MemoryStream())
+            using (var outputWriter = new EndianWriter(outputStream, CacheVersionDetection.IsLittleEndian(Cache.Version, Cache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+            {
+                var dataContext = new DataSerializationContext(inputReader, outputWriter);
+                var deserializer = new TagDeserializer(Gen2Cache.Version, Gen2Cache.Platform);
+                var serializer = new TagSerializer(Cache.Version, Cache.Platform);
+                while (!inputReader.EOF)
+                {
+                    var header = deserializer.Deserialize<Havok.Gen2.MoppCodeHeader>(dataContext);
+                    var dataSize = header.Size - 0x30;
+                    var nextOffset = (inputReader.Position + dataSize) + 0xf & ~0xf;
+                    
+
+                    List<byte> moppCodes = new List<byte>();
+                    for (int j = 0; j < dataSize; j++)
+                    {
+                        moppCodes.Add(inputReader.ReadByte());
+                    }
+                    inputReader.SeekTo(nextOffset);
+
+                    var newHeader = new HkpMoppCode
+                    {
+                        Info = new CodeInfo
+                        {
+                            Offset = header.Offset
+                        },
+                        ArrayBase = new HkArrayBase
+                        {
+                            Size = (uint)moppCodes.Count,
+                            CapacityAndFlags = (uint)(moppCodes.Count | 0x80000000)
+                        }
+                    };
+
+                    serializer.Serialize(dataContext, newHeader);
+                    for (int j = 0; j < moppCodes.Count; j++)
+                        outputWriter.Write(moppCodes[j]);
+
+                    StreamUtil.Align(outputStream, 0x10);
+                }
+                result = outputStream.ToArray();
+            }
             return result;
         }
     }
