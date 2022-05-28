@@ -247,4 +247,18 @@ namespace TagTool.Havok.Gen2
     {
         public uint ShapeAddress;
     }
+
+    [TagStructure(Size = 0x30)]
+    public class MoppCodeHeader : TagStructure
+    {
+        public RealQuaternion Offset;
+        public int Unknown1;
+        public int Unknown2;
+        public int Unknown3;
+        public int Unknown4;
+        public uint Size;
+        public int Unknown6;
+        public int Unknown7;
+        public int Unknown8;
+    }
 }

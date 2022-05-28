@@ -13,6 +13,7 @@ using TagTool.Havok;
 using TagTool.Cache;
 using System.IO;
 using TagTool.IO;
+using TagTool.Serialization;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -432,16 +433,17 @@ namespace TagTool.Commands.Porting.Gen2
 
         public List<TagHkpMoppCode> ConvertH2MOPP(byte[] moppdata)
         {
-            RealQuaternion moppoffset;
+            Havok.Gen2.MoppCodeHeader moppHeader;
+            byte[] moppData;
+
             using (var moppStream = new MemoryStream(moppdata))
             using (var moppReader = new EndianReader(moppStream, Gen2Cache.Endianness))
             {
-                moppoffset = new RealQuaternion(moppReader.ReadSingle(), moppReader.ReadSingle(), 
-                    moppReader.ReadSingle(), moppReader.ReadSingle());
+                var context = new DataSerializationContext(moppReader);
+                var deserializer = new TagDeserializer(Gen2Cache.Version, Gen2Cache.Platform);
+                moppHeader = deserializer.Deserialize<Havok.Gen2.MoppCodeHeader>(context);
+                moppData = moppReader.ReadBytes((int)(moppHeader.Size - 0x30));
             };
-
-            byte[] newmoppdata = new byte[moppdata.Length - 48];
-            Array.Copy(moppdata, 48, newmoppdata, 0, newmoppdata.Length);
 
             var result = new List<TagHkpMoppCode>
             {
@@ -449,16 +451,16 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     Info = new CodeInfo
                     {
-                        Offset = moppoffset
+                        Offset = moppHeader.Offset
                     },
                     ArrayBase = new HkArrayBase
                     {
-                        Size = (uint)newmoppdata.Length,
-                        CapacityAndFlags = (uint)(newmoppdata.Length | 0x80000000)
+                        Size = (uint)moppData.Length,
+                        CapacityAndFlags = (uint)(moppData.Length | 0x80000000)
                     },
                     Data = new TagBlock<byte>(CacheAddressType.Data)
                     {
-                        Elements = newmoppdata.ToList()
+                        Elements = moppData.ToList()
                     }
                 }
             };
