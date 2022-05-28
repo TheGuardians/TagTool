@@ -65,17 +65,20 @@ namespace TagTool.Commands.Porting.Gen2
             //main collision geometry
             CollisionResource.CollisionBsps = new TagBlock<CollisionGeometry>(CacheAddressType.Definition);
 
+            int collisionEdgeCount = 0;
             foreach (var bsp in gen2Tag.CollisionBsp)
             {
-                bsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
-                bsp.Planes.AddressType = CacheAddressType.Data;
-                bsp.Leaves.AddressType = CacheAddressType.Data;
-                bsp.Bsp2dReferences.AddressType = CacheAddressType.Data;
-                bsp.Bsp2dNodes.AddressType = CacheAddressType.Data;
-                bsp.Surfaces.AddressType = CacheAddressType.Data;
-                bsp.Edges.AddressType = CacheAddressType.Data;
-                bsp.Vertices.AddressType = CacheAddressType.Data;
-                CollisionResource.CollisionBsps.Add(bsp);
+                var newBsp = ConvertCollisionGeometry(bsp);
+                newBsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
+                newBsp.Planes.AddressType = CacheAddressType.Data;
+                newBsp.Leaves.AddressType = CacheAddressType.Data;
+                newBsp.Bsp2dReferences.AddressType = CacheAddressType.Data;
+                newBsp.Bsp2dNodes.AddressType = CacheAddressType.Data;
+                newBsp.Surfaces.AddressType = CacheAddressType.Data;
+                newBsp.Edges.AddressType = CacheAddressType.Data;
+                newBsp.Vertices.AddressType = CacheAddressType.Data;
+                collisionEdgeCount = newBsp.Edges.Count;
+                CollisionResource.CollisionBsps.Add(newBsp);
             }
 
             //structure physics
@@ -371,7 +374,10 @@ namespace TagTool.Commands.Porting.Gen2
             var pathfindingresource = new StructureBspCacheFileTagResources();
             pathfindingresource.Planes = new TagBlock<StructureSurfaceToTriangleMapping>(CacheAddressType.Data);
             pathfindingresource.SurfacePlanes = new TagBlock<StructureSurface>(CacheAddressType.Data);
-            pathfindingresource.EdgeToSeams = new TagBlock<EdgeToSeamMapping>(CacheAddressType.Data) { new EdgeToSeamMapping() { SeamIndex = -1, SeamEdgeIndex = -1 } };
+            pathfindingresource.EdgeToSeams = new TagBlock<EdgeToSeamMapping>(CacheAddressType.Data);
+            for (int i = 0; i < collisionEdgeCount; i++)
+                pathfindingresource.EdgeToSeams.Add(new EdgeToSeamMapping() { SeamIndex = -1, SeamEdgeIndex = -1 });
+
             pathfindingresource.PathfindingData = new TagBlock<Pathfinding.ResourcePathfinding>(CacheAddressType.Data);
 
             //write pathfinding resource
