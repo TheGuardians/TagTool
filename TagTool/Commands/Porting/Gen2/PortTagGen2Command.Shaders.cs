@@ -126,6 +126,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                     break;
                 case "tex_bump_env":
+                case "tex_bump_env_clamped":
                     {
                         shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
                         shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
