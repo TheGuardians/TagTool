@@ -335,7 +335,7 @@ namespace TagTool.Commands.Porting.Gen2
                     CompressionIndex = -1,
                     Name = instanced.Name,
                     WorldBoundingSphereCenter = instanced.WorldBoundingSphereCenter,
-                    BoundingSphereRadiusBounds = new Bounds<float>(0, instanced.BoundingSphereRadius),
+                    BoundingSphereRadiusBounds = new Bounds<float>(instanced.BoundingSphereRadius, instanced.BoundingSphereRadius),
                     PathfindingPolicy = (Scenery.PathfindingPolicyValue)instanced.PathfindingPolicy,
                     LightmappingPolicy = (InstancedGeometryInstance.InstancedGeometryLightmappingPolicy)instanced.LightmappingPolicy,
                 };
@@ -524,9 +524,6 @@ namespace TagTool.Commands.Porting.Gen2
 
         void ConvertGen2EnvironmentMopp(ScenarioStructureBsp sbsp)
         {
-            if (sbsp.InstancedGeometryInstances == null)
-                return;
-
             if (sbsp.Physics.CollisionMoppCodes.Count == 0)
                 return;
 
