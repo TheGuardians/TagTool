@@ -65,21 +65,21 @@ namespace TagTool.Geometry
                         case VertexBufferFormat.World:
                             ConvertVertices(buffer.Definition.Count, inVertexStream.ReadWorldVertex, v =>
                             {
-                                v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
+                                //v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
                                 outVertexStream.WriteWorldVertex(v);
                             });
                             break;
                         case VertexBufferFormat.Rigid:
                             ConvertVertices(buffer.Definition.Count, inVertexStream.ReadRigidVertex, v =>
                             {
-                                v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
+                                //v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
                                 outVertexStream.WriteRigidVertex(v);
                             });
                             break;
                         case VertexBufferFormat.Skinned:
                             ConvertVertices(buffer.Definition.Count, inVertexStream.ReadSkinnedVertex, v =>
                             {
-                                v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
+                                //v.Binormal = new RealVector3d(v.Position.W, v.Tangent.W, 0); // Converted shaders use this
                                 outVertexStream.WriteSkinnedVertex(v);
                             });
                             break;

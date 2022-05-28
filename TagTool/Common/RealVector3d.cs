@@ -10,6 +10,8 @@ namespace TagTool.Common
         public float J { get; set; }
         public float K { get; set; }
 
+        public RealVector3d(RealVector3d xyz) : this(xyz.I, xyz.J, xyz.K) { }
+
         public RealVector3d(float x, float y, float z)
         {
             I = x;
@@ -163,5 +165,19 @@ namespace TagTool.Common
                 return new RealVector3d(0, 0, 0);
             return 1 / n * a;
         }
+
+        public static RealVector3d Frac(RealVector3d a)
+        {
+            RealVector3d result = new RealVector3d
+            {
+                I = a.I - (float)Math.Floor(a.I),
+                J = a.J - (float)Math.Floor(a.J),
+                K = a.K - (float)Math.Floor(a.K)
+            };
+
+            return result;
+        }
+
+        public RealVector3d ConvertRange() => new RealVector3d(this * 2.0f - 1.0f);
     }
 }
