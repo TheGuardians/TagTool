@@ -808,7 +808,7 @@ namespace TagTool.Commands.Porting.Gen2
             },
             new[] // 0x2F lightmap_bucket_vertex.incident_direction
             {
-                ("IncidentRadiosity", VertexDeclarationUsage.Color, VertexDeclarationType.HenD3N, 1),
+                ("IncidentRadiosity", VertexDeclarationUsage.Color, VertexDeclarationType.Float3, 1),
             },
             new[] // 0x30
             {

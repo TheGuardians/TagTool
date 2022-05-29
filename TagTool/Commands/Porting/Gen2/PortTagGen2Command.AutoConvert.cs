@@ -80,6 +80,7 @@ namespace TagTool.Commands.Porting.Gen2
                 }
             }
         }
+
         public void TranslateList(object input, object output)
         {
             if (input == null || output == null)
@@ -128,6 +129,20 @@ namespace TagTool.Commands.Porting.Gen2
                 output = (T)Enum.Parse(enumType, setstring, true);
 
             return result;
+        }
+
+        public void InitTagBlocks(object input)
+        {
+            var inputtype = input.GetType();
+            var inputinfo = TagStructure.GetTagStructureInfo(inputtype, Cache.Version, Cache.Platform);
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(inputinfo.Types[0], inputinfo.Version, inputinfo.CachePlatform))
+            {
+                if (tagFieldInfo.FieldType.IsGenericType && tagFieldInfo.FieldType.GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    object newlist = Activator.CreateInstance(tagFieldInfo.FieldType);
+                    tagFieldInfo.SetValue(input, newlist);
+                }
+            }
         }
     }
 }

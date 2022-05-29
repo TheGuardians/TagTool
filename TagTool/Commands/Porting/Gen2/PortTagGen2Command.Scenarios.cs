@@ -20,23 +20,228 @@ namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
 	{
-        public object ConvertScenario(object gen2Tag)
+        public TagStructure ConvertScenario(TagTool.Tags.Definitions.Gen2.Scenario gen2Tag, TagTool.Tags.Definitions.Gen2.Scenario rawgen2Tag, string scenarioPath, Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             Scenario newScenario = new Scenario();
+            InitTagBlocks(newScenario);
+
+            //default values for now, pulled from valhalla
+            Cache.TagCache.TryGetTag<Wind>(@"levels\multi\riverworld\wind_riverworld", out var windTag);
+            Cache.TagCache.TryGetTag<Bitmap>(@"levels\multi\riverworld\riverworld_riverworld_cubemaps", out var cubemapsTag);
+            Cache.TagCache.TryGetTag<CameraFxSettings>(@"levels\multi\riverworld\riverworld", out var cfxsTag);
+            Cache.TagCache.TryGetTag<SkyAtmParameters>(@"levels\multi\riverworld\sky\riverworld", out var skyaTag);
+            Cache.TagCache.TryGetTag<ChocolateMountainNew>(@"levels\multi\riverworld\riverworld", out var chmtTag);
+            Cache.TagCache.TryGetTag<PerformanceThrottles>(@"levels\multi\riverworld\riverworld", out var perfTag);
+
+            newScenario.DefaultCameraFx = cfxsTag;
+            newScenario.SkyParameters = skyaTag;
+            newScenario.GlobalLighting = chmtTag;
+            newScenario.PerformanceThrottles = perfTag;
+
+            //lightmaps
+            var sldtTag = Cache.TagCache.AllocateTag<ScenarioLightmapBspData>($"{scenarioPath}_faux_lightmap");
+            var sldt = new ScenarioLightmap();
+            sldt.LightmapDataReferences = new List<ScenarioLightmap.DataReferenceBlock>();
+            for (var i = 0; i < gen2Tag.StructureBsps.Count; i++)
+            {
+                var lbsp = new ScenarioLightmapBspData();
+                lbsp.BspIndex = (short)i;
+                var lbspTag = Cache.TagCache.AllocateTag<ScenarioLightmapBspData>($"{scenarioPath}_faux_lightmap_bsp_data_{i}");
+                Cache.Serialize(cacheStream, lbspTag, lbsp);
+                sldt.LightmapDataReferences.Add(new ScenarioLightmap.DataReferenceBlock() { LightmapBspData = lbspTag });
+            }
+            Cache.Serialize(cacheStream, sldtTag, sldt);
+
+            //mapid and type
+            newScenario.MapType = (ScenarioMapType)gen2Tag.Type;
+            switch (newScenario.MapType)
+            {
+                case ScenarioMapType.Multiplayer:
+                    newScenario.MapId = gen2Tag.LevelData[0].Multiplayer[0].MapId;
+                    newScenario.CampaignId = -1;
+                    break;
+                case ScenarioMapType.SinglePlayer:
+                    newScenario.MapId = gen2Tag.LevelData[0].CampaignLevelData[0].MapId;
+                    newScenario.CampaignId = gen2Tag.LevelData[0].CampaignLevelData[0].CampaignId;
+                    break;
+            }
+
+            //default starting profile
+            newScenario.PlayerStartingProfile.Add(new Scenario.PlayerStartingProfileBlock
+            {
+                Name = "start_assault",
+                PrimaryWeapon = Cache.TagCacheGenHO.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle.weapon"),
+                PrimaryRoundsLoaded = 32,
+                PrimaryRoundsTotal = 108,
+                StartingFragGrenadeCount = 2
+            });
+
+            //soft surfaces
+            newScenario.SoftSurfaces = new List<Scenario.SoftSurfaceBlock> { new Scenario.SoftSurfaceBlock() };
+
+            //player starting locations
+            foreach(var startlocation in gen2Tag.PlayerStartingLocations)
+            {
+                newScenario.PlayerStartingLocations.Add(new Scenario.PlayerStartingLocation
+                {
+                    Position = startlocation.Position,
+                    Facing = new RealEulerAngles2d(startlocation.Facing, Angle.FromDegrees(0.0f)),
+                    EditorFolderIndex = -1
+                });
+            }
+
+            newScenario.ZoneSetPvs.Add(new Scenario.ZoneSetPvsBlock());
+            newScenario.ZoneSets.Add(new Scenario.ZoneSet
+            {
+                Name = Cache.StringTable.GetStringId("default"),
+                AudibilityIndex = -1
+            });
+            for (var i = 0; i < gen2Tag.StructureBsps.Count; i++)
+            {
+                ScenarioStructureBsp currentbsp = Cache.Deserialize<ScenarioStructureBsp>(cacheStream, gen2Tag.StructureBsps[i].StructureBsp);
+
+                //bsps
+                newScenario.StructureBsps.Add(new Scenario.StructureBspBlock
+                {
+                    StructureBsp = gen2Tag.StructureBsps[i].StructureBsp,
+                    Flags = 32,
+                    DefaultSkyIndex = -1,
+                    Cubemap = cubemapsTag,
+                    Wind = windTag
+                });
+
+                //zoneset pvs
+                newScenario.ZoneSetPvs[0].StructureBspMask = (Scenario.BspFlags)(((int)newScenario.ZoneSetPvs[0].StructureBspMask) | (1 << i));
+                newScenario.ZoneSetPvs[0].StructureBspPvs = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock>();
+                newScenario.ZoneSetPvs[0].StructureBspPvs.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock());
+                InitTagBlocks(newScenario.ZoneSetPvs[0].StructureBspPvs[i]);
+
+                int pvsbits = 0;
+                for(var k = 0; k < currentbsp.Clusters.Count; k++)
+                {
+                    pvsbits |= 1 << k;
+                }
+
+                for (var j = 0; j < currentbsp.Clusters.Count; j++)
+                {
+                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].ClusterPvs.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock
+                    {
+                        ClusterPvsBitVectors = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock>
+                        {
+                            new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock
+                            {
+                                Bits = new List<Scenario.ZoneSetPvsBlock.BitVectorDword>
+                                {
+                                    new Scenario.ZoneSetPvsBlock.BitVectorDword
+                                    {
+                                        Bits = (Scenario.ZoneSetPvsBlock.BitVectorDword.DwordBits)pvsbits
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].ClusterPvsDoorsClosed.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock
+                    {
+                        ClusterPvsBitVectors = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock>
+                        {
+                            new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock
+                            {
+                                Bits = new List<Scenario.ZoneSetPvsBlock.BitVectorDword>
+                                {
+                                    new Scenario.ZoneSetPvsBlock.BitVectorDword
+                                    {
+                                        Bits = (Scenario.ZoneSetPvsBlock.BitVectorDword.DwordBits)pvsbits
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].AttachedSkyIndices.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock());
+                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].VisibleSkyIndices.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock());
+                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].ClusterMappings.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping());
+                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].ClusterAudioBitvector.Add(new Scenario.ZoneSetPvsBlock.BitVectorDword());
+                }
+
+                //zonesets
+                newScenario.ZoneSets[0].Bsps = (Scenario.BspFlags)((int)newScenario.ZoneSets[0].Bsps | (1 << i));
+                newScenario.ZoneSetPvs[0].PortaldeviceMapping = new List<Scenario.ZoneSetPvsBlock.PortalDeviceMappingBlock> 
+                { 
+                    new Scenario.ZoneSetPvsBlock.PortalDeviceMappingBlock()
+                };
+            }
+
+            //skies
+            int bspbits = 0;
+            for (var b = 0; b < gen2Tag.StructureBsps.Count; b++)
+            {
+                bspbits |= 1 << b;
+            }
+            foreach (var gen2sky in rawgen2Tag.Skies)
+            {
+                string skytagname = gen2sky.Sky.Name;
+                var gen2skytag = Gen2Cache.Deserialize<TagTool.Tags.Definitions.Gen2.Sky>(gen2CacheStream, gen2sky.Sky);
+                var skymodetag = ConvertTag(cacheStream, gen2CacheStream, resourceStreams, gen2skytag.RenderModel);
+                var newmodel = new Model
+                {
+                    RenderModel = skymodetag
+                };
+                CachedTag newmodeltag = Cache.TagCache.AllocateTag<Model>($"{skytagname}");
+                Cache.Serialize(cacheStream, newmodeltag, newmodel);
+                var newscen = new Scenery
+                {
+                    BoundingRadius = 5555.0f,
+                    ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery},
+                    Model = newmodeltag
+                };
+                CachedTag newscentag = Cache.TagCache.AllocateTag<Scenery>($"{skytagname}");
+                Cache.Serialize(cacheStream, newscentag, newscen);
+                newScenario.SkyReferences.Add(new Scenario.SkyReference
+                {
+                    SkyObject = newscentag,
+                    NameIndex = -1,
+                    ActiveBsps = (Scenario.BspShortFlags)bspbits
+                });
+            }
+
+            //scenery
+            foreach(var scenpal in gen2Tag.SceneryPalette)
+            {
+                newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = scenpal.Name
+                });
+            }
+            for(var scenobjindex = 0; scenobjindex < gen2Tag.Scenery.Count; scenobjindex++)
+            {
+                var scenobj = gen2Tag.Scenery[scenobjindex];
+                newScenario.Scenery.Add(new Scenario.SceneryInstance
+                {
+                    PaletteIndex = scenobj.Type,
+                    NameIndex = scenobj.Name,
+                    PlacementFlags = (Scenario.ObjectPlacementFlags)scenobj.ObjectData.PlacementFlags,
+                    Position = scenobj.ObjectData.Position,
+                    Rotation = scenobj.ObjectData.Rotation,
+                    Scale = scenobj.ObjectData.Scale,
+                    Source = (Scenario.ScenarioInstance.SourceValue)scenobj.ObjectData.ObjectId.Source,
+                    UniqueHandle = new DatumHandle((uint)scenobj.ObjectData.ObjectId.UniqueId),
+                    EditorFolder = -1
+                });
+                newScenario.Scenery[scenobjindex].ObjectType = new ScenarioObjectType { Halo3ODST = new GameObjectTypeHalo3ODST()};
+                TranslateEnum(scenobj.ObjectData.ObjectId.Type, out newScenario.Scenery[scenobjindex].ObjectType.Halo3ODST, newScenario.Scenery[scenobjindex].ObjectType.Halo3ODST.GetType());
+            }
             
-
-
             return newScenario;
         }
 
-        public TagStructure ConvertStructureBSP(TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp gen2Tag, Stream cacheStream, string tagname)
+        public TagStructure ConvertStructureBSP(TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp gen2Tag)
         {
             ScenarioStructureBsp newSbsp = new ScenarioStructureBsp();
             newSbsp.UseResourceItems = 1; // use CollisionBspResource
             newSbsp.ImportVersion = 7;
 
+            InitTagBlocks(newSbsp);
+
             //materials
-            newSbsp.Materials = new List<RenderMaterial>();
             foreach(var material in gen2Tag.Materials)
             {
                 newSbsp.Materials.Add(new RenderMaterial
@@ -46,7 +251,6 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //collision materials
-            newSbsp.CollisionMaterials = new List<ScenarioStructureBsp.CollisionMaterial>();
             foreach (var material in gen2Tag.CollisionMaterials)
             {
                 newSbsp.CollisionMaterials.Add(new ScenarioStructureBsp.CollisionMaterial
@@ -94,21 +298,12 @@ namespace TagTool.Commands.Porting.Gen2
             byte[] moppdata = gen2Tag.StructurePhysics.MoppCode;
             newSbsp.Physics.CollisionMoppCodes = ConvertH2MOPP(moppdata);
 
-            /*
-            var moppCode = HavokMoppGenerator.GenerateMoppCode(gen2Tag.CollisionBsp[0]);
-            if (moppCode == null)
-                new TagToolError(CommandError.OperationFailed, "Failed to generate mopp code!");
-            moppCode.Data.AddressType = CacheAddressType.Data;
-            newSbsp.Physics.CollisionMoppCodes.Add(moppCode);
-            */
-
             //world bounds
             newSbsp.WorldBoundsX = gen2Tag.WorldBoundsX;
             newSbsp.WorldBoundsY = gen2Tag.WorldBoundsY;
             newSbsp.WorldBoundsZ = gen2Tag.WorldBoundsZ;
 
             //leaves
-            newSbsp.Leaves = new List<ScenarioStructureBsp.Leaf>();
             foreach(var leaf in gen2Tag.Leaves)
             {
                 newSbsp.Leaves.Add(new ScenarioStructureBsp.Leaf
@@ -118,7 +313,6 @@ namespace TagTool.Commands.Porting.Gen2
             };
 
             //transparent planes
-            newSbsp.TransparentPlanes = new List<ScenarioStructureBsp.TransparentPlane>();
             foreach(var plane in gen2Tag.TransparentPlanes)
             {
                 newSbsp.TransparentPlanes.Add(new ScenarioStructureBsp.TransparentPlane
@@ -137,7 +331,6 @@ namespace TagTool.Commands.Porting.Gen2
                 };
 
             //cluster portals
-            newSbsp.ClusterPortals = new List<ScenarioStructureBsp.ClusterPortal>();
             foreach(var portal in gen2Tag.ClusterPortals)
             {
                 var newportal = new ScenarioStructureBsp.ClusterPortal
@@ -163,7 +356,6 @@ namespace TagTool.Commands.Porting.Gen2
             List<Gen2BSPResourceMesh> Gen2Meshes = new List<Gen2BSPResourceMesh>();
 
             //cluster data
-            newSbsp.Clusters = new List<ScenarioStructureBsp.Cluster>();
             foreach (var cluster in gen2Tag.Clusters)
             {
                 //render geometry
@@ -306,22 +498,12 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     var mopps = ConvertH2MOPP(instanced.BspPhysics[0].MoppCodeData);
                     newinstance.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition, mopps);
-
-                    /*
-                    var mopp = HavokMoppGenerator.GenerateMoppCode(newinstance.CollisionInfo);
-                    if (mopp == null)
-                        new TagToolError(CommandError.OperationFailed, "Failed to generate mopp code!");
-                    mopp.Data.AddressType = CacheAddressType.Data;
-                    newinstance.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition);
-                    newinstance.CollisionMoppCodes.Add(mopp);
-                    */
                 }
 
                 CollisionResource.InstancedGeometry.Add(newinstance);
             }
 
             //instanced geometry instances
-            newSbsp.InstancedGeometryInstances = new List<InstancedGeometryInstance>();
             foreach (var instanced in gen2Tag.InstancedGeometryInstances)
             {
                 var newinstance = new InstancedGeometryInstance
@@ -389,14 +571,6 @@ namespace TagTool.Commands.Porting.Gen2
             //write collision resource
             newSbsp.CollisionBspResource = Cache.ResourceCache.CreateStructureBspResource(CollisionResource);
             //write meshes and render model resource
-
-            /*
-            var lbsp = new ScenarioLightmapBspData();
-            lbsp.Geometry = meshbuild.Geometry;
-            var destinationTag = Cache.TagCache.AllocateTag(lbsp.GetType(), tagname);
-            Cache.Serialize(cacheStream, destinationTag, lbsp);
-            */
-
             newSbsp.Geometry = meshbuild.Geometry;
 
             //fixup per mesh visibility mopp
@@ -608,7 +782,6 @@ namespace TagTool.Commands.Porting.Gen2
                     case 0x0B: // HK_MOPP_TERM_REOFFSET32
                     case 0x53: // HK_MOPP_TERM32
                         int key = data[i + 4] + ((data[i + 3] + ((data[i + 2] + (data[i + 1] << 8)) << 8)) << 8);
-                        Console.WriteLine(key);
                         key = ConvertShapeKey(key);
                         data[i + 1] = (byte)((key & 0x7F000000) >> 24);
                         data[i + 2] = (byte)((key & 0x00FF0000) >> 16);
