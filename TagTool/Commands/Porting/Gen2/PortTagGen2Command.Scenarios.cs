@@ -382,24 +382,29 @@ namespace TagTool.Commands.Porting.Gen2
                     clustermeshes = new List<Gen2BSPResourceMesh> { clustermeshes.First() };
                 }
 
-                BuildMeshes(builder, clustermeshes, (RenderGeometryClassification)cluster.SectionInfo.GeometryClassification,
-                    cluster.SectionInfo.OpaqueMaxNodesVertex, 0);
-
-                //fixup mesh part fields
-                var newmesh = builder.Meshes.Last();
-                for (var i = 0; i < newmesh.Mesh.Parts.Count; i++)
+                int newmeshindex = -1;
+                if(clustermeshes.Count > 0)
                 {
-                    newmesh.Mesh.Parts[i].FirstSubPartIndex = clustermeshes[0].Parts[i].FirstSubPartIndex;
-                    newmesh.Mesh.Parts[i].SubPartCount = clustermeshes[0].Parts[i].SubPartCount;
-                    newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)clustermeshes[0].Parts[i].TypeOld;
+                    BuildMeshes(builder, clustermeshes, (RenderGeometryClassification)cluster.SectionInfo.GeometryClassification,
+                        cluster.SectionInfo.OpaqueMaxNodesVertex, 0);
+
+                    //fixup mesh part fields
+                    var newmesh = builder.Meshes.Last();
+                    for (var i = 0; i < newmesh.Mesh.Parts.Count; i++)
+                    {
+                        newmesh.Mesh.Parts[i].FirstSubPartIndex = clustermeshes[0].Parts[i].FirstSubPartIndex;
+                        newmesh.Mesh.Parts[i].SubPartCount = clustermeshes[0].Parts[i].SubPartCount;
+                        newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)clustermeshes[0].Parts[i].TypeOld;
+                    }
+                    Gen2Meshes.AddRange(clustermeshes);
+                    newmeshindex = Gen2Meshes.Count - 1;
                 }
-                Gen2Meshes.AddRange(clustermeshes);
 
                 //block values
                 var newcluster = new ScenarioStructureBsp.Cluster
                 {
                     //mesh that was just built
-                    MeshIndex = (short)(builder.Meshes.Count - 1),
+                    MeshIndex = (short)newmeshindex,
                     BoundsX = cluster.BoundsX,
                     BoundsY = cluster.BoundsY,
                     BoundsZ = cluster.BoundsZ,
@@ -458,19 +463,24 @@ namespace TagTool.Commands.Porting.Gen2
                     new TagToolWarning("instance had >1 render mesh! Culling extras...");
                     instancemeshes = new List<Gen2BSPResourceMesh> { instancemeshes.First() };
                 }
-                
-                BuildMeshes(builder, instancemeshes, (RenderGeometryClassification)instanced.RenderInfo.SectionInfo.GeometryClassification, 
+
+                int newmeshindex = -1;
+                if(instancemeshes.Count > 0)
+                {
+                    BuildMeshes(builder, instancemeshes, (RenderGeometryClassification)instanced.RenderInfo.SectionInfo.GeometryClassification,
                     instanced.RenderInfo.SectionInfo.OpaqueMaxNodesVertex, 0);
 
-                //fixup mesh part fields
-                var newmesh = builder.Meshes.Last();
-                for(var i = 0; i < newmesh.Mesh.Parts.Count; i++)
-                {
-                    newmesh.Mesh.Parts[i].FirstSubPartIndex = instancemeshes[0].Parts[i].FirstSubPartIndex;
-                    newmesh.Mesh.Parts[i].SubPartCount = instancemeshes[0].Parts[i].SubPartCount;
-                    newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)instancemeshes[0].Parts[i].TypeOld;
-                }
-                Gen2Meshes.AddRange(instancemeshes);
+                    //fixup mesh part fields
+                    var newmesh = builder.Meshes.Last();
+                    for (var i = 0; i < newmesh.Mesh.Parts.Count; i++)
+                    {
+                        newmesh.Mesh.Parts[i].FirstSubPartIndex = instancemeshes[0].Parts[i].FirstSubPartIndex;
+                        newmesh.Mesh.Parts[i].SubPartCount = instancemeshes[0].Parts[i].SubPartCount;
+                        newmesh.Mesh.Parts[i].TypeNew = (Part.PartTypeNew)instancemeshes[0].Parts[i].TypeOld;
+                    }
+                    Gen2Meshes.AddRange(instancemeshes);
+                    newmeshindex = Gen2Meshes.Count - 1;
+                }         
 
                 //block values
                 var newinstance = new InstancedGeometryBlock
@@ -479,7 +489,7 @@ namespace TagTool.Commands.Porting.Gen2
                     BoundingSphereOffset = instanced.BoundingSphereCenter,
                     BoundingSphereRadius = instanced.BoundingSphereRadius,
                     //index of mesh just builts
-                    MeshIndex = (short)(builder.Meshes.Count - 1),
+                    MeshIndex = (short)newmeshindex,
                 };
 
                 var bsp = ConvertCollisionGeometry(instanced.CollisionInfo);
