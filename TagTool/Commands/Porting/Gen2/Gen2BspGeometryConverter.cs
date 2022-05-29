@@ -169,6 +169,9 @@ namespace TagTool.Commands.Porting.Gen2
                 var dataContext = new DataSerializationContext(reader);
                 var mesh = Gen2Cache.Deserializer.Deserialize<Gen2BSPResourceMesh>(dataContext);
 
+                if (mesh == null)
+                    return new List<Gen2BSPResourceMesh>();
+
                 meshes.Add(mesh);
                 mesh.RawVertices = new List<Gen2BSPResourceMesh.RawVertex>(vertexcount);
 

@@ -10,6 +10,7 @@ using TagTool.Commands.Porting;
 using TagTool.IO;
 using TagTool.Tags;
 using TagTool.Tags.Definitions.Gen2;
+using TagTool.BlamFile;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -107,7 +108,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "proj",
                 "trak",
                 "shad",
-                "sbsp"
+                "sbsp",
+                "scnr"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -175,11 +177,15 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
                 case Shader shader:
                     //preserve a copy of unconverted data
-                    object h2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
-                    definition = ConvertShader(shader, (Shader)h2definition, cacheStream);
+                    Shader oldshader = Gen2Cache.Deserialize<Shader>(gen2CacheStream, gen2Tag);
+                    definition = ConvertShader(shader, oldshader, cacheStream);
                     break;
                 case ScenarioStructureBsp sbsp:
-                    definition = ConvertStructureBSP(sbsp, cacheStream, gen2Tag.Name);
+                    definition = ConvertStructureBSP(sbsp);
+                    break;
+                case Scenario scnr:
+                    Scenario oldscnr = Gen2Cache.Deserialize<Scenario>(gen2CacheStream, gen2Tag);
+                    definition = ConvertScenario(scnr, oldscnr, gen2Tag.Name, cacheStream, gen2CacheStream, resourceStreams);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
@@ -193,25 +199,59 @@ namespace TagTool.Commands.Porting.Gen2
             if (destinationTag == null)
                 destinationTag = Cache.TagCache.AllocateTag(definition.GetType(), gen2Tag.Name);
 
-            definition = PostFixups(definition, destinationTag);
-
             Cache.Serialize(cacheStream, destinationTag, definition);
+
+            PostFixups(definition, destinationTag, cacheStream);
 
             Console.WriteLine($"['{destinationTag.Group.Tag}', 0x{destinationTag.Index:X4}] {destinationTag}");
 
             return destinationTag;
         }
 
-        public TagStructure PostFixups(TagStructure definition, CachedTag destinationTag)
+        public void PostFixups(TagStructure definition, CachedTag destinationTag, Stream cacheStream)
         {
             switch (definition)
             {
                 case TagTool.Tags.Definitions.ScenarioStructureBsp sbsp:
                     foreach (var cluster in sbsp.Clusters)
                         cluster.InstancedGeometryPhysics.StructureBsp = destinationTag;
-                    return definition;
+                    break;
+                case TagTool.Tags.Definitions.Scenario scnr:
+                    GenerateMapFile(cacheStream, Cache, destinationTag, destinationTag.Name.Split('\\').ToList().Last(), "", "Bungie");
+                    break;
                 default:
-                    return definition;
+                    return;
+            }
+            Cache.Serialize(cacheStream, destinationTag, definition);
+        }
+
+        private void GenerateMapFile(Stream cacheStream, GameCache cache, CachedTag scenarioTag, string mapName, string mapDescription, string author)
+        {
+            var scenarioName = Path.GetFileName(scenarioTag.Name);
+            var scnr = cache.Deserialize<TagTool.Tags.Definitions.Scenario>(cacheStream, scenarioTag);
+
+            var mapBuilder = new MapFileBuilder(cache.Version);
+            mapBuilder.MapName = mapName;
+            mapBuilder.MapDescription = mapDescription;
+            MapFile map = mapBuilder.Build(scenarioTag, scnr);
+
+            if (cache is GameCacheModPackage)
+            {
+                var mapStream = new MemoryStream();
+                var writer = new EndianWriter(mapStream, leaveOpen: true);
+                map.Write(writer);
+
+                var modPackCache = cache as GameCacheModPackage;
+                modPackCache.AddMapFile(mapStream, scnr.MapId);
+            }
+            else
+            {
+                var mapFile = new FileInfo(Path.Combine(cache.Directory.FullName, $"{scenarioName}.map"));
+
+                using (var mapFileStream = mapFile.Create())
+                {
+                    map.Write(new EndianWriter(mapFileStream));
+                }
             }
         }
 
