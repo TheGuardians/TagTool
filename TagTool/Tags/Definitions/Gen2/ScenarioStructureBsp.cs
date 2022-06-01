@@ -82,7 +82,7 @@ namespace TagTool.Tags.Definitions.Gen2
         public List<StructurePortalDeviceMappingBlock> PortalDeviceMapping;
         public List<StructureBspAudibilityBlock> Audibility;
         public List<StructureBspFakeLightprobesBlock> ObjectFakeLightprobes;
-        public List<DecoratorPlacementDefinitionBlock> Decorators1;
+        public List<DecoratorPlacementDefinitionBlock> DecoratorPlacements;
         
         [TagStructure(Size = 0x250)]
         public class GlobalTagImportInfoBlock : TagStructure
@@ -2540,15 +2540,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public List<DecoratorCellCollectionBlock> Cells;
             public List<DecoratorProjectedDecalBlock> Decals;
             
-            [TagStructure(Size = 0x34)]
+            [TagStructure(Size = 0x34, MinVersion = CacheVersion.Halo2Vista)]
+            [TagStructure(Size = 0x2C, MaxVersion = CacheVersion.Halo2Xbox)]
             public class DecoratorCacheBlockBlock : TagStructure
             {
                 public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
                 public List<DecoratorCacheBlockDataBlock> CacheBlockData;
-                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                [TagField(MinVersion = CacheVersion.Halo2Vista, Length = 0x8, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
-                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding1;
                 
                 [TagStructure(Size = 0x24)]
                 public class GlobalGeometryBlockInfoStructBlock : TagStructure
