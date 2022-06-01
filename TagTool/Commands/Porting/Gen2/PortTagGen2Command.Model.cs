@@ -116,8 +116,11 @@ namespace TagTool.Commands.Porting.Gen2
             TranslateList(gen2Model.NewDamageInfo, model.NewDamageInfo);
 
             // Fixup NewDamageInfo
-            model.NewDamageInfo[0].CollisionDamageReportingType = ConvertDamageReportingType(gen2Model.NewDamageInfo[0].CollisionDamageReportingType);
-            model.NewDamageInfo[0].ResponseDamageReportingType = ConvertDamageReportingType(gen2Model.NewDamageInfo[0].ResponseDamageReportingType);
+            if (gen2Model.NewDamageInfo.Count > 0)
+            {
+                model.NewDamageInfo[0].CollisionDamageReportingType = ConvertDamageReportingType(gen2Model.NewDamageInfo[0].CollisionDamageReportingType);
+                model.NewDamageInfo[0].ResponseDamageReportingType = ConvertDamageReportingType(gen2Model.NewDamageInfo[0].ResponseDamageReportingType);
+            }
 
             //collision regions
             foreach (var gen2coll in gen2Model.CollisionRegions)
