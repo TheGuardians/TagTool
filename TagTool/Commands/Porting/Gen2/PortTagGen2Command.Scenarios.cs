@@ -375,29 +375,33 @@ namespace TagTool.Commands.Porting.Gen2
             //cluster data
             foreach (var cluster in gen2Tag.Clusters)
             {
-                //render geometry
-                var compressor = new VertexCompressor(
-                    cluster.SectionInfo.Compression.Count > 0 ?
-                        cluster.SectionInfo.Compression[0] :
-                        new RenderGeometryCompression
-                        {
-                            X = new Bounds<float>(0.0f, 1.0f),
-                            Y = new Bounds<float>(0.0f, 1.0f),
-                            Z = new Bounds<float>(0.0f, 1.0f),
-                            U = new Bounds<float>(0.0f, 1.0f),
-                            V = new Bounds<float>(0.0f, 1.0f),
-                            U2 = new Bounds<float>(0.0f, 1.0f),
-                            V2 = new Bounds<float>(0.0f, 1.0f),
-                        });
-                List<Gen2BSPResourceMesh> clustermeshes = ReadResourceMeshes(Gen2Cache, cluster.GeometryBlockInfo,
-                    cluster.SectionInfo.TotalVertexCount, (RenderGeometryCompressionFlags)cluster.SectionInfo.GeometryCompressionFlags,
-                    (TagTool.Tags.Definitions.Gen2.RenderModel.SectionLightingFlags)cluster.SectionInfo.SectionLightingFlags, compressor);
-
-                if (clustermeshes.Count > 1)
+                List<Gen2BSPResourceMesh> clustermeshes = new List<Gen2BSPResourceMesh>();
+                if (cluster.SectionInfo.TotalVertexCount > 0)
                 {
-                    new TagToolWarning("cluster had >1 render mesh! Culling extras...");
-                    clustermeshes = new List<Gen2BSPResourceMesh> { clustermeshes.First() };
-                }
+                    //render geometry
+                    var compressor = new VertexCompressor(
+                        cluster.SectionInfo.Compression.Count > 0 ?
+                            cluster.SectionInfo.Compression[0] :
+                            new RenderGeometryCompression
+                            {
+                                X = new Bounds<float>(0.0f, 1.0f),
+                                Y = new Bounds<float>(0.0f, 1.0f),
+                                Z = new Bounds<float>(0.0f, 1.0f),
+                                U = new Bounds<float>(0.0f, 1.0f),
+                                V = new Bounds<float>(0.0f, 1.0f),
+                                U2 = new Bounds<float>(0.0f, 1.0f),
+                                V2 = new Bounds<float>(0.0f, 1.0f),
+                            });
+                        clustermeshes = ReadResourceMeshes(Gen2Cache, cluster.GeometryBlockInfo,
+                        cluster.SectionInfo.TotalVertexCount, (RenderGeometryCompressionFlags)cluster.SectionInfo.GeometryCompressionFlags,
+                        (TagTool.Tags.Definitions.Gen2.RenderModel.SectionLightingFlags)cluster.SectionInfo.SectionLightingFlags, compressor);
+
+                    if (clustermeshes.Count > 1)
+                    {
+                        new TagToolWarning("cluster had >1 render mesh! Culling extras...");
+                        clustermeshes = new List<Gen2BSPResourceMesh> { clustermeshes.First() };
+                    }
+                }              
 
                 int newmeshindex = -1;
                 if(clustermeshes.Count > 0)
@@ -457,11 +461,14 @@ namespace TagTool.Commands.Porting.Gen2
             CollisionResource.InstancedGeometry = new TagBlock<InstancedGeometryBlock>(CacheAddressType.Definition);
             foreach(var instanced in gen2Tag.InstancedGeometriesDefinitions)
             {
-                //render geometry
-                var compressor = new VertexCompressor(
-                    instanced.RenderInfo.SectionInfo.Compression.Count > 0 ?
-                        instanced.RenderInfo.SectionInfo.Compression[0] :
-                        new RenderGeometryCompression
+                List<Gen2BSPResourceMesh> instancemeshes = new List<Gen2BSPResourceMesh>();
+                if (instanced.RenderInfo.SectionInfo.TotalVertexCount > 0)
+                {
+                    //render geometry
+                    var compressor = new VertexCompressor(
+                        instanced.RenderInfo.SectionInfo.Compression.Count > 0 ?
+                            instanced.RenderInfo.SectionInfo.Compression[0] :
+                            new RenderGeometryCompression
                             {
                                 X = new Bounds<float>(0.0f, 1.0f),
                                 Y = new Bounds<float>(0.0f, 1.0f),
@@ -471,15 +478,16 @@ namespace TagTool.Commands.Porting.Gen2
                                 U2 = new Bounds<float>(0.0f, 1.0f),
                                 V2 = new Bounds<float>(0.0f, 1.0f),
                             });
-                List<Gen2BSPResourceMesh> instancemeshes = ReadResourceMeshes(Gen2Cache, instanced.RenderInfo.GeometryBlockInfo,
-                    instanced.RenderInfo.SectionInfo.TotalVertexCount, (RenderGeometryCompressionFlags)instanced.RenderInfo.SectionInfo.GeometryCompressionFlags, 
-                    (TagTool.Tags.Definitions.Gen2.RenderModel.SectionLightingFlags)instanced.RenderInfo.SectionInfo.SectionLightingFlags, compressor);
-                
-                if(instancemeshes.Count > 1)
-                {
-                    new TagToolWarning("instance had >1 render mesh! Culling extras...");
-                    instancemeshes = new List<Gen2BSPResourceMesh> { instancemeshes.First() };
-                }
+                        instancemeshes = ReadResourceMeshes(Gen2Cache, instanced.RenderInfo.GeometryBlockInfo,
+                        instanced.RenderInfo.SectionInfo.TotalVertexCount, (RenderGeometryCompressionFlags)instanced.RenderInfo.SectionInfo.GeometryCompressionFlags,
+                        (TagTool.Tags.Definitions.Gen2.RenderModel.SectionLightingFlags)instanced.RenderInfo.SectionInfo.SectionLightingFlags, compressor);
+
+                    if (instancemeshes.Count > 1)
+                    {
+                        new TagToolWarning("instance had >1 render mesh! Culling extras...");
+                        instancemeshes = new List<Gen2BSPResourceMesh> { instancemeshes.First() };
+                    }
+                }               
 
                 int newmeshindex = -1;
                 if(instancemeshes.Count > 0)
@@ -595,10 +603,41 @@ namespace TagTool.Commands.Porting.Gen2
             //write pathfinding resource
             newSbsp.PathfindingResource = Cache.ResourceCache.CreateStructureBspCacheFileResource(pathfindingresource);
 
-            //write collision resource
-            newSbsp.CollisionBspResource = Cache.ResourceCache.CreateStructureBspResource(CollisionResource);
             //write meshes and render model resource
             newSbsp.Geometry = meshbuild.Geometry;
+
+            //add empty meshes for clusters and instances with no mesh
+            foreach(var cluster in newSbsp.Clusters)
+            {
+                if(cluster.MeshIndex == -1)
+                {
+                    newSbsp.Geometry.Meshes.Add(new Mesh()
+                    {
+                        Type = VertexType.World,
+                        RigidNodeIndex = -1,
+                        VertexBufferIndices = new short[8] { -1, -1, -1, -1, -1, -1, -1, -1 },
+                        IndexBufferIndices = new short[2] { -1, -1 },
+                    });
+                    cluster.MeshIndex = (short)(newSbsp.Geometry.Meshes.Count - 1);
+                }
+            }
+            foreach (var instance in CollisionResource.InstancedGeometry)
+            {
+                if (instance.MeshIndex == -1)
+                {
+                    newSbsp.Geometry.Meshes.Add(new Mesh()
+                    {
+                        Type = VertexType.World,
+                        RigidNodeIndex = -1,
+                        VertexBufferIndices = new short[8] { -1, -1, -1, -1, -1, -1, -1, -1 },
+                        IndexBufferIndices = new short[2] { -1, -1 },
+                    });
+                    instance.MeshIndex = (short)(newSbsp.Geometry.Meshes.Count - 1);
+                }
+            }
+
+            //write collision resource
+            newSbsp.CollisionBspResource = Cache.ResourceCache.CreateStructureBspResource(CollisionResource);
 
             //fixup per mesh visibility mopp
             newSbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
