@@ -66,6 +66,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Curve = BitmapImageCurve.xRGB, //default to this for now
                     PixelDataSize = (int)gen2Img.Lod0Size
                 };
+
                 if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.PowerOfTwoDimensions))
                     newImg.Flags |= BitmapFlags.PowerOfTwoDimensions;
                 if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Compressed))
@@ -105,8 +106,10 @@ namespace TagTool.Commands.Porting.Gen2
         private BitmapFormat ConvertBitmapFormat(BitmapGen2.BitmapDataBlock.FormatValue format)
         {
             BitmapFormat result;
-            if(Enum.TryParse(format.ToString(), true, out result))
+            if (Enum.TryParse(format.ToString(), true, out result))
                 return result;
+            else if (format == BitmapGen2.BitmapDataBlock.FormatValue.P8Bump)
+                return BitmapFormat.A8;
             else
             {
                 new TagToolWarning($"Failed to find bitmap format matching {format}");
