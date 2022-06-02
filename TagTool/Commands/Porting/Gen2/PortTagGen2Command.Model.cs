@@ -19,6 +19,7 @@ namespace TagTool.Commands.Porting.Gen2
 	{
         public Model ConvertModel(ModelGen2 gen2Model, Stream cacheStream)
         {
+            RenderModel rendermodel = (RenderModel)Cache.Deserialize(cacheStream, gen2Model.RenderModel);
             var model = new Model
             {
                 CollisionModel = gen2Model.CollisionModel,
@@ -35,24 +36,13 @@ namespace TagTool.Commands.Porting.Gen2
                 Nodes = new List<Model.Node>(),
                 ModelObjectData = new List<Model.ModelObjectDatum>(),
                 RenderOnlyNodeFlags = gen2Model.RenderOnlyNodeFlags,
-                RenderOnlySectionFlags = gen2Model.RenderOnlySectionFlags
+                RenderOnlySectionFlags = gen2Model.RenderOnlySectionFlags,
+                RuntimeFlags = Model.RuntimeFlagsValue.ContainsRuntimeNodes,
+                RuntimeNodeListChecksum = gen2Model.RuntimeNodeListChecksum
             };
 
             //materials
-            foreach(var gen2mat in gen2Model.Materials)
-            {
-                var newMaterial = new Model.Material
-                {
-                    Name = gen2mat.MaterialName,
-                    MaterialType = (Model.Material.MaterialTypeValue)gen2mat.MaterialType,
-                    DamageSectionIndex = gen2mat.DamageSection,
-                    MaterialName = gen2mat.GlobalMaterialName,
-                };
-                var globals = Cache.Deserialize<Globals>(cacheStream, Cache.TagCache.FindFirstInGroup("matg"));
-                int globalmaterialindex = globals.Materials.FindIndex(m => m.Name == newMaterial.MaterialName);
-                newMaterial.GlobalMaterialIndex = globalmaterialindex == -1 ? (short)0 : (short)globalmaterialindex;
-                model.Materials.Add(newMaterial);
-            }
+            TranslateList(gen2Model.Materials, model.Materials);
 
             //variants
             foreach (var gen2var in gen2Model.Variants)
@@ -60,35 +50,77 @@ namespace TagTool.Commands.Porting.Gen2
                 var variant = new Model.Variant
                 {
                     Name = gen2var.Name,
+                    ModelRegionIndices = gen2var.ModelRegionIndices,
                     Regions = new List<Model.Variant.Region>(),
                     Objects = new List<Model.Variant.Object>()
                 };
-                TranslateList(gen2var.Objects, variant.Objects);
                 foreach (var gen2reg in gen2var.Regions)
                 {
                     var region = new Model.Variant.Region
                     {
                         Name = gen2reg.RegionName,
+                        RenderModelRegionIndex = gen2reg.ModelRegionIndex,
                         ParentVariant = gen2reg.ParentVariant,
                         SortOrder = (Model.Variant.Region.SortOrderValue)gen2reg.SortOrder,
                         Permutations = new List<Model.Variant.Region.Permutation>()
                     };
                     foreach (var gen2perm in gen2reg.Permutations)
                     {
-                        region.Permutations.Add(new Model.Variant.Region.Permutation
+                        var permutation = new Model.Variant.Region.Permutation
                         {
                             Name = gen2perm.PermutationName,
+                            RenderModelPermutationIndex = gen2perm.ModelPermutationIndex,
                             Flags = (Model.Variant.Region.Permutation.FlagsValue)gen2perm.Flags,
-                            Probability = gen2perm.Probability
-                        });
+                            Probability = gen2perm.Probability,
+                            States = new List<Model.Variant.Region.Permutation.State>()
+                        };
+                        TranslateList(gen2perm.States, permutation.States);
+
+                        // Fixups for States block
+                        // Reference proper permutation index from render model in model permutation index
+                        foreach (var state in permutation.States)
+                        {
+                            foreach (var h2region_state in rendermodel.Regions)
+                            {
+                                if (h2region_state.Name.ToString() == gen2reg.RegionName.ToString())
+                                {
+                                    foreach (var h2permutation_state in h2region_state.Permutations)
+                                    {
+                                        if (h2permutation_state.Name.ToString() == gen2perm.PermutationName.ToString())
+                                        {
+                                            state.ModelPermutationIndex = gen2perm.ModelPermutationIndex;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        region.Permutations.Add(permutation);
                     }
                     variant.Regions.Add(region);
                 }
                 model.Variants.Add(variant);
+
+                TranslateList(gen2var.Objects, variant.Objects);
             }
 
             TranslateList(gen2Model.Targets, model.Targets);
+            // Fixup Targets
+            for (byte i = 0; i < model.Targets.Count; i++)
+            {
+                model.Targets[i].LockOnFlags = new Model.Target.TargetLockOnFlags();
+                model.Targets[i].LockOnFlags.Flags = (Model.Target.TargetLockOnFlags.FlagsValue)gen2Model.Targets[i].LockOnData.Flags;
+                model.Targets[i].LockOnDistance = gen2Model.Targets[i].LockOnData.LockOnDistance;
+            }
+
             TranslateList(gen2Model.NewDamageInfo, model.NewDamageInfo);
+
+            // Fixup NewDamageInfo
+            if (gen2Model.NewDamageInfo.Count > 0)
+            {
+                model.NewDamageInfo[0].CollisionDamageReportingType = ConvertDamageReportingType(gen2Model.NewDamageInfo[0].CollisionDamageReportingType);
+                model.NewDamageInfo[0].ResponseDamageReportingType = ConvertDamageReportingType(gen2Model.NewDamageInfo[0].ResponseDamageReportingType);
+            }
 
             //collision regions
             foreach (var gen2coll in gen2Model.CollisionRegions)
@@ -107,6 +139,7 @@ namespace TagTool.Commands.Porting.Gen2
                         Name = gen2perm.Name,
                         Flags = (Model.CollisionRegion.Permutation.FlagsValue)gen2perm.Flags,
                         CollisionPermutationIndex = gen2perm.CollisionPermutationIndex,
+                        PhysicsPermutationIndex = gen2perm.PhysicsRegionIndex
                     });
                 }
                 model.CollisionRegions.Add(coll);

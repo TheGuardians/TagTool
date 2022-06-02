@@ -307,12 +307,12 @@ namespace TagTool.Geometry.Utils
                 var sbspMaterial = StructureBsp.CollisionMaterials[mapping.Key];
                 model.Materials[mapping.Value] = new Model.Material()
                 {
-                    Name = StringId.Invalid,
+                    MaterialName = StringId.Invalid,
                     MaterialType = Model.Material.MaterialTypeValue.Dirt,
                     DamageSectionIndex = -1,
                     RuntimeDamagerMaterialIndex = -1,
                     RuntimeCollisionMaterialIndex = 0,
-                    MaterialName = StringId.Invalid,
+                    GlobalMaterialName = StringId.Invalid,
                     GlobalMaterialIndex = sbspMaterial.RuntimeGlobalMaterialIndex,
                 };
             }

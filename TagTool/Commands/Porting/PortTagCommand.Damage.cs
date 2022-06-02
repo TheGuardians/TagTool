@@ -105,7 +105,7 @@ namespace TagTool.Commands.Porting
                 IndirectDamageSection = damageInfo.IndirectDamageSection,
                 CollisionDamageReportingType = damageInfo.CollisionDamageReportingType,
                 ResponseDamageReportingType = damageInfo.ResponseDamageReportingType,
-                MaxVitality = damageInfo.MaxVitality,
+                MaximumVitality = damageInfo.MaximumVitality,
                 MinStunDamage = 0.0f,
                 StunTime = 0.0f,
                 RechargeTime = 0.0f,
@@ -143,8 +143,8 @@ namespace TagTool.Commands.Porting
                     StunTime = section.StunTime,
                     RechargeTime = section.RechargeTime,
                     RuntimeRechargeVelocity = section.RuntimeRechargeVelocity,
-                    ResurrectionRegionName = section.ResurrectionRestoredRegionName,
-                    RessurectionRegionRuntimeIndex = section.RuntimeResurrectionRestoredRegionIndex,
+                    ResurrectionRestoredRegionName = section.ResurrectionRestoredRegionName,
+                    ResurrectionRegionRuntimeIndex = section.RuntimeResurrectionRestoredRegionIndex,
                 };
 
                 foreach(var instantResponse in section.InstantResponses)
