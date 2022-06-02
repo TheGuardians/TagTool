@@ -79,17 +79,6 @@ namespace TagTool.Commands.Porting.Gen2
             //soft surfaces
             newScenario.SoftSurfaces = new List<Scenario.SoftSurfaceBlock> { new Scenario.SoftSurfaceBlock() };
 
-            //player starting locations
-            foreach(var startlocation in gen2Tag.PlayerStartingLocations)
-            {
-                newScenario.PlayerStartingLocations.Add(new Scenario.PlayerStartingLocation
-                {
-                    Position = startlocation.Position,
-                    Facing = new RealEulerAngles2d(startlocation.Facing, Angle.FromDegrees(0.0f)),
-                    EditorFolderIndex = -1
-                });
-            }
-
             newScenario.ZoneSetPvs.Add(new Scenario.ZoneSetPvsBlock());
             newScenario.ZoneSets.Add(new Scenario.ZoneSet
             {
@@ -246,7 +235,58 @@ namespace TagTool.Commands.Porting.Gen2
                 newScenario.Scenery[scenobjindex].ObjectType = new ScenarioObjectType { Halo3ODST = new GameObjectTypeHalo3ODST()};
                 TranslateEnum(scenobj.ObjectData.ObjectId.Type, out newScenario.Scenery[scenobjindex].ObjectType.Halo3ODST, newScenario.Scenery[scenobjindex].ObjectType.Halo3ODST.GetType());
             }
-            
+
+            //player starting locations
+            foreach (var startlocation in gen2Tag.PlayerStartingLocations)
+            {
+                newScenario.PlayerStartingLocations.Add(new Scenario.PlayerStartingLocation
+                {
+                    Position = startlocation.Position,
+                    Facing = new RealEulerAngles2d(startlocation.Facing, Angle.FromDegrees(0.0f)),
+                    EditorFolderIndex = -1
+                });
+            }
+
+            //spawn points from starting locations
+            if(newScenario.MapType == ScenarioMapType.Multiplayer)
+            {
+                newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = Cache.TagCache.GetTag<Scenery>(@"objects\multi\spawning\respawn_point_invisible")
+                });
+                bool prematchcameraset = false;
+                foreach(var startlocation in newScenario.PlayerStartingLocations)
+                {
+                    newScenario.Scenery.Add(new Scenario.SceneryInstance
+                    {
+                        PaletteIndex = (short)(newScenario.SceneryPalette.Count - 1),
+                        NameIndex = -1,
+                        Position = startlocation.Position,
+                        Rotation = new RealEulerAngles3d(startlocation.Facing.Yaw, Angle.FromDegrees(0.0f), Angle.FromDegrees(0.0f)),
+                        ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery},
+                        Source = Scenario.ScenarioInstance.SourceValue.Editor,
+                        EditorFolder = -1,
+                        ParentId = new ScenarioObjectParentStruct() { NameIndex = -1 },
+                        UniqueHandle = new DatumHandle(0xffffffff),
+                        OriginBspIndex = -1,
+                        CanAttachToBspFlags = (ushort)(1u << 0),
+                        Multiplayer = new Scenario.MultiplayerObjectProperties() { Team = TagTool.Tags.Definitions.Common.MultiplayerTeamDesignator.Neutral },
+                    });
+                    if (!prematchcameraset)
+                    {
+                        newScenario.CutsceneCameraPoints.Add(new Scenario.CutsceneCameraPoint()
+                        {
+                            Position = startlocation.Position,
+                            Orientation = new RealEulerAngles3d(startlocation.Facing.Yaw, Angle.FromDegrees(0.0f), Angle.FromDegrees(0.0f)),
+                            Flags = Scenario.CutsceneCameraPointFlags.PrematchCameraHack,
+                            Name = "prematch_camera",
+                        });
+                        prematchcameraset = true;
+                    }
+                }
+            }
+
+
             return newScenario;
         }
 
