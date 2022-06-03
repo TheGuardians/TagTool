@@ -228,6 +228,9 @@ namespace TagTool.Commands.Porting.Gen2
                     Position = scenobj.ObjectData.Position,
                     Rotation = scenobj.ObjectData.Rotation,
                     Scale = scenobj.ObjectData.Scale,
+                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)scenobj.ObjectData.BspPolicy,
+                    OriginBspIndex = (short)scenobj.ObjectData.ManualBspFlags,
+                    CanAttachToBspFlags = (ushort)(scenobj.ObjectData.ManualBspFlags + 1),
                     Source = (Scenario.ScenarioInstance.SourceValue)scenobj.ObjectData.ObjectId.Source,
                     UniqueHandle = new DatumHandle((uint)scenobj.ObjectData.ObjectId.UniqueId),
                     EditorFolder = -1
@@ -286,6 +289,35 @@ namespace TagTool.Commands.Porting.Gen2
                 }
             }
 
+            //device machines
+            foreach (var macpal in gen2Tag.MachinePalette)
+            {
+                newScenario.MachinePalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = macpal.Name
+                });
+            }
+            for (var machobjindex = 0; machobjindex < gen2Tag.Machines.Count; machobjindex++)
+            {
+                var machobj = gen2Tag.Machines[machobjindex];
+                newScenario.Machines.Add(new Scenario.MachineInstance
+                {
+                    PaletteIndex = machobj.Type,
+                    NameIndex = machobj.Name,
+                    PlacementFlags = (Scenario.ObjectPlacementFlags)machobj.ObjectData.PlacementFlags,
+                    Position = machobj.ObjectData.Position,
+                    Rotation = machobj.ObjectData.Rotation,
+                    Scale = machobj.ObjectData.Scale,
+                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)machobj.ObjectData.BspPolicy,
+                    OriginBspIndex = (short)machobj.ObjectData.ManualBspFlags,
+                    CanAttachToBspFlags = (ushort)(machobj.ObjectData.ManualBspFlags + 1),
+                    Source = (Scenario.ScenarioInstance.SourceValue)machobj.ObjectData.ObjectId.Source,
+                    UniqueHandle = new DatumHandle((uint)machobj.ObjectData.ObjectId.UniqueId),
+                    EditorFolder = -1
+                });
+                newScenario.Machines[machobjindex].ObjectType = new ScenarioObjectType { Halo3ODST = new GameObjectTypeHalo3ODST() };
+                TranslateEnum(machobj.ObjectData.ObjectId.Type, out newScenario.Machines[machobjindex].ObjectType.Halo3ODST, newScenario.Machines[machobjindex].ObjectType.Halo3ODST.GetType());
+            }
 
             return newScenario;
         }
