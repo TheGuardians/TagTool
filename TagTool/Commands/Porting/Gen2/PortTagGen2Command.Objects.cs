@@ -50,6 +50,11 @@ namespace TagTool.Commands.Porting.Gen2
                     CameraTrack newtrack = new CameraTrack();
                     TranslateTagStructure(track, newtrack);
                     return newtrack;
+                case TagTool.Tags.Definitions.Gen2.DeviceMachine devicemachine:
+                    DeviceMachine newdevicemachine = new DeviceMachine();
+                    TranslateTagStructure(devicemachine, newdevicemachine);
+                    newdevicemachine.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Machine };
+                    return newdevicemachine;
                 default:
                     return null;
             }
