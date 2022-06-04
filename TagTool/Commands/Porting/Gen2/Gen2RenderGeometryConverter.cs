@@ -298,17 +298,17 @@ namespace TagTool.Commands.Porting.Gen2
                                     break;
 
                                 case 3:
-                                    if (LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapTexcoords))
+                                    if (LightingFlags.HasFlag(TagTool.Tags.Definitions.Gen2.RenderModel.SectionLightingFlags.HasLightmapTexcoords))
                                         vertex.PrimaryLightmapTexcoord = element.XY;
                                     break;
 
                                 case 4:
-                                    if (LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapIncRad))
+                                    if (LightingFlags.HasFlag(TagTool.Tags.Definitions.Gen2.RenderModel.SectionLightingFlags.HasLightmapIncRad))
                                         vertex.SecondaryLightmapIncidentDirection = element.IJK;
                                     break;
 
                                 case 5:
-                                    if (LightingFlags.HasFlag(RenderModel.SectionLightingFlags.HasLightmapColors))
+                                    if (LightingFlags.HasFlag(TagTool.Tags.Definitions.Gen2.RenderModel.SectionLightingFlags.HasLightmapColors))
                                         vertex.PrimaryLightmapColor = element.RGB;
                                     break;
 
