@@ -233,10 +233,9 @@ namespace TagTool.Commands.Porting.Gen2
                     CanAttachToBspFlags = (ushort)(scenobj.ObjectData.ManualBspFlags + 1),
                     Source = (Scenario.ScenarioInstance.SourceValue)scenobj.ObjectData.ObjectId.Source,
                     UniqueHandle = new DatumHandle((uint)scenobj.ObjectData.ObjectId.UniqueId),
-                    EditorFolder = -1
+                    EditorFolder = -1,
+                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery },
                 });
-                newScenario.Scenery[scenobjindex].ObjectType = new ScenarioObjectType { Halo3ODST = new GameObjectTypeHalo3ODST()};
-                TranslateEnum(scenobj.ObjectData.ObjectId.Type, out newScenario.Scenery[scenobjindex].ObjectType.Halo3ODST, newScenario.Scenery[scenobjindex].ObjectType.Halo3ODST.GetType());
             }
 
             //player starting locations
@@ -313,10 +312,9 @@ namespace TagTool.Commands.Porting.Gen2
                     CanAttachToBspFlags = (ushort)(machobj.ObjectData.ManualBspFlags + 1),
                     Source = (Scenario.ScenarioInstance.SourceValue)machobj.ObjectData.ObjectId.Source,
                     UniqueHandle = new DatumHandle((uint)machobj.ObjectData.ObjectId.UniqueId),
-                    EditorFolder = -1
+                    EditorFolder = -1,
+                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Machine },
                 });
-                newScenario.Machines[machobjindex].ObjectType = new ScenarioObjectType { Halo3ODST = new GameObjectTypeHalo3ODST() };
-                TranslateEnum(machobj.ObjectData.ObjectId.Type, out newScenario.Machines[machobjindex].ObjectType.Halo3ODST, newScenario.Machines[machobjindex].ObjectType.Halo3ODST.GetType());
             }
 
             return newScenario;
