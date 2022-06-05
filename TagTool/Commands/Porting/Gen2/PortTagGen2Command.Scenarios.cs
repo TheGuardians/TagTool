@@ -209,113 +209,7 @@ namespace TagTool.Commands.Porting.Gen2
                 });
             }
 
-            //scenery
-            foreach(var scenpal in gen2Tag.SceneryPalette)
-            {
-                newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
-                {
-                    Object = scenpal.Name
-                });
-            }
-            for(var scenobjindex = 0; scenobjindex < gen2Tag.Scenery.Count; scenobjindex++)
-            {
-                var scenobj = gen2Tag.Scenery[scenobjindex];
-                newScenario.Scenery.Add(new Scenario.SceneryInstance
-                {
-                    PaletteIndex = scenobj.Type,
-                    NameIndex = scenobj.Name,
-                    PlacementFlags = (Scenario.ObjectPlacementFlags)scenobj.ObjectData.PlacementFlags,
-                    Position = scenobj.ObjectData.Position,
-                    Rotation = scenobj.ObjectData.Rotation,
-                    Scale = scenobj.ObjectData.Scale,
-                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)scenobj.ObjectData.BspPolicy,
-                    OriginBspIndex = (short)scenobj.ObjectData.ManualBspFlags,
-                    CanAttachToBspFlags = (ushort)(scenobj.ObjectData.ManualBspFlags + 1),
-                    Source = (Scenario.ScenarioInstance.SourceValue)scenobj.ObjectData.ObjectId.Source,
-                    UniqueHandle = new DatumHandle((uint)scenobj.ObjectData.ObjectId.UniqueId),
-                    EditorFolder = -1,
-                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery },
-                });
-            }
-
-            //player starting locations
-            foreach (var startlocation in gen2Tag.PlayerStartingLocations)
-            {
-                newScenario.PlayerStartingLocations.Add(new Scenario.PlayerStartingLocation
-                {
-                    Position = startlocation.Position,
-                    Facing = new RealEulerAngles2d(startlocation.Facing, Angle.FromDegrees(0.0f)),
-                    EditorFolderIndex = -1
-                });
-            }
-
-            //spawn points from starting locations
-            if(newScenario.MapType == ScenarioMapType.Multiplayer)
-            {
-                newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
-                {
-                    Object = Cache.TagCache.GetTag<Scenery>(@"objects\multi\spawning\respawn_point_invisible")
-                });
-                bool prematchcameraset = false;
-                foreach(var startlocation in newScenario.PlayerStartingLocations)
-                {
-                    newScenario.Scenery.Add(new Scenario.SceneryInstance
-                    {
-                        PaletteIndex = (short)(newScenario.SceneryPalette.Count - 1),
-                        NameIndex = -1,
-                        Position = startlocation.Position,
-                        Rotation = new RealEulerAngles3d(startlocation.Facing.Yaw, Angle.FromDegrees(0.0f), Angle.FromDegrees(0.0f)),
-                        ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery},
-                        Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                        EditorFolder = -1,
-                        ParentId = new ScenarioObjectParentStruct() { NameIndex = -1 },
-                        UniqueHandle = new DatumHandle(0xffffffff),
-                        OriginBspIndex = -1,
-                        CanAttachToBspFlags = (ushort)(1u << 0),
-                        Multiplayer = new Scenario.MultiplayerObjectProperties() { Team = TagTool.Tags.Definitions.Common.MultiplayerTeamDesignator.Neutral },
-                    });
-                    if (!prematchcameraset)
-                    {
-                        newScenario.CutsceneCameraPoints.Add(new Scenario.CutsceneCameraPoint()
-                        {
-                            Position = startlocation.Position,
-                            Orientation = new RealEulerAngles3d(startlocation.Facing.Yaw, Angle.FromDegrees(0.0f), Angle.FromDegrees(0.0f)),
-                            Flags = Scenario.CutsceneCameraPointFlags.PrematchCameraHack,
-                            Name = "prematch_camera",
-                        });
-                        prematchcameraset = true;
-                    }
-                }
-            }
-
-            //device machines
-            foreach (var macpal in gen2Tag.MachinePalette)
-            {
-                newScenario.MachinePalette.Add(new Scenario.ScenarioPaletteEntry
-                {
-                    Object = macpal.Name
-                });
-            }
-            for (var machobjindex = 0; machobjindex < gen2Tag.Machines.Count; machobjindex++)
-            {
-                var machobj = gen2Tag.Machines[machobjindex];
-                newScenario.Machines.Add(new Scenario.MachineInstance
-                {
-                    PaletteIndex = machobj.Type,
-                    NameIndex = machobj.Name,
-                    PlacementFlags = (Scenario.ObjectPlacementFlags)machobj.ObjectData.PlacementFlags,
-                    Position = machobj.ObjectData.Position,
-                    Rotation = machobj.ObjectData.Rotation,
-                    Scale = machobj.ObjectData.Scale,
-                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)machobj.ObjectData.BspPolicy,
-                    OriginBspIndex = (short)machobj.ObjectData.ManualBspFlags,
-                    CanAttachToBspFlags = (ushort)(machobj.ObjectData.ManualBspFlags + 1),
-                    Source = (Scenario.ScenarioInstance.SourceValue)machobj.ObjectData.ObjectId.Source,
-                    UniqueHandle = new DatumHandle((uint)machobj.ObjectData.ObjectId.UniqueId),
-                    EditorFolder = -1,
-                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Machine },
-                });
-            }
+            ConvertScenarioPlacements(gen2Tag, newScenario);
 
             return newScenario;
         }
@@ -743,6 +637,151 @@ namespace TagTool.Commands.Porting.Gen2
             InstanceBucketGenerator.Generate(newSbsp, CollisionResource);
             ConvertGen2EnvironmentMopp(newSbsp);
             return newSbsp;
+        }
+
+        public void ConvertScenarioPlacements(TagTool.Tags.Definitions.Gen2.Scenario gen2Tag, Scenario newScenario)
+        {
+            //device machines
+            foreach (var macpal in gen2Tag.MachinePalette)
+            {
+                newScenario.MachinePalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = macpal.Name
+                });
+            }
+            for (var machobjindex = 0; machobjindex < gen2Tag.Machines.Count; machobjindex++)
+            {
+                var machobj = gen2Tag.Machines[machobjindex];
+                newScenario.Machines.Add(new Scenario.MachineInstance
+                {
+                    PaletteIndex = machobj.Type,
+                    NameIndex = machobj.Name,
+                    PlacementFlags = (Scenario.ObjectPlacementFlags)machobj.ObjectData.PlacementFlags,
+                    Position = machobj.ObjectData.Position,
+                    Rotation = machobj.ObjectData.Rotation,
+                    Scale = machobj.ObjectData.Scale,
+                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)machobj.ObjectData.BspPolicy,
+                    OriginBspIndex = (short)machobj.ObjectData.ManualBspFlags,
+                    CanAttachToBspFlags = (ushort)(machobj.ObjectData.ManualBspFlags + 1),
+                    Source = (Scenario.ScenarioInstance.SourceValue)machobj.ObjectData.ObjectId.Source,
+                    UniqueHandle = new DatumHandle((uint)machobj.ObjectData.ObjectId.UniqueId),
+                    EditorFolder = -1,
+                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Machine },
+                    //extra device/machine flags
+                    DeviceFlags = (Scenario.ScenarioDeviceFlags)machobj.DeviceData.Flags,
+                    MachineFlags = (Scenario.MachineInstance.ScenarioMachineFlags)machobj.MachineData.Flags,
+                    PowerGroup = machobj.DeviceData.PowerGroup,
+                    PositionGroup = machobj.DeviceData.PositionGroup
+                });
+            }
+
+            //crates
+            foreach (var blocpal in gen2Tag.CratesPalette)
+            {
+                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = blocpal.Name
+                });
+            }
+            for (var blocobjindex = 0; blocobjindex < gen2Tag.Crates.Count; blocobjindex++)
+            {
+                var crateobj = gen2Tag.Crates[blocobjindex];
+                newScenario.Crates.Add(new Scenario.CrateInstance
+                {
+                    PaletteIndex = crateobj.Type,
+                    NameIndex = crateobj.Name,
+                    PlacementFlags = (Scenario.ObjectPlacementFlags)crateobj.ObjectData.PlacementFlags,
+                    Position = crateobj.ObjectData.Position,
+                    Rotation = crateobj.ObjectData.Rotation,
+                    Scale = crateobj.ObjectData.Scale,
+                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)crateobj.ObjectData.BspPolicy,
+                    OriginBspIndex = (short)crateobj.ObjectData.ManualBspFlags,
+                    CanAttachToBspFlags = (ushort)(crateobj.ObjectData.ManualBspFlags + 1),
+                    Source = (Scenario.ScenarioInstance.SourceValue)crateobj.ObjectData.ObjectId.Source,
+                    UniqueHandle = new DatumHandle((uint)crateobj.ObjectData.ObjectId.UniqueId),
+                    EditorFolder = -1,
+                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Crate },
+                });
+            }
+
+            //scenery
+            foreach (var scenpal in gen2Tag.SceneryPalette)
+            {
+                newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = scenpal.Name
+                });
+            }
+            for (var scenobjindex = 0; scenobjindex < gen2Tag.Scenery.Count; scenobjindex++)
+            {
+                var scenobj = gen2Tag.Scenery[scenobjindex];
+                newScenario.Scenery.Add(new Scenario.SceneryInstance
+                {
+                    PaletteIndex = scenobj.Type,
+                    NameIndex = scenobj.Name,
+                    PlacementFlags = (Scenario.ObjectPlacementFlags)scenobj.ObjectData.PlacementFlags,
+                    Position = scenobj.ObjectData.Position,
+                    Rotation = scenobj.ObjectData.Rotation,
+                    Scale = scenobj.ObjectData.Scale,
+                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)scenobj.ObjectData.BspPolicy,
+                    OriginBspIndex = (short)scenobj.ObjectData.ManualBspFlags,
+                    CanAttachToBspFlags = (ushort)(scenobj.ObjectData.ManualBspFlags + 1),
+                    Source = (Scenario.ScenarioInstance.SourceValue)scenobj.ObjectData.ObjectId.Source,
+                    UniqueHandle = new DatumHandle((uint)scenobj.ObjectData.ObjectId.UniqueId),
+                    EditorFolder = -1,
+                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery },
+                });
+            }
+
+            //player starting locations
+            foreach (var startlocation in gen2Tag.PlayerStartingLocations)
+            {
+                newScenario.PlayerStartingLocations.Add(new Scenario.PlayerStartingLocation
+                {
+                    Position = startlocation.Position,
+                    Facing = new RealEulerAngles2d(startlocation.Facing, Angle.FromDegrees(0.0f)),
+                    EditorFolderIndex = -1
+                });
+            }
+
+            //spawn points from starting locations
+            if (newScenario.MapType == ScenarioMapType.Multiplayer)
+            {
+                newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = Cache.TagCache.GetTag<Scenery>(@"objects\multi\spawning\respawn_point_invisible")
+                });
+                bool prematchcameraset = false;
+                foreach (var startlocation in newScenario.PlayerStartingLocations)
+                {
+                    newScenario.Scenery.Add(new Scenario.SceneryInstance
+                    {
+                        PaletteIndex = (short)(newScenario.SceneryPalette.Count - 1),
+                        NameIndex = -1,
+                        Position = startlocation.Position,
+                        Rotation = new RealEulerAngles3d(startlocation.Facing.Yaw, Angle.FromDegrees(0.0f), Angle.FromDegrees(0.0f)),
+                        ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery },
+                        Source = Scenario.ScenarioInstance.SourceValue.Editor,
+                        EditorFolder = -1,
+                        ParentId = new ScenarioObjectParentStruct() { NameIndex = -1 },
+                        UniqueHandle = new DatumHandle(0xffffffff),
+                        OriginBspIndex = -1,
+                        CanAttachToBspFlags = (ushort)(1u << 0),
+                        Multiplayer = new Scenario.MultiplayerObjectProperties() { Team = TagTool.Tags.Definitions.Common.MultiplayerTeamDesignator.Neutral },
+                    });
+                    if (!prematchcameraset)
+                    {
+                        newScenario.CutsceneCameraPoints.Add(new Scenario.CutsceneCameraPoint()
+                        {
+                            Position = startlocation.Position,
+                            Orientation = new RealEulerAngles3d(startlocation.Facing.Yaw, Angle.FromDegrees(0.0f), Angle.FromDegrees(0.0f)),
+                            Flags = Scenario.CutsceneCameraPointFlags.PrematchCameraHack,
+                            Name = "prematch_camera",
+                        });
+                        prematchcameraset = true;
+                    }
+                }
+            }
         }
 
         public List<TagHkpMoppCode> ConvertH2MOPP(byte[] moppdata)

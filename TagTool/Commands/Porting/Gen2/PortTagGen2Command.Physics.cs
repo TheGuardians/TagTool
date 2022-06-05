@@ -172,7 +172,7 @@ namespace TagTool.Commands.Porting.Gen2
                     AnotherFieldPointerSkip = new PlatformUnsignedValue(gen2poly.Unknown),
                     PlaneEquationsSize = gen2poly.PlaneEquationsSize,
                     PlaneEquationsCapacity = (uint)gen2poly.PlaneEquationsSize | 0x80000000,
-                    ProxyCollisionGroup = -1 //doesn't exist in H2
+                    ProxyCollisionGroup = -1, //doesn't exist in H2
                 };
 
                 //sets of three or less fourvectors are stored inside the polyhedron block in H2
@@ -247,13 +247,6 @@ namespace TagTool.Commands.Porting.Gen2
                     {
                         var gen2listshape = gen2PhysicsModel.ListShapes[i];
 
-                        //remove any invalid shape types
-                        if ((PhysicsModelGen2.ListShapesBlock.ShapeTypeValue.MultiSphere < gen2listshape.ShapeType) && (gen2listshape.ShapeType < PhysicsModelGen2.ListShapesBlock.ShapeTypeValue.List))
-                        {
-                            childshapescount--;
-                            continue;
-                        }
-
                         physicsModel.ListShapes.Add(new PhysicsModel.ListShape
                         {
                             Shape = new Havok.HavokShapeReference((Havok.BlamShapeType)gen2listshape.ShapeType, gen2listshape.Shape),
@@ -269,13 +262,6 @@ namespace TagTool.Commands.Porting.Gen2
                     for (var i = 0; i < gen2list.ChildShapesSize; i++)
                     {
                         var gen2listshape = gen2list.CollisionFilter[i];
-
-                        //remove any invalid shape types
-                        if ((PhysicsModelGen2.ListsBlock.ShapeTypeValue.MultiSphere < gen2listshape.ShapeType) && (gen2listshape.ShapeType < PhysicsModelGen2.ListsBlock.ShapeTypeValue.List))
-                        {
-                            childshapescount--;
-                            continue;
-                        }
 
                         physicsModel.ListShapes.Add(new PhysicsModel.ListShape
                         {
@@ -380,6 +366,14 @@ namespace TagTool.Commands.Porting.Gen2
                 newRag.ConeRange = new TagTool.Common.Bounds<float>(gen2ragdoll.MinCone, gen2ragdoll.MaxCone);
                 newRag.PlaneRange = new TagTool.Common.Bounds<float>(gen2ragdoll.MinPlane, gen2ragdoll.MaxPlane);
                 physicsModel.RagdollConstraints.Add(newRag);
+            }
+
+            //convert ball and socket constraints
+            foreach(var gen2ball in gen2PhysicsModel.BallAndSocketConstraints)
+            {
+                PhysicsModel.BallAndSocketConstraint newBall = new PhysicsModel.BallAndSocketConstraint();
+                TranslateTagStructure(gen2ball.ConstraintBodies, newBall);
+                physicsModel.BallAndSocketConstraints.Add(newBall);
             }
 
             return physicsModel;

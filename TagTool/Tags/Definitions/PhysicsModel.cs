@@ -76,9 +76,7 @@ namespace TagTool.Tags.Definitions
         public byte[] UnusedPointToPathCurves;
 
         public List<LimitedHingeConstraint> LimitedHingeConstraints;
-
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] UnusedBallAndSocketConstraints;
+        public List<BallAndSocketConstraint> BallAndSocketConstraints;
 
         [TagField(Flags = Padding, Length = 12)]
         public byte[] UnusedStiffSpringConstraints;
@@ -927,6 +925,27 @@ namespace TagTool.Tags.Definitions
             public uint Unknown2;
             public float LimitFriction;
             public Bounds<float> LimitAngleBounds;
+        }
+
+        [TagStructure(Size = 0x74)]
+        public class BallAndSocketConstraint : TagStructure
+        {
+            public StringId Name;
+            public short NodeA;
+            public short NodeB;
+            public float AScale;
+            public RealVector3d AForward;
+            public RealVector3d ALeft;
+            public RealVector3d AUp;
+            public RealPoint3d APosition;
+            public float BScale;
+            public RealVector3d BForward;
+            public RealVector3d BLeft;
+            public RealVector3d BUp;
+            public RealPoint3d BPosition;
+            public short EdgeIndex;
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] H;
         }
 
         [TagStructure(Size = 0x2C, Align = 0x10, Platform = CachePlatform.Original)]
