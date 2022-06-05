@@ -16,7 +16,7 @@ namespace TagTool.Commands.Porting.Gen2
             Bitmap newBitmap = new Bitmap
             {
                 Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource,
-                SpriteSpacing = gen2Bitmap.SpriteSpacing, //this seems to be a default value
+                SpriteSpacing = gen2Bitmap.SpriteSpacing,
                 BumpMapHeight = gen2Bitmap.BumpHeight,
                 FadeFactor = gen2Bitmap.DetailFadeFactor,
                 Sequences = new List<Bitmap.Sequence>(),
@@ -72,7 +72,7 @@ namespace TagTool.Commands.Porting.Gen2
                 if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Compressed))
                     newImg.Flags |= BitmapFlags.Compressed;
                 if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Linear))
-                    newImg.Curve = BitmapImageCurve.Linear;
+                    newImg.Curve |= BitmapImageCurve.Linear;
 
                 //get raw bitmap data and create resource
                 byte[] rawBitmapData = Gen2Cache.GetCacheRawData(gen2Img.Lod0Pointer, (int)gen2Img.Lod0Size);

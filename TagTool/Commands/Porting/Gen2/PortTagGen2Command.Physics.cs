@@ -19,27 +19,9 @@ namespace TagTool.Commands.Porting.Gen2
                 Mass = gen2PhysicsModel.Mass,
                 LowFrequencyDeactivationScale = gen2PhysicsModel.LowFreqDeactivationScale,
                 HighFrequencyDeactivationScale = gen2PhysicsModel.HighFreqDeactivationScale,
-                PhantomTypes = new List<PhysicsModel.PhantomType>(),
-                NodeEdges = new List<PhysicsModel.NodeEdge>(),
-                RigidBodies = new List<PhysicsModel.RigidBody>(),
-                Materials = new List<PhysicsModel.Material>(),
-                Spheres = new List<PhysicsModel.Sphere>(),
-                Pills = new List<PhysicsModel.Pill>(),
-                Boxes = new List<PhysicsModel.Box>(),
-                Triangles = new List<PhysicsModel.Triangle>(),
-                Polyhedra = new List<PhysicsModel.Polyhedron>(),
-                PolyhedronFourVectors = new List<PhysicsModel.PolyhedronFourVector>(),
-                PolyhedronPlaneEquations = new List<PhysicsModel.PolyhedronPlaneEquation>(),
-                Lists = new List<PhysicsModel.List>(),
-                ListShapes = new List<PhysicsModel.ListShape>(),
-                HingeConstraints = new List<PhysicsModel.HingeConstraint>(),
-                RagdollConstraints = new List<PhysicsModel.RagdollConstraint>(),
-                Regions = new List<PhysicsModel.Region>(),
-                Nodes = new List<PhysicsModel.Node>(),
-                LimitedHingeConstraints = new List<PhysicsModel.LimitedHingeConstraint>(),
-                Phantoms = new List<PhysicsModel.Phantom>(),
-                Mopps = new List<Havok.CMoppBvTreeShape>()
             };
+
+            InitTagBlocks(physicsModel);
 
             //convert phantom types
             foreach (var gen2phantomtype in gen2PhysicsModel.PhantomTypes)
@@ -118,6 +100,9 @@ namespace TagTool.Commands.Porting.Gen2
                 };
                 physicsModel.RigidBodies.Add(newRig);
             }
+
+            //convert node edges
+            TranslateList(gen2PhysicsModel.NodeEdges, physicsModel.NodeEdges);
 
             //convert pills
             foreach (var gen2pill in gen2PhysicsModel.Pills)
@@ -364,7 +349,37 @@ namespace TagTool.Commands.Porting.Gen2
             }
             if (gen2PhysicsModel.MoppCodes.Length > 0)
             {
-                physicsModel.MoppData = ConvertH2MOPP(gen2PhysicsModel.MoppCodes)[0].Data.ToArray();
+                physicsModel.MoppData = ConvertH2MoppData(gen2PhysicsModel.MoppCodes);
+            }
+
+            //convert limited hinge constraints
+            foreach(var gen2hinge in gen2PhysicsModel.LimitedHingeConstraints)
+            {
+                PhysicsModel.LimitedHingeConstraint newHinge = new PhysicsModel.LimitedHingeConstraint();
+                TranslateTagStructure(gen2hinge.ConstraintBodies, newHinge);
+                newHinge.LimitFriction = gen2hinge.LimitFriction;
+                newHinge.LimitAngleBounds = new TagTool.Common.Bounds<float>(gen2hinge.LimitMinAngle, gen2hinge.LimitMaxAngle);
+                physicsModel.LimitedHingeConstraints.Add(newHinge);
+            }
+
+            //convert hinge constraints
+            foreach(var gen2con in gen2PhysicsModel.HingeConstraints)
+            {
+                PhysicsModel.HingeConstraint newCon = new PhysicsModel.HingeConstraint();
+                TranslateTagStructure(gen2con.ConstraintBodies, newCon);
+                physicsModel.HingeConstraints.Add(newCon);
+            }
+
+            //convert ragdoll constraints
+            foreach(var gen2ragdoll in gen2PhysicsModel.RagdollConstraints)
+            {
+                PhysicsModel.RagdollConstraint newRag = new PhysicsModel.RagdollConstraint();
+                TranslateTagStructure(gen2ragdoll.ConstraintBodies, newRag);
+                newRag.MaxFrictionTorque = gen2ragdoll.MaxFricitonTorque;
+                newRag.TwistRange = new TagTool.Common.Bounds<float>(gen2ragdoll.MinTwist, gen2ragdoll.MaxTwist);
+                newRag.ConeRange = new TagTool.Common.Bounds<float>(gen2ragdoll.MinCone, gen2ragdoll.MaxCone);
+                newRag.PlaneRange = new TagTool.Common.Bounds<float>(gen2ragdoll.MinPlane, gen2ragdoll.MaxPlane);
+                physicsModel.RagdollConstraints.Add(newRag);
             }
 
             return physicsModel;
