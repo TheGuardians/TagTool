@@ -195,7 +195,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Checksum = gen2anim.ImportChecksum,
                     FrameCount = gen2anim.FrameCount,
                     NodeCount = (byte)gen2anim.NodeCount,
-                    MovementDataType = (ModelAnimationTagResource.GroupMemberMovementDataType)gen2anim.Type,
+                    MovementDataType = (ModelAnimationTagResource.GroupMemberMovementDataType)gen2anim.FrameInfoType,
                     PackedDataSizes = new ModelAnimationTagResource.GroupMember.PackedDataSizesStructBlock
                     {
                         CompressedDataSize = gen2anim.DataSizes.CompressedDataSize,

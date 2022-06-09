@@ -106,10 +106,11 @@ namespace TagTool.Commands.Porting.Gen2
         private BitmapFormat ConvertBitmapFormat(BitmapGen2.BitmapDataBlock.FormatValue format)
         {
             BitmapFormat result;
-            if (Enum.TryParse(format.ToString(), true, out result))
-                return result;
-            else if (format == BitmapGen2.BitmapDataBlock.FormatValue.P8Bump)
+            if (format == BitmapGen2.BitmapDataBlock.FormatValue.P8Bump ||
+                format == BitmapGen2.BitmapDataBlock.FormatValue.P8)
                 return BitmapFormat.A8;
+            else if (Enum.TryParse(format.ToString(), true, out result))
+                return result;
             else
             {
                 new TagToolWarning($"Failed to find bitmap format matching {format}");

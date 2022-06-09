@@ -20,6 +20,8 @@ namespace TagTool.Commands.Porting.Gen2
 {
 	partial class PortTagGen2Command : Command
 	{
+        List<List<Gen2BSPResourceMesh>> bspMeshes = new List<List<Gen2BSPResourceMesh>>();
+
         public TagStructure ConvertScenario(TagTool.Tags.Definitions.Gen2.Scenario gen2Tag, TagTool.Tags.Definitions.Gen2.Scenario rawgen2Tag, string scenarioPath, Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             Scenario newScenario = new Scenario();
@@ -38,19 +40,7 @@ namespace TagTool.Commands.Porting.Gen2
             newScenario.GlobalLighting = chmtTag;
             newScenario.PerformanceThrottles = perfTag;
 
-            //lightmaps
-            var sldtTag = Cache.TagCache.AllocateTag<ScenarioLightmapBspData>($"{scenarioPath}_faux_lightmap");
-            var sldt = new ScenarioLightmap();
-            sldt.LightmapDataReferences = new List<ScenarioLightmap.DataReferenceBlock>();
-            for (var i = 0; i < gen2Tag.StructureBsps.Count; i++)
-            {
-                var lbsp = new ScenarioLightmapBspData();
-                lbsp.BspIndex = (short)i;
-                var lbspTag = Cache.TagCache.AllocateTag<ScenarioLightmapBspData>($"{scenarioPath}_faux_lightmap_bsp_data_{i}");
-                Cache.Serialize(cacheStream, lbspTag, lbsp);
-                sldt.LightmapDataReferences.Add(new ScenarioLightmap.DataReferenceBlock() { LightmapBspData = lbspTag });
-            }
-            Cache.Serialize(cacheStream, sldtTag, sldt);
+            newScenario.Lightmap = ConvertLightmap(rawgen2Tag, scenarioPath, cacheStream, gen2CacheStream);
 
             //mapid and type
             newScenario.MapType = (ScenarioMapType)gen2Tag.Type;
@@ -633,6 +623,8 @@ namespace TagTool.Commands.Porting.Gen2
                 }
 
             }
+
+            bspMeshes.Add(Gen2Meshes);
 
             InstanceBucketGenerator.Generate(newSbsp, CollisionResource);
             ConvertGen2EnvironmentMopp(newSbsp);

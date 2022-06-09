@@ -108,24 +108,22 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagStructure(Size = 0x400)]
             public class StructureLightmapPaletteColorBlock : TagStructure
             {
-                public int FirstPaletteColor;
-                [TagField(Length = 0x3FC)]
-                public byte[] Unknown;
+                [TagField(Length = 256)]
+                public ArgbColor[] PaletteColors;
             }
             
             [TagStructure(Size = 0x400)]
             public class StructureLightmapPaletteColorBlock1 : TagStructure
             {
-                public int FirstPaletteColor;
-                [TagField(Length = 0x3FC)]
-                public byte[] Unknown;
+                [TagField(Length = 256)]
+                public ArgbColor[] PaletteColors;
             }
             
             [TagStructure(Size = 0x54)]
             public class LightmapGeometrySectionBlock : TagStructure
             {
                 public GlobalGeometrySectionInfoStructBlock GeometryInfo;
-                public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
+                public CacheFileResourceGen2 GeometryBlockInfo;
                 public List<LightmapGeometrySectionCacheDataBlock> CacheData;
                 
                 [TagStructure(Size = 0x28)]
@@ -144,7 +142,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public short ShadowCastingRigidTriangleCount;
                     public GeometryClassificationValue GeometryClassification;
                     public GeometryCompressionFlagsValue GeometryCompressionFlags;
-                    public List<GlobalGeometryCompressionInfoBlock> Unknown;
+                    public List<TagTool.Geometry.RenderGeometryCompression> Compression;
                     public sbyte HardwareNodeCount;
                     public sbyte NodeMapSize;
                     public short SoftwarePlaneCount;

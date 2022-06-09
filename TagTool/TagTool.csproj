@@ -400,6 +400,7 @@
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.AutoConvert.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Bitmap.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Effects.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Lightmaps.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Objects.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Model.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.RenderModel.cs" />
