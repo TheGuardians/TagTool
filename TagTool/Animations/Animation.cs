@@ -54,7 +54,7 @@ namespace TagTool.Animations
                 RealEulerAngles3d angles = new RealEulerAngles3d();
                 for (int index = 0; index < animationData.FrameCount; ++index)
                 {
-                    RealPoint3d = animationData.Movement_Data.Translations[index];
+                    RealPoint3d += animationData.Movement_Data.Translations[index];
                     angles = new RealEulerAngles3d 
                     { 
                         YawValue = animationData.Movement_Data.Rotations[index].YawValue,
