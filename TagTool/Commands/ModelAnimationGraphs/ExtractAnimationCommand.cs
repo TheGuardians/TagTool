@@ -64,6 +64,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
             {
                 foreach(var animation in Animation.Animations)
                 {
+                    if (animation.AnimationDataBlock == null || animation.AnimationDataBlock.Count <= 0)
+                        continue;
                     animation.AnimationData = animation.AnimationDataBlock[0];
                     var animationtypereach = animation.AnimationData.AnimationTypeReach;
                     animation.AnimationData.AnimationType = animationtypereach == ModelAnimationGraph.FrameTypeReach.None ?
@@ -74,6 +76,13 @@ namespace TagTool.Commands.ModelAnimationGraphs
             foreach (var animationindex in AnimationIndices)
             {                  
                 ModelAnimationGraph.Animation animationblock = Animation.Animations[animationindex];
+
+                if(animationblock.AnimationData == null)
+                {
+                    new TagToolWarning($"Animation {CacheContext.StringTable.GetString(animationblock.Name)} inherits from another jmad...skipping...");
+                    continue;
+                }
+
                 AnimationResourceData animationData1 = BuildAnimationResourceData(animationblock);
 
                 string str = CacheContext.StringTable.GetString(animationblock.Name).Replace(':', ' ');
@@ -225,7 +234,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         }
         public ModelAnimationGraph.Animation GetBaseAnimation(string animationName)
         {
-            var baseanims = Animation.Animations.Where(q => q.AnimationData.AnimationType == 0 && q.AnimationData.FrameInfoType == 0);
+            var baseanims = Animation.Animations.Where(q => q.AnimationData != null && q.AnimationData.AnimationType == 0 && q.AnimationData.FrameInfoType == 0);
             char separatorChar = ':';
             string[] strArray = animationName.Split(separatorChar);
             string baseAnimationPrefix = strArray.First();
