@@ -163,9 +163,9 @@ namespace TagTool.Animations.Codecs
                         RealPoint3d tangent2 = CalculateTangent(((int)num10 & 15) - 7, ((int)num11 & 15) - 7, ((int)num12 & 15) - 7, p1, p2);
                         RealPoint3d2 = CalculateCurvePosition((float)((double)(index3 - num13) / (double)(num14 - num13)), tangent1, tangent2, p1, p2);
                     }
-                    RealPoint3d2.X = (float)(((double)num9 * (double)RealPoint3d2.X + (double)num6));
-                    RealPoint3d2.Y = (float)(((double)num9 * (double)RealPoint3d2.Y + (double)num7));
-                    RealPoint3d2.Z = (float)(((double)num9 * (double)RealPoint3d2.Z + (double)num8));
+                    RealPoint3d2.X = (float)(((double)num9 * (double)RealPoint3d2.X + (double)num6) * 100.0);
+                    RealPoint3d2.Y = (float)(((double)num9 * (double)RealPoint3d2.Y + (double)num7) * 100.0);
+                    RealPoint3d2.Z = (float)(((double)num9 * (double)RealPoint3d2.Z + (double)num8) * 100.0);
                     Translations[index1][index3] = RealPoint3d2;
                 }
             }

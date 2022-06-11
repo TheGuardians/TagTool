@@ -182,7 +182,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                     ParentNode = skellynode.ParentNodeIndex,
                     FirstChildNode = skellynode.FirstChildNodeIndex,
                     NextSiblingNode = skellynode.NextSiblingNodeIndex,
-                    Translation = matchingnode.DefaultTranslation,
+                    Translation = matchingnode.DefaultTranslation * 100.0f,
                     Rotation = new Quaternion(matchingnode.DefaultRotation.I, matchingnode.DefaultRotation.J, matchingnode.DefaultRotation.K, matchingnode.DefaultRotation.W),
                     Scale = matchingnode.DefaultScale
                 });
