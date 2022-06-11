@@ -136,7 +136,7 @@ namespace TagTool.Tags.Definitions
             public enum RenderMethodPostprocessFlags : uint
             {
                 None = 0,
-                Bit0 = 1 << 0,
+                ForceSinglePass = 1 << 0, // this shader will compile as single pass even if blend mode is opaque
                 EnableAlphaTest = 1 << 1,
                 SfxDistort_ForceAlphaBlend = 1 << 2 // added by saber
             }
