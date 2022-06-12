@@ -88,10 +88,10 @@ namespace TagTool.Tags.Definitions
         public FlagsValue Flags;
         public StringId DefaultDialogueEffect;
 
-        [TagField(Length = 32)]
-        public byte[] RenderOnlyNodeFlags = new byte[32];
-        [TagField(Length = 32)]
-        public byte[] RenderOnlySectionFlags = new byte[32];
+        [TagField(Length = 8)]
+        public int[] RenderOnlyNodeFlags = new int[8];
+        [TagField(Length = 8)]
+        public int[] RenderOnlySectionFlags = new int[8];
 
         public RuntimeFlagsValue RuntimeFlags;
         [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
