@@ -457,15 +457,8 @@ namespace TagTool.Shaders.ShaderMatching
                                 optionName = "on";
                                 break;
                             // MCC rmsh //
-                            case @"albedo\chameleon_albedo_masked":
-                                optionName = "chameleon_masked";
-                                break;
                             case @"material_model\cook_torrance_pbr_maps":
                                 optionName = "cook_torrance";
-                                break;
-                            // MCC rmtr //
-                            case @"material_1\diffuse_plus_specular_plus_self_illum":
-                                optionName = "diffuse_plus_specular";
                                 break;
                         }
 
