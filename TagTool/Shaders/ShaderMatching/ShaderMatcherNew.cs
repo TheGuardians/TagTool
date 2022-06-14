@@ -416,6 +416,8 @@ namespace TagTool.Shaders.ShaderMatching
                             optionName = "always_calc_albedo";
                         if (methodName == "alpha_test" && optionName == "from_texture")
                             optionName = "simple";
+                        if (PortingCache.Version == CacheVersion.Halo3ODST && methodName == "material_model" && optionName == "cook_torrance")
+                            optionName = "cook_torrance_odst";
                         if (methodName == "material_model" && optionName == "cook_torrance_rim_fresnel")
                             optionName = "cook_torrance";
 

@@ -354,6 +354,49 @@ namespace TagTool.Commands.Porting
             // apply post option->options fixups
             ApplyPostOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
 
+            // hackfix for cook_torrance -> cook_torrance_rim_fresnel (ms23)
+            // in rim_fresnel material parameters are multiplied against the material texture, we want to negate this behaviour
+            // with new odst cook_torrance this can be removed in shader code
+            if (BlamCache.Version != CacheVersion.Halo3ODST && 
+                edRmt2Descriptor.Type == "shader" && 
+                blamRmt2Descriptor.Options[4] == 1 && 
+                edRmt2Descriptor.Options[4] == 1)
+            {
+                bool using_material_texture = false;
+                for (int i = 0; i < bmRmt2.BooleanParameterNames.Count; i++)
+                {
+                    if (BlamCache.StringTable.GetString(bmRmt2.BooleanParameterNames[i].Name) == "use_material_texture")
+                    {
+                        if ((originalRm.ShaderProperties[0].BooleanConstants & (1 << i)) == 1)
+                            using_material_texture = true;
+                    }
+                }
+                for (int i = 0; i < bmRmt2.RealParameterNames.Count; i++)
+                {
+                    if (BlamCache.StringTable.GetString(bmRmt2.RealParameterNames[i].Name) == "use_material_texture")
+                    {
+                        if (originalRm.ShaderProperties[0].RealConstants[i].Arg0 != 0.0f)
+                            using_material_texture = true;
+                    }
+                }
+
+                if (using_material_texture)
+                {
+                    for (int i = 0; i < edRmt2.RealParameterNames.Count; i++)
+                    {
+                        switch (CacheContext.StringTable.GetString(edRmt2.RealParameterNames[i].Name))
+                        {
+                            case "specular_coefficient":
+                            case "environment_map_specular_contribution":
+                            case "albedo_blend":
+                            case "roughness":
+                                newShaderProperty.RealConstants[i].Arg0 = 1.0f;
+                                break;
+                        }
+                    }
+                }
+            }
+
             finalRm.Parameters = new List<RenderMethodParameterBlock>(); // most likely not used
             finalRm.ShaderProperties[0].Template = edRmt2Instance;
             finalRm.ShaderProperties[0].TextureConstants = newShaderProperty.TextureConstants;
