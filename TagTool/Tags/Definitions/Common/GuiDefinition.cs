@@ -47,13 +47,13 @@ namespace TagTool.Tags.Definitions.Common
 
 	public enum WidgetFontValue_ODST : short
 	{
+		FullscreenHudMessage,   // Conduit 18
+		SplitscreenHudMessage,  // Agency 16
 		Terminal,               // Fixedsys 9
 		BodyText,               // Conduit 14 (?)
 		Title,                  // Conduit 32
 		SuperLargeFont,         // Agency 32
 		LargeBodyText,          // Conduit 23
-		SplitscreenHudMessage,  // Agency 16
-		FullscreenHudMessage,   // Conduit 18
 		EnglishBodyText,        // Agency 18
 		HudNumberText,          // Conduit 18
 		SubtitleFont,           // Conduit 16
