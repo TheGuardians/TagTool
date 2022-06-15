@@ -13,7 +13,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
     partial class PortTagGen2Command : Command
     {
-        public Shader ConvertShader(ShaderGen2 gen2Shader, ShaderGen2 gen2ShaderH2, Stream stream)
+        public Shader ConvertShader(ShaderGen2 gen2Shader, ShaderGen2 gen2ShaderH2, Stream cacheStream)
         {
             var ShaderBlendMode = RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.Opaque;
             string shader_template = gen2ShaderH2.Template.Name;
@@ -26,7 +26,9 @@ namespace TagTool.Commands.Porting.Gen2
                 Options = new List<Shader.RenderMethodOptionIndex>()
             };
 
-            byte[] shaderCategories = new byte[11];
+            byte[] shaderCategories = new byte[Enum.GetValues(typeof(HaloShaderGenerator.Shader.ShaderMethods)).Length];
+            for (var i = 0; i < shaderCategories.Length; i++)
+                shaderCategories[i] = 0;
 
             // Declare string lists that contain the order and contents for each of these tagblocks
             var h2_bitmap_order = new List<string> {
@@ -564,7 +566,6 @@ namespace TagTool.Commands.Porting.Gen2
             if (!Cache.TagCacheGenHO.TryGetTag(rmt2TagName + ".rmt2", out rmt2Tag))
             {
                 // Generate the template
-
                 var generator = rmt2Desc.GetGenerator(true);
 
                 GlobalPixelShader glps;
@@ -574,26 +575,26 @@ namespace TagTool.Commands.Porting.Gen2
                 if (!Cache.TagCache.TryGetTag($"shaders\\{rmt2Desc.Type}.rmdf", out rmdfTag))
                 {
                     Console.WriteLine($"Generating rmdf for \"{rmt2Desc.Type}\"");
-                    rmdf = TagTool.Shaders.ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, rmt2Desc.Type, out glps, out glvs);
+                    rmdf = TagTool.Shaders.ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(Cache, cacheStream, generator, rmt2Desc.Type, out glps, out glvs);
                     rmdfTag = Cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{rmt2Desc.Type}");
-                    Cache.Serialize(stream, rmdfTag, rmdf);
+                    Cache.Serialize(cacheStream, rmdfTag, rmdf);
                     Cache.SaveTagNames();
                 }
                 else
                 {
-                    rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, rmdfTag);
-                    glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-                    glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+                    rmdf = Cache.Deserialize<RenderMethodDefinition>(cacheStream, rmdfTag);
+                    glps = Cache.Deserialize<GlobalPixelShader>(cacheStream, rmdf.GlobalPixelShader);
+                    glvs = Cache.Deserialize<GlobalVertexShader>(cacheStream, rmdf.GlobalVertexShader);
                 }
 
-                rmt2Definition = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2TagName, out PixelShader pixl, out VertexShader vtsh);
+                rmt2Definition = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, cacheStream, rmdf, glps, glvs, generator, rmt2TagName, out PixelShader pixl, out VertexShader vtsh);
                 rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2TagName);
 
-                Cache.Serialize(stream, rmt2Tag, rmt2Definition);
+                Cache.Serialize(cacheStream, rmt2Tag, rmt2Definition);
             }
             else
             {
-                rmt2Definition = Cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
+                rmt2Definition = Cache.Deserialize<RenderMethodTemplate>(cacheStream, rmt2Tag);
             }
 
             shader.BaseRenderMethod = Cache.TagCacheGenHO.GetTag<RenderMethodDefinition>(rmt2Desc.GetRmdfName());

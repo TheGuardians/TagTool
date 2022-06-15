@@ -256,16 +256,16 @@ namespace TagTool.Tags.Definitions.Gen2
             public uint Lod0Pointer;
             public uint Lod1Pointer;
             public uint Lod2Pointer;
-
-            [TagField(Length = 0xC)]
-            public byte[] Unknown1;
+            public uint Lod3Pointer;
+            public uint Lod4Pointer;
+            public uint Lod5Pointer;
 
             public uint Lod0Size;
             public uint Lod1Size;
             public uint Lod2Size;
-
-            [TagField(Length = 0xC)]
-            public byte[] Unknown3;
+            public uint Lod3Size;
+            public uint Lod4Size;
+            public uint Lod5Size;
 
             [TagField(Flags = Short)]
             public CachedTag Datum;

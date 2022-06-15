@@ -6,6 +6,7 @@ using TagTool.Bitmaps;
 using System.IO;
 using TagTool.IO;
 using TagTool.Commands.Common;
+using System.IO.Compression;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -76,6 +77,18 @@ namespace TagTool.Commands.Porting.Gen2
 
                 //get raw bitmap data and create resource
                 byte[] rawBitmapData = Gen2Cache.GetCacheRawData(gen2Img.Lod0Pointer, (int)gen2Img.Lod0Size);
+
+                if(Gen2Cache.Version == TagTool.Cache.CacheVersion.Halo2Vista)
+                {
+                    using (var stream = new MemoryStream(rawBitmapData))
+                    using (var zstream = new GZipStream(stream, CompressionMode.Decompress))
+                    {
+                        byte[] decompressedData = new byte[rawBitmapData.Length];
+                        zstream.Read(decompressedData, 0, rawBitmapData.Length);
+                        rawBitmapData = decompressedData;
+                    }
+                }
+
                 BaseBitmap bitmapbase = new BaseBitmap(newImg);
                 bitmapbase.Data = rawBitmapData;
                 var bitmapResourceDefinition = BitmapUtils.CreateBitmapTextureInteropResource(bitmapbase);
