@@ -420,12 +420,10 @@ namespace TagTool.Serialization
             {
                 bool invalid = true;
 
-                while (invalid)
-                {
-                    foreach (string tag in valueInfo.ValidTags)
-                        if (referencedTag.IsInGroup(tag))
-                            invalid = false;
-                }
+                foreach (string tag in valueInfo.ValidTags)
+                    if (referencedTag.IsInGroup(tag))
+                        invalid = false;
+
                 if (invalid)
                     new TagToolWarning($"ERROR: Tag reference with invalid group found during serialization: {referencedTag.Name}.{referencedTag.Group.Tag}");
             }
