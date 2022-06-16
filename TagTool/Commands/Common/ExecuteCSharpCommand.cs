@@ -48,7 +48,7 @@ namespace TagTool.Commands.Common
 
         public override object Execute(List<string> args)
         {
-            var evalContext = new EvaluationContext(ContextStack);
+            dynamic evalContext = new EvaluationContext(ContextStack);
 
             if (args.Count == 0)
             {
