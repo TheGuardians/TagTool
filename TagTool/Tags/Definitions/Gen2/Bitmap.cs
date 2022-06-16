@@ -253,19 +253,19 @@ namespace TagTool.Tags.Definitions.Gen2
             public short LowDetailMipmapCount;
             public int PixelsOffset;
 
-            public uint Lod0Pointer;
-            public uint Lod1Pointer;
-            public uint Lod2Pointer;
-            public uint Lod3Pointer;
-            public uint Lod4Pointer;
-            public uint Lod5Pointer;
+            public int Lod0Pointer;
+            public int Lod1Pointer;
+            public int Lod2Pointer;
+            public int Lod3Pointer;
+            public int Lod4Pointer;
+            public int Lod5Pointer;
 
-            public uint Lod0Size;
-            public uint Lod1Size;
-            public uint Lod2Size;
-            public uint Lod3Size;
-            public uint Lod4Size;
-            public uint Lod5Size;
+            public int Lod0Size;
+            public int Lod1Size;
+            public int Lod2Size;
+            public int Lod3Size;
+            public int Lod4Size;
+            public int Lod5Size;
 
             [TagField(Flags = Short)]
             public CachedTag Datum;

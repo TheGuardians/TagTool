@@ -59,7 +59,7 @@ namespace TagTool.Commands.Porting.Gen2
                 if(clusterrenderdata.BitmapIndex != -1)
                 {
                     var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];
-                    byte[] rawBitmapData = Gen2Cache.GetCacheRawData(image.Lod0Pointer, (int)image.Lod0Size);
+                    byte[] rawBitmapData = Gen2Cache.GetCacheRawData((uint)image.Lod0Pointer, (int)image.Lod0Size);
                     var palette = lgroup.SectionPalette[clusterrenderdata.PaletteIndex];
                     List<LightmapRawVertex> lightmapRawVertices = new List<LightmapRawVertex>();
                     foreach(var vert in clustermesh.RawVertices)
