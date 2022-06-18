@@ -8,6 +8,7 @@ using TagTool.IO;
 using TagTool.Commands.Common;
 using System.IO.Compression;
 using TagTool.Common;
+using System.Numerics;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -19,7 +20,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource,
                 SpriteSpacing = gen2Bitmap.SpriteSpacing,
-                BumpMapHeight = gen2Bitmap.BumpHeight / 10.0f,
+                BumpMapHeight = gen2Bitmap.BumpHeight,
                 FadeFactor = gen2Bitmap.DetailFadeFactor,
                 Sequences = new List<Bitmap.Sequence>(),
                 Images = new List<Bitmap.Image>(),
@@ -93,6 +94,11 @@ namespace TagTool.Commands.Porting.Gen2
                     gen2Img.Format == BitmapGen2.BitmapDataBlock.FormatValue.P8Bump)
                     rawBitmapData = ConvertP8BitmapData(rawBitmapData);
 
+                //normalize X8R8G8B8 bumpmaps
+                if (gen2Img.Format == BitmapGen2.BitmapDataBlock.FormatValue.X8r8g8b8 &&
+                    gen2Bitmap.Usage == BitmapGen2.UsageValue.HeightMap)
+                    rawBitmapData = NormalizeX8R8G8B8HeightMap(rawBitmapData);
+
                 //set pixel data size after decompression and modification
                 newImg.PixelDataSize = rawBitmapData.Length;
 
@@ -125,6 +131,31 @@ namespace TagTool.Commands.Porting.Gen2
                     writer.Write(palette[reader.ReadByte()].GetValue());
             }
             return outputdata;
+        }
+
+        private byte[] NormalizeX8R8G8B8HeightMap(byte[] data)
+        {
+            using (var dataStream = new MemoryStream(data))
+            using (var outStream = new MemoryStream())
+            using (var reader = new EndianReader(dataStream))
+            using (var writer = new EndianWriter(outStream))
+            {
+                while(reader.BaseStream.Position < reader.BaseStream.Length)
+                {
+                    ArgbColor color = reader.ReadArgbColor();
+                    Vector3 vec = new Vector3(color.Red, color.Green, color.Blue);
+                    vec = Vector3.Normalize(vec);
+                    color = new ArgbColor
+                    {
+                        Alpha = color.Alpha,
+                        Red = (byte)(vec.X * 255.0f),
+                        Green = (byte)(vec.Y * 255.0f),
+                        Blue = (byte)(vec.Z * 255.0f),
+                    };
+                    writer.Write(color.GetValue());
+                }
+                return outStream.ToArray();
+            }
         }
 
         private BitmapType ConvertBitmapType(BitmapGen2.BitmapDataBlock.TypeValue type)

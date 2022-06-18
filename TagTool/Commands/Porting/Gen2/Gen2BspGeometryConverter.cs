@@ -295,7 +295,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                                 case 4:
                                     if (LightingFlags.HasFlag(RenderModelGen2.SectionLightingFlags.HasLightmapIncRad))
-                                        vertex.SecondaryLightmapIncidentDirection = element.IJK;
+                                        vertex.PrimaryLightmapIncidentDirection = element.IJK;
                                     break;
 
                                 case 5:

@@ -21,7 +21,6 @@ namespace TagTool.Commands.Porting.Gen2
 	partial class PortTagGen2Command : Command
 	{
         List<List<Gen2BSPResourceMesh>> bspMeshes = new List<List<Gen2BSPResourceMesh>>();
-
         public TagStructure ConvertScenario(TagTool.Tags.Definitions.Gen2.Scenario gen2Tag, TagTool.Tags.Definitions.Gen2.Scenario rawgen2Tag, string scenarioPath, Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             Scenario newScenario = new Scenario();
@@ -39,8 +38,6 @@ namespace TagTool.Commands.Porting.Gen2
             newScenario.SkyParameters = skyaTag;
             newScenario.GlobalLighting = chmtTag;
             newScenario.PerformanceThrottles = perfTag;
-
-            newScenario.Lightmap = ConvertLightmap(rawgen2Tag, scenarioPath, cacheStream, gen2CacheStream);
 
             //mapid and type
             newScenario.MapType = (ScenarioMapType)gen2Tag.Type;
@@ -75,6 +72,7 @@ namespace TagTool.Commands.Porting.Gen2
                 Name = Cache.StringTable.GetStringId("default"),
                 AudibilityIndex = -1
             });
+
             for (var i = 0; i < gen2Tag.StructureBsps.Count; i++)
             {
                 ScenarioStructureBsp currentbsp = Cache.Deserialize<ScenarioStructureBsp>(cacheStream, gen2Tag.StructureBsps[i].StructureBsp);
@@ -200,6 +198,8 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             ConvertScenarioPlacements(gen2Tag, newScenario);
+
+            newScenario.Lightmap = ConvertLightmap(rawgen2Tag, newScenario, scenarioPath, cacheStream, gen2CacheStream);
 
             return newScenario;
         }
