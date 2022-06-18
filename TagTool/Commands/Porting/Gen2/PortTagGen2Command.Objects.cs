@@ -71,6 +71,12 @@ namespace TagTool.Commands.Porting.Gen2
                     FirstPersonAnimations = firstperson.FirstPersonAnimations
                 });
             }
+            newweapon.MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>();
+            newweapon.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock
+            {
+                Type = TagTool.Tags.Definitions.Common.MultiplayerObjectType.Weapon,
+                SpawnTimerType = TagTool.Tags.Definitions.Common.MultiplayerObjectSpawnTimerType.StartsOnDisturbance
+            });
 
             return newweapon;
         }

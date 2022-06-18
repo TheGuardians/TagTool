@@ -110,7 +110,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "shad",
                 "sbsp",
                 "scnr",
-                "mach"
+                "mach",
+                "ligh"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -188,6 +189,9 @@ namespace TagTool.Commands.Porting.Gen2
                 case Scenario scnr:
                     Scenario oldscnr = Gen2Cache.Deserialize<Scenario>(gen2CacheStream, gen2Tag);
                     definition = ConvertScenario(scnr, oldscnr, gen2Tag.Name, cacheStream, gen2CacheStream, resourceStreams);
+                    break;
+                case Light light:
+                    definition = ConvertLight(light);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
