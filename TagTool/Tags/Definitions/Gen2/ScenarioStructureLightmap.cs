@@ -651,7 +651,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
                 public List<LightmapBucketRawVertexBlock> RawVertices;
-                public GlobalGeometryBlockInfoStructBlock GeometryBlockInfo;
+                public CacheFileResourceGen2 GeometryBlockInfo;
                 public List<LightmapVertexBufferBucketCacheDataBlock> CacheData;
                 
                 [Flags]

@@ -147,7 +147,7 @@ namespace TagTool.Commands.Porting
             if (BlamCache.Version > CacheVersion.Halo3Retail || BlamCache.Platform == CachePlatform.MCC)
                 return scenarioLightmap;
 
-            scenarioLightmap.LightmapDataReferences = new List<ScenarioLightmap.DataReferenceBlock>();
+            scenarioLightmap.PerPixelLightmapDataReferences = new List<ScenarioLightmap.DataReferenceBlock>();
 
             for (int i = 0; i < scenarioLightmap.Lightmaps.Count; i++)
             {
@@ -175,7 +175,7 @@ namespace TagTool.Commands.Porting
 
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
 
-                scenarioLightmap.LightmapDataReferences.Add(new ScenarioLightmap.DataReferenceBlock() { LightmapBspData = edTag });
+                scenarioLightmap.PerPixelLightmapDataReferences.Add(new ScenarioLightmap.DataReferenceBlock() { LightmapBspData = edTag });
             }
 
 
@@ -224,19 +224,19 @@ namespace TagTool.Commands.Porting
 
         private ScenarioLightmap ConvertReachLightmap(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, string blamTagName, ScenarioLightmap scenarioLightmap)
         {
-            for (int i = 0; i < scenarioLightmap.LightmapDataReferences.Count; i++)
+            for (int i = 0; i < scenarioLightmap.PerPixelLightmapDataReferences.Count; i++)
             {
-                var lbspTag = scenarioLightmap.LightmapDataReferences[i].LightmapBspData;
+                var lbspTag = scenarioLightmap.PerPixelLightmapDataReferences[i].LightmapBspData;
                 if (lbspTag == null)
                     continue;
 
-                Console.WriteLine($"Converting lightmap bsp: {i + 1}/{ scenarioLightmap.LightmapDataReferences.Count}");
+                Console.WriteLine($"Converting lightmap bsp: {i + 1}/{ scenarioLightmap.PerPixelLightmapDataReferences.Count}");
 
                 var Lbsp = BlamCache.Deserialize<ScenarioLightmapBspData>(blamCacheStream, lbspTag);
                 Lbsp.BspIndex = (short)i;
                 Lbsp = ConvertScenarioLightmapBspDataReach(cacheStream, blamCacheStream, resourceStreams, lbspTag.Name, lbspTag, Lbsp);
 
-                CachedTag edTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>(scenarioLightmap.LightmapDataReferences[i].LightmapBspData.Name);
+                CachedTag edTag = CacheContext.TagCacheGenHO.AllocateTag<ScenarioLightmapBspData>(scenarioLightmap.PerPixelLightmapDataReferences[i].LightmapBspData.Name);
                 CacheContext.Serialize(cacheStream, edTag, Lbsp);
             }
 

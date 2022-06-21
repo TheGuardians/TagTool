@@ -23,13 +23,13 @@ namespace TagTool.Cache.Monolithic
             Reader = new PersistChunkReader(chunk.Stream, reader.Format);
         }
 
-        public TagLayout ReadLayout()
+        public TagLayout ReadLayout(EndianFormat endianness)
         {
             var chunk = Reader.ReadNextChunk();
             if (chunk.Header.Signature != "blay")
                 throw new Exception("Invalid tag layout chunk signature");
 
-            var chunkReader = new PersistChunkReader(chunk.Stream, EndianFormat.BigEndian);
+            var chunkReader = new PersistChunkReader(chunk.Stream, endianness);
 
             var persistentId = chunkReader.ReadBytes(0x14);
             var layoutVersion = chunkReader.ReadUInt32();

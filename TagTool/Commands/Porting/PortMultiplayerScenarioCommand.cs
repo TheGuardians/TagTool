@@ -577,24 +577,24 @@ namespace TagTool.Commands.Porting
 
         private static void FixupLightmapBpsData(GameCacheHaloOnlineBase destCache, Stream destStream, ScenarioLightmap sldt)
         {
-            for (short i = 0; i < sldt.LightmapDataReferences.Count; i++)
+            for (short i = 0; i < sldt.PerPixelLightmapDataReferences.Count; i++)
             {
-                var lbsp = destCache.Deserialize<ScenarioLightmapBspData>(destStream, sldt.LightmapDataReferences[i].LightmapBspData);
+                var lbsp = destCache.Deserialize<ScenarioLightmapBspData>(destStream, sldt.PerPixelLightmapDataReferences[i].LightmapBspData);
                 lbsp.BspIndex = i;
-                destCache.Serialize(destStream, sldt.LightmapDataReferences[i].LightmapBspData, lbsp);
+                destCache.Serialize(destStream, sldt.PerPixelLightmapDataReferences[i].LightmapBspData, lbsp);
             }
         }
 
         private void ConvertLightmap(CacheVersion version, Stream srcStream, ScenarioLightmap lightmap, uint includeBspMask)
         {
-            if(lightmap.LightmapDataReferences.Count > 0)
+            if(lightmap.PerPixelLightmapDataReferences.Count > 0)
             {
                 var newLightmapDataReference = new List<ScenarioLightmap.DataReferenceBlock>();
                 for (int test_index = 0; test_index < 32; test_index++)
                 {
                     if ((includeBspMask & (1 << test_index)) > 0)
                     {
-                        foreach (var lbspTag in lightmap.LightmapDataReferences.Select(r => r.LightmapBspData))
+                        foreach (var lbspTag in lightmap.PerPixelLightmapDataReferences.Select(r => r.LightmapBspData))
                         {
                             if (lbspTag == null)
                                 continue;
@@ -608,7 +608,7 @@ namespace TagTool.Commands.Porting
                         }
                     }
                 }
-                lightmap.LightmapDataReferences = newLightmapDataReference;
+                lightmap.PerPixelLightmapDataReferences = newLightmapDataReference;
             }
             else
             {

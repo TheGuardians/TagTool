@@ -392,6 +392,7 @@
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
     <Compile Include="Commands\Common\BeginScriptCommand.cs" />
     <Compile Include="Commands\Common\EndScriptCommand.cs" />
+    <Compile Include="Commands\Tags\ImportLooseTagCommand.cs" />
     <Compile Include="Commands\Files\ConvertMapVariantCommand.cs" />
     <Compile Include="Commands\Gen2\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
     <Compile Include="Commands\Porting\Gen2\Gen2BspGeometryConverter.cs" />

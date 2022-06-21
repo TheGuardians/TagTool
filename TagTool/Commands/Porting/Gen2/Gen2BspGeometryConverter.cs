@@ -290,7 +290,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                                 case 3:
                                     if (LightingFlags.HasFlag(RenderModelGen2.SectionLightingFlags.HasLightmapTexcoords))
-                                        vertex.PrimaryLightmapTexcoord = element.XY;
+                                        vertex.PrimaryLightmapTexcoord = element.IJ;
                                     break;
 
                                 case 4:

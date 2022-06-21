@@ -14,18 +14,17 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
         public List<ScenarioLightmapBspData> Lightmaps;
 
-        public List<DataReferenceBlock> LightmapDataReferences;
+        public List<DataReferenceBlock> PerPixelLightmapDataReferences;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<CachedTag> Unknown2;
+        public List<CachedTag> PerVertexLightmapDataReferences;
 
         public List<Airprobe> Airprobes;
         public List<SceneryLightProbe> SceneryLightProbes;
         public List<MachineLightProbes> MachineLightProbes;
 
-        // block is always empty, format not known
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<int> Unknown5;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] DeprecatedLightmapBspDataBlock = new byte[0xC];
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<NullBlock> Unknown3Reach;

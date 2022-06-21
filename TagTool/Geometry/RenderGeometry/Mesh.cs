@@ -201,10 +201,10 @@ namespace TagTool.Geometry
             public RealVector3d AnisotropicBinormal;
             public RealPoint2d SecondaryTexcoord;
             public RealRgbColor PrimaryLightmapColor;
-            public RealPoint2d PrimaryLightmapTexcoord;
+            public RealVector2d PrimaryLightmapTexcoord;
             public RealVector3d PrimaryLightmapIncidentDirection;
             public RealRgbColor SecondaryLightmapColor;
-            public RealPoint2d SecondaryLightmapTexcoord;
+            public RealVector2d SecondaryLightmapTexcoord;
             public RealVector3d SecondaryLightmapIncidentDirection;
         }
 

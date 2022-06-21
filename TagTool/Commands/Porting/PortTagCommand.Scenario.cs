@@ -497,9 +497,9 @@ namespace TagTool.Commands.Porting
                     // In reach this is the mesh index, the per pixel data is indexed by instance index instead, 
                     // with a -1 vertex buffer index for instances that do not have per pixel data
 
-                    if (lightmap.LightmapDataReferences[i].LightmapBspData != null)
+                    if (lightmap.PerPixelLightmapDataReferences[i].LightmapBspData != null)
                     {
-                        var Lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData);
+                        var Lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, lightmap.PerPixelLightmapDataReferences[i].LightmapBspData);
                         var newPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
                         for (int instanceIndex = 0; instanceIndex < sbsp.InstancedGeometryInstances.Count; instanceIndex++)
                         {
@@ -530,7 +530,7 @@ namespace TagTool.Commands.Porting
                             }
                         }
 
-                        CacheContext.Serialize(cacheStream, lightmap.LightmapDataReferences[i].LightmapBspData, Lbsp);
+                        CacheContext.Serialize(cacheStream, lightmap.PerPixelLightmapDataReferences[i].LightmapBspData, Lbsp);
                     }
 
                     // Fixup instance bsp physics

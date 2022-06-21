@@ -1134,13 +1134,13 @@ namespace TagTool.Commands.Porting
                     //fixup lightmap bsp references
                     if (BlamCache.Version >= CacheVersion.HaloReach)
                     {
-                        for (short i = 0; i < sLdT.LightmapDataReferences.Count; i++)
+                        for (short i = 0; i < sLdT.PerPixelLightmapDataReferences.Count; i++)
                         {
-                            if(sLdT.LightmapDataReferences[i].LightmapBspData != null)
+                            if(sLdT.PerPixelLightmapDataReferences[i].LightmapBspData != null)
                             {
-                                var lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, sLdT.LightmapDataReferences[i].LightmapBspData);
+                                var lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, sLdT.PerPixelLightmapDataReferences[i].LightmapBspData);
                                 lbsp.BspIndex = i;
-                                CacheContext.Serialize(cacheStream, sLdT.LightmapDataReferences[i].LightmapBspData, lbsp);
+                                CacheContext.Serialize(cacheStream, sLdT.PerPixelLightmapDataReferences[i].LightmapBspData, lbsp);
                             }
                         }
                     }
