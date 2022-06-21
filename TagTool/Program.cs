@@ -26,8 +26,6 @@ namespace TagTool.Commands
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
             ConsoleHistory.Initialize();
 
-            Console.SetWindowSize(165, 45);
-
             // If there are extra arguments, use them to automatically execute a command
             List<string> autoexecCommand = null;
             if (args.Length > 1)
