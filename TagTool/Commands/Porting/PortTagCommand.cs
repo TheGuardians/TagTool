@@ -364,7 +364,7 @@ namespace TagTool.Commands.Porting
                 scenario.SquadPatrols.Clear();
                 scenario.SquadGroups.Clear();
                 scenario.AiObjectives.Clear();
-                scenario.AiPathfindingData.Clear();
+                scenario.AiUserHintData.Clear();
                 scenario.Scripts.Clear();
                 scenario.ScriptStrings = null;
 

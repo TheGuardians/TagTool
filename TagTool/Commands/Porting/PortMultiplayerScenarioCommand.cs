@@ -684,11 +684,11 @@ namespace TagTool.Commands.Porting
                 //Scenario.TriggerVolumes?.Clear();
                 Scenario.RecordedAnimations?.Clear();
                 Scenario.ZonesetSwitchTriggerVolumes?.Clear();
-                Scenario.Unknown32?.Clear();
-                Scenario.Unknown33?.Clear();
-                Scenario.Unknown34?.Clear();
-                Scenario.Unknown35?.Clear();
-                Scenario.Unknown36?.Clear();
+                Scenario.EnemyForbidInfluence?.Clear();
+                Scenario.EnemyBiasInfluence?.Clear();
+                Scenario.AllyBiasInfluence?.Clear();
+                Scenario.SelectedAllyBiasInfluence?.Clear();
+                Scenario.DeadTeammateInfluence?.Clear();
                 Scenario.StylePalette?.Clear();
                 Scenario.SquadGroups?.Clear();
                 Scenario.Squads?.Clear();
@@ -722,13 +722,13 @@ namespace TagTool.Commands.Porting
                 Scenario.ObjectReferenceFrames?.Clear();
                 Scenario.AiObjectives?.Clear();
                 Scenario.DesignerZoneSets?.Clear();
-                Scenario.Unknown135?.Clear();
+                Scenario.ZoneDebugger?.Clear();
                 Scenario.ScenarioMetagame?.Clear();
                 Scenario.EditorFolders?.Clear();
 
                 // if we're not interested in path finding data clear that out too
                 if (!ConversionFlags.HasFlag(MultiplayerScenarioConversionFlags.PathFinding))
-                    Scenario.AiPathfindingData.Clear();
+                    Scenario.AiUserHintData.Clear();
             }
 
             private void ConvertSkies()

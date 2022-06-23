@@ -293,7 +293,7 @@ namespace TagTool.Commands.Scenarios
             scnr.MapType = ScenarioMapType.Multiplayer;
             scnr.CampaignId = -1;
             scnr.MapId = mapId;
-            scnr.SoftSurfaces = new List<SoftSurfaceBlock>() { new SoftSurfaceBlock() { Unknown1 = 0 } };
+            scnr.SoftSurfaces = new List<SoftSurfaceBlock>() { new SoftSurfaceBlock() { Padding0 = new byte[4] } };
             scnr.ZoneSets = new List<ZoneSet>() {
                         new ZoneSet() {
                         Name = Cache.StringTable.GetStringId("default"),

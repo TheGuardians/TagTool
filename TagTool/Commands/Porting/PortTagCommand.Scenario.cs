@@ -180,7 +180,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                foreach (var pathfindingdata in scnr.AiPathfindingData)
+                foreach (var pathfindingdata in scnr.AiUserHintData)
                 {
                     foreach (var cookieCutter in pathfindingdata.CookieCutters)
                     {
@@ -488,7 +488,7 @@ namespace TagTool.Commands.Porting
                     // Reach doesn't have these blocks in sbsp anymore, move it back
                     sbsp.CameraFxPalette = scnr.CameraFx;
                     sbsp.AtmospherePalette = scnr.Atmosphere;
-                    sbsp.AcousticsPalette = scnr.BackgroundSoundEnvironmentPalette;
+                    sbsp.AcousticsPalette = scnr.AcousticsPalette;
 
 
                     // Rebuild reach instanced geometry instance per pixel data
