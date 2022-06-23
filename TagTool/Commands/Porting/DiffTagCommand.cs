@@ -30,7 +30,6 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-            CachedTag tag1, tag2;
             bool simple = false;
 
             if (args.Count < 1)
@@ -46,10 +45,20 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            if (!Cache1.TagCache.TryGetCachedTag(args[0], out tag1))
+            if (!Cache1.TagCache.TryGetCachedTag(args[0], out CachedTag tag1))
                 return new TagToolError(CommandError.TagInvalid, $"\"{args[0]}\"");
-            if (!Cache2.TagCache.TryGetCachedTag(args.Count > 1 ? args[1] : args[0], out tag2))
-                return new TagToolError(CommandError.TagInvalid, $"\"{(args.Count > 1 ? args[1] : args[0])}\"");
+
+            string tag2name;
+
+            if (tag1.Name.StartsWith("ms30\\") && args.Count == 1)
+            {
+                tag2name = args[0].Replace("ms30\\", "");
+            }
+            else
+                tag2name = args[1];
+
+            if (!Cache2.TagCache.TryGetCachedTag(tag2name, out CachedTag tag2))
+                return new TagToolError(CommandError.TagInvalid, $"\"{(args.Count > 1 ? args[1] : tag2name)}\"");
 
             var differences = new List<Difference>();
 
