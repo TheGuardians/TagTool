@@ -55,6 +55,11 @@ namespace TagTool.Commands.Porting.Gen2
                     TranslateTagStructure(devicemachine, newdevicemachine);
                     newdevicemachine.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Machine };
                     return newdevicemachine;
+                case TagTool.Tags.Definitions.Gen2.Equipment equipment:
+                    Equipment newequipment = new Equipment();
+                    TranslateTagStructure(equipment, newequipment);
+                    newequipment.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Equipment };
+                    return newequipment;
                 default:
                     return null;
             }

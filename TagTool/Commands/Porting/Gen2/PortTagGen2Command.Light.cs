@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Geometry;
-using TagTool.Tags;
-using TagTool.Tags.Definitions;
-using TagTool.IO;
-using TagTool.Serialization;
-using TagTool.Cache.Gen2;
+﻿using TagTool.Tags.Definitions;
 using LightGen2 = TagTool.Tags.Definitions.Gen2.Light;
-using System.IO;
-using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting.Gen2
 {

@@ -75,6 +75,7 @@ namespace TagTool.Cache
                     cachePlatform = CachePlatform.Original;
                     break;
                 case "11081.07.04.30.0934.main":
+                case "11122.07.08.24.1808.main":
                     version = CacheVersion.Halo2Vista;
                     cachePlatform = CachePlatform.Original;
                     break;

@@ -592,7 +592,6 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "one_alpha_env":
                 case "one_alpha_env_active_camo":
-                case "sky_one_alpha_env":
                     {
                         shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Texture;
                         shaderCategories[(int)ShaderMethods.Environment_Mapping] = (byte)Environment_Mapping.Custom_Map;
@@ -615,6 +614,36 @@ namespace TagTool.Commands.Porting.Gen2
                             h2_vertex_constants[4] = "+specular_mask_texture";
                             h2_vertex_constants[6] = "+base_map";
                             h2_vertex_constants[7] = "\0";
+                        }
+
+                        h2_pixel_constants[0] = "env_tint_color";
+                        h2_pixel_constants[1] = "albedo_color";
+                        h2_pixel_constants[2] = "\0";
+                        break;
+                    }
+                case "sky_one_alpha_env":
+                    {
+                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Texture;
+                        shaderCategories[(int)ShaderMethods.Environment_Mapping] = (byte)Environment_Mapping.Custom_Map;
+                        shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Alpha_Blend;
+                        ShaderBlendMode = RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.AlphaBlend;
+
+                        h2_bitmap_order[0] = "environment_map";
+                        h2_bitmap_order[1] = "specular_mask_texture";
+                        h2_bitmap_order[2] = "base_map";
+                        h2_bitmap_order[3] = "\0";
+
+                        if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                        {
+                            h2_vertex_constants[0] = "+specular_mask_texture";
+                            h2_vertex_constants[2] = "+base_map";
+                            h2_vertex_constants[3] = "\0";
+                        }
+                        else
+                        {
+                            h2_vertex_constants[0] = "+specular_mask_texture";
+                            h2_vertex_constants[2] = "+base_map";
+                            h2_vertex_constants[3] = "\0";
                         }
 
                         h2_pixel_constants[0] = "env_tint_color";
