@@ -112,7 +112,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "scnr",
                 "mach",
                 "ligh",
-                "eqip"
+                "eqip",
+                "ctrl"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -175,6 +176,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case CameraTrack track:
                 case DeviceMachine devicemachine:
                 case Equipment equipment:
+                case DeviceControl devicecontrol:
                     definition = ConvertObject(gen2definition, cacheStream);
                     break;
                 case DamageEffect damage:

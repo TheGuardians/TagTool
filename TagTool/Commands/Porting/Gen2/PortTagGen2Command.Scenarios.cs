@@ -635,7 +635,28 @@ namespace TagTool.Commands.Porting.Gen2
         public void ConvertScenarioPlacements(TagTool.Tags.Definitions.Gen2.Scenario gen2Tag, TagTool.Tags.Definitions.Gen2.Scenario rawgen2tag,
             Scenario newScenario, Stream gen2CacheStream, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
-            //device machines
+            // Object names
+            foreach (var objname in gen2Tag.ObjectNames)
+            {
+                newScenario.ObjectNames.Add(new Scenario.ObjectName {
+                    Name = objname.Name,
+                    ObjectType = objname.ObjectType,
+                    PlacementIndex = objname.PlacementIndex
+                });
+            }
+
+            // Device Groups
+            foreach (var devgroup in gen2Tag.DeviceGroups)
+            {
+                newScenario.DeviceGroups.Add(new Scenario.DeviceGroup
+                {
+                    Name = devgroup.Name,
+                    InitialValue = devgroup.InitialValue,
+                    Flags = (Scenario.DeviceGroupFlags)devgroup.Flags
+                });
+            }
+
+            // Device machines
             foreach (var macpal in gen2Tag.MachinePalette)
             {
                 newScenario.MachinePalette.Add(new Scenario.ScenarioPaletteEntry
@@ -669,7 +690,40 @@ namespace TagTool.Commands.Porting.Gen2
                 });
             }
 
-            //crates
+            // Device controls
+            foreach (var ctrlpal in gen2Tag.ControlPalette)
+            {
+                newScenario.ControlPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = ctrlpal.Name
+                });
+            }
+            for (var ctrlobjindex = 0; ctrlobjindex < gen2Tag.Controls.Count; ctrlobjindex++)
+            {
+                var ctrlobj = gen2Tag.Controls[ctrlobjindex];
+                newScenario.Controls.Add(new Scenario.ControlInstance
+                {
+                    PaletteIndex = ctrlobj.Type,
+                    NameIndex = ctrlobj.Name,
+                    PlacementFlags = (Scenario.ObjectPlacementFlags)ctrlobj.ObjectData.PlacementFlags,
+                    Position = ctrlobj.ObjectData.Position,
+                    Rotation = ctrlobj.ObjectData.Rotation,
+                    Scale = ctrlobj.ObjectData.Scale,
+                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)ctrlobj.ObjectData.BspPolicy,
+                    OriginBspIndex = (short)ctrlobj.ObjectData.ManualBspFlags,
+                    CanAttachToBspFlags = (ushort)(ctrlobj.ObjectData.ManualBspFlags + 1),
+                    Source = (Scenario.ScenarioInstance.SourceValue)ctrlobj.ObjectData.ObjectId.Source,
+                    UniqueHandle = new DatumHandle((uint)ctrlobj.ObjectData.ObjectId.UniqueId),
+                    EditorFolder = -1,
+                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Control },
+                    ControlFlags = (Scenario.ControlInstance.ScenarioControlFlags)ctrlobj.ControlData.Flags,
+                    DeviceFlags = (Scenario.ScenarioDeviceFlags)ctrlobj.DeviceData.Flags,
+                    PowerGroup = ctrlobj.DeviceData.PowerGroup,
+                    PositionGroup = ctrlobj.DeviceData.PositionGroup
+                });
+            }
+
+            // Crates
             foreach (var blocpal in gen2Tag.CratesPalette)
             {
                 newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry
@@ -698,7 +752,7 @@ namespace TagTool.Commands.Porting.Gen2
                 });
             }
 
-            //scenery
+            // Scenery
             foreach (var scenpal in gen2Tag.SceneryPalette)
             {
                 newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
@@ -731,7 +785,7 @@ namespace TagTool.Commands.Porting.Gen2
 
             }
 
-            //player starting locations
+            // Player starting locations
             foreach (var startlocation in gen2Tag.PlayerStartingLocations)
             {
                 newScenario.PlayerStartingLocations.Add(new Scenario.PlayerStartingLocation
@@ -742,7 +796,7 @@ namespace TagTool.Commands.Porting.Gen2
                 });
             }
 
-            //spawn points from starting locations
+            // Spawn points from starting locations
             if (newScenario.MapType == ScenarioMapType.Multiplayer)
             {
                 newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
@@ -1071,7 +1125,7 @@ namespace TagTool.Commands.Porting.Gen2
                                             found = true;
                                             var equipment = new Scenario.EquipmentInstance
                                             {
-                                                PaletteIndex = 0,
+                                                PaletteIndex = i,
                                                 NameIndex = -1,
                                                 PlacementFlags = Scenario.ObjectPlacementFlags.None,
                                                 Position = NetgameEquipment.Position,

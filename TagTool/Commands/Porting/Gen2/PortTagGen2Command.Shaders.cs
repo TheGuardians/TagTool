@@ -264,6 +264,32 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order[3] = "\0";
                         break;
                     }
+                case "tex_bump_dprs_env":
+                    {
+                        shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
+                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
+                        shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
+                        shaderCategories[(int)ShaderMethods.Environment_Mapping] = (byte)Environment_Mapping.Custom_Map;
+
+                        h2_vertex_constants[0] = "bump_map";
+                        h2_vertex_constants[1] = "base_map";
+                        h2_vertex_constants[2] = "detail_map";
+                        h2_vertex_constants[8] = "env_tint_color";
+                        h2_vertex_constants[10] = "environment_map_specular_contribution";
+                        h2_vertex_constants[11] = "\0";
+                        
+                        h2_pixel_constants[0] = "normal_specular_tint";
+                        h2_pixel_constants[1] = "glancing_specular_tint";
+                        h2_pixel_constants[2] = "\0";
+                        
+                        h2_bitmap_order[0] = "bump_map";
+                        h2_bitmap_order[1] = "alpha_test_map";
+                        h2_bitmap_order[2] = "base_map";
+                        h2_bitmap_order[3] = "detail_map";
+                        h2_bitmap_order[4] = "environment_map";
+                        h2_bitmap_order[5] = "\0";
+                        break;
+                    }
                 case "tex_bump_env":
                 case "tex_bump_env_clamped":
                 case "tex_bump_env_combined":
@@ -553,6 +579,47 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order[4] = "\0";
                         break;
                     }
+                case "tex_bump_one_change_color":
+                    {
+                        shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Two_Change_Color;
+                        shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
+                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
+                        shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
+
+                        h2_vertex_constants[0] = "bump_map";
+                        h2_vertex_constants[1] = "base_map";
+                        h2_vertex_constants[2] = "change_color_map";
+                        h2_vertex_constants[3] = "\0";
+                        
+                        h2_pixel_constants[0] = "normal_specular_tint";
+                        h2_pixel_constants[1] = "glancing_specular_tint";
+                        h2_pixel_constants[2] = "\0";
+
+                        h2_bitmap_order[0] = "bump_map";
+                        h2_bitmap_order[1] = "base_map";
+                        h2_bitmap_order[2] = "change_color_map";
+                        h2_bitmap_order[3] = "\0";
+                        break;
+                    }
+                case "illum":
+                    {
+                        shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Constant_Color;
+                        shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
+                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
+                        shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
+                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.Simple;
+
+                        h2_vertex_constants[0] = "self_illum_map";
+                        h2_vertex_constants[1] = "\0";
+
+                        h2_pixel_constants[0] = "self_illum_color";
+                        h2_pixel_constants[1] = "\0";
+
+                        h2_bitmap_order[0] = "self_illum_map";
+                        h2_bitmap_order[1] = "\0";
+                        break;
+                    }
+
                 case "illum_3_channel":
                     {
                         shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Constant_Color;

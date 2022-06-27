@@ -14,8 +14,8 @@ using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting.Gen2
 {
-	partial class PortTagGen2Command : Command
-	{
+    partial class PortTagGen2Command : Command
+    {
         public TagStructure ConvertObject(object gen2Tag, Stream cacheStream)
         {
             switch (gen2Tag)
@@ -60,6 +60,11 @@ namespace TagTool.Commands.Porting.Gen2
                     TranslateTagStructure(equipment, newequipment);
                     newequipment.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Equipment };
                     return newequipment;
+                case TagTool.Tags.Definitions.Gen2.DeviceControl devicecontrol:
+                    DeviceControl newdevicecontrol = new DeviceControl();
+                    TranslateTagStructure(devicecontrol, newdevicecontrol);
+                    newdevicecontrol.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Control };
+                    return newdevicecontrol;
                 default:
                     return null;
             }
@@ -68,7 +73,7 @@ namespace TagTool.Commands.Porting.Gen2
         public Weapon FixupWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag, Weapon newweapon)
         {
             newweapon.FirstPerson = new List<Weapon.FirstPersonBlock>();
-            foreach(var firstperson in gen2Tag.PlayerInterface.FirstPerson)
+            foreach (var firstperson in gen2Tag.PlayerInterface.FirstPerson)
             {
                 newweapon.FirstPerson.Add(new Weapon.FirstPersonBlock
                 {
@@ -82,24 +87,26 @@ namespace TagTool.Commands.Porting.Gen2
                 Type = TagTool.Tags.Definitions.Common.MultiplayerObjectType.Weapon,
                 SpawnTimerType = TagTool.Tags.Definitions.Common.MultiplayerObjectSpawnTimerType.StartsOnDisturbance
             });
+            newweapon.WeaponFlags = new WeaponFlags();
 
+            TranslateEnum(gen2Tag.WeaponFlags, out newweapon.WeaponFlags.NewFlags, newweapon.WeaponFlags.NewFlags.GetType());
             return newweapon;
         }
 
         public Scenery FixupScenery(TagTool.Tags.Definitions.Gen2.Scenery gen2Tag, Scenery newscenery, Stream cacheStream)
         {
             //fixup for coll model reference in bsp physics
-            if(newscenery.Model != null)
+            if (newscenery.Model != null)
             {
                 Model model = Cache.Deserialize<Model>(cacheStream, newscenery.Model);
-                if(model.CollisionModel != null)
+                if (model.CollisionModel != null)
                 {
                     CollisionModel coll = Cache.Deserialize<CollisionModel>(cacheStream, model.CollisionModel);
-                    foreach(var region in coll.Regions)
+                    foreach (var region in coll.Regions)
                     {
-                        foreach(var perm in region.Permutations)
+                        foreach (var perm in region.Permutations)
                         {
-                            if(perm.BspPhysics != null)
+                            if (perm.BspPhysics != null)
                             {
                                 foreach (var bsp in perm.BspPhysics)
                                 {
@@ -164,8 +171,8 @@ namespace TagTool.Commands.Porting.Gen2
                     vehi.PhysicsTypes.HumanJeep = new List<Vehicle.HumanJeepPhysics>();
                     var newjeep = new Vehicle.HumanJeepPhysics
                     {
-                        Steering = new Vehicle.VehicleSteeringControl 
-                        { 
+                        Steering = new Vehicle.VehicleSteeringControl
+                        {
                             OverdampenCuspAngle = gen2Tag.OverdampenCuspAngle,
                             OverdampenExponent = gen2Tag.OverdampenExponent
                         },
@@ -338,6 +345,6 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
             }
             return vehi;
-        }       
+        }
     }
 }

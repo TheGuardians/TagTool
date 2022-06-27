@@ -379,10 +379,10 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             [TagField(Length = 32)]
             public string Name;
-            public short Unknown;
-            public short Unknown1;
+            public GameObjectType ObjectType;
+            public short PlacementIndex;
         }
-        
+
         [TagStructure(Size = 0x5C)]
         public class ScenarioSceneryBlock : TagStructure
         {

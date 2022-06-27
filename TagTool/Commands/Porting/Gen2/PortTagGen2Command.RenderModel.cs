@@ -114,7 +114,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
 
                     var section = gen2RenderModel.Sections[sectionIndex];
-                    BuildMeshes(builder, section.Meshes, section.GeometryClassification, section.OpaqueMaxNodesVertex, section.RigidNode);
+                    BuildMeshes(Gen2Cache, builder, section.Meshes, section.GeometryClassification, section.OpaqueMaxNodesVertex, section.RigidNode);
                     
                     builder.EndPermutation();
                 }

@@ -18,7 +18,8 @@ namespace TagTool.Commands.Porting.Gen2
 {
     class Gen2RenderGeometryConverter
     {
-        public static void BuildMeshes(RenderModelBuilder builder, List<Gen2ResourceMesh> meshes, RenderGeometryClassification geometrytype, int maxvertexnodes, int rigidnode)
+        public static void BuildMeshes(GameCacheGen2 Gen2Cache, RenderModelBuilder builder, List<Gen2ResourceMesh> meshes, 
+            RenderGeometryClassification geometrytype, int maxvertexnodes, int rigidnode)
         {
             foreach (var mesh in meshes)
             {
@@ -31,13 +32,22 @@ namespace TagTool.Commands.Porting.Gen2
                 for (var vertex_index = 0; vertex_index < mesh.RawVertices.Count; vertex_index++)
                 {
                     var vertex = mesh.RawVertices[vertex_index];
+                    RealVector2d Texcoord = vertex.Texcoord.IJ;
+
+                    // Normalize texcoords to 0 to 1 instead of -1 to 1 for h2v
+                    if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                    {
+                        Texcoord.I = (Texcoord.I + 1) / 2;
+                        Texcoord.J = (Texcoord.J + 1) / 2;
+                    }
+
                     switch (geometrytype)
                     {
                         case RenderGeometryClassification.Worldspace:
                             worldVertices.Add(new WorldVertex
                             {
                                 Position = new RealQuaternion(vertex.Point.Position.ToArray()),
-                                Texcoord = vertex.Texcoord.IJ,
+                                Texcoord = Texcoord,
                                 Normal = vertex.Normal,
                                 Tangent = new RealQuaternion(vertex.Tangent.ToArray()),
                                 Binormal = vertex.Binormal
@@ -48,7 +58,7 @@ namespace TagTool.Commands.Porting.Gen2
                             rigidVertices.Add(new RigidVertex
                             {
                                 Position = new RealQuaternion(vertex.Point.Position.ToArray()),
-                                Texcoord = vertex.Texcoord.IJ,
+                                Texcoord = Texcoord,
                                 Normal = vertex.Normal,
                                 Tangent = new RealQuaternion(vertex.Tangent.ToArray()),
                                 Binormal = vertex.Binormal
@@ -60,7 +70,7 @@ namespace TagTool.Commands.Porting.Gen2
                             SkinnedVertex newskinned = new SkinnedVertex
                             {
                                 Position = new RealQuaternion(vertex.Point.Position.ToArray()),
-                                Texcoord = vertex.Texcoord.IJ,
+                                Texcoord = Texcoord,
                                 Normal = vertex.Normal,
                                 Tangent = new RealQuaternion(vertex.Tangent.ToArray()),
                                 Binormal = vertex.Binormal,

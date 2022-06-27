@@ -500,7 +500,7 @@ namespace TagTool.Tags.Definitions
         }
     }
 
-    public enum GameObjectTypeHalo2 : sbyte
+    public enum GameObjectTypeHalo2 : short
     {
         Biped,
 		Vehicle,

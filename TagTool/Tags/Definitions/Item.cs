@@ -32,8 +32,8 @@ namespace TagTool.Tags.Definitions
         public CachedTag DetonatingEffect;
         public CachedTag DetonationEffect;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public float CampaignGroundScale;
-        public float MultiplayerGroundScale;
+        public float MultiplayerOnGroundScale;
+        public float CampaignOnGroundScale;
         public float SmallUnitHoldScale;
         public float SmallUnitHolsterScale;
         public float MediumUnitHoldScale;
