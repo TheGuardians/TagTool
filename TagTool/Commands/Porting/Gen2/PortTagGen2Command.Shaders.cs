@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HaloShaderGenerator.Shader;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +8,6 @@ using TagTool.Commands.Common;
 using TagTool.Shaders.ShaderMatching;
 using TagTool.Tags.Definitions;
 using ShaderGen2 = TagTool.Tags.Definitions.Gen2.Shader;
-using HaloShaderGenerator.Shader;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -190,10 +190,9 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_pixel_constants[2] = "\0";
 
                         h2_bitmap_order[0] = "bump_map";
-                        if (gen2ShaderH2.PostprocessDefinition[0].Bitmaps[1].Bitmap.Name == "shaders\\default_bitmaps\\bitmaps\\default_vector" ||
-                            gen2ShaderH2.PostprocessDefinition[0].Bitmaps[1].Bitmap.Name == "shaders\\default_bitmaps\\bitmaps\\default_multiplicative")
+                        if (gen2ShaderH2.PostprocessDefinition[0].Bitmaps[1].Bitmap.Name == "shaders\\default_bitmaps\\bitmaps\\color_white")
                         {
-                            h2_bitmap_order_pass2[2] = "alpha_test_map";
+                            h2_bitmap_order_pass2[0] = "alpha_test_map";
                         }
                         else
                         {
@@ -277,11 +276,11 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_vertex_constants[8] = "env_tint_color";
                         h2_vertex_constants[10] = "environment_map_specular_contribution";
                         h2_vertex_constants[11] = "\0";
-                        
+
                         h2_pixel_constants[0] = "normal_specular_tint";
                         h2_pixel_constants[1] = "glancing_specular_tint";
                         h2_pixel_constants[2] = "\0";
-                        
+
                         h2_bitmap_order[0] = "bump_map";
                         h2_bitmap_order[1] = "alpha_test_map";
                         h2_bitmap_order[2] = "base_map";
@@ -437,7 +436,7 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_pixel_constants[6] = "\0";
 
                         h2_bitmap_order[0] = "bump_map";
-                        if (gen2ShaderH2.PostprocessDefinition[0].Bitmaps[1].Bitmap.Name == "shaders\\default_bitmaps\\bitmaps\\default_vector" || 
+                        if (gen2ShaderH2.PostprocessDefinition[0].Bitmaps[1].Bitmap.Name == "shaders\\default_bitmaps\\bitmaps\\default_vector" ||
                             gen2ShaderH2.PostprocessDefinition[0].Bitmaps[1].Bitmap.Name == "shaders\\default_bitmaps\\bitmaps\\default_multiplicative")
                         {
                             h2_bitmap_order_pass2[2] = "alpha_test_map";
@@ -590,7 +589,7 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_vertex_constants[1] = "base_map";
                         h2_vertex_constants[2] = "change_color_map";
                         h2_vertex_constants[3] = "\0";
-                        
+
                         h2_pixel_constants[0] = "normal_specular_tint";
                         h2_pixel_constants[1] = "glancing_specular_tint";
                         h2_pixel_constants[2] = "\0";
@@ -606,7 +605,6 @@ namespace TagTool.Commands.Porting.Gen2
                         shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Constant_Color;
                         shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
                         shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
-                        shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
                         shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.Simple;
 
                         h2_vertex_constants[0] = "self_illum_map";
@@ -664,7 +662,7 @@ namespace TagTool.Commands.Porting.Gen2
                         shaderCategories[(int)ShaderMethods.Environment_Mapping] = (byte)Environment_Mapping.Custom_Map;
                         shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Alpha_Blend;
                         ShaderBlendMode = RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.AlphaBlend;
-                        
+
                         h2_bitmap_order[0] = "environment_map";
                         h2_bitmap_order[1] = "specular_mask_texture";
                         h2_bitmap_order[2] = "base_map";
@@ -676,7 +674,7 @@ namespace TagTool.Commands.Porting.Gen2
                             h2_vertex_constants[2] = "+base_map";
                             h2_vertex_constants[3] = "\0";
                         }
-                        else 
+                        else
                         {
                             h2_vertex_constants[4] = "+specular_mask_texture";
                             h2_vertex_constants[6] = "+base_map";
@@ -1000,94 +998,20 @@ namespace TagTool.Commands.Porting.Gen2
                     // try to find and convert Vertex Constants to Float Constants
                     if (found == false)
                     {
-                        for (var i = 0; h2_vertex_constants[i] != "\0"; i++)
-                        {
-                            string temp_type = null;
-                            char[] symbol = h2_vertex_constants[i].Substring(0, 1).ToCharArray().DeepClone();
-                            foreach (var modifier in modifiers)
-                            {
-                                if (symbol[0] == modifier) temp_type = h2_vertex_constants[i].Remove(0, 1);
-                            }
+                        RenderMethod.RenderMethodPostprocessBlock.RealConstant newfloatconstant = 
+                            MatchVertexConstant(h2_vertex_constants, modifiers, h2vertex_constant, current_type, ref found);
 
-                            if (h2_vertex_constants[i] == current_type || temp_type == current_type)
-                            {
-                                found = true;
-                                RenderMethod.RenderMethodPostprocessBlock.RealConstant newfloatconstant = new RenderMethod.RenderMethodPostprocessBlock.RealConstant();
-                                switch (symbol[0])
-                                {
-                                    case '!':
-                                        {
-                                            newfloatconstant.Arg0 = h2vertex_constant[i].W;
-                                            newfloatconstant.Arg1 = h2vertex_constant[i].Vector3.K;
-                                            newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.J;
-                                            newfloatconstant.Arg3 = h2vertex_constant[i].Vector3.I;
-                                        };
-                                        break;
-                                    case '+':
-                                        {
-                                            newfloatconstant.Arg0 = h2vertex_constant[i].Vector3.I;
-                                            newfloatconstant.Arg1 = h2vertex_constant[i + 1].Vector3.J;
-                                            newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.K;
-                                            newfloatconstant.Arg3 = h2vertex_constant[i].W;
-                                        };
-                                        break;
-                                    default:
-                                        newfloatconstant.Arg0 = h2vertex_constant[i].Vector3.I;
-                                        newfloatconstant.Arg1 = h2vertex_constant[i].Vector3.J;
-                                        newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.K;
-                                        newfloatconstant.Arg3 = h2vertex_constant[i].W;
-                                        break;
-                                }
-                                newPostprocessBlock.RealConstants.Add(newfloatconstant);
-                            }
-                        }
+                        if (newfloatconstant != null) newPostprocessBlock.RealConstants.Add(newfloatconstant);
                     }
 
                     // If any Vertex Constants with matching types aren't found
                     // try to find and convert Vertex Constants from the second vertex constants list
                     if (found == false)
                     {
-                        for (var i = 0; h2_vertex_constants_pass2[i] != "\0"; i++)
-                        {
-                            string temp_type = null;
-                            char[] symbol = h2_vertex_constants_pass2[i].Substring(0, 1).ToCharArray().DeepClone();
-                            foreach (var modifier in modifiers)
-                            {
-                                if (symbol[0] == modifier) temp_type = h2_vertex_constants_pass2[i].Remove(0, 1);
-                            }
+                        RenderMethod.RenderMethodPostprocessBlock.RealConstant newfloatconstant =
+                            MatchVertexConstant(h2_vertex_constants_pass2, modifiers, h2vertex_constant, current_type, ref found);
 
-                            if (h2_vertex_constants_pass2[i] == current_type || temp_type == current_type)
-                            {
-                                found = true;
-                                RenderMethod.RenderMethodPostprocessBlock.RealConstant newfloatconstant = new RenderMethod.RenderMethodPostprocessBlock.RealConstant();
-                                switch (symbol[0])
-                                {
-                                    case '!':
-                                        {
-                                            newfloatconstant.Arg0 = h2vertex_constant[i].W;
-                                            newfloatconstant.Arg1 = h2vertex_constant[i].Vector3.K;
-                                            newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.J;
-                                            newfloatconstant.Arg3 = h2vertex_constant[i].Vector3.I;
-                                        };
-                                        break;
-                                    case '+':
-                                        {
-                                            newfloatconstant.Arg0 = h2vertex_constant[i].Vector3.I;
-                                            newfloatconstant.Arg1 = h2vertex_constant[i + 1].Vector3.J;
-                                            newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.K;
-                                            newfloatconstant.Arg3 = h2vertex_constant[i].W;
-                                        };
-                                        break;
-                                    default:
-                                        newfloatconstant.Arg0 = h2vertex_constant[i].Vector3.I;
-                                        newfloatconstant.Arg1 = h2vertex_constant[i].Vector3.J;
-                                        newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.K;
-                                        newfloatconstant.Arg3 = h2vertex_constant[i].W;
-                                        break;
-                                }
-                                newPostprocessBlock.RealConstants.Add(newfloatconstant);
-                            }
-                        }
+                        if (newfloatconstant != null) newPostprocessBlock.RealConstants.Add(newfloatconstant);
                     }
 
                     // Set albedo_color to 1 as default for all shaders
@@ -1120,6 +1044,53 @@ namespace TagTool.Commands.Porting.Gen2
                 }
             }
             return shader;
+        }
+
+        private RenderMethod.RenderMethodPostprocessBlock.RealConstant MatchVertexConstant(List<string> h2_vertex_constants, List<char> modifiers,
+            List<ShaderGen2.ShaderPostprocessDefinitionNewBlock.RealVector4dBlock> h2vertex_constant, string current_type, ref bool found)
+        {
+            for (var i = 0; h2_vertex_constants[i] != "\0"; i++)
+            {
+                string temp_type = null;
+                char[] symbol = h2_vertex_constants[i].Substring(0, 1).ToCharArray().DeepClone();
+                foreach (var modifier in modifiers)
+                {
+                    if (symbol[0] == modifier) temp_type = h2_vertex_constants[i].Remove(0, 1);
+                }
+
+                if (h2_vertex_constants[i] == current_type || temp_type == current_type)
+                {
+                    found = true;
+                    RenderMethod.RenderMethodPostprocessBlock.RealConstant newfloatconstant = new RenderMethod.RenderMethodPostprocessBlock.RealConstant();
+                    switch (symbol[0])
+                    {
+                        case '!':
+                            {
+                                newfloatconstant.Arg0 = h2vertex_constant[i].W;
+                                newfloatconstant.Arg1 = h2vertex_constant[i].Vector3.K;
+                                newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.J;
+                                newfloatconstant.Arg3 = h2vertex_constant[i].Vector3.I;
+                            };
+                            break;
+                        case '+':
+                            {
+                                newfloatconstant.Arg0 = h2vertex_constant[i].Vector3.I;
+                                newfloatconstant.Arg1 = h2vertex_constant[i + 1].Vector3.J;
+                                newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.K;
+                                newfloatconstant.Arg3 = h2vertex_constant[i].W;
+                            };
+                            break;
+                        default:
+                            newfloatconstant.Arg0 = h2vertex_constant[i].Vector3.I;
+                            newfloatconstant.Arg1 = h2vertex_constant[i].Vector3.J;
+                            newfloatconstant.Arg2 = h2vertex_constant[i].Vector3.K;
+                            newfloatconstant.Arg3 = h2vertex_constant[i].W;
+                            break;
+                    }
+                    return newfloatconstant;
+                }
+            }
+            return null;
         }
     }
 }

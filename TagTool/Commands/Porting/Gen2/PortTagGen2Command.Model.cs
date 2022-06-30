@@ -19,7 +19,8 @@ namespace TagTool.Commands.Porting.Gen2
 	{
         public Model ConvertModel(ModelGen2 gen2Model, Stream cacheStream)
         {
-            RenderModel rendermodel = (RenderModel)Cache.Deserialize(cacheStream, gen2Model.RenderModel);
+            RenderModel rendermodel = null;
+            if (gen2Model.RenderModel != null) rendermodel = (RenderModel)Cache.Deserialize(cacheStream, gen2Model.RenderModel);
             var model = new Model
             {
                 CollisionModel = gen2Model.CollisionModel,

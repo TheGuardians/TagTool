@@ -67,15 +67,15 @@ namespace TagTool.Commands.Porting.Gen2
             //soft surfaces
             newScenario.SoftSurfaces = new List<Scenario.SoftSurfaceBlock> { new Scenario.SoftSurfaceBlock() };
 
-            newScenario.ZoneSetPvs.Add(new Scenario.ZoneSetPvsBlock());
-            newScenario.ZoneSets.Add(new Scenario.ZoneSet
-            {
-                Name = Cache.StringTable.GetStringId("default"),
-                AudibilityIndex = -1
-            });
 
             for (var i = 0; i < gen2Tag.StructureBsps.Count; i++)
             {
+                newScenario.ZoneSets.Add(new Scenario.ZoneSet
+                {
+                    Name = Cache.StringTable.GetStringId("default"),
+                    AudibilityIndex = -1
+                });
+
                 ScenarioStructureBsp currentbsp = Cache.Deserialize<ScenarioStructureBsp>(cacheStream, gen2Tag.StructureBsps[i].StructureBsp);
 
                 //bsps
@@ -89,10 +89,11 @@ namespace TagTool.Commands.Porting.Gen2
                 });
 
                 //zoneset pvs
-                newScenario.ZoneSetPvs[0].StructureBspMask = (Scenario.BspFlags)(((int)newScenario.ZoneSetPvs[0].StructureBspMask) | (1 << i));
-                newScenario.ZoneSetPvs[0].StructureBspPvs = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock>();
-                newScenario.ZoneSetPvs[0].StructureBspPvs.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock());
-                InitTagBlocks(newScenario.ZoneSetPvs[0].StructureBspPvs[i]);
+                newScenario.ZoneSetPvs.Add(new Scenario.ZoneSetPvsBlock());
+                newScenario.ZoneSetPvs[i].StructureBspMask = (Scenario.BspFlags)(((int)newScenario.ZoneSetPvs[0].StructureBspMask) | (1 << i));
+                newScenario.ZoneSetPvs[i].StructureBspPvs = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock>();
+                newScenario.ZoneSetPvs[i].StructureBspPvs.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock());
+                InitTagBlocks(newScenario.ZoneSetPvs[i].StructureBspPvs[0]);
 
                 int pvsbits = 0;
                 for (var k = 0; k < currentbsp.Clusters.Count; k++)
@@ -102,7 +103,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                 for (var j = 0; j < currentbsp.Clusters.Count; j++)
                 {
-                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].ClusterPvs.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock
+                    newScenario.ZoneSetPvs[i].StructureBspPvs[0].ClusterPvs.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock
                     {
                         ClusterPvsBitVectors = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock>
                         {
@@ -118,7 +119,7 @@ namespace TagTool.Commands.Porting.Gen2
                             }
                         }
                     });
-                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].ClusterPvsDoorsClosed.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock
+                    newScenario.ZoneSetPvs[i].StructureBspPvs[0].ClusterPvsDoorsClosed.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock
                     {
                         ClusterPvsBitVectors = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock.ClusterPvsBlock.CluserPvsBitVectorBlock>
                         {
@@ -134,15 +135,15 @@ namespace TagTool.Commands.Porting.Gen2
                             }
                         }
                     });
-                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].AttachedSkyIndices.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock());
-                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].VisibleSkyIndices.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock());
-                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].ClusterMappings.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping());
-                    newScenario.ZoneSetPvs[0].StructureBspPvs[i].ClusterAudioBitvector.Add(new Scenario.ZoneSetPvsBlock.BitVectorDword());
+                    newScenario.ZoneSetPvs[i].StructureBspPvs[0].AttachedSkyIndices.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock());
+                    newScenario.ZoneSetPvs[i].StructureBspPvs[0].VisibleSkyIndices.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.SkyIndicesBlock());
+                    newScenario.ZoneSetPvs[i].StructureBspPvs[0].ClusterMappings.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock.BspSeamClusterMapping());
+                    newScenario.ZoneSetPvs[i].StructureBspPvs[0].ClusterAudioBitvector.Add(new Scenario.ZoneSetPvsBlock.BitVectorDword());
                 }
 
                 //zonesets
-                newScenario.ZoneSets[0].Bsps = (Scenario.BspFlags)((int)newScenario.ZoneSets[0].Bsps | (1 << i));
-                newScenario.ZoneSetPvs[0].PortaldeviceMapping = new List<Scenario.ZoneSetPvsBlock.PortalDeviceMappingBlock>
+                newScenario.ZoneSets[i].Bsps = (Scenario.BspFlags)(1 << i);
+                newScenario.ZoneSetPvs[i].PortaldeviceMapping = new List<Scenario.ZoneSetPvsBlock.PortalDeviceMappingBlock>
                 {
                     new Scenario.ZoneSetPvsBlock.PortalDeviceMappingBlock()
                 };
@@ -156,46 +157,55 @@ namespace TagTool.Commands.Porting.Gen2
             }
             foreach (var gen2sky in rawgen2Tag.Skies)
             {
-                string skytagname = gen2sky.Sky.Name;
-                var gen2skytag = Gen2Cache.Deserialize<TagTool.Tags.Definitions.Gen2.Sky>(gen2CacheStream, gen2sky.Sky);
-                var skymodetag = ConvertTag(cacheStream, gen2CacheStream, resourceStreams, gen2skytag.RenderModel);
+                if (gen2sky.Sky != null)
+                {
+                    string skytagname = gen2sky.Sky.Name;
 
-                //fixup skymodetag with gen2 sky render model scale
-                RenderModel skymode = Cache.Deserialize<RenderModel>(cacheStream, skymodetag);
-                foreach (var comp in skymode.Geometry.Compression)
-                {
-                    float size_x = comp.X.Upper - comp.X.Lower;
-                    float size_y = comp.Y.Upper - comp.Y.Lower;
-                    float size_z = comp.Z.Upper - comp.Z.Lower;
-                    comp.X.Upper = (comp.X.Upper - (size_x / 2)) + (size_x / 2) * gen2skytag.RenderModelScale;
-                    comp.X.Lower = (comp.X.Lower + (size_x / 2)) - (size_x / 2) * gen2skytag.RenderModelScale;
-                    comp.Y.Upper = (comp.Y.Upper - (size_y / 2)) + (size_y / 2) * gen2skytag.RenderModelScale;
-                    comp.Y.Lower = (comp.Y.Lower + (size_y / 2)) - (size_y / 2) * gen2skytag.RenderModelScale;
-                    comp.Z.Upper = (comp.Z.Upper - (size_z / 2)) + (size_z / 2) * gen2skytag.RenderModelScale;
-                    comp.Z.Lower = (comp.Z.Lower + (size_z / 2)) - (size_z / 2) * gen2skytag.RenderModelScale;
-                };
-                Cache.Serialize(cacheStream, skymodetag, skymode);
+                    var gen2skytag = Gen2Cache.Deserialize<TagTool.Tags.Definitions.Gen2.Sky>(gen2CacheStream, gen2sky.Sky);
+                    CachedTag skymodetag = null;
+                    if (gen2skytag.RenderModel != null)
+                    {
+                        skymodetag = ConvertTag(cacheStream, gen2CacheStream, resourceStreams, gen2skytag.RenderModel);
 
-                var newmodel = new Model
-                {
-                    RenderModel = skymodetag
-                };
-                CachedTag newmodeltag = Cache.TagCache.AllocateTag<Model>($"{skytagname}");
-                Cache.Serialize(cacheStream, newmodeltag, newmodel);
-                var newscen = new Scenery
-                {
-                    BoundingRadius = 5555.0f,
-                    ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery },
-                    Model = newmodeltag
-                };
-                CachedTag newscentag = Cache.TagCache.AllocateTag<Scenery>($"{skytagname}");
-                Cache.Serialize(cacheStream, newscentag, newscen);
-                newScenario.SkyReferences.Add(new Scenario.SkyReference
-                {
-                    SkyObject = newscentag,
-                    NameIndex = -1,
-                    ActiveBsps = (Scenario.BspShortFlags)bspbits
-                });
+                        //fixup skymodetag with gen2 sky render model scale
+                        RenderModel skymode = Cache.Deserialize<RenderModel>(cacheStream, skymodetag);
+
+                        foreach (var comp in skymode.Geometry.Compression)
+                        {
+                            float size_x = comp.X.Upper - comp.X.Lower;
+                            float size_y = comp.Y.Upper - comp.Y.Lower;
+                            float size_z = comp.Z.Upper - comp.Z.Lower;
+                            comp.X.Upper = (comp.X.Upper - (size_x / 2)) + (size_x / 2) * gen2skytag.RenderModelScale;
+                            comp.X.Lower = (comp.X.Lower + (size_x / 2)) - (size_x / 2) * gen2skytag.RenderModelScale;
+                            comp.Y.Upper = (comp.Y.Upper - (size_y / 2)) + (size_y / 2) * gen2skytag.RenderModelScale;
+                            comp.Y.Lower = (comp.Y.Lower + (size_y / 2)) - (size_y / 2) * gen2skytag.RenderModelScale;
+                            comp.Z.Upper = (comp.Z.Upper - (size_z / 2)) + (size_z / 2) * gen2skytag.RenderModelScale;
+                            comp.Z.Lower = (comp.Z.Lower + (size_z / 2)) - (size_z / 2) * gen2skytag.RenderModelScale;
+                        };
+                        Cache.Serialize(cacheStream, skymodetag, skymode);
+                    }
+
+                    var newmodel = new Model
+                    {
+                        RenderModel = skymodetag
+                    };
+                    CachedTag newmodeltag = Cache.TagCache.AllocateTag<Model>($"{skytagname}");
+                    Cache.Serialize(cacheStream, newmodeltag, newmodel);
+                    var newscen = new Scenery
+                    {
+                        BoundingRadius = 5555.0f,
+                        ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery },
+                        Model = newmodeltag
+                    };
+                    CachedTag newscentag = Cache.TagCache.AllocateTag<Scenery>($"{skytagname}");
+                    Cache.Serialize(cacheStream, newscentag, newscen);
+                    newScenario.SkyReferences.Add(new Scenario.SkyReference
+                    {
+                        SkyObject = newscentag,
+                        NameIndex = -1,
+                        ActiveBsps = (Scenario.BspShortFlags)bspbits
+                    });
+                }
             }
 
             ConvertScenarioPlacements(gen2Tag, rawgen2Tag, newScenario, gen2CacheStream, cacheStream, resourceStreams);
@@ -797,7 +807,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             // Spawn points from starting locations
-            if (newScenario.MapType == ScenarioMapType.Multiplayer)
+            if (newScenario.MapType == ScenarioMapType.Multiplayer || newScenario.MapType == ScenarioMapType.SinglePlayer)
             {
                 newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
                 {
@@ -1189,6 +1199,42 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 }
                 uniqueid += 101;
+            }
+
+            // Trigger Volumes
+            foreach (var vol in gen2Tag.KillTriggerVolumes)
+            {
+                newScenario.TriggerVolumes.Add(new Scenario.TriggerVolume
+                {
+                    Name = vol.Name,
+                    ObjectName = vol.ObjectName,
+                    NodeName = vol.NodeName,
+                    Position = vol.Position,
+                    Forward = vol.Forward,
+                    Up = vol.Up,
+                    Extents = vol.Extents,
+                    KillVolume = vol.KillTriggerVolume
+                });
+            }
+
+            // Bsp Switch -> ZoneSet Switch
+            foreach (var switchvol in gen2Tag.BspSwitchTriggerVolumes)
+            {
+                newScenario.ZonesetSwitchTriggerVolumes.Add(new Scenario.ZoneSetSwitchTriggerVolume {
+                    Flags = Scenario.ZoneSetSwitchTriggerVolume.FlagBits.TeleportVehicles,
+                    BeginZoneSet = -1,
+                    TriggerVolume = switchvol.TriggerVolume,
+                    CommitZoneSet = switchvol.Destination
+                });
+            }
+
+            // Kill Trigger Volumes
+            foreach (var killvol in gen2Tag.ScenarioKillTriggers)
+            {
+                newScenario.ScenarioKillTriggers.Add(new Scenario.ScenarioKillTrigger
+                {
+                    TriggerVolume = killvol.TriggerVolume
+                });
             }
         }
 

@@ -1902,8 +1902,8 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(Length = 0x2)]
             public byte[] Unknown;
             public StringId NodeName;
-            [TagField(Length = 6)]
-            public float[] Unknown1;
+            public RealVector3d Forward;
+            public RealVector3d Up;
             public RealPoint3d Position;
             public RealPoint3d Extents;
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
