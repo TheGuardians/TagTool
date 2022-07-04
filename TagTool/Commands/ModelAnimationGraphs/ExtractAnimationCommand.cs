@@ -26,11 +26,13 @@ namespace TagTool.Commands.ModelAnimationGraphs
             : base(false,
 
                   "ExtractAnimation",
-                  "Extract an animation to a JMA/JMM/JMO/JMR/JMW/JMZ/JMT file",
+                  "Extract an animation to a JMA/JMM/JMO/JMR/JMW/JMZ/JMT file.",
 
-                  "ExtractAnimation <index/all> <filepath>",
+                  "ExtractAnimation <(name in quotes)/index/all> <filepath>",
 
-                  "Extract an animation to a JMA/JMM/JMO/JMR/JMW/JMZ/JMT file. Use the index of the animation as the first argument or 'all' to extract all animations in this jmad.")
+                  "Extract an animation to a JMA/JMM/JMO/JMR/JMW/JMZ/JMT file. " +
+                  "\nProvide the index of the Animation block or the animation name as the first argument." +
+                  "\nAlternatively, use 'all' to extract all animations in this jmad.")
         {
             CacheContext = cachecontext;
             Animation = animation;
@@ -45,15 +47,39 @@ namespace TagTool.Commands.ModelAnimationGraphs
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
             List<int> AnimationIndices = new List<int>();
+
             var index = argStack.Pop();
-            if (index == "all")
-                AnimationIndices.AddRange(Enumerable.Range(0, Animation.Animations.Count).ToList());
+
+            if (int.TryParse(index, out int i))
+            {
+                if (i >= 0 && i < Animation.Animations.Count())
+                    AnimationIndices.Add(i);
+                else
+                    return new TagToolError(CommandError.CustomError, $"{i} is not a valid animation index. (count: {Animation.Animations.Count()})");
+            }
             else
-                AnimationIndices.Add(int.Parse(index));
+            {
+                if (index.ToLower() == "all")
+                    AnimationIndices.AddRange(Enumerable.Range(0, Animation.Animations.Count).ToList());
+                else
+                {
+                    for (int j = 0; j < Animation.Animations.Count(); j++)
+                    {
+                        string name = CacheContext.StringTable.GetString(Animation.Animations[j].Name);
+                        var request = index.ToLower().Replace(' ', ':');
+
+                        if (request == name)
+                            AnimationIndices.Add(j);
+                    }
+                    
+                    if (AnimationIndices.Count() == 0)
+                        return new TagToolError(CommandError.CustomError, $"Animation named {index} could not be found.");
+                }                   
+            }
+
             string directoryarg = argStack.Pop();
 
-            if (!Directory.Exists(directoryarg))
-                return new TagToolError(CommandError.FileNotFound);
+            Directory.CreateDirectory(directoryarg);
 
             Console.WriteLine($"###Extracting {AnimationIndices.Count} animation(s)...");
 
@@ -117,7 +143,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         animation.InsertBaseFrame();
                     }
                 }
-                Console.WriteLine($"Exporting {str}");
+                Console.WriteLine($"Exporting \"{str}\"");
                 animation.Export(fileName);
             }
             Console.WriteLine("Done!");
