@@ -240,6 +240,46 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order[4] = "\0";
                         break;
                     }
+                case "tex_bump_detail_blend_detail":
+                    {
+                        // No template in HO has 3 detail maps as well as an albedo colour (sacrificing albedo colour in this case)
+                        shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Albedo.Two_Detail_Overlay;
+                        shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
+                        shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
+
+                        if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                        {
+                            h2_vertex_constants[0] = "base_map";
+                            h2_vertex_constants[1] = "bump_map";
+                            h2_vertex_constants[2] = "detail_map";
+                            h2_vertex_constants[3] = "detail_map2";
+                            h2_vertex_constants[4] = "!detail_map_overlay";
+                            h2_vertex_constants[5] = "\0";
+                        }
+                        else
+                        {
+                            h2_vertex_constants[0] = "detail_map";
+                            h2_vertex_constants[1] = "detail_map2";
+                            h2_vertex_constants[2] = "!detail_map_overlay";
+                            h2_vertex_constants[3] = "base_map";
+                            h2_vertex_constants[4] = "bump_map";
+                            h2_vertex_constants[5] = "\0";
+
+                        }
+
+                        h2_pixel_constants[0] = "albedo_color";
+                        h2_pixel_constants[2] = "normal_specular_tint";
+                        h2_pixel_constants[3] = "glancing_specular_tint";
+                        h2_pixel_constants[4] = "\0";
+
+                        h2_bitmap_order[0] = "bump_map";
+                        h2_bitmap_order[1] = "base_map";
+                        h2_bitmap_order[2] = "detail_map";
+                        h2_bitmap_order[3] = "detail_map2";
+                        h2_bitmap_order[4] = "detail_map_overlay";
+                        h2_bitmap_order[5] = "\0";
+                        break;
+                    }
                 case "tex_bump_detail_keep":
                     {
                         // No template in HO has 2 detail maps as well as an albedo colour (sacrificing albedo colour in this case)
@@ -292,6 +332,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case "tex_bump_env":
                 case "tex_bump_env_clamped":
                 case "tex_bump_env_combined":
+                case "tex_bump_env_dbl_spec":
                     {
                         shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
                         shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
@@ -415,6 +456,7 @@ namespace TagTool.Commands.Porting.Gen2
                         break;
                     }
                 case "tex_bump_env_alpha_test":
+                case "tex_bump_env_alpha_clamped":
                 case "tex_bump_env_alpha_test_indexed":
                     {
                         shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
@@ -600,12 +642,49 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order[3] = "\0";
                         break;
                     }
+                case "tex_bump_two_detail":
+                    {
+                        shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Albedo.Two_Detail;
+                        shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
+                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
+                        shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
+
+                        if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                        {
+                            h2_vertex_constants[0] = "detail_map";
+                            h2_vertex_constants[1] = "detail_map2";
+                            h2_vertex_constants[2] = "base_map";
+                            h2_vertex_constants[3] = "bump_map";
+                            h2_vertex_constants[4] = "\0";
+                        }
+                        else
+                        {
+                            h2_vertex_constants[0] = "bump_map";
+                            h2_vertex_constants[1] = "base_map";
+                            h2_vertex_constants[2] = "detail_map";
+                            h2_vertex_constants[3] = "detail_map2";
+                            h2_vertex_constants[4] = "\0";
+
+                        }
+
+                        h2_pixel_constants[2] = "normal_specular_tint";
+                        h2_pixel_constants[3] = "glancing_specular_tint";
+                        h2_pixel_constants[4] = "\0";
+
+                        h2_bitmap_order[0] = "bump_map";
+                        h2_bitmap_order[1] = "base_map";
+                        h2_bitmap_order[2] = "detail_map";
+                        h2_bitmap_order[3] = "detail_map2";
+                        h2_bitmap_order[4] = "\0";
+                        break;
+                    }
                 case "illum":
                     {
                         shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Constant_Color;
                         shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
                         shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
                         shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.Simple;
+                        ShaderBlendMode = RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.AlphaBlend;
 
                         h2_vertex_constants[0] = "self_illum_map";
                         h2_vertex_constants[1] = "\0";
@@ -617,7 +696,6 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order[1] = "\0";
                         break;
                     }
-
                 case "illum_3_channel":
                     {
                         shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Constant_Color;
@@ -625,7 +703,7 @@ namespace TagTool.Commands.Porting.Gen2
                         shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
                         shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
                         shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination._3_Channel_Self_Illum;
-
+                        ShaderBlendMode = RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.AlphaBlend;
 
                         h2_vertex_constants[0] = "self_illum_map";
                         h2_vertex_constants[1] = "\0";

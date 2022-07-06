@@ -113,7 +113,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "mach",
                 "ligh",
                 "eqip",
-                "ctrl"
+                "ctrl",
+                "bipd"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -177,6 +178,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case DeviceMachine devicemachine:
                 case Equipment equipment:
                 case DeviceControl devicecontrol:
+                case Biped biped:
                     definition = ConvertObject(gen2definition, cacheStream);
                     break;
                 case DamageEffect damage:

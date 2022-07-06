@@ -1,9 +1,8 @@
-using TagTool.Cache;
-using TagTool.Common;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using static TagTool.Tags.TagFieldFlags;
+using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Havok;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
@@ -34,15 +33,15 @@ namespace TagTool.Tags.Definitions.Gen2
         /// </summary>
         public RealPoint3d DynamicLightSphereOffset;
         public StringId DefaultModelVariant;
-        [TagField(ValidTags = new [] { "hlmt" })]
+        [TagField(ValidTags = new[] { "hlmt" })]
         public CachedTag Model;
-        [TagField(ValidTags = new [] { "bloc" })]
+        [TagField(ValidTags = new[] { "bloc" })]
         public CachedTag CrateObject;
-        [TagField(ValidTags = new [] { "shad" })]
+        [TagField(ValidTags = new[] { "shad" })]
         public CachedTag ModifierShader;
-        [TagField(ValidTags = new [] { "effe" })]
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag CreationEffect;
-        [TagField(ValidTags = new [] { "foot" })]
+        [TagField(ValidTags = new[] { "foot" })]
         public CachedTag MaterialEffects;
         public List<ObjectAiPropertiesBlock> AiProperties;
         public List<ObjectFunctionBlock> Functions;
@@ -99,10 +98,10 @@ namespace TagTool.Tags.Definitions.Gen2
         public List<OldObjectFunctionBlock> OldFunctions;
         public List<ObjectChangeColors> ChangeColors;
         public List<PredictedResourceBlock> PredictedResources;
-        public FlagsValue1 Flags1;
+        public UnitFlagBits UnitFlags;
         public DefaultTeamValue DefaultTeam;
         public ConstantSoundVolumeValue ConstantSoundVolume;
-        [TagField(ValidTags = new [] { "effe" })]
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag IntegratedLightToggle;
         public Angle CameraFieldOfView; // degrees
         public float CameraStiffness;
@@ -132,7 +131,7 @@ namespace TagTool.Tags.Definitions.Gen2
         /// <summary>
         /// automatically created character when this unit is driven
         /// </summary>
-        [TagField(ValidTags = new [] { "char" })]
+        [TagField(ValidTags = new[] { "char" })]
         public CachedTag SpawnedTurretCharacter;
         /// <summary>
         /// number of actors which we spawn
@@ -156,7 +155,7 @@ namespace TagTool.Tags.Definitions.Gen2
         /// </summary>
         public StringId LeftHandNode;
         public UnitAdditionalNodeNamesStructBlock MoreDamnNodes;
-        [TagField(ValidTags = new [] { "jpt!" })]
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag MeleeDamage;
         public UnitBoardingMeleeStructBlock YourMomma;
         public MotionSensorBlipSizeValue MotionSensorBlipSize;
@@ -174,7 +173,7 @@ namespace TagTool.Tags.Definitions.Gen2
         public UnitBoostStructBlock Boost;
         public UnitLipsyncScalesStructBlock Lipsync;
         public Angle MovingTurningSpeed; // degrees per second
-        public FlagsValue2 Flags2;
+        public BipedDefinitionFlags BipedFlags;
         public Angle StationaryTurningThreshold;
         public float JumpVelocity; // world units per second
         /// <summary>
@@ -240,8 +239,8 @@ namespace TagTool.Tags.Definitions.Gen2
         /// when the biped ragdolls from a head shot it acceleartes based on this value.  0 defaults to the standard acceleration
         /// scale
         /// </summary>
-        public float HeadShotAccScale;
-        [TagField(ValidTags = new [] { "effe" })]
+        public float HeadshotAccelerationScale;
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag AreaDamageEffect;
         public CharacterPhysicsStructBlock Physics;
         /// <summary>
@@ -251,17 +250,17 @@ namespace TagTool.Tags.Definitions.Gen2
         /// <summary>
         /// when the flood reanimate this guy, he turns into a ...
         /// </summary>
-        [TagField(ValidTags = new [] { "char" })]
+        [TagField(ValidTags = new[] { "char" })]
         public CachedTag ReanimationCharacter;
         /// <summary>
         /// when I die, out of the ashes of my death crawls a ...
         /// </summary>
-        [TagField(ValidTags = new [] { "char" })]
+        [TagField(ValidTags = new[] { "char" })]
         public CachedTag DeathSpawnCharacter;
         public short DeathSpawnCount;
         [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding6;
-        
+
         [Flags]
         public enum FlagsValue : ushort
         {
@@ -289,21 +288,21 @@ namespace TagTool.Tags.Definitions.Gen2
             AttachToClustersByDynamicSphere = 1 << 12,
             EffectsCreatedByThisObjectDoNotSpawnObjectsInMultiplayer = 1 << 13
         }
-        
+
         public enum LightmapShadowModeValue : short
         {
             Default,
             Never,
             Always
         }
-        
+
         public enum SweetenerSizeValue : sbyte
         {
             Small,
             Medium,
             Large
         }
-        
+
         [TagStructure(Size = 0x10)]
         public class ObjectAiPropertiesBlock : TagStructure
         {
@@ -316,7 +315,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public byte[] Padding;
             public AiSizeValue AiSize;
             public LeapJumpSpeedValue LeapJumpSpeed;
-            
+
             [Flags]
             public enum AiFlagsValue : uint
             {
@@ -324,7 +323,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 PathfindingIgnoreWhenDead = 1 << 1,
                 DynamicCover = 1 << 2
             }
-            
+
             public enum AiSizeValue : short
             {
                 Default,
@@ -335,7 +334,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 Huge,
                 Immobile
             }
-            
+
             public enum LeapJumpSpeedValue : short
             {
                 None,
@@ -348,7 +347,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 Infinite
             }
         }
-        
+
         [TagStructure(Size = 0x20)]
         public class ObjectFunctionBlock : TagStructure
         {
@@ -365,7 +364,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public float MinValue;
             public MappingFunctionBlock DefaultFunction;
             public StringId ScaleBy;
-            
+
             [Flags]
             public enum FlagsValue : uint
             {
@@ -386,24 +385,18 @@ namespace TagTool.Tags.Definitions.Gen2
                 /// </summary>
                 RandomTimeOffset = 1 << 3
             }
-            
+
             [TagStructure(Size = 0x8)]
             public class MappingFunctionBlock : TagStructure
             {
-                public List<ByteBlock> Data;
-                
-                [TagStructure(Size = 0x1)]
-                public class ByteBlock : TagStructure
-                {
-                    public sbyte Value;
-                }
+                public byte[] Data;
             }
         }
-        
+
         [TagStructure(Size = 0x18)]
         public class ObjectAttachmentBlock : TagStructure
         {
-            [TagField(ValidTags = new [] { "ligh","MGS2","tdtl","cont","effe","lsnd","lens" })]
+            [TagField(ValidTags = new[] { "ligh", "MGS2", "tdtl", "cont", "effe", "lsnd", "lens" })]
             public CachedTag Type;
             public StringId Marker;
             public ChangeColorValue ChangeColor;
@@ -411,7 +404,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public byte[] Padding;
             public StringId PrimaryScale;
             public StringId SecondaryScale;
-            
+
             public enum ChangeColorValue : short
             {
                 None,
@@ -421,14 +414,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 Quaternary
             }
         }
-        
+
         [TagStructure(Size = 0x8)]
         public class ObjectWidgetBlock : TagStructure
         {
-            [TagField(ValidTags = new [] { "ant!","devo","whip","BooM","tdtl" })]
+            [TagField(ValidTags = new[] { "ant!", "devo", "whip", "BooM", "tdtl" })]
             public CachedTag Type;
         }
-        
+
         [TagStructure(Size = 0x50)]
         public class OldObjectFunctionBlock : TagStructure
         {
@@ -436,13 +429,13 @@ namespace TagTool.Tags.Definitions.Gen2
             public byte[] Padding;
             public StringId Unknown;
         }
-        
+
         [TagStructure(Size = 0x10)]
         public class ObjectChangeColors : TagStructure
         {
             public List<ObjectChangeColorInitialPermutation> InitialPermutations;
             public List<ObjectChangeColorFunction> Functions;
-            
+
             [TagStructure(Size = 0x20)]
             public class ObjectChangeColorInitialPermutation : TagStructure
             {
@@ -454,7 +447,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 /// </summary>
                 public StringId VariantName;
             }
-            
+
             [TagStructure(Size = 0x28)]
             public class ObjectChangeColorFunction : TagStructure
             {
@@ -465,7 +458,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public RealRgbColor ColorUpperBound;
                 public StringId DarkenBy;
                 public StringId ScaleBy;
-                
+
                 [Flags]
                 public enum ScaleFlagsValue : uint
                 {
@@ -480,14 +473,14 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
             }
         }
-        
+
         [TagStructure(Size = 0x8)]
         public class PredictedResourceBlock : TagStructure
         {
             public TypeValue Type;
             public short ResourceIndex;
             public int TagIndex;
-            
+
             public enum TypeValue : short
             {
                 Bitmap,
@@ -501,9 +494,9 @@ namespace TagTool.Tags.Definitions.Gen2
                 LightmapInstanceBitmaps
             }
         }
-        
+
         [Flags]
-        public enum FlagsValue1 : uint
+        public enum UnitFlagBits : uint
         {
             CircularAiming = 1 << 0,
             DestroyedAfterDying = 1 << 1,
@@ -535,7 +528,7 @@ namespace TagTool.Tags.Definitions.Gen2
             ParentSPrimaryWeapon = 1 << 27,
             UnitHasBoost = 1 << 28
         }
-        
+
         public enum DefaultTeamValue : short
         {
             Default,
@@ -555,7 +548,7 @@ namespace TagTool.Tags.Definitions.Gen2
             Unused14,
             Unused15
         }
-        
+
         public enum ConstantSoundVolumeValue : short
         {
             Silent,
@@ -564,7 +557,7 @@ namespace TagTool.Tags.Definitions.Gen2
             Shout,
             Quiet
         }
-        
+
         [TagStructure(Size = 0x1C)]
         public class UnitCameraStructBlock : TagStructure
         {
@@ -573,15 +566,15 @@ namespace TagTool.Tags.Definitions.Gen2
             public Angle PitchAutoLevel;
             public Bounds<Angle> PitchRange;
             public List<UnitCameraTrackBlock> CameraTracks;
-            
+
             [TagStructure(Size = 0x8)]
             public class UnitCameraTrackBlock : TagStructure
             {
-                [TagField(ValidTags = new [] { "trak" })]
+                [TagField(ValidTags = new[] { "trak" })]
                 public CachedTag Track;
             }
         }
-        
+
         [TagStructure(Size = 0x14)]
         public class UnitSeatAccelerationStructBlock : TagStructure
         {
@@ -589,7 +582,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public float AccelActionScale; // actions fail [0,1+]
             public float AccelAttachScale; // detach unit [0,1+]
         }
-        
+
         [TagStructure(Size = 0x4)]
         public class UnitAdditionalNodeNamesStructBlock : TagStructure
         {
@@ -598,43 +591,43 @@ namespace TagTool.Tags.Definitions.Gen2
             /// </summary>
             public StringId PreferredGunNode;
         }
-        
+
         [TagStructure(Size = 0x28)]
         public class UnitBoardingMeleeStructBlock : TagStructure
         {
-            [TagField(ValidTags = new [] { "jpt!" })]
+            [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag BoardingMeleeDamage;
-            [TagField(ValidTags = new [] { "jpt!" })]
+            [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag BoardingMeleeResponse;
-            [TagField(ValidTags = new [] { "jpt!" })]
+            [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag LandingMeleeDamage;
-            [TagField(ValidTags = new [] { "jpt!" })]
+            [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag FlurryMeleeDamage;
-            [TagField(ValidTags = new [] { "jpt!" })]
+            [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag ObstacleSmashDamage;
         }
-        
+
         public enum MotionSensorBlipSizeValue : short
         {
             Medium,
             Small,
             Large
         }
-        
+
         [TagStructure(Size = 0x10)]
         public class UnitPosturesBlock : TagStructure
         {
             public StringId Name;
             public RealVector3d PillOffset;
         }
-        
+
         [TagStructure(Size = 0x8)]
         public class UnitHudReferenceBlock : TagStructure
         {
-            [TagField(ValidTags = new [] { "nhdt" })]
+            [TagField(ValidTags = new[] { "nhdt" })]
             public CachedTag NewUnitHudInterface;
         }
-        
+
         [TagStructure(Size = 0xC)]
         public class DialogueVariantBlock : TagStructure
         {
@@ -644,30 +637,30 @@ namespace TagTool.Tags.Definitions.Gen2
             public short VariantNumber;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            [TagField(ValidTags = new [] { "udlg" })]
+            [TagField(ValidTags = new[] { "udlg" })]
             public CachedTag Dialogue;
         }
-        
+
         public enum GrenadeTypeValue : short
         {
             HumanFragmentation,
             CovenantPlasma
         }
-        
+
         [TagStructure(Size = 0x8)]
         public class PoweredSeatBlock : TagStructure
         {
             public float DriverPowerupTime; // seconds
             public float DriverPowerdownTime; // seconds
         }
-        
+
         [TagStructure(Size = 0x8)]
         public class UnitWeaponBlock : TagStructure
         {
-            [TagField(ValidTags = new [] { "weap" })]
+            [TagField(ValidTags = new[] { "weap" })]
             public CachedTag Weapon;
         }
-        
+
         [TagStructure(Size = 0xB0)]
         public class UnitSeatBlock : TagStructure
         {
@@ -712,7 +705,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public StringId EnterSeatString;
             public Angle YawMinimum;
             public Angle YawMaximum;
-            [TagField(ValidTags = new [] { "char" })]
+            [TagField(ValidTags = new[] { "char" })]
             public CachedTag BuiltInGunner;
             /// <summary>
             /// note: the entry radius shouldn't exceed 3 world units, 
@@ -735,7 +728,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public float MaximumRelativeVelocity;
             public StringId InvisibleSeatRegion;
             public int RuntimeInvisibleSeatRegionIndex;
-            
+
             [Flags]
             public enum FlagsValue : uint
             {
@@ -760,7 +753,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 GunnerPlayerOnly = 1 << 18,
                 InvisibleUnderMajorDamage = 1 << 19
             }
-            
+
             [TagStructure(Size = 0x14)]
             public class UnitSeatAccelerationStructBlock : TagStructure
             {
@@ -768,7 +761,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public float AccelActionScale; // actions fail [0,1+]
                 public float AccelAttachScale; // detach unit [0,1+]
             }
-            
+
             public enum AiSeatTypeValue : short
             {
                 None,
@@ -778,7 +771,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 LargeCargo,
                 Driver
             }
-            
+
             [TagStructure(Size = 0x1C)]
             public class UnitCameraStructBlock : TagStructure
             {
@@ -787,23 +780,23 @@ namespace TagTool.Tags.Definitions.Gen2
                 public Angle PitchAutoLevel;
                 public Bounds<Angle> PitchRange;
                 public List<UnitCameraTrackBlock> CameraTracks;
-                
+
                 [TagStructure(Size = 0x8)]
                 public class UnitCameraTrackBlock : TagStructure
                 {
-                    [TagField(ValidTags = new [] { "trak" })]
+                    [TagField(ValidTags = new[] { "trak" })]
                     public CachedTag Track;
                 }
             }
-            
+
             [TagStructure(Size = 0x8)]
             public class UnitHudReferenceBlock : TagStructure
             {
-                [TagField(ValidTags = new [] { "nhdt" })]
+                [TagField(ValidTags = new[] { "nhdt" })]
                 public CachedTag NewUnitHudInterface;
             }
         }
-        
+
         [TagStructure(Size = 0x14)]
         public class UnitBoostStructBlock : TagStructure
         {
@@ -813,37 +806,38 @@ namespace TagTool.Tags.Definitions.Gen2
             public float BoostFallPower;
             public float DeadTime;
         }
-        
+
         [TagStructure(Size = 0x8)]
         public class UnitLipsyncScalesStructBlock : TagStructure
         {
             public float AttackWeight;
             public float DecayWeight;
         }
-        
+
         [Flags]
-        public enum FlagsValue2 : uint
+        public enum BipedDefinitionFlags : uint
         {
+            None,
             TurnsWithoutAnimating = 1 << 0,
             PassesThroughOtherBipeds = 1 << 1,
             ImmuneToFallingDamage = 1 << 2,
             RotateWhileAirborne = 1 << 3,
-            UsesLimpBodyPhysics = 1 << 4,
+            UseLimpBodyPhysics = 1 << 4,
             Unused = 1 << 5,
             RandomSpeedIncrease = 1 << 6,
-            Unused1 = 1 << 7,
+            Unused_ = 1 << 7,
             SpawnDeathChildrenOnDestroy = 1 << 8,
             StunnedByEmpDamage = 1 << 9,
             DeadPhysicsWhenStunned = 1 << 10,
             AlwaysRagdollWhenDead = 1 << 11
         }
-        
+
         [TagStructure(Size = 0x8)]
         public class BipedLockOnDataStructBlock : TagStructure
         {
             public FlagsValue Flags;
             public float LockOnDistance;
-            
+
             [Flags]
             public enum FlagsValue : uint
             {
@@ -852,11 +846,11 @@ namespace TagTool.Tags.Definitions.Gen2
                 AlwaysLockedByPlasmaTargeting = 1 << 2
             }
         }
-        
+
         [TagStructure(Size = 0x94)]
         public class CharacterPhysicsStructBlock : TagStructure
         {
-            public FlagsValue Flags;
+            public BipedPhysicsFlags Flags;
             public float HeightStanding;
             public float HeightCrouching;
             public float Radius;
@@ -871,159 +865,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public StringId DeadMaterialName;
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
-            public List<SpheresBlock> DeadSphereShapes;
-            public List<PillsBlock> PillShapes;
-            public List<SpheresBlock1> SphereShapes;
+            public List<PhysicsModel.SpheresBlock> DeadSphereShapes;
+            public List<PhysicsModel.PillsBlock> PillShapes;
+            public List<PhysicsModel.SpheresBlock> SphereShapes;
             public CharacterPhysicsGroundStructBlock GroundPhysics;
             public CharacterPhysicsFlyingStructBlock FlyingPhysics;
             //public CharacterPhysicsDeadStructBlock DeadPhysics;
             //public CharacterPhysicsSentinelStructBlock SentinelPhysics;
-            
-            [Flags]
-            public enum FlagsValue : uint
-            {
-                CenteredAtOrigin = 1 << 0,
-                ShapeSpherical = 1 << 1,
-                UsePlayerPhysics = 1 << 2,
-                ClimbAnySurface = 1 << 3,
-                Flying = 1 << 4,
-                NotPhysical = 1 << 5,
-                DeadCharacterCollisionGroup = 1 << 6
-            }
-            
-            [TagStructure(Size = 0x80)]
-            public class SpheresBlock : TagStructure
-            {
-                public StringId Name;
-                public short Material;
-                public FlagsValue Flags;
-                public float RelativeMassScale;
-                public float Friction;
-                public float Restitution;
-                public float Volume;
-                public float Mass;
-                [TagField(Length = 0x2)]
-                public byte[] Unknown;
-                public short Phantom;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown1;
-                public short Size;
-                public short Count;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown2;
-                public float Radius;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown3;
-                public short Size1;
-                public short Count1;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown4;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown5;
-                public RealVector3d RotationI;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown6;
-                public RealVector3d RotationJ;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown7;
-                public RealVector3d RotationK;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown8;
-                public RealVector3d Translation;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown9;
-                
-                [Flags]
-                public enum FlagsValue : ushort
-                {
-                    Unused = 1 << 0
-                }
-            }
-            
-            [TagStructure(Size = 0x50)]
-            public class PillsBlock : TagStructure
-            {
-                public StringId Name;
-                public short Material;
-                public FlagsValue Flags;
-                public float RelativeMassScale;
-                public float Friction;
-                public float Restitution;
-                public float Volume;
-                public float Mass;
-                [TagField(Length = 0x2)]
-                public byte[] Unknown;
-                public short Phantom;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown1;
-                public short Size;
-                public short Count;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown2;
-                public float Radius;
-                public RealVector3d Bottom;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown3;
-                public RealVector3d Top;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown4;
-                
-                [Flags]
-                public enum FlagsValue : ushort
-                {
-                    Unused = 1 << 0
-                }
-            }
-            
-            [TagStructure(Size = 0x80)]
-            public class SpheresBlock1 : TagStructure
-            {
-                public StringId Name;
-                public short Material;
-                public FlagsValue Flags;
-                public float RelativeMassScale;
-                public float Friction;
-                public float Restitution;
-                public float Volume;
-                public float Mass;
-                [TagField(Length = 0x2)]
-                public byte[] Unknown;
-                public short Phantom;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown1;
-                public short Size;
-                public short Count;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown2;
-                public float Radius;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown3;
-                public short Size1;
-                public short Count1;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown4;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown5;
-                public RealVector3d RotationI;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown6;
-                public RealVector3d RotationJ;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown7;
-                public RealVector3d RotationK;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown8;
-                public RealVector3d Translation;
-                [TagField(Length = 0x4)]
-                public byte[] Unknown9;
-                
-                [Flags]
-                public enum FlagsValue : ushort
-                {
-                    Unused = 1 << 0
-                }
-            }
-            
+
             [TagStructure(Size = 0x30)]
             public class CharacterPhysicsGroundStructBlock : TagStructure
             {
@@ -1034,10 +883,13 @@ namespace TagTool.Tags.Definitions.Gen2
                 public Angle UphillCutoffAngle; // degrees
                 public float DownhillVelocityScale;
                 public float UphillVelocityScale;
-                [TagField(Length = 0x14, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
+                public float RuntimeMinimumNormalK;
+                public float RuntimeDownhillK0;
+                public float RuntimeDownhillK1;
+                public float RuntimeUphillK0;
+                public float RuntimeUphillK1;
             }
-            
+
             [TagStructure(Size = 0x2C)]
             public class CharacterPhysicsFlyingStructBlock : TagStructure
             {
@@ -1080,18 +932,18 @@ namespace TagTool.Tags.Definitions.Gen2
                 /// </summary>
                 public float CrouchVelocityModifier; // [0,1]
             }
-            
+
             [TagStructure()]
             public class CharacterPhysicsDeadStructBlock : TagStructure
             {
             }
-            
+
             [TagStructure()]
             public class CharacterPhysicsSentinelStructBlock : TagStructure
             {
             }
         }
-        
+
         [TagStructure(Size = 0x4)]
         public class ContactPointBlock : TagStructure
         {

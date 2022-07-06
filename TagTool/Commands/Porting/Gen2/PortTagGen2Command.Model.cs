@@ -1,22 +1,12 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Geometry;
-using TagTool.Tags;
-using TagTool.Tags.Definitions;
-using TagTool.IO;
-using TagTool.Serialization;
-using TagTool.Cache.Gen2;
-using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;
 using System.IO;
-using TagTool.Commands.Common;
+using TagTool.Tags.Definitions;
+using ModelGen2 = TagTool.Tags.Definitions.Gen2.Model;
 
 namespace TagTool.Commands.Porting.Gen2
 {
-	partial class PortTagGen2Command : Command
-	{
+    partial class PortTagGen2Command : Command
+    {
         public Model ConvertModel(ModelGen2 gen2Model, Stream cacheStream)
         {
             RenderModel rendermodel = null;
@@ -73,27 +63,34 @@ namespace TagTool.Commands.Porting.Gen2
                             RenderModelPermutationIndex = gen2perm.ModelPermutationIndex,
                             Flags = (Model.Variant.Region.Permutation.FlagsValue)gen2perm.Flags,
                             Probability = gen2perm.Probability,
-                            States = new List<Model.Variant.Region.Permutation.State>()
+                            States = new List<Model.Variant.Region.Permutation.State>(),
+                            RuntimeStatePermutationIndices = gen2perm.RuntimeStatePermutationIndices
                         };
                         TranslateList(gen2perm.States, permutation.States);
 
                         // Fixups for States block
                         // Reference proper permutation index from render model in model permutation index
-                        foreach (var state in permutation.States)
+
+                        for (byte i = 0; i < permutation.States.Count; i++)
                         {
-                            foreach (var h2region_state in rendermodel.Regions)
+                            foreach (var h2render_region in rendermodel.Regions)
                             {
-                                if (h2region_state.Name.ToString() == gen2reg.RegionName.ToString())
+                                if (h2render_region.Name.ToString() == gen2reg.RegionName.ToString())
                                 {
-                                    foreach (var h2permutation_state in h2region_state.Permutations)
+                                    for (byte j = 0; j < h2render_region.Permutations.Count; j++)
                                     {
-                                        if (h2permutation_state.Name.ToString() == gen2perm.PermutationName.ToString())
+                                        if (h2render_region.Permutations[j].Name.ToString() == permutation.Name.ToString())
                                         {
-                                            state.ModelPermutationIndex = gen2perm.ModelPermutationIndex;
+                                            permutation.RenderModelPermutationIndex = (sbyte)j;
+                                        }
+                                        if (h2render_region.Permutations[j].Name.ToString() == permutation.States[i].Name.ToString())
+                                        {
+                                            permutation.States[i].ModelPermutationIndex = (sbyte)j;
                                         }
                                     }
                                 }
                             }
+                            TranslateEnum(gen2perm.States[i].PropertyFlags, out permutation.States[i].PropertyFlags, permutation.States[i].PropertyFlags.GetType());
                         }
 
                         region.Permutations.Add(permutation);
@@ -110,7 +107,7 @@ namespace TagTool.Commands.Porting.Gen2
             for (byte i = 0; i < model.Targets.Count; i++)
             {
                 model.Targets[i].LockOnFlags = new Model.Target.TargetLockOnFlags();
-                model.Targets[i].LockOnFlags.Flags = (Model.Target.TargetLockOnFlags.FlagsValue)gen2Model.Targets[i].LockOnData.Flags;
+                TranslateEnum(gen2Model.Targets[i].LockOnData.Flags, out model.Targets[i].LockOnFlags.Flags, model.Targets[i].LockOnFlags.Flags.GetType());
                 model.Targets[i].LockOnDistance = gen2Model.Targets[i].LockOnData.LockOnDistance;
             }
 
@@ -124,54 +121,13 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //collision regions
-            foreach (var gen2coll in gen2Model.CollisionRegions)
-            {
-                var coll = new Model.CollisionRegion
-                {
-                    Name = gen2coll.Name,
-                    CollisionRegionIndex = gen2coll.CollisionRegionIndex,
-                    PhysicsRegionIndex = gen2coll.PhysicsRegionIndex,
-                    Permutations = new List<Model.CollisionRegion.Permutation>()
-                };
-                foreach (var gen2perm in gen2coll.Permutations)
-                {
-                    coll.Permutations.Add(new Model.CollisionRegion.Permutation
-                    {
-                        Name = gen2perm.Name,
-                        Flags = (Model.CollisionRegion.Permutation.FlagsValue)gen2perm.Flags,
-                        CollisionPermutationIndex = gen2perm.CollisionPermutationIndex,
-                        PhysicsPermutationIndex = gen2perm.PhysicsRegionIndex
-                    });
-                }
-                model.CollisionRegions.Add(coll);
-            }
+            TranslateList(gen2Model.CollisionRegions, model.CollisionRegions);
 
             //nodes
-            foreach (var gen2node in gen2Model.Nodes)
-            {
-                model.Nodes.Add(new Model.Node
-                {
-                    Name = gen2node.Name,
-                    ParentNode = gen2node.ParentNode,
-                    FirstChildNode = gen2node.FirstChildNode,
-                    NextSiblingNode = gen2node.NextSiblingNode,
-                    DefaultTranslation = gen2node.DefaultTranslation,
-                    DefaultRotation = gen2node.DefaultRotation,
-                    DefaultScale = gen2node.DefaultScale,
-                    Inverse = gen2node.Inverse
-                });
-            }
+            TranslateList(gen2Model.Nodes, model.Nodes);
 
             //model object data
-            foreach (var gen2mod in gen2Model.ModelObjectData)
-            {
-                model.ModelObjectData.Add(new Model.ModelObjectDatum
-                {
-                    Type = (Model.ModelObjectDatum.TypeValue)gen2mod.Type,
-                    Offset = gen2mod.Offset,
-                    Radius = gen2mod.Radius
-                });
-            }
+            TranslateList(gen2Model.ModelObjectData, model.ModelObjectData);
 
             return model;
         }

@@ -54,15 +54,9 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
             }
 
-            //default starting profile
-            newScenario.PlayerStartingProfile.Add(new Scenario.PlayerStartingProfileBlock
-            {
-                Name = "start_assault",
-                PrimaryWeapon = Cache.TagCacheGenHO.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle.weapon"),
-                PrimaryRoundsLoaded = 32,
-                PrimaryRoundsTotal = 108,
-                StartingFragGrenadeCount = 2
-            });
+
+            // Starting Profiles
+            TranslateList(gen2Tag.PlayerStartingProfile, newScenario.PlayerStartingProfile);
 
             //soft surfaces
             newScenario.SoftSurfaces = new List<Scenario.SoftSurfaceBlock> { new Scenario.SoftSurfaceBlock() };
@@ -698,6 +692,7 @@ namespace TagTool.Commands.Porting.Gen2
                     PowerGroup = machobj.DeviceData.PowerGroup,
                     PositionGroup = machobj.DeviceData.PositionGroup
                 });
+                newScenario.Machines[machobjindex].CanAttachToBspFlags |= (ushort)(machobj.ObjectData.ManualBspFlags + 1);
             }
 
             // Device controls
@@ -793,6 +788,103 @@ namespace TagTool.Commands.Porting.Gen2
                 newScenario.Scenery.Add(scenery);
                 TranslateEnum(gen2Tag.Scenery[scenobjindex].SceneryData.ValidMultiplayerGames, out scenery.Multiplayer.EngineFlags, scenery.Multiplayer.EngineFlags.GetType());
 
+            }
+
+            // Bipeds
+            foreach (var bipdpal in gen2Tag.BipedPalette)
+            {
+                newScenario.BipedPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = bipdpal.Name
+                });
+            }
+            for (var bipdobjindex = 0; bipdobjindex < gen2Tag.Bipeds.Count; bipdobjindex++)
+            {
+                var bipdobj = gen2Tag.Bipeds[bipdobjindex];
+                var biped = new Scenario.BipedInstance
+                {
+                    PaletteIndex = bipdobj.Type,
+                    NameIndex = bipdobj.Name,
+                    PlacementFlags = (Scenario.ObjectPlacementFlags)bipdobj.ObjectData.PlacementFlags,
+                    Position = bipdobj.ObjectData.Position,
+                    Rotation = bipdobj.ObjectData.Rotation,
+                    Scale = bipdobj.ObjectData.Scale,
+                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)bipdobj.ObjectData.BspPolicy,
+                    OriginBspIndex = (short)bipdobj.ObjectData.ManualBspFlags,
+                    CanAttachToBspFlags = (ushort)(bipdobj.ObjectData.ManualBspFlags + 1),
+                    Source = (Scenario.BipedInstance.SourceValue)bipdobj.ObjectData.ObjectId.Source,
+                    
+                    UniqueHandle = new DatumHandle((uint)bipdobj.ObjectData.ObjectId.UniqueId),
+                    EditorFolder = -1,
+                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Biped },
+                    Variant = bipdobj.PermutationData.VariantName,
+                    ActiveChangeColors = (Scenario.BipedInstance.ScenarioObjectActiveChangeColorFlags)bipdobj.PermutationData.ActiveChangeColors,
+
+                    BodyVitalityFraction = bipdobj.UnitData.BodyVitality,
+                    Flags = (Scenario.BipedInstance.ScenarioUnitDatumFlags)bipdobj.UnitData.Flags
+                };
+                newScenario.Bipeds.Add(biped);
+            }
+
+            // Weapons
+            foreach (var weappal in gen2Tag.WeaponPalette)
+            {
+                newScenario.WeaponPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = weappal.Name
+                });
+            }
+            for (var weapobjindex = 0; weapobjindex < gen2Tag.Weapons.Count; weapobjindex++)
+            {
+                var weapobj = gen2Tag.Weapons[weapobjindex];
+                var weapon = new Scenario.WeaponInstance
+                {
+                    PaletteIndex = weapobj.Type,
+                    NameIndex = weapobj.Name,
+                    PlacementFlags = (Scenario.ObjectPlacementFlags)weapobj.ObjectData.PlacementFlags,
+                    Position = weapobj.ObjectData.Position,
+                    Rotation = weapobj.ObjectData.Rotation,
+                    Scale = weapobj.ObjectData.Scale,
+                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)weapobj.ObjectData.BspPolicy,
+                    OriginBspIndex = (short)weapobj.ObjectData.ManualBspFlags,
+                    CanAttachToBspFlags = (ushort)(weapobj.ObjectData.ManualBspFlags + 1),
+                    Source = (Scenario.BipedInstance.SourceValue)weapobj.ObjectData.ObjectId.Source,
+                    UniqueHandle = new DatumHandle((uint)weapobj.ObjectData.ObjectId.UniqueId),
+                    EditorFolder = -1,
+                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Weapon },
+                    WeaponFlags = (Scenario.WeaponInstance.ScenarioWeaponDatumFlags)weapobj.WeaponData.Flags,
+                };
+                newScenario.Weapons.Add(weapon);
+            }
+
+            // Equipment
+            foreach (var eqippal in gen2Tag.EquipmentPalette)
+            {
+                newScenario.EquipmentPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = eqippal.Name
+                });
+            }
+            for (var eqipobjindex = 0; eqipobjindex < gen2Tag.Equipment.Count; eqipobjindex++)
+            {
+                var eqipobj = gen2Tag.Weapons[eqipobjindex];
+                var equipment = new Scenario.EquipmentInstance
+                {
+                    PaletteIndex = eqipobj.Type,
+                    NameIndex = eqipobj.Name,
+                    PlacementFlags = (Scenario.ObjectPlacementFlags)eqipobj.ObjectData.PlacementFlags,
+                    Position = eqipobj.ObjectData.Position,
+                    Rotation = eqipobj.ObjectData.Rotation,
+                    Scale = eqipobj.ObjectData.Scale,
+                    BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)eqipobj.ObjectData.BspPolicy,
+                    OriginBspIndex = (short)eqipobj.ObjectData.ManualBspFlags,
+                    CanAttachToBspFlags = (ushort)(eqipobj.ObjectData.ManualBspFlags + 1),
+                    Source = (Scenario.BipedInstance.SourceValue)eqipobj.ObjectData.ObjectId.Source,
+                    UniqueHandle = new DatumHandle((uint)eqipobj.ObjectData.ObjectId.UniqueId),
+                    EditorFolder = -1,
+                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Equipment },
+                };
+                newScenario.Equipment.Add(equipment);
             }
 
             // Player starting locations

@@ -1731,17 +1731,17 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             [TagField(Length = 32)]
             public string Name;
-            public float StartingHealthDamage; // [0,1]
-            public float StartingShieldDamage; // [0,1]
+            public float StartingHealthDamage;
+            public float StartingShieldDamage;
             [TagField(ValidTags = new [] { "weap" })]
             public CachedTag PrimaryWeapon;
-            public short RoundsLoaded;
-            public short RoundsTotal;
+            public short PrimaryRoundsLoaded;
+            public short PrimaryRoundsTotal;
             [TagField(ValidTags = new [] { "weap" })]
             public CachedTag SecondaryWeapon;
-            public short RoundsLoaded1;
-            public short RoundsTotal1;
-            public sbyte StartingFragmentationGrenadeCount;
+            public short SecondaryRoundsLoaded;
+            public short SecondaryRoundsTotal;
+            public sbyte StartingFragGrenadeCount;
             public sbyte StartingPlasmaGrenadeCount;
             public sbyte StartingUnknownGrenadeCount;
             public sbyte StartingUnknownGrenadeCount1;

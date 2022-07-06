@@ -75,8 +75,10 @@ namespace TagTool.Tags.Definitions
 
         public Angle CameraInterpolationStart; // looking-downward angle that starts camera interpolation to fp position
         public Angle CameraInterpolationEnd; // looking-downward angle at which camera interpolation to fp position is complete
-        public RealVector3d CameraOffset;
-        public float RootOffsetCameraScale;
+        public float CameraForwardMovementScale;
+        public float CameraSideMovementScale;
+        public float CameraVerticalMovementScale;
+        public float CameraExclusionDistance;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float RootOffsetCameraDampening;
         public float AutoaimWidth; // world units
