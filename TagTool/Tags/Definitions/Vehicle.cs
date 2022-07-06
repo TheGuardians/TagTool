@@ -31,8 +31,8 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public sbyte ComplexSuspensionSampleCount; // How many additional raycasts to perform per side of a tire.
-        [TagField(Length = 0x1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
-        public byte[] Unused5;
+        [TagField(Length = 0x1, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
+        public byte[] PaddingReach;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public Bounds<float> FlippingAngularVelocityRangeNew;
@@ -51,16 +51,17 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public StringId FlipOverMessageNew;
 
+        [TagField(ValidTags = new[] { "snd!" })]
         public CachedTag SuspensionSound;
-
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag SpecialEffect;
-        public CachedTag DriverBoostDamageEffectOrResponse;
-        public CachedTag RiderBoostDamageEffectOrResponse;
+        [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+        public CachedTag DriverBoostDamageResponse;
+        [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+        public CachedTag RiderBoostDamageResponse;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public float Unknown31;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public float Unknown32;
+        [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] PaddingHO;
 
         [Flags]
         public enum VehicleFlagBits : int

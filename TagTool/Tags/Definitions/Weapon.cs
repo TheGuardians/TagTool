@@ -707,32 +707,31 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0xC4)]
             public class FiringEffectBlock : TagStructure
             {
-                // the minimum and maximum number of times this firing effect will be used, once it has been chosen
-                public Bounds<short> ShotCount;
-                // this effect is used when the weapon is loaded and fired normally
-                public CachedTag FiringEffect;
-                // this effect is used when the weapon is loaded but fired while overheated
-                public CachedTag MisfireEffect;
-                // this effect is used when the weapon is not loaded
-                public CachedTag EmptyEffect;
-                // this effect is used when the weapon is not loaded
-                public CachedTag OptionalSecondaryFiringEffect;
-                // this effect is used when the weapon is loaded and fired normally
-                public CachedTag FiringDamage;
-                // this effect is used when the weapon is loaded but fired while overheated
-                public CachedTag MisfireDamage;
-                // this effect is used when the weapon is not loaded
-                public CachedTag EmptyDamage;
-                // this effect is used when the weapon is loaded and fired normally
-                public CachedTag OptionalSecondaryFiringDamage;
-                // this effect is used when the weapon is loaded and fired normally
-                public CachedTag FiringRiderDamage;
-                // this effect is used when the weapon is loaded but fired while overheated
-                public CachedTag MisfireRiderDamage;
-                // this effect is used when the weapon is not loaded
-                public CachedTag EmptyRiderDamage;
-                // this effect is used when the weapon is loaded and fired normally
-                public CachedTag OptionalSecondaryFiringRiderDamage;
+                public Bounds<short> ShotCount; // the minimum number of times this firing effect will be used, once it has been chosen
+                [TagField(ValidTags = new[] { "snd!", "effe" })]
+                public CachedTag FiringEffect; // this effect is used when the weapon is loaded and fired normally
+                [TagField(ValidTags = new[] { "snd!", "effe" })]
+                public CachedTag MisfireEffect; // this effect is used when the weapon is loaded but fired while overheated
+                [TagField(ValidTags = new[] { "snd!", "effe" })]
+                public CachedTag EmptyEffect; // this effect is used when the weapon is not loaded
+                [TagField(ValidTags = new[] { "snd!", "effe" })]
+                public CachedTag OptionalSecondaryFiringEffect; // this effect is used when the weapon is not loaded
+                [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+                public CachedTag FiringDamage; // this effect is used when the weapon is loaded and fired normally
+                [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+                public CachedTag MisfireDamage; // this effect is used when the weapon is loaded but fired while overheated
+                [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+                public CachedTag EmptyDamage; // this effect is used when the weapon is not loaded
+                [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+                public CachedTag OptionalSecondaryFiringDamage; // this effect is used when the weapon is loaded and fired normally
+                [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+                public CachedTag FiringRiderDamage; // this effect is used when the weapon is loaded and fired normally
+                [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+                public CachedTag MisfireRiderDamage; // this effect is used when the weapon is loaded but fired while overheated
+                [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+                public CachedTag EmptyRiderDamage; // this effect is used when the weapon is not loaded
+                [TagField(ValidTags = new[] { "jpt!", "drdf" })]
+                public CachedTag OptionalSecondaryFiringRiderDamage; // this effect is used when the weapon is loaded and fired normally
             }
 
             [TagStructure(Size = 0x78)]

@@ -37,26 +37,39 @@ namespace TagTool.Tags.Definitions
         public AiSoundVolume DetonationNoiseForAi;
         public short SuperDetonationProjectileCount;
         public float SuperDetonationDelay;
+
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag DetonationStarted;
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag AirborneDetonationEffect;
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag GroundDetonationEffect;
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag DetonationDamage;
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag AttachedDetonationDamage;
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag SuperDetonation;
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag SuperDetonationDamage;
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag DetonationSound;
 
         public DamageReportingType DamageReportingType;
-        [TagField(Length = 3, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+
+        [TagField(Length = 3, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(Length = 1, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
         public byte[] Padding1;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public GameObjectType SuperDetonationObjectTypes;
         public CachedTag AttachedSuperDetonationDamage;
         public float MaterialEffectRadius; // radius within we will generate material effects
         public CachedTag FlybySound;
+
         [TagField(ValidTags = new[] { "drdf" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag FlybyDamageResponse;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float FlybyDamageResponseMaxDistance;
         public CachedTag ImpactEffect;

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Commands.Common;
+using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Shaders.ShaderFunctions;
+using System.Linq;
 
 namespace TagTool.Commands.RenderMethods
 {
@@ -47,13 +49,26 @@ namespace TagTool.Commands.RenderMethods
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");
 
             int functionIndex;
+
             if (!int.TryParse(args[2], out functionIndex))
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[2]}\"");
 
             var properties = Definition.ShaderProperties[0];
 
             if (functionIndex >= properties.Functions.Count)
-                new TagToolWarning($"Function index \"{functionIndex}\" is invalid.");
+            {
+                if (properties.Functions.Count != 0)
+                    new TagToolWarning($"Function block at index {functionIndex} does not exist; a new function block with blank data will be added.");
+
+                properties.Functions.Add(new RenderMethod.RenderMethodAnimatedParameterBlock
+                {
+                    Function = new TagFunction { Data = new byte[52] }
+                });
+
+                functionIndex = properties.Functions.Count() - 1;
+            }
+            else if (functionIndex < 0)
+                return new TagToolError(CommandError.CustomError, "Function index argument cannot be negative.");
 
             using (var stream = Cache.OpenCacheRead())
             {
@@ -113,6 +128,7 @@ namespace TagTool.Commands.RenderMethods
                     return new TagToolError(CommandError.CustomError, "Failed to build animated parameters.");
             }
 
+            Console.WriteLine($"Function created successfully at index {functionIndex}.");
             return true;
         }
 

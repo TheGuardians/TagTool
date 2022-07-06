@@ -85,7 +85,7 @@ namespace TagTool.Commands.Porting.Gen2
 
             sound.Scale = scale;
             sound.Promotion = promotion;
-            sound.CustomPlayBacks = customPlayback;
+            sound.CustomPlaybacks = customPlayback;
 
             //
             // Gen3 / HO specifics

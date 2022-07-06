@@ -48,10 +48,15 @@ namespace TagTool.Tags.Definitions
         public CachedTag GenericServiceTagList;
 
         public StringId DefaultModelVariant;
+
+        [TagField(ValidTags = new[] { "hlmt" })]
         public CachedTag Model;
-        [TagField(MaxVersion = CacheVersion.HaloOnline416097)]
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+
+        [TagField(ValidTags = new[] { "bloc" }, MaxVersion = CacheVersion.HaloOnline416097)]
+        [TagField(ValidTags = new[] { "bloc" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag CrateObject;
+
+        [TagField(ValidTags = new[] { "cddf" })]    // only set this tag if you want to override the default collision damage values in globals.globals
         public CachedTag CollisionDamage;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -59,12 +64,16 @@ namespace TagTool.Tags.Definitions
 
         public List<EarlyMoverProperty> EarlyMoverProperties;
 
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag CreationEffect;
+
+        [TagField(ValidTags = new[] { "foot" })]
         public CachedTag MaterialEffects;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ArmorSounds;
 
+        [TagField(ValidTags = new[] { "snd!" })]
         public CachedTag MeleeImpactSound; // sound made when I am meleed. Overrides the sweetener sound of my material.
 
         public List<AiProperty> AiProperties;
@@ -79,9 +88,9 @@ namespace TagTool.Tags.Definitions
 
         public List<Attachment> Attachments;
 
-        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
+        [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 0xC)]
         public byte[] WaterPhysicsHullSurfaceBlock = new byte[0xC];
-        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0xC)]
+        [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 0xC)]
         public byte[] JetwashBlock = new byte[0xC];
 
         public List<TagReferenceBlock> Widgets;

@@ -19,25 +19,25 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Label)]
             public StringId Name;
 
-            public float OriginFadeRange;
-            public float OriginFadeCutoff;
-            public float EdgeFadeRange;
-            public float EdgeFadeCutoff;
-            public float LodInDistance;
-            public float LodFeatherInDistance;
-            public float LodOutDistance;
-            public float LodFeatherOutDistance;
+            public float OriginFadeRange; // distance beyond cutoff over which contrails fade (world units)
+            public float OriginFadeCutoff; // distance from contrail origin where fade begins (world units)
+            public float EdgeFadeRange; // degrees beyond cutoff over which contrails fade (degrees)
+            public float EdgeFadeCutoff; // degrees away from edge-on where fade is total (degrees)
+            public float LodInDistance; // world units
+            public float LodFeatherInDistance; // world units
+            public float LodOutDistance; // world units
+            public float LodFeatherOutDistance; // world units
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float UnknownReach;
 
-            public ContrailPropertyScalar EmissionRate;
-            public ContrailPropertyScalar ProfileLifespan;
-            public ContrailPropertyRealVector3d ProfileSelfAcceleration;
-            public ContrailPropertyScalar ProfileSize;
-            public ContrailPropertyRealPoint2d ProfileOffset;
-            public ContrailPropertyScalar ProfileRotation;
-            public ContrailPropertyScalar ProfileRotationRate;
+            public ContrailPropertyScalar EmissionRate; // profiles per second
+            public ContrailPropertyScalar ProfileLifespan; // seconds
+            public ContrailPropertyRealVector3d ProfileSelfAcceleration; // world units per second per second
+            public ContrailPropertyScalar ProfileSize; // world units
+            public ContrailPropertyRealPoint2d ProfileOffset; // world units
+            public ContrailPropertyScalar ProfileRotation; // degrees
+            public ContrailPropertyScalar ProfileRotationRate; // degrees per second
 
             public ContrailAppearanceFlags AppearanceFlags;
             public ContrailProfileShapeEnum ProfileShape;
@@ -45,8 +45,8 @@ namespace TagTool.Tags.Definitions
 
             public RenderMethod RenderMethod;
 
-            public RealPoint2d Tiling;
-            public RealPoint2d ScrollSpeed;
+            public RealPoint2d Tiling; // u is tiles/world unit, v is absolute tiles (u lengthwise, v crosswise)
+            public RealPoint2d ScrollSpeed; // tiles per second
 
             public ContrailPropertyColor ProfileColor;
             public ContrailPropertyScalar ProfileAlpha;
@@ -86,7 +86,8 @@ namespace TagTool.Tags.Definitions
                 public byte[] MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
-                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+
+                [TagField(Length = 3, Flags = Padding)]
                 public byte[] DSFDSGLKJ;
 
                 public enum ContrailStateInputEnum : sbyte
@@ -127,8 +128,10 @@ namespace TagTool.Tags.Definitions
                 public byte[] MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
-                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+
+                [TagField(Length = 3, Flags = Padding)]
                 public byte[] DSFDSGLKJ;
+
                 public RealVector3d StartingInterpolant;
                 public RealVector3d EndingInterpolant;
 
@@ -170,8 +173,10 @@ namespace TagTool.Tags.Definitions
                 public byte[] MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
-                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+
+                [TagField(Length = 3, Flags = Padding)]
                 public byte[] DSFDSGLKJ;
+
                 public RealPoint2d StartingInterpolant;
                 public RealPoint2d EndingInterpolant;
 
@@ -213,7 +218,8 @@ namespace TagTool.Tags.Definitions
                 public byte[] MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
-                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+
+                [TagField(Length = 3, Flags = Padding)]
                 public byte[] DSFDSGLKJ;
 
                 public enum ContrailStateInputEnum : sbyte

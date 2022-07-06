@@ -73,7 +73,7 @@ namespace TagTool.Tags.Definitions
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         [TagField(BuildType = CacheBuildType.TagsBuild)]
-        public List<CustomPlayback> CustomPlayBacks;
+        public List<CustomPlayback> CustomPlaybacks;
 
         [TagField(MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.TagsBuild)]
         public TagResourceReference ResourceReachTagsBuild;

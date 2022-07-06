@@ -176,7 +176,7 @@ namespace TagTool.Commands.Porting
             sound.Scale = scale;
             sound.PlatformCodec = platformCodec.DeepClone();
             sound.Promotion = promotion;
-            sound.CustomPlayBacks = customPlayBack;
+            sound.CustomPlaybacks = customPlayBack;
 
             //
             // Tag fixes
