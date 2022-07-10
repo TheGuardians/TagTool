@@ -22,11 +22,24 @@ namespace TagTool.Commands.Sounds
         public ExtractSoundCommand(GameCache cache, CachedTag tag, Sound definition) :
             base(true,
 
+                name:
                 "ExtractSound",
-                "Export snd! data to a file",
-
+                
+                description:
+                "Extract snd! data to a file",
+                
+                usage:
                 "ExtractSound [format] <Path>",
-                "")
+                
+                examples:
+                "extractsound\n" +
+                "extractsound d:\\sound\n"+
+                "extractsound mp3 d:\\sound\\",
+                
+                helpMessage:
+                "- Valid formats: " + string.Join(", ", Enum.GetNames(typeof(Compression))) + "\n" +
+                "- [format] is optional and not supported for Halo Online cache\n" +
+                "- <Path> if not specified, files with be ripped to CURRENT_WORKING_DIRECTORY\\Sound")
         {
             Cache = cache;
             Tag = tag;
