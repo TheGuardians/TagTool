@@ -18,6 +18,10 @@ namespace TagTool.Cache.Monolithic
         {
             TagResources.Add(resourceHandle, state);
         }
+        public void AddTagResourceData(byte[] data)
+        {
+
+        }
 
         public StringId AddStringId(string stringvalue)
         {

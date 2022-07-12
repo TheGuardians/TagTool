@@ -8,6 +8,8 @@ namespace TagTool.Cache.Monolithic
 
         void AddTagResource(DatumHandle resourceHandle, TagResourceXSyncState xsyncState);
 
+        void AddTagResourceData(byte[] data);
+
         CachedTag GetTag(Tag groupTag, string name);
     }
 }

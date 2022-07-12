@@ -7,6 +7,7 @@ using TagTool.IO;
 using System.IO;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Resources;
 using TagTool.Tags;
 using TagTool.Common;
 
@@ -45,7 +46,7 @@ namespace TagTool.Commands.Tags
                 inStream.Read(tagData, 0, tagData.Length);
             }
 
-            var singleFileTagReader = new SingleTagFileReader(new PersistChunkReader(new MemoryStream(tagData), EndianFormat.LittleEndian));
+            var singleFileTagReader = new SingleTagFileReader(new PersistChunkReader(new MemoryStream(tagData), Cache.Endianness));
 
             // read the layout
             var layout = singleFileTagReader.ReadLayout(Cache.Endianness);
@@ -84,6 +85,14 @@ namespace TagTool.Commands.Tags
             DataSerializationContext context = new DataSerializationContext(newTagDataReader);
             var result = deserializer.DeserializeStruct(newTagDataReader, context, info);
 
+            //tag resources
+            if (layout.ResourceDefinitions.Length > 1)
+                new TagToolWarning("Resources supported for tags with only one resource type for the moment");
+            else if(FixupContext.TagResourceData.Count > 0 && layout.ResourceDefinitions.Length == 1)
+            {
+                FixupResources(result, FixupContext, layout, looseTagType);
+            }
+
             var destTag = Cache.TagCache.AllocateTag(looseTagType, args[0].ToString());
             using (var stream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(stream, destTag, result);
@@ -95,9 +104,42 @@ namespace TagTool.Commands.Tags
             return true;
         }
 
+        private void FixupResources(object tagDef, HaloOnlinePersistContext FixupContext, TagLayout layout, Type looseTagType)
+        {
+            for(var i = 0; i < FixupContext.TagResourceData.Count; i++)
+            {
+                MemoryStream dataStream = new MemoryStream(FixupContext.TagResourceData[i]);
+                var chunkReader = new PersistChunkReader(dataStream, Cache.Endianness);        
+                var dataReader = new SingleTagFileDataReader(0, layout, FixupContext);
+                uint offset = dataReader.ReadResource(chunkReader, out MemoryStream outStream, layout.ResourceDefinitions[0]);
+
+                var newResourceReader = new EndianReader(outStream, Cache.Endianness);
+                newResourceReader.SeekTo(offset);
+                DataSerializationContext resourceContext = new DataSerializationContext(newResourceReader);
+                var deserializer = new TagDeserializer(CacheVersion.Halo3Retail, CachePlatform.MCC);
+
+                switch (looseTagType.Name)
+                {
+                    case "ModelAnimationGraph":
+                        var resourceInfo = TagStructure.GetTagStructureInfo(typeof(ModelAnimationTagResource), CacheVersion.Halo3Retail, CachePlatform.MCC);              
+                        var resourceDef = deserializer.DeserializeStruct(newResourceReader, resourceContext, resourceInfo);
+                        ModelAnimationGraph jmad = (ModelAnimationGraph)tagDef;
+                        ModelAnimationTagResource resource = (ModelAnimationTagResource)resourceDef;
+                        resource.GroupMembers.AddressType = CacheAddressType.Definition;
+                        jmad.ResourceGroups[i].ResourceReference = Cache.ResourceCache.CreateModelAnimationGraphResource(resource);
+                        break;
+                    default:
+                        new TagToolWarning($"'{layout.ResourceDefinitions[0].Name}' import not yet supported!");
+                        break;
+                }
+            }
+            
+        }
+
         public class HaloOnlinePersistContext : ISingleTagFilePersistContext
         {
             public GameCache Cache;
+            public List<byte[]> TagResourceData = new List<byte[]>();
             public HaloOnlinePersistContext(GameCache cache)
             {
                 Cache = cache;
@@ -106,6 +148,11 @@ namespace TagTool.Commands.Tags
             public void AddTagResource(DatumHandle resourceHandle, TagResourceXSyncState state)
             {
 
+            }
+
+            public void AddTagResourceData(byte[] data)
+            {
+                TagResourceData.Add(data);
             }
 
             public StringId AddStringId(string stringvalue)

@@ -82,6 +82,50 @@ namespace TagTool.Cache.Monolithic
             return offset;
         }
 
+        public uint ReadResource(PersistChunkReader reader, out MemoryStream outStream, TagResourceDefinition definition)
+        {
+            var chunk = reader.ReadNextChunk();
+            if (chunk.Header.Signature != "tgdt")
+                throw new Exception("Invalid tag block chunk signature");
+
+            var chunkReader = new PersistChunkReader(chunk.Stream, reader.Format);
+
+            var data = chunkReader.ReadBytes(definition.Struct.Size);
+            var newDataReader = new PersistChunkReader(new MemoryStream(data), chunkReader.Format);
+
+            OutputStream = new MemoryStream();
+            var outputWriter = new EndianWriter(new MemoryStream(), chunkReader.Format);
+            SerializationContext = new DataSerializationContext(outputWriter);
+
+            if (!reader.EOF)
+            {
+                var oldFixups = DataFixups;
+                DataFixups = new List<SingleTagFileDataFixup>();
+
+                ReadStruct(newDataReader, reader, definition.Struct);
+
+                var writer = new EndianWriter(new MemoryStream(data), reader.Format);
+                foreach (var fixup in DataFixups)
+                {
+                    writer.BaseStream.Position = fixup.Offset;
+                    fixup.Apply(PersistContext, writer);
+                }
+
+                DataFixups = oldFixups;
+            }
+
+            var block = SerializationContext.CreateBlock();
+            block.Writer.WriteBlock(data);
+            uint offset = block.Finalize(OutputStream);
+
+            SerializationContext.EndSerialize(null, OutputStream.ToArray(), offset);
+            offset = SerializationContext.MainStructOffset;
+
+            outStream = OutputStream;
+
+            return offset;
+        }
+
         private void ReadStruct(PersistChunkReader dataReader, PersistChunkReader reader, TagStructDefinition definition)
         {
             var chunk = reader.ReadNextChunk();
@@ -144,6 +188,12 @@ namespace TagTool.Cache.Monolithic
             else if (chunk.Header.Signature == "tg\0c")
             {
                 // unused
+            }
+            else if(chunk.Header.Signature == "tgrc")
+            {
+                MemoryStream tempStream = new MemoryStream();
+                chunk.Stream.CopyTo(tempStream);
+                PersistContext.AddTagResourceData(tempStream.ToArray());
             }
             else
             {
