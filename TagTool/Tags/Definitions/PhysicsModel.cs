@@ -8,7 +8,8 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
 	[TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x18C, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Beta)]
-	[TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x1A0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
+	[TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x1A0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x198, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x19C, MinVersion = CacheVersion.HaloReach)]
     public class PhysicsModel : TagStructure
@@ -86,9 +87,9 @@ namespace TagTool.Tags.Definitions
 
         public List<Phantom> Phantoms;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
         public uint Unknown17;
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
         public uint Unknown18;
 
         [Flags]
