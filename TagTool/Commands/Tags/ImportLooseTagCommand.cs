@@ -86,12 +86,7 @@ namespace TagTool.Commands.Tags
             var result = deserializer.DeserializeStruct(newTagDataReader, context, info);
 
             //tag resources
-            if (layout.ResourceDefinitions.Length > 1)
-                new TagToolWarning("Resources supported for tags with only one resource type for the moment");
-            else if(FixupContext.TagResourceData.Count > 0 && layout.ResourceDefinitions.Length == 1)
-            {
-                FixupResources(result, FixupContext, layout, looseTagType);
-            }
+            FixupResources(result, FixupContext, layout, looseTagType);
 
             var destTag = Cache.TagCache.AllocateTag(looseTagType, args[0].ToString());
             using (var stream = Cache.OpenCacheReadWrite())
@@ -105,35 +100,52 @@ namespace TagTool.Commands.Tags
         }
 
         private void FixupResources(object tagDef, HaloOnlinePersistContext FixupContext, TagLayout layout, Type looseTagType)
-        {
-            for(var i = 0; i < FixupContext.TagResourceData.Count; i++)
+        {         
+            switch (looseTagType.Name)
             {
-                MemoryStream dataStream = new MemoryStream(FixupContext.TagResourceData[i]);
-                var chunkReader = new PersistChunkReader(dataStream, Cache.Endianness);        
-                var dataReader = new SingleTagFileDataReader(0, layout, FixupContext);
-                uint offset = dataReader.ReadResource(chunkReader, out MemoryStream outStream, layout.ResourceDefinitions[0]);
-
-                var newResourceReader = new EndianReader(outStream, Cache.Endianness);
-                newResourceReader.SeekTo(offset);
-                DataSerializationContext resourceContext = new DataSerializationContext(newResourceReader);
-                var deserializer = new TagDeserializer(CacheVersion.Halo3Retail, CachePlatform.MCC);
-
-                switch (looseTagType.Name)
-                {
-                    case "ModelAnimationGraph":
-                        var resourceInfo = TagStructure.GetTagStructureInfo(typeof(ModelAnimationTagResource), CacheVersion.Halo3Retail, CachePlatform.MCC);              
-                        var resourceDef = deserializer.DeserializeStruct(newResourceReader, resourceContext, resourceInfo);
+                case "ModelAnimationGraph":
+                    for (var i = 0; i < FixupContext.TagResourceData.Count; i++)
+                    {
+                        MemoryStream dataStream = new MemoryStream(FixupContext.TagResourceData[i]);
+                        var chunkReader = new PersistChunkReader(dataStream, Cache.Endianness);
+                        var dataReader = new SingleTagFileDataReader(0, layout, FixupContext);
+                        uint offset = dataReader.ReadResource(chunkReader, out MemoryStream outStream, layout.ResourceDefinitions[0]);
+                        var newResourceReader = new EndianReader(outStream, Cache.Endianness);
+                        newResourceReader.SeekTo(offset);
+                        DataSerializationContext resourceContext = new DataSerializationContext(newResourceReader);
+                        var deserializer = new TagDeserializer(CacheVersion.Halo3Retail, CachePlatform.MCC);
+                        var jmadInfo = TagStructure.GetTagStructureInfo(typeof(ModelAnimationTagResource), CacheVersion.Halo3Retail, CachePlatform.MCC);
+                        ModelAnimationTagResource animationResource = (ModelAnimationTagResource)deserializer.DeserializeStruct(newResourceReader, resourceContext, jmadInfo);
                         ModelAnimationGraph jmad = (ModelAnimationGraph)tagDef;
-                        ModelAnimationTagResource resource = (ModelAnimationTagResource)resourceDef;
-                        resource.GroupMembers.AddressType = CacheAddressType.Definition;
-                        jmad.ResourceGroups[i].ResourceReference = Cache.ResourceCache.CreateModelAnimationGraphResource(resource);
-                        break;
-                    default:
+                        animationResource.GroupMembers.AddressType = CacheAddressType.Definition;
+                        jmad.ResourceGroups[i].ResourceReference = Cache.ResourceCache.CreateModelAnimationGraphResource(animationResource);
+                    }                 
+                    break;
+                case "Bitmap":
+                    Bitmap bitm = (Bitmap)tagDef;
+                    BitmapTextureInteropResource bitmResource = new BitmapTextureInteropResource
+                    {
+                        Texture = new D3DStructure<BitmapTextureInteropResource.BitmapDefinition>
+                        {
+                            Definition = new BitmapTextureInteropResource.BitmapDefinition
+                            {
+                                PrimaryResourceData = new TagData
+                                {
+                                    Data = bitm.ProcessedPixelData
+                                }
+                            },
+                            AddressType = CacheAddressType.Definition
+                        }
+                    };
+                    bitm.HardwareTextures.Add(Cache.ResourceCache.CreateBitmapResource(bitmResource));
+                    bitm.ProcessedPixelData = null;
+                    break;
+                default:
+                    if(layout.ResourceDefinitions.Length > 0)
                         new TagToolWarning($"'{layout.ResourceDefinitions[0].Name}' import not yet supported!");
-                        break;
-                }
+                    break;
             }
-            
+
         }
 
         public class HaloOnlinePersistContext : ISingleTagFilePersistContext

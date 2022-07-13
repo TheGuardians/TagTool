@@ -88,8 +88,8 @@ namespace TagTool.Cache.Monolithic
             if (chunk.Header.Signature != "tgdt")
                 throw new Exception("Invalid tag block chunk signature");
 
+            //the tgdt chunk only contains the main struct, everything else is in subsequent chunks
             var chunkReader = new PersistChunkReader(chunk.Stream, reader.Format);
-
             var data = chunkReader.ReadBytes(definition.Struct.Size);
             var newDataReader = new PersistChunkReader(new MemoryStream(data), chunkReader.Format);
 
