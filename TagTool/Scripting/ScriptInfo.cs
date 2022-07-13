@@ -718,7 +718,7 @@ namespace TagTool.Scripting
                 [0x37B] = "ai_movement_stunned",
                 [0x37C] = "ai_movement_berserk",
                 [0x425] = "cinematic_letterbox_style",
-                [0x437] = "global_playtest_mode",
+                [0x43A] = "global_playtest_mode",
                 [0x44B] = "e3",
                 [0x45F] = "lruv_lirp_enabled",
                 [0x48A] = "use_temp_directory_for_files",
