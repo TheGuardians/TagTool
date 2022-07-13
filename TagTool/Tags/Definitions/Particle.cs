@@ -40,9 +40,9 @@ namespace TagTool.Tags.Definitions
         public float Curvature; // 0=flat, 1=hemisphere
         public float AngleFadeRange;
         public float AngleFadeCutoff;
-        public float MotionBlurTranslationScale;
-        public float MotionBlurRotationScale;
-        public float MotionBlurAspectScale;
+        public float MotionBlurTranslationScale = 1.0f;
+        public float MotionBlurRotationScale = 1.0f;
+        public float MotionBlurAspectScale = 0.5f;
         public RenderMethod RenderMethod;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -87,12 +87,14 @@ namespace TagTool.Tags.Definitions
             None = 0,
             DiesAtRest = 1 << 0,
             DiesOnStructureCollision = 1 << 1,
-            DiesInMedia = 1 << 2,
+            DiesInWater = 1 << 2,
             DiesInAir = 1 << 3,
             HasSweetener = 1 << 4,
-            UsesCheapShader = 1 << 5,
-            Bit6 = 1 << 6,
-            HasAttachment = 1 << 7
+            UseCheapShader = 1 << 5,
+            NoAttachments = 1 << 6,
+            HasAttachmentOnBirth = 1 << 7,
+            HasAttachmentOnCollision = 1 << 8,
+            HasAttachmentOnDeath = 1 << 9,
         }
 
         [Flags]
@@ -101,11 +103,13 @@ namespace TagTool.Tags.Definitions
             None = 0,
             DiesAtRest = 1 << 0,
             DiesOnStructureCollision = 1 << 1,
-            DiesInAir = 1 << 2,
-            HasSweetener = 1 << 3,
-            UsesCheapShader = 1 << 4,
-            Bit6 = 1 << 5,
-            HasAttachment = 1 << 6
+            DiesInMedia = 1 << 2,
+            DiesInAir = 1 << 3,
+            HasSweetener = 1 << 4,
+            NoAttachments = 1 << 5,
+            HasAttachmentOnBirth = 1 << 6,
+            HasAttachmentOnCollision = 1 << 7,
+            HasAttachmentOnDeath = 1 << 8,
         }
 
         [TagStructure(Size = 0x14)]
@@ -147,6 +151,7 @@ namespace TagTool.Tags.Definitions
             DistortionActive = 1 << 13,
             LdrOnly = 1 << 14,
             IsParticleModel = 1 << 15,
+            Opaque = 1 << 16,
         }
 
         [Flags]
