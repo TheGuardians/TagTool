@@ -10,6 +10,7 @@ using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using TagTool.Tags;
 using TagTool.Common;
+using TagTool.Geometry;
 
 namespace TagTool.Commands.Tags
 {
@@ -82,6 +83,10 @@ namespace TagTool.Commands.Tags
                 return new TagToolError(CommandError.OperationFailed, "Tag name already exists in cache!");
 
             var info = TagStructure.GetTagStructureInfo(looseTagType, CacheVersion.Halo3Retail, CachePlatform.MCC);
+
+            if (info.TotalSize != layout.RootStruct.Size)
+                return new TagToolError(CommandError.OperationFailed, $"Loose tag struct size ({layout.RootStruct.Size}) did not match known definition size ({info.TotalSize}). Check game version.");
+
             DataSerializationContext context = new DataSerializationContext(newTagDataReader);
             var result = deserializer.DeserializeStruct(newTagDataReader, context, info);
 
@@ -140,12 +145,133 @@ namespace TagTool.Commands.Tags
                     bitm.HardwareTextures.Add(Cache.ResourceCache.CreateBitmapResource(bitmResource));
                     bitm.ProcessedPixelData = null;
                     break;
+                case "RenderModel":
+                    RenderModel mode = (RenderModel)tagDef;
+                    RenderGeometryApiResourceDefinition modeResource = new RenderGeometryApiResourceDefinition
+                    {
+                        VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>(CacheAddressType.Definition),
+                        IndexBuffers = new TagBlock<D3DStructure<IndexBufferDefinition>>(CacheAddressType.Definition)
+                    };
+                    //fixup resource data fields
+                    for(var meshindex = 0; meshindex < mode.Geometry.Meshes.Count; meshindex++)
+                    {
+                        var mesh = mode.Geometry.Meshes[meshindex];
+                        //no support for prt data right now
+                        mesh.PrtType = PrtSHType.None;
+                        var tagResource = mode.Geometry.GeometryTagResources[meshindex];
+                        mesh.VertexBufferIndices = new short[8] { (short)meshindex, -1, -1, -1, -1, -1, -1, -1 };
+                        mesh.IndexBufferIndices = new short[2] { (short)meshindex, -1 };
+
+                        //vertex buffers
+                        var vertStream = new MemoryStream();
+                        var vertexWriter = VertexStreamFactory.Create(Cache.Version, Cache.Platform, vertStream);
+                        switch (mesh.Type)
+                        {
+                            case VertexType.Rigid:
+                                foreach (var vert in tagResource.RawVertices)
+                                    vertexWriter.WriteRigidVertex(new RigidVertex
+                                    {
+                                        Position = new RealQuaternion(point_to_vector(vert.Position), 1.0f),
+                                        Normal = point_to_vector(vert.Normal),
+                                        Texcoord = point_to_vector(vert.Texcoord),
+                                        Tangent = new RealQuaternion(point_to_vector(vert.Tangent), 1.0f),
+                                        Binormal = point_to_vector(vert.Binormal)
+                                    });
+                                modeResource.VertexBuffers.Add(new D3DStructure<VertexBufferDefinition>
+                                {
+                                    Definition = new VertexBufferDefinition
+                                    {
+                                        Format = VertexBufferFormat.Rigid,
+                                        VertexSize = 0x38,
+                                        Count = tagResource.RawVertices.Count,
+                                        Data = new TagData
+                                        {
+                                            Data = vertStream.ToArray()
+                                        }
+                                    }
+                                });
+                                break;
+                            case VertexType.Skinned:
+                                foreach (var vert in tagResource.RawVertices)
+                                    vertexWriter.WriteSkinnedVertex(new SkinnedVertex
+                                    {
+                                        Position = new RealQuaternion(point_to_vector(vert.Position), 1.0f),
+                                        Normal = point_to_vector(vert.Normal),
+                                        Texcoord = point_to_vector(vert.Texcoord),
+                                        Tangent = new RealQuaternion(point_to_vector(vert.Tangent), 1.0f),
+                                        Binormal = point_to_vector(vert.Binormal),
+                                        BlendIndices = vert.NodeIndices,
+                                        BlendWeights = vert.NodeWeights
+                                    });
+                                modeResource.VertexBuffers.Add(new D3DStructure<VertexBufferDefinition>
+                                {
+                                    Definition = new VertexBufferDefinition
+                                    {
+                                        Format = VertexBufferFormat.Skinned,
+                                        VertexSize = 0x40,
+                                        Count = tagResource.RawVertices.Count,
+                                        Data = new TagData
+                                        {
+                                            Data = vertStream.ToArray()
+                                        }
+                                    }
+                                });
+                                break;
+                            default:
+                                new TagToolError(CommandError.OperationFailed, $"Render model vertex buffer type '{mesh.Type}' unsupported!");
+                                break;
+                        }
+
+                        //index buffers
+                        using (var indexStream = new MemoryStream())
+                        using (var indexWriter = new EndianWriter(indexStream))
+                        {
+                            foreach (var indexValue in tagResource.RawIndices)
+                                indexWriter.Write(indexValue.Word);
+                            modeResource.IndexBuffers.Add(new D3DStructure<IndexBufferDefinition>
+                            {
+                                Definition = new IndexBufferDefinition
+                                {
+                                    Data = new TagData
+                                    {
+                                        Data = indexStream.ToArray()
+                                    }
+                                }
+                            });
+                        }
+                        switch (mesh.IndexBufferType)
+                        {
+                            case PrimitiveType.TriangleList:
+                                modeResource.IndexBuffers[meshindex].Definition.Format = IndexBufferFormat.TriangleList;
+                                break;
+                            case PrimitiveType.TriangleStrip:
+                                modeResource.IndexBuffers[meshindex].Definition.Format = IndexBufferFormat.TriangleStrip;
+                                break;
+                            default:
+                                new TagToolError(CommandError.OperationFailed, $"Render model index buffer type '{mesh.IndexBufferType}' unsupported!");
+                                break;
+                        }
+                        
+                    }
+                    mode.Geometry.Resource = Cache.ResourceCache.CreateRenderGeometryApiResource(modeResource);
+                    mode.Geometry.GeometryTagResources = null;
+                    break;
                 default:
                     if(layout.ResourceDefinitions.Length > 0)
                         new TagToolWarning($"'{layout.ResourceDefinitions[0].Name}' import not yet supported!");
                     break;
             }
 
+        }
+
+        public RealVector3d point_to_vector(RealPoint3d point)
+        {
+            return new RealVector3d(point.X, point.Y, point.Z);
+        }
+
+        public RealVector2d point_to_vector(RealPoint2d point)
+        {
+            return new RealVector2d(point.X, point.Y);
         }
 
         public class HaloOnlinePersistContext : ISingleTagFilePersistContext

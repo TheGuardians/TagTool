@@ -4,6 +4,7 @@ using TagTool.Tags;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Tags.Resources;
+using System;
 
 namespace TagTool.Geometry
 {
@@ -33,7 +34,7 @@ namespace TagTool.Geometry
 
         public List<UserDataBlock> UserData;
 
-        public List<GeometryTagResource> GeometryTagResources; 
+        public List<PerMeshRawDataBlock> GeometryTagResources; 
 
         public List<MoppClusterVisiblity> MeshClusterVisibility;
 
@@ -164,12 +165,65 @@ namespace TagTool.Geometry
         /// Unused tag mesh data
         /// </summary>
         [TagStructure(Size = 0x2C)]
-        public class GeometryTagResource : TagStructure
+        public class PerMeshRawDataBlock : TagStructure
         {
-            public List<float> VertexBuffer;
-            public List<short> IndexBuffer;
-            [TagField(Flags = Padding, Length = 20)]
-            public byte[] Unused;
+            public List<RawVertexBlock> RawVertices;
+            public List<IndicesWordBlock> RawIndices;
+            public List<RawWaterBlock> RawWaterData;
+            public short ParameterizedTextureWidth;
+            public short ParameterizedTextureHeight;
+            public PerMeshRawDataFlags Flags;
+
+            [Flags]
+            public enum PerMeshRawDataFlags : uint
+            {
+                IndicesAreTriangleStrips = 1 << 0,
+                IndicesAreTriangleLists = 1 << 1,
+                IndicesAreQuadLists = 1 << 2
+            }
+
+            [TagStructure(Size = 0x60)]
+            public class RawVertexBlock : TagStructure
+            {
+                public RealPoint3d Position;
+                public RealPoint2d Texcoord;
+                public RealPoint3d Normal;
+                public RealPoint3d Binormal;
+                public RealPoint3d Tangent;
+                public RealPoint2d LightmapTexcoord;
+                [TagField(Length = 4)]
+                public byte[] NodeIndices;
+                [TagField(Length = 4)]
+                public float[] NodeWeights;
+                public RealPoint3d VertexColor;
+            }
+
+            [TagStructure(Size = 0x2)]
+            public class IndicesWordBlock : TagStructure
+            {
+                public short Word;
+            }
+
+            [TagStructure(Size = 0x18)]
+            public class RawWaterBlock : TagStructure
+            {
+                public List<IndicesWordBlock> RawWaterIndices;
+                public List<RawWaterAppendBlock> RawWaterVertices;
+
+                [TagStructure(Size = 0x2)]
+                public class IndicesWordBlock : TagStructure
+                {
+                    public short Word;
+                }
+
+                [TagStructure(Size = 0x24)]
+                public class RawWaterAppendBlock : TagStructure
+                {
+                    public RealPoint3d LocalInfo;
+                    public RealPoint3d WaterVelocity;
+                    public RealPoint3d BaseTexcoord;
+                }
+            }
         }
 
         //
