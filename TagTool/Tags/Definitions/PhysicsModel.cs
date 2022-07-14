@@ -54,8 +54,7 @@ namespace TagTool.Tags.Definitions
         public List<PolyhedronFourVector> PolyhedronFourVectors;
         public List<PolyhedronPlaneEquation> PolyhedronPlaneEquations;
 
-        [TagField(Flags = Padding, Length = 12)]
-        public byte[] UnusedMassDistributions;
+        public List<MassDistributionsBlock> MassDistributions;
 
         public List<List> Lists;
         public List<ListShape> ListShapes;
@@ -965,6 +964,19 @@ namespace TagTool.Tags.Definitions
             public PlatformUnsignedValue Unknown5;
 
             public HavokShapeBaseNoRadius PhantomShape;
+        }
+
+        [TagStructure(Size = 0x40)]
+        public class MassDistributionsBlock : TagStructure
+        {
+            public RealVector3d CenterOfMass;
+            public float HavokWCenterOfMass;
+            public RealVector3d InertiaTensorI;
+            public float HavokWInertiaTensorI;
+            public RealVector3d InertiaTensorJ;
+            public float HavokWInertiaTensorJ;
+            public RealVector3d InertiaTensorK;
+            public float HavokWInertiaTensorK;
         }
     }
 }
