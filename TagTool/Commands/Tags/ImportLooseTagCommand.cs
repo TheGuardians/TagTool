@@ -90,8 +90,8 @@ namespace TagTool.Commands.Tags
             DataSerializationContext context = new DataSerializationContext(newTagDataReader);
             var result = deserializer.DeserializeStruct(newTagDataReader, context, info);
 
-            //tag resources
-            FixupResources(result, FixupContext, layout, looseTagType);
+            //fixup tags and resources
+            FixupTag(result, FixupContext, layout, looseTagType);
 
             var destTag = Cache.TagCache.AllocateTag(looseTagType, args[0].ToString());
             using (var stream = Cache.OpenCacheReadWrite())
@@ -104,11 +104,12 @@ namespace TagTool.Commands.Tags
             return true;
         }
 
-        private void FixupResources(object tagDef, HaloOnlinePersistContext FixupContext, TagLayout layout, Type looseTagType)
+        private void FixupTag(object tagDef, HaloOnlinePersistContext FixupContext, TagLayout layout, Type looseTagType)
         {         
             switch (looseTagType.Name)
             {
                 case "ModelAnimationGraph":
+                    //jmad resources
                     for (var i = 0; i < FixupContext.TagResourceData.Count; i++)
                     {
                         MemoryStream dataStream = new MemoryStream(FixupContext.TagResourceData[i]);
@@ -127,6 +128,7 @@ namespace TagTool.Commands.Tags
                     }                 
                     break;
                 case "Bitmap":
+                    //bitmap resource
                     Bitmap bitm = (Bitmap)tagDef;
                     BitmapTextureInteropResource bitmResource = new BitmapTextureInteropResource
                     {
@@ -146,6 +148,7 @@ namespace TagTool.Commands.Tags
                     bitm.ProcessedPixelData = null;
                     break;
                 case "RenderModel":
+                    //render model resource
                     RenderModel mode = (RenderModel)tagDef;
                     RenderGeometryApiResourceDefinition modeResource = new RenderGeometryApiResourceDefinition
                     {
@@ -255,6 +258,26 @@ namespace TagTool.Commands.Tags
                     }
                     mode.Geometry.Resource = Cache.ResourceCache.CreateRenderGeometryApiResource(modeResource);
                     mode.Geometry.GeometryTagResources = null;
+                    break;
+                case "PhysicsModel":
+                    PhysicsModel phmo = (PhysicsModel)tagDef;
+                    if (phmo.MassDistributions.Count != phmo.RigidBodies.Count &&
+                        phmo.MassDistributions.Count > 0 && phmo.RigidBodies.Count > 0)
+                    {
+                        new TagToolWarning("Physics model mass distributions count != rigid bodies count!");
+                        break;
+                    }                      
+                    for(var massIndex = 0; massIndex < phmo.MassDistributions.Count; massIndex++)
+                    {
+                        phmo.RigidBodies[massIndex].CenterOfMass = phmo.MassDistributions[massIndex].CenterOfMass;
+                        phmo.RigidBodies[massIndex].CenterOfMassRadius = phmo.MassDistributions[massIndex].HavokWCenterOfMass;
+                        phmo.RigidBodies[massIndex].InertiaTensorX = phmo.MassDistributions[massIndex].InertiaTensorI;
+                        phmo.RigidBodies[massIndex].InertiaTensorXRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorI;
+                        phmo.RigidBodies[massIndex].InertiaTensorY = phmo.MassDistributions[massIndex].InertiaTensorJ;
+                        phmo.RigidBodies[massIndex].InertiaTensorYRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorJ;
+                        phmo.RigidBodies[massIndex].InertiaTensorZ = phmo.MassDistributions[massIndex].InertiaTensorK;
+                        phmo.RigidBodies[massIndex].InertiaTensorZRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorK;
+                    }
                     break;
                 default:
                     if(layout.ResourceDefinitions.Length > 0)
