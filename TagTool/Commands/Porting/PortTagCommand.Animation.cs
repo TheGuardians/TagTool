@@ -453,8 +453,8 @@ namespace TagTool.Commands.Porting
                     else
                         animation.AnimationData.AnimationType = (ModelAnimationGraph.FrameType)Enum.Parse(typeof(ModelAnimationGraph.FrameType), animation.AnimationData.AnimationTypeReach.ToString());
 
-                    animation.AnimationData.PreviousVariantSibling = animation.PreviousVariantSiblingReach;
-                    animation.AnimationData.NextVariantSibling = animation.NextVariantSiblingReach;
+                    animation.AnimationData.ParentAnimation = animation.PreviousVariantSiblingReach;
+                    animation.AnimationData.NextAnimation = animation.NextVariantSiblingReach;
                     animation.AnimationData.DesiredCompression = animation.AnimationData.DesiredCompressionReach;
                     animation.AnimationData.CurrentCompression = animation.AnimationData.CurrentCompressionReach;
                     animation.AnimationData.ProductionFlags = animation.ProductionFlagsReach;

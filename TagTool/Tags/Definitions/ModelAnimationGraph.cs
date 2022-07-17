@@ -89,7 +89,8 @@ namespace TagTool.Tags.Definitions
         {
             None = 0,
             InheritRootTransScaleOnly = 1 << 0,
-            InheritForUseOnPlayer = 1 << 1
+            InheritForUseOnPlayer = 1 << 1,
+            AllowFacialAnimationMaskRemap = 1 << 2
         }
 
         [Flags]
@@ -97,9 +98,9 @@ namespace TagTool.Tags.Definitions
         {
             None = 0,
             PreparedForCache = 1 << 0,
-            Bit1 = 1 << 1,
+            Unused = 1 << 1,
             ImportedWithCodecCompressors = 1 << 2,
-            Bit3 = 1 << 3,
+            Unused1 = 1 << 3,
             WrittenToCache = 1 << 4,
             AnimationDataReordered = 1 << 5,
             ReadyForUse = 1 << 6
@@ -109,7 +110,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
         public class SkeletonNode : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
             public short NextSiblingNodeIndex;
             public short FirstChildNodeIndex;
@@ -119,8 +120,8 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public byte AdditionalFlags;
-            [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 3)]
-            public byte[] Pad = new byte[3];
+            [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 3)]
+            public byte[] Padding0;
 
             public RealVector3d BaseVector;
             public float VectorRange;
@@ -163,7 +164,7 @@ namespace TagTool.Tags.Definitions
             FirstPersonOnly = 1 << 3,
             ForwardOnly = 1 << 4,
             ReverseOnly = 1 << 5,
-            Bit6 = 1 << 6,
+            FpNoAgedWeapons = 1 << 6,
             Bit7 = 1 << 7,
             Bit8 = 1 << 8,
             Bit9 = 1 << 9,
@@ -180,7 +181,9 @@ namespace TagTool.Tags.Definitions
 		{
             public CachedTag Reference;
             public AnimationTagReferenceFlags Flags;
-            public short InternalFlags;
+
+            [TagField(Length = 2, Flags = Padding)]
+            public byte[] Padding0;
         }
 
         [TagStructure(Size = 0x1C)]
@@ -188,6 +191,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Flags = TagFieldFlags.Label)]
             public StringId Label;
+
             public Angle RightYawPerFrame;
             public Angle LeftYawPerFrame;
             public short RightFrameCount;
@@ -202,17 +206,18 @@ namespace TagTool.Tags.Definitions
         public class FootMarkersBlock : TagStructure
 		{
             public StringId FootMarker;
-            public Bounds<float> FootBounds;
+            public Bounds<float> FootIkRange;
             public StringId AnkleMarker;
-            public Bounds<float> AnkleBounds;
-            public AnchorsValue Anchors;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
-            public byte[] Pad = new byte[2];
+            public Bounds<float> AnkleIkRange;
+            public FootTrackingDefaultValues DefaultState;
 
-            public enum AnchorsValue : short
+            [TagField(Flags = Padding, Length = 2)]
+            public byte[] Padding1;
+
+            public enum FootTrackingDefaultValues : short
             {
-                False,
-                True
+                Off,
+                On
             }
         }
 
@@ -235,8 +240,9 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x3C, MinVersion = CacheVersion.HaloReach)]
         public class Animation : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
-            public StringId Name;           
+            [TagField(Flags = Label)]
+            public StringId Name;
+
             public float Weight;            
             public short LoopFrameIndex;            
             public PlaybackFlagsValue PlaybackFlags;
@@ -259,8 +265,8 @@ namespace TagTool.Tags.Definitions
             public CachedTag GraphReference;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short SharedAnimationIndex;
-            [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 2)]
-            public byte[] Pad = new byte[2];
+            [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 2)]
+            public byte[] Padding2;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public SharedAnimationData AnimationData; //this block is inline up until Reach
@@ -279,8 +285,10 @@ namespace TagTool.Tags.Definitions
                 public CompressionValue CurrentCompression;
 
                 public sbyte NodeCount;
+
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public byte Unknown0;
+                public byte ReachUnknown0;
+
                 public short FrameCount;
 
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -296,8 +304,9 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ProductionFlagsValue ProductionFlags;
+
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public short Unknown1;
+                public short ReachUnknown1;
 
                 public InternalFlagsValue InternalFlags;
 
@@ -308,15 +317,13 @@ namespace TagTool.Tags.Definitions
 
                 public int NodeListChecksum;
                 public int ProductionChecksum;
-
-                //Compressor version??
-                public short Unknown2;
-                public short Unknown3;
+                public short ImporterVersion;
+                public short CompressorVersion;
 
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public short PreviousVariantSibling;
+                public short ParentAnimation;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public short NextVariantSibling;
+                public short NextAnimation;
 
                 public short ResourceGroupIndex;
                 public short ResourceGroupMemberIndex;
@@ -392,7 +399,8 @@ namespace TagTool.Tags.Definitions
                 DisableWeaponIk = 1 << 3,
                 DisableWeaponAim1stPerson = 1 << 4,
                 DisableLookScreen = 1 << 5,
-                DisableTransitionAdjustment = 1 << 6
+                DisableTransitionAdjustment = 1 << 6,
+                ForceWeaponIkOn = 1 << 7
             }
 
             public enum CompressionValue : sbyte
@@ -416,7 +424,9 @@ namespace TagTool.Tags.Definitions
                 TransitionC,
                 TransitionD,
                 BothFeetShuffle,
-                BodyImpact               
+                BodyImpact,
+                LeftBackFoot,
+                RightBackFoot
             }
 
             public enum FrameEventTypeHO : short
@@ -433,8 +443,8 @@ namespace TagTool.Tags.Definitions
                 TransitionD,
                 BothFeetShuffle,
                 BodyImpact,
-                Unknown12,
-                Unknown13,
+                LeftBackFoot,
+                RightBackFoot,
                 RagdollKeyframe,
                 DropWeaponKeyframe
             }
@@ -497,10 +507,12 @@ namespace TagTool.Tags.Definitions
                 public short Effect;
                 public short Frame;
                 public StringId MarkerName;
+
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public DamageReportingType DamageEffectReportingType;
-                [TagField(MinVersion = CacheVersion.Halo3ODST, Length = 3)]
-                public byte[] Unknown = new byte[3];
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Flags = Padding, Length = 3)]
+                public byte[] Padding3;
             }
 
             public enum DialogueEventType : short
@@ -556,8 +568,8 @@ namespace TagTool.Tags.Definitions
             public class FootTrackingBlock : TagStructure
 			{
                 public short Foot;
-                [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
-                public byte[] Pad = new byte[2];
+                [TagField(Flags = Padding, Length = 2)]
+                public byte[] Padding4;
                 public List<FootLockCycleBlock> FootLockCycles;
 
                 [TagStructure(Size = 0x14)]
@@ -576,7 +588,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
         public class Mode : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.Label)]
+            [TagField(Flags = Label)]
             public StringId Name;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -641,8 +653,8 @@ namespace TagTool.Tags.Definitions
                         public short ikGroup;
                         [TagField(MinVersion = CacheVersion.HaloReach)]
                         public short gaitGroup;
-                        [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 0x2)]
-                        public byte[] Pad = new byte[2];
+                        [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 0x2)]
+                        public byte[] Padding5;
 
                         public List<Entry> Actions;
                         public List<Entry> Overlays;
@@ -695,12 +707,15 @@ namespace TagTool.Tags.Definitions
                         [TagField(Flags = TagFieldFlags.Label, MaxVersion = CacheVersion.HaloOnline700123)]
                         public StringId FullName;
                         public StringId StateName;
-                        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                        public short Unknown;
+
+                        [TagField(MaxVersion = CacheVersion.HaloOnline700123, Flags = Padding, Length = 2)]
+                        public byte[] Padding0;
+
                         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                         public sbyte IndexA;
                         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                         public sbyte IndexB;
+
                         public List<Destination> Destinations;
 
                         [TagStructure(Size = 0x14, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -709,16 +724,21 @@ namespace TagTool.Tags.Definitions
 						{
                             [TagField(Flags = TagFieldFlags.Label, MaxVersion = CacheVersion.HaloOnline700123)]
                             public StringId FullName;
+
                             public StringId ModeName;
                             public StringId StateName;
+
                             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                             public FrameEventLinkValue FrameEventLink;
-                            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                            public sbyte Unknown;
+
+                            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Flags = Padding, Length = 1)]
+                            public byte[] Padding1;
+
                             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                             public sbyte IndexA;
                             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                             public sbyte IndexB;
+
                             public short GraphIndex;
                             public short Animation;
 
@@ -841,13 +861,13 @@ namespace TagTool.Tags.Definitions
             public short Animation;
 
             [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused1;
+            public byte[] Padding0;
 
             public FunctionControlsValue FunctionControls;
             public StringId Function;
 
             [TagField(Flags = Padding, Length = 4)]
-            public byte[] Unused2;
+            public byte[] Padding1;
 
             public enum FunctionControlsValue : short
             {

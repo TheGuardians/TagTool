@@ -130,11 +130,11 @@ namespace TagTool.Commands.Porting
 
                 var edAnimation = edAnimations[entry.Value.Item2];
 
-                if (edAnimation.AnimationData.PreviousVariantSibling != -1)
-                    edAnimation.AnimationData.PreviousVariantSibling = result[BlamCache.StringTable.GetString(h3Def.Animations[edAnimation.AnimationData.PreviousVariantSibling].Name)].Item2;
+                if (edAnimation.AnimationData.ParentAnimation != -1)
+                    edAnimation.AnimationData.ParentAnimation = result[BlamCache.StringTable.GetString(h3Def.Animations[edAnimation.AnimationData.ParentAnimation].Name)].Item2;
 
-                if (edAnimation.AnimationData.NextVariantSibling != -1)
-                    edAnimation.AnimationData.NextVariantSibling = result[BlamCache.StringTable.GetString(h3Def.Animations[edAnimation.AnimationData.NextVariantSibling].Name)].Item2;
+                if (edAnimation.AnimationData.NextAnimation != -1)
+                    edAnimation.AnimationData.NextAnimation = result[BlamCache.StringTable.GetString(h3Def.Animations[edAnimation.AnimationData.NextAnimation].Name)].Item2;
             }
 
             return result;

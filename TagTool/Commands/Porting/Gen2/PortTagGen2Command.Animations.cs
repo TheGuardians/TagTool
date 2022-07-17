@@ -170,10 +170,10 @@ namespace TagTool.Commands.Porting.Gen2
                         InternalFlags = (ModelAnimationGraph.Animation.InternalFlagsValue)gen2anim.InternalFlags,
                         NodeListChecksum = gen2anim.NodeListChecksum,
                         ProductionChecksum = gen2anim.ProductionChecksum,
-                        Unknown2 = 5, //not sure what these do, setting default values
-                        Unknown3 = 6,
-                        PreviousVariantSibling= gen2anim.PreviousVariantSibling,
-                        NextVariantSibling = gen2anim.NextVariantSibling,
+                        ImporterVersion = 5,
+                        CompressorVersion = 6,
+                        ParentAnimation= gen2anim.PreviousVariantSibling,
+                        NextAnimation = gen2anim.NextVariantSibling,
 
                         //these may need to be adjusted later, hackfix for now
                         ResourceGroupIndex = 0,

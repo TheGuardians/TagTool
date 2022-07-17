@@ -190,11 +190,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         FrameCount = (short)importer.frameCount,
                         NodeCount = (sbyte)importer.AnimationNodes.Count,
                         NodeListChecksum = 0,
-                        Unknown2 = 5, //don't know what these do, but set usual values
-                        Unknown3 = 6,
+                        ImporterVersion = 5,
+                        CompressorVersion = 6,
                         Heading = new RealVector3d(1, 0, 0),
-                        PreviousVariantSibling = -1,
-                        NextVariantSibling = -1,
+                        ParentAnimation = -1,
+                        NextAnimation = -1,
                         ResourceGroupIndex = (short)(Animation.ResourceGroups.Count - 1),
                         ResourceGroupMemberIndex = 0,
                     }
