@@ -14,6 +14,7 @@ using TagTool.Commands.ModelAnimationGraphs;
 using TagTool.Commands.Shaders;
 using TagTool.Commands.GUI;
 using TagTool.Commands.HUD;
+using TagTool.Commands.Forge;
 using TagTool.Cache.HaloOnline;
 using TagTool.Commands.Scenarios;
 using TagTool.Cache.Monolithic;
@@ -117,6 +118,8 @@ namespace TagTool.Commands.Tags
                 var hoCache = cache as GameCacheHaloOnline;
                 context.AddCommand(new RebuildCacheFileCommand(hoCache));
                 context.AddCommand(new CreateModPackageCommand(contextStack, hoCache));
+                context.AddCommand(new AddForgeCategoryCommand(cache as GameCacheHaloOnlineBase));
+                context.AddCommand(new AddForgeItemCommand(cache as GameCacheHaloOnlineBase));
             }
 
             if (cache is GameCacheModPackage)
@@ -135,7 +138,9 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new NameTagCacheCommand(modCache));
                 context.AddCommand(new UpdateDescriptionCommand(modCache));
                 context.AddCommand(new SetModTypeCommand(modCache));
-                context.AddCommand(new Modding.MapFileCommand(modCache));
+                context.AddCommand(new MapFileCommand(modCache));
+                context.AddCommand(new AddForgeCategoryCommand(cache as GameCacheHaloOnlineBase));
+                context.AddCommand(new AddForgeItemCommand(cache as GameCacheHaloOnlineBase));
             }
 
             if(cache is GameCacheMonolithic)

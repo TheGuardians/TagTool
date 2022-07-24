@@ -392,6 +392,9 @@
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
     <Compile Include="Commands\Common\BeginScriptCommand.cs" />
     <Compile Include="Commands\Common\EndScriptCommand.cs" />
+    <Compile Include="Commands\Forge\AddForgeItemCommand.cs" />
+    <Compile Include="Commands\Forge\AddForgeCategoryCommand.cs" />
+    <Compile Include="Commands\Modding\AddGameVariantWeapon.cs" />
     <Compile Include="Commands\Tags\ImportLooseTagCommand.cs" />
     <Compile Include="Commands\Files\ConvertMapVariantCommand.cs" />
     <Compile Include="Commands\Gen2\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
