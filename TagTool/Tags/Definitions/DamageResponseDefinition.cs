@@ -192,13 +192,7 @@ namespace TagTool.Tags.Definitions
         public class DamageResponseGlobalSoundEffectBlockStruct : TagStructure
         {
             public StringId EffectName;
-            public MappingFunction ScaleDuration; // seconds
-
-            [TagStructure(Size = 0x14)]
-            public class MappingFunction : TagStructure
-            {
-                public byte[] Data;
-            }
+            public TagFunction ScaleDuration; // seconds
         }
 
         [TagStructure(Size = 0x4C)]
@@ -226,13 +220,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x14)]
             public class AreaControlScalarFunctionStruct : TagStructure
             {
-                public MappingFunction Mapping;
-
-                [TagStructure(Size = 0x14)]
-                public class MappingFunction : TagStructure
-                {
-                    public byte[] Data;
-                }
+                public TagFunction Mapping;
             }
 
             [TagStructure(Size = 0x1C)]
@@ -240,13 +228,7 @@ namespace TagTool.Tags.Definitions
             {
                 public StringId InputVariable;
                 public StringId RangeVariable;
-                public MappingFunction Mapping;
-
-                [TagStructure(Size = 0x14)]
-                public class MappingFunction : TagStructure
-                {
-                    public byte[] Data;
-                }
+                public TagFunction Mapping;
             }
         }
     }

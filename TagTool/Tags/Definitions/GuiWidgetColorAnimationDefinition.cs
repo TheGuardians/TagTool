@@ -23,13 +23,7 @@ namespace TagTool.Tags.Definitions
         {
             public int TimeOffset; // milliseconds
             public RealArgbColor Color;
-            public List<KeyframeTransitionFunctionBlock> CustomTransitionFxn;
-
-            [TagStructure(Size = 0x14)]
-            public class KeyframeTransitionFunctionBlock : TagStructure
-            {
-                public byte[] CustomFunction;
-            }
+            public List<TagFunction> CustomTransitionFxn;
         }
     }
 }

@@ -83,7 +83,7 @@ namespace TagTool.Tags.Definitions
                 public ContrailStateInputEnum RangeVariable;
                 public OutputModEnum OutputModifier;
                 public ContrailStateInputEnum OutputModifierInput;
-                public byte[] MappingFunction;
+                public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
 
@@ -125,7 +125,7 @@ namespace TagTool.Tags.Definitions
                 public ContrailStateInputEnum RangeVariable;
                 public OutputModEnum OutputModifier;
                 public ContrailStateInputEnum OutputModifierInput;
-                public byte[] MappingFunction;
+                public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
 
@@ -170,7 +170,7 @@ namespace TagTool.Tags.Definitions
                 public ContrailStateInputEnum RangeVariable;
                 public OutputModEnum OutputModifier;
                 public ContrailStateInputEnum OutputModifierInput;
-                public byte[] MappingFunction;
+                public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
 
@@ -215,7 +215,7 @@ namespace TagTool.Tags.Definitions
                 public ContrailStateInputEnum RangeVariable;
                 public OutputModEnum OutputModifier;
                 public ContrailStateInputEnum OutputModifierInput;
-                public byte[] MappingFunction;
+                public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
 

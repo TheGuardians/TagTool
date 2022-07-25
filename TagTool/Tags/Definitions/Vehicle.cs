@@ -1122,26 +1122,14 @@ namespace TagTool.Tags.Definitions
                                                            // how far pitched back the boat tries to achieve (0 is perfectly flat)
             public Angle StabilizationDesiredInclination; // deg
             public float DragInputRangeVelocity; // wu/s
-            public ScalarFunctionNamedStruct NormalDrag;
-            public ScalarFunctionNamedStruct BoostDrag;
-            public ScalarFunctionNamedStruct AirDrag;
+            public TagFunction NormalDrag;
+            public TagFunction BoostDrag;
+            public TagFunction AirDrag;
 
             [Flags]
             public enum BoatFlags : byte
             {
                 UsesFakePhysics = 1 << 0
-            }
-
-            [TagStructure(Size = 0x14)]
-            public class ScalarFunctionNamedStruct : TagStructure
-            {
-                public MappingFunction Function;
-
-                [TagStructure(Size = 0x14)]
-                public class MappingFunction : TagStructure
-                {
-                    public byte[] Data;
-                }
             }
         }
 

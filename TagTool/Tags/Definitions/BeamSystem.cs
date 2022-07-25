@@ -85,7 +85,7 @@ namespace TagTool.Tags.Definitions
                 public BeamStateInputEnum RangeVariable;
                 public OutputModEnum OutputModifier;
                 public BeamStateInputEnum OutputModifierInput;
-                public byte[] MappingFunction;
+                public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public byte RuntimeMFlags;
                 [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
@@ -122,7 +122,7 @@ namespace TagTool.Tags.Definitions
                 public BeamStateInputEnum RangeVariable;
                 public OutputModEnum OutputModifier;
                 public BeamStateInputEnum OutputModifierInput;
-                public byte[] MappingFunction;
+                public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public byte RuntimeMFlags;
                 [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
@@ -161,7 +161,7 @@ namespace TagTool.Tags.Definitions
                 public BeamStateInputEnum RangeVariable;
                 public OutputModEnum OutputModifier;
                 public BeamStateInputEnum OutputModifierInput;
-                public byte[] MappingFunction;
+                public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public byte RuntimeMFlags;
                 [TagField(Length = 3, Flags = TagFieldFlags.Padding)]

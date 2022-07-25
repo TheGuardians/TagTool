@@ -472,31 +472,13 @@ namespace TagTool.Tags.Definitions
                 public RealPoint2d PeggedScale;
                 // the maximum turning speed during peg
                 public Angle PegMaxAngularVelocity; // degrees per sec
-                public List<InputMappingFunctionBlock> InputMappingFunction;
+                public List<TagFunction> InputMappingFunction;
 
                 public enum InputMappingShapeEnum : sbyte
                 {
                     None,
                     UnitCircle,
                     UnitSquare
-                }
-
-                [TagStructure(Size = 0x14)]
-                public class InputMappingFunctionBlock : TagStructure
-                {
-                    public ScalarFunctionNamedStruct Function;
-
-                    [TagStructure(Size = 0x14)]
-                    public class ScalarFunctionNamedStruct : TagStructure
-                    {
-                        public MappingFunction Function;
-
-                        [TagStructure(Size = 0x14)]
-                        public class MappingFunction : TagStructure
-                        {
-                            public byte[] Data;
-                        }
-                    }
                 }
             }
         }

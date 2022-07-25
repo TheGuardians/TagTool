@@ -85,7 +85,7 @@ namespace TagTool.Tags.Definitions
                 public LightVolumeStateInputEnum RangeVariable;
                 public OutputModEnum OutputModifier;
                 public LightVolumeStateInputEnum OutputModifierInput;
-                public byte[] MappingFunction;
+                public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
                 [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
@@ -120,7 +120,7 @@ namespace TagTool.Tags.Definitions
                 public LightVolumeStateInputEnum RangeVariable;
                 public OutputModEnum OutputModifier;
                 public LightVolumeStateInputEnum OutputModifierInput;
-                public byte[] MappingFunction;
+                public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public sbyte RuntimeMFlags;
                 [TagField(Length = 3, Flags = TagFieldFlags.Padding)]

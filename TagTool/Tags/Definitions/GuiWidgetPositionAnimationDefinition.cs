@@ -16,13 +16,7 @@ namespace TagTool.Tags.Definitions
         {
             public int TimeOffset; // milliseconds
             public RealPoint3d Position;
-            public List<KeyframeTransitionFunctionBlock> CustomTransitionFxn;
-
-            [TagStructure(Size = 0x14)]
-            public class KeyframeTransitionFunctionBlock : TagStructure
-            {
-                public byte[] CustomFunction;
-            }
+            public List<TagFunction> CustomTransitionFxn;
         }
 
         [Flags]

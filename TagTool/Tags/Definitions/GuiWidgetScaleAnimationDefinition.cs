@@ -27,7 +27,7 @@ namespace TagTool.Tags.Definitions
             public byte[] Rotationpad0;
             public RealPoint2d LocalOrigin;
             public RealVector2d ScaleFactor;
-            public List<KeyframeTransitionFunctionBlock> CustomTransitionFxn;
+            public List<TagFunction> CustomTransitionFxn;
 
             public enum WidgetPositioning : short
             {
@@ -41,12 +41,6 @@ namespace TagTool.Tags.Definitions
                 ToprightCorner,
                 BottomrightCorner,
                 BottomleftCorner
-            }
-
-            [TagStructure(Size = 0x14)]
-            public class KeyframeTransitionFunctionBlock : TagStructure
-            {
-                public byte[] CustomFunction;
             }
         }
     }

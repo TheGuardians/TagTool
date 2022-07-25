@@ -30,13 +30,7 @@ namespace TagTool.Tags.Definitions
             public int TimeOffset; // milliseconds
             public short SpriteSequence;
             public short SpriteFrame;
-            public List<KeyframeTransitionFunctionBlock> CustomTransitionFxn;
-
-            [TagStructure(Size = 0x14)]
-            public class KeyframeTransitionFunctionBlock : TagStructure
-            {
-                public byte[] CustomFunction;
-            }
+            public List<TagFunction> CustomTransitionFxn;
         }
     }
 }
