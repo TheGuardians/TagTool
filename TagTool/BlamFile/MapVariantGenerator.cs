@@ -223,6 +223,7 @@ namespace TagTool.BlamFile
             paletteEntry.PlacedOnMap = 0;
             paletteEntry.MaximumCount = paletteEntry.PlacedOnMap;
             paletteEntry.MaxAllowed = 255;
+            paletteEntry.Cost = 0;
             mapVariant.PlaceableQuotaCount++;
             return firstEmptyIndex;
         }
@@ -448,17 +449,8 @@ namespace TagTool.BlamFile
                 QuotaIndex = -1,
                 Properties = new VariantMultiplayerProperties()
                 {
-                    EngineFlags =
-                    GameEngineSubTypeFlags.CaptureTheFlag |
-                    GameEngineSubTypeFlags.Slayer |
-                    GameEngineSubTypeFlags.Oddball |
-                    GameEngineSubTypeFlags.KingOfTheHill |
-                    GameEngineSubTypeFlags.Juggernaut |
-                    GameEngineSubTypeFlags.Territories |
-                    GameEngineSubTypeFlags.Assault |
-                    GameEngineSubTypeFlags.Vip |
-                    GameEngineSubTypeFlags.Infection,
-                    Flags = (VariantPlacementFlags)0xC
+                    EngineFlags = GameEngineSubTypeFlags.All,
+                    Flags = VariantPlacementFlags.Symmetric | VariantPlacementFlags.Asymmetric
                 },
                 ParentObject = new ObjectIdentifier()
                 {
