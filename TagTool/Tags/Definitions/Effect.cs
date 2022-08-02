@@ -539,32 +539,229 @@ namespace TagTool.Tags.Definitions
                     [TagStructure(Size = 0x30)]
 					public class RuntimeMGpuData : TagStructure
 					{
-                        public int ConstantPerParticleProperties;
-                        public int ConstantOverTimeProperties;
+                        public ParticleProperties ConstantPerParticleProperties;
+                        public ParticleProperties ConstantOverTimeProperties;
                         public ParticlePropertyScalar.ParticleStatesFlags UsedParticleStates;
-                        public List<Property> Properties;
-                        public List<Function> Functions;
-                        public List<Color> Colors;
+                        public List<Property> Properties; // 13 blocks (predefined usage, see Property.PropertyType)
+                        public List<Function> Functions; // indexed in Properties
+                        public List<RealRgbaColor> Colors; // indexed in Properties
 
                         [TagStructure(Size = 0x10)]
 						public class Property : TagStructure
 						{
-                            [TagField(Length = 4)]
-                            public float[] Data;
+                            // X = Constant value, YZW = multiple packed fields
+                            //public RealVector4d MInnards;
+                            public float MConstantValue;
+                            public InnardsY MInnardsY;
+                            public InnardsZ MInnardsZ;
+                            public InnardsW MInnardsW;
+
+                            [TagStructure(Size = 0x4)]
+                            public class InnardsY : TagStructure
+                            {
+                                public float FBitfield;
+                                // Packed data:
+                                // Bits 0-5: Function index red
+                                // Bits 5-10: Input index red (ranged input)
+                                // Bits 21-22: IsConstant
+                                public byte FunctionIndexRed { get => GetFunctionIndexRed(); set => SetFunctionIndexRed(value); }
+                                public ParticlePropertyScalar.ParticleStates InputIndexRed { get => GetInputIndexRed(); set => SetInputIndexRed(value); }
+                                public byte IsConstant { get => GetIsConstant(); set => SetIsConstant(value); }
+
+                                private byte GetFunctionIndexRed() 
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    return (byte)(temp & 0x1F);
+                                }
+                                private ParticlePropertyScalar.ParticleStates GetInputIndexRed()
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    return (ParticlePropertyScalar.ParticleStates)((temp >> 5) & 0x1F);
+                                }
+                                private byte GetIsConstant()
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    return (byte)((temp >> 21) & 0x1);
+                                }
+
+                                private void SetFunctionIndexRed(byte value) 
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    temp = (temp & 0xFFFFFFE0) | (uint)(value & 0x1F);
+                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                }
+                                private void SetInputIndexRed(ParticlePropertyScalar.ParticleStates value)
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    temp = (temp & 0xFFFFFC1F) | (((uint)value & 0x1F) << 5);
+                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                }
+                                private void SetIsConstant(byte value)
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    temp = (temp & 0xFFDFFFFF) | ((uint)(value & 0x1) << 21);
+                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                }
+                            }
+                            [TagStructure(Size = 0x4)]
+                            public class InnardsZ : TagStructure
+                            {
+                                public float FBitfield;
+                                // Packed data:
+                                // Bits 0-2: Modifier Index
+                                // Bits 2-7: Input Index Modifier
+                                // Bits 17-22: Function index green
+                                public ParticlePropertyScalar.OutputModifierValue ModifierIndex { get => GetModifierIndex(); set => SetModifierIndex(value); }
+                                public ParticlePropertyScalar.ParticleStates InputIndexModifier { get => GetInputIndexModifier(); set => SetInputIndexModifier(value); }
+                                public byte FunctionIndexGreen { get => GetFunctionIndexGreen(); set => SetFunctionIndexGreen(value); }
+
+                                private ParticlePropertyScalar.OutputModifierValue GetModifierIndex()
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    return (ParticlePropertyScalar.OutputModifierValue)(temp & 0x3);
+                                }
+                                private ParticlePropertyScalar.ParticleStates GetInputIndexModifier()
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    return (ParticlePropertyScalar.ParticleStates)((temp >> 2) & 0x1F);
+                                }
+                                private byte GetFunctionIndexGreen()
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    return (byte)((temp >> 17) & 0x1F);
+                                }
+
+                                private void SetModifierIndex(ParticlePropertyScalar.OutputModifierValue value)
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    temp = (temp & 0xFFFFFFFD) | ((uint)value & 0x2);
+                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                }
+                                private void SetInputIndexModifier(ParticlePropertyScalar.ParticleStates value)
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    temp = (temp & 0xFFFFFF83) | (((uint)value & 0x1F) << 2);
+                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                }
+                                private void SetFunctionIndexGreen(byte value)
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    temp = (temp & 0xFFC1FFFF) | ((uint)(value & 0x1F) << 17);
+                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                }
+                            }
+                            [TagStructure(Size = 0x4)]
+                            public class InnardsW : TagStructure
+                            {
+                                public float FBitfield;
+                                // Packed data:
+                                // Bits 0-3: Color index lo
+                                // Bits 3-6: Color index hi
+                                // Bits 17-22: Input index green
+                                public byte ColorIndexLo { get => GetColorIndexLo(); set => SetColorIndexLo(value); }
+                                public byte ColorIndexHi { get => GetColorIndexHi(); set => SetColorIndexHi(value); }
+                                public ParticlePropertyScalar.ParticleStates InputIndexGreen { get => GetInputIndexGreen(); set => SetInputIndexGreen(value); }
+
+                                private byte GetColorIndexLo()
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    return (byte)(temp & 0x7);
+                                }
+                                private byte GetColorIndexHi()
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    return (byte)((temp >> 3) & 0x7);
+                                }
+                                private ParticlePropertyScalar.ParticleStates GetInputIndexGreen()
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    return (ParticlePropertyScalar.ParticleStates)((temp >> 17) & 0x1F);
+                                }
+
+                                private void SetColorIndexLo(byte value)
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    temp = (temp & 0xFFFFFFF8) | (uint)(value & 0x7);
+                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                }
+                                private void SetColorIndexHi(byte value)
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    temp = (temp & 0xFFFFFFC7) | ((uint)(value & 0x7) << 3);
+                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                }
+                                private void SetInputIndexGreen(ParticlePropertyScalar.ParticleStates value)
+                                {
+                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    temp = (temp & 0xFFC1FFFF) | (((uint)value & 0x1F) << 17);
+                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                }
+                            }
+
+                            public enum PropertyType
+                            {
+                                EmitterTint,
+                                EmitterAlpha,
+                                EmitterSize,
+                                ParticleColor,
+                                ParticleIntensity,
+                                ParticleAlpha,
+                                ParticleScale,
+                                ParticleRotation,
+                                ParticleFrame,
+                                ParticleBlackPoint,
+                                ParticleAspect,
+                                ParticleSelfAcceleration,
+                                ParticlePalette
+                            }
                         }
 
                         [TagStructure(Size = 0x40)]
 						public class Function : TagStructure
 						{
-                            [TagField(Length = 16)]
-                            public float[] Data;
+                            public FunctionTypeReal FunctionType;
+                            public float DomainMax;
+                            public float RangeMin;
+                            public float RangeMax;
+                            public float Flags;
+                            public float ExclusionMin;
+                            public float ExclusionMax;
+                            [TagField(Flags = Padding, Length = 0x4)]
+                            public byte[] Float4Padding;
+                            [TagField(Length = 8)]
+                            public float[] Innards;
+
+                            [TagStructure(Size = 0x4)]
+                            public class FunctionTypeReal : TagStructure
+                            {
+                                public float FunctionType;
+
+                                public TagFunction.TagFunctionType Type { get => (TagFunction.TagFunctionType)FunctionType; set => FunctionType = (float)value; }
+                            }
                         }
 
-                        [TagStructure(Size = 0x10)]
-						public class Color : TagStructure
-						{
-                            [TagField(Length = 4)]
-                            public float[] Data;
+                        [Flags]
+                        public enum ParticleProperties : int
+                        {
+                            None = 0,
+                            TranslationOffset = 1 << 0,
+                            RelativeDirection = 1 << 1,
+                            EmissionRadius = 1 << 2,
+                            EmissionAngle = 1 << 3,
+                            EmissionAxisAngle = 1 << 4,
+                            ParticleStartingCount = 1 << 5,
+                            ParticleMaxCount = 1 << 6,
+                            ParticleEmissionRate = 1 << 7,
+                            ParticleLifespan = 1 << 8,
+                            ParticleSelfAcceleration = 1 << 9,
+                            ParticleInitialVelocity = 1 << 10,
+                            ParticleRotation = 1 << 11,
+                            ParticleInitialRotationRate = 1 << 12,
+                            ParticleSize = 1 << 13,
+                            ParticleScale = 1 << 14,
+                            ParticleTint = 1 << 15,
+                            ParticleAlpha = 1 << 16,
+                            ParticleAlphaBlackPoint = 1 << 17
                         }
                     }
                 }
