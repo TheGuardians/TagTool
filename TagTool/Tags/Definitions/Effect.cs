@@ -212,22 +212,22 @@ namespace TagTool.Tags.Definitions
                 public float Unknown19;
 
                 public float PixelBudget; // ms
-                public float NearRange;
-                public float NearCutoff;
+                public float NearRange; // if (Version>H3) NearRange = 1.0f / max(NearRange, 0.000099999997f)
+                public float NearCutoff; // if (FLAG(OverrideNearFade)) NearCutoff = NearFadeOverride
                 public float NearFadeOverride;
                 public float LodInDistance;
                 public float LodFeatherInDelta;
-                public float InverseLodFeatherIn;
+                public float InverseLodFeatherIn; // 1.0f / LodFeatherInDelta
                 public float LodOutDistance;
                 public float LodFeatherOutDelta;
-                public float InverseLodFeatherOut;
+                public float InverseLodFeatherOut; // 1.0f / LodFeatherOutDelta
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown15;
 
                 public List<Emitter> Emitters;
 
-                public float RuntimeMaximumLifespan;
+                public float RuntimeMaximumLifespan; // longest lifespan property out of all emitters
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float Unknown17;
 
@@ -247,7 +247,9 @@ namespace TagTool.Tags.Definitions
                     ForceGpuUpdating = 1 << 10,
                     OverrideNearFade = 1 << 11,
                     ParticlesDieWhenEffectEnds = 1 << 12,
-                    GpuOcclusion = 1 << 13
+                    GpuOcclusion = 1 << 13,
+                    Bit14 = 1 << 14,
+                    AttachmentUnknown = 1 << 15,
                 }
 
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]
@@ -404,10 +406,11 @@ namespace TagTool.Tags.Definitions
                     public enum FlagsValue : byte
                     {
                         None,
-                        VolumeEmitterParticleVelocitiesAreRandom = 1 << 0, // might be wrong
+                        Postprocessed = 1 << 0,
                         IsCpu = 1 << 1,
                         IsGpu = 1 << 2,
-                        BecomesGpuWhenAtRest = 1 << 3
+                        BecomesGpuWhenAtRest = 1 << 3,
+                        AlphaBlackPoint_Bit3 = 1 << 4,
                     }
 
                     [TagStructure(Size = 0x38)]

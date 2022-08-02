@@ -1,6 +1,7 @@
 using TagTool.Common;
 using System.Collections.Generic;
 using System;
+using System.IO;
 using TagTool.Cache;
 
 namespace TagTool.Tags.Definitions
@@ -75,7 +76,7 @@ namespace TagTool.Tags.Definitions
 
             public DecalPass Pass;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float SpecularMultiplier;
+            public float RuntimeSpecularMultiplier;
             public float RuntimeBitmapAspect;
 
             [Flags]
@@ -85,7 +86,7 @@ namespace TagTool.Tags.Definitions
                 SpecularModulate = 1 << 0,
                 BumpModulate = 1 << 1,
                 RandomSpriteSequence = 1 << 2,
-                DebugBorderColorWhite = 1 << 3
+                AdditiveBlendMode = 1 << 3
             }
 
             public enum DecalPass : uint

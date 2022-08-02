@@ -252,6 +252,8 @@ namespace TagTool.Serialization
                 return new RealRgbColor(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             else if (valueType == typeof(RealArgbColor))
                 return new RealArgbColor(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
+            else if (valueType == typeof(RealRgbaColor))
+                return new RealRgbaColor(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             else if (valueType == typeof(ArgbColor))
                 return new ArgbColor(reader.ReadUInt32());
 

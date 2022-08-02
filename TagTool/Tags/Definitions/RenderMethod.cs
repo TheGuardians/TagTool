@@ -2,6 +2,7 @@ using System;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Shaders;
+using System.IO;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using static TagTool.Tags.Definitions.RenderMethodTemplate;
@@ -29,7 +30,12 @@ namespace TagTool.Tags.Definitions
 
         public RenderMethodRenderFlags RenderFlags;
         public SortingLayerValue SortLayer;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public GlobalRenderMethodRuntimeFlagsDefintion RuntimeFlags;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Version;
+
         public int CustomFogSettingIndex; // skya AtmosphereProperties block index
         public int PredictionAtomIndex;
 
