@@ -537,18 +537,18 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x30)]
-					public class RuntimeMGpuData : TagStructure
-					{
+                    public class RuntimeMGpuData : TagStructure
+                    {
                         public ParticleProperties ConstantPerParticleProperties;
                         public ParticleProperties ConstantOverTimeProperties;
                         public ParticlePropertyScalar.ParticleStatesFlags UsedParticleStates;
                         public List<Property> Properties; // 13 blocks (predefined usage, see Property.PropertyType)
                         public List<Function> Functions; // indexed in Properties
-                        public List<RealRgbaColor> Colors; // indexed in Properties
+                        public List<GpuColor> Colors; // indexed in Properties
 
                         [TagStructure(Size = 0x10)]
-						public class Property : TagStructure
-						{
+                        public class Property : TagStructure
+                        {
                             // X = Constant value, YZW = multiple packed fields
                             //public RealVector4d MInnards;
                             public float MConstantValue;
@@ -568,7 +568,7 @@ namespace TagTool.Tags.Definitions
                                 public ParticlePropertyScalar.ParticleStates InputIndexRed { get => GetInputIndexRed(); set => SetInputIndexRed(value); }
                                 public byte IsConstant { get => GetIsConstant(); set => SetIsConstant(value); }
 
-                                private byte GetFunctionIndexRed() 
+                                private byte GetFunctionIndexRed()
                                 {
                                     uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
                                     return (byte)(temp & 0x1F);
@@ -584,7 +584,7 @@ namespace TagTool.Tags.Definitions
                                     return (byte)((temp >> 21) & 0x1);
                                 }
 
-                                private void SetFunctionIndexRed(byte value) 
+                                private void SetFunctionIndexRed(byte value)
                                 {
                                     uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
                                     temp = (temp & 0xFFFFFFE0) | (uint)(value & 0x1F);
@@ -717,8 +717,8 @@ namespace TagTool.Tags.Definitions
                         }
 
                         [TagStructure(Size = 0x40)]
-						public class Function : TagStructure
-						{
+                        public class Function : TagStructure
+                        {
                             public FunctionTypeReal FunctionType;
                             public float DomainMax;
                             public float RangeMin;
@@ -738,6 +738,12 @@ namespace TagTool.Tags.Definitions
 
                                 public TagFunction.TagFunctionType Type { get => (TagFunction.TagFunctionType)FunctionType; set => FunctionType = (float)value; }
                             }
+                        }
+
+                        [TagStructure(Size = 0x10)]
+                        public class GpuColor
+                        {
+                            public RealRgbaColor Color;
                         }
 
                         [Flags]

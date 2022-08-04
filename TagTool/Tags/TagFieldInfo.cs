@@ -221,6 +221,7 @@ namespace TagTool.Tags
 				case TypeCode.Object when type == typeof(CachedTag) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.Halo3Beta, CacheVersion.Unknown):
                 case TypeCode.Object when type == typeof(CachedTag) && CacheVersionDetection.IsBetween(targetVersion, CacheVersion.HaloXbox, CacheVersion.HaloCustomEdition):
                 case TypeCode.Object when type == typeof(RealArgbColor):
+				case TypeCode.Object when type == typeof(RealRgbaColor):
 				case TypeCode.Object when type == typeof(RealQuaternion):
 				case TypeCode.Object when type == typeof(RealPlane3d):
 					return 0x10;
