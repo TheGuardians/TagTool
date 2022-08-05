@@ -169,5 +169,39 @@ namespace TagTool.Commands
             // Add the tools directory to the search path to simplify usage of [DllImport]
             NativeInterop.AddDllDirectory(Path.Combine(TagToolDirectory, "Tools"));
         }
+
+        public static void ReportElapsed()
+        {
+            _stopWatch.Stop();
+            TimeSpan t = TimeSpan.FromMilliseconds(_stopWatch.ElapsedMilliseconds);
+
+            string timeDisplay = $"{t.TotalMilliseconds} milliseconds";
+
+            if (t.TotalMilliseconds > 10000)
+            {
+                timeDisplay = $"{t.Minutes} minutes and {t.Seconds} seconds";
+
+                if (t.Hours > 0)
+                    timeDisplay = $"{t.Hours} hours, " + timeDisplay;
+            }
+
+            Console.Write($"{timeDisplay} elapsed with ");
+
+            Console.ForegroundColor = (ErrorCount == 0) ? ConsoleColor.Green : ConsoleColor.Red;
+            Console.Write($"{ErrorCount} errors ");
+            Console.ResetColor();
+
+            Console.Write("and ");
+
+            Console.ForegroundColor = (WarningCount == 0) ? Console.ForegroundColor : ConsoleColor.DarkYellow;
+            Console.Write($"{WarningCount} warnings");
+            Console.ResetColor();
+
+            Console.Write(".\n");
+
+            ErrorCount = 0;
+            WarningCount = 0;
+            _stopWatch.Reset();
+        }
     }
 }

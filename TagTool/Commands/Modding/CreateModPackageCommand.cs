@@ -151,6 +151,10 @@ namespace TagTool.Commands.Modding
             ContextStack.Push(TagCacheContextFactory.Create(ContextStack, modCache,
                 $"{modCache.BaseModPackage.Metadata.Name}.pak"));
 
+            Program.ErrorCount = 0;
+            Program.WarningCount = 0;
+            Program._stopWatch.Start();
+
             return true;
 
         }
