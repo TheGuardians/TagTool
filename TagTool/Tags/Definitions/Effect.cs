@@ -741,7 +741,7 @@ namespace TagTool.Tags.Definitions
                         }
 
                         [TagStructure(Size = 0x10)]
-                        public class GpuColor
+                        public class GpuColor : TagStructure
                         {
                             public RealRgbaColor Color;
                         }
