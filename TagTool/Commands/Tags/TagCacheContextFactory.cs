@@ -30,7 +30,7 @@ namespace TagTool.Commands.Tags
             return context;
         }
 
-        public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache cache)
+        public static void Populate(CommandContextStack contextStack, CommandContext context, GameCache cache, GameCache portingCache = null)
         {
             context.ScriptGlobals.Add(ExecuteCSharpCommand.GlobalCacheKey, cache);
 
@@ -152,7 +152,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new UseAudioCacheCommand());
             context.AddCommand(new UseShaderCacheCommand());
             context.AddCommand(new OpenCacheFileCommand(contextStack, cache));
-            context.AddCommand(new DiffTagCommand(cache, cache));
+            context.AddCommand(new DiffTagCommand(cache, portingCache ?? cache));
             context.AddCommand(new VerifyStringsCommand(cache));
         }
     }

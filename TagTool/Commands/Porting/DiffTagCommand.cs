@@ -20,9 +20,10 @@ namespace TagTool.Commands.Porting
                    "DiffTag",
                    "Deep compares two tags and lists their differences.",
 
-                   "DiffTag [simple] <Tag> [OtherTag]",
+                   "DiffTag [simple] <tag> [other tag]",
 
-                   "Deep compares two tags and lists their differences. Use the \"simple\" argument to list only the difference count.")
+                   "Deep compares two tags and lists their differences. Use the \"simple\" argument to list only the difference count.\n" +
+                   "In a porting context, you can specify only one tag name to compare between caches.")
         {
             Cache1 = cache1;
             Cache2 = cache2;
@@ -30,35 +31,28 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-            bool simple = false;
-
             if (args.Count < 1)
                 return new TagToolError(CommandError.ArgCount);
 
-            for (int i = 0; i < args.Count; i++)
+            bool simple = false;
+            if (args[0].ToLower() == "simple")
             {
-                var arg = args[i].ToLower();
-                if (arg == "simple")
-                {
-                    simple = true;
-                    args.RemoveAt(i);
-                }
+                simple = true;
+                args.RemoveAt(0);
+
+                if (args.Count < 1)
+                    return new TagToolError(CommandError.ArgCount);
             }
 
             if (!Cache1.TagCache.TryGetCachedTag(args[0], out CachedTag tag1))
                 return new TagToolError(CommandError.TagInvalid, $"\"{args[0]}\"");
 
-            string tag2name;
-
-            if (tag1.Name.StartsWith("ms30\\") && args.Count == 1)
-            {
-                tag2name = args[0].Replace("ms30\\", "");
-            }
-            else
+            string tag2name = args[0];
+            if (args.Count > 1)
                 tag2name = args[1];
 
             if (!Cache2.TagCache.TryGetCachedTag(tag2name, out CachedTag tag2))
-                return new TagToolError(CommandError.TagInvalid, $"\"{(args.Count > 1 ? args[1] : tag2name)}\"");
+                return new TagToolError(CommandError.TagInvalid, $"\"{tag2name}\"");
 
             var differences = new List<Difference>();
 
