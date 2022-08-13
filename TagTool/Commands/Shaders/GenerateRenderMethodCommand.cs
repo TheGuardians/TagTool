@@ -46,7 +46,7 @@ namespace TagTool.Commands.Shaders
             if (args.Count != 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            if (!Cache.TagCache.TryGetTag($"{args[1]}.rmt2", out var rmt2Tag))
+            if (!Cache.TagCache.TryGetTag($"{args[1].Split('.')[0]}.rmt2", out var rmt2Tag))
                 return new TagToolError(CommandError.TagInvalid, $"Could not find \"{args[1]}.rmt2\"");
 
             // easier to get the type, and cleaner to check if ms30
@@ -164,7 +164,7 @@ namespace TagTool.Commands.Shaders
                 }
 
                 if (textureConstant.Bitmap == null)
-                    new TagToolWarning("Texture constant has no default bitmap. This needs to be set or this shader can become corrupted ingame");
+                    new TagToolWarning($"Texture constant \"{name}\" has no default bitmap. This needs to be set or this shader can become corrupted ingame");
 
                 textureConstants.Add(textureConstant);
             }

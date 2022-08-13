@@ -27,7 +27,7 @@ namespace TagTool.Commands.Modding
                 "CreateCharacterType",
                 "Builds a character type from a biped tag.",
 
-                "CreateCharacterType [campaigndistinct] [binocs] <bipd tagname>",
+                "CreateCharacterType [character set index/name] [campaigndistinct] [binocs] <bipd tagname>",
 
                 "Builds a character type from the provided biped tag."
                 + "\nThe \"campaigndistinct\" argument enables creation of separate Campaign and Multiplayer representations."
@@ -39,22 +39,31 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             bool campaignDistinct = false;
-            
-            if (args.Count > 0)
-            {
-                if (!Cache.TagCache.TryGetCachedTag(args.Last(), out UnitTag))
-                    return new TagToolError(CommandError.TagInvalid);
+            var stack = new Stack<string>(args.AsEnumerable());
+            int setIndex = 0;
+            string setName = "";
 
-                if (args.Contains("campaigndistinct"))
+            if (!Cache.TagCache.TryGetCachedTag(stack.Pop(), out UnitTag))
+                return new TagToolError(CommandError.TagInvalid);
+
+            while (stack.Count > 0)
+            {
+                var arg = stack.Pop().ToLower();
+                switch (arg)
                 {
-                    campaignDistinct = true;
-                    Simple = false;
+                    case "campaigndistinct":
+                        campaignDistinct = true;
+                        Simple = false;
+                        break;
+                    case "binocs":
+                        Binocs = true;
+                        break;
+                    default:
+                        if (!int.TryParse(arg, out setIndex))
+                            setName = arg;
+                        break;
                 }
-                if (args.Contains("binocs"))
-                    Binocs = true;
             }
-            else
-                return new TagToolError(CommandError.ArgCount);
 
             OpenGlobalTags();
 
@@ -86,11 +95,12 @@ namespace TagTool.Commands.Modding
             CreateNewCharacterType();
             SectionBreak();
 
-            int setIndex = Simple ? 0 : GetIntFromUser("Enter the character set index (-1 to create new): ");
+            if (!Simple)
+                setIndex = GetIntFromUser("Enter the character set index (-1 to create new): ");
 
             ModGlobalsDefinition.PlayerCharacterSet current_set;
 
-            if ( setIndex == -1)
+            if (setIndex == -1 || setName == "new")
             {
                 current_set = new ModGlobalsDefinition.PlayerCharacterSet();
                 CreateNewCharacterSet(current_set);
@@ -98,6 +108,22 @@ namespace TagTool.Commands.Modding
             }
             else
             {
+                if (!string.IsNullOrEmpty(setName))
+                {
+                    bool found = false;
+                    for (int i = 0; i < ModGlobals.PlayerCharacterSets.Count(); i++)
+                        if (ModGlobals.PlayerCharacterSets[i].DisplayName.ToLower() == setName)
+                        {
+                            setIndex = i;
+                            found = true;
+                        }
+
+
+
+                    if (!found)
+                        return new TagToolError(CommandError.CustomError, $"Player Character Set \"{setName}\" could not be found.");
+                }
+
                 current_set = ModGlobals.PlayerCharacterSets[setIndex];
             }
 

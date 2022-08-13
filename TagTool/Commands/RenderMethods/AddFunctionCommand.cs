@@ -48,16 +48,27 @@ namespace TagTool.Commands.RenderMethods
             if (parameterType == ShaderFunctionHelper.ParameterType.Bool || parameterType == ShaderFunctionHelper.ParameterType.Int)
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");
 
-            int functionIndex;
-
-            if (!int.TryParse(args[2], out functionIndex))
-                return new TagToolError(CommandError.ArgInvalid, $"\"{args[2]}\"");
-
             var properties = Definition.ShaderProperties[0];
+            bool newBlock = false;
+
+            if (!int.TryParse(args[2], out int functionIndex))
+            {
+                switch (args[2].ToLower())
+                {
+                    case "new":
+                        newBlock = true;
+                        break;
+                    case "last":
+                        functionIndex = properties.Functions.Count - 1;
+                        break;
+                    default:
+                        return new TagToolError(CommandError.ArgInvalid, $"\"{args[2]}\"");
+                }
+            }
 
             if (functionIndex >= properties.Functions.Count)
             {
-                if (properties.Functions.Count != 0)
+                if (properties.Functions.Count != 0 && !newBlock)
                     new TagToolWarning($"Function block at index {functionIndex} does not exist; a new function block with blank data will be added.");
 
                 properties.Functions.Add(new RenderMethod.RenderMethodAnimatedParameterBlock
