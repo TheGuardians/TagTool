@@ -28,36 +28,36 @@ namespace TagTool.Tags.Definitions.Common
         }
     }
 
-	public enum WidgetFontValue : short   // engine order bracketed
+	public enum WidgetFontValue : short   // engine order commented
 	{
-		BodyText,               // Conduit 16 [1]
-		Terminal,               // FixedSys 9 [0]
-		SplitscreenHudMessage,  // FixedSys 9 [loop]
-		FullscreenHudMessage,	// Conduit 18 [4]
-		Title,                  // Conduit 32 [2]
-		SuperLargeFont,         // Conduit 32 [3]
-		LargeBodyText,			// Conduit 23
-		Value7,
-		HudNumberText,			// Conduit 16 [loop]
-		Value9,
-		Value10,
-		Value11,
-		Value12
+		Terminal,               // fixedsys,  9pt
+		BodyText,               // conduit,  16pt
+		Title,                  // conduit,  32pt
+		SuperLargeFont,         // conduit,  32pt
+		LargeBodyText,          // conduit,  23pt
+		SplitscreenHudMessage,  // fixedsys,  9pt
+		FullscreenHudMessage,   // conduit,  18pt
+		EnglishBodyText,        // larbie,   10pt
+		HudNumberText,          // conduit,  18pt
+		SubtitleFont,           // conduit,  16pt
+		MainMenuFont,           // pragmata, 14pt
+		Value11,                // null
+		Value12                 // null
 	}
 
 	public enum WidgetFontValue_ODST : short
 	{
-		FullscreenHudMessage,   // Conduit 18
-		SplitscreenHudMessage,  // Agency 16
-		Terminal,               // Fixedsys 9
-		BodyText,               // Conduit 14 (?)
-		Title,                  // Conduit 32
-		SuperLargeFont,         // Agency 32
-		LargeBodyText,          // Conduit 23
-		EnglishBodyText,        // Agency 18
-		HudNumberText,          // Conduit 18
-		SubtitleFont,           // Conduit 16
-		MainMenuFont            // Agency 23
+		Terminal,               // Fixedsys,  9pt
+		BodyText,               // Conduit,  14pt
+		Title,                  // Conduit,  32pt
+		SuperLargeFont,         // Agency,   32pt
+		LargeBodyText,          // Conduit,  23pt
+		SplitscreenHudMessage,  // Agency,   16pt
+		FullscreenHudMessage,   // Conduit,  18pt
+		EnglishBodyText,        // Agency,   18pt
+		HudNumberText,          // Conduit,  18pt
+		SubtitleFont,           // Conduit,  16pt
+		MainMenuFont            // Agency,   23pt
 	}
 
 	public enum WidgetFontValue_H3Original : short
