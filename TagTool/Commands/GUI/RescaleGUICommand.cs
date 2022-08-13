@@ -28,14 +28,38 @@ namespace TagTool.Commands.GUI
         public override object Execute(List<string> args)
         {
             float scalefactor = 1.3125f;
-            if (args.Count > 0 && !float.TryParse(args[0], out scalefactor))
+            if (args.Count == 1 && args[0] != "ignore" && !float.TryParse(args[0], out scalefactor))
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
+            else
+            if (args.Count == 2 && args[0] == "ignore" && !float.TryParse(args[1], out scalefactor))
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");
+
+            var ignoredTagIndicies = new HashSet<int>();
+
+            if (args.Count > 0 && args[0] == "ignore")
+            {
+                Console.WriteLine("Please specify the tags to be ignored:");
+
+                string ignoreLine;
+
+                while ((ignoreLine = Console.ReadLine()) != "")
+                {
+                    if (!Cache.TagCache.TryGetTag(ignoreLine, out var instance))
+                        continue;
+
+                    ignoredTagIndicies.Add(instance.Index);
+                }
+            }
 
             List<string> TargetTagGroups = new List<string>{ "bmp3", "skn3", "txt3", "lst3", "grup", "bkey", "mdl3", "scn3" };
             foreach (var tag in Cache.TagCache.TagTable)
             {
                 if (tag == null)
                     continue;
+
+                if (ignoredTagIndicies.Contains(tag.Index))
+                    continue;
+
                 if (TargetTagGroups.Contains(tag.Group.Tag.ToString()))
                 {
                     using (var cacheStream = Cache.OpenCacheReadWrite())
