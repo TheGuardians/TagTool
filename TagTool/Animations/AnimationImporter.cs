@@ -598,10 +598,10 @@ namespace TagTool.Animations
                 case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
                     //extract data only from the first (root) node
                     //data collection starts at the end of the frames, moving backwards to the beginning
-                    for (int frame_index = AnimationNodes[0].Frames.Count - 2; frame_index >= 0; frame_index--)
+                    for (int frame_index = AnimationNodes[0].Frames.Count - 1; frame_index > 0; frame_index--)
                     {
-                        AnimationFrame CurrentFrame = AnimationNodes[0].Frames[frame_index];
-                        AnimationFrame NextFrame = AnimationNodes[0].Frames[frame_index + 1];
+                        AnimationFrame CurrentFrame = AnimationNodes[0].Frames[frame_index - 1];
+                        AnimationFrame NextFrame = AnimationNodes[0].Frames[frame_index];
                         AnimationFrame FirstFrame = AnimationNodes[0].Frames[0];
 
                         //don't include z axis for basic movement data
@@ -613,11 +613,18 @@ namespace TagTool.Animations
                             };
 
                         //set 'nextframe' translation to be equivalent to that of the first frame
-                        AnimationNodes[0].Frames[frame_index + 1].Translation = AnimationNodes[0].DefaultTranslation;
+                        AnimationNodes[0].Frames[frame_index].Translation = FirstFrame.Translation;
 
                         //since we are moving backwards, insert the movementframe at the beginning of the list
                         MovementData.Insert(0, MovementFrame);
                     }
+
+                    //add an extra frame for the transition from the resting position
+                    MovementData.Insert(0, new MovementDataDxDyDzDyaw
+                    {
+                        X = AnimationNodes[0].Frames[0].Translation.X - AnimationNodes[0].DefaultTranslation.X,
+                        Y = AnimationNodes[0].Frames[0].Translation.Y - AnimationNodes[0].DefaultTranslation.Y
+                    });
                     return;
                 default:
                     return;
