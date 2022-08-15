@@ -31,7 +31,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag CampaignFloodMaskTile; // FloodGoo
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public float MotionSensorBlipHeightModifier;
+        public float MotionSensorLevelHeightRange = float.MaxValue; // if object outside this height range of player, up/down indicator is used respectively
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float ShieldMinorThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]

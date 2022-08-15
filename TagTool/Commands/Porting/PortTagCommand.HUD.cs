@@ -440,9 +440,10 @@ namespace TagTool.Commands.Porting
             H3Definition.MediumSensorBlipScale *= 1.5f;
             H3Definition.SmallSensorBlipScale *= 1.5f;
             H3Definition.SizePower *= 1.5f;
+            H3Definition.MotionSensorLevelHeightRange = float.MaxValue;
 
-            //prevent crash?
-            H3Definition.AchievementDisplayTime = 3.0f;
+            if (BlamCache.Version <= CacheVersion.Halo3Retail)
+                H3Definition.AchievementDisplayTime = 3.0f;
 
             return H3Definition;
         }
