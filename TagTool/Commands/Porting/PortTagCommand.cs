@@ -1447,6 +1447,12 @@ namespace TagTool.Commands.Porting
                 case PhysicsModel.PhantomTypeFlags phantomTypeFlags:
                     return ConvertPhantomTypeFlags(blamTagName, phantomTypeFlags);
 
+                case PhysicsModel.Shape shape:
+                    shape = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, shape, definition, blamTagName);
+                    // might be from 3, had no reference
+                    shape.ProxyCollisionGroup = shape.ProxyCollisionGroup > 2 ? (sbyte)(shape.ProxyCollisionGroup + 1) : shape.ProxyCollisionGroup;
+                    return shape;
+
                 case DamageReportingType damageReportingType:
 					return ConvertDamageReportingType(damageReportingType);
 
