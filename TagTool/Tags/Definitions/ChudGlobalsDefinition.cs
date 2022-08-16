@@ -402,7 +402,7 @@ namespace TagTool.Tags.Definitions
             public float WaypointMaxDistanceScale;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public float Unknown29;
+            public float WaypointScale;
 
             public enum ChudSkinType : int
             {
