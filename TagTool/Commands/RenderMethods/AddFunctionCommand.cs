@@ -66,7 +66,7 @@ namespace TagTool.Commands.RenderMethods
                 }
             }
 
-            if (functionIndex >= properties.Functions.Count)
+            if (functionIndex >= properties.Functions.Count || newBlock)
             {
                 if (properties.Functions.Count != 0 && !newBlock)
                     new TagToolWarning($"Function block at index {functionIndex} does not exist; a new function block with blank data will be added.");
