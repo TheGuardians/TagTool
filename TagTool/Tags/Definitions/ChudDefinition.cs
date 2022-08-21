@@ -86,8 +86,10 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline700123)]
             public class StateDatum : TagStructure
             {
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
                 public ChudGameStateH3 GameStateH3;
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                public ChudGameStateH3MCC GameStateH3MCC;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public ChudGameStateODSTFlags GameStateODST;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
@@ -228,6 +230,28 @@ namespace TagTool.Tags.Definitions
                     Unused = 1 << 13,
                     Editor = 1 << 14,
                     Theater = 1 << 15
+                }
+
+                [Flags]
+                public enum ChudGameStateH3MCC : ushort
+                {
+                    None,
+                    CampaignSolo = 1 << 0,
+                    CampaignCoop = 1 << 1,
+                    FreeForAll = 1 << 2,
+                    TeamGame = 1 << 3,
+                    CTF = 1 << 4,
+                    Slayer = 1 << 5,
+                    Oddball = 1 << 6,
+                    KOTH = 1 << 7,
+                    Juggernaut = 1 << 8,
+                    Territories = 1 << 9,
+                    Assault = 1 << 10,
+                    VIP = 1 << 11,
+                    Infection = 1 << 12,
+                    Editor = 1 << 13,
+                    Theater = 1 << 14,
+                    Unused = 1 << 15
                 }
 
                 [Flags]
@@ -1704,11 +1728,9 @@ namespace TagTool.Tags.Definitions
                 public int WidgetIndex;
 
                 // flags
-                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-                public WidgetTextFlags_H3Original TextFlags_H3Original; // ushort
 
-                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-                public WidgetTextFlags_H3MCC TextFlags_H3MCC; // uint
+                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                public WidgetTextFlags_H3 TextFlags_H3; // uint
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
                 public WidgetTextFlags TextFlags; // uint
@@ -1738,9 +1760,8 @@ namespace TagTool.Tags.Definitions
                 public StringId InputString;
 
                 [Flags]
-                public enum WidgetTextFlags_H3Original : ushort
+                public enum WidgetTextFlags_H3 : uint
                 {
-                    None,
                     StringIsANumber = 1 << 0,
                     Force2DigitNumber = 1 << 1,
                     Force3DigitNumber = 1 << 2,
@@ -1752,30 +1773,9 @@ namespace TagTool.Tags.Definitions
                     SuperHugeNumber = 1 << 8,
                     SuffixWithX = 1 << 9,
                     WrapWithBrackets = 1 << 10,
-                    FormatAsTime_S_MS = 1 << 11,
-                    FormatAsTime_H_M_S = 1 << 12,
-                    FormatAsBudgetNumber = 1 << 13,
-                    PrefixWithMinus = 1 << 14,
-                    OnlyAxesGlobal = 1 << 15
-                }
-
-                [Flags]
-                public enum WidgetTextFlags_H3MCC : uint
-                {
-                    StringIsANumber = 1 << 0,
-                    Force2digitNumber = 1 << 1,
-                    Force3digitNumber = 1 << 2,
-                    SuffixWithPlus = 1 << 3,
-                    SuffixWithM = 1 << 4,
-                    Decimal2Digits = 1 << 5,
-                    Decimal3Digits = 1 << 6,
-                    Decimal5Digits = 1 << 7,
-                    SuperHugeNumber = 1 << 8,
-                    SuffixWithX = 1 << 9,
-                    WrapWithBrackets = 1 << 10,
                     FormatAsTime = 1 << 11,
-                    FormatAsTime_S_MS = 1 << 12,
-                    FormatAsTime_H_M_S = 1 << 13,
+                    FormatAsHhmmssTime = 1 << 12,
+                    FormatAsBudgetNumber = 1 << 13,
                     PrefixWithMinus = 1 << 14,
                     OnlyAxesGlobal = 1 << 15,
                     OnlyAxesLocal = 1 << 16
@@ -1797,13 +1797,13 @@ namespace TagTool.Tags.Definitions
                     SuperHugeNumber = 1 << 9,
                     SuffixWithX = 1 << 10,
                     WrapWithBrackets = 1 << 11,
-                    FormatAsTime_S_MS = 1 << 12,
-                    FormatAsTime_H_M_S = 1 << 13,
+                    FormatAsTime = 1 << 12,
+                    FormatAsHhmmssTime = 1 << 13,
                     FormatAsBudgetNumber = 1 << 14,
                     PrefixWithMinus = 1 << 15,
-                    OnlyAxesGlobal = 1 << 16,
-                    OnlyAxesLocal = 1 << 17,
-                    Bit18 = 1 << 18,
+                    CenterHorizontally = 1 << 16,
+                    OnlyAxesGlobal = 1 << 17,
+                    OnlyAxesLocal = 1 << 18,
                     Bit19 = 1 << 19,
                     Bit20 = 1 << 20,
                     Bit21 = 1 << 21,

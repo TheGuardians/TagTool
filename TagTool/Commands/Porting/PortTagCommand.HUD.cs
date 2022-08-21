@@ -15,7 +15,10 @@ namespace TagTool.Commands.Porting
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
-                    stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateH3);
+                    if (BlamCache.Platform == CachePlatform.Original)
+                        stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateH3);
+                    else if (BlamCache.Platform == CachePlatform.MCC)
+                        stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateH3MCC);
                     stateData.EngineGeneralFlags = GetEquivalentFlags(stateData.EngineGeneralFlags, stateData.EngineGeneralFlags_H3);
                     stateData.UnitBaseFlags = GetEquivalentFlags(stateData.UnitBaseFlags, stateData.UnitBaseFlags_H3);
                     stateData.Player_SpecialFlags = GetEquivalentFlags(stateData.Player_SpecialFlags, stateData.Player_SpecialFlags_H3);
@@ -92,13 +95,12 @@ namespace TagTool.Commands.Porting
         {
             switch (BlamCache.Version)
             {
-                case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.Original:
-                    textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3Original);
-                    textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3);
-                    break;
-                case CacheVersion.Halo3Retail when BlamCache.Platform == CachePlatform.MCC:
-                    textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3MCC);
-                    textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3MCC);
+                case CacheVersion.Halo3Retail:
+                    textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3);
+                    if (BlamCache.Platform == CachePlatform.Original)
+                        textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3);
+                    else if (BlamCache.Platform == CachePlatform.MCC)
+                        textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3MCC);
                     break;
                 case CacheVersion.Halo3ODST:
                     textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_ODST);
@@ -143,6 +145,7 @@ namespace TagTool.Commands.Porting
                     if (bitmapwidgetname.Contains("who_am_i") || bitmapwidgetname.Contains("summary_sandbox_title"))
                     {
                         chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[0].GameStateH3 |= ChudDefinition.HudWidget.StateDatum.ChudGameStateH3.Editor;
+                        chudDefinition.HudWidgets[hudWidgetIndex].BitmapWidgets[bitmapWidgetIndex].StateData[0].GameStateH3MCC |= ChudDefinition.HudWidget.StateDatum.ChudGameStateH3MCC.Editor;
                     }
 
                     //fix elite upper corner weirdness
