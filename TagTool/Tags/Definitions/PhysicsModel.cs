@@ -556,7 +556,16 @@ namespace TagTool.Tags.Definitions
                 DisableEffects = 1 << 2, //this rigid body will not generate impact effects unless it hits another dynamic rigid body that does
                 DoesNotInteractWithEnvironment = 1 << 3, //set this flag if this rigid bodies won't touch the environment, this allows us to open up some optimizations
                 BestEarlyMoverBody = 1 << 4, //if you have either of the early mover flags set in the object definitoin this body will be choosen as the one to make every thing local to, otherwise I pick :-
-                HasNoPhantomPowerVersion = 1 << 5 //don't check this flag without talking to eamon
+                HasNoPhantomPowerVersion = 1 << 5, //don't check this flag without talking to eamon
+                InfiniteInertiaTensor = 1 << 6, //rigid body will never have angular velocity
+                bit7 = 1 << 7,
+                bit8 = 1 << 8,
+                bit9 = 1 << 9,
+                bit10 = 1 << 10,
+                bit11 = 1 << 11,
+                bit12 = 1 << 12,
+                bit13 = 1 << 13,
+                bit14 = 1 << 14
             }
 
             public enum MotionTypeValue : short

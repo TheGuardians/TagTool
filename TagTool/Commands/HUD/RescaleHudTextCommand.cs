@@ -21,7 +21,7 @@ namespace TagTool.Commands.HUD
             Cache = cache;
         }
 
-        static readonly List<int> fontIndices = new List<int> { 3, 4, 5, 9 };
+        static readonly List<int> fontIndices = new List<int> { 0, 5, 6, 8 };//3, 4, 5, 9 };
 
         public override object Execute(List<string> args)
         {
@@ -45,7 +45,7 @@ namespace TagTool.Commands.HUD
                         {
                             foreach (var textWidget in hudWidget.TextWidgets)
                             {
-                                if (fontIndices.Contains((int)textWidget.Font_H3) || applyToAll)
+                                if (fontIndices.Contains((int)textWidget.Font) || applyToAll)
                                 {
                                     foreach (var placementData in textWidget.PlacementData)
                                     {
