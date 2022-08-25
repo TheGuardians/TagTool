@@ -393,6 +393,7 @@
     <Compile Include="Commands\Forge\AddForgeItemCommand.cs" />
     <Compile Include="Commands\Forge\AddForgeCategoryCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\SetAnimationCommand.cs" />
+    <Compile Include="Commands\Models\ExportJMSCommand.cs" />
     <Compile Include="Commands\Tags\ImportLooseTagCommand.cs" />
     <Compile Include="Commands\Files\ConvertMapVariantCommand.cs" />
     <Compile Include="Commands\Gen2\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
@@ -423,6 +424,8 @@
     <Compile Include="Common\RealRgbaColor.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\CollisionBSPGen3Builder.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\VerifyBsp3d.cs" />
+    <Compile Include="Geometry\Jms\JmsModeExporter.cs" />
+    <Compile Include="Geometry\Jms\JmsPhmoExporter.cs" />
     <Compile Include="Geometry\Utils\InstanceBucketGenerator.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />

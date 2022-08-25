@@ -372,13 +372,12 @@ namespace TagTool.Geometry.Jms
             return;
         }
 
-        public class JmsNode : JmsFormat
+        public class JmsNode : JmsElement
         {
             public string Name = "default";
-            public int FirstChildNodeIndex = -1;
-            public int SiblingNodeIndex = -1;
+            public int ParentNodeIndex = -1;
             public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
-            public RealPoint3d Position = new RealPoint3d(0, 0, 0);
+            public RealVector3d Position = new RealVector3d(0, 0, 0);
 
             public void Read(StreamReader stream)
             {
@@ -386,15 +385,14 @@ namespace TagTool.Geometry.Jms
 
             public void Write(StreamWriter stream)
             {
-                stream.WriteLine(Name);
-                stream.WriteLine(FirstChildNodeIndex);
-                stream.WriteLine(SiblingNodeIndex);
+                stream.WriteLine("b_" + Name);
+                stream.WriteLine(ParentNodeIndex);
                 WriteQuaternion(Rotation, stream);
-                WritePoint3d(Position, stream);            
+                WriteVector3d(Position, stream);            
             }
         }
 
-        public class JmsMaterial : JmsFormat
+        public class JmsMaterial : JmsElement
         {
             public string Name = "default";
             public string MaterialName = "default";
@@ -412,12 +410,12 @@ namespace TagTool.Geometry.Jms
             }
         }
 
-        public class JmsMarker : JmsFormat
+        public class JmsMarker : JmsElement
         {
             public string Name = "default";
             public int NodeIndex = -1;
             public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
-            public RealPoint3d Translation = new RealPoint3d(0, 0, 0);
+            public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public float Radius = 0.0f;
 
             public void Read(StreamReader stream)
@@ -429,12 +427,12 @@ namespace TagTool.Geometry.Jms
                 stream.WriteLine(Name);
                 stream.WriteLine(NodeIndex);
                 WriteQuaternion(Rotation, stream);
-                WritePoint3d(Translation, stream);
+                WriteVector3d(Translation, stream);
                 WriteFloat(Radius, stream);
             }
         }
 
-        public class JmsVertex : JmsFormat
+        public class JmsVertex : JmsElement
         {
             public RealPoint3d Position = new RealPoint3d(0, 0, 0);
             public RealVector3d Normal = new RealVector3d(0, 0, 0);
@@ -479,7 +477,7 @@ namespace TagTool.Geometry.Jms
             }
         }
 
-        public class JmsTriangle : JmsFormat
+        public class JmsTriangle : JmsElement
         {
             public int MaterialIndex = -1;
             public uint[] VertexIndices = new uint[3];
@@ -502,13 +500,13 @@ namespace TagTool.Geometry.Jms
             }
         }
 
-        public class JmsSphere : JmsFormat
+        public class JmsSphere : JmsElement
         {
             public string Name = "default";
             public int Parent = -1;
             public int Material = -1;
             public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
-            public RealPoint3d Translation = new RealPoint3d(0, 0, 0);
+            public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public float Radius = 0.0f;
 
             public void Read(StreamReader stream)
@@ -521,18 +519,18 @@ namespace TagTool.Geometry.Jms
                 stream.WriteLine(Parent);
                 stream.WriteLine(Material);
                 WriteQuaternion(Rotation, stream);
-                WritePoint3d(Translation, stream);
+                WriteVector3d(Translation, stream);
                 WriteFloat(Radius, stream);
             }
         }
 
-        public class JmsBox : JmsFormat
+        public class JmsBox : JmsElement
         {
             public string Name = "default";
             public int Parent = -1;
             public int Material = -1;
             public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
-            public RealPoint3d Translation = new RealPoint3d(0, 0, 0);
+            public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public float Width = 0.0f;
             public float Length = 0.0f;
             public float Height = 0.0f;
@@ -547,20 +545,20 @@ namespace TagTool.Geometry.Jms
                 stream.WriteLine(Parent);
                 stream.WriteLine(Material);
                 WriteQuaternion(Rotation, stream);
-                WritePoint3d(Translation, stream);
+                WriteVector3d(Translation, stream);
                 WriteFloat(Width, stream);
                 WriteFloat(Length, stream);
                 WriteFloat(Height, stream);
             }
         }
 
-        public class JmsCapsule : JmsFormat
+        public class JmsCapsule : JmsElement
         {
             public string Name = "default";
             public int Parent = -1;
             public int Material = -1;
             public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
-            public RealPoint3d Translation = new RealPoint3d(0, 0, 0);
+            public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public float Height = 0.0f;
             public float Radius = 0.0f;
 
@@ -574,19 +572,19 @@ namespace TagTool.Geometry.Jms
                 stream.WriteLine(Parent);
                 stream.WriteLine(Material);
                 WriteQuaternion(Rotation, stream);
-                WritePoint3d(Translation, stream);
+                WriteVector3d(Translation, stream);
                 WriteFloat(Height, stream);
                 WriteFloat(Radius, stream);
             }
         }
 
-        public class JmsConvexShape : JmsFormat
+        public class JmsConvexShape : JmsElement
         {
             public string Name = "default";
             public int Parent = -1;
             public int Material = -1;
             public RealQuaternion Rotation = new RealQuaternion(0, 0, 0, 0);
-            public RealPoint3d Translation = new RealPoint3d(0, 0, 0);
+            public RealVector3d Translation = new RealVector3d(0, 0, 0);
             public int ShapeVertexCount = 0;
             public List<RealPoint3d> ShapeVertices = new List<RealPoint3d>();
 
@@ -600,60 +598,80 @@ namespace TagTool.Geometry.Jms
                 stream.WriteLine(Parent);
                 stream.WriteLine(Material);
                 WriteQuaternion(Rotation, stream);
-                WritePoint3d(Translation, stream);
+                WriteVector3d(Translation, stream);
                 stream.WriteLine(ShapeVertexCount);
                 foreach(var shapevert in ShapeVertices)
                     WritePoint3d(shapevert, stream);
             }
         }
-        public void WriteQuaternion(RealQuaternion quaternion, StreamWriter stream)
-        {
-            stream.Write(Math.Round(quaternion.I, SignificantFigures) + '\t');
-            stream.Write(Math.Round(quaternion.J, SignificantFigures) + '\t');
-            stream.Write(Math.Round(quaternion.K, SignificantFigures) + '\t');
-            stream.Write(Math.Round(quaternion.W, SignificantFigures) + '\n');
-        }
 
-        public void WriteVector3d(RealVector3d point, StreamWriter stream)
+        //inherited class that contains all of the writing methods
+        public class JmsElement
         {
-            stream.Write(Math.Round(point.I, SignificantFigures) + '\t');
-            stream.Write(Math.Round(point.J, SignificantFigures) + '\t');
-            stream.Write(Math.Round(point.K, SignificantFigures) + '\n');
-        }
-        public void WritePoint3d(RealPoint3d point, StreamWriter stream)
-        {
-            stream.Write(Math.Round(point.X, SignificantFigures) + '\t');
-            stream.Write(Math.Round(point.Y, SignificantFigures) + '\t');
-            stream.Write(Math.Round(point.Z, SignificantFigures) + '\n');
-        }
-        public void WriteRealRGB(RealRgbColor color, StreamWriter stream)
-        {
-            stream.Write(Math.Round(color.Red, SignificantFigures) + '\t');
-            stream.Write(Math.Round(color.Green, SignificantFigures) + '\t');
-            stream.Write(Math.Round(color.Blue, SignificantFigures) + '\n');
-        }
+            public void WriteQuaternion(RealQuaternion quaternion, StreamWriter stream)
+            {
+                stream.Write(quaternion.I.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(quaternion.J.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(quaternion.K.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(quaternion.W.ToString("0.0000000000"));
+                stream.WriteLine();
+            }
 
-        public void WritePoint2d(RealPoint2d point, StreamWriter stream)
-        {
-            stream.Write(Math.Round(point.X, SignificantFigures) + '\t');
-            stream.Write(Math.Round(point.Y, SignificantFigures) + '\n');
-        }
+            public void WriteVector3d(RealVector3d point, StreamWriter stream)
+            {
+                stream.Write(point.I.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(point.J.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(point.K.ToString("0.0000000000"));
+                stream.WriteLine();
+            }
+            public void WritePoint3d(RealPoint3d point, StreamWriter stream)
+            {
+                stream.Write(point.X.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(point.Y.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(point.Z.ToString("0.0000000000"));
+                stream.WriteLine();
+            }
+            public void WriteRealRGB(RealRgbColor color, StreamWriter stream)
+            {
+                stream.Write(color.Red.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(color.Green.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(color.Blue.ToString("0.0000000000"));
+                stream.WriteLine();
+            }
 
-        public void WriteFloat(float number, StreamWriter stream)
-        {
-            stream.WriteLine(Math.Round(number, SignificantFigures));
-        }
+            public void WritePoint2d(RealPoint2d point, StreamWriter stream)
+            {
+                stream.Write(point.X.ToString("0.0000000000"));
+                stream.Write('\t');
+                stream.Write(point.Y.ToString("0.0000000000"));
+                stream.WriteLine();
+            }
 
-        public RealVector3d ReadVector3d(StreamReader stream)
-        {
-            string[] vector3dArray = stream.ReadLine().Split('\t');
-            return new RealVector3d(float.Parse(vector3dArray[0]), float.Parse(vector3dArray[1]), float.Parse(vector3dArray[2]));
-        }
+            public void WriteFloat(float number, StreamWriter stream)
+            {
+                stream.WriteLine(number.ToString("0.0000000000"));
+            }
 
-        public RealPoint3d ReadPoint3d(StreamReader stream)
-        {
-            string[] point3dArray = stream.ReadLine().Split('\t');
-            return new RealPoint3d(float.Parse(point3dArray[0]), float.Parse(point3dArray[1]), float.Parse(point3dArray[2]));
-        }
+            public RealVector3d ReadVector3d(StreamReader stream)
+            {
+                string[] vector3dArray = stream.ReadLine().Split('\t');
+                return new RealVector3d(float.Parse(vector3dArray[0]), float.Parse(vector3dArray[1]), float.Parse(vector3dArray[2]));
+            }
+
+            public RealPoint3d ReadPoint3d(StreamReader stream)
+            {
+                string[] point3dArray = stream.ReadLine().Split('\t');
+                return new RealPoint3d(float.Parse(point3dArray[0]), float.Parse(point3dArray[1]), float.Parse(point3dArray[2]));
+            }
+        }       
     }
 }

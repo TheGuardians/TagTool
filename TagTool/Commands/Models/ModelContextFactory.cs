@@ -22,6 +22,7 @@ namespace TagTool.Commands.Models
             context.AddCommand(new ListVariantsCommand(cache, model));
             context.AddCommand(new ExtractModelCommand(cache, tag, model));
             context.AddCommand(new ExtractBitmapsCommand(cache, tag, model));
+            context.AddCommand(new ExportJMSCommand(cache, model));
         }
     }
 }
