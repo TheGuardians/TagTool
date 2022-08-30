@@ -9,9 +9,13 @@ namespace TagTool.Tags.Definitions
     
     public class UserInterfaceGlobalsDefinition : TagStructure
 	{
+        [TagField(ValidTags = new[] { "wigl" })]
         public CachedTag SharedGlobals;
+        [TagField(ValidTags = new[] { "goof" })]
         public CachedTag MpVariantSettingsUi;
+        [TagField(ValidTags = new[] { "unic" })]
         public CachedTag GameHopperDescriptions;
+
         public List<ScreenWidget> ScreenWidgets;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
@@ -21,7 +25,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag SwearFilter; // TODO: Version number
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public uint Unknown;
+        public uint UnknownHO;
 
         [TagStructure(Size = 0x10)]
         public class ScreenWidget : TagStructure

@@ -38,14 +38,15 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<UiWidgetBiped> UiWidgetBipeds;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId UnknownPlayer1;
+        public StringId Player0Flag;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId UnknownPlayer2;
+        public StringId Player1Flag;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId UnknownPlayer3;
+        public StringId Player2Flag;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId UnknownPlayer4;
+        public StringId Player3Flag;
 
         //Spartan in H3
         [TagField(Length = 32)] public string McBipedName;
@@ -114,7 +115,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public TagFunction PdaWaypointScaleFunction;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint PdaWaypointJumpSpeed;
+        public uint PdaCameraVelocity;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint PdaUnknownA;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]

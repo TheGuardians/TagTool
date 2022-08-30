@@ -2,6 +2,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -14,43 +15,52 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new [] { "unic" })] public CachedTag SurvivalModeStrings;
         [TagField(ValidTags = new [] { "snd!" })] public CachedTag CountdownSound;
         [TagField(ValidTags = new [] { "snd!" })] public CachedTag RespawnSound;
+
         public List<SurvivalEvent> SurvivalEvents;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public List<ArmorCustomization> ArmorCustomizations;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public uint Unknown2;
+        public uint UnknownHO;
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public uint Unknown3;
+        public uint UnknownHO_1;
 
         [TagStructure(Size = 0x108, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x10C, MinVersion = CacheVersion.HaloOnlineED)]
         public class SurvivalEvent : TagStructure
 		{
-            public ushort Flags;
+            public GameEngineEventFlagsDefinition Flags;
             public TypeValue Type;
             [TagField(Flags = Label)]
             public StringId Event;
             public AudienceValue Audience;
-            public short Unknown;
-            public short Unknown2;
+            public short DisplayPriority;
+            public short SubPriority;
             public TeamValue Team;
             public StringId DisplayString;
-            public StringId DisplayMedal;
+            public StringId DisplayMedal; // This is only valid on Flavor Events and will not award a medal for Engine Events
+
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public uint Unknown3;
-            public float DisplayDuration;
+            public uint UnknownHO;
+
+            public float DisplayTime; // seconds
             public RequiredFieldValue RequiredField;
             public RequiredFieldValue ExcludedAudience;
-            public RequiredFieldValue RequiredField2;
-            public RequiredFieldValue ExcludedAudience2;
+            public GameEngineEventSplitscreenSuppressionEnumDefinition SplitscreenSuppression;
+
+            [TagField(Length = 0x2, Flags = Padding)]
+            public byte[] Padding0;
+
             public StringId PrimaryString;
-            public int PrimaryStringDuration;
+            public int PrimaryStringDuration; // seconds
             public StringId PluralDisplayString;
             public float SoundDelayAnnouncerOnly;
-            public ushort SoundFlags;
-            public short Unknown4;
+            public GameEngineSoundResponseFlagsDefinition SoundFlags;
+
+            [TagField(Length = 0x2, Flags = Padding)]
+            public byte[] Padding1;
+
             public CachedTag EnglishSound;
             public CachedTag JapaneseSound;
             public CachedTag GermanSound;
@@ -63,10 +73,14 @@ namespace TagTool.Tags.Definitions
             public CachedTag ChineseSimplifiedSound;
             public CachedTag PortugueseSound;
             public CachedTag PolishSound;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
+            public CachedTag ProbablyRussianSound;
+
+            [Flags]
+            public enum GameEngineEventFlagsDefinition : ushort
+            {
+                QuantityMessage = 1 << 0,
+                SuppressText = 1 << 1
+            }
 
             public enum TypeValue : short
             {
@@ -110,6 +124,21 @@ namespace TagTool.Tags.Definitions
                 CauseTeam,
                 EffectPlayer,
                 EffectTeam
+            }
+
+            [Flags]
+            public enum GameEngineSoundResponseFlagsDefinition : ushort
+            {
+                AnnouncerSound = 1 << 0
+            }
+
+            public enum GameEngineEventSplitscreenSuppressionEnumDefinition : short
+            {
+                None,
+                SuppressAudio,
+                SuppressAudioIfOverlapping,
+                SuppressText,
+                SuppressAudioAndText
             }
         }
 

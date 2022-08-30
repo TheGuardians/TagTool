@@ -96,11 +96,17 @@ namespace TagTool.Commands.Porting
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
-                    textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3);
+                    
                     if (BlamCache.Platform == CachePlatform.Original)
+                    {
+                        textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3Original);
                         textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3);
+                    }
                     else if (BlamCache.Platform == CachePlatform.MCC)
+                    {
+                        textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3MCC);
                         textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3MCC);
+                    }
                     break;
                 case CacheVersion.Halo3ODST:
                     textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_ODST);

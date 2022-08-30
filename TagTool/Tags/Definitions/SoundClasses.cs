@@ -45,7 +45,7 @@ namespace TagTool.Tags.Definitions
             public SoundClassPropagation AirPropagation;
             public SoundClassPropagation UnderwaterPropagation;
 
-            public float OverrideSpeaerGain;
+            public float OverrideSpeakerGain;
 
             //
             // Distance Parameters
@@ -81,7 +81,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             public SoundClassDucking ArgDucking;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public SoundClassDucking UnknownUiDucking;
+            public SoundClassDucking PdaDucking;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float UnknownCortanaEffect;
@@ -104,10 +104,10 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float OcclusionMaxBend;
 
-            public int Unknown39;
+            public int XmaCompressionLevel;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown40;
+            public float SendToLfeGain; // When send (mono) to lfe is set, this is how much additional gain to apply (dB)
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float UnknownReach10;
@@ -129,7 +129,7 @@ namespace TagTool.Tags.Definitions
                 ValidObstructionFactor = 1 << 6,
                 Multilingual = 1 << 7,
                 ValidUnderwaterPropagation = 1 << 8,
-                Bit9 = 1 << 9,
+                ValidSuppressSpatialization = 1 << 9,
                 Bit10 = 1 << 10,
                 StopsWithDeadObject = 1 << 11,
                 Bit12 = 1 << 12,

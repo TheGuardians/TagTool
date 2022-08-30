@@ -1729,8 +1729,11 @@ namespace TagTool.Tags.Definitions
 
                 // flags
 
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public WidgetTextFlags_H3 TextFlags_H3; // uint
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+                public WidgetTextFlags_H3Original TextFlags_H3Original; // ushort
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                public WidgetTextFlags_H3MCC TextFlags_H3MCC; // uint
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
                 public WidgetTextFlags TextFlags; // uint
@@ -1754,13 +1757,34 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public ushort FontReach; // short
 
-                [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+                [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
                 public byte[] FontPadding;
 
                 public StringId InputString;
 
                 [Flags]
-                public enum WidgetTextFlags_H3 : uint
+                public enum WidgetTextFlags_H3Original : ushort
+                {
+                    StringIsANumber = 1 << 0,
+                    Force2DigitNumber = 1 << 1,
+                    Force3DigitNumber = 1 << 2,
+                    SuffixWithPlus = 1 << 3,
+                    SuffixWithM = 1 << 4,
+                    Decimal2Digits = 1 << 5,
+                    Decimal3Digits = 1 << 6,
+                    Decimal5Digits = 1 << 7,
+                    SuperHugeNumber = 1 << 8,
+                    SuffixWithX = 1 << 9,
+                    WrapWithBrackets = 1 << 10,
+                    FormatAsTime = 1 << 11,
+                    FormatAsHhmmssTime = 1 << 12,
+                    FormatAsBudgetNumber = 1 << 13,
+                    PrefixWithMinus = 1 << 14,
+                    OnlyAxesGlobal = 1 << 15
+                }
+
+                [Flags]
+                public enum WidgetTextFlags_H3MCC : uint
                 {
                     StringIsANumber = 1 << 0,
                     Force2DigitNumber = 1 << 1,

@@ -67,7 +67,7 @@ namespace TagTool.Tags.Definitions
         public enum VehicleFlagBits : int
         {
             None,
-            NoFrictionWdriver = 1 << 0,
+            NoFrictionWithDriver = 1 << 0,
             CanTriggerAutomaticOpeningDoors = 1 << 1,
             AutoaimWhenTeamless = 1 << 2,
             AiWeaponCannotRotate = 1 << 3,
@@ -79,7 +79,7 @@ namespace TagTool.Tags.Definitions
             NoncombatVehicle = 1 << 9,
             CausesCollisionDamage = 1 << 10,
             HugeVehiclePhysicsGroup = 1 << 11,
-            EnableWheeliepoppingHack = 1 << 12,
+            EnableWheeliePoppingHack = 1 << 12,
             AiAutoTurret = 1 << 13
         }
 

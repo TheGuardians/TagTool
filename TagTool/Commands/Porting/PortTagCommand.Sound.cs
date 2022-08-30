@@ -581,7 +581,7 @@ namespace TagTool.Commands.Porting
 
                 InternalFlags = (SoundClasses.Class.InternalFlagBits.Valid | SoundClasses.Class.InternalFlagBits.ValidXmaCompressionLevel |
                  SoundClasses.Class.InternalFlagBits.ValidDopplerFactor | SoundClasses.Class.InternalFlagBits.ValidObstructionFactor |
-                 SoundClasses.Class.InternalFlagBits.ValidUnderwaterPropagation | SoundClasses.Class.InternalFlagBits.Bit9),
+                 SoundClasses.Class.InternalFlagBits.ValidUnderwaterPropagation | SoundClasses.Class.InternalFlagBits.ValidSuppressSpatialization),
 
                 Priority = 5,
                 DistanceBounds = new Bounds<float>(8, 120),
