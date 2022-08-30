@@ -227,9 +227,9 @@ namespace TagTool.Tags.Definitions
                     Assault = 1 << 10,
                     VIP = 1 << 11,
                     Infection = 1 << 12,
-                    Unused = 1 << 13,
-                    Editor = 1 << 14,
-                    Theater = 1 << 15
+                    Editor = 1 << 13,
+                    Theater = 1 << 14,
+                    Unused = 1 << 15
                 }
 
                 [Flags]
