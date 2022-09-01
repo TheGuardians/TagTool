@@ -681,7 +681,8 @@ namespace TagTool.Commands.Porting.Gen2
                     Scale = machobj.ObjectData.Scale,
                     BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)machobj.ObjectData.BspPolicy,
                     OriginBspIndex = (short)machobj.ObjectData.ManualBspFlags,
-                    CanAttachToBspFlags = (ushort)(machobj.ObjectData.ManualBspFlags + 1),
+
+                    CanAttachToBspFlags = (ushort)(machobj.ObjectData.ManualBspFlags),
                     Source = (Scenario.ScenarioInstance.SourceValue)machobj.ObjectData.ObjectId.Source,
                     UniqueHandle = new DatumHandle((uint)machobj.ObjectData.ObjectId.UniqueId),
                     EditorFolder = -1,
@@ -692,7 +693,6 @@ namespace TagTool.Commands.Porting.Gen2
                     PowerGroup = machobj.DeviceData.PowerGroup,
                     PositionGroup = machobj.DeviceData.PositionGroup
                 });
-                newScenario.Machines[machobjindex].CanAttachToBspFlags |= (ushort)(machobj.ObjectData.ManualBspFlags + 1);
             }
 
             // Device controls
@@ -787,7 +787,6 @@ namespace TagTool.Commands.Porting.Gen2
                 };
                 newScenario.Scenery.Add(scenery);
                 TranslateEnum(gen2Tag.Scenery[scenobjindex].SceneryData.ValidMultiplayerGames, out scenery.Multiplayer.EngineFlags, scenery.Multiplayer.EngineFlags.GetType());
-
             }
 
             // Bipeds
@@ -867,7 +866,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
             for (var eqipobjindex = 0; eqipobjindex < gen2Tag.Equipment.Count; eqipobjindex++)
             {
-                var eqipobj = gen2Tag.Weapons[eqipobjindex];
+                var eqipobj = gen2Tag.Equipment[eqipobjindex];
                 var equipment = new Scenario.EquipmentInstance
                 {
                     PaletteIndex = eqipobj.Type,
