@@ -5,6 +5,7 @@ using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
@@ -74,9 +75,18 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                     foreach (var instance in Definition.InstancedGeometryInstances)
                     {
-                        var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
-                        var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, Definition.Geometry.Meshes[collresource.InstancedGeometry[instance.DefinitionIndex].MeshIndex]);
-                        objExtractor.ExtractMesh(meshReader, vertexCompressor, CacheContext.StringTable.GetString(instance.Name));
+                        var instanceDef = collresource.InstancedGeometry[instance.DefinitionIndex];
+                        var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[instanceDef.CompressionIndex]);
+                        var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, Definition.Geometry.Meshes[instanceDef.MeshIndex]);
+
+                        var scale = Matrix4x4.CreateScale(instance.Scale);
+                        var transform = scale * new Matrix4x4(
+                                    instance.Matrix.m11, instance.Matrix.m12, instance.Matrix.m13, 0.0f,
+                                    instance.Matrix.m21, instance.Matrix.m22, instance.Matrix.m23, 0.0f,
+                                    instance.Matrix.m31, instance.Matrix.m32, instance.Matrix.m33, 0.0f,
+                                    instance.Matrix.m41, instance.Matrix.m42, instance.Matrix.m43, 0.0f);
+
+                        objExtractor.ExtractMesh(meshReader, vertexCompressor, CacheContext.StringTable.GetString(instance.Name), transform);
                     }
 
                     objExtractor.Finish();

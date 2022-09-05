@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 
 namespace TagTool.Geometry
 {
@@ -25,16 +26,27 @@ namespace TagTool.Geometry
             WriteHeader();
         }
 
+        public struct VertexTransform
+        {
+            public RealVector3d Forward;
+            public RealVector3d Up;
+            public RealPoint3d Position;
+        }
+
         /// <summary>
         /// Writes mesh data to the .obj.
         /// </summary>
         /// <param name="reader">The mesh reader to use.</param>
         /// <param name="compressor">The vertex compressor to use.</param>
         /// <param name="name">The name of the mesh.</param>
-        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, string name = null)
+        /// <param name="transform">An optional transform to apply to the vertices</param>
+        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, string name = null, Matrix4x4? transform = null)
         {
             var vertices = ReadVertices(reader);
             DecompressVertices(vertices, compressor);
+
+            if (transform != null)
+                TransformVertices(vertices, transform.Value);
 
             var indicesList = new List<ushort[]>();
             var indexCount = 0;
@@ -299,6 +311,23 @@ namespace TagTool.Geometry
                 yield return $"f {a}/{a}/{a} {b}/{b}/{b} {c}/{c}/{c}";
             }
         }
+
+        /// <summary>
+        /// Applys a transformation to a list of vertices
+        /// </summary>
+        /// <param name="vertices">The list of vertices</param>
+        /// <param name="transform">The transform to apply</param>
+        private void TransformVertices(List<ObjVertex> vertices, Matrix4x4 transform)
+        {
+            foreach (var vertex in vertices)
+            {
+                var p = Vector3.Transform(new Vector3(vertex.Position.I, vertex.Position.J, vertex.Position.K), transform);
+                var n = Vector3.TransformNormal(new Vector3(vertex.Normal.I, vertex.Normal.J, vertex.Normal.K), transform);
+                vertex.Position = new RealQuaternion(p.X, p.Y, p.Z);
+                vertex.Normal = new RealVector3d(n.X, n.Y, n.Z);
+            }
+        }
+
 
         private class ObjVertex
         {
