@@ -35,12 +35,21 @@ namespace TagTool.Geometry.Jms
                     Name = Cache.StringTable.GetString(box.Name),
                     Parent = -1,
                     Material = box.MaterialIndex,
-                    Rotation = new RealQuaternion(), //FIX ME
+                    Rotation = new RealQuaternion(),
                     Translation = new RealVector3d(box.Translation.I, box.Translation.J, box.Translation.K) * 100.0f,
                     Width = box.HalfExtents.I * 2 * 100.0f,
                     Length = box.HalfExtents.J * 2 * 100.0f,
                     Height = box.HalfExtents.K * 2 * 100.0f
                 };
+
+                //quaternion rotation from 4x4 matrix
+                Matrix4x4 boxMatrix = new Matrix4x4(box.RotationI.I, box.RotationI.J, box.RotationI.K, box.RotationIRadius,
+                    box.RotationJ.I, box.RotationJ.J, box.RotationJ.K, box.RotationJRadius,
+                    box.RotationK.I, box.RotationK.J, box.RotationK.K, box.RotationKRadius,
+                    box.Translation.I, box.Translation.J, box.Translation.K, box.TranslationRadius);
+                Quaternion boxQuat = Quaternion.CreateFromRotationMatrix(boxMatrix);
+                newbox.Rotation = new RealQuaternion(boxQuat.X, boxQuat.Y, boxQuat.Z, boxQuat.W);
+
                 int rigidbody = phmo.RigidBodies.FindIndex(r => r.ShapeType == Havok.BlamShapeType.Box && r.ShapeIndex == phmo.Boxes.IndexOf(box));
                 if (rigidbody != -1)
                     newbox.Parent = phmo.RigidBodies[rigidbody].Node;
@@ -70,7 +79,7 @@ namespace TagTool.Geometry.Jms
                     Parent = -1,
                     Material = pill.MaterialIndex,
                     Rotation = new RealQuaternion(),
-                    Translation = pill.Bottom - ((pill.Top - pill.Bottom)/2) * 100.0f,
+                    Translation = pill.Bottom * 100.0f,
                     Height = RealVector3d.Norm(pill.Top - pill.Bottom) * 100.0f,
                     Radius = pill.ShapeBase.Radius * 100.0f
                 };
@@ -79,9 +88,14 @@ namespace TagTool.Geometry.Jms
                 if (rigidbody != -1)
                     newpill.Parent = phmo.RigidBodies[rigidbody].Node;
 
-                //placeholders
-                newpill.Translation = new RealVector3d(0,0,0);
-                newpill.Rotation = new RealQuaternion(0,0,0,0);
+                RealVector3d pillvec = (pill.Top - pill.Bottom) * 100.0f;
+
+                var pillBottom = new Vector3(pill.Bottom.I, pill.Bottom.J, pill.Bottom.K);
+                var pillTop = new Vector3(pill.Top.I, pill.Top.J, pill.Top.K);
+                Matrix4x4 newMatrix = Matrix4x4.CreateLookAt(pillBottom, pillTop, new Vector3(0,1,0));
+
+                Quaternion newQuat = Quaternion.CreateFromRotationMatrix(newMatrix);
+                newpill.Rotation = new RealQuaternion(newQuat.X, newQuat.Y, newQuat.Z, newQuat.W);
                
                 Jms.Capsules.Add(newpill);
             }

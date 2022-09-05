@@ -22,7 +22,23 @@ namespace TagTool.Geometry.Jms
 
         public void Export(RenderModel mode)
         {
-            
+            //build markers
+            foreach(var markergroup in mode.MarkerGroups)
+            {
+                var name = Cache.StringTable.GetString(markergroup.Name);
+                foreach(var marker in markergroup.Markers)
+                {
+                    Jms.Markers.Add(new JmsFormat.JmsMarker
+                    {
+                        Name = name,
+                        NodeIndex = marker.NodeIndex,
+                        Rotation = marker.Rotation,
+                        Translation = new RealVector3d(marker.Translation.X, marker.Translation.Y, marker.Translation.Z) * 100.0f,
+                        Radius = marker.Scale
+                    });
+                }
+
+            }
         }
 
 

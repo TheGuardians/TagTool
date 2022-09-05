@@ -14,6 +14,10 @@ namespace TagTool.Commands.Models
     {
         private GameCache Cache { get; }
         private Model Definition { get; }
+        private bool ExportRender = false;
+        private bool ExportPhysics = false;
+        private bool ExportCollision = false;
+        private bool ExportAnimations = false;
 
         public ExportJMSCommand(GameCache cache, Model definition) :
             base(true,
@@ -41,6 +45,7 @@ namespace TagTool.Commands.Models
 
             JmsFormat jms = new JmsFormat();
 
+            //build nodes
             foreach (var node in Definition.Nodes)
             {
                 var newnode = new JmsFormat.JmsNode
@@ -76,7 +81,12 @@ namespace TagTool.Commands.Models
                     JmsPhmoExporter exporter = new JmsPhmoExporter(Cache, jms);
                     exporter.Export(phmo);
                 }
-
+                if (Definition.RenderModel != null)
+                {
+                    RenderModel mode = Cache.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
+                    JmsModeExporter exporter = new JmsModeExporter(Cache, jms);
+                    exporter.Export(mode);
+                }
 
             }
 
