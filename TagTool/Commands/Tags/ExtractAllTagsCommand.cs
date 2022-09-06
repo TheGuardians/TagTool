@@ -65,10 +65,14 @@ namespace TagTool.Commands.Tags
                     if (!Directory.Exists(tagDirectory))
                         Directory.CreateDirectory(tagDirectory);
 
+                    var tagData = ExtractTag(cacheStream, instance);
+                    if (tagData == null)
+                        continue;
+
                     using (var tagStream = File.Create(tagPath))
                     using (var writer = new BinaryWriter(tagStream))
                     {
-                        writer.Write(ExtractTag(cacheStream, instance));
+                        writer.Write(tagData);
                     }
 
                     Console.WriteLine($"Exported {tagName}");
