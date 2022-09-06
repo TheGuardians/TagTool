@@ -88,14 +88,19 @@ namespace TagTool.Geometry.Jms
                 if (rigidbody != -1)
                     newpill.Parent = phmo.RigidBodies[rigidbody].Node;
 
+                //pill translation needs to be adjusted to include pill radius
+                var pillBottom = new Vector3(pill.Bottom.I, pill.Bottom.J, pill.Bottom.K) * 100.0f;
+                var pillTop = new Vector3(pill.Top.I, pill.Top.J, pill.Top.K) * 100.0f;
                 RealVector3d pillvec = (pill.Top - pill.Bottom) * 100.0f;
+                Vector3 pillVector = new Vector3(pillvec.I, pillvec.J, pillvec.K);
+                Vector3 inverseVec = pillVector * (newpill.Radius / newpill.Height);
+                Vector3 newPos = pillBottom - inverseVec;
+                newpill.Translation = new RealVector3d(newPos.X, newPos.Y, newPos.Z);
 
-                var pillBottom = new Vector3(pill.Bottom.I, pill.Bottom.J, pill.Bottom.K);
-                var pillTop = new Vector3(pill.Top.I, pill.Top.J, pill.Top.K);
+                //calculate quaternion rotation from pill vector
                 Matrix4x4 newMatrix = Matrix4x4.CreateLookAt(pillBottom, pillTop, new Vector3(0,1,0));
-
                 Quaternion newQuat = Quaternion.CreateFromRotationMatrix(newMatrix);
-                newpill.Rotation = new RealQuaternion(newQuat.X, newQuat.Y, newQuat.Z, newQuat.W);
+                newpill.Rotation = new RealQuaternion(newQuat.X, newQuat.Y, newQuat.Z, newQuat.W);                    
                
                 Jms.Capsules.Add(newpill);
             }
