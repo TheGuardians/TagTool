@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.CodeDom.Compiler;
 
 namespace TagTool.Commands.Scenarios
 {
@@ -52,51 +53,63 @@ namespace TagTool.Commands.Scenarios
             return result;
         }
 
-        private void WriteValueExpression(HsSyntaxNode expr, BinaryReader stringReader, StreamWriter scriptWriter)
+        private void WriteValueExpression(HsSyntaxNode parentExprk, HsSyntaxNode expr, BinaryReader stringReader, IndentedTextWriter indentWriter)
         {
+            var exprIndex = (ushort)(Definition.ScriptExpressions.IndexOf(expr));
+            var nextExpr = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+            var nextExprValid = false;
+            if (nextExpr < Definition.ScriptExpressions.Count)
+                nextExprValid = GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[nextExpr].ValueType) != "Invalid";
+
             var valueType = GetHsTypeAsString(Cache.Version, expr.ValueType);
+
+            if (valueType != "FunctionName")
+                indentWriter.Write(" ");
 
             switch (valueType)
             {
                 case "FunctionName":
-                    scriptWriter.Write(expr.StringAddress == 0 ? OpcodeLookup(expr.Opcode) : ReadScriptString(stringReader, expr.StringAddress)); 
+                    indentWriter.Write(expr.StringAddress == 0 ? OpcodeLookup(expr.Opcode) : ReadScriptString(stringReader, expr.StringAddress));
+                    if ((expr.Opcode == 0 || expr.Opcode == 1 || expr.Opcode == 22) && nextExprValid)
+                        indentWriter.WriteLine("--");
+                    else if (expr.Opcode < 19 && nextExprValid)
+                        indentWriter.Write(' ');
                     break; //Trust the string table, its faster than going through the dictionary with OpcodeLookup.
 
                 case "Boolean":
-                    scriptWriter.Write(expr.Data[0] == 0 ? "false" : "true");
+                    indentWriter.Write(expr.Data[0] == 0 ? "false" : "true");
                     break;
 
                 case "Real":
-                    scriptWriter.Write(BitConverter.ToSingle(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0));
+                    indentWriter.Write(BitConverter.ToSingle(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0));
                     break;
 
                 case "Short":
-                    scriptWriter.Write(BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0));
+                    indentWriter.Write(BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0));
                     break;
 
                 case "Long":
-                    scriptWriter.Write(BitConverter.ToInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0));
+                    indentWriter.Write(BitConverter.ToInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0));
                     break;
-
                 case "String":
-                    scriptWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
+                    indentWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
                     break;
 
                 case "Script":
-                    scriptWriter.Write(Definition.Scripts[BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0)].ScriptName);
+                    indentWriter.Write(Definition.Scripts[BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0)].ScriptName);
                     break;
 
                 case "StringId":
-                    scriptWriter.Write(Cache.StringTable.GetString(new StringId(BitConverter.ToUInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0))));
+                    indentWriter.Write($"\"{Cache.StringTable.GetString(new StringId(BitConverter.ToUInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0)))}\"");
                     break;
 
                 case "GameDifficulty":
                     switch (BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0))
                     {
-                        case 0: scriptWriter.Write("easy"); break;
-                        case 1: scriptWriter.Write("normal"); break;
-                        case 2: scriptWriter.Write("heroic"); break;
-                        case 3: scriptWriter.Write("legendary"); break;
+                        case 0: indentWriter.Write("easy"); break;
+                        case 1: indentWriter.Write("normal"); break;
+                        case 2: indentWriter.Write("heroic"); break;
+                        case 3: indentWriter.Write("legendary"); break;
                         default: throw new NotImplementedException();
                     }
                     break;
@@ -107,56 +120,105 @@ namespace TagTool.Commands.Scenarios
                 case "Object":
                 case "Device":
                 case "CutsceneCameraPoint":
+                case "CutsceneFlag":
                 case "TriggerVolume":
                 case "UnitSeatMapping":
                 case "Vehicle":
                 case "VehicleName":
-                    scriptWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
+                case "Effect":
+                case "Sound":
+                case "LoopingSound":
+                case "AnyTag":
+                case "ObjectName":
+                case "Scenery":
+                case "Ai":
+                case "PointReference":
+                case "ObjectDefinition":
+                case "CutsceneTitle":
+                case "ZoneSet":
+                case "Damage":
+                case "StartingProfile":
+                case "DeviceGroup":
+                    indentWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
+                    break;
+
+                case "Team":
+                case "AiCommandScript":
+                case "AiLine":
+                    indentWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
                     break;
 
                 default:
-                    scriptWriter.Write($"<UNIMPLEMENTED VALUE: {expr.Flags.ToString()} {valueType}>");
+                    indentWriter.Write($"<UNIMPLEMENTED VALUE: {expr.Flags.ToString()} {valueType}>");
                     break;
             }
+            
         }
 
-        private void WriteGroupExpression(HsSyntaxNode expr, BinaryReader stringReader, StreamWriter scriptWriter)
+        private void WriteGroupExpression(HsSyntaxNode parentExpr, HsSyntaxNode expr, BinaryReader stringReader, IndentedTextWriter indentWriter, bool shouldSkip)
         {
-            scriptWriter.Write('(');
+            bool shouldSkipFirst = shouldSkip;
 
+            if (!shouldSkip)
+            {
+                if (parentExpr.Opcode > 19 && parentExpr.Opcode != 22)
+                    indentWriter.Write(' ');
+
+                indentWriter.Indent++;
+                indentWriter.Write('(');
+            }
+
+            var prevExpr = expr;
             for (var exprIndex = (ushort)(Definition.ScriptExpressions.IndexOf(expr) + 1); GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[exprIndex].ValueType) != "Invalid"; exprIndex = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index)
             {
-                WriteExpression(Definition.ScriptExpressions[exprIndex], stringReader, scriptWriter);
+                if (shouldSkipFirst)
+                {
+                    shouldSkipFirst = false;
+                    continue;
+                }
+                var nextExpr = Definition.ScriptExpressions[exprIndex];
+                if (prevExpr.Flags == HsSyntaxNodeFlags.GlobalsReference && (nextExpr.Flags == HsSyntaxNodeFlags.Group || nextExpr.Flags == HsSyntaxNodeFlags.ScriptReference))
+                    indentWriter.Write('$');
+                WriteExpression(expr, nextExpr, stringReader, indentWriter, false);
+                prevExpr = nextExpr;
 
                 if (Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index == ushort.MaxValue || Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index + 1 > Definition.ScriptExpressions.Count)
                     break;
-
-                scriptWriter.Write(' ');
             }
 
-            scriptWriter.Write(')');
+            if (!shouldSkip)
+            {
+                if (parentExpr.Opcode < 3 || parentExpr.Opcode == 22)
+                    indentWriter.WriteLine(")");
+                else
+                    indentWriter.Write(')');
+
+                indentWriter.Indent--;
+            }
         }
 
-        private void WriteExpression(HsSyntaxNode expr, BinaryReader stringReader, StreamWriter scriptWriter)
+        private void WriteExpression(HsSyntaxNode parentExpr, HsSyntaxNode expr, BinaryReader stringReader, IndentedTextWriter indentWriter, bool shouldSkip)
         {
             switch (expr.Flags)
             {
                 case HsSyntaxNodeFlags.ScriptReference:
                 case HsSyntaxNodeFlags.Group:
-                    WriteGroupExpression(expr, stringReader, scriptWriter);
+                    WriteGroupExpression(parentExpr, expr, stringReader, indentWriter, shouldSkip);
                     break;
 
                 case HsSyntaxNodeFlags.Expression:
-                    WriteValueExpression(expr, stringReader, scriptWriter);
+                    WriteValueExpression(parentExpr, expr, stringReader, indentWriter);
                     break;
 
                 case HsSyntaxNodeFlags.GlobalsReference:
                 case HsSyntaxNodeFlags.ParameterReference:
-                    scriptWriter.Write(expr.StringAddress == 0 ? "none" : ReadScriptString(stringReader, expr.StringAddress));
+                    if(parentExpr.Opcode > 19)
+                        indentWriter.Write(' ');
+                    indentWriter.Write(expr.StringAddress == 0 ? "none" : ReadScriptString(stringReader, expr.StringAddress));
                     break;
 
                 default:
-                    scriptWriter.Write($"<UNIMPLEMENTED EXPR: {expr.Flags.ToString()} {GetHsTypeAsString(Cache.Version, expr.ValueType)}>");
+                    indentWriter.Write($"<UNIMPLEMENTED EXPR: {expr.Flags.ToString()} {GetHsTypeAsString(Cache.Version, expr.ValueType)}>");
                     break;
             }
         }
@@ -190,21 +252,27 @@ namespace TagTool.Commands.Scenarios
             using (var scriptWriter = new StreamWriter(scriptFileStream))
             using (var scriptStringStream = new MemoryStream(Definition.ScriptStrings))
             using (var scriptStringReader = new BinaryReader(scriptStringStream))
+            using (var baseTextWriter = new System.IO.StringWriter())
+            using (var indentWriter = new IndentedTextWriter(scriptWriter, "	"))
             {
+                indentWriter.Indent = 0;
+
                 //
                 // Export scenario script globals
                 //
 
                 foreach (var scriptGlobal in Definition.Globals)
                 {
-                    scriptWriter.Write($"(global {GetHsTypeAsString(Cache.Version, scriptGlobal.Type).ToSnakeCase()} {scriptGlobal.Name} ");
+                    indentWriter.Write($"(global {GetHsTypeAsString(Cache.Version, scriptGlobal.Type).ToSnakeCase()} {scriptGlobal.Name}");
 
-                    WriteExpression(Definition.ScriptExpressions[scriptGlobal.InitializationExpressionHandle.Index], scriptStringReader, scriptWriter);
+                    var expr = Definition.ScriptExpressions[scriptGlobal.InitializationExpressionHandle.Index];
 
-                    scriptWriter.WriteLine(')');
+                    WriteExpression(expr, expr, scriptStringReader, indentWriter, false);
+
+                    indentWriter.WriteLine(')');
                 }
 
-                scriptWriter.WriteLine();
+                indentWriter.WriteLine();
 
                 //
                 // Export scenario scripts
@@ -212,29 +280,32 @@ namespace TagTool.Commands.Scenarios
 
                 foreach (var script in Definition.Scripts)
                 {
-                    scriptWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToSnakeCase()} ");
+                    indentWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToSnakeCase()} ");
 
                     if (script.Parameters.Count == 0)
                     {
-                        scriptWriter.WriteLine(script.ScriptName + ' ');
+                        indentWriter.WriteLine(script.ScriptName);
                     }
                     else
                     {
-                        scriptWriter.Write($"({script.ScriptName}");
+                        indentWriter.Write($"({script.ScriptName}");
 
                         foreach (var parameter in script.Parameters)
                         {
-                            scriptWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToSnakeCase()} {parameter.Name})");
+                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToSnakeCase()} {parameter.Name})");
                         }
 
-                        scriptWriter.WriteLine(')');
+                        indentWriter.WriteLine(')');
                     }
+                    var expr = Definition.ScriptExpressions[script.RootExpressionHandle.Index];
+                    var shouldSkip = false;
+                    if (expr.Opcode == 0)
+                        shouldSkip = true;
+                    WriteExpression(expr, expr, scriptStringReader, indentWriter, shouldSkip);
 
-                    WriteExpression(Definition.ScriptExpressions[script.RootExpressionHandle.Index], scriptStringReader, scriptWriter);
+                    indentWriter.WriteLine(')');
 
-                    scriptWriter.WriteLine(')');
-
-                    scriptWriter.WriteLine();
+                    indentWriter.WriteLine();
                 }
             }
 

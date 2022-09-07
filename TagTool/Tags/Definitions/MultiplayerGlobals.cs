@@ -224,7 +224,8 @@ namespace TagTool.Tags.Definitions
                     public float Unknown;
                 }
 
-                [TagStructure(Size = 0x50)]
+                [TagStructure(Size = 0x50, MaxVersion = CacheVersion.HaloOnline449175)]
+                [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloOnline498295)]
                 public class MoveAnimation : TagStructure
 				{
                     [TagField(Flags = Label, Length = 32)]
@@ -235,6 +236,10 @@ namespace TagTool.Tags.Definitions
                     public int Unknown;
                     public CachedTag PrimaryWeapon;
                     public CachedTag SecondaryWeapon;
+                    [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+                    public float Unknown2;
+                    [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+                    public float Unknown3;
                 }
             }
         }
