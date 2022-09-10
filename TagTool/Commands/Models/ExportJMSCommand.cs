@@ -70,6 +70,8 @@ namespace TagTool.Commands.Models
                     Rotation = node.DefaultRotation,
                     Position = new RealVector3d(node.DefaultTranslation.X, node.DefaultTranslation.Y, node.DefaultTranslation.Z) * 100.0f
                 };
+                if (!newnode.Name.StartsWith("b_"))
+                    newnode.Name = "b_" + newnode.Name;
                 if (newnode.ParentNodeIndex != -1)
                 {
                     Matrix4x4 transform = MatrixFromNode(newnode.Rotation, newnode.Position);

@@ -385,7 +385,7 @@ namespace TagTool.Geometry.Jms
 
             public void Write(StreamWriter stream)
             {
-                stream.WriteLine("b_" + Name);
+                stream.WriteLine(Name);
                 stream.WriteLine(ParentNodeIndex);
                 WriteQuaternion(Rotation, stream);
                 WriteVector3d(Position, stream);            
