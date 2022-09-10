@@ -7,6 +7,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Numerics;
 using TagTool.Geometry.BspCollisionGeometry.Utils;
+using TagTool.Geometry.Utils;
 
 namespace TagTool.Geometry.Jms
 {
@@ -120,18 +121,14 @@ namespace TagTool.Geometry.Jms
                 foreach (var plane in currentPlanes)
                 {
                     List<RealPoint3d> polygon = plane_clip_to_polygon(plane, currentPlanes);
-                    foreach (var point in polygon)
+                    if (polygon.Count == 3)
+                        points.AddRange(polygon);
+                    else
                     {
-                        bool duplicatedPoint = false;
-                        foreach(var existingPoint in points)
-                            if(RealVector3d.Norm(PointToVector(point * 100.0f - existingPoint)) < 0.01)
-                            {
-                                duplicatedPoint = true;
-                                break;
-                            }
-                        if(!duplicatedPoint)
-                            points.Add(point * 100.0f);
-                    }                        
+                        List<List<RealPoint3d>> triangles = Triangulator.Triangulate(polygon, plane);
+                        foreach(var triangle in triangles)
+                            points.AddRange(triangle);
+                    }
                 };
                 JmsFormat.JmsConvexShape newConvex = new JmsFormat.JmsConvexShape
                 {

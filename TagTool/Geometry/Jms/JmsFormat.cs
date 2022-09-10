@@ -462,7 +462,7 @@ namespace TagTool.Geometry.Jms
                     foreach (var nodeset in NodeSets)
                     {
                         stream.WriteLine(nodeset.NodeIndex);
-                        stream.WriteLine(nodeset.NodeWeight);
+                        WriteFloat(nodeset.NodeWeight, stream);
                     }
                 }
                 stream.WriteLine(UvSets.Count);
@@ -474,13 +474,15 @@ namespace TagTool.Geometry.Jms
                         WriteRealRGB(uvset.VertexColor, stream);
                     }
                 }
+                //color is null
+                WritePoint3d(new RealPoint3d(), stream);
             }
         }
 
         public class JmsTriangle : JmsElement
         {
             public int MaterialIndex = -1;
-            public uint[] VertexIndices = new uint[3];
+            public List<int> VertexIndices = new List<int>();
 
             public void Read(StreamReader stream)
             {
@@ -489,8 +491,7 @@ namespace TagTool.Geometry.Jms
                 // parse triangle indices
                 string[] indexArray = stream.ReadLine().Split('\t');
                 for (byte index = 0; index < indexArray.Length; index++)
-                    VertexIndices[index] = uint.Parse(indexArray[index]);
-
+                    VertexIndices.Add(int.Parse(indexArray[index]));
             }
 
             public void Write(StreamWriter stream)

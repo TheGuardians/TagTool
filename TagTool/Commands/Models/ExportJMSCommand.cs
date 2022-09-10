@@ -25,7 +25,7 @@ namespace TagTool.Commands.Models
                 "ExportJMS",
                 "",
 
-                "ExportJMS <File>",
+                "ExportJMS <coll/mode/phmo> <File>",
 
                 "")
         {
@@ -35,10 +35,25 @@ namespace TagTool.Commands.Models
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            if (args.Count != 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            var file = new FileInfo(args[0]);
+            switch (args[0])
+            {
+                case "coll":
+                    ExportCollision = true;
+                    break;
+                case "mode":
+                    ExportRender = true;
+                    break;
+                case "phmo":
+                    ExportPhysics = true;
+                    break;
+                default:
+                    return new TagToolError(CommandError.ArgInvalid);
+            }
+
+            var file = new FileInfo(args[1]);
 
             if (!file.Directory.Exists)
                 file.Directory.Create();
@@ -75,13 +90,19 @@ namespace TagTool.Commands.Models
 
             using (var cacheStream = Cache.OpenCacheRead())
             {
-                if (Definition.PhysicsModel != null)
+                if (ExportCollision && Definition.CollisionModel != null)
+                {
+                    CollisionModel coll = Cache.Deserialize<CollisionModel>(cacheStream, Definition.CollisionModel);
+                    JmsCollExporter exporter = new JmsCollExporter(Cache, jms);
+                    exporter.Export(coll);
+                }
+                if (ExportPhysics && Definition.PhysicsModel != null)
                 {
                     PhysicsModel phmo = Cache.Deserialize<PhysicsModel>(cacheStream, Definition.PhysicsModel);
                     JmsPhmoExporter exporter = new JmsPhmoExporter(Cache, jms);
                     exporter.Export(phmo);
                 }
-                if (Definition.RenderModel != null)
+                if (ExportRender && Definition.RenderModel != null)
                 {
                     RenderModel mode = Cache.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
                     JmsModeExporter exporter = new JmsModeExporter(Cache, jms);
