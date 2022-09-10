@@ -1793,11 +1793,13 @@ namespace TagTool.Tags.Definitions
             public byte[] Unused;
         }
 
-        [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x58, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x58, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x68, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x58, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public class PlayerStartingProfileBlock : TagStructure
-		{
+        {
             [TagField(Flags = Label, Length = 32)]
             public string Name;
             public float StartingHealthDamage;
@@ -1808,18 +1810,22 @@ namespace TagTool.Tags.Definitions
             public CachedTag SecondaryWeapon;
             public short SecondaryRoundsLoaded;
             public short SecondaryRoundsTotal;
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown;
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown2;
             public byte StartingFragGrenadeCount;
             public byte StartingPlasmaGrenadeCount;
             public byte StartingSpikeGrenadeCount;
             public byte StartingFirebombGrenadeCount;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public short Unknown3;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public short Unknown4;
+            [TagField(ValidTags = new[] { "eqip" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag StartingEquipment;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+            [TagField(Platform = CachePlatform.MCC)]
+            public short EditorFolder;
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 2, Platform = CachePlatform.MCC)]
+            public byte[] Padding;
         }
 
         public enum PlayerUnitTypeValue : short

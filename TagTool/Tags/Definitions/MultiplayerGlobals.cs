@@ -26,6 +26,12 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
             public List<CustomizedModelCharacter> CustomizableCharacters;
 
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline235640)]
+            public List<CustomizedModelCharacter_HO> SpartanArmorCustomization;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline235640)]
+            public List<CustomizedModelCharacter_HO> EliteArmorCustomization;
+
             [TagField(MinVersion = CacheVersion.HaloOnlineED)]
             public List<Consumable> Equipment;
 
@@ -54,6 +60,29 @@ namespace TagTool.Tags.Definitions
             public class MultiplayerColor : TagStructure
 			{
                 public RealRgbColor Color;
+            }
+
+            [TagStructure(Size = 0x14)]
+            public class CustomizedModelCharacter_HO : TagStructure
+            {
+                public StringId armorRegion;
+                public StringId bipedRegion;
+
+                public List<Permutation> Permutations;
+
+                [TagStructure(Size = 0x30)]
+                public class Permutation : TagStructure
+                {
+                    public StringId Name;
+                    public CachedTag ThirdPersonArmorObject;
+                    public CachedTag FirstPersonArmorObject;
+
+                    public Int16 unknown1;
+                    public Int16 unknown2;
+
+                    public StringId ParentAttachMarker;
+                    public StringId ChildAttachMarker;
+                }
             }
 
             [TagStructure(Size = 0x10)]
@@ -221,7 +250,7 @@ namespace TagTool.Tags.Definitions
                     public StringId LoopAnimation;
                     public StringId UnarmedTransition;
                     public StringId ArmedTransition;
-                    public float Unknown;
+                    public float CameraDistanceOffset;
                 }
 
                 [TagStructure(Size = 0x50, MaxVersion = CacheVersion.HaloOnline449175)]
@@ -233,13 +262,24 @@ namespace TagTool.Tags.Definitions
                     public StringId InAnimation;
                     public StringId LoopAnimation;
                     public StringId OutAnimation;
-                    public int Unknown;
-                    public CachedTag PrimaryWeapon;
-                    public CachedTag SecondaryWeapon;
+                    [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
+                    public float offset;
+                    [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                    public WeaponLoadout WeaponLoadout;
+                    public CachedTag CustomPrimaryWeapon;
+                    public CachedTag CustomSecondaryWeapon;
                     [TagField(MinVersion = CacheVersion.HaloOnline498295)]
                     public float Unknown2;
                     [TagField(MinVersion = CacheVersion.HaloOnline498295)]
                     public float Unknown3;
+                }
+
+                public enum WeaponLoadout : int
+                {
+                    Unarrmed,
+                    LoadoutPrimary,
+                    LoadoutSecondary,
+                    Custom
                 }
             }
         }
@@ -628,7 +668,7 @@ namespace TagTool.Tags.Definitions
                 public StringId NetpointContestedString;
 
                 [TagStructure(Size = 0x14)]
-                public class SpawnConstantStruct
+                public class SpawnConstantStruct : TagStructure
                 {
                     public float FullWeightRadius; // (world units)
                     public float FalloffRadius; // (world units)
