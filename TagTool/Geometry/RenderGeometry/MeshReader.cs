@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TagTool.IO;
 
 namespace TagTool.Geometry
 {
@@ -17,6 +18,7 @@ namespace TagTool.Geometry
 
         private readonly CacheVersion _version;
         private readonly CachePlatform _platform;
+        private readonly EndianFormat _endianness;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshReader"/> class.
@@ -24,10 +26,11 @@ namespace TagTool.Geometry
         /// <param name="version">The engine version to target.</param>
         /// <param name="platform"></param>
         /// <param name="mesh">The mesh.</param>
-        public MeshReader(CacheVersion version, CachePlatform platform, Mesh mesh)
+        public MeshReader(CacheVersion version, CachePlatform platform, Mesh mesh, EndianFormat endianness = EndianFormat.LittleEndian)
         {
             _version = version;
             _platform = platform;
+            _endianness = endianness;
             Mesh = mesh;
             VertexStreams = new VertexBufferDefinition[StreamCount];
             IndexBuffers = new IndexBufferDefinition[IndexBufferCount];
@@ -89,7 +92,7 @@ namespace TagTool.Geometry
         public IndexBufferStream OpenIndexBufferStream(IndexBufferDefinition definition)
         {
             var stream = new MemoryStream(definition.Data.Data);
-            return new IndexBufferStream(stream);
+            return new IndexBufferStream(stream, _endianness);
         }
 
         /// <summary>
@@ -175,6 +178,8 @@ namespace TagTool.Geometry
             { VertexBufferFormat.TesselatedWaterParameters, 3 },
             { VertexBufferFormat.Unknown1C, 0 },
             { VertexBufferFormat.Unused1D, 1 },
+            { VertexBufferFormat.SkinnedCompressed, 0 },
+            { VertexBufferFormat.RigidCompressed, 0 },
         };
     }
 }

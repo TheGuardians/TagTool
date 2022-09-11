@@ -12,6 +12,7 @@ using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
+using TagTool.Commands.Tags;
 
 namespace TagTool.Geometry
 {
@@ -897,7 +898,7 @@ namespace TagTool.Geometry
             }
         }
 
-        private int GetPartVertexOffset(int meshIndex, int partIndex)
+        public int GetPartVertexOffset(int meshIndex, int partIndex)
         {
             var mesh = RenderModel.Geometry.Meshes[meshIndex];
             int vertexOffset = 0;
@@ -923,7 +924,35 @@ namespace TagTool.Geometry
             return absIndex;
         }
 
-        private static List<GenericVertex> ReadVertices(MeshReader reader)
+        public static List<GenericVertex> ReadVerticesReach(MeshReader reader)
+        {
+            // Open a vertex reader on stream 0 (main vertex data)
+            var mainBuffer = reader.VertexStreams[0];
+            if (mainBuffer == null)
+                return new List<GenericVertex>();
+
+            VertexStreamReach vertexReader = (VertexStreamReach)reader.OpenVertexStream(mainBuffer);
+
+            switch (reader.Mesh.ReachType)
+            {
+                case VertexTypeReach.Rigid:
+                    return ReadRigidVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.Skinned:
+                    return ReadSkinnedVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.World:
+                    return ReadWorldVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.Decorator:
+                    return ReadDecoratorVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.SkinnedCompressed:
+                    return ReadSkinnedCompressedVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.RigidCompressed:
+                    return ReadRigidCompressedVertices(vertexReader, mainBuffer.Count);
+                default:
+                    throw new InvalidOperationException("Only Rigid, RigidCompressed, Skinned, SkinnedCompressed, DualQuat, World and Decorator meshes are supported");
+            }
+        }
+
+        public static List<GenericVertex> ReadVertices(MeshReader reader)
         {
             // Open a vertex reader on stream 0 (main vertex data)
             var mainBuffer = reader.VertexStreams[0];
@@ -974,6 +1003,30 @@ namespace TagTool.Geometry
         }
 
         /// <summary>
+        /// Reads rigid compressed vertices.
+        /// </summary>
+        /// <param name="reader">The vertex reader to read from.</param>
+        /// <param name="count">The number of vertices to read.</param>
+        /// <returns>The vertices that were read.</returns>
+        private static List<GenericVertex> ReadRigidCompressedVertices(VertexStreamReach reader, int count)
+        {
+            var result = new List<GenericVertex>();
+            for (var i = 0; i < count; i++)
+            {
+                var rigid = reader.ReadReachRigidVertex();
+                result.Add(new GenericVertex
+                {
+                    Position = ToVector3D(rigid.Position),
+                    Normal = ToVector3D(rigid.Normal),
+                    TexCoords = ToVector3D(rigid.Texcoord),
+                    Tangents = ToVector3D(rigid.Tangent),
+                    Binormals = ToVector3D(rigid.Binormal)
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Reads skinned vertices.
         /// </summary>
         /// <param name="reader">The vertex reader to read from.</param>
@@ -985,6 +1038,30 @@ namespace TagTool.Geometry
             for (var i = 0; i < count; i++)
             {
                 var skinned = reader.ReadSkinnedVertex();
+                result.Add(new GenericVertex
+                {
+                    Position = ToVector3D(skinned.Position),
+                    Normal = ToVector3D(skinned.Normal),
+                    TexCoords = ToVector3D(skinned.Texcoord),
+                    Weights = skinned.BlendWeights,
+                    Indices = skinned.BlendIndices
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Reads skinned compressed vertices.
+        /// </summary>
+        /// <param name="reader">The vertex reader to read from.</param>
+        /// <param name="count">The number of vertices to read.</param>
+        /// <returns>The vertices that were read.</returns>
+        private static List<GenericVertex> ReadSkinnedCompressedVertices(VertexStreamReach reader, int count)
+        {
+            var result = new List<GenericVertex>();
+            for (var i = 0; i < count; i++)
+            {
+                var skinned = reader.ReadReachSkinnedVertex();
                 result.Add(new GenericVertex
                 {
                     Position = ToVector3D(skinned.Position),
@@ -1072,7 +1149,7 @@ namespace TagTool.Geometry
         /// </summary>
         /// <param name="vertices">The vertices to decompress in-place.</param>
         /// <param name="compressor">The compressor to use.</param>
-        private static void DecompressVertices(IEnumerable<GenericVertex> vertices, VertexCompressor compressor)
+        public static void DecompressVertices(IEnumerable<GenericVertex> vertices, VertexCompressor compressor)
         {
             if (compressor == null)
                 return;
@@ -1091,7 +1168,7 @@ namespace TagTool.Geometry
         /// <param name="reader">The mesh reader to use.</param>
         /// <param name="part">The mesh part to read.</param>
         /// <returns>The index buffer converted into a triangle list.</returns>
-        private static ushort[] ReadIndices(MeshReader reader, Part part)
+        public static ushort[] ReadIndices(MeshReader reader, Part part)
         {
             // Use index buffer 0
             var indexBuffer = reader.IndexBuffers[0];
@@ -1135,7 +1212,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// Generic vertex class that contains all the possible information to generate meshes
         /// </summary>
-        private class GenericVertex
+        public class GenericVertex
         {
             public Vector3D Position { get; set; }
             public Vector3D Normal { get; set; }

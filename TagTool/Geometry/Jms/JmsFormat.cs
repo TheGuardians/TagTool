@@ -438,6 +438,7 @@ namespace TagTool.Geometry.Jms
             public RealVector3d Normal = new RealVector3d(0, 0, 0);
             public List<NodeSet> NodeSets = new List<NodeSet>();
             public List<UvSet> UvSets = new List<UvSet>();
+            public RealRgbColor VertexColor = new RealRgbColor();
 
             public class NodeSet
             {
@@ -447,7 +448,6 @@ namespace TagTool.Geometry.Jms
             public class UvSet
             {
                 public RealPoint2d TextureCoordinates = new RealPoint2d();
-                public RealRgbColor VertexColor = new RealRgbColor();
             }
             public void Read(StreamReader stream)
             {
@@ -471,7 +471,6 @@ namespace TagTool.Geometry.Jms
                     foreach (var uvset in UvSets)
                     {
                         WritePoint2d(uvset.TextureCoordinates, stream);
-                        WriteRealRGB(uvset.VertexColor, stream);
                     }
                 }
                 //color is null
