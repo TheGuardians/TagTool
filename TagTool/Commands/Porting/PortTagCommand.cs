@@ -804,17 +804,20 @@ namespace TagTool.Commands.Porting
                     foreach (var screenEffect in sefc.ScreenEffects)
                     {
                         //convert flags
-                        Enum.TryParse(screenEffect.Flags.ToString(), out screenEffect.Flags_HO);
+                        if (BlamCache.Version == CacheVersion.Halo3Retail)
+                            Enum.TryParse(screenEffect.Flags_H3.ToString(), out screenEffect.Flags);
+                        else if (BlamCache.Version == CacheVersion.Halo3ODST)
+                            Enum.TryParse(screenEffect.Flags_ODST.ToString(), out screenEffect.Flags);
 
                         if (screenEffect.InputVariable != null && screenEffect.InputVariable != StringId.Invalid)
                         {
                             //restore ODST stringid input variables using name field to store values
                             screenEffect.Name = ConvertStringId(screenEffect.InputVariable);
 
-                            screenEffect.Flags_HO |= AreaScreenEffect.ScreenEffectBlock.FlagBits_HO.UseNameAsStringIDInput;
+                            screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.SefcFlagBits.UseNameAsStringIDInput;
                             if (screenEffect.RangeVariable != null && screenEffect.RangeVariable != StringId.Invalid)
                             {
-                                screenEffect.Flags_HO |= AreaScreenEffect.ScreenEffectBlock.FlagBits_HO.InvertStringIDInput;
+                                screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.SefcFlagBits.InvertStringIDInput;
                             }
 
                             //fixup for vision mode saved film sefc always displaying
@@ -855,6 +858,15 @@ namespace TagTool.Commands.Porting
 				case ChudGlobalsDefinition chudGlobals:
 					blamDefinition = ConvertChudGlobalsDefinition(cacheStream, blamCacheStream, resourceStreams, chudGlobals);
 					break;
+
+                case ChudAnimationDefinition chudAnimation:
+                    {
+                        if (BlamCache.Version >= CacheVersion.HaloReach)
+                        {
+                            Enum.TryParse(chudAnimation.ReachFlags.ToString(), out chudAnimation.Flags);
+                        }
+                    }
+                    break;
 
                 case CinematicScene cisc:
                     foreach (var shot in cisc.Shots)
@@ -1298,6 +1310,12 @@ namespace TagTool.Commands.Porting
                 effe.Flags = effe.FlagsMCC.ConvertLexical<EffectFlags>();
             }
 
+            if (BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                effe.Priority = effe.PriorityReach;
+                effe.LocalLocation1 = effe.LocalLocation1Reach;
+            }
+
             foreach (var effectEvent in effe.Events)
             {
                 if (BlamCache.Platform == CachePlatform.MCC)
@@ -1313,17 +1331,22 @@ namespace TagTool.Commands.Porting
                         particleSystem.NearRange = 1 / particleSystem.NearRange;
                     }
 
-                    if(BlamCache.Version >= CacheVersion.HaloReach)
+                    if (BlamCache.Version >= CacheVersion.HaloReach)
                     {
-                        foreach(var emitter in particleSystem.Emitters)
+                        Enum.TryParse(particleSystem.ReachFlags.ToString(), out particleSystem.Flags);
+
+                        foreach (var emitter in particleSystem.Emitters)
                         {
                             // Needs to be implemented in the engine
-                            if(emitter.EmissionShape >= Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.BoatHullSurface)
+                            if (emitter.EmissionShape >= Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.BoatHullSurface)
                             {
                                 switch (emitter.EmissionShape)
                                 {
                                     case Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Cylinder:
                                         emitter.EmissionShape = Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Tube;
+                                        break;
+                                    case Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Plane:
+                                        emitter.EmissionShape = Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Globe;
                                         break;
                                     default:
                                         new TagToolWarning($"Unsupported particle emitter shape '{emitter.EmissionShape}'. Using default.");

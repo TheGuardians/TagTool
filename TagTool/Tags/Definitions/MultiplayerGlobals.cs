@@ -65,8 +65,8 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x14)]
             public class CustomizedModelCharacter_HO : TagStructure
             {
-                public StringId armorRegion;
-                public StringId bipedRegion;
+                public StringId ArmorRegion;
+                public StringId BipedRegion;
 
                 public List<Permutation> Permutations;
 
@@ -77,8 +77,8 @@ namespace TagTool.Tags.Definitions
                     public CachedTag ThirdPersonArmorObject;
                     public CachedTag FirstPersonArmorObject;
 
-                    public Int16 unknown1;
-                    public Int16 unknown2;
+                    public Int16 Unknown1;
+                    public Int16 Unknown2;
 
                     public StringId ParentAttachMarker;
                     public StringId ChildAttachMarker;
@@ -263,7 +263,7 @@ namespace TagTool.Tags.Definitions
                     public StringId LoopAnimation;
                     public StringId OutAnimation;
                     [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
-                    public float offset;
+                    public float Offset;
                     [TagField(MinVersion = CacheVersion.HaloOnline106708)]
                     public WeaponLoadout WeaponLoadout;
                     public CachedTag CustomPrimaryWeapon;
@@ -276,7 +276,7 @@ namespace TagTool.Tags.Definitions
 
                 public enum WeaponLoadout : int
                 {
-                    Unarrmed,
+                    Unarmed,
                     LoadoutPrimary,
                     LoadoutSecondary,
                     Custom

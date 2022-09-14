@@ -378,9 +378,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float FootTurnBlendOffTime; // time to blend off the foot turn effect 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown1;
+            public float FreeLegStretchDistance;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown2;
+            public Angle FreeFootRelaxAngle; // (degrees)
 
             public float PivotonfootScale; // (0=none, 1= full)
             public float PivotMinFootDelta; // vert world units to find lowest foot

@@ -24,7 +24,7 @@ namespace TagTool.Tags.Definitions
             public int LowAmmoReserveThreshold;
             public int LowBatteryThreshold;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int UnknownThreshold;
+            public int FtMemberWeaponSequence;
         }
 
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -43,7 +43,7 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public sbyte SpecialHudType;
-            [TagField(Length = 3, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            [TagField(Length = 3, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding1;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short ImportInput;
@@ -906,13 +906,87 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
             public class PlacementDatumReach : TagStructure
             {
-                public sbyte Unknown1;
-                public sbyte Anchor;
-                [TagField(Length = 2, Flags =  TagFieldFlags.Padding)]
-                public byte[] Padding1;
+                public ChudCurvatureResFlags WindowState;
+                public ChudAnchorTypeEnum AnchorType;
+                public ChudWidgetPlacementFlags AnchorFlags;
+                [TagField(Length = 0x1, Flags = Padding)]
+                public byte[] DSFKSLVJ;
                 public RealPoint2d Origin;
                 public RealPoint2d Offset;
                 public RealPoint2d Scale;
+
+                [Flags]
+                public enum ChudCurvatureResFlags : byte
+                {
+                    FullscreenWide = 1 << 0,
+                    FullscreenStandard = 1 << 1,
+                    Halfscreen = 1 << 2,
+                    QuarterscreenWide = 1 << 3,
+                    QuarterscreenStandard = 1 << 4
+                }
+
+                public enum ChudAnchorTypeEnum : sbyte
+                {
+                    Parent,
+                    TopLeft,
+                    TopCenter,
+                    TopRight,
+                    Center,
+                    BottomLeft,
+                    BottomCenter,
+                    BottomRight,
+                    MotionSensor,
+                    DDamge,
+                    Messaging,
+                    StateMsgLeft,
+                    StateMsgRight,
+                    MsgBottomState,
+                    MsgBottomPrim,
+                    TrackedTarget,
+                    TrackingObject,
+                    Crosshair,
+                    BackpackWeapon,
+                    Grenade,
+                    Equipment,
+                    WeaponTarget,
+                    GhostReticule,
+                    HologramTarget,
+                    AirstrikeTarget,
+                    Player,
+                    ScriptedObject,
+                    MetagameBar,
+                    MetagameP1,
+                    MetagameP2,
+                    MetagameP3,
+                    MetagameP4,
+                    SBFriendly,
+                    SBEnemy,
+                    Territory1,
+                    Territory2,
+                    Territory3,
+                    Territory4,
+                    Territory5,
+                    StateMsgFireteam,
+                    FireteamPossibleActionObject,
+                    FireteamPendingTargetObject,
+                    FireteamCurrentTargetObject,
+                    FireteamPendingDirectiveUnit,
+                    FireteamCurrentDirectiveUnit,
+                    EnemyObjectiveObject,
+                    FriendlyObjectiveObject,
+                    NeutralObjectiveObject,
+                    LasingTargetObject,
+                    CampaignFireteamMember,
+                    TopCenterSavedfilm
+                }
+
+                [Flags]
+                public enum ChudWidgetPlacementFlags : byte
+                {
+                    ClampPlacementToScreenCircle = 1 << 0,
+                    ClampPlacementUnlessSplitscreen = 1 << 1,
+                    DoNotRotate = 1 << 2
+                }
             }
 
             [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
@@ -1541,7 +1615,7 @@ namespace TagTool.Tags.Definitions
             public class RenderDatumReach : TagStructure
             {
                 public sbyte ShaderType;
-                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
+                [TagField(Length = 3, Flags = Padding)]
                 public byte[] Padding1;
                 public RealArgbColor LocalColorA;
                 public RealArgbColor LocalColorB;
@@ -1563,10 +1637,32 @@ namespace TagTool.Tags.Definitions
                 public short OutputScalarD;
                 public short OutputScalarE;
                 public short OutputScalarF;
-                public uint Unknown1;
-                public uint Unknown2;
-                public ushort Unknown3;
-                public ushort Unknown4;
+                public Rectangle2d ScissorRect;
+                public RenderBlendMode AlphaBlendMode;
+                [TagField(Length = 0x2, Flags = Padding)]
+                public byte[] VMOWELA;
+
+                public enum RenderBlendMode : short
+                {
+                    Opaque,
+                    Additive,
+                    Multiply,
+                    AlphaBlend,
+                    DoubleMultiply,
+                    PreMultipliedAlpha,
+                    Maximum,
+                    MultiplyAdd,
+                    AddSrcTimesDstalpha,
+                    AddSrcTimesSrcalpha,
+                    InverseAlphaBlend,
+                    MotionBlurStatic,
+                    MotionBlurInhibit,
+                    ApplyShadowToShadowMask,
+                    AlphaBlendConstant,
+                    OverdrawApply,
+                    WetEffect,
+                    Minimum
+                }
             }
         }
 

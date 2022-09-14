@@ -34,18 +34,19 @@ namespace TagTool.Tags.Definitions
             public RealVector2d UvScrolling;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public uint Unknown1;
+            public float AngleFadeRange; // radial (from beam axis) degrees beyond beginning angle over which beam fades (degrees)
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public uint Unknown2;
+            public float AngleFadeBegin; // radial (from beam axis) degrees away from face-on where fade begins (degrees)
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public uint Unknown3;
+            public short SortBias; // use values between -10 and 10 to move closer and farther from camera (positive is closer)
+
+            [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x2, Flags = Padding)]
+            public byte[] PaddingReach;
 
             public float OriginFadeRange;
             public float OriginFadeCutoff;
             public float EdgeFadeRange;
             public float EdgeFadeCutoff;
-
-           
 
             public BeamPropertyReal Length;
             public BeamPropertyReal Offset;
@@ -88,8 +89,8 @@ namespace TagTool.Tags.Definitions
                 public TagFunction MappingFunction;
                 public float RuntimeMConstantValue;
                 public byte RuntimeMFlags;
-                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
-                public byte[] DSFDSGLKJ;
+                [TagField(Length = 3, Flags = Padding)]
+                public byte[] Padding0;
 
                 public enum BeamStateInputEnum : byte
                 {

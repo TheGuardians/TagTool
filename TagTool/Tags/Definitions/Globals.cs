@@ -54,7 +54,7 @@ namespace TagTool.Tags.Definitions
         public List<DifficultyBlock> Difficulty;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<UnknownReachBlock> UnknownBlocksReach;
+        public List<CoopDifficultyBlock> CoopDifficulty;
 
         public List<Grenade> Grenades;
 
@@ -984,41 +984,50 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x84)]
-        public class UnknownReachBlock : TagStructure
+        public class CoopDifficultyBlock : TagStructure
         {
-            public float Unknown1;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-            public float Unknown11;
-            public float Unknown12;
-            public float Unknown13;
-            public float Unknown14;
-            public float Unknown15;
-            public float Unknown16;
-            public float Unknown17;
-            public float Unknown18;
-            public float Unknown19;
-            public float Unknown20;
-            public float Unknown21;
-            public float Unknown22;
-            public float Unknown23;
-            public float Unknown24;
-            public float Unknown25;
-            public float Unknown26;
-            public float Unknown27;
-            public float Unknown28;
-            public float Unknown29;
-            public float Unknown30;
-            public float Unknown31;
-            public float Unknown32;
-            public float Unknown33;
+            /* vitality */
+            public float TwoPlayerShieldRechargeDelay; // multiplier on enemy shield recharge delay with two coop players
+            public float FourPlayerShieldRechargeDelay; // multiplier on enemy shield recharge delay with four coop players
+            public float SixPlayerShieldRechargeDelay; // multiplier on enemy shield recharge delay with six coop players or more
+            public float TwoPlayerShieldRechargeTimer; // multiplier on enemy shield recharge timer with two coop players
+            public float FourPlayerShieldRechargeTimer; // multiplier on enemy shield recharge timer with four coop players
+            public float SixPlayerShieldRechargeTimer; // multiplier on enemy shield recharge timer with six coop players or more
+
+            /* movement */
+            public float TwoPlayerGrenadeDiveChance; // multiplier on enemy grenade dive chance with two coop players
+            public float FourPlayerGrenadeDiveChance; // multiplier on enemy grenade dive chance with four coop players
+            public float SixPlayerGrenadeDiveChance; // multiplier on enemy grenade dive chance with six coop players or more
+            public float TwoPlayerArmorLockChance; // multiplier on enemy armor lock chance with two coop players
+            public float FourPlayerArmorLockChance; // multiplier on enemy armor lock chance with four coop players
+            public float SixPlayerArmorLockChance; // multiplier on enemy armor lock chance with six coop players or more
+
+            /* evasion */
+            public float TwoPlayerEvasionDangerThreshold; // multiplier on enemy evasion danger threshold with two coop players
+            public float FourPlayerEvasionDangerThreshold; // multiplier on enemy evasion danger threshold with four coop players
+            public float SixPlayerEvasionDangerThreshold; // multiplier on enemy evasion danger threshold with six coop players or more
+            public float TwoPlayerEvasionDelayTimer; // multiplier on enemy evasion delay timer with two coop players
+            public float FourPlayerEvasionDelayTimer; // multiplier on enemy evasion delay timer with four coop players
+            public float SixPlayerEvasionDelayTimer; // multiplier on enemy evasion delay timer with six coop players or more
+            public float TwoPlayerEvasionChance; // multiplier on enemy evasion chance with two coop players
+            public float FourPlayerEvasionChance; // multiplier on enemy evasion chance with four coop players
+            public float SixPlayerEvasionChance; // multiplier on enemy evasion chance with six coop players or more
+
+            /* shooting */
+            public float TwoPlayerBurstDuration; // multiplier on the enemy shooting burst duration with two coop players
+            public float FourPlayerBurstDuration; // multiplier on the enemy shooting burst duration with four coop players
+            public float SixPlayerBurstDuration; // multiplier on the enemy shooting burst duration with six coop players or more
+            public float TwoPlayerBurstSeparation; // multipler on the enemy shooting burst separation with two coop players
+            public float FourPlayerBurstSeparation; // multipler on the enemy shooting burst separation with four coop players
+            public float SixPlayerBurstSeparation; // multipler on the enemy shooting burst separation with six coop players or more
+            public float TwoPlayerDamageModifier; // multipler on the enemy shooting damage multiplier with two coop players
+            public float FourPlayerDamageModifier; // multipler on the enemy shooting damage multiplier with four coop players
+            public float SixPlayerDamageModifier; // multipler on the enemy shooting damage multiplier with six coop players or more
+
+            /* projectile */
+            public float TwoPlayerProjectileSpeed; // multiplier on the speed of projectiles fired by enemies with two coop players
+            public float FourPlayerProjectileSpeed; // multiplier on the speed of projectiles fired by enemies with four coop players
+            public float SixPlayerProjectileSpeed; // multiplier on the speed of projectiles fired by enemies with six coop players or more
         }
 
         [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1031,7 +1040,7 @@ namespace TagTool.Tags.Definitions
             public byte[] Padding0;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float UnknownReach;
+            public float DropPercentage;
 
             [TagField(ValidTags = new[] { "effe" })]
             public CachedTag ThrowingEffect; // The effect produced by the grenade when a biped throws it.
@@ -1049,13 +1058,13 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
         public class SoftBarrierProperty : TagStructure
         {
-            public float BipedGive;
-            public float BipedBounciness;
-            public float BipedBumpiness;
-            public float Unknown;
-            public float VehicleGive;
-            public float VehicleBounciness;
-            public float VehicleBumpiness;
+            public float BipedSpringConstant;
+            public float BipedNormalDamping;
+            public float BipedTangentDamping;
+            public float BipedMinTangentDampVelocity;
+            public float VehicleSpringConstant;
+            public float VehicleNormalDamping;
+            public float VehicleTangentDamping;
         }
 
         [TagStructure(Size = 0x120, MaxVersion = CacheVersion.Halo3ODST)]

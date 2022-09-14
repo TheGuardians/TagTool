@@ -8,13 +8,13 @@ namespace TagTool.Geometry.BspCollisionGeometry
     [TagStructure(Size = 0x20)]
     public class BreakableSurfaceBits : TagStructure
     {
-        public uint Unknown1;
-        public uint Unknown2;
-        public uint Unknown3;
-        public uint Unknown4;
-        public uint Unknown5;
-        public uint Unknown6;
-        public uint Unknown7;
-        public uint Unknown8;
+        [TagField(Length = 8)]
+        public SupportedBitfieldStruct[] SupportedBitfield;
+
+        [TagStructure(Size = 0x4)]
+        public class SupportedBitfieldStruct : TagStructure
+        {
+            public int BitvectorData;
+        }
     }
 }

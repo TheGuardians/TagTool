@@ -5,12 +5,17 @@ using System;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "chud_animation_definition", Tag = "chad", Size = 0x5C)]
+    [TagStructure(Name = "chud_animation_definition", Tag = "chad", Size = 0x5C, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "chud_animation_definition", Tag = "chad", Size = 0x74, MinVersion = CacheVersion.HaloReach)]
     public class ChudAnimationDefinition : TagStructure
 	{
-        public ChudAnimationFlags Flags;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public ChudAnimationFlags Flags;    //short
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public ChudAnimationFlagsReach ReachFlags;  //byte
 
-        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123, Length = 2, Flags = TagFieldFlags.Padding)]
+        [TagField(MinVersion = CacheVersion.HaloReach, Length = 3, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
 
         public List<PositionBlock> Position;
@@ -20,6 +25,12 @@ namespace TagTool.Tags.Definitions
         public List<ScalarBlock> Alpha;
         public List<ScalarBlock> Flash;
         public List<TextureBlock> Texture;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ChudAnimationExternalInputABlock> ExternalInputA;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<ChudAnimationExternalInputBBlock> ExternalInputB;
+
         public int RuntimePeriodMsec;
 
         [Flags]
@@ -29,6 +40,17 @@ namespace TagTool.Tags.Definitions
             Loop = 1 << 1,
             LoopSeesaw = 1 << 2,
             DoNotCorrectTranslation = 1 << 3
+        }
+
+        [Flags]
+        public enum ChudAnimationFlagsReach : byte
+        {
+            Spline = 1 << 0,
+            Loop = 1 << 1,
+            LoopSeesaw = 1 << 2,
+            DoNotCorrectTranslation = 1 << 3,
+            WeaponAmmoAnimationHack = 1 << 4,
+            DoNotAdjustPositionForScale = 1 << 5
         }
 
         [TagStructure(Size = 0x20)]
@@ -127,6 +149,46 @@ namespace TagTool.Tags.Definitions
                 public int TimeOffset; // milliseconds
                 public RealPoint2d TextureScale;
                 public RealPoint2d TextureOffset;
+            }
+        }
+
+        [TagStructure(Size = 0x20)]
+        public class ChudAnimationExternalInputABlock : TagStructure
+        {
+            public List<ChudKeyframeExternalInputBlock> Keyframes;
+            public TagFunction DefaultFunction;
+
+            [TagStructure(Size = 0x8)]
+            public class ChudKeyframeExternalInputBlock : TagStructure
+            {
+                public ChudKeyframeBaseStruct Base;
+                public float Scale;
+
+                [TagStructure(Size = 0x4)]
+                public class ChudKeyframeBaseStruct : TagStructure
+                {
+                    public float TimeOffset; // milliseconds
+                }
+            }
+        }
+
+        [TagStructure(Size = 0x20)]
+        public class ChudAnimationExternalInputBBlock : TagStructure
+        {
+            public List<ChudKeyframeExternalInputBlock> Keyframes;
+            public TagFunction DefaultFunction;
+
+            [TagStructure(Size = 0x8)]
+            public class ChudKeyframeExternalInputBlock : TagStructure
+            {
+                public ChudKeyframeBaseStruct Base;
+                public float Scale;
+
+                [TagStructure(Size = 0x4)]
+                public class ChudKeyframeBaseStruct : TagStructure
+                {
+                    public float TimeOffset; // milliseconds
+                }
             }
         }
     }

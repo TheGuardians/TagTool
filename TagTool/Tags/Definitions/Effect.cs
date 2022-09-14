@@ -23,15 +23,19 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public GlobalEffectPriorityEnum Priority;
-        [TagField(Length = 3, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
-        public byte[] Padd;
+        [TagField(Length = 3, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Padding0;
 
         public short LoopStartEvent;
         public short LocalLocation0;
         public float RuntimeDangerRadius;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint Unknown6;
+        public short LocalLocation1Reach;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public GlobalEffectPriorityEnum PriorityReach;
+        [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x1, Flags = Padding)]
+        public byte[] PaddingReach;
 
         public List<Location> Locations;
         public List<Event> Events;
@@ -64,7 +68,7 @@ namespace TagTool.Tags.Definitions
             public EffectLocationFlags Flags;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public GlobalEffectPriorityEnum Priority;
-            [TagField(Length = 3, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Length = 3, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Padd2;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -187,8 +191,8 @@ namespace TagTool.Tags.Definitions
             public class ParticleSystem : TagStructure
             {
                 public GlobalEffectPriorityEnum Priority;
-                [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
-                public byte[] Padd3;
+                [TagField(Length = 3, Flags = Padding)]
+                public byte[] Padding0;
 
                 public CachedTag Particle;
                 public uint LocationIndex;
@@ -197,19 +201,18 @@ namespace TagTool.Tags.Definitions
                 public EffectViolenceMode Disposition;
                 public ParticleCameraMode CameraMode;
                 public short SortBias;
+
                 [TagField(Flags = Padding, Length = 0x2, MinVersion = CacheVersion.HaloReach)]
-                public byte[] Unused0;
+                public byte[] Padding1;
 
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ParticleSystemFlags Flags;
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public int FlagsReach;
+                public ParticleSystemFlagsReach ReachFlags;
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public float Unknown18;
-                [TagField(MinVersion = CacheVersion.HaloReach)]
-                public float Unknown19;
+                public Bounds<float> PercentVelocityToInherit; // flag must be checked above
 
                 public float PixelBudget; // ms
                 public float NearRange; // if (Version>H3) NearRange = 1.0f / max(NearRange, 0.000099999997f)
@@ -223,13 +226,14 @@ namespace TagTool.Tags.Definitions
                 public float InverseLodFeatherOut; // 1.0f / LodFeatherOutDelta
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public float Unknown15;
+                public float DynamicResolutionMultiplier; // lower numbers cause particle systems to render more at low-res - must check flag above
 
                 public List<Emitter> Emitters;
 
                 public float RuntimeMaximumLifespan; // longest lifespan property out of all emitters
+
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public float Unknown17;
+                public float RuntimeOverdraw;
 
                 [Flags]
                 public enum ParticleSystemFlags : ushort
@@ -247,9 +251,31 @@ namespace TagTool.Tags.Definitions
                     ForceGpuUpdating = 1 << 10,
                     OverrideNearFade = 1 << 11,
                     ParticlesDieWhenEffectEnds = 1 << 12,
-                    GpuOcclusion = 1 << 13,
-                    Bit14 = 1 << 14,
+                    GpuOcclusionWeatherOnly = 1 << 13,
+                    TurnOffNearFadeOnEnhancedGraphics = 1 << 14,
                     AttachmentUnknown = 1 << 15,
+                }
+
+                [Flags]
+                public enum ParticleSystemFlagsReach : uint
+                {
+                    ParticlesFreezeWhenOffscreen = 1 << 0,
+                    ParticlesContinueAsUsualWhenOffscreen = 1 << 1,
+                    LodAlways10 = 1 << 2,
+                    LodSameInSplitscreen = 1 << 3,
+                    DisabledIn3And4WaySplitscreen = 1 << 4,
+                    DisabledForDebugging = 1 << 5,
+                    InheritEffectVelocity = 1 << 6,
+                    DontRenderSystem = 1 << 7,
+                    RenderWhenZoomed = 1 << 8,
+                    ForceCpuUpdating = 1 << 9,
+                    ForceGpuUpdating = 1 << 10,
+                    OverrideNearFadeUseWithCaution = 1 << 11,
+                    ParticlesDieWhenEffectEnds = 1 << 12,
+                    UseSynchronizedRandomSeed = 1 << 13, // synchronized across particle systems
+                    UseWorldOrientation = 1 << 14, // particle system uses local-space position but up is always 'global up'
+                    RenderInSpawnOrder = 1 << 15, // first particle spawned renders first (at the back), last particle spawned renders last (front)
+                    DynamicParticleResolution = 1 << 16 // use distance and multiplier (below) to tune high- or low-res rendering
                 }
 
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]

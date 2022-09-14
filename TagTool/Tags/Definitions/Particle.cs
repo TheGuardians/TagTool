@@ -46,25 +46,17 @@ namespace TagTool.Tags.Definitions
         public RenderMethod RenderMethod;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown1;
+        public RealRgbColor BrightTint;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown2;
+        public RealRgbColor AmbientTint;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown3;
+        public float Contrast;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown4;
+        public float BlurWeight;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown5;
+        public float IntensityScale;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown6;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown7;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown8;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown9;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public CachedTag Unknown10;
+        public CachedTag Palette;
 
         public ParticlePropertyScalar AspectRatio;
         public ParticlePropertyScalar Color;
@@ -168,8 +160,8 @@ namespace TagTool.Tags.Definitions
             FadeWhenViewedEdgeOn = 1 << 7,
             MotionBlur = 1 << 8,
             DoubleSided = 1 << 9,
-            Bit10 = 1 << 10,
-            Bit11 = 1 << 11,
+            LowRes = 1 << 10,
+            LowResTighterMask = 1 << 11,
             Fogged = 1 << 12,
             LightmapLit = 1 << 13,
             DepthFadeActive = 1 << 14,

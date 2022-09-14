@@ -29,7 +29,9 @@ namespace TagTool.Tags.Definitions
             public float LodFeatherOutDistance; // world units
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float UnknownReach;
+            public short SortBias; // use values between -10 and 10 to move closer and farther from camera (positive is closer)
+            [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x2, Flags = Padding)]
+            public byte[] ReachPadding0;
 
             public ContrailPropertyScalar EmissionRate; // profiles per second
             public ContrailPropertyScalar ProfileLifespan; // seconds

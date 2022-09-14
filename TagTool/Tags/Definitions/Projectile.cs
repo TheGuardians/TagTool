@@ -18,6 +18,7 @@ namespace TagTool.Tags.Definitions
         public float CollisionRadius; // world units
         public float ArmingTime; // won't detonate before this time elapses (seconds)
         public float DangerRadius; // world units     
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float DangerStimuliRadius; // // Overrides the danger radius when non-zero for stimuli related danger radius calculations. (world units)
         // The number of projectiles in this burst before this burst is considered dangerous
@@ -25,10 +26,12 @@ namespace TagTool.Tags.Definitions
         public short DangerGroupBurstCount;  // The maximum number of projectiles we allow in a group
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public short DangerGroupBurstMaxCount;
+
         public Bounds<float> Timer; // detonation countdown (seconds, zero is untimed)
         public float MinimumVelocity; // detonates when slowed below this velocity (world units per second)
         public float MaximumRange; // detonates after traveling this distance (world units)
         public float BounceMaximumRange; // detonates after this distance, but is reset after a bounce. Combines with maximum range
+        
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public float MaxLatchTimeToDetonate; // projectile will detonate regardless of weapon latching after this total time (seconds)
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
@@ -85,16 +88,23 @@ namespace TagTool.Tags.Definitions
         public Bounds<float> WaterDamageRange; // the range over which damage is scaled when the projectile is in water.
         public float InitialVelocity;// bullet's velocity when inflicting maximum damage (world units per second)
         public float FinalVelocity; // bullet's velocity when inflicting minimum damage (world units per second)
+        
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float IndirectFireVelocity;
+        
         public float AiVelocityScaleNormal; // scale on the initial velocity when fired by the ai on normal difficulty
+        
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float AiVelocityScaleHeroic; // scale on the initial velocity when fired by the ai on heroic  difficulty
+        
         public float AiVelocityScaleLegendary; // scale on the initial velocity when fired by the ai on legendary difficulty (0 defaults to 1.0)
+        
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float AiGuidedAngularVelocityScaleNormal; // scale on the guided angular velocity when fired by the ai on normal difficulty (0 defaults to 1.0) [0-1]
+        
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float AiGuidedAngularVelocityScaleLegendary; // // scale on the guided angular velocity when fired by the ai on legendary difficulty (0 defaults to 1.0) [0-1]
+        
         public Bounds<Angle> GuidedAngularVelocity; // degrees per second
         public Angle GuidedAngularVelocityAtRest; // degrees per second
         public Bounds<float> AccelerationRange;

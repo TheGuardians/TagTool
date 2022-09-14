@@ -10,19 +10,16 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "decal_system", Tag = "decs", Size = 0x3C, MinVersion = CacheVersion.HaloReach)]
     public class DecalSystem : TagStructure
 	{
-        public FlagsValue Flags;
+        public DecalSystemFlags Flags;
         public int MaxOverlapping; // 0= no limit
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float OverlappingThreshold;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float MaterialShaderFadeTime;
+        public int ChainUpgradeThreshold; // 0= no upgrade, how many of this will upgrade
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown1; // flags for the tag below?
+        public float ChainUpgradeCheckingRadius;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown2; // delay for the tag below?
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public CachedTag Unknown3;
+        public CachedTag NextDecalChain;
 
         public Bounds<float> DistanceFadeRange;
 
@@ -30,7 +27,7 @@ namespace TagTool.Tags.Definitions
         public float RuntimeMaxRadius;
 
         [Flags]
-        public enum FlagsValue : int
+        public enum DecalSystemFlags : int
         {
             RandomRotation = 1 << 0,
             RandomUMirror = 1 << 1,
@@ -40,7 +37,10 @@ namespace TagTool.Tags.Definitions
             RestrictToSingleMaterial = 1 << 5,
             UsePrimaryCollisionOnly = 1 << 6,
             DontCollideWithStructure = 1 << 7,
-            DontCollideWithInstances = 1 << 8
+            DontCollideWithInstances = 1 << 8,
+            UsingRelativeOverlappingRadius = 1 << 9,
+            RespectsNegativeHorizontalScale = 1 << 10,
+            RespectsNegativeVerticalScale = 1 << 11
         }
 
         [TagStructure(Size = 0x74, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -48,12 +48,12 @@ namespace TagTool.Tags.Definitions
         public class DecalDefinitionBlock : TagStructure
 		{
             public StringId DecalName;
-            public FlagsValue Flags;
+            public DecalFlags Flags;
 
             public RenderMethod RenderMethod;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public uint Unknown1;
+            public uint SpecularModulate;
 
             [TagField(Format = "World Units")]
             public Bounds<float> Radius;
@@ -80,7 +80,7 @@ namespace TagTool.Tags.Definitions
             public float RuntimeBitmapAspect;
 
             [Flags]
-            public enum FlagsValue : uint
+            public enum DecalFlags : uint
             {
                 None = 0,
                 SpecularModulate = 1 << 0,

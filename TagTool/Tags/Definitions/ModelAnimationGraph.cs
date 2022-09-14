@@ -259,8 +259,8 @@ namespace TagTool.Tags.Definitions
             public ProductionFlagsValue ProductionFlagsReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public sbyte BlendScreenReach;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public byte ReachUnknown;
+            [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x1, Flags = Padding)]
+            public byte[] PaddingReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public CachedTag GraphReference;
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -286,8 +286,8 @@ namespace TagTool.Tags.Definitions
 
                 public sbyte NodeCount;
 
-                [TagField(MinVersion = CacheVersion.HaloReach)]
-                public byte ReachUnknown0;
+                [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x1, Flags = Padding)]
+                public byte[] PaddingReach;
 
                 public short FrameCount;
 
@@ -305,8 +305,8 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ProductionFlagsValue ProductionFlags;
 
-                [TagField(MinVersion = CacheVersion.HaloReach)]
-                public short ReachUnknown1;
+                [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x2, Flags = Padding)]
+                public byte[] PaddingReach1;
 
                 public InternalFlagsValue InternalFlags;
 

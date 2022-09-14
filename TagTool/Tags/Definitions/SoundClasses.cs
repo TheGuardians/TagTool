@@ -37,10 +37,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public AccousticsFlagsValue BindToAccoustics;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public SupressSpatializationFlagsValue SupressSpatialization;
+            public SuppressSpatializationFlagsValue SuppressSpatialization;
             [TagField(Length = 3, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3ODST)]
             public byte[] Padding;
-            
 
             public SoundClassPropagation AirPropagation;
             public SoundClassPropagation UnderwaterPropagation;
@@ -64,11 +63,11 @@ namespace TagTool.Tags.Definitions
             //
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float UnknownReach1;
+            public float EquipmentLowpass; // sets the lowpass wet mix when an equiment is active (wetmix)
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float UnknownReach2;
+            public float EnvironmentForcedLowpass; // sets the lowpass wet mix when an environment forced lowpass is active (wetmix)
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float UnknownReach3;
+            public float EffectLowpass; // sets the lowpass wet mix when a lowpass effect is active (wetmix)
 
             public SoundClassDucking CutsceneDucking;
             public SoundClassDucking ScriptedDialogDucking;
@@ -87,7 +86,7 @@ namespace TagTool.Tags.Definitions
             public float UnknownCortanaEffect;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public SoundClassDucking UnknownReachDucking;
+            public SoundClassDucking BetweenRoundsDucking;
 
             public float DopplerFactor;
             public StereoPlaybackTypeValue StereoPlaybackType;
@@ -97,7 +96,7 @@ namespace TagTool.Tags.Definitions
             public float TransmissionMultiplier;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int UnknownReach8;
+            public float TransmissionInterpolationTime; // default is 0.5 seconds (seconds)
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float ObstructionMaxBend;
@@ -110,11 +109,11 @@ namespace TagTool.Tags.Definitions
             public float SendToLfeGain; // When send (mono) to lfe is set, this is how much additional gain to apply (dB)
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float UnknownReach10;
+            public int MinimumFacialAnimationDelay; // setting this forces sounds of this class to be delayed while the facial animation resource loads. (msecs)
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int UnknownReach11;
+            public int MaximumFacialAnimationDelay; // setting this allows sounds of this class to be delayed while the facial animation resource loads. (msecs)
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int UnknownReach12;
+            public int MaximumFacialAnimationBlend; // setting this makes sounds blends in facial animation (will cut off at maximum facial animation delay). (msecs)
 
             [Flags]
             public enum InternalFlagBits : ushort
@@ -180,7 +179,7 @@ namespace TagTool.Tags.Definitions
             }
 
             [Flags]
-            public enum SupressSpatializationFlagsValue : byte
+            public enum SuppressSpatializationFlagsValue : byte
             {
                 FirstPerson = 1 << 0,
                 ThirdPerson = 1 << 1

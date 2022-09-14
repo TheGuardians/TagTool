@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public Bounds<float> CollisionDamageImpulseThresholds;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public Bounds<float> AoEDamageVitality;
+        public Bounds<float> AoeDamageVitality;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float MaximumVitality;
         [TagField(ValidTags = new[] { "effe" })]

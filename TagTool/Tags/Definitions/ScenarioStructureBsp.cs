@@ -135,15 +135,10 @@ namespace TagTool.Tags.Definitions
         public List<ConveyorSurface> ConveyorSurfaces;
         public List<BreakableSurfaceBits> BreakableSurfaces;
         public List<TagPathfinding> PathfindingData;
-
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<StructureBspPathfindingEdgesBlock> PathfindingEdges;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<Gen4.ScenarioStructureBsp.StructureCookieCutterDefinition> CookieCutters;
-
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<NullBlock> Unknown1;
 
         public List<AcousticsPaletteBlock> AcousticsPalette;
 
@@ -208,12 +203,8 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<NullBlock> Audability;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        
         public List<NullBlock> ObjectFakeLightprobes;
-
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<NullBlock> Unknown2;
-
         public RenderGeometry Geometry;
 
         public List<WidgetReferenceBlock> WidgetReferences;

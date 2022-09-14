@@ -5256,7 +5256,7 @@ namespace TagTool.Tags.Definitions
             public byte[] Padding0;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short ReachUnknown;
+            public short ManualBspFlagsReach;
 
             [TagField(MinVersion = CacheVersion.Halo4)]
             public ManualBspFlagsReferences ManualBspFlags;

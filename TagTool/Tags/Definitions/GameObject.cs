@@ -73,7 +73,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ArmorSounds;
 
-        [TagField(ValidTags = new[] { "snd!" })]
+        [TagField(ValidTags = new[] { "snd!", "scmb" })]
         public CachedTag MeleeImpactSound; // sound made when I am meleed. Overrides the sweetener sound of my material.
 
         public List<AiProperty> AiProperties;

@@ -51,13 +51,13 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
 
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public ushort Unknown;
+            public SefcFlagBits_H3 Flags_H3;
 
-            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public FlagBits Flags;
+            public SefcFlagBits_ODST Flags_ODST;
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public FlagBits_HO Flags_HO;
+            public SefcFlagBits Flags;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public HiddenFlagBits HiddenFlags;
@@ -156,12 +156,8 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float VerticalBlur; ///[0-10] expensive#blurs the entire screen
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Vision; ///[0-1]#turns on the global vision mode
-
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown4;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float VisionMode; ///[0-1]#turns on the global vision mode
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -182,7 +178,7 @@ namespace TagTool.Tags.Definitions
             public CachedTag ScreenShader; ///#applies this shader to the entire screen
 
             [Flags]
-            public enum FlagBits_HO : ushort
+            public enum SefcFlagBits : ushort
             {
                 None = 0,
                 DebugDisable = 1 << 0,
@@ -199,7 +195,16 @@ namespace TagTool.Tags.Definitions
             }
 
             [Flags]
-            public enum FlagBits : ushort
+            public enum SefcFlagBits_H3 : uint
+            {
+                DebugDisable = 1 << 0,
+                AllowEffectOutsideRadius = 1 << 1,
+                FirstPersonOnly = 1 << 2,
+                ThirdPersonOnly = 1 << 3
+            }
+
+            [Flags]
+            public enum SefcFlagBits_ODST : ushort
             {
                 None = 0,
                 DebugDisable = 1 << 0,
