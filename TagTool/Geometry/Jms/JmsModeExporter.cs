@@ -40,11 +40,7 @@ namespace TagTool.Geometry.Jms
                 }
             };
 
-            //build materials
-            foreach(var material in mode.Materials)
-            {
-                Jms.Materials.Add(new JmsFormat.JmsMaterial());
-            }
+            List<JmsFormat.JmsMaterial> materialList = new List<JmsFormat.JmsMaterial>();
 
             //build meshes
             ModelExtractor extractor = new ModelExtractor(Cache, mode);
@@ -68,6 +64,24 @@ namespace TagTool.Geometry.Jms
                     ModelExtractor.DecompressVertices(vertices, new VertexCompressor(mode.Geometry.Compression[0]));
                     for (int partIndex = 0; partIndex < mesh.Parts.Count; partIndex++)
                     {
+                        int newMaterialIndex = -1;
+                        if(mesh.Parts[partIndex].MaterialIndex != -1)
+                        {
+                            JmsFormat.JmsMaterial newMaterial = new JmsFormat.JmsMaterial
+                            {
+                                Name = mode.Materials[mesh.Parts[partIndex].MaterialIndex].RenderMethod.Name.Split('\\').Last(),
+                                MaterialName = $"{Cache.StringTable.GetString(perm.Name)} {Cache.StringTable.GetString(region.Name)}"
+                            };
+                            int existingIndex = materialList.FindIndex(m => m.Name == newMaterial.Name && m.MaterialName == newMaterial.MaterialName);
+                            if (existingIndex == -1)
+                            {
+                                newMaterialIndex = materialList.Count;
+                                materialList.Add(newMaterial);
+                            }
+                            else
+                                newMaterialIndex = existingIndex;
+                        }                        
+
                         var indices = ModelExtractor.ReadIndices(meshReader, mesh.Parts[partIndex]);
                         for(var j = 0; j < indices.Length; j += 3)
                         {
@@ -79,7 +93,7 @@ namespace TagTool.Geometry.Jms
                                     vertices[indices[j + 1]],
                                     vertices[indices[j + 2]],
                                 },
-                                MaterialIndex = mesh.Parts[partIndex].MaterialIndex
+                                MaterialIndex = newMaterialIndex
                             });
                         }
                     }
@@ -132,6 +146,14 @@ namespace TagTool.Geometry.Jms
                     Jms.Vertices.Add(newVert);
                 }            
             }
+
+            //add materials
+            foreach (var material in materialList)
+                Jms.Materials.Add(new JmsFormat.JmsMaterial
+                {
+                    Name = material.Name,
+                    MaterialName = $"({Jms.Materials.Count + 1}) {material.MaterialName}"
+                });
         }
 
         struct Triangle
