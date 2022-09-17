@@ -87,7 +87,7 @@ namespace TagTool.Geometry.Jms
                     }
                     Jms.Materials.Add(new JmsFormat.JmsMaterial
                     {
-                        Name = Cache.StringTable.GetString(coll.Materials[material_index].Name),
+                        Name = material_index == -1 ? "default" : Cache.StringTable.GetString(coll.Materials[material_index].Name),
                         MaterialName = $"({Jms.Materials.Count + 1}) {Cache.StringTable.GetString(permutation.Name)} {Cache.StringTable.GetString(region.Name)}"
                     });
                 }

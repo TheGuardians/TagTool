@@ -67,9 +67,10 @@ namespace TagTool.Geometry.Jms
                         int newMaterialIndex = -1;
                         if(mesh.Parts[partIndex].MaterialIndex != -1)
                         {
+                            CachedTag renderMethod = mode.Materials[mesh.Parts[partIndex].MaterialIndex].RenderMethod;
                             JmsFormat.JmsMaterial newMaterial = new JmsFormat.JmsMaterial
                             {
-                                Name = mode.Materials[mesh.Parts[partIndex].MaterialIndex].RenderMethod.Name.Split('\\').Last(),
+                                Name = renderMethod == null ? "default" : renderMethod.Name.Split('\\').Last(),
                                 MaterialName = $"{Cache.StringTable.GetString(perm.Name)} {Cache.StringTable.GetString(region.Name)}"
                             };
                             int existingIndex = materialList.FindIndex(m => m.Name == newMaterial.Name && m.MaterialName == newMaterial.MaterialName);
