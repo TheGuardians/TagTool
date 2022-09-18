@@ -107,14 +107,7 @@ namespace TagTool.Commands.Porting.Gen2
             //convert pills
             foreach (var gen2pill in gen2PhysicsModel.Pills)
             {
-                PhysicsModel.Pill newPill = new PhysicsModel.Pill
-                {
-                    Bottom = gen2pill.Bottom,
-                    BottomRadius = gen2pill.BottomRadius,
-                    Top = gen2pill.Top,
-                    TopRadius = gen2pill.TopRadius
-                };
-                ConvertHavokShape(newPill, gen2pill);
+                PhysicsModel.Pill newPill = ConvertPill(gen2pill);
                 physicsModel.Pills.Add(newPill);
             }
 
@@ -122,13 +115,7 @@ namespace TagTool.Commands.Porting.Gen2
             //TODO: Shape reference?
             foreach (var gen2sphere in gen2PhysicsModel.Spheres)
             {
-                PhysicsModel.Sphere newSphere = new PhysicsModel.Sphere
-                {
-                    ConvexBase = ConvertHavokShapeBase(gen2sphere.ConvexBase),
-                    Translation = gen2sphere.Translation,
-                    TranslationRadius = gen2sphere.TranslationRadius,
-                };
-                ConvertHavokShape(newSphere, gen2sphere);
+                PhysicsModel.Sphere newSphere = ConvertSphere(gen2sphere);
                 physicsModel.Spheres.Add(newSphere);
             }
 
@@ -432,6 +419,31 @@ namespace TagTool.Commands.Porting.Gen2
                 FourVectorsZ = gen2vector.FourVectorsZ,
                 FourVectorsZRadius = gen2vector.FourVectorsZRadius
             };
+        }
+
+        public PhysicsModel.Pill ConvertPill(PhysicsModelGen2.PillsBlock gen2pill)
+        {
+            PhysicsModel.Pill newPill = new PhysicsModel.Pill
+            {
+                Bottom = gen2pill.Bottom,
+                BottomRadius = gen2pill.BottomRadius,
+                Top = gen2pill.Top,
+                TopRadius = gen2pill.TopRadius
+            };
+            ConvertHavokShape(newPill, gen2pill);
+            return newPill;
+        }
+
+        public PhysicsModel.Sphere ConvertSphere(PhysicsModelGen2.SpheresBlock gen2sphere)
+        {
+            PhysicsModel.Sphere newSphere = new PhysicsModel.Sphere
+            {
+                ConvexBase = ConvertHavokShapeBase(gen2sphere.ConvexBase),
+                Translation = gen2sphere.Translation,
+                TranslationRadius = gen2sphere.TranslationRadius,
+            };
+            ConvertHavokShape(newSphere, gen2sphere);
+            return newSphere;
         }
     }
 }

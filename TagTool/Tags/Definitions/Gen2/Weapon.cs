@@ -99,7 +99,7 @@ namespace TagTool.Tags.Definitions.Gen2
         public List<OldObjectFunctionBlock> OldFunctions;
         public List<ObjectChangeColors> ChangeColors;
         public List<PredictedResourceBlock> PredictedResources;
-        public FlagsValue1 Flags1;
+        public ItemFlagsValue ItemFlags;
         public short OldMessageIndex;
         public short SortOrder;
         public float MultiplayerOnGroundScale;
@@ -109,14 +109,14 @@ namespace TagTool.Tags.Definitions.Gen2
         /// </summary>
         public StringId PickupMessage;
         public StringId SwapMessage;
-        public StringId PickupOrDualMsg;
-        public StringId SwapOrDualMsg;
+        public StringId PickupOrDualWieldMessage;
+        public StringId SwapOrDualWieldMessage;
         public StringId DualOnlyMsg;
-        public StringId PickedUpMsg;
+        public StringId PickedUpMessage;
         public StringId SingluarQuantityMsg;
         public StringId PluralQuantityMsg;
-        public StringId SwitchToMsg;
-        public StringId SwitchToFromAiMsg;
+        public StringId SwitchToMessage;
+        public StringId SwitchToFromAiMessage;
         [TagField(ValidTags = new [] { "foot" })]
         public CachedTag Unused;
         [TagField(ValidTags = new [] { "snd!" })]
@@ -134,7 +134,7 @@ namespace TagTool.Tags.Definitions.Gen2
         /// Blurred permutations are called
         /// '$primary-blur' and '$secondary-blur'.
         /// </summary>
-        public FlagsValue2 Flags2;
+        public WeaponFlagsValue WeaponFlags;
         public StringId Unknown;
         public SecondaryTriggerModeValue SecondaryTriggerMode;
         /// <summary>
@@ -536,7 +536,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [Flags]
-        public enum FlagsValue1 : uint
+        public enum ItemFlagsValue : uint
         {
             AlwaysMaintainsZUp = 1 << 0,
             DestroyedByExplosions = 1 << 1,
@@ -551,7 +551,7 @@ namespace TagTool.Tags.Definitions.Gen2
         }
         
         [Flags]
-        public enum FlagsValue2 : uint
+        public enum WeaponFlagsValue : uint
         {
             VerticalHeatDisplay = 1 << 0,
             MutuallyExclusiveTriggers = 1 << 1,
@@ -968,43 +968,12 @@ namespace TagTool.Tags.Definitions.Gen2
         [TagStructure(Size = 0xEC)]
         public class WeaponBarrels : TagStructure
         {
-            public FlagsValue Flags;
-            /// <summary>
-            /// the number of firing effects created per second
-            /// </summary>
-            public Bounds<float> RoundsPerSecond;
-            /// <summary>
-            /// the continuous firing time it takes for the weapon to achieve its final rounds per second
-            /// </summary>
-            public float AccelerationTime; // seconds
-            /// <summary>
-            /// the continuous idle time it takes for the weapon to return from its final rounds per second to its initial
-            /// </summary>
-            public float DecelerationTime; // seconds
-            /// <summary>
-            /// scale the barrel spin speed by this amount
-            /// </summary>
-            public float BarrelSpinScale;
-            /// <summary>
-            /// a percentage between 0 and 1 which controls how soon in its firing animation the weapon blurs
-            /// </summary>
-            public float BlurredRateOfFire;
-            /// <summary>
-            /// allows designer caps to the shots you can fire from one firing action
-            /// </summary>
-            public Bounds<short> ShotsPerFire;
-            /// <summary>
-            /// how long after a set of shots it takes before the barrel can fire again
-            /// </summary>
-            public float FireRecoveryTime; // seconds
-            /// <summary>
-            /// how much of the recovery allows shots to be queued
-            /// </summary>
-            public float SoftRecoveryFraction;
+            public BarrelFlagsValue Flags;
+            public WeaponBarrelFiringParametersStruct Firing;
             /// <summary>
             /// the magazine from which this trigger draws its ammunition
             /// </summary>
-            public short Magazine;
+            public short MagazineIndex;
             /// <summary>
             /// the number of rounds expended to create a single firing effect
             /// </summary>
@@ -1053,14 +1022,14 @@ namespace TagTool.Tags.Definitions.Gen2
             public float DualWieldDamageScale;
             public DistributionFunctionValue DistributionFunction;
             public short ProjectilesPerShot;
-            public float DistributionAngle; // degrees
-            public Angle MinimumError1; // degrees
-            public Bounds<Angle> ErrorAngle1; // degrees
+            public Angle ProjectileDistributionAngle; // degrees
+            public Angle ProjectileMinimumError; // degrees
+            public Bounds<Angle> ProjectileErrorAngle1; // degrees
             /// <summary>
             /// +x is forward, +z is up, +y is left
             /// </summary>
             public RealPoint3d FirstPersonOffset; // world units
-            public DamageEffectReportingTypeValue DamageEffectReportingType;
+            public DamageReportingTypeValue DamageReportingType;
             [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
             [TagField(ValidTags = new [] { "proj" })]
@@ -1116,7 +1085,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public List<BarrelFiringEffectBlock> FiringEffects;
             
             [Flags]
-            public enum FlagsValue : uint
+            public enum BarrelFlagsValue : uint
             {
                 /// <summary>
                 /// poo poo ca ca pee pee
@@ -1179,7 +1148,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 HorizontalFan
             }
             
-            public enum DamageEffectReportingTypeValue : sbyte
+            public enum DamageReportingTypeValue : sbyte
             {
                 TehGuardians11,
                 FallingDamage,
@@ -1224,14 +1193,51 @@ namespace TagTool.Tags.Definitions.Gen2
                 SentinelRpg,
                 Teleporter
             }
-            
+
+            [TagStructure(Size = 0x24)]
+            public class WeaponBarrelFiringParametersStruct : TagStructure
+            {
+                /// <summary>
+                /// the number of firing effects created per second
+                /// </summary>
+                public Bounds<float> RoundsPerSecond;
+                /// <summary>
+                /// the continuous firing time it takes for the weapon to achieve its final rounds per second
+                /// </summary>
+                public float AccelerationTime; // seconds
+                /// <summary>
+                /// the continuous idle time it takes for the weapon to return from its final rounds per second to its initial
+                /// </summary>
+                public float DecelerationTime; // seconds
+                /// <summary>
+                /// scale the barrel spin speed by this amount
+                /// </summary>
+                public float BarrelSpinScale;
+                /// <summary>
+                /// a percentage between 0 and 1 which controls how soon in its firing animation the weapon blurs
+                /// </summary>
+                public float BlurredRateOfFire;
+                /// <summary>
+                /// allows designer caps to the shots you can fire from one firing action
+                /// </summary>
+                public Bounds<short> ShotsPerFire;
+                /// <summary>
+                /// how long after a set of shots it takes before the barrel can fire again
+                /// </summary>
+                public float FireRecoveryTime; // seconds
+                /// <summary>
+                /// how much of the recovery allows shots to be queued
+                /// </summary>
+                public float SoftRecoveryFraction;
+            }
+
             [TagStructure(Size = 0x8)]
             public class WeaponBarrelDamageEffectStructBlock : TagStructure
             {
                 [TagField(ValidTags = new [] { "jpt!" })]
                 public CachedTag DamageEffect;
             }
-            
+
             public enum AngleChangeFunctionValue : short
             {
                 Linear,

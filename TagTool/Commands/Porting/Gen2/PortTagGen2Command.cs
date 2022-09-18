@@ -110,7 +110,11 @@ namespace TagTool.Commands.Porting.Gen2
                 "shad",
                 "sbsp",
                 "scnr",
-                "mach"
+                "mach",
+                "ligh",
+                "eqip",
+                "ctrl",
+                "bipd"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -172,6 +176,9 @@ namespace TagTool.Commands.Porting.Gen2
                 case Projectile projectile:
                 case CameraTrack track:
                 case DeviceMachine devicemachine:
+                case Equipment equipment:
+                case DeviceControl devicecontrol:
+                case Biped biped:
                     definition = ConvertObject(gen2definition, cacheStream);
                     break;
                 case DamageEffect damage:
@@ -188,6 +195,9 @@ namespace TagTool.Commands.Porting.Gen2
                 case Scenario scnr:
                     Scenario oldscnr = Gen2Cache.Deserialize<Scenario>(gen2CacheStream, gen2Tag);
                     definition = ConvertScenario(scnr, oldscnr, gen2Tag.Name, cacheStream, gen2CacheStream, resourceStreams);
+                    break;
+                case Light light:
+                    definition = ConvertLight(light);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");

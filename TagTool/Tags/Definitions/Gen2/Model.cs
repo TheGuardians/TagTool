@@ -136,7 +136,7 @@ namespace TagTool.Tags.Definitions.Gen2
                     public float Probability; // (0,+inf)
                     public List<ModelVariantStateBlock> States;
                     [TagField(Length = 12)]
-                    public sbyte[] RuntimePermutationIndex = new sbyte[12];
+                    public sbyte[] RuntimeStatePermutationIndices = new sbyte[12];
 
                     [Flags]
                     public enum FlagsValue : byte
@@ -298,8 +298,8 @@ namespace TagTool.Tags.Definitions.Gen2
             /// 0 defaults to 1 - to what maximum level the body health will be allowed to recharge
             /// </summary>
             public float RechargeFraction;
-            [TagField(Length = 0x40, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding4;
+            [TagField(Length = 16)]
+            public uint[] UnknownRuntimeValues = new uint[16];
             [TagField(ValidTags = new [] { "shad" })]
             public CachedTag ShieldDamagedFirstPersonShader;
             [TagField(ValidTags = new [] { "shad" })]

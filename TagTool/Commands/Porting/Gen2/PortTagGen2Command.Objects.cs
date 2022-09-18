@@ -14,8 +14,8 @@ using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting.Gen2
 {
-	partial class PortTagGen2Command : Command
-	{
+    partial class PortTagGen2Command : Command
+    {
         public TagStructure ConvertObject(object gen2Tag, Stream cacheStream)
         {
             switch (gen2Tag)
@@ -55,6 +55,21 @@ namespace TagTool.Commands.Porting.Gen2
                     TranslateTagStructure(devicemachine, newdevicemachine);
                     newdevicemachine.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Machine };
                     return newdevicemachine;
+                case TagTool.Tags.Definitions.Gen2.Equipment equipment:
+                    Equipment newequipment = new Equipment();
+                    TranslateTagStructure(equipment, newequipment);
+                    newequipment.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Equipment };
+                    return newequipment;
+                case TagTool.Tags.Definitions.Gen2.DeviceControl devicecontrol:
+                    DeviceControl newdevicecontrol = new DeviceControl();
+                    TranslateTagStructure(devicecontrol, newdevicecontrol);
+                    newdevicecontrol.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Control };
+                    return newdevicecontrol;
+                case TagTool.Tags.Definitions.Gen2.Biped biped:
+                    Biped newbiped = new Biped();
+                    TranslateTagStructure(biped, newbiped);
+                    newbiped.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Biped };
+                    return FixupBiped(biped, newbiped);
                 default:
                     return null;
             }
@@ -63,7 +78,7 @@ namespace TagTool.Commands.Porting.Gen2
         public Weapon FixupWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag, Weapon newweapon)
         {
             newweapon.FirstPerson = new List<Weapon.FirstPersonBlock>();
-            foreach(var firstperson in gen2Tag.PlayerInterface.FirstPerson)
+            foreach (var firstperson in gen2Tag.PlayerInterface.FirstPerson)
             {
                 newweapon.FirstPerson.Add(new Weapon.FirstPersonBlock
                 {
@@ -71,24 +86,32 @@ namespace TagTool.Commands.Porting.Gen2
                     FirstPersonAnimations = firstperson.FirstPersonAnimations
                 });
             }
+            newweapon.MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>();
+            newweapon.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock
+            {
+                Type = TagTool.Tags.Definitions.Common.MultiplayerObjectType.Weapon,
+                SpawnTimerType = TagTool.Tags.Definitions.Common.MultiplayerObjectSpawnTimerType.StartsOnDisturbance
+            });
+            newweapon.WeaponFlags = new WeaponFlags();
 
+            TranslateEnum(gen2Tag.WeaponFlags, out newweapon.WeaponFlags.NewFlags, newweapon.WeaponFlags.NewFlags.GetType());
             return newweapon;
         }
 
         public Scenery FixupScenery(TagTool.Tags.Definitions.Gen2.Scenery gen2Tag, Scenery newscenery, Stream cacheStream)
         {
             //fixup for coll model reference in bsp physics
-            if(newscenery.Model != null)
+            if (newscenery.Model != null)
             {
                 Model model = Cache.Deserialize<Model>(cacheStream, newscenery.Model);
-                if(model.CollisionModel != null)
+                if (model.CollisionModel != null)
                 {
                     CollisionModel coll = Cache.Deserialize<CollisionModel>(cacheStream, model.CollisionModel);
-                    foreach(var region in coll.Regions)
+                    foreach (var region in coll.Regions)
                     {
-                        foreach(var perm in region.Permutations)
+                        foreach (var perm in region.Permutations)
                         {
-                            if(perm.BspPhysics != null)
+                            if (perm.BspPhysics != null)
                             {
                                 foreach (var bsp in perm.BspPhysics)
                                 {
@@ -153,8 +176,8 @@ namespace TagTool.Commands.Porting.Gen2
                     vehi.PhysicsTypes.HumanJeep = new List<Vehicle.HumanJeepPhysics>();
                     var newjeep = new Vehicle.HumanJeepPhysics
                     {
-                        Steering = new Vehicle.VehicleSteeringControl 
-                        { 
+                        Steering = new Vehicle.VehicleSteeringControl
+                        {
                             OverdampenCuspAngle = gen2Tag.OverdampenCuspAngle,
                             OverdampenExponent = gen2Tag.OverdampenExponent
                         },
@@ -327,6 +350,60 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
             }
             return vehi;
-        }       
+        }
+
+        public Biped FixupBiped(TagTool.Tags.Definitions.Gen2.Biped gen2Tag, Biped newbiped)
+        {
+
+            for (byte i = 0; i < newbiped.Functions.Count; i++)
+            {
+                newbiped.Functions[i].DefaultFunction.Data = gen2Tag.Functions[i].DefaultFunction.Data;
+            }
+
+            newbiped.PreferredGunNode = gen2Tag.MoreDamnNodes.PreferredGunNode;
+
+            newbiped.HudInterfaces = new List<Unit.HudInterface>();
+            newbiped.HudInterfaces.Add(new Unit.HudInterface
+            {
+                UnitHudInterface = Cache.TagCache.GetTag(@"ui\chud\spartan.chdt")
+            });
+
+            newbiped.LockonDistance = gen2Tag.LockOnData.LockOnDistance;
+            TranslateEnum(gen2Tag.LockOnData.Flags, out newbiped.LockonFlags, newbiped.LockonFlags.GetType());
+
+            newbiped.PhysicsFlags = gen2Tag.Physics.Flags;
+            newbiped.HeightStanding = gen2Tag.Physics.HeightStanding;
+            newbiped.HeightCrouching = gen2Tag.Physics.HeightCrouching;
+            newbiped.Radius = gen2Tag.Physics.Radius;
+            newbiped.Mass = gen2Tag.Physics.Mass;
+            newbiped.LivingMaterialName = gen2Tag.Physics.LivingMaterialName;
+            newbiped.DeadMaterialName = gen2Tag.Physics.DeadMaterialName;
+
+
+            // Convert Physics Shapes
+            newbiped.DeadSphereShapes = new List<PhysicsModel.Sphere>();
+            newbiped.PillShapes = new List<PhysicsModel.Pill>();
+            newbiped.SphereShapes = new List<PhysicsModel.Sphere>();
+
+            foreach (var gen2sphere in gen2Tag.Physics.DeadSphereShapes)
+            {
+                newbiped.DeadSphereShapes.Add(ConvertSphere(gen2sphere));
+            }
+            foreach (var gen2pill in gen2Tag.Physics.PillShapes)
+            {
+                newbiped.PillShapes.Add(ConvertPill(gen2pill));
+            }
+            foreach (var gen2sphere in gen2Tag.Physics.SphereShapes)
+            {
+                newbiped.SphereShapes.Add(ConvertSphere(gen2sphere));
+            }
+
+            newbiped.BipedGroundPhysics = new Biped.CharacterPhysicsGroundStruct();
+            newbiped.BipedFlyingPhysics = new Biped.CharacterPhysicsFlyingStruct();
+            TranslateTagStructure(gen2Tag.Physics.GroundPhysics, newbiped.BipedGroundPhysics);
+            TranslateTagStructure(gen2Tag.Physics.FlyingPhysics, newbiped.BipedFlyingPhysics);
+
+            return newbiped;
+        }
     }
 }

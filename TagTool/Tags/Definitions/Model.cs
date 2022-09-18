@@ -770,8 +770,8 @@ namespace TagTool.Tags.Definitions
             public float RechargeTime;
             public float RechargeFraction;
 
-            [TagField(Flags = Padding, Length = 64)]
-            public byte[] Unused6 = new byte[64];
+            [TagField(Length = 16)]
+            public uint[] UnknownRuntimeValues = new uint[16];
 
             public float MaxShieldVitality;
             [TagField(Flags = GlobalMaterial)]

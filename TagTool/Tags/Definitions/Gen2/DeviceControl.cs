@@ -393,10 +393,10 @@ namespace TagTool.Tags.Definitions.Gen2
         
         public enum TypeValue : short
         {
-            ToggleSwitch,
-            OnButton,
-            OffButton,
-            CallButton
+            Toggle,
+            On,
+            Off,
+            Call
         }
         
         public enum TriggersWhenValue : short
