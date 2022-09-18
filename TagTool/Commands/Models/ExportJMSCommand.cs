@@ -38,6 +38,10 @@ namespace TagTool.Commands.Models
             if (args.Count != 2)
                 return new TagToolError(CommandError.ArgCount);
 
+            ExportRender = false;
+            ExportPhysics = false;
+            ExportCollision = false;
+            ExportAnimations = false;
             switch (args[0])
             {
                 case "coll":
