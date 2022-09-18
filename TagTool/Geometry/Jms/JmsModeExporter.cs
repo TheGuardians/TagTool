@@ -54,7 +54,7 @@ namespace TagTool.Geometry.Jms
                     if (perm.MeshIndex == -1)
                         continue;
                     var mesh = mode.Geometry.Meshes[perm.MeshIndex];
-                    var meshReader = new MeshReader(Cache.Version, Cache.Platform, mode.Geometry.Meshes[perm.MeshIndex], Cache.Endianness);
+                    var meshReader = new MeshReader(Cache, mode.Geometry.Meshes[perm.MeshIndex]);
 
                     var vertices = new List<ModelExtractor.GenericVertex>();
                     if(Cache.Version >= CacheVersion.HaloReach)

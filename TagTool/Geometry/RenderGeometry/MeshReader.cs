@@ -26,11 +26,11 @@ namespace TagTool.Geometry
         /// <param name="version">The engine version to target.</param>
         /// <param name="platform"></param>
         /// <param name="mesh">The mesh.</param>
-        public MeshReader(CacheVersion version, CachePlatform platform, Mesh mesh, EndianFormat endianness = EndianFormat.LittleEndian)
+        public MeshReader(GameCache cache, Mesh mesh)
         {
-            _version = version;
-            _platform = platform;
-            _endianness = endianness;
+            _version = cache.Version;
+            _platform = cache.Platform;
+            _endianness = cache.Endianness;
             Mesh = mesh;
             VertexStreams = new VertexBufferDefinition[StreamCount];
             IndexBuffers = new IndexBufferDefinition[IndexBufferCount];

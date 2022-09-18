@@ -16,6 +16,11 @@ namespace TagTool.Cache.Monolithic
         public byte[] ControlData;
         public uint ResourceOwner;
 
+        public TagResourceXSyncState()
+        {
+
+        }
+
         public TagResourceXSyncState(uint resourceOwner, PersistChunkReader reader)
         {
             ResourceOwner = resourceOwner;

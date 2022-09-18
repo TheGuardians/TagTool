@@ -304,7 +304,7 @@ namespace TagTool.Geometry
                     permValueList.Add(amfWriter.BaseStream.Position);
                     foreach (var perm in region.Permutations)
                     {
-                        var reader = new MeshReader(CacheContext.Version, CacheContext.Platform, RenderModel.Geometry.Meshes[perm.MeshIndex], CacheContext.Endianness);
+                        var reader = new MeshReader(CacheContext, RenderModel.Geometry.Meshes[perm.MeshIndex]);
                         amfWriter.Write(GetStringNT(perm.Name));
                         amfWriter.Write(ConvertVertTypeEnum(reader.Mesh.Type));
                         amfWriter.Write(unchecked((byte?)reader.Mesh.RigidNodeIndex) ?? byte.MaxValue);
@@ -340,7 +340,7 @@ namespace TagTool.Geometry
                     foreach (var perm in region.Permutations)
                     {
                         var mesh = RenderModel.Geometry.Meshes[perm.MeshIndex];
-                        var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, RenderModel.Geometry.Meshes[perm.MeshIndex], CacheContext.Endianness);
+                        var meshReader = new MeshReader(CacheContext, RenderModel.Geometry.Meshes[perm.MeshIndex]);
 
                         List<GenericVertex> vertices;
                         if (CacheContext.Version >= CacheVersion.HaloReach)
@@ -417,7 +417,7 @@ namespace TagTool.Geometry
                 {
                     foreach (var perm in region.Permutations)
                     {
-                        var reader = new MeshReader(CacheContext.Version, CacheContext.Platform, RenderModel.Geometry.Meshes[perm.MeshIndex], CacheContext.Endianness);
+                        var reader = new MeshReader(CacheContext, RenderModel.Geometry.Meshes[perm.MeshIndex]);
 
                         long address;
                         if (dupeDic.TryGetValue(perm.MeshIndex, out address))
@@ -453,7 +453,7 @@ namespace TagTool.Geometry
                     {
                         meshValueList.Add(amfWriter.BaseStream.Position);
 
-                        var reader = new MeshReader(CacheContext.Version, CacheContext.Platform, RenderModel.Geometry.Meshes[perm.MeshIndex], CacheContext.Endianness);
+                        var reader = new MeshReader(CacheContext, RenderModel.Geometry.Meshes[perm.MeshIndex]);
 
                         int currentPosition = 0;
                         foreach (var part in reader.Mesh.Parts)
@@ -755,7 +755,7 @@ namespace TagTool.Geometry
             mesh.UVComponentCount[textureCoordinateIndex] = 2;
 
             // prepare vertex extraction
-            var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, RenderModel.Geometry.Meshes[meshIndex], CacheContext.Endianness);
+            var meshReader = new MeshReader(CacheContext, RenderModel.Geometry.Meshes[meshIndex]);
             var vertexCompressor = new VertexCompressor(RenderModel.Geometry.Compression[0]);
 
             var geometryMesh = RenderModel.Geometry.Meshes[meshIndex];
