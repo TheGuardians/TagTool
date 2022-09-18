@@ -341,7 +341,12 @@ namespace TagTool.Geometry
                     {
                         var mesh = RenderModel.Geometry.Meshes[perm.MeshIndex];
                         var meshReader = new MeshReader(CacheContext.Version, CacheContext.Platform, RenderModel.Geometry.Meshes[perm.MeshIndex]);
-                        var vertices = ReadVertices(meshReader);
+
+                        List<GenericVertex> vertices;
+                        if (CacheContext.Version >= CacheVersion.HaloReach)
+                            vertices = ReadVerticesReach(meshReader);
+                        else
+                            vertices = ReadVertices(meshReader);
 
                         DecompressVertices(vertices, new VertexCompressor(RenderModel.Geometry.Compression[0]));
 
@@ -759,7 +764,11 @@ namespace TagTool.Geometry
             mesh.MaterialIndex = geometryPart.MaterialIndex;
 
             // optimize this part to not load and decompress all mesh vertices everytime
-            var vertices = ReadVertices(meshReader);
+            List<GenericVertex> vertices;
+            if (CacheContext.Version >= CacheVersion.HaloReach)
+                vertices = ReadVerticesReach(meshReader);
+            else
+                vertices = ReadVertices(meshReader);
             DecompressVertices(vertices, vertexCompressor);
             
             // get offset in the list of all vertices for the mesh
