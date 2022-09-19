@@ -67,7 +67,7 @@ namespace TagTool.Commands.Models
             using (var cacheStream = Cache.OpenCacheRead())
             {
                 //build nodes
-                if (Definition.Nodes != null)
+                if (Definition.Nodes != null && Definition.Nodes.Count > 0)
                 {
                     BuildNodesFromHlmt(jms, Definition);
                 }
