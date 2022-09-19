@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Cache.Monolithic;
 using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags;
@@ -35,7 +36,12 @@ namespace TagTool.Commands.Tags
             var phrase = args[0].ToLower().Trim();
 
             Console.WriteLine("Searching...");
-            Parallel.ForEach(Cache.TagCache.NonNull(), tag => PerformSearch(tag, phrase));
+            //monolithic cache doesn't play well with async due to taglayouts
+            if (Cache is GameCacheMonolithic)
+                foreach (var tag in Cache.TagCache.NonNull())
+                    PerformSearch(tag, phrase);
+            else
+                Parallel.ForEach(Cache.TagCache.NonNull(), tag => PerformSearch(tag, phrase));
             Console.WriteLine("Finished.");
             return true;
         }
