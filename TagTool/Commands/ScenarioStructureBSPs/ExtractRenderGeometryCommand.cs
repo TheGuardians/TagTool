@@ -63,7 +63,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                 using (var objFile = new StreamWriter(file.Create()))
                 {
-                    var objExtractor = new ObjExtractor(objFile);
+                    var objExtractor = new ObjExtractor(CacheContext, objFile);
 
                     var i = 0;
                     foreach (var cluster in Definition.Clusters)

@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using TagTool.Cache;
+using TagTool.IO;
+using static TagTool.Geometry.ModelExtractor;
 
 namespace TagTool.Geometry
 {
@@ -13,6 +16,7 @@ namespace TagTool.Geometry
     public class ObjExtractor
     {
         private readonly TextWriter _writer;
+        private readonly GameCache CacheContext;
         private readonly StringWriter _faceWriter = new StringWriter();
         private uint _baseIndex = 1;
         
@@ -20,8 +24,9 @@ namespace TagTool.Geometry
         /// Initializes a new instance of the <see cref="ObjExtractor"/> class.
         /// </summary>
         /// <param name="writer">The stream to write the output file to.</param>
-        public ObjExtractor(TextWriter writer)
+        public ObjExtractor(GameCache cache, TextWriter writer)
         {
+            CacheContext = cache;
             _writer = writer;
             WriteHeader();
         }
@@ -42,7 +47,11 @@ namespace TagTool.Geometry
         /// <param name="transform">An optional transform to apply to the vertices</param>
         public void ExtractMesh(MeshReader reader, VertexCompressor compressor, string name = null, Matrix4x4? transform = null)
         {
-            var vertices = ReadVertices(reader);
+            List<ObjVertex> vertices;
+            if (CacheContext.Version >= CacheVersion.HaloReach)
+                vertices = ReadVerticesReach(reader);
+            else
+                vertices = ReadVertices(reader);
             DecompressVertices(vertices, compressor);
 
             if (transform != null)
@@ -100,6 +109,28 @@ namespace TagTool.Geometry
         {
             _writer.Write(_faceWriter.ToString());
             _faceWriter.Close();
+        }
+
+        private static List<ObjVertex> ReadVerticesReach(MeshReader reader)
+        {
+            // Open a vertex reader on stream 0 (main vertex data)
+            var mainBuffer = reader.VertexStreams[0];
+            if (mainBuffer == null)
+                return new List<ObjVertex>();
+
+            VertexStreamReach vertexReader = (VertexStreamReach)reader.OpenVertexStream(mainBuffer);
+
+            switch (reader.Mesh.ReachType)
+            {
+                case VertexTypeReach.Rigid:
+                    return ReadRigidVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.Skinned:
+                    return ReadSkinnedVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.World:
+                    return ReadWorldVertices(vertexReader, mainBuffer.Count);
+                default:
+                    throw new InvalidOperationException("Only Rigid, Skinned, World meshes are supported");
+            }
         }
 
         /// <summary>

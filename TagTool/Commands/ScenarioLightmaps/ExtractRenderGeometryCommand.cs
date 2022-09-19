@@ -64,7 +64,7 @@ namespace TagTool.Commands.ScenarioLightmaps
 
                 using (var objFile = new StreamWriter(file.Create()))
                 {
-                    var objExtractor = new ObjExtractor(objFile);
+                    var objExtractor = new ObjExtractor(Cache, objFile);
 
                     foreach (var mesh in Definition.Geometry.Meshes)
                     {
