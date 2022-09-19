@@ -58,7 +58,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new DeleteTagCommand(cache));
             context.AddCommand(new ListNullTagsCommand(cache));
             context.AddCommand(new ListUnnamedTagsCommand(cache));
-            context.AddCommand(new ExtractBitmapsCommand(cache));
+            context.AddCommand(new ExtractAllBitmapsCommand(cache));
             context.AddCommand(new ExtractBlfImageCommand());
             context.AddCommand(new CreateBlfImageCommand());
             context.AddCommand(new DumpDisassembledShadersCommand(cache));
