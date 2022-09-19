@@ -48,19 +48,7 @@ namespace TagTool.Commands.Bitmaps
             else
                 return new TagToolError(CommandError.ArgCount);
 
-            if (!Directory.Exists(directory))
-            {
-                Console.Write("Destination directory does not exist. Create it? [y/n] ");
-                var answer = Console.ReadLine().ToLower();
-
-                if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return new TagToolError(CommandError.YesNoSyntax);
-
-                if (answer.StartsWith("y"))
-                    Directory.CreateDirectory(directory);
-                else
-                    return true;
-            }
+            Directory.CreateDirectory(directory);
 
             var ddsOutDir = directory;
             string name;

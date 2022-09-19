@@ -651,7 +651,7 @@
     <Compile Include="Commands\Bipeds\BipedContextFactory.cs" />
     <Compile Include="Commands\Bitmaps\BitmapContextFactory.cs" />
     <Compile Include="Commands\Bitmaps\ExtractBitmapCommand.cs" />
-    <Compile Include="Commands\Bitmaps\ExtractBitmapsCommand.cs" />
+    <Compile Include="Commands\Bitmaps\ExtractAllBitmapsCommand.cs" />
     <Compile Include="Commands\Bitmaps\ImportBitmapCommand.cs" />
     <Compile Include="Commands\CollisionModels\CollisionModelContextFactory.cs" />
     <Compile Include="Commands\CollisionModels\ExtractModelCommand.cs" />
