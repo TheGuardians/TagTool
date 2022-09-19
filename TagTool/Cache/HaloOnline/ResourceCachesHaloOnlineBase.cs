@@ -129,41 +129,6 @@ namespace TagTool.Cache.HaloOnline
                 return cache.ExtractRaw(stream, resource.Page.Index, resource.Page.CompressedBlockSize);
         }
 
-        /// <summary>
-        /// Replaces a resource
-        /// </summary>
-        /// <param name="resource">The resource to be replaced.</param>
-        /// <param name="definition">The new resource definition</param>
-        /// <exception cref="System.ArgumentException">Thrown if the input stream is not open for reading.</exception>
-        public void ReplaceResource(PageableResource resource, object definition)
-        {
-            var definitionStream = new MemoryStream();
-            var dataStream = new MemoryStream();
-
-            using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
-            using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
-            {
-                var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
-                var serializer = new ResourceSerializer(Cache.Version, Cache.Platform);
-                serializer.Serialize(context, definition);
-
-                var cache = GetResourceCache(resource, out var location);
-                using (var stream = OpenCacheReadWrite(location))
-                {
-                    var data = dataStream.ToArray();
-                    var definitionData = definitionStream.ToArray();
-                    var compressedSize = cache.Compress(stream, resource.Page.Index, data);
-                    resource.Resource.DefinitionData = definitionData;
-                    resource.Resource.FixupLocations = context.FixupLocations;
-                    resource.Resource.DefinitionAddress = context.MainStructOffset;
-                    resource.Resource.InteropLocations = context.InteropLocations;
-                    resource.Page.CompressedBlockSize = compressedSize;
-                    resource.Page.UncompressedBlockSize = (uint)data.Length;
-                    resource.DisableChecksum();
-                }
-            }
-        }
-
 
         /// <summary>
         /// Compresses and replaces the data for a resource.
@@ -171,7 +136,7 @@ namespace TagTool.Cache.HaloOnline
         /// <param name="resource">The resource whose data should be replaced. On success, the reference will be adjusted to account for the new data.</param>
         /// <param name="dataStream">The stream to read the new data from.</param>
         /// <exception cref="System.ArgumentException">Thrown if the input stream is not open for reading.</exception>
-        public void ReplaceResource(PageableResource resource, Stream dataStream)
+        public virtual void ReplaceResource(PageableResource resource, Stream dataStream)
         {
             if (resource == null)
                 throw new ArgumentNullException("resource");
@@ -184,11 +149,48 @@ namespace TagTool.Cache.HaloOnline
                 var dataSize = (int)(dataStream.Length - dataStream.Position);
                 var data = new byte[dataSize];
                 dataStream.Read(data, 0, dataSize);
-                var compressedSize = cache.Compress(stream, resource.Page.Index, data);
+                resource.Page.Index = cache.Add(stream, data, out uint compressedSize);
                 resource.Page.CompressedBlockSize = compressedSize;
                 resource.Page.UncompressedBlockSize = (uint)dataSize;
                 resource.DisableChecksum();
             }
+        }
+        
+        public void ReplaceResource(PageableResource resource, object resourceDefinition)
+        {
+            if (resource == null)
+                throw new ArgumentNullException("resource");
+
+            var definitionStream = new MemoryStream();
+            var dataStream = new MemoryStream();
+
+            using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
+            using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
+            {
+                var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
+                var serializer = new ResourceSerializer(Cache.Version, Cache.Platform);
+                serializer.Serialize(context, resourceDefinition);
+
+                var data = dataStream.ToArray();
+                var definitionData = definitionStream.ToArray();
+                dataStream.Position = 0;
+
+                resource.DisableChecksum();
+
+                dataStream.Position = 0;
+                ReplaceResource(resource, dataStream);
+
+                // add resource definition and fixups
+                resource.Resource.DefinitionData = definitionData;
+                resource.Resource.FixupLocations = context.FixupLocations;
+                resource.Resource.DefinitionAddress = context.MainStructOffset;
+                resource.Resource.InteropLocations = context.InteropLocations;
+            }
+        }
+
+        public void ReplaceResource(TagResourceReference resource, object resourceDefinition)
+        {
+            ReplaceResource(resource.HaloOnlinePageableResource, resourceDefinition);
         }
 
         /// <summary>
