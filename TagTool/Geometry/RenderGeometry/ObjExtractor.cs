@@ -128,6 +128,8 @@ namespace TagTool.Geometry
                     return ReadSkinnedVertices(vertexReader, mainBuffer.Count);
                 case VertexTypeReach.World:
                     return ReadWorldVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.RigidCompressed:
+                    return ReadRigidCompressedVertices(vertexReader, mainBuffer.Count);
                 default:
                     throw new InvalidOperationException("Only Rigid, Skinned, World meshes are supported");
             }
@@ -174,6 +176,28 @@ namespace TagTool.Geometry
             for (var i = 0; i < count; i++)
             {
                 var rigid = reader.ReadRigidVertex();
+                result.Add(new ObjVertex
+                {
+                    Position = rigid.Position,
+                    Normal = rigid.Normal,
+                    TexCoords = rigid.Texcoord,
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Reads rigid vertices into a format-independent list.
+        /// </summary>
+        /// <param name="reader">The vertex reader to read from.</param>
+        /// <param name="count">The number of vertices to read.</param>
+        /// <returns>The vertices that were read.</returns>
+        private static List<ObjVertex> ReadRigidCompressedVertices(VertexStreamReach reader, int count)
+        {
+            var result = new List<ObjVertex>();
+            for (var i = 0; i < count; i++)
+            {
+                var rigid = reader.ReadReachRigidVertex();
                 result.Add(new ObjVertex
                 {
                     Position = rigid.Position,
