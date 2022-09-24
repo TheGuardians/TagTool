@@ -386,7 +386,6 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order[4] = "\0";
                         break;
                     }
-
                 case "tex_bump_dprs_env":
                     {
                         shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;

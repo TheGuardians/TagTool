@@ -682,7 +682,7 @@ namespace TagTool.Commands.Porting.Gen2
                     BspPolicy = (Scenario.ScenarioInstance.BspPolicyValue)machobj.ObjectData.BspPolicy,
                     OriginBspIndex = (short)machobj.ObjectData.ManualBspFlags,
 
-                    CanAttachToBspFlags = (ushort)(machobj.ObjectData.ManualBspFlags),
+                    CanAttachToBspFlags = (ushort)(machobj.ObjectData.ManualBspFlags + 1),
                     Source = (Scenario.ScenarioInstance.SourceValue)machobj.ObjectData.ObjectId.Source,
                     UniqueHandle = new DatumHandle((uint)machobj.ObjectData.ObjectId.UniqueId),
                     EditorFolder = -1,
@@ -1115,32 +1115,35 @@ namespace TagTool.Commands.Porting.Gen2
                                     found = false;
                                     for (byte i = 0; i < newScenario.WeaponPalette.Count; i++)
                                     {
-                                        if (itemlayout.ItemPermutations[0].Item.Name == newScenario.WeaponPalette[i].Object.Name)
+                                        if (newScenario.WeaponPalette[i].Object != null)
                                         {
-                                            found = true;
-                                            var weapon = new Scenario.WeaponInstance
+                                            if (itemlayout.ItemPermutations[0].Item.Name == newScenario.WeaponPalette[i].Object.Name)
                                             {
-                                                PaletteIndex = i,
-                                                NameIndex = -1,
-                                                PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                                Position = NetgameEquipment.Position,
-                                                Rotation = NetgameEquipment.Orientation.Orientation,
-                                                Scale = 1,
-                                                BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                                OriginBspIndex = 1,
-                                                CanAttachToBspFlags = 1,
-                                                Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                                UniqueHandle = new DatumHandle(uniqueid),
-                                                EditorFolder = -1,
-                                                ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Weapon },
-                                                WeaponFlags = WeaponFlags,
-                                                Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                            };
-                                            newScenario.Weapons.Add(weapon);
-                                            weapon.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                            weapon.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                            weapon.Multiplayer.EngineFlags = EngineFlags;
-                                            break;
+                                                found = true;
+                                                var weapon = new Scenario.WeaponInstance
+                                                {
+                                                    PaletteIndex = i,
+                                                    NameIndex = -1,
+                                                    PlacementFlags = Scenario.ObjectPlacementFlags.None,
+                                                    Position = NetgameEquipment.Position,
+                                                    Rotation = NetgameEquipment.Orientation.Orientation,
+                                                    Scale = 1,
+                                                    BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
+                                                    OriginBspIndex = 1,
+                                                    CanAttachToBspFlags = 1,
+                                                    Source = Scenario.ScenarioInstance.SourceValue.Editor,
+                                                    UniqueHandle = new DatumHandle(uniqueid),
+                                                    EditorFolder = -1,
+                                                    ObjectType = new ScenarioObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Weapon },
+                                                    WeaponFlags = WeaponFlags,
+                                                    Multiplayer = new Scenario.MultiplayerObjectProperties(),
+                                                };
+                                                newScenario.Weapons.Add(weapon);
+                                                weapon.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
+                                                weapon.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
+                                                weapon.Multiplayer.EngineFlags = EngineFlags;
+                                                break;
+                                            }
                                         }
                                     }
 
