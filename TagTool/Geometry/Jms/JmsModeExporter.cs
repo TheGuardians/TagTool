@@ -155,6 +155,45 @@ namespace TagTool.Geometry.Jms
                     Name = material.Name,
                     MaterialName = $"({Jms.Materials.Count + 1}) {material.MaterialName}"
                 });
+            SmoothVertices(Jms);
+        }
+
+        public void SmoothVertices(JmsFormat jms)
+        {
+            //build list of identical vertices
+            List<List<int>> MatchingVertices = new List<List<int>>();
+            for(var i = 0; i < jms.Vertices.Count; i++)
+            {
+                bool matchFound = false;
+                foreach(var vertexset in MatchingVertices)
+                {
+                    if (Vector3.Distance(PointToVector(jms.Vertices[vertexset[0]].Position), PointToVector(jms.Vertices[i].Position)) < 0.01)
+                    {
+                        matchFound = true;
+                        vertexset.Add(i);
+                        break;
+                    }
+                }
+                if(!matchFound)
+                    MatchingVertices.Add(new List<int> { i });
+            }
+
+            //average vertex normals and apply
+            foreach(var vertexgroup in MatchingVertices)
+            {
+                List<RealVector3d> normals = vertexgroup.Select(v => jms.Vertices[v].Normal).ToList();
+                RealVector3d sum = new RealVector3d();
+                foreach (var normal in normals)
+                    sum += normal;
+                RealVector3d average = sum / normals.Count;
+                foreach (var vertex in vertexgroup)
+                    jms.Vertices[vertex].Normal = average;
+            }
+        }
+
+        private Vector3 PointToVector(RealPoint3d point)
+        {
+            return new Vector3(point.X, point.Y, point.Z);
         }
 
         struct Triangle
