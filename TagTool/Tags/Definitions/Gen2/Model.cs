@@ -298,8 +298,8 @@ namespace TagTool.Tags.Definitions.Gen2
             /// 0 defaults to 1 - to what maximum level the body health will be allowed to recharge
             /// </summary>
             public float RechargeFraction;
-            [TagField(Length = 16)]
-            public uint[] UnknownRuntimeValues = new uint[16];
+            [TagField(Length = 64)]
+            public byte[] UnknownRuntimeValues = new byte[64];
             [TagField(ValidTags = new [] { "shad" })]
             public CachedTag ShieldDamagedFirstPersonShader;
             [TagField(ValidTags = new [] { "shad" })]

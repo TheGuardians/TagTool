@@ -93,8 +93,11 @@ namespace TagTool.Geometry
                 var triangles = GenerateTriangles(indices);
 
                 if (triangles.Count() != 0)
+                {
+                    _writer.WriteLine($"usemtl {name}_material_{reader.Mesh.Parts[partIndex].MaterialIndex}");
                     _writer.WriteLine($"g {name}_part_{partIndex++}");
-
+                }
+                    
                 foreach (var triangle in triangles)
                     _writer.WriteLine(triangle);
             }
