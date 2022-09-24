@@ -58,9 +58,24 @@ namespace TagTool.Geometry.Jms
 
                     var vertices = new List<ModelExtractor.GenericVertex>();
                     if(Cache.Version >= CacheVersion.HaloReach)
+                    {
                         vertices = ModelExtractor.ReadVerticesReach(meshReader);
+                        if(mesh.ReachType == VertexTypeReach.Rigid || mesh.ReachType == VertexTypeReach.RigidCompressed)
+                        {
+                            vertices.ForEach(v => v.Indices = new byte[4] { (byte)mesh.RigidNodeIndex, 0, 0, 0 });
+                            vertices.ForEach(v => v.Weights = new float[4] { 1, 0, 0, 0 });
+                        }                      
+                    }
                     else
+                    {
                         vertices = ModelExtractor.ReadVertices(meshReader);
+                        if(mesh.Type == VertexType.Rigid)
+                        {
+                            vertices.ForEach(v => v.Indices = new byte[4] { (byte)mesh.RigidNodeIndex, 0, 0, 0 });
+                            vertices.ForEach(v => v.Weights = new float[4] { 1, 0, 0, 0 });
+                        }
+                    }
+                        
                     ModelExtractor.DecompressVertices(vertices, new VertexCompressor(mode.Geometry.Compression[0]));
                     for (int partIndex = 0; partIndex < mesh.Parts.Count; partIndex++)
                     {
@@ -155,7 +170,6 @@ namespace TagTool.Geometry.Jms
                     Name = material.Name,
                     MaterialName = $"({Jms.Materials.Count + 1}) {material.MaterialName}"
                 });
-            SmoothVertices(Jms);
         }
 
         public void SmoothVertices(JmsFormat jms)
