@@ -47,6 +47,7 @@ namespace TagTool.Cache.Monolithic
             {
                 // 11883.10.10.25.1227.dlc_1_ship__tag_test
                 case "0237d057-1e3c-4390-9cfc-6108a911de01":
+                case "f1acaa38-9d6c-40d4-ad9d-8cc985606b27":
                     version = CacheVersion.HaloReach11883;
                     platform = CachePlatform.Original;
                     break;

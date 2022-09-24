@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using TagTool.Common;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
@@ -69,7 +70,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     foreach (var cluster in Definition.Clusters)
                     {
                         var meshReader = new MeshReader(CacheContext, Definition.Geometry.Meshes[cluster.MeshIndex]);
-                        objExtractor.ExtractMesh(meshReader, null, String.Format("cluster_{0}", i));
+                        objExtractor.ExtractMesh(meshReader, null, String.Format("cluster_{0}", i, Definition.Materials));
                         i++;
                     }
 
@@ -86,7 +87,16 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                                     instance.Matrix.m31, instance.Matrix.m32, instance.Matrix.m33, 0.0f,
                                     instance.Matrix.m41, instance.Matrix.m42, instance.Matrix.m43, 0.0f);
 
-                        objExtractor.ExtractMesh(meshReader, vertexCompressor, CacheContext.StringTable.GetString(instance.Name), transform);
+                        if (CacheContext.Version >= CacheVersion.HaloReach)
+                        {
+                            objExtractor.ExtractMesh(meshReader, vertexCompressor,
+                                String.Concat("%", CacheContext.StringTable.GetString(instance.NameReach)), transform, Definition.Materials);
+                        }
+                        else
+                        {
+                            objExtractor.ExtractMesh(meshReader, vertexCompressor, 
+                                String.Concat("%", CacheContext.StringTable.GetString(instance.Name)), transform, Definition.Materials);
+                        }
                     }
 
                     objExtractor.Finish();

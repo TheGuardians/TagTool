@@ -45,7 +45,10 @@ namespace TagTool.Geometry
         /// <param name="compressor">The vertex compressor to use.</param>
         /// <param name="name">The name of the mesh.</param>
         /// <param name="transform">An optional transform to apply to the vertices</param>
-        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, string name = null, Matrix4x4? transform = null)
+        /// <param name="materials">An optional list of materials for naming materials properly</param>
+
+        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, string name = null, Matrix4x4? transform = null,
+            List<RenderMaterial> materials = null)
         {
             List<ObjVertex> vertices;
             if (CacheContext.Version >= CacheVersion.HaloReach)
@@ -94,7 +97,22 @@ namespace TagTool.Geometry
 
                 if (triangles.Count() != 0)
                 {
-                    _writer.WriteLine($"usemtl {name}_material_{reader.Mesh.Parts[partIndex].MaterialIndex}");
+                    if (materials != null)
+                    {
+                        if (materials[reader.Mesh.Parts[partIndex].MaterialIndex].RenderMethod != null)
+                        {
+                            _writer.WriteLine($"usemtl {materials[reader.Mesh.Parts[partIndex].MaterialIndex].RenderMethod.Name}");
+                        }
+                        else
+                        {
+                            _writer.WriteLine($"usemtl {name}_material_{reader.Mesh.Parts[partIndex].MaterialIndex}");
+                        }
+                    }
+                    else
+                    {
+                        _writer.WriteLine($"usemtl {name}_material_{reader.Mesh.Parts[partIndex].MaterialIndex}");
+                    }
+
                     _writer.WriteLine($"g {name}_part_{partIndex++}");
                 }
                     
