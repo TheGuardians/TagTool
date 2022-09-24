@@ -126,7 +126,7 @@ namespace TagTool.Geometry.Jms
                             {
                                 new JmsFormat.JmsVertex.UvSet
                                 {
-                                    TextureCoordinates = new RealPoint2d(vertex.TexCoords.X, vertex.TexCoords.Y)
+                                    TextureCoordinates = new RealPoint2d(vertex.TexCoords.X, 1 - vertex.TexCoords.Y)
                                 }
                             }
                     };
