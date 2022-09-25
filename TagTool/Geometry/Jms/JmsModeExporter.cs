@@ -35,7 +35,7 @@ namespace TagTool.Geometry.Jms
                         NodeIndex = marker.NodeIndex,
                         Rotation = marker.Rotation,
                         Translation = new RealVector3d(marker.Translation.X, marker.Translation.Y, marker.Translation.Z) * 100.0f,
-                        Radius = marker.Scale
+                        Radius = marker.Scale <= 0.0 ? 1.0f : marker.Scale //needs to not be zero
                     });
                 }
             };
@@ -57,6 +57,7 @@ namespace TagTool.Geometry.Jms
                     var meshReader = new MeshReader(Cache, mode.Geometry.Meshes[perm.MeshIndex]);
 
                     var vertices = new List<ModelExtractor.GenericVertex>();
+                    //assign rigid node indices from mesh for rigid meshes
                     if(Cache.Version >= CacheVersion.HaloReach)
                     {
                         vertices = ModelExtractor.ReadVerticesReach(meshReader);
@@ -82,10 +83,18 @@ namespace TagTool.Geometry.Jms
                         int newMaterialIndex = -1;
                         if(mesh.Parts[partIndex].MaterialIndex != -1)
                         {
+                            string renderMaterialName = "default";
                             CachedTag renderMethod = mode.Materials[mesh.Parts[partIndex].MaterialIndex].RenderMethod;
+                            if (renderMethod != null)
+                            {
+                                string[] nameParts = renderMethod.Name.Split('\\');
+                                if (nameParts.Length >= 1)
+                                    renderMaterialName = nameParts.Last();
+                            }
+
                             JmsFormat.JmsMaterial newMaterial = new JmsFormat.JmsMaterial
                             {
-                                Name = renderMethod == null ? "default" : renderMethod.Name.Split('\\').Last(),
+                                Name = renderMaterialName,
                                 MaterialName = $"{Cache.StringTable.GetString(perm.Name)} {Cache.StringTable.GetString(region.Name)}"
                             };
                             int existingIndex = materialList.FindIndex(m => m.Name == newMaterial.Name && m.MaterialName == newMaterial.MaterialName);
