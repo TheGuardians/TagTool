@@ -70,7 +70,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     foreach (var cluster in Definition.Clusters)
                     {
                         var meshReader = new MeshReader(CacheContext, Definition.Geometry.Meshes[cluster.MeshIndex]);
-                        objExtractor.ExtractMesh(meshReader, null, String.Format("cluster_{0}", i, Definition.Materials));
+                        objExtractor.ExtractMesh(meshReader, null, Definition.Materials, String.Format("cluster_{0}", i));
                         i++;
                     }
 
@@ -89,13 +89,13 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                         if (CacheContext.Version >= CacheVersion.HaloReach)
                         {
-                            objExtractor.ExtractMesh(meshReader, vertexCompressor,
-                                String.Concat("%", CacheContext.StringTable.GetString(instance.NameReach)), transform, Definition.Materials);
+                            objExtractor.ExtractMesh(meshReader, vertexCompressor, Definition.Materials,
+                                String.Concat("%", CacheContext.StringTable.GetString(instance.NameReach)), transform);
                         }
                         else
                         {
-                            objExtractor.ExtractMesh(meshReader, vertexCompressor, 
-                                String.Concat("%", CacheContext.StringTable.GetString(instance.Name)), transform, Definition.Materials);
+                            objExtractor.ExtractMesh(meshReader, vertexCompressor, Definition.Materials,
+                                String.Concat("%", CacheContext.StringTable.GetString(instance.Name)), transform);
                         }
                     }
 
