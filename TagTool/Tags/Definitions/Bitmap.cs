@@ -246,7 +246,7 @@ namespace TagTool.Tags.Definitions
         public class Image : TagStructure
 		{
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public Tag Signature; // The group tag signature of the image.
+            public Tag Signature = "bitm"; // The group tag signature of the image.
 
             public short Width; // Pixels; DO NOT CHANGE
             public short Height; // Pixels; DO NOT CHANGE
@@ -258,14 +258,15 @@ namespace TagTool.Tags.Definitions
 
             public BitmapType Type; // The type of the bitmap image. DO NOT CHANGE
 
-            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
             public byte[] Padding1;
 
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public byte UnknownFlags;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public sbyte FourTimesLog2Size;
 
             // Handle the BitmapFormat enum as a sbyte instead of a short. This converts the endianness indirectly.
-           
+
             [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
             [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
             public byte[] Padding2;
@@ -276,7 +277,11 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Padding3;
 
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, EnumType = typeof(ushort))]
+            [TagField(MinVersion = CacheVersion.HaloReach, EnumType = typeof(byte))]
             public BitmapFlags Flags; // The flags of the bitmap image. DO NOT CHANGE
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public sbyte ExponentBias;
             public Point2d RegistrationPoint; // The 'center' of the bitmap - i.e. for particles
             public sbyte MipmapCount; // DO NOT CHANGE (not counting the highest resolution)
             public BitmapImageCurve Curve; // How to convert from pixel value to linear.

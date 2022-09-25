@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
@@ -11,7 +12,7 @@ using TagTool.Tags.Resources;
 
 namespace TagTool.Lighting
 {
-    static class VmfConversion
+    public static class VmfConversion
     {
         public static void ConvertStaticPerVertexBuffers(ScenarioLightmapBspData Lbsp, RenderGeometryApiResourceDefinition renderGeometryResource, CacheVersion targetVersion, CachePlatform targetPlatform = CachePlatform.All)
         {
@@ -86,16 +87,16 @@ namespace TagTool.Lighting
                 vmfProbe.Direct = new VmfLight()
                 {
                     Direction = direction,
-                    Magnitude = dc,
+                    AnalyticalMask = dc,
                     Color = new RealRgbColor(r0, g0, b0),
-                    Scale = 1.0f
+                    Bandwidth = 1.0f
                 };
                 vmfProbe.Indirect = new VmfLight()
                 {
                     Direction = new RealVector3d(0, 0, 1),
-                    Magnitude = dc,
+                    AnalyticalMask = dc,
                     Color = new RealRgbColor(r1, g1, b1),
-                    Scale = 0.0f
+                    Bandwidth = 0.0f
                 };
 
                 var qudraticShProbe = ConvertVmfLightprobe(vmfProbe);
@@ -133,18 +134,54 @@ namespace TagTool.Lighting
             return halfsh;
         }
 
+        public static float DecompressedNormalizedBandwidth(float y)
+        {
+            if (y < 0.0f) y = 0.0f;
+            if (y > 1.0f) y = 1.0f;
+            return (float)((Math.Pow(56.976875 - (y * 56.0), -0.93375814) * 55.384312) - 0.81427675);
+        }
+
         public static SphericalHarmonics.SH3Probe ConvertVmfLightprobe(DualVmfBasis vmf)
         {
-            var directLinear = new[] { vmf.Direct.Magnitude, -vmf.Direct.Direction.J, vmf.Direct.Direction.K, -vmf.Direct.Direction.I };
-            var indirectLinear = new[] { vmf.Indirect.Magnitude, -vmf.Indirect.Direction.J, vmf.Indirect.Direction.K, -vmf.Indirect.Direction.I };
+            float[] dczh = new float[3];
+            float[] iczh = new float[3];
+            VmfLight.EvalulateVmf(DecompressedNormalizedBandwidth(vmf.Direct.Bandwidth), dczh);
+            VmfLight.EvalulateVmf(DecompressedNormalizedBandwidth(vmf.Indirect.Bandwidth), iczh);
+
+            float[] sh_basis = new float[9];
+            SphericalHarmonics.EvaluateDirection(vmf.Direct.Direction, 3, sh_basis);
 
             var result = new SphericalHarmonics.SH3Probe();
-            for (int i = 0; i < 4; i++)
-            {
-                result.R[i] = (directLinear[i] * vmf.Direct.Color.Red) + (indirectLinear[i] * vmf.Indirect.Color.Red);
-                result.G[i] = (directLinear[i] * vmf.Direct.Color.Green) + (indirectLinear[i] * vmf.Indirect.Color.Green);
-                result.B[i] = (directLinear[i] * vmf.Direct.Color.Blue) + (indirectLinear[i] * vmf.Indirect.Color.Blue);
-            }
+            result.R[0] = (sh_basis[0] * dczh[0] * vmf.Direct.Color.Red) + (sh_basis[0] * iczh[0] * vmf.Indirect.Color.Red);
+            result.R[1] = (sh_basis[1] * dczh[1] * vmf.Direct.Color.Red);
+            result.R[2] = (sh_basis[2] * dczh[1] * vmf.Direct.Color.Red);
+            result.R[3] = (sh_basis[3] * dczh[1] * vmf.Direct.Color.Red);
+            result.R[4] = (sh_basis[4] * dczh[2] * vmf.Direct.Color.Red);
+            result.R[5] = (sh_basis[5] * dczh[2] * vmf.Direct.Color.Red);
+            result.R[6] = (sh_basis[6] * dczh[2] * vmf.Direct.Color.Red);
+            result.R[7] = (sh_basis[7] * dczh[2] * vmf.Direct.Color.Red);
+            result.R[8] = (sh_basis[8] * dczh[2] * vmf.Direct.Color.Red);
+
+            result.G[0] = (sh_basis[0] * dczh[0] * vmf.Direct.Color.Green) + (sh_basis[0] * iczh[0] * vmf.Indirect.Color.Green);
+            result.G[1] = (sh_basis[1] * dczh[1] * vmf.Direct.Color.Green);
+            result.G[2] = (sh_basis[2] * dczh[1] * vmf.Direct.Color.Green);
+            result.G[3] = (sh_basis[3] * dczh[1] * vmf.Direct.Color.Green);
+            result.G[4] = (sh_basis[4] * dczh[2] * vmf.Direct.Color.Green);
+            result.G[5] = (sh_basis[5] * dczh[2] * vmf.Direct.Color.Green);
+            result.G[6] = (sh_basis[6] * dczh[2] * vmf.Direct.Color.Green);
+            result.G[7] = (sh_basis[7] * dczh[2] * vmf.Direct.Color.Green);
+            result.G[8] = (sh_basis[8] * dczh[2] * vmf.Direct.Color.Green);
+
+            result.B[0] = (sh_basis[0] * dczh[0] * vmf.Direct.Color.Blue) + (sh_basis[0] * iczh[0] * vmf.Indirect.Color.Blue);
+            result.B[1] = (sh_basis[1] * dczh[1] * vmf.Direct.Color.Blue);
+            result.B[2] = (sh_basis[2] * dczh[1] * vmf.Direct.Color.Blue);
+            result.B[3] = (sh_basis[3] * dczh[1] * vmf.Direct.Color.Blue);
+            result.B[4] = (sh_basis[4] * dczh[2] * vmf.Direct.Color.Blue);
+            result.B[5] = (sh_basis[5] * dczh[2] * vmf.Direct.Color.Blue);
+            result.B[6] = (sh_basis[6] * dczh[2] * vmf.Direct.Color.Blue);
+            result.B[7] = (sh_basis[7] * dczh[2] * vmf.Direct.Color.Blue);
+            result.B[8] = (sh_basis[8] * dczh[2] * vmf.Direct.Color.Blue);
+
             return result;
         }
 

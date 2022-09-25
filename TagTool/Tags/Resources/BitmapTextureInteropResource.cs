@@ -41,7 +41,7 @@ namespace TagTool.Tags.Resources
         public byte HighResInSecondaryResource;
 
         [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
-        public int Unknown3;
+        public int ExponentBias;
 
         public int D3DFormat;
 
