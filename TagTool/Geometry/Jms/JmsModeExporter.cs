@@ -87,9 +87,17 @@ namespace TagTool.Geometry.Jms
                             CachedTag renderMethod = mode.Materials[mesh.Parts[partIndex].MaterialIndex].RenderMethod;
                             if (renderMethod != null)
                             {
-                                string[] nameParts = renderMethod.Name.Split('\\');
+                                string[] nameParts = renderMethod.Name.Split(new string[] { "\\shaders\\" }, StringSplitOptions.None);
                                 if (nameParts.Length >= 1)
                                     renderMaterialName = nameParts.Last();
+                                else
+                                {
+                                    nameParts = renderMethod.Name.Split('\\');
+                                    if (nameParts.Length >= 1)
+                                        renderMaterialName = nameParts.Last();
+                                    else
+                                        renderMaterialName = renderMethod.Name;
+                                }                                
                             }
 
                             JmsFormat.JmsMaterial newMaterial = new JmsFormat.JmsMaterial
