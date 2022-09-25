@@ -116,18 +116,18 @@ namespace TagTool.Lighting
             vmf.Direct.Direction.I = v17 / v20;
             vmf.Direct.Direction.J = v18 / v20;
             vmf.Direct.Direction.K = v19 / v20;
-            vmf.Direct.Magnitude = c0.a;
+            vmf.Direct.AnalyticalMask = c0.a;
             vmf.Direct.Color.Red = (((c2.r * 2.0f) + c1.r) - 1.0f) * intensity;
             vmf.Direct.Color.Green = (((c2.g * 2.0f) + c1.g) - 1.0f) * intensity;
             vmf.Direct.Color.Blue = (((c2.b * 2.0f) + c1.b) - 1.0f) * intensity;
-            vmf.Direct.Scale = v20;
+            vmf.Direct.Bandwidth = v20;
             vmf.Indirect = new VmfLight();
             vmf.Indirect.Direction = new RealVector3d();
-            vmf.Indirect.Magnitude = c0.a;
+            vmf.Indirect.AnalyticalMask = c0.a;
             vmf.Indirect.Color.Red = intensity * c3.r;
             vmf.Indirect.Color.Green = intensity * c3.g;
             vmf.Indirect.Color.Blue = intensity * c3.b;
-            vmf.Indirect.Scale = 0.0f;
+            vmf.Indirect.Bandwidth = 0.0f;
             return vmf;
         }
 
