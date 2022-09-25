@@ -70,7 +70,7 @@ namespace TagTool.Commands.ScenarioLightmaps
                     {
                         var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
                         var meshReader = new MeshReader(Cache, mesh);
-                        objExtractor.ExtractMesh(meshReader, vertexCompressor);
+                        objExtractor.ExtractMesh(meshReader, vertexCompressor, null);
                     }
 
                     objExtractor.Finish();

@@ -47,8 +47,7 @@ namespace TagTool.Geometry
         /// <param name="transform">An optional transform to apply to the vertices</param>
         /// <param name="materials">An optional list of materials for naming materials properly</param>
 
-        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, string name = null, Matrix4x4? transform = null,
-            List<RenderMaterial> materials = null)
+        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, List<RenderMaterial> materials, string name = null, Matrix4x4? transform = null)
         {
             List<ObjVertex> vertices;
             if (CacheContext.Version >= CacheVersion.HaloReach)
