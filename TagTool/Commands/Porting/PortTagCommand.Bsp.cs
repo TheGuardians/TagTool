@@ -72,8 +72,11 @@ namespace TagTool.Commands.Porting
                 }
                 cluster.DecoratorGrids = newDecoratorGrids;
                 
-                foreach(var cubemap in cluster.ClusterCubemaps)
-                    cubemap.Position = cubemap.ReferencePoints[0].ReferencePoint;
+                if (BlamCache.Version >= CacheVersion.HaloReach)
+                {
+                    foreach (var cubemap in cluster.ClusterCubemaps)
+                        cubemap.Position = cubemap.ReferencePoints[0].ReferencePoint;
+                }
             }
 
             // convert all the decorator vertex buffers
