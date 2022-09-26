@@ -87,16 +87,19 @@ namespace TagTool.Geometry.Jms
                             CachedTag renderMethod = mode.Materials[mesh.Parts[partIndex].MaterialIndex].RenderMethod;
                             if (renderMethod != null)
                             {
-                                string[] nameParts = renderMethod.Name.Split(new string[] { "\\shaders\\" }, StringSplitOptions.None);
+                                string renderMethodName = renderMethod.Name;
+                                if (renderMethodName == null)
+                                    renderMethodName = "shader_" + renderMethod.Index.ToString();
+                                string[] nameParts = renderMethodName.Split(new string[] { "\\shaders\\" }, StringSplitOptions.None);
                                 if (nameParts.Length >= 1)
                                     renderMaterialName = nameParts.Last();
                                 else
                                 {
-                                    nameParts = renderMethod.Name.Split('\\');
+                                    nameParts = renderMethodName.Split('\\');
                                     if (nameParts.Length >= 1)
                                         renderMaterialName = nameParts.Last();
                                     else
-                                        renderMaterialName = renderMethod.Name;
+                                        renderMaterialName = renderMethodName;
                                 }                                
                             }
 
