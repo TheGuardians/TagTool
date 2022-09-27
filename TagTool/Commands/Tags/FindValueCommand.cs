@@ -15,34 +15,52 @@ namespace TagTool.Commands.Tags
     public class FindValueCommand : Command
     {
         public GameCache Cache;
+        public CachedTag Tag;
 
-        public FindValueCommand(GameCache cache) : base(false,
+        public FindValueCommand(GameCache cache, CachedTag tag) : base(false,
 
             "FindValue",
-            "Performs a deep search for a field value",
+            "Performs a deep search for a field value.",
 
-            "Search <phrase>",
+            "FindValue <phrase> <group>",
 
-            "Performs a deep search for a field value")
+            "Performs a deep search for field values that contain the provided phrase."
+            + "\nOptionally specify the short name of a tag group to search within (e.g. hlmt)."
+            + "\nWhen used within an edited tag, search will be performed within that tag only.")
         {
             Cache = cache;
+            Tag = tag;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1)
+            if (args.Count < 1 || args.Count > 2)
                 return new TagToolError(CommandError.ArgCount);
 
             var phrase = args[0].ToLower().Trim();
+            var tagSet = Cache.TagCache.NonNull();
 
-            Console.WriteLine("Searching...");
+            if (args.Count == 2)
+            {
+                if (!Cache.TagCache.TryParseGroupTag(args[1], out var tagGroup))
+                    return new TagToolError(CommandError.CustomError, $"\"{args[1]}\" is not a valid tag group.");
+                else
+                    tagSet = Cache.TagCache.NonNull().Where(t => t.IsInGroup(tagGroup));
+            }
+            else if (Tag != null)
+                tagSet = new List<CachedTag>() { Tag };
+                
+
+            Console.WriteLine("Searching...\n");
+
             //monolithic cache doesn't play well with async due to taglayouts
             if (Cache is GameCacheMonolithic)
-                foreach (var tag in Cache.TagCache.NonNull())
+                foreach (var tag in tagSet)
                     PerformSearch(tag, phrase);
             else
-                Parallel.ForEach(Cache.TagCache.NonNull(), tag => PerformSearch(tag, phrase));
-            Console.WriteLine("Finished.");
+                Parallel.ForEach(tagSet, tag => PerformSearch(tag, phrase));
+
+            Console.WriteLine("\nFinished.");
             return true;
         }
 
@@ -69,6 +87,11 @@ namespace TagTool.Commands.Tags
                 if (data == null)
                     return;
 
+                string outputPrefix = $"{ShortTagName(tag)} :: ";
+
+                if (Tag != null)
+                    outputPrefix = "";
+
                 switch (data)
                 {
                     case StringId stringId:
@@ -77,11 +100,11 @@ namespace TagTool.Commands.Tags
                             {
                                 var stringValue = Cache.StringTable.GetString(stringId);
                                 if (stringValue.ToLower().Contains(phrase))
-                                    Console.WriteLine($"{ShortTagName(tag)} :: {path} = {stringValue}");
+                                    Console.WriteLine($"{outputPrefix}{path} = {stringValue}");
                             }
                             catch
                             {
-                                new TagToolError(CommandError.CustomError, $"{ShortTagName(tag)} :: invalid string id found! {path}");
+                                new TagToolError(CommandError.CustomError, $"{outputPrefix}{path} invalid string id found! {path}");
                             }
                         }
                         break;
@@ -105,7 +128,7 @@ namespace TagTool.Commands.Tags
                         {
                             var stringValue = data.ToString();
                             if (stringValue.ToLower().Contains(phrase))
-                                Console.WriteLine($"{ShortTagName(tag)} :: {path} = {stringValue}");
+                                Console.WriteLine($"{outputPrefix}{path} = {stringValue}");
                         }
                         break;
                 }

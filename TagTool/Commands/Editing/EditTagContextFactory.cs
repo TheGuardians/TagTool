@@ -28,6 +28,7 @@ using CommandsGen2 = TagTool.Commands.Gen2;
 using DefinitionsGen4 = TagTool.Tags.Definitions.Gen4;
 using CommandsGen4 = TagTool.Commands.Gen4;
 using TagTool.Commands.Common;
+using TagTool.Commands.Tags;
 
 namespace TagTool.Commands.Editing
 {
@@ -194,6 +195,7 @@ namespace TagTool.Commands.Editing
             commandContext.AddCommand(new ForEachCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new SaveTagChangesCommand(cache, tag, definition));
             commandContext.AddCommand(new ExportCommandsCommand(cache, definition as TagStructure));
+            commandContext.AddCommand(new FindValueCommand(cache, tag));
 
             commandContext.AddCommand(new ExitToCommand(contextStack));
 
