@@ -1538,12 +1538,13 @@ namespace TagTool.Commands.Porting
         public bool ConvertScriptUsingPresets(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
         {
             // Return false to convert normally.
-
+            var blamScripts = ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)];
             if (BlamCache.Platform == CachePlatform.MCC)
             {
-                switch (expr.Opcode)
+                var opName = blamScripts[expr.Opcode].Name;
+                switch (opName)
                 {
-                    case 0x0FA: // vehicle_test_seat_list
+                    case "vehicle_test_seat_list":
                         expr.Opcode = 0x114;
                         if (expr.Flags == HsSyntaxNodeFlags.Group &&
                             expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
@@ -1552,7 +1553,7 @@ namespace TagTool.Commands.Porting
                         }
                         return true;
 
-                    case 0x0FB: // vehicle_test_seat
+                    case "vehicle_test_seat":
                         expr.Opcode = 0x115; // -> vehicle_test_seat_unit
                         if (expr.Flags == HsSyntaxNodeFlags.Group &&
                             expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
@@ -1561,48 +1562,48 @@ namespace TagTool.Commands.Porting
                         }
                         return true;
 
-                    case 0x1B8: // campaign_metagame_award_primary_skull
+                    case "campaign_metagame_award_primary_skull":
                         expr.Opcode = 0x1E5; // ^
                         return true;
 
-                    case 0x1B9: //campaign_metagame_award_secondary_skull
+                    case "campaign_metagame_award_secondary_skull":
                         expr.Opcode = 0x1E6; // ^
                         return true;
 
-                    case 0x2D3: // player_action_test_cinematic_skip
+                    case "player_action_test_cinematic_skip":
                         expr.Opcode = 0x2F5; // player_action_test_jump
                         return true;
 
-                    case 0x33D: // cinematic_object_get_unit
-                    case 0x33E: // cinematic_object_get_scenery
-                    case 0x33F: // cinematic_object_get_effect_scenery
+                    case "cinematic_object_get_unit":
+                    case "cinematic_object_get_scenery":
+                    case "cinematic_object_get_effect_scenery":
                         expr.Opcode = 0x391; // -> cinematic_object_get
                         return true;
-                    case 0x34B: // cinematic_scripting_create_object
+                    case "cinematic_scripting_create_object":
                         expr.Opcode = 0x6A2;
                         return true;
-                    case 0x34D: // cinematic_scripting_start_animation
+                    case "cinematic_scripting_start_animation":
                         expr.Opcode = 0x6A1;
                         return true;
-                    case 0x34E: // cinematic_scripting_destroy_object
+                    case "cinematic_scripting_destroy_object":
                         expr.Opcode = 0x6A6;
                         return true;
-                    case 0x353: // cinematic_scripting_create_and_animate_object
+                    case "cinematic_scripting_create_and_animate_object":
                         expr.Opcode = 0x6A3;
                         return true;
-                    case 0x354: // cinematic_scripting_create_and_animate_cinematic_object
+                    case "cinematic_scripting_create_and_animate_cinematic_object":
                         expr.Opcode = 0x6A5;
                         return true;
-                    case 0x355: // cinematic_scripting_create_and_animate_object_no_animation
+                    case "cinematic_scripting_create_and_animate_object_no_animation":
                         expr.Opcode = 0x6A4;
                         return true;
-                    case 0x3CE: // chud_show_weapon_stats
+                    case "chud_show_weapon_stats":
                         expr.Opcode = 0x423; // -> chud_show_crosshair
                         return true;
-                    case 0x44E: // objectives_secondary_show
+                    case "objectives_secondary_show":
                         expr.Opcode = 0x4AE; // -> objectives_show
                         return true;
-                    case 0x450: // objectives_secondary_unavailable
+                    case "objectives_secondary_unavailable":
                         expr.Opcode = 0x4B2; // -> objectives_show
                         return true;
 
