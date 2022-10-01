@@ -117,23 +117,24 @@ namespace TagTool.Commands.Porting
         {
             if (bsp.Bsp3dSupernodes != null && bsp.Bsp3dSupernodes.Count > 0)
             {
-                var largebuilder = new LargeCollisionBSPBuilder();
-                var gen3builder = new CollisionBSPGen3Builder();
                 var resizer = new ResizeCollisionBSP();
-
                 var largebsp = resizer.GrowCollisionBsp(bsp);
-                if (PortingOptions.Current.Gen1Collision)
-                {
-                    if (!largebuilder.generate_bsp(ref largebsp, false) || !resizer.collision_bsp_check_counts(largebsp))
-                        new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
-                }
-                else
-                {
-                    gen3builder.Bsp = largebsp;
-                    if (!gen3builder.build_bsp() || !resizer.collision_bsp_check_counts(largebsp))
-                        new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
-                }
+                // var largebuilder = new LargeCollisionBSPBuilder();
+                // var gen3builder = new CollisionBSPGen3Builder();
 
+                //if (PortingOptions.Current.Gen1Collision)
+                //{
+                //    if (!largebuilder.generate_bsp(ref largebsp, false) || !resizer.collision_bsp_check_counts(largebsp))
+                //        new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
+                //}
+                //else
+                //{
+                //    gen3builder.Bsp = largebsp;
+                //    if (!gen3builder.build_bsp() || !resizer.collision_bsp_check_counts(largebsp))
+                //        new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
+                //}
+                var superNodeConverter = new SupernodeToNodeConverter();
+                largebsp = superNodeConverter.Convert(largebsp);
                 bsp = resizer.ShrinkCollisionBsp(largebsp);
             }
 
@@ -152,20 +153,22 @@ namespace TagTool.Commands.Porting
         {
             if (largebsp.Bsp3dSupernodes != null && largebsp.Bsp3dSupernodes.Count > 0)
             {
-                var largebuilder = new LargeCollisionBSPBuilder();
-                var gen3builder = new CollisionBSPGen3Builder();
+                var superNodeConverter = new SupernodeToNodeConverter();
+                largebsp = superNodeConverter.Convert(largebsp);
+                //var largebuilder = new LargeCollisionBSPBuilder();
+                //var gen3builder = new CollisionBSPGen3Builder();
 
-                if (PortingOptions.Current.Gen1Collision)
-                {
-                    if (!largebuilder.generate_bsp(ref largebsp, false))
-                        new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
-                }
-                else
-                {
-                    gen3builder.Bsp = largebsp;
-                    if (!gen3builder.build_bsp())
-                        new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
-                }
+                //if (PortingOptions.Current.Gen1Collision)
+                //{
+                //    if (!largebuilder.generate_bsp(ref largebsp, false))
+                //        new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
+                //}
+                //else
+                //{
+                //    gen3builder.Bsp = largebsp;
+                //    if (!gen3builder.build_bsp())
+                //        new TagToolError(CommandError.CustomError, "Failed to generate collision bsp!");
+                //}
             }
 
             largebsp.Bsp3dNodes.AddressType = CacheAddressType.Data;
