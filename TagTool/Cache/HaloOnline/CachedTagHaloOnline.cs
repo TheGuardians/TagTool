@@ -96,10 +96,10 @@ namespace TagTool.Cache.HaloOnline
         {
             Checksum = reader.ReadUInt32();                        // 0x00 uint32 checksum
             TotalSize = reader.ReadUInt32();                       // 0x04 uint32 total size
-            var numDependencies = reader.ReadInt16();              // 0x08 int16  dependencies count
-            var numDataFixups = reader.ReadInt16();                // 0x0A int16  data fixup count
-            var numResourceFixups = reader.ReadInt16();            // 0x0C int16  resource fixup count
-            var numTagReferenceFixups = reader.ReadInt16();        // 0x0E int16  tag reference fixup count(was padding)
+            var numDependencies = reader.ReadUInt16();              // 0x08 int16  dependencies count
+            var numDataFixups = reader.ReadUInt16();                // 0x0A int16  data fixup count
+            var numResourceFixups = reader.ReadUInt16();            // 0x0C int16  resource fixup count
+            var numTagReferenceFixups = reader.ReadUInt16();        // 0x0E int16  tag reference fixup count(was padding)
             Offset = reader.ReadUInt32();                // 0x10 uint32 main struct offset
             var groupTag = new Tag(reader.ReadInt32());            // 0x14 int32  group tag
             var parentGroupTag = new Tag(reader.ReadInt32());      // 0x18 int32  parent group tag
@@ -138,10 +138,10 @@ namespace TagTool.Cache.HaloOnline
         {
             writer.Write(Checksum);
             writer.Write((uint)TotalSize);
-            writer.Write((short)Dependencies.Count);
-            writer.Write((short)PointerOffsets.Count);
-            writer.Write((short)ResourcePointerOffsets.Count);
-            writer.Write((short)TagReferenceOffsets.Count);
+            writer.Write((ushort)Dependencies.Count);
+            writer.Write((ushort)PointerOffsets.Count);
+            writer.Write((ushort)ResourcePointerOffsets.Count);
+            writer.Write((ushort)TagReferenceOffsets.Count);
             writer.Write(DefinitionOffset);
             writer.Write(Group.Tag.Value);
             writer.Write(Group.ParentTag.Value);
