@@ -719,6 +719,19 @@ namespace TagTool.Commands.Porting
                     AddGametypeObjects(scnr);
             }
 
+            if (scnr.PlayerStartingProfile == null || scnr.PlayerStartingProfile.Count == 0)
+            {
+                scnr.PlayerStartingProfile = new List<Scenario.PlayerStartingProfileBlock>() {
+                    new Scenario.PlayerStartingProfileBlock() {
+                        Name = "start_assault",
+                        PrimaryWeapon = CacheContext.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap"),
+                        PrimaryRoundsLoaded = 32,
+                        PrimaryRoundsTotal = 108,
+                        StartingFragGrenadeCount = 2
+                    }
+                };
+            }
+
             return scnr;
         }
 
