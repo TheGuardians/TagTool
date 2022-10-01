@@ -336,8 +336,9 @@ namespace TagTool.Tags.Definitions
                 ChooseAllMembers
             }
 
-            [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             public class InstanceMember : TagStructure
 			{
                 public int SubgroupIndex; // if this member is chosen, this subgroup will be chosen as well
@@ -347,9 +348,11 @@ namespace TagTool.Tags.Definitions
                 public int InstancePlacementMask1;
                 public int InstancePlacementMask2;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
                 public int InstancePlacementMask3;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
                 public int InstancePlacementMask4;
             }
         }
