@@ -521,7 +521,7 @@ namespace TagTool.Commands.Porting.Gen2
                 var instancedef = gen2Tag.InstancedGeometriesDefinitions[instanced.InstanceDefinition];
                 if (instancedef.BspPhysics != null && instancedef.BspPhysics.Count > 0)
                 {
-                    newinstance.Flags |= InstancedGeometryInstance.FlagsValue.Collidable;
+                    newinstance.Flags |= InstancedGeometryInstance.InstancedGeometryFlags.Collidable;
                     newinstance.BspPhysics = new List<CollisionBspPhysicsDefinition>
                     {
                         new CollisionBspPhysicsDefinition

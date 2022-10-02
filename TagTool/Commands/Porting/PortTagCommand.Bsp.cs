@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
@@ -90,7 +91,7 @@ namespace TagTool.Commands.Porting
             sbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(geometry);
 
             sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp, out StructureBspTagResources sbspTagResources);
-            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, instance);
+            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, sbspTagResources, instance);
             sbsp.UseResourceItems = 1;
 
             //
@@ -114,12 +115,51 @@ namespace TagTool.Commands.Porting
             {
                 // Temporary fix for collision - prior to sbsp version 3, instance buckets were used for collision
                 sbsp.ImportVersion = 2;
-                InstanceBucketGenerator.Generate(sbsp, sbspTagResources);
 
+                ConvertInstanceBucketsReach(sbsp, sbspTagResources);
                 ConvertReachEnvironmentMopp(sbsp);
             }
 
             return sbsp;
+        }
+
+        void ConvertInstanceBucketsReach(ScenarioStructureBsp sbsp, StructureBspTagResources resources)
+        {
+            for (int i = 0; i < sbsp.Clusters.Count; i++)
+            {
+                var cluster = sbsp.Clusters[i];
+                var clusterMesh = sbsp.Geometry.Meshes[cluster.MeshIndex];
+
+                clusterMesh.InstanceBuckets = new List<Mesh.InstancedBucketBlock>();
+
+                var instanceGroupSphere = sbsp.ClusterToInstanceGroupSpheres[i];
+                for (int j = 0; j < instanceGroupSphere.InstanceGroupIndices.Count; j++)
+                {
+                    var instanceSphere = sbsp.InstanceGroupToInstanceSpheres[instanceGroupSphere.InstanceGroupIndices[j].Index];
+                    for (int k = 0; k < instanceSphere.InstanceIndices.Count; k++)
+                    {
+                        int instanceIndex = instanceSphere.InstanceIndices[k].Index;
+                        if (instanceIndex < 0 || instanceIndex >= sbsp.InstancedGeometryInstances.Count)
+                            continue;
+
+                        var instance = sbsp.InstancedGeometryInstances[instanceIndex];
+                        var defintion = resources.InstancedGeometry[instance.DefinitionIndex];
+
+                        var instanceBucket = clusterMesh.InstanceBuckets.FirstOrDefault(x => x.MeshIndex == defintion.MeshIndex && x.DefinitionIndex == instance.DefinitionIndex);
+                        if (instanceBucket == null)
+                        {
+                            instanceBucket = new Mesh.InstancedBucketBlock();
+                            instanceBucket.MeshIndex = defintion.MeshIndex;
+                            instanceBucket.DefinitionIndex = instance.DefinitionIndex;
+                            instanceBucket.Instances = new List<Mesh.InstancedBucketBlock.InstanceIndexBlock>();
+                            clusterMesh.InstanceBuckets.Add(instanceBucket);
+                        }
+
+                        if(!instanceBucket.Instances.Any(x => x.InstanceIndex == instanceIndex))
+                            instanceBucket.Instances.Add(new Mesh.InstancedBucketBlock.InstanceIndexBlock() { InstanceIndex = (short)instanceIndex });
+                    }
+                }
+            }
         }
 
         public CollisionBspPhysicsDefinition ConvertCollisionBspPhysicsReach(CollisionBspPhysicsReach bspPhysicsReach)
