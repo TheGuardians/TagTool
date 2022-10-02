@@ -89,7 +89,7 @@ namespace TagTool.Geometry.Jms
                             {
                                 string renderMethodName = renderMethod.Name;
                                 if (renderMethodName == null)
-                                    renderMethodName = "shader_" + renderMethod.Index.ToString();
+                                    renderMethodName = $"{renderMethod.Group.Tag}_" + $"0x{renderMethod.Index:X4}";
                                 string[] nameParts = renderMethodName.Split(new string[] { "\\shaders\\" }, StringSplitOptions.None);
                                 if (nameParts.Length >= 1)
                                     renderMaterialName = nameParts.Last();
