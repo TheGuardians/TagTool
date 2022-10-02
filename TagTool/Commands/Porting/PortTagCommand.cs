@@ -275,6 +275,10 @@ namespace TagTool.Commands.Porting
 
                 if (TagIsValid(blamTag, blamCacheStream, out result))
                 { 
+                    if(blamTag.Name == null)
+                    {
+                        blamTag.Name = $"{blamTag.Group.Tag}_" + $"{blamTag.Index:X4}";
+                    }
                     var oldFlags = Flags;
                     result = ConvertTagInternal(cacheStream, blamCacheStream, resourceStreams, blamTag);
 
@@ -1851,7 +1855,10 @@ namespace TagTool.Commands.Porting
 		{
             // TODO: refactor for Halo 2
 
-			if (weaponFlags.OldFlags.HasFlag(WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode))
+            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                return weaponFlags;
+
+            if (weaponFlags.OldFlags.HasFlag(WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode))
 				weaponFlags.OldFlags &= ~WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode;
 
 			if (!Enum.TryParse(weaponFlags.OldFlags.ToString(), out weaponFlags.NewFlags))
@@ -1866,6 +1873,9 @@ namespace TagTool.Commands.Porting
             if (barrelflags.Halo3.HasFlag(BarrelFlags.Halo3Value.FiresLockedProjectiles))
                 barrelflags.Halo3 &= ~BarrelFlags.Halo3Value.FiresLockedProjectiles;
 
+            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                return barrelflags;
+
             if (!Enum.TryParse(barrelflags.Halo3.ToString(), out barrelflags.HaloOnline))
                 throw new NotSupportedException(barrelflags.Halo3.ToString());
 
@@ -1874,6 +1884,9 @@ namespace TagTool.Commands.Porting
 
         private object ConvertTargetFlags(Model.Target.TargetLockOnFlags target)
         {
+            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                return target;
+
             if (BlamCache.Version <= CacheVersion.Halo3ODST)
                 if (!Enum.TryParse(target.Flags.ToString(), out target.Flags_HO))
                     throw new FormatException(BlamCache.Version.ToString());

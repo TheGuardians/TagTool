@@ -85,6 +85,9 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
+            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                return damageReportingType;
+
             if (value == null || !Enum.TryParse(value, out damageReportingType.HaloOnline))
             {
                 new TagToolWarning($"Unsupported Damage reporting type '{value}'. Using default.");

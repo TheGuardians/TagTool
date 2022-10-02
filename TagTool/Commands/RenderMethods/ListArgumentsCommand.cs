@@ -88,6 +88,22 @@ namespace TagTool.Commands.RenderMethods
                 filter.ShowFullResult = true;
 
 
+            if (filter.ShowFullResult)
+                output.AppendLine("\n  Options");
+
+            RenderMethodDefinition shader;
+            using (var cacheStream = Cache.OpenCacheRead())
+                shader = Cache.Deserialize<RenderMethodDefinition>(cacheStream, Definition.BaseRenderMethod);
+
+            for (var i = 0; i < Definition.Options.Count; i++)
+            {
+                var category = Cache.StringTable.GetString(shader.Categories[i].Name);
+                var option = Cache.StringTable.GetString(shader.Categories[i].ShaderOptions[Definition.Options[i].OptionIndex].Name);
+
+                if (filter.ShowFullResult)
+                    output.AppendLine(String.Format("    {0} - {1}", category, option));
+            }
+
             foreach (var property in Definition.ShaderProperties)
             {
                 RenderMethodTemplate template;
