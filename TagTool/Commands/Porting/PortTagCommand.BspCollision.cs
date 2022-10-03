@@ -103,6 +103,18 @@ namespace TagTool.Commands.Porting
                         instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition);
                         instancedGeometry.CollisionMoppCodes.Add(moppCode);
                     }
+                    else if(instancedGeometry.CollisionInfo.Surfaces.Count == 0 && instancedGeometry.Polyhedra.Count > 0)
+                    {
+                        var mopp = new List<byte> { 0 };
+                        var moppCode = new TagHkpMoppCode()
+                        {
+                            ReferencedObject = new HkpReferencedObject { ReferenceCount = 128 },
+                            Info = new CodeInfo(),
+                            ArrayBase = new HkArrayBase { Size = (uint)mopp.Count, CapacityAndFlags = (uint)(mopp.Count | 0x80000000) },
+                            Data = new TagBlock<byte>(CacheAddressType.Data, mopp)
+                        };
+                        instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition) { moppCode };
+                    }
 
                     instancedGeometry.CollisionInfo = convertedCollisionBsp;
                 });
