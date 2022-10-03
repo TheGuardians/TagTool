@@ -455,7 +455,13 @@ namespace TagTool.Commands.Porting
 
             //
             // Reach fixups
-            //    
+            //
+
+            if(BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                for(int i = 0; i < scnr.TriggerVolumes.Count; i++)
+                    scnr.TriggerVolumes[i] = ConvertTriggerVolumeReach(scnr.TriggerVolumes[i]);
+            }
 
             if (BlamCache.Version >= CacheVersion.HaloReach && Flags.HasFlag(PortingFlags.Recursive))
             {
@@ -733,6 +739,45 @@ namespace TagTool.Commands.Porting
             }
 
             return scnr;
+        }
+
+        private Scenario.TriggerVolume ConvertTriggerVolumeReach(Scenario.TriggerVolume volume)
+        {
+            RealVector3d ProjectPointOnPlane(RealPlane3d plane, RealVector3d point)
+            {
+                var o = new RealVector3d(plane.I * plane.D, plane.J * plane.D, plane.K * plane.D);
+                var v = point - o;
+                var n = plane.Normal;
+                float dist = (n.I * v.I) + (n.J * v.J) + (n.K * v.K);
+                return point - dist * n;
+            }
+
+
+            if (volume.Type == Scenario.TriggerVolumeType.Sector)
+            {
+                foreach (var triangle in volume.RuntimeTriangles)
+                {
+                    triangle.BoundsX0 = triangle.BoundsY0 = triangle.BoundsZ0 = float.MaxValue;
+                    triangle.BoundsX1 = triangle.BoundsY1 = triangle.BoundsZ1 = -float.MaxValue;
+
+                    var points = new[] { triangle.Vertex0, triangle.Vertex1, triangle.Vertex2 };
+                    for (int i = 0; i < points.Length; i++)
+                    {
+                        var proj = ProjectPointOnPlane(triangle.Plane0, new RealVector3d(points[i].X, points[i].Y, 0));
+                        triangle.BoundsX0 = Math.Min(triangle.BoundsX0, proj.I);
+                        triangle.BoundsX1 = Math.Max(triangle.BoundsX1, proj.I);
+                        triangle.BoundsY0 = Math.Min(triangle.BoundsY0, proj.J);
+                        triangle.BoundsY1 = Math.Max(triangle.BoundsY1, proj.J);
+                        triangle.BoundsZ0 = Math.Min(triangle.BoundsZ0, proj.K);
+                        triangle.BoundsZ1 = Math.Max(triangle.BoundsZ1, proj.K);
+                    }
+
+                    triangle.Plane1.Normal *= -1;
+                    triangle.Plane1.D *= -1;
+                }
+            }
+
+            return volume;
         }
 
         public void AddGametypeObjects(Scenario scnr)

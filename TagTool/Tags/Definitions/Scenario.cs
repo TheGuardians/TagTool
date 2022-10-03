@@ -1923,23 +1923,37 @@ namespace TagTool.Tags.Definitions
                 public RealEulerAngles2d Normal;
             }
 
-            [TagStructure(Size = 0x50)]
+            [TagStructure(Size = 0x50, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x70, MinVersion = CacheVersion.HaloReach)]
             public class RuntimeTriangle : TagStructure
 			{
-                public RealPlane3d LowerPlane;
-                public RealPlane3d UpperPlane;
+                public RealPlane3d Plane0;
+                public RealPlane3d Plane1;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public RealPlane3d Plane2;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public RealPlane3d Plane3;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public RealPlane3d Plane4;
 
                 public RealPoint2d Vertex0;
                 public RealPoint2d Vertex1;
                 public RealPoint2d Vertex2;
 
+                [TagField(Length = 0x8, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+                public byte[] Padding1;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float BoundsX0;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float BoundsX1;
-
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float BoundsY0;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float BoundsY1;
-
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float BoundsZ0;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public float BoundsZ1;
             }
         }
