@@ -473,6 +473,12 @@ namespace TagTool.Commands.Porting
 
                 }
 
+                foreach (var sound in definition.SoundReferences)
+                    Enum.TryParse(sound.FlagsReach.ToString(), out sound.Flags);
+
+                foreach (var effect in definition.SoundReferences)
+                    Enum.TryParse(effect.FlagsReach.ToString(), out effect.Flags);
+
                 //convert weapon types
                 foreach (var mode in definition.Modes)
                 {
