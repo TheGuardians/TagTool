@@ -72,7 +72,7 @@ namespace TagTool.Commands.Bitmaps
                 var bitmapName = (Bitmap.Images.Count > 1) ? i.ToString() : name;
 
                 var outPath = Path.Combine(ddsOutDir, bitmapName);
-                var ddsFile = BitmapExtractor.ExtractBitmap(Cache, Bitmap, i);
+                var ddsFile = BitmapExtractor.ExtractBitmap(Cache, Bitmap, i, Tag.Name);
 
                 if (File.Exists(outPath + ".dds"))
                 {

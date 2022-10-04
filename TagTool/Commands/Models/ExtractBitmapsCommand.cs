@@ -83,7 +83,7 @@ namespace TagTool.Commands.Models
                                 using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                                 using(var writer = new EndianWriter(outStream))
                                 {
-                                    var ddsFile = BitmapExtractor.ExtractBitmap(CacheContext, bitmap, j);
+                                    var ddsFile = BitmapExtractor.ExtractBitmap(CacheContext, bitmap, j, property.TextureConstants[i].Bitmap.Name);
                                     ddsFile.Write(writer);
                                 }
                                     

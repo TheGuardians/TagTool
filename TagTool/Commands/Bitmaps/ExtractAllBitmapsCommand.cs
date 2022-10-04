@@ -69,7 +69,7 @@ namespace TagTool.Commands.Bitmaps
                         for (var i = 0; i < bitmap.Images.Count; i++)
                         {
                             var outPath = Path.Combine(ddsOutDir, ((bitmap.Images.Count > 1) ? i.ToString() : tag.Index.ToString("X8")) + ".dds");
-                            var ddsFile = BitmapExtractor.ExtractBitmap(Cache, bitmap, i);
+                            var ddsFile = BitmapExtractor.ExtractBitmap(Cache, bitmap, i, tag.Name);
                             if (ddsFile == null)
                                 continue;
                             using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))

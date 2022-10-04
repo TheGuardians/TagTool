@@ -23,8 +23,8 @@ namespace TagTool.Lighting
 
             var directionBitmap = sourceCache.Deserialize<Bitmap>(sourceStream, Lbsp.LightmapSHCoefficientsBitmap);
             var intensityBitmap = sourceCache.Deserialize<Bitmap>(sourceStream, Lbsp.LightmapDominantLightDirectionBitmap);
-            var convertedDirectionBitmap = BitmapConverter.ConvertGen3Bitmap(sourceCache, directionBitmap, 0, true);
-            var convertedIntensityBitmap = BitmapConverter.ConvertGen3Bitmap(sourceCache, intensityBitmap, 0, true);
+            var convertedDirectionBitmap = BitmapConverter.ConvertGen3Bitmap(sourceCache, directionBitmap, 0, Lbsp.LightmapSHCoefficientsBitmap.Name, true);
+            var convertedIntensityBitmap = BitmapConverter.ConvertGen3Bitmap(sourceCache, intensityBitmap, 0, Lbsp.LightmapDominantLightDirectionBitmap.Name, true);
 
             if (convertedDirectionBitmap == null || convertedIntensityBitmap == null)
                 return null;

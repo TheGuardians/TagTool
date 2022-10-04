@@ -56,7 +56,7 @@ namespace TagTool.Bitmaps
             }
         }
 
-        public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
+        public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex, string tagName)
         {
             if (cache is GameCacheHaloOnlineBase)
             {
@@ -66,7 +66,7 @@ namespace TagTool.Bitmaps
             }
             else if (CacheVersionDetection.GetGeneration(cache.Version) ==  CacheGeneration.Third)
             {
-                var baseBitmap = BitmapConverter.ConvertGen3Bitmap(cache, bitmap, imageIndex, true);
+                var baseBitmap = BitmapConverter.ConvertGen3Bitmap(cache, bitmap, imageIndex, tagName, true);
                 if (baseBitmap == null)
                     return null;
                 return new DDSFile(baseBitmap);
@@ -76,9 +76,9 @@ namespace TagTool.Bitmaps
             
         }
 
-        public static byte[] ExtractBitmapToDDSArray(GameCache cache, Bitmap bitmap, int imageIndex)
+        public static byte[] ExtractBitmapToDDSArray(GameCache cache, Bitmap bitmap, int imageIndex, string tagName)
         {
-            var ddsFile = ExtractBitmap(cache, bitmap, imageIndex);
+            var ddsFile = ExtractBitmap(cache, bitmap, imageIndex, tagName);
             var stream = new MemoryStream();
             using(var writer = new EndianWriter(stream))
             {

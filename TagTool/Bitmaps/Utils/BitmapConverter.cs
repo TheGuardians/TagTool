@@ -13,7 +13,7 @@ namespace TagTool.Bitmaps.Utils
 {
     public static class BitmapConverter
     {
-        public static BaseBitmap ConvertGen3Bitmap(GameCache cache, Bitmap bitmap, int imageIndex, bool forDDS = false)
+        public static BaseBitmap ConvertGen3Bitmap(GameCache cache, Bitmap bitmap, int imageIndex, string tagName, bool forDDS = false)
         {
             var image = bitmap.Images[imageIndex];
 
@@ -38,7 +38,18 @@ namespace TagTool.Bitmaps.Utils
                     definition = resource.Texture.Definition.Bitmap1;
                     otherDefinition = resource.Texture.Definition.Bitmap2;
                 }
-                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, definition, bitmap, imageIndex, true, pairIndex, otherDefinition, forDDS, cache.Version, cache.Platform);
+                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, 
+                    resource.Texture.Definition.SecondaryResourceData.Data, 
+                    definition, 
+                    bitmap, 
+                    imageIndex, 
+                    true, 
+                    pairIndex, 
+                    otherDefinition, 
+                    forDDS, 
+                    cache.Version,
+                cache.Platform,
+                    tagName);
             }
             else
             {
@@ -46,11 +57,33 @@ namespace TagTool.Bitmaps.Utils
                 if (resource == null)
                     return null;
 
-                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, resource.Texture.Definition.SecondaryResourceData.Data, resource.Texture.Definition.Bitmap, bitmap, imageIndex, false, 0, null, forDDS, cache.Version, cache.Platform);
+                return ConvertGen3Bitmap(resource.Texture.Definition.PrimaryResourceData.Data, 
+                    resource.Texture.Definition.SecondaryResourceData.Data, 
+                    resource.Texture.Definition.Bitmap, 
+                    bitmap, 
+                    imageIndex, 
+                    false, 
+                    0, 
+                    null, 
+                    forDDS, 
+                    cache.Version, 
+                    cache.Platform,
+                    tagName);
             }
         }
 
-        private static BaseBitmap ConvertGen3Bitmap(byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, bool forDDS, CacheVersion version, CachePlatform cachePlatform)
+        private static BaseBitmap ConvertGen3Bitmap(byte[] primaryData, 
+            byte[] secondaryData, 
+            BitmapTextureInteropDefinition definition, 
+            Bitmap bitmap, 
+            int imageIndex, 
+            bool isPaired, 
+            int pairIndex, 
+            BitmapTextureInteropDefinition otherDefinition, 
+            bool forDDS, 
+            CacheVersion version, 
+            CachePlatform cachePlatform,
+            string tagName)
         {
             if (primaryData == null && secondaryData == null)
                 return null;
@@ -152,6 +185,28 @@ namespace TagTool.Bitmaps.Utils
                     resultBitmap.UpdateFormat(BitmapFormat.Dxn);
                 }
             }
+            // fix dxt5 bumpmaps (h3 wraith bump)
+            else if (bitmap.Usage == Bitmap.BitmapUsageGlobalEnum.BumpMapfromHeightMap &&
+                bitmap.Images[imageIndex].Format == BitmapFormat.Dxt5 &&
+                tagName != @"levels\multi\zanzibar\bitmaps\palm_frond_a_bump") // this tag is actually an alpha test bitmap, ignore it
+            {
+                // convert to raw RGBA
+                byte[] rawData = BitmapDecoder.DecodeBitmap(resultData, bitmap.Images[imageIndex].Format, bitmap.Images[imageIndex].Width, bitmap.Images[imageIndex].Height);
+
+                // (0<->1) to (-1<->1)
+                for (int i = 0; i < rawData.Length; i += 4)
+                {
+                    rawData[i + 0] = (byte)((((rawData[i + 0] / 255.0f) + 1.007874015748031f) / 2.007874015748031f) * 255.0f);
+                    rawData[i + 1] = (byte)((((rawData[i + 1] / 255.0f) + 1.007874015748031f) / 2.007874015748031f) * 255.0f);
+                    rawData[i + 2] = (byte)((((rawData[i + 2] / 255.0f) + 1.007874015748031f) / 2.007874015748031f) * 255.0f);
+                    rawData[i + 3] = 0xFF;
+                }
+
+                // encode as DXN. unfortunately mips have artifacts, maybe this can be fixed?
+                resultData = EncodeDXN(rawData, bitmap.Images[imageIndex].Width, bitmap.Images[imageIndex].Height, out resultBitmap.MipMapCount, true);
+                resultBitmap.UpdateFormat(BitmapFormat.Dxn);
+                resultBitmap.Flags |= BitmapFlags.Compressed;
+            }
             else
             {
                 // fix slope_water bitmap conversion
@@ -241,6 +296,7 @@ namespace TagTool.Bitmaps.Utils
 
         private unsafe static void ConvertGen3BitmapDataMCC(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, CacheVersion version)
         {
+            int mipCount = 0;
             var pixelDataOffset = BitmapUtilsPC.GetTextureOffset(bitmap.Images[imageIndex], level);
             var pixelDataSize = BitmapUtilsPC.GetMipmapPixelDataSize(bitmap.Images[imageIndex], level);
 
@@ -262,7 +318,7 @@ namespace TagTool.Bitmaps.Utils
                 int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
                 int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 byte[] rgba = BitmapDecoder.DecodeDxnSigned(pixelData, width, height, true);
-                pixelData = EncodeDXN(rgba, width, height);
+                pixelData = EncodeDXN(rgba, width, height, out mipCount);
             }
             else if (bitmap.Images[imageIndex].Format == BitmapFormat.V8U8)
             {
@@ -270,7 +326,7 @@ namespace TagTool.Bitmaps.Utils
                 int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
                 int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 var rgba = BitmapDecoder.DecodeV8U8(pixelData, width, height, true);
-                pixelData = EncodeDXN(rgba, width, height);
+                pixelData = EncodeDXN(rgba, width, height, out mipCount);
             }
             else if (bitmap.Images[imageIndex].Format == BitmapFormat.V16U16)
             {
@@ -278,7 +334,7 @@ namespace TagTool.Bitmaps.Utils
                 int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
                 int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 var rgba = BitmapDecoder.DecodeV16U16(pixelData, width, height, true);
-                pixelData = EncodeDXN(rgba, width, height);
+                pixelData = EncodeDXN(rgba, width, height, out mipCount);
             }
             else if (bitmap.Images[imageIndex].Format == BitmapFormat.A2R10G10B10)
             {
@@ -530,7 +586,7 @@ namespace TagTool.Bitmaps.Utils
             }
         }
 
-        private static byte[] EncodeDXN(byte[] rgba, int width, int height, bool generateMips = false)
+        private static byte[] EncodeDXN(byte[] rgba, int width, int height, out int mipCount, bool generateMips = false)
         {
             string tempBitmap = $@"Temp\{Guid.NewGuid().ToString()}.dds";
 
@@ -545,7 +601,7 @@ namespace TagTool.Bitmaps.Utils
 
                 ProcessStartInfo info = new ProcessStartInfo($@"{Program.TagToolDirectory}\Tools\nvcompress.exe")
                 {
-                    Arguments = $"-bc5 {(generateMips ? "" : "-nomips")} {tempBitmap} {tempBitmap}",
+                    Arguments = $"-bc5 -normal -tonormal {(generateMips ? "" : "-nomips")} {tempBitmap} {tempBitmap}",
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     UseShellExecute = false,
@@ -560,6 +616,7 @@ namespace TagTool.Bitmaps.Utils
                 {
                     ddsFile = new DDSFile();
                     ddsFile.Read(reader);
+                    mipCount = ddsFile.Header.MipMapCount - 1;
                     return ddsFile.BitmapData;
                 }
             }
