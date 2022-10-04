@@ -57,6 +57,9 @@ namespace TagTool.Commands.Models
                     return new TagToolError(CommandError.ArgInvalid);
             }
 
+            if (!args[1].ToLower().EndsWith(".jms"))
+                args[1] += ".jms";
+
             var file = new FileInfo(args[1]);
 
             if (!file.Directory.Exists)
@@ -104,6 +107,8 @@ namespace TagTool.Commands.Models
             }
 
             jms.Write(file);
+            Console.WriteLine($"Exported to \"{file.FullName}\".");
+
             return true;
         }
 
