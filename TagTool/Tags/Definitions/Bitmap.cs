@@ -253,29 +253,15 @@ namespace TagTool.Tags.Definitions
             public sbyte Depth; // Pixels; DO NOT CHANGE
             public BitmapFlagsXbox XboxFlags; // The xbox 360 flags of the bitmap image. DO NOT CHANGE
 
-            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-            public byte[] Padding0;
-
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, EnumType = typeof(short))]
+            [TagField(MinVersion = CacheVersion.HaloReach, EnumType = typeof(sbyte))]
             public BitmapType Type; // The type of the bitmap image. DO NOT CHANGE
-
-            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
-            public byte[] Padding1;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public sbyte FourTimesLog2Size;
 
-            // Handle the BitmapFormat enum as a sbyte instead of a short. This converts the endianness indirectly.
-
-            [TagField(Flags = Padding, Length = 1, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
-            public byte[] Padding2;
-
+            [TagField(MinVersion = CacheVersion.Halo3Beta, EnumType = typeof(short))]
             public BitmapFormat Format; // The format of the bitmap image. DO NOT CHANGE
-
-            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public byte[] Padding3;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123, EnumType = typeof(ushort))]
             [TagField(MinVersion = CacheVersion.HaloReach, EnumType = typeof(byte))]
