@@ -11,7 +11,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
     [TagStructure(Size = 0xC4, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     [TagStructure(Size = 0xB8, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     [TagStructure(Size = 0xC8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-    [TagStructure(Size = 0x144, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x144, MinVersion = CacheVersion.HaloReach)]
     public class InstancedGeometryBlock : TagStructure
     {
         public int Checksum;
@@ -39,7 +39,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public TagBlock<PolyhedronPlaneEquation> PolyhedraPlaneEquations;
 
-        [TagField(Platform = CachePlatform.MCC)]
+        [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         public TagBlock<SmallSurfacesPlanes> SmallSurfacesPlanes;
         public TagBlock<StructureSurface> SurfacePlanes;
         public TagBlock<StructureSurfaceToTriangleMapping> Planes;

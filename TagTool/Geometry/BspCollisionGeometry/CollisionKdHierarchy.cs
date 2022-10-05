@@ -1,9 +1,11 @@
 ﻿using System;
+using TagTool.Cache;
 using TagTool.Tags;
 
 namespace TagTool.Geometry.BspCollisionGeometry
 {
-    [TagStructure(Size = 0x4C)]
+    [TagStructure(Size = 0x4C, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x50, Platform = CachePlatform.MCC)]
     public class CollisionKdHierarchyStatic : TagStructure
     {
         public int HashTotalCount;
@@ -13,6 +15,8 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public TagBlock<CollisionKdHierarchyStaticNodesBlock> Nodes;
         public TagBlock<CollisionKdHierarchyStaticInUseMasksBlock> InUseMasks;
         public TagBlock<ClusterTableBlock> ClusterTable;
+        [TagField(Length = 4, Platform = CachePlatform.MCC)]
+        public byte[] Padding1;
 
         [TagStructure(Size = 0x10)]
         public class CollisionKdHierarchyStaticHashTableDataBlock : TagStructure

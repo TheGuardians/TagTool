@@ -25,11 +25,8 @@ namespace TagTool.Cache.MCC
         public StringIDHeaderMCC StringIdsHeader;
         public int Language;
         public int MinorVersion;
-        public ulong Timestamp;
-        [TagField(Length = 4)]
-        public ulong[] SharedFileTimestamps;
-        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
-        public byte[] Unused2;
+        [TagField(Length = 6)]
+        public ulong[] Timestamps;
         [TagField(Length = 32)]
         public byte[] CreatorId;
         [TagField(Length = 32)]
@@ -55,13 +52,13 @@ namespace TagTool.Cache.MCC
         public byte[] ContentHash2;
         [TagField(Length = 0x14)]
         public byte[] ContentHash3;
-        [TagField(Length = 0x20, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 0x20)]
         public byte[] RSAKeyBlobHash;
         [TagField(Length = 0x100)]
         public byte[] RSASignature;
         public CacheFileSectionTable SectionTable;
         [TagField(Length = 0x3B00, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagField(Length = 0x9B20, MinVersion = CacheVersion.HaloReach)]
+        [TagField(Length = 0x9B00, MinVersion = CacheVersion.HaloReach)]
         public byte[] Unknown1;
         public Tag FooterSiganture;
 

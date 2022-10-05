@@ -85,6 +85,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public CollisionKdHierarchyStatic InstanceKdHierarchy;
 
+       
+
         public Bounds<float> WorldBoundsX;
         public Bounds<float> WorldBoundsY;
         public Bounds<float> WorldBoundsZ;
@@ -92,7 +94,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public List<SurfaceReference> StructureSurfacesH2;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         public List<StructureSurface> StructureSurfaces;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
@@ -189,6 +192,8 @@ namespace TagTool.Tags.Definitions
         public List<BspPreplacedDecalReferenceBlock> PreplacedDecals;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public RenderGeometry PreplacedDecalGeometry;
+
+      
 
         public List<StructureBspSoundClusterBlock> AcousticsSoundClusters;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -538,10 +543,11 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x118, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x118, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0xDC, MaxVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0xE0, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class Cluster : TagStructure
         {
             public Bounds<float> BoundsX;

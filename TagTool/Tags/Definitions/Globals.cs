@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x608, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x618, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline604673)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x614, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "globals", Tag = "matg", Size = 0x714, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x714, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.Original)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x7A8, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class Globals : TagStructure
 	{
@@ -170,7 +170,7 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "effg" })]
         public CachedTag EffectGlobals;
 
-        [TagField(Platform = CachePlatform.MCC)]
+        [TagField(Version = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         public CachedTag RenderObjectSkins;
 
         [TagField(ValidTags = new[] { "hcfd" }, MinVersion = CacheVersion.HaloReach)]

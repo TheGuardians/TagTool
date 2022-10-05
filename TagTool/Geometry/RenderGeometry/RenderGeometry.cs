@@ -5,11 +5,13 @@ using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Tags.Resources;
 using System;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Geometry
 {
     [TagStructure(Name = "render_geometry", Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "render_geometry", Size = 0x9C, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "render_geometry", Size = 0x9C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "render_geometry", Size = 0xA8, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class RenderGeometry : TagStructure
 	{
         /// <summary>
@@ -65,6 +67,9 @@ namespace TagTool.Geometry
         public List<WaterBoundingBox> WaterBoundingBoxes;
 
         public TagResourceReference Resource;
+
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        public List<NullBlock> ConstantBufferInterop;
 
         [TagStructure(Size = 0x20)]
         public class PerMeshPrtDataBlock : TagStructure
