@@ -61,9 +61,8 @@ namespace TagTool.Geometry.BspCollisionGeometry
             MiscoloredBsp = 1 << 0,
             ErrorFree = 1 << 1,
             SurfaceToTriangleRemapped = 1 << 2,
-            ExternalReferenceMesh = 1 << 3,
-            NoPhysics = 1 << 4,
-            StitchedPhysics = 1 << 5
+            NoPhysics = 1 << 3,
+            StitchedPhysics = 1 << 4
         }
 
         [TagStructure(Size = 0x80)]

@@ -91,9 +91,7 @@ namespace TagTool.Commands.Porting
                             instancedGeometry.RenderBsp[j] = ConvertCollisionBsp(instancedGeometry.RenderBsp[j]);
                     }
 
-                    if (instancedGeometry.CollisionInfo.Surfaces.Count > 0 &&
-                    (instancedGeometry.Polyhedra != null && instancedGeometry.Polyhedra.Count > 0) || 
-                    (instancedGeometry.CollisionMoppCodes != null && instancedGeometry.CollisionMoppCodes.Count > 0))
+                    if (instancedGeometry.CollisionInfo.Surfaces.Count > 0)
                     {
                         var moppCode = HavokMoppGenerator.GenerateMoppCode(instancedGeometry.CollisionInfo);
                         if (moppCode == null)
@@ -103,8 +101,9 @@ namespace TagTool.Commands.Porting
                         instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition);
                         instancedGeometry.CollisionMoppCodes.Add(moppCode);
                     }
-                    else if(instancedGeometry.CollisionInfo.Surfaces.Count == 0 && instancedGeometry.Polyhedra.Count > 0)
+                    else if (instancedGeometry.Polyhedra.Count > 0)
                     {
+                        new TagToolWarning($"Instanced geometry #{i} has physics but no collision bsp!");
                         var mopp = new List<byte> { 0 };
                         var moppCode = new TagHkpMoppCode()
                         {
@@ -113,7 +112,8 @@ namespace TagTool.Commands.Porting
                             ArrayBase = new HkArrayBase { Size = (uint)mopp.Count, CapacityAndFlags = (uint)(mopp.Count | 0x80000000) },
                             Data = new TagBlock<byte>(CacheAddressType.Data, mopp)
                         };
-                        instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition) { moppCode };
+                        instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition);
+                        instancedGeometry.CollisionMoppCodes.Add(moppCode);
                     }
 
                     instancedGeometry.CollisionInfo = convertedCollisionBsp;

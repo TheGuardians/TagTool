@@ -113,7 +113,7 @@ namespace TagTool.Commands.Porting
                         {
                             ConvertCollisionBspPhysicsReach(instancedgeo.BspPhysicsReach[0])
                         };
-                    };
+                    }
                 }
 
                 //convert cluster instanced geometry physics
