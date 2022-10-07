@@ -211,7 +211,7 @@ namespace TagTool.Tags.Definitions
                 IgnoresDeadBipeds = 1u << 27,
                 Unknown5 = 1u << 28,
                 Unknown6 = 1u << 29,
-                Unknown7 = 1u << 30,
+                LatchingDisabled = 1u << 30,
                 AccelerateAlongInputDirection = 1u << 31
             }
 
@@ -249,7 +249,7 @@ namespace TagTool.Tags.Definitions
                 IgnoresDeadBipeds = 1u << 27,
                 Unknown5 = 1u << 28,
                 Unknown6 = 1u << 29,
-                Unknown7 = 1u << 30,
+                LatchingDisabled = 1u << 30,
                 AccelerateAlongInputDirection = 1u << 31
             }
 
