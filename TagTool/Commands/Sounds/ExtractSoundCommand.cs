@@ -12,7 +12,7 @@ using TagTool.Cache.Monolithic;
 
 namespace TagTool.Commands.Sounds
 {
-    class ExtractSoundCommand : Command
+    public class ExtractSoundCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }

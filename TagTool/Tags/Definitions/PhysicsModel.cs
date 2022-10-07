@@ -162,11 +162,11 @@ namespace TagTool.Tags.Definitions
                 IgnoresSoundScenery = 1u << 15,
                 IgnoresCrates = 1u << 16,
                 IgnoresCreatures = 1u << 17,
-                Unknown19 = 1u << 19,
-                Unknown20 = 1u << 20,
-                Unknown21 = 1u << 21,
-                Unknown22 = 1u << 22,
-                Unknown23 = 1u << 23,
+                Unused0 = 1u << 19,
+                Unused1 = 1u << 20,
+                Unused2 = 1u << 21,
+                Unused3 = 1u << 22,
+                Unused4 = 1u << 23,
                 LocalizesPhysics = 1 << 24,
                 DisableLinearDamping = 1 << 25,
                 DisableAngularDamping = 1 << 26,
@@ -200,19 +200,19 @@ namespace TagTool.Tags.Definitions
                 IgnoresCreatures = 1u << 16,
                 IgnoresGiants = 1u << 17,
                 IgnoresEffectScenery = 1u << 18,
-                Unused1 = 1u << 19,     
-                Unknown1 = 1u << 20,
-                Unknown2 = 1u << 21,
-                Unknown3 = 1u << 22,
-                Unknown4 = 1u << 23,
+                Unused0 = 1u << 19,     
+                Unused1 = 1u << 20,
+                Unused2 = 1u << 21,
+                Unused3 = 1u << 22,
+                Unused4 = 1u << 23,
                 LocalizesPhysics = 1u << 24,
                 DisableLinearDamping = 1u << 25,
                 DisableAngularDamping = 1u << 26,
                 IgnoresDeadBipeds = 1u << 27,
-                Unknown5 = 1u << 28,
-                Unknown6 = 1u << 29,
+                ReciprocalAcc = 1u << 28,
+                ReciprocalAccONLY = 1u << 29,
                 LatchingDisabled = 1u << 30,
-                AccelerateAlongInputDirection = 1u << 31
+                MirroredAxis = 1u << 31
             }
 
             [Flags]
@@ -239,18 +239,18 @@ namespace TagTool.Tags.Definitions
                 IgnoresCreatures = 1u << 17,
                 IgnoresGiants = 1u << 18,
                 IgnoresEffectScenery = 1u << 19,
-                Unknown1 = 1u << 20,
-                Unknown2 = 1u << 21,
-                Unknown3 = 1u << 22,
-                Unknown4 = 1u << 23,
+                Unused0 = 1u << 20,
+                Unused1 = 1u << 21,
+                Unused2 = 1u << 22,
+                Unused3 = 1u << 23,
                 LocalizesPhysics = 1u << 24,
                 DisableLinearDamping = 1 << 25,
                 DisableAngularDamping = 1 << 26,
                 IgnoresDeadBipeds = 1u << 27,
-                Unknown5 = 1u << 28,
-                Unknown6 = 1u << 29,
+                ReciprocalAcc = 1u << 28,
+                ReciprocalAccOnly = 1u << 29,
                 LatchingDisabled = 1u << 30,
-                AccelerateAlongInputDirection = 1u << 31
+                MirroredAxis = 1u << 31
             }
 
             [Flags]
@@ -278,17 +278,17 @@ namespace TagTool.Tags.Definitions
                 IgnoresCreatures = 1u << 18,
                 IgnoresGiants = 1u << 19,
                 IgnoresEffectScenery = 1u << 20,
-                Unknown21 = 1u << 21,
-                Unknown22 = 1u << 22,
-                Unknown23 = 1u << 23,
+                Unused0 = 1u << 21,
+                Unused1 = 1u << 22,
+                Unused2 = 1u << 23,
                 LocalizesPhysics = 1u << 24,
                 DisableLinearDamping = 1 << 25,
                 DisableAngularDamping = 1 << 26,
                 Unknown27 = 1 << 27,
                 IgnoresDeadBipeds = 1u << 28,
-                Unknown29 = 1u << 29,
-                Unknown30 = 1u << 30,
-                AccelerateAlongInputDirection = 1u << 31
+                ReciprocalAcc = 1u << 29,
+                ReciprocalAccOnly = 1u << 30,
+                MirroredAxis = 1u << 31
             }
         }
 

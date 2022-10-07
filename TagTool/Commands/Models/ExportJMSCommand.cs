@@ -10,7 +10,7 @@ using System.Numerics;
 
 namespace TagTool.Commands.Models
 {
-    class ExportJMSCommand : Command
+    public class ExportJMSCommand : Command
     {
         private GameCache Cache { get; }
         private Model Definition { get; }
