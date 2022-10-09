@@ -522,9 +522,9 @@ namespace TagTool.Commands.Porting.Gen2
                 if (instancedef.BspPhysics != null && instancedef.BspPhysics.Count > 0)
                 {
                     newinstance.Flags |= InstancedGeometryInstance.InstancedGeometryFlags.Collidable;
-                    newinstance.BspPhysics = new List<CollisionBspPhysicsDefinition>
+                    newinstance.BspPhysics = new List<InstancedGeometryPhysics>
                     {
-                        new CollisionBspPhysicsDefinition
+                        new InstancedGeometryPhysics
                         {
                             MoppBvTreeShape = new CMoppBvTreeShape
                             {

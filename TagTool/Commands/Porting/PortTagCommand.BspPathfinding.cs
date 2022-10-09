@@ -109,7 +109,7 @@ namespace TagTool.Commands.Porting
 
                     if (instancedgeo.BspPhysicsReach.Count > 0)
                     {
-                        instancedgeo.BspPhysics = new List<CollisionBspPhysicsDefinition>()
+                        instancedgeo.BspPhysics = new List<InstancedGeometryPhysics>()
                         {
                             ConvertCollisionBspPhysicsReach(instancedgeo.BspPhysicsReach[0])
                         };

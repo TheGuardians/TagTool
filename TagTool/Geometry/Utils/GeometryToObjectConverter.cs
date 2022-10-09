@@ -389,7 +389,12 @@ namespace TagTool.Geometry.Utils
 
                     foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
                     {
-                        permutation.BspPhysics.Add(ConvertData(bspPhysics));
+                        var data = ConvertData(bspPhysics);
+                        permutation.BspPhysics.Add(new CollisionBspPhysicsDefinition()
+                        {
+                            GeometryShape = data.GeometryShape,
+                            MoppBvTreeShape = data.MoppBvTreeShape
+                        });
                     }
 
                     //mopps

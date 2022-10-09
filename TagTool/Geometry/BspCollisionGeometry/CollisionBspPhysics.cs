@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using TagTool.Cache;
+﻿using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Havok;
 using TagTool.Tags;
@@ -16,8 +15,23 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public CMoppBvTreeShape MoppBvTreeShape;
     }
 
+    [TagStructure(Size = 0xB0, Align = 16, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Size = 0x70, Align = 16, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x80, Align = 16, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x80, Align = 16, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x90, Align = 16, Version = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
+    public class InstancedGeometryPhysics : TagStructure
+    {
+        public CollisionGeometryShape GeometryShape;
+        [TagField(Align = 16)]
+        public CMoppBvTreeShape MoppBvTreeShape;
+
+        [TagField(Version = CacheVersion.HaloOnlineED)]
+        public TagBlock<DecomposedPoopShape> PoopShape;
+    }
+
     [TagStructure(Size = 0x70, Align = 16)]
-    public class CollisionBspPhysicsReach : TagStructure
+    public class InstancedGeometryPhysicsReach : TagStructure
     {
         public MoppBvTreeShapeStruct MoppBvTreeShape;
         public TagBlock<CollisionGeometryShape> GeometryShape;
@@ -64,18 +78,17 @@ namespace TagTool.Geometry.BspCollisionGeometry
                 User,
             };
         }
+    }
 
-        // A collection of scaled hkpConvexVerticesShape (polyhedra in instanced geometry definition)
-        [TagStructure(Size = 0x30, Align = 16)]
-        public class DecomposedPoopShape : HkpShapeCollection
-        {
-            [TagField(Align = 16)]
-            public RealQuaternion AabbCenter;
-            public RealQuaternion AabbHalfExtents;
-            public float Scale;
-            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding5;
-        }
+    // A collection of scaled hkpConvexVerticesShape (polyhedra in instanced geometry definition)
+    [TagStructure(Size = 0x30, Align = 16)]
+    public class DecomposedPoopShape : HkpShapeCollection
+    {
+        [TagField(Align = 16)]
+        public RealQuaternion AabbCenter;
+        public RealQuaternion AabbHalfExtents;
+        public float Scale;
+        public PlatformSignedValue InstanceDefinition;
     }
 
     [TagStructure(Size = 0x70, MaxVersion = CacheVersion.Halo2Vista)]

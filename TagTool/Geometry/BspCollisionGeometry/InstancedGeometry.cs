@@ -50,10 +50,15 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float GlobalLightmapResolutionScale;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public TagBlock<TagHkpMoppCode> UnknownBspPhysics;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public uint RuntimePointer;
+        [TagField(Version = CacheVersion.HaloOnlineED)]
+        public TagBlock<ExtraDataBlock> ExtraData;
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding, Version = CacheVersion.HaloOnlineED)]
+        public byte[] Unused2;
+
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        public TagBlock<TagHkpMoppCode> MeshMopp;
+        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        public uint MeshMoppBvTreePointer; // Runtime
 
         [Flags]
         public enum InstancedGeometryDefinitionFlags : uint
@@ -65,29 +70,20 @@ namespace TagTool.Geometry.BspCollisionGeometry
             StitchedPhysics = 1 << 4
         }
 
-        [TagStructure(Size = 0x80)]
+        [TagStructure(Size = 0x24)]
+        public class ExtraDataBlock : TagStructure
+        {
+            public TagBlock<PolyhedronBlock> Polyhedra;
+            public TagBlock<PolyhedronFourVector> PolyhedraFourVectors;
+            public TagBlock<PolyhedronPlaneEquation> PolyhedraPlaneEquations;
+        }
+
+        [TagStructure(Size = 0x70, Align = 16, Version = CacheVersion.HaloOnlineED)]
+        [TagStructure(Size = 0x80, Align = 16, MinVersion = CacheVersion.HaloReach)]
         public class PolyhedronBlock : TagStructure
         {
-            // hkpConvexVerticesShape
-            public uint VTableAddress;
-            public HkpReferencedObject ReferencedObject;
-            public uint UserDataAddress;
-            public int Type;
-            public float Radius;
-            [TagField(Align = 16)]
-            public RealQuaternion AabbHalfExtents;
-            public RealQuaternion AabbCenter;
-            public HkArrayBase FourVectors;
-            public uint NumVertices;
-            public uint UseSpuBuffer;
-            public HkArrayBase PlaneEquations;
-            public uint Connectivity;
-            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding1;
-
-            public int MaterialIndex; // sbsp collision materials
-            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding2;
+            public HkConvexVerticesShape ConvexVerticesShape;
+            public int MaterialIndex;
         }
 
         [TagStructure(Size = 0x30, Align = 0x10)]
@@ -159,10 +155,10 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public float SinglePassRenderDistance;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<CollisionBspPhysicsDefinition> BspPhysics;
+        public List<InstancedGeometryPhysics> BspPhysics;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<CollisionBspPhysicsReach> BspPhysicsReach;
+        public List<InstancedGeometryPhysicsReach> BspPhysicsReach;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public ushort FadePixelsStart;

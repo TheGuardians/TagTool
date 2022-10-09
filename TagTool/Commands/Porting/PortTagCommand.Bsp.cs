@@ -162,9 +162,9 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        public CollisionBspPhysicsDefinition ConvertCollisionBspPhysicsReach(CollisionBspPhysicsReach bspPhysicsReach)
+        public InstancedGeometryPhysics ConvertCollisionBspPhysicsReach(InstancedGeometryPhysicsReach bspPhysicsReach)
         {
-            var bspPhysics = new CollisionBspPhysicsDefinition();
+            var bspPhysics = new InstancedGeometryPhysics();
             bspPhysics.MoppBvTreeShape = new Havok.CMoppBvTreeShape()
             {
                 ReferencedObject = new Havok.HkpReferencedObject(),
@@ -179,15 +179,7 @@ namespace TagTool.Commands.Porting
             else if (bspPhysicsReach.PoopShape.Count > 0)
             {
                 var poop = bspPhysicsReach.PoopShape[0];
-                bspPhysics.GeometryShape = new CollisionGeometryShape()
-                {
-                    ReferencedObject = new Havok.HkpReferencedObject(),
-                    Type = 2,
-                    AABB_Center = poop.AabbCenter,
-                    AABB_Half_Extents = poop.AabbHalfExtents,
-                    CollisionGeometryShapeType = 2,
-                    Scale = poop.Scale
-                };
+                bspPhysics.PoopShape = new TagTool.Tags.TagBlock<DecomposedPoopShape>() { poop };
             }
 
             return bspPhysics;
@@ -341,15 +333,6 @@ namespace TagTool.Commands.Porting
 
             int ConvertShapeKey(int key)
             {
-                int type = key >> 29;
-                if (type == 3)
-                {
-                    int instanceIndex = key & 0xffff;
-                    if (instanceIndex < 0 || instanceIndex >= sbsp.InstancedGeometryInstances.Count)
-                        return -1;
-
-                    return (2 << 29) | instanceIndex;
-                }
                 return key;
             }
         }

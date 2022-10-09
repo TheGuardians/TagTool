@@ -91,30 +91,11 @@ namespace TagTool.Commands.Porting
                             instancedGeometry.RenderBsp[j] = ConvertCollisionBsp(instancedGeometry.RenderBsp[j]);
                     }
 
-                    if (instancedGeometry.CollisionInfo.Surfaces.Count > 0)
-                    {
-                        var moppCode = HavokMoppGenerator.GenerateMoppCode(instancedGeometry.CollisionInfo);
-                        if (moppCode == null)
-                            new TagToolError(CommandError.OperationFailed, "Failed to generate mopp code!");
-
-                        moppCode.Data.AddressType = CacheAddressType.Data;
-                        instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition);
-                        instancedGeometry.CollisionMoppCodes.Add(moppCode);
-                    }
-                    else if (instancedGeometry.Polyhedra.Count > 0)
-                    {
-                        new TagToolWarning($"Instanced geometry #{i} has physics but no collision bsp!");
-                        var mopp = new List<byte> { 0 };
-                        var moppCode = new TagHkpMoppCode()
-                        {
-                            ReferencedObject = new HkpReferencedObject { ReferenceCount = 128 },
-                            Info = new CodeInfo(),
-                            ArrayBase = new HkArrayBase { Size = (uint)mopp.Count, CapacityAndFlags = (uint)(mopp.Count | 0x80000000) },
-                            Data = new TagBlock<byte>(CacheAddressType.Data, mopp)
-                        };
-                        instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition);
-                        instancedGeometry.CollisionMoppCodes.Add(moppCode);
-                    }
+                    var extraData = new InstancedGeometryBlock.ExtraDataBlock();
+                    extraData.Polyhedra = new TagBlock<InstancedGeometryBlock.PolyhedronBlock>(CacheAddressType.Data, instancedGeometry.Polyhedra.ToList());
+                    extraData.PolyhedraFourVectors = new TagBlock<InstancedGeometryBlock.PolyhedronFourVector>(CacheAddressType.Data, instancedGeometry.PolyhedraFourVectors.ToList());
+                    extraData.PolyhedraPlaneEquations = new TagBlock<InstancedGeometryBlock.PolyhedronPlaneEquation>(CacheAddressType.Data, instancedGeometry.PolyhedraPlaneEquations.ToList());
+                    instancedGeometry.ExtraData = new TagBlock<InstancedGeometryBlock.ExtraDataBlock>(CacheAddressType.Definition) { extraData };
 
                     instancedGeometry.CollisionInfo = convertedCollisionBsp;
                 });
