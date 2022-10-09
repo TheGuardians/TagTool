@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Resources;
 using TagTool.Common;
+using TagTool.Serialization;
 
 namespace TagTool.Cache.ModPackages
 {
@@ -28,6 +29,8 @@ namespace TagTool.Cache.ModPackages
             Cache = cache;
             ExistingResources = new Dictionary<string, ResourcePage>();
             ResourceCache = new ResourceCacheHaloOnline(package.PackageVersion, package.PackagePlatform, package.ResourcesStream);
+            Serializer = new ResourceSerializer(Cache.Version, Cache.Platform);
+            Deserializer = new ResourceDeserializer(Cache.Version, Cache.Platform);
         }
 
         public override ResourceCacheHaloOnline GetResourceCache(ResourceLocation location)
