@@ -102,10 +102,7 @@ namespace TagTool.Commands.Porting
                     instancedgeo.SeamBitVector = new uint[] { instancedgeo.SeamBitVector[0] };
               
                     instancedgeo.PathfindingPolicy = instancedgeo.LightmappingPolicyReach.ConvertLexical<Scenery.PathfindingPolicyValue>();
-
                     instancedgeo.LightmappingPolicy = instancedgeo.LightmappingPolicyReach.ConvertLexical<InstancedGeometryInstance.InstancedGeometryLightmappingPolicy>();
-                    if (instancedgeo.LightmappingPolicy == InstancedGeometryInstance.InstancedGeometryLightmappingPolicy.SingleProbe)
-                        instancedgeo.LightmappingPolicy = InstancedGeometryInstance.InstancedGeometryLightmappingPolicy.PerPixelShared;
 
                     if (instancedgeo.BspPhysicsReach.Count > 0)
                     {

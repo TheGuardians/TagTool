@@ -73,10 +73,15 @@ namespace TagTool.Commands.Porting
                 }
                 cluster.DecoratorGrids = newDecoratorGrids;
                 
-                if (BlamCache.Version >= CacheVersion.HaloReach)
+                if(CacheContext.Version == CacheVersion.HaloOnlineED && BlamCache.Version < CacheVersion.HaloReach)
                 {
                     foreach (var cubemap in cluster.ClusterCubemaps)
-                        cubemap.Position = cubemap.ReferencePoints[0].ReferencePoint;
+                    {
+                        cubemap.ReferencePoints = new List<ScenarioStructureBsp.Cluster.StructureClusterCubemap.CubemapReferencePointsBlock>()
+                        {
+                            new ScenarioStructureBsp.Cluster.StructureClusterCubemap.CubemapReferencePointsBlock() { ReferencePoint = cubemap.Position }
+                        };
+                    }
                 }
             }
 
