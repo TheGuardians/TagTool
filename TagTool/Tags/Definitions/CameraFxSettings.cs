@@ -109,7 +109,7 @@ namespace TagTool.Tags.Definitions
             public short BlingSpikes;
         }
 
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x10)]
         public class SsaoPropertiesBlock : TagStructure
         {
             public SsaoFlags Flags;
