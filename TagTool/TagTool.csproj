@@ -418,6 +418,7 @@
     <Compile Include="Commands\Strings\VerifyStringsCommand.cs" />
     <Compile Include="Commands\StructureDesigns\StructureDesignContextFactory.cs" />
     <Compile Include="Commands\StructureDesigns\ExtractStructureDesignCommand.cs" />
+    <Compile Include="Commands\Tags\TagResourceReportCommand.cs" />
     <Compile Include="Common\BitStream.cs" />
     <Compile Include="Common\ColorConversion.cs" />
     <Compile Include="Common\GameTitle.cs" />
