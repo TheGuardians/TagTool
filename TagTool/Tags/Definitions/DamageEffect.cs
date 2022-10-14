@@ -56,9 +56,9 @@ namespace TagTool.Tags.Definitions
         public float ShakeRadius;
         public float EmpRadius;   
 		[TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public float AOESpikeRadius;
+        public float AoeSpikeRadius;
 		[TagField(MinVersion = CacheVersion.Halo3Retail)]
-		public float AOESpikeDamageBump;   
+		public float AoeSpikeDamageBump;   
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float ShieldRenderEffectsScale = 1.0f; 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]

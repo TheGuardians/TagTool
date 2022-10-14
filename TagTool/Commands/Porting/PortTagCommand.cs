@@ -1927,6 +1927,10 @@ namespace TagTool.Commands.Porting
                     if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
                         throw new FormatException(BlamCache.Version.ToString());
                     break;
+                case CacheVersion.HaloReach:
+                    if (!Enum.TryParse(flags.HaloReach.ToString(), out flags.Halo3ODST))
+                        throw new FormatException(BlamCache.Version.ToString());
+                    break;
             }
 
             return flags;

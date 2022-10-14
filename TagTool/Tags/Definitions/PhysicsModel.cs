@@ -14,7 +14,11 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x19C, MinVersion = CacheVersion.HaloReach)]
     public class PhysicsModel : TagStructure
 	{
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public PhysicsModelFlags Flags;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public ReachPhysicsModelFlags FlagsReach;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float MassScale;
@@ -33,7 +37,7 @@ namespace TagTool.Tags.Definitions
 		public sbyte ImportVersion;
 
         [TagField(Flags = Padding, Length = 3, MinVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused;
+        public byte[] Padding0;
 
         public List<DampedSpringMotor> DampedSpringMotors;
         public List<PositionMotor> PositionMotors;
@@ -101,6 +105,12 @@ namespace TagTool.Tags.Definitions
             UsePhysicsForCollision = 1 << 3
         }
 
+        [Flags]
+        public enum ReachPhysicsModelFlags : uint
+        {
+            MoppCodesDirty = 1 << 0
+        }
+
         [TagStructure(Size = 0x18)]
         public class DampedSpringMotor : TagStructure
 		{
@@ -137,8 +147,11 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
             public Halo3ODSTBits Halo3ODST;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+            [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
             public HaloOnlineBits HaloOnline;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public HaloReachBits HaloReach;
 
             [Flags]
             public enum Halo2Bits : uint
@@ -290,6 +303,42 @@ namespace TagTool.Tags.Definitions
                 ReciprocalAccOnly = 1u << 30,
                 MirroredAxis = 1u << 31
             }
+            [Flags]
+            public enum HaloReachBits : uint
+            {
+                GeneratesEffects = 1 << 0,
+                UseAccAsForce = 1 << 1,
+                NegatesGravity = 1 << 2,
+                IgnoresPlayers = 1 << 3,
+                IgnoresNonplayers = 1 << 4,
+                IgnoresBipeds = 1 << 5,
+                IgnoresVehicles = 1 << 6,
+                IgnoresWeapons = 1 << 7,
+                IgnoresEquipment = 1 << 8,
+                IgnoresGarbage = 1 << 9,
+                IgnoresProjectiles = 1 << 10,
+                IgnoresScenery = 1 << 11,
+                IgnoresMachines = 1 << 12,
+                IgnoresControls = 1 << 13,
+                IgnoresSoundScenery = 1 << 14,
+                IgnoresCrates = 1 << 15,
+                IgnoresCreatures = 1 << 16,
+                IgnoresGiants = 1 << 17,
+                IgnoresEffectScenery = 1 << 18,
+                Unused0 = 1 << 19,
+                Unused1 = 1 << 20,
+                Unused2 = 1 << 21,
+                Unused3 = 1 << 22,
+                IgnoresGroundedBipeds = 1 << 23,
+                LocalizesPhysics = 1 << 24,
+                DisableLinearDamping = 1 << 25,
+                DisableAngularDamping = 1 << 26,
+                IgnoresDeadBipeds = 1 << 27,
+                ReciprocalAcc = 1 << 28,
+                ReciprocalAccOnly = 1 << 29,
+                LatchingDisabled = 1 << 30,
+                MirroredAxis = 1u << 31
+            }
         }
 
         public enum PhantomTypeSize : sbyte
@@ -308,19 +357,21 @@ namespace TagTool.Tags.Definitions
         public class PhantomType : TagStructure
 		{
             public PhantomTypeFlags Flags;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float BrittleTimer;
+
             public PhantomTypeSize MinimumSize;
             public PhantomTypeSize MaximumSize;
 
             [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused1;
+            public byte[] Padding0;
 
             public StringId MarkerName;
             public StringId AlignmentMarkerName;
 
             [TagField(Flags = Padding, Length = 8)]
-            public byte[] Unused2;
+            public byte[] Padding1;
 
             public float HookesLawE;
             public float LinearDeadRadius;
@@ -332,14 +383,14 @@ namespace TagTool.Tags.Definitions
             public float DirectionMaxVelocity;
 
             [TagField(Flags = Padding, Length = 28)]
-            public byte[] Unused3;
+            public byte[] Padding2;
 
             public float AlignmentHookesLawE;
             public float AlignmentAcceleration;
             public float AlignmentMaxVelocity;
 
             [TagField(Flags = Padding, Length = 8)]
-            public byte[] Unused4;
+            public byte[] Padding3;
         }
 
         public enum ConstraintType : short
@@ -636,7 +687,7 @@ namespace TagTool.Tags.Definitions
             public short Count;
             public PlatformUnsignedValue Userdata;
             public int Type;
-            [TagField(Length = 4, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+            [TagField(Length = 4, Flags = Padding, Platform = CachePlatform.MCC)]
             public byte[] Padding1;
         }
 

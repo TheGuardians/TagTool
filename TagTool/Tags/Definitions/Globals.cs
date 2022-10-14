@@ -31,13 +31,12 @@ namespace TagTool.Tags.Definitions
         public List<DamageTableBlock> DamageTable;
 
         // ?????? see List<GNullBlock> Empty in h3ek def. size = 0x0
-        public uint Unknown45;
-        public uint Unknown46;
-        public uint Unknown47;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public List<GNullBlock> Empty;
         // ??????
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint Unknown;
+        public CachedTag LoadScreenGlobals;
 
         public List<TagReferenceBlock> Sounds;
 
@@ -62,24 +61,17 @@ namespace TagTool.Tags.Definitions
         public List<SoftBarrierProperty> SoftBarrierProperties;
 
         // ?????? see List<GNullBlock> What in h3ek def. size = 0x0
-        public uint Unknown48;
-        public uint Unknown49;
-        public uint Unknown50;
+        public List<GNullBlock> UnusedBlock;
 
         public List<InterfaceTagsBlock> InterfaceTags;
 
         //should be public List<CheatWeapon> WeaponList;
-        public uint Unknown51;
-        public uint Unknown52;
-        public uint Unknown53;
-        public uint Unknown54;
+        public List<CheatWeapon> CheatWeapons;
 
         // ?????? supposed to be CheatPowerups but size doesn't match. should be 16 bytes
-        public uint Unknown55;
-        public uint Unknown56;
+        public List<CheatPowerup> CheatPowerups;
 
         public List<PlayerInformationBlock> PlayerInformation;
-
         public List<PlayerRepresentationBlock> PlayerRepresentation;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -263,6 +255,11 @@ namespace TagTool.Tags.Definitions
 				}
 			}
 		}
+
+        [TagStructure(Size = 0x0)]
+        public class GNullBlock : TagStructure
+        {
+        }
 
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
         public class ThumbStickDeadZone : TagStructure
@@ -1068,7 +1065,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x120, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x12C, MinVersion = CacheVersion.HaloOnlineED)]
+        [TagStructure(Size = 0x12C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x120, MinVersion = CacheVersion.HaloReach)]
         public class InterfaceTagsBlock : TagStructure
 		{
@@ -1110,7 +1107,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x10)]
-        public class CheatPowerupsBlock : TagStructure
+        public class CheatPowerup : TagStructure
         {
             public CachedTag Powerup;
         }
