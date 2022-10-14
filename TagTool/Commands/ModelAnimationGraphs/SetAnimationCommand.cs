@@ -19,11 +19,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "SetAnimation",
                   "Assign an animation as an action or overlay.",
 
-                  "SetAnimation <mode:class:type:label> <index/last/-1>",
+                  "SetAnimation <mode:class:type:label> <index/last/-1> [addaction/addoverlay]",
 
                   "Assign an animation as an action or overlay."
                   + "Animation name must contain 4 parts: a mode, weapon class, weapon type, and action/overlay name, separated by colons (:)."
-                  + "Index must be between 0 and the animation count, or -1 to disable the animation. Use \"last\" to a")
+                  + "Index must be between 0 and the animation count, or -1 to disable the animation. Use \"last\" for the last animation in the list.")
         {
             CacheContext = cachecontext;
             Animation = animation;
@@ -33,7 +33,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public override object Execute(List<string> args)
         {
             //Arguments needed: <filepath>
-            if (args.Count != 2)
+            if (args.Count > 3 || args.Count < 2)
                 return new TagToolError(CommandError.ArgCount);
 
             if (!short.TryParse(args[1], out short animationIndex))
@@ -56,24 +56,87 @@ namespace TagTool.Commands.ModelAnimationGraphs
             if (nameSplit.Length != 4)
                 return new TagToolError(CommandError.CustomError, "Animation name must contain 4 parts: a mode, weapon class, weapon type, and action/overlay name, separated by colons (:).");
 
+            bool addmodes = false;
+            bool overlay = false;
+
+            if (args.Count == 3)
+            {
+                switch (args[2].ToLower())
+                {
+                    case "addaction":
+                        addmodes = true;
+                        break;
+                    case "addoverlay":
+                        addmodes = true;
+                        overlay = true;
+                        break;
+                    default:
+                        return new TagToolError(CommandError.CustomError, "Final argument is unrecognized.");
+                }
+            }
 
             ModelAnimationGraph.Mode mode = Animation.Modes.Where(x => x.Name == CacheContext.StringTable.GetStringId(nameSplit[0])).FirstOrDefault();
 
             if (mode == null)
-                return new TagToolError(CommandError.CustomError, $"Mode \"{nameSplit[0]}\" could not be found in this jmad.");
+            {
+                if (addmodes)
+                {
+                    Animation.Modes.Add(new ModelAnimationGraph.Mode
+                    {
+                        Name = CacheContext.StringTable.GetStringId(nameSplit[0]),
+                        WeaponClass = new List<ModelAnimationGraph.Mode.WeaponClassBlock>()
+                    });
+
+                    mode = Animation.Modes.Last();
+                }
+                else
+                    return new TagToolError(CommandError.CustomError, $"Mode \"{nameSplit[0]}\" could not be found in this jmad.");
+            }
 
             ModelAnimationGraph.Mode.WeaponClassBlock weapClass = mode.WeaponClass
                 .Where(y => y.Label == CacheContext.StringTable.GetStringId(nameSplit[1])).FirstOrDefault();
 
             if (weapClass == null)
-                return new TagToolError(CommandError.CustomError, $"Weapon class \"{nameSplit[1]}\" could not be found in mode \"{nameSplit[0]}\".");
+            {
+                if (addmodes)
+                {
+                    mode.WeaponClass.Add(new ModelAnimationGraph.Mode.WeaponClassBlock
+                    {
+                        Label = CacheContext.StringTable.GetStringId(nameSplit[1]),
+                        WeaponType = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock>()
+                    });
+
+                    weapClass = mode.WeaponClass.Last();
+                }
+                else
+                    return new TagToolError(CommandError.CustomError, $"Weapon class \"{nameSplit[1]}\" could not be found in mode \"{nameSplit[0]}\".");
+            }
 
             ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock weapType = weapClass.WeaponType
                 .Where(z => z.Label == CacheContext.StringTable.GetStringId(nameSplit[2])).FirstOrDefault();
 
             if (weapType == null)
-                return new TagToolError(CommandError.CustomError, $"Weapon type \"{nameSplit[2]}\" could not be found in weapon class \"{nameSplit[1]}\".");
+            {
+                if (addmodes)
+                {
+                    weapClass.WeaponType.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock
+                    {
+                        Label = CacheContext.StringTable.GetStringId(nameSplit[2]),
+                        Set = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.AnimationSet()
+                        {
+                            Actions = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry>(),
+                            Overlays = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry>(),
+                            DeathAndDamage = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.DeathAndDamageBlock>(),
+                            Transitions = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Transition>()
+                        },
+                    });
 
+                    weapType = weapClass.WeaponType.Last();
+                }
+                else
+                    return new TagToolError(CommandError.CustomError, $"Weapon type \"{nameSplit[2]}\" could not be found in weapon class \"{nameSplit[1]}\".");
+            }
+            
             ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry entry = weapType.Set.Actions
                 .Where(a => a.Label == CacheContext.StringTable.GetStringId(nameSplit[3])).FirstOrDefault();
 
@@ -85,7 +148,32 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 .Where(b => b.Label == CacheContext.StringTable.GetStringId(nameSplit[3])).FirstOrDefault();
 
                 if (entry == null)
-                    return new TagToolError(CommandError.CustomError, $"Action or overlay \"{nameSplit[3]}\" could not be found in weapon type \"{nameSplit[2]}\".");
+                {
+                    if (addmodes)
+                    {
+                        if (overlay)
+                        {
+                            weapType.Set.Overlays.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
+                            {
+                                Label = CacheContext.StringTable.GetStringId(nameSplit[3])
+                            });
+
+                            entry = weapType.Set.Overlays.Last();
+                            type = "Overlay";
+                        }
+                        else
+                        {
+                            weapType.Set.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
+                            {
+                                Label = CacheContext.StringTable.GetStringId(nameSplit[3])
+                            });
+
+                            entry = weapType.Set.Actions.Last();
+                        }
+                    }
+                    else
+                        return new TagToolError(CommandError.CustomError, $"Action or overlay \"{nameSplit[3]}\" could not be found in weapon type \"{nameSplit[2]}\".");
+                }
                 else
                     type = "Overlay";
             }
