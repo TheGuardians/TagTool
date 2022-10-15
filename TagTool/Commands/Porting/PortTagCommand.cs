@@ -1928,8 +1928,13 @@ namespace TagTool.Commands.Porting
                         throw new FormatException(BlamCache.Version.ToString());
                     break;
                 case CacheVersion.HaloReach:
-                    if (!Enum.TryParse(flags.HaloReach.ToString(), out flags.Halo3ODST))
-                        throw new FormatException(BlamCache.Version.ToString());
+                    {
+                        flags.HaloReach &= ~PhysicsModel.PhantomTypeFlags.HaloReachBits.IgnoresGarbage;
+                        flags.HaloReach &= ~PhysicsModel.PhantomTypeFlags.HaloReachBits.IgnoresGroundedBipeds;
+
+                        if (!Enum.TryParse(flags.HaloReach.ToString(), out flags.Halo3ODST))
+                            throw new FormatException(BlamCache.Version.ToString());
+                    }
                     break;
             }
 
