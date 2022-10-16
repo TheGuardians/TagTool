@@ -39,7 +39,7 @@ namespace TagTool.Havok
                 using (var tmp = inputFile.CreateText())
                     input.Write(tmp);
 
-                int exitCode = HavokTool.ExecuteCommand("generate-mesh-mopp", $"{inputFile.FullName} {outputFile.FullName}");
+                int exitCode = HavokTool.ExecuteCommand("generate-mesh-mopp", $"\"{inputFile.FullName}\" \"{outputFile.FullName}\"");
                 if (exitCode != 0)
                     return null;
 
