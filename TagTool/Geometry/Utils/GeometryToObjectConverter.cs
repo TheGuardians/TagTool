@@ -598,7 +598,7 @@ namespace TagTool.Geometry.Utils
                 mesh
             };
 
-            renderGeometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
+            renderGeometry.MeshClusterVisibility = new List<RenderGeometry.PerMeshMoppBlock>();
             if (meshindex != -1 && meshindex < Lbsp.Geometry.MeshClusterVisibility.Count)
                 renderGeometry.MeshClusterVisibility.Add(Lbsp.Geometry.MeshClusterVisibility[meshindex].DeepClone());
 

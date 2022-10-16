@@ -114,7 +114,7 @@ namespace TagTool.Commands.Porting
             //
 
             // Without this 005_intro crash on cortana sbsp       
-            sbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
+            sbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.PerMeshMoppBlock>();
 
             if (BlamCache.Version >= CacheVersion.HaloReach)
             {

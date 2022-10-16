@@ -38,7 +38,7 @@ namespace TagTool.Geometry
 
         public List<PerMeshRawDataBlock> GeometryTagResources; 
 
-        public List<MoppClusterVisiblity> MeshClusterVisibility;
+        public List<PerMeshMoppBlock> MeshClusterVisibility;
 
         /// <summary>
         /// The per-mesh node mappings of the render geometry.
@@ -116,10 +116,10 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x20)]
-        public class MoppClusterVisiblity : TagStructure
+        public class PerMeshMoppBlock : TagStructure
 		{
-            public byte[] MoppData;
-            public List<short> UnknownMeshPartIndicesCount;
+            public byte[] MoppCode;
+            public List<short> MoppReorderTable;
         }
 
         [TagStructure(Size = 0xC)]

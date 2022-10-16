@@ -10,6 +10,7 @@ using TagTool.Geometry;
 using TagTool.Tags.Resources;
 using TagTool.Lighting;
 using TagTool.Commands.Bitmaps;
+using TagTool.Havok;
 
 namespace TagTool.Commands.Porting
 {
@@ -348,7 +349,20 @@ namespace TagTool.Commands.Porting
                     staticPerVertexLighting.VertexBufferIndex = -1;
                 }
             }
+
+
+            Console.WriteLine("Generating cluster per mesh mopp...");
+            Lbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.PerMeshMoppBlock>();
+            for (int i = 0; i < Lbsp.Geometry.Meshes.Count; i++)
+            {
+                var mesh = Lbsp.Geometry.Meshes[i];
+                if (mesh.Type == VertexType.World && mesh.Parts.Count > 0)
+                    Lbsp.Geometry.MeshClusterVisibility.Add(PerMeshMoppGenerator.Generate(CacheContext, mesh));
+                else
+                    Lbsp.Geometry.MeshClusterVisibility.Add(new RenderGeometry.PerMeshMoppBlock());
+            }
             
+
             Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
 
             return Lbsp;

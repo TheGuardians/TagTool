@@ -599,7 +599,7 @@ namespace TagTool.Commands.Porting.Gen2
             newSbsp.CollisionBspResource = Cache.ResourceCache.CreateStructureBspResource(CollisionResource);
 
             //fixup per mesh visibility mopp
-            newSbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
+            newSbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.PerMeshMoppBlock>();
             newSbsp.Geometry.PerMeshSubpartVisibility = new List<RenderGeometry.PerMeshSubpartVisibilityBlock>();
             for (var i = 0; i < Gen2Meshes.Count; i++)
             {
@@ -607,10 +607,10 @@ namespace TagTool.Commands.Porting.Gen2
                 //mesh visibility mopp and mopp reorder table
                 if (gen2mesh.VisibilityMoppCodeData.Length > 0 && gen2mesh.MoppReorderTable != null)
                 {
-                    newSbsp.Geometry.MeshClusterVisibility.Add(new RenderGeometry.MoppClusterVisiblity
+                    newSbsp.Geometry.MeshClusterVisibility.Add(new RenderGeometry.PerMeshMoppBlock
                     {
-                        MoppData = ConvertH2MoppData(gen2mesh.VisibilityMoppCodeData),
-                        UnknownMeshPartIndicesCount = gen2mesh.MoppReorderTable.Select(m => m.Index).ToList()
+                        MoppCode = ConvertH2MoppData(gen2mesh.VisibilityMoppCodeData),
+                        MoppReorderTable = gen2mesh.MoppReorderTable.Select(m => m.Index).ToList()
                     });
                 }
                 //visibility bounds (approximate conversion)

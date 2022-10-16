@@ -432,6 +432,10 @@
     <Compile Include="Geometry\Jms\JmsPhmoExporter.cs" />
     <Compile Include="Geometry\Utils\InstanceBucketGenerator.cs" />
     <Compile Include="Geometry\Utils\Triangulator.cs" />
+    <Compile Include="Havok\CollisionMoppGenerator.cs" />
+    <Compile Include="Havok\HavokMoppGenerator.cs" />
+    <Compile Include="Havok\HavokMoppUtil.cs" />
+    <Compile Include="Havok\PerMeshMoppGenerator.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RealVector4d.cs" />
@@ -782,7 +786,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
-    <Compile Include="Havok\HavokMoppGenerator.cs" />
+    <Compile Include="Havok\HavokTool.cs" />
     <Compile Include="IO\ExtantStream.cs" />
     <Compile Include="IO\ModPackageStream.cs" />
     <Compile Include="IO\OffsetStream.cs" />
