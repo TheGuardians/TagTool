@@ -223,7 +223,7 @@ namespace TagTool.Tags.Definitions
                 DisableAngularDamping = 1u << 26,
                 IgnoresDeadBipeds = 1u << 27,
                 ReciprocalAcc = 1u << 28,
-                ReciprocalAccONLY = 1u << 29,
+                ReciprocalAccOnly = 1u << 29,
                 LatchingDisabled = 1u << 30,
                 MirroredAxis = 1u << 31
             }
