@@ -11,6 +11,7 @@ using TagTool.Tags.Resources;
 using TagTool.Lighting;
 using TagTool.Commands.Bitmaps;
 using TagTool.Havok;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting
 {
@@ -206,6 +207,13 @@ namespace TagTool.Commands.Porting
                 {
                     if (staticPerVertexLighting.VertexBufferIndex != -1)
                     {
+                        if (staticPerVertexLighting.VertexBufferIndex >= lightmapResourceDefinition.VertexBuffers.Count)
+                        {
+                            new TagToolWarning("Invalid per vertex lighting buffer index!");
+                            staticPerVertexLighting.VertexBufferIndex = -1;
+                            continue;
+                        }
+
                         staticPerVertexLighting.VertexBuffer = lightmapResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndex].Definition;
                         VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, staticPerVertexLighting.VertexBuffer);
                         var d3dPointer = new D3DStructure<VertexBufferDefinition>();
