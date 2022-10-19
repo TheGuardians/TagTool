@@ -34,41 +34,27 @@ namespace TagTool.Commands.Porting
                 {
                     var buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.Gen3Info.VertexBufferIndex].Definition;
                         
-                    if(BlamCache.Version >= CacheVersion.HaloReach)
+                    var offset = grid.VertexBufferOffset;
+                    grid.Vertices = new List<TinyPositionVertex>();
+                    using (var stream = new MemoryStream(buffer.Data.Data))
                     {
-                        grid.HaloOnlineInfo = new ScenarioStructureBsp.Cluster.DecoratorGrid.HaloOnlineDecoratorInfo()
-                        {
-                            PaletteIndex = grid.Gen3Info.PaletteIndex,
-                            Variant = 0,
-                            VertexBufferIndex = grid.Gen3Info.VertexBufferIndex
-                        };
-                        grid.GridSize *= 1.0f / ushort.MaxValue;
-                        newDecoratorGrids.Add(grid);
+                        var vertexStream = VertexStreamFactory.Create(BlamCache.Version, BlamCache.Platform, stream);
+                        stream.Position = offset;
+
+                        for (int i = 0; i < grid.Amount; i++)
+                            grid.Vertices.Add(vertexStream.ReadTinyPositionVertex());
                     }
+
+                    if (grid.Amount == 0)
+                        newDecoratorGrids.Add(grid);
                     else
                     {
-                        var offset = grid.VertexBufferOffset;
-                        grid.Vertices = new List<TinyPositionVertex>();
-                        using (var stream = new MemoryStream(buffer.Data.Data))
-                        {
-                            var vertexStream = VertexStreamFactory.Create(BlamCache.Version, BlamCache.Platform, stream);
-                            stream.Position = offset;
+                        // Get the new grids
+                        var newGrids = ConvertDecoratorGrid(grid.Vertices, grid);
 
-                            for (int i = 0; i < grid.Amount; i++)
-                                grid.Vertices.Add(vertexStream.ReadTinyPositionVertex());
-                        }
-
-                        if (grid.Amount == 0)
-                            newDecoratorGrids.Add(grid);
-                        else
-                        {
-                            // Get the new grids
-                            var newGrids = ConvertDecoratorGrid(grid.Vertices, grid);
-
-                            // Add all to list
-                            foreach (var newGrid in newGrids)
-                                newDecoratorGrids.Add(newGrid);
-                        }
+                        // Add all to list
+                        foreach (var newGrid in newGrids)
+                            newDecoratorGrids.Add(newGrid);
                     }
                 }
                 cluster.DecoratorGrids = newDecoratorGrids;
@@ -208,6 +194,9 @@ namespace TagTool.Commands.Porting
                 newGrid.HaloOnlineInfo.PaletteIndex = grid.Gen3Info.PaletteIndex;
                 newGrid.HaloOnlineInfo.VertexBufferIndex = grid.Gen3Info.VertexBufferIndex; // this doesn't change as each vertex buffer corresponds to the palette index
 
+                if(BlamCache.Version >= CacheVersion.HaloReach)
+                    newGrid.GridSize /= ushort.MaxValue;
+
                 decoratorGrids.Add(newGrid);
             }
             return decoratorGrids;
@@ -216,24 +205,20 @@ namespace TagTool.Commands.Porting
         List<DecoratorData> ParseVertices(List<TinyPositionVertex> vertices)
         {
             List<DecoratorData> decoratorData = new List<DecoratorData>();
-            var currentIndex = 0;
-            while(currentIndex < vertices.Count)
+
+            int currentIndex = 0;
+            while (currentIndex < vertices.Count)
             {
-                var currentVertex = vertices[currentIndex];
-                var currentVariant = (currentVertex.Variant >> 8) & 0xFF;
+                var currentVariant = (vertices[currentIndex].Variant >> 8) & 0xff;
 
-                DecoratorData data = new DecoratorData(0,(short)currentVariant,currentIndex*16);
-
-                while(currentIndex < vertices.Count && currentVariant == ((currentVertex.Variant >> 8) & 0xFF))
+                DecoratorData data = new DecoratorData(0, (short)currentVariant, currentIndex * 16);
+                decoratorData.Add(data);
+                while (currentIndex < vertices.Count && currentVariant == ((vertices[currentIndex].Variant >> 8) & 0xff))
                 {
-                    currentVertex = vertices[currentIndex];
                     data.Amount++;
                     currentIndex++;
                 }
-
-                decoratorData.Add(data);
             }
-
             return decoratorData;
         }
 

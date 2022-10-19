@@ -290,12 +290,18 @@ namespace TagTool.Geometry
             };
         }
 
+        public ushort ReadDecoratorAuxInfo()
+        {
+            var value = Stream.ReadUByte4();
+            return (ushort)((value[3] << 8) | value[2]);
+        }
+
         public TinyPositionVertex ReadTinyPositionVertex()
         {
             return new TinyPositionVertex
             {
-                Position = Stream.ReadUShort3N(),
-                Variant = Stream.ReadUShort(),
+                Position = Stream.ReadUHenD3N(),
+                Variant = ReadDecoratorAuxInfo(),
                 Normal = Stream.ReadSByte4N(),
                 Color = Stream.ReadColor()
             };

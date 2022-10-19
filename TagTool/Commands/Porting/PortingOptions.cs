@@ -16,7 +16,7 @@ namespace TagTool.Commands.Porting
         public string ReachLightmapCache = null;
 
         [Description("Enable reach decorator porting (WIP)")]
-        public bool ReachDecorators = false;
+        public bool ReachDecorators = true;
 
         [Description("Enable legacy Gen1 collision BSP generator")]
         public bool Gen1Collision = false;
