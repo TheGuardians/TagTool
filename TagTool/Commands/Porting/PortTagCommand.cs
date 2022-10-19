@@ -327,6 +327,12 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            if(definition is AreaScreenEffect sefc)
+            {
+                foreach (var screenEffect in sefc.ScreenEffects)
+                    screenEffect.ContrastEnhance = 0;
+            }
+
             if(definition is Scenario scenario)
             {
                 scenario.Bipeds.Clear();
