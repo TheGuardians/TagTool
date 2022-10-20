@@ -106,9 +106,9 @@ namespace TagTool.Commands.Porting.Gen2
             // Fixup Targets
             for (byte i = 0; i < model.Targets.Count; i++)
             {
-                model.Targets[i].LockOnFlags = new Model.Target.TargetLockOnFlags();
-                TranslateEnum(gen2Model.Targets[i].LockOnData.Flags, out model.Targets[i].LockOnFlags.Flags, model.Targets[i].LockOnFlags.Flags.GetType());
-                model.Targets[i].LockOnDistance = gen2Model.Targets[i].LockOnData.LockOnDistance;
+                model.Targets[i].LockOnData = new Model.TargetLockOnData();
+                TranslateEnum(gen2Model.Targets[i].LockOnData.Flags, out model.Targets[i].LockOnData.Flags, model.Targets[i].LockOnData.Flags.GetType());
+                model.Targets[i].LockOnData.LockOnDistance = gen2Model.Targets[i].LockOnData.LockOnDistance;
             }
 
             TranslateList(gen2Model.NewDamageInfo, model.NewDamageInfo);

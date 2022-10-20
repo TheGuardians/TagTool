@@ -1017,9 +1017,9 @@ namespace TagTool.Commands.Porting
 
                                 foreach (var target in hlmt.Targets)
                                 {
-                                    if (target.TargetFilter == StringId.Invalid && CacheContext.StringTable.GetString(target.MarkerName) == "target_main")
+                                    if (target.LockOnData.TrackingType == StringId.Invalid && CacheContext.StringTable.GetString(target.MarkerName) == "target_main")
                                     {
-                                        target.TargetFilter = CacheContext.StringTable.GetStringId("bipeds");
+                                        target.LockOnData.TrackingType = CacheContext.StringTable.GetStringId("bipeds");
                                     }
                                 }
 
@@ -1081,10 +1081,10 @@ namespace TagTool.Commands.Porting
                     {
                         if (BlamCache.Version <= CacheVersion.Halo3ODST)
                         {
-                            if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetLockOnFlags.FlagsValue.LockedByHumanTracking))
-                                target.TargetFilter = CacheContext.StringTable.GetStringId("flying_vehicles");
-                            else if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetLockOnFlags.FlagsValue.LockedByPlasmaTracking))
-                                target.TargetFilter = CacheContext.StringTable.GetStringId("bipeds");
+                            if (target.LockOnData.FlagsOld.HasFlag(Model.TargetLockOnData.FlagsValueOld.LockedByHumanTracking))
+                                target.LockOnData.TrackingType = CacheContext.StringTable.GetStringId("flying_vehicles");
+                            else if (target.LockOnData.FlagsOld.HasFlag(Model.TargetLockOnData.FlagsValueOld.LockedByPlasmaTracking))
+                                target.LockOnData.TrackingType = CacheContext.StringTable.GetStringId("bipeds");
                         }
                     }
                     if(BlamCache.Version >= CacheVersion.HaloReach)
@@ -1517,8 +1517,8 @@ namespace TagTool.Commands.Porting
                 case BarrelFlags barrelflags:
                     return ConvertBarrelFlags(barrelflags);
 
-                case Model.Target.TargetLockOnFlags targetflags:
-                    return ConvertTargetFlags(targetflags);
+                case Model.TargetLockOnData lockOnData:
+                    return ConvertTargetLockOnData(lockOnData);
 
                 case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
 					if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
@@ -1888,16 +1888,11 @@ namespace TagTool.Commands.Porting
             return barrelflags;
         }
 
-        private object ConvertTargetFlags(Model.Target.TargetLockOnFlags target)
+        private object ConvertTargetLockOnData(Model.TargetLockOnData data)
         {
-            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
-                return target;
-
-            if (BlamCache.Version <= CacheVersion.Halo3ODST)
-                if (!Enum.TryParse(target.Flags.ToString(), out target.Flags_HO))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            return target;
+            if(BlamCache.Version < CacheVersion.HaloOnlineED)
+                data.Flags = data.FlagsOld.ConvertLexical<Model.TargetLockOnData.FlagsValue>();
+            return data;
         }
 
         private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(string tagName, PhysicsModel.PhantomTypeFlags flags)
