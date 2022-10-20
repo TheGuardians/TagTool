@@ -1807,7 +1807,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public ushort FontReach; // short
 
-                [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+                [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
                 public byte[] FontPadding;
 
                 public StringId InputString;
