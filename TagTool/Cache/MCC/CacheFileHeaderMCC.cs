@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using TagTool.Common;
 using TagTool.Tags;
 
@@ -6,6 +6,7 @@ namespace TagTool.Cache.MCC
 {
     [TagStructure(Size = 0x4000, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x1E000, MinVersion = CacheVersion.Halo4, MaxVersion = CacheVersion.Groundhog)]
     public class CacheFileHeaderMCC : CacheFileHeader
     {
         public Tag HeaderSignature;
@@ -112,7 +113,9 @@ namespace TagTool.Cache.MCC
             Unknown3,
             Unknown4,
             Halo3ODST,
-            HaloReach
+            HaloReach,
+            Halo4,
+            Groundhog
         }
     }
 }
