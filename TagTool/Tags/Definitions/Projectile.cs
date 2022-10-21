@@ -65,7 +65,7 @@ namespace TagTool.Tags.Definitions
         public byte[] Padding1;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public GameObjectType SuperDetonationObjectTypes;
+        public GameObjectType16 SuperDetonationObjectTypes;
         public CachedTag AttachedSuperDetonationDamage;
         public float MaterialEffectRadius; // radius within we will generate material effects
         public CachedTag FlybySound;

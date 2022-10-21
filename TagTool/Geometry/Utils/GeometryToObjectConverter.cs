@@ -228,7 +228,7 @@ namespace TagTool.Geometry.Utils
         {
             var scenery = new Scenery()
             {
-                ObjectType = new GameObjectType() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery }, // TODO: generic object type
+                ObjectType = new GameObjectType16() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery }, // TODO: generic object type
                 BoundingRadius = boundingSphere,
                 AccelerationScale = 1.0f,
                 SweetenerSize = GameObject.SweetenerSizeValue.Large,

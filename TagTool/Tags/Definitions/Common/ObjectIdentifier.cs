@@ -7,7 +7,7 @@ namespace TagTool.Tags.Definitions.Common
     {
         public DatumHandle UniqueHandle;
         public short OriginBspIndex;
-        public ScenarioObjectType ObjectType;
+        public GameObjectType8 ObjectType;
         public SourceValue Source;
 
         public enum SourceValue : sbyte

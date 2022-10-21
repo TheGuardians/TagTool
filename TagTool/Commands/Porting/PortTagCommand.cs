@@ -1489,10 +1489,17 @@ namespace TagTool.Commands.Porting
                 case DamageReportingType damageReportingType:
 					return ConvertDamageReportingType(damageReportingType);
 
-                case GameObjectType gameObjectType:
-					return ConvertGameObjectType(gameObjectType);
+                case GameObjectType8 gameObjectType:
+                    gameObjectType.SetValue(CacheContext.Version, gameObjectType.GetValue(BlamCache.Version));
+                    return gameObjectType;
+                case GameObjectType16 gameObjectType:
+                    gameObjectType.SetValue(CacheContext.Version, gameObjectType.GetValue(BlamCache.Version));
+                    return gameObjectType;
+                case GameObjectType32 gameObjectType:
+                    gameObjectType.SetValue(CacheContext.Version, gameObjectType.GetValue(BlamCache.Version));
+                    return gameObjectType;
 
-				case ObjectTypeFlags objectTypeFlags:
+                case ObjectTypeFlags objectTypeFlags:
 					return ConvertObjectTypeFlags(objectTypeFlags);
 
                 case GameObject.MultiplayerObjectBlock multiplayer when BlamCache.Version >= CacheVersion.HaloReach:
@@ -1522,9 +1529,6 @@ namespace TagTool.Commands.Porting
 
 				case RenderMethod renderMethod:
                     return ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderMethod, definition, blamTagName);
-
-				case ScenarioObjectType scenarioObjectType:
-					return ConvertScenarioObjectType(scenarioObjectType);
 
                 case Scenario.MultiplayerObjectProperties scnrObj when BlamCache.Version >= CacheVersion.HaloReach:
                     {
@@ -1940,50 +1944,6 @@ namespace TagTool.Commands.Porting
 		private TagFunction ConvertTagFunction(TagFunction function)
 		{
 			return TagFunction.ConvertTagFunction(CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian, function);
-		}
-
-        private GameObjectType ConvertGameObjectType(GameObjectType objectType)
-		{
-            if (BlamCache.Version <= CacheVersion.Halo2Vista)
-                if (!Enum.TryParse(objectType.Halo2.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
-				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
-					throw new FormatException(BlamCache.Version.ToString());
-
-            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
-                if (!Enum.TryParse(objectType.HaloOnline.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            if (BlamCache.Version >= CacheVersion.HaloReach)
-                if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            // todo: properly convert type
-            if (BlamCache.Endianness != CacheContext.Endianness && BlamCache.Endianness == EndianFormat.BigEndian)
-                objectType.Unknown2 = objectType.Unknown1;
-            else if (BlamCache.Endianness != CacheContext.Endianness)
-                objectType.Unknown1 = objectType.Unknown2;
-
-            return objectType;
-		}
-
-		private ScenarioObjectType ConvertScenarioObjectType(ScenarioObjectType objectType)
-        {
-            if (BlamCache.Version <= CacheVersion.Halo2Vista)
-                if (!Enum.TryParse(objectType.Halo2.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
-				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
-					throw new FormatException(BlamCache.Version.ToString());
-
-            if (BlamCache.Version >= CacheVersion.HaloReach)
-                if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            return objectType;
 		}
 
 		private StringId ConvertStringId(StringId stringId)

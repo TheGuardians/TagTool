@@ -716,7 +716,7 @@ namespace TagTool.Tags.Definitions
 				{
                     public int UniqueId;
                     public short OriginBspIndex;
-                    public ScenarioObjectType ObjectType;
+                    public GameObjectType8 ObjectType;
                     public ObjectSource Source;
                     public short FirstGamePortalIndex;
                     public ushort GamePortalCount;
@@ -1093,7 +1093,7 @@ namespace TagTool.Tags.Definitions
             public string Name;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public StringId NameReach;
-            public GameObjectType ObjectType;
+            public GameObjectType16 ObjectType;
             public short PlacementIndex;
         }
 
@@ -1173,7 +1173,7 @@ namespace TagTool.Tags.Definitions
             // object id
             public DatumHandle UniqueHandle;
             public short OriginBspIndex;
-            public ScenarioObjectType ObjectType;
+            public GameObjectType8 ObjectType;
             public SourceValue Source; // sbyte
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -4504,7 +4504,7 @@ namespace TagTool.Tags.Definitions
 		{
             public DatumHandle ObjectHandle;
             public short OriginBspIndex;
-            public ScenarioObjectType ObjectType;
+            public GameObjectType8 ObjectType;
             public ScenarioInstance.SourceValue Source;
             public short NodeIndex;
             public short ProjectionAxis;

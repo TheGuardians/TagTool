@@ -406,7 +406,7 @@ namespace TagTool.Commands.Scenarios
                 instance.PaletteIndex = (short)GetOrAddScenarioPaletteEntry(type, tag);
                 instance.NameIndex = -1;
                 instance.UniqueHandle = DatumHandle.None;
-                instance.ObjectType = new ScenarioObjectType() { Halo3ODST = type };
+                instance.ObjectType = new GameObjectType8() { Halo3ODST = type };
                 instance.Source = ScenarioInstance.SourceValue.Editor;
 
                 if (instance.ParentId != null)
