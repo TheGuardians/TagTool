@@ -117,10 +117,7 @@ namespace TagTool.Tags.Definitions
 
                 public ChudSandboxEditorState EditorFlags;
 
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public ChudHindsightState_H3 EngineGeneralFlags_H3;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public ChudHindsightState_ED EngineGeneralFlags;
+                public ChudHindsightState HindsightState;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public Skulls SkullFlags;
@@ -422,7 +419,7 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum ChudHindsightState_H3 : ushort
+                public enum ChudHindsightState : ushort
                 {
                     None,
                     SensorRange10m = 1 << 0,
@@ -438,27 +435,10 @@ namespace TagTool.Tags.Definitions
                     MetagameP4Talking = 1 << 10,
                     TransientScoreAvail = 1 << 11,
                     MetagameMultikillAvail = 1 << 12,
-                    MetagameNegScoreAvail = 1 << 13
-                }
-
-                [Flags]
-                public enum ChudHindsightState_ED : ushort
-                {
-                    None,
-                    SensorRange10m = 1 << 0,
-                    SensorRange25m = 1 << 1,
-                    SensorRange75m = 1 << 2,
-                    SensorRange150m = 1 << 3,
-                    MetagameP1Talking = 1 << 4,
-                    MetagameP2Enabled = 1 << 5,
-                    MetagameP2Talking = 1 << 6,
-                    MetagameP3Enabled = 1 << 7,
-                    MetagameP3Talking = 1 << 8,
-                    MetagameP4Enabled = 1 << 9,
-                    MetagameP4Talking = 1 << 10,
-                    TransientScoreAvail = 1 << 11,
-                    MetagameMultikillAvail = 1 << 12,
-                    MetagameNegScoreAvail = 1 << 13
+                    MetagameNegScoreAvail = 1 << 13,
+                    //ODST
+                    MetagameTeamScoring = 1 << 14,
+                    MetagameFfaScoring = 1 << 15
                 }
 
                 [Flags]

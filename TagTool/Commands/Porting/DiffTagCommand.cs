@@ -14,6 +14,7 @@ namespace TagTool.Commands.Porting
     {
         private GameCache Cache1 { get; }
         private GameCache Cache2 { get; }
+        private bool IgnoreData { get; set; }
 
         public DiffTagCommand(GameCache cache1, GameCache cache2)
             : base(true,
@@ -43,6 +44,9 @@ namespace TagTool.Commands.Porting
                 if (args.Count < 1)
                     return new TagToolError(CommandError.ArgCount);
             }
+
+            if ((IgnoreData = args[0].ToLower() == "ignore_data"))
+                args.RemoveAt(0);
 
             if (!Cache1.TagCache.TryGetCachedTag(args[0], out CachedTag tag1))
                 return new TagToolError(CommandError.TagInvalid, $"\"{args[0]}\"");
@@ -105,14 +109,14 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        static void DiffTags(List<Difference> differences, Stream stream1, GameCache cache1, CachedTag tag1, Stream stream2, GameCache cache2, CachedTag tag2)
+        void DiffTags(List<Difference> differences, Stream stream1, GameCache cache1, CachedTag tag1, Stream stream2, GameCache cache2, CachedTag tag2)
         {
             var def1 = cache1.Deserialize(stream1, tag1);
             var def2 = cache2.Deserialize(stream2, tag2);
             DiffData(differences, def1.GetType(), cache1, def1, cache2, def2);
         }
 
-        static void DiffData(List<Difference> differences, Type type, GameCache cache1, object data1, GameCache cache2, object data2, string path = "")
+        void DiffData(List<Difference> differences, Type type, GameCache cache1, object data1, GameCache cache2, object data2, string path = "")
         {
             if (data1 == data2)
                 return;
@@ -168,6 +172,9 @@ namespace TagTool.Commands.Porting
                         differences.Add(new Difference(DifferenceKind.ElementCount, path, list1, list2));
                         return;
                     }
+
+                    if (IgnoreData && type == typeof(byte[]))
+                        return;
 
                     Type elementType = type.IsArray ? type.GetElementType() : type.GetGenericArguments().First();
                     for (int i = 0; i < list1.Count; i++)

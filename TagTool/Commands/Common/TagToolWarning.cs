@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TagTool.Commands.Common
 {
-    class TagToolWarning
+    public class TagToolWarning
     {
         private static readonly object Mutex = new object();
 

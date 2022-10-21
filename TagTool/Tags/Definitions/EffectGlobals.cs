@@ -20,12 +20,14 @@ namespace TagTool.Tags.Definitions
                 TypeLocation,
                 TypeLightprobe,
                 TypeEffectMessage,
-                TracerSystem,
-                TracerLocation,
-                TracerSpawned,
-                TracerStateless,
-                TracerSpawnedProfileRow,
-                TracerStatelessProfileRow,
+                TypeBeamSystem,
+                TypeBeamLocation,
+                TypeBeam,
+                TypeBeamProfileRow,
+                TypeContrailSystem,
+                TypeContrailLocation,
+                TypeContrail,
+                TypeContrailProfileRow,
                 TypeDecalSystem,
                 TypeDecal,
                 TypeDecalVertex,
@@ -39,8 +41,8 @@ namespace TagTool.Tags.Definitions
                 TypeParticleEmitter,
                 TypeCpuParticle,
                 TypeGpuParticleRow,
-                TypeParticleQueue,
-                TracerQueue
+                TypeContrailQueue,
+                TypeParticleQueue
             }
 
             public uint OverallBudget;

@@ -119,6 +119,7 @@ namespace TagTool.Tags.Definitions
             InstantSoundPropagation = 1 << 9,
             FakeSpatializationWithDistance = 1 << 10,
             PlayPermutationsInOrder = 1 << 11,
+            Bit12 = 1 << 12
         }
 
         [Flags]
@@ -145,7 +146,9 @@ namespace TagTool.Tags.Definitions
         {
             DuplicateDirectoryName = 1 << 0,
             CutToBlockSize = 1 << 1,
-            UseMarkers = 1 << 2
+            UseMarkers = 1 << 2,
+            Bit3 = 1 << 3,
+            Bit4 = 1 << 4
         }
 
         [Flags]

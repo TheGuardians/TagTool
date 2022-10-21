@@ -248,7 +248,8 @@ namespace TagTool.Tags.Definitions
             ParentsPrimaryWeapon = 1 << 26,
             ParentsSecondaryWeapon = 1 << 27,
             UnitHasBoost = 1 << 28,
-            AllowAimWhileOpeningOrClosing = 1 << 29 // in MCC, needs testing
+            AllowAimWhileOpeningOrClosing = 1 << 29, // in MCC, needs testing
+            UseAimStillXxForAirborne = 1 << 30
         }
 
         public enum DefaultTeamValue : short

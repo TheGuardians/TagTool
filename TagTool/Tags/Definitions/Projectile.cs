@@ -148,7 +148,8 @@ namespace TagTool.Tags.Definitions
             AIStimulusWhenAttached = 1 << 16,
             OverPeneDetonation = 1 << 17,
             NoImpactEffectsOnBounce = 1 << 18,
-            RC1OverpenetrationFixes = 1 << 19
+            RC1OverpenetrationFixes = 1 << 19,
+            Bit20 = 1 << 20
         }
 
         public enum DetonationTimerModes : short

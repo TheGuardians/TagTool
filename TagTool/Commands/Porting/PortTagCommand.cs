@@ -1520,11 +1520,6 @@ namespace TagTool.Commands.Porting
                 case Model.TargetLockOnData lockOnData:
                     return ConvertTargetLockOnData(lockOnData);
 
-                case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
-					if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
-						throw new NotSupportedException(propertyType.Halo2.ToString());
-					return propertyType;
-
 				case RenderMethod renderMethod:
                     return ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderMethod, definition, blamTagName);
 

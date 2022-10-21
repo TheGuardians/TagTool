@@ -147,7 +147,8 @@ namespace TagTool.Tags.Definitions
         {
             AmbientOcclusion,
             Linear,
-            Quadratic
+            Quadratic,
+            Undefined // HO
         }
 
         public enum PRTShadowBounces : byte
@@ -457,6 +458,7 @@ namespace TagTool.Tags.Definitions
 
                 public enum TypeValue : short
                 {
+                    None = -1,
                     Hinge,
                     LimitedHinge,
                     Ragdoll,
@@ -1112,7 +1114,7 @@ namespace TagTool.Tags.Definitions
                 None = 0,
                 AoeTopLevel = 1 << 0,
                 AoeTestObstruction = 1 << 1,
-                ShowsTrackingReticle = 1 << 2
+                ShowsTrackingReticle = 1 << 2,
             }
         }
 

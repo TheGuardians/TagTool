@@ -272,6 +272,13 @@ namespace TagTool.Tags.Definitions
             RocketLauncher,
             EnergySword,
             SpartanLaser,
+            // HO
+            AssaultRifle,
+            BattleRifle,
+            DMR,
+            Magnum,
+            SniperRifle,
+            SMG,
         }
 
         public enum SpecialHudVersionValue : int
@@ -902,7 +909,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum NewWeaponFlags : int
+        public enum NewWeaponFlags : uint
         {
             None = 0,
             VerticalHeatDisplay = 1 << 0,
@@ -934,6 +941,9 @@ namespace TagTool.Tags.Definitions
             WeaponAgesWithEachKill = 1 << 26,
             AllowsUnaimedLunge = 1 << 27,
             CannotBeUsedByPlayer = 1 << 28,
+            Bit29 = 1 << 29,
+            Bit30 = 1 << 30,
+            Bit31 = 1u << 31
         }
     }
 
@@ -944,7 +954,11 @@ namespace TagTool.Tags.Definitions
         MagnitizesOnlyWhenZoomed = 1 << 0,
         ForceEnableEquipmentTossing = 1 << 1,
         // melee-physics dash is disabled on melees that are not lunges
-        NonlungeMeleeDashDisabled = 1 << 2
+        NonlungeMeleeDashDisabled = 1 << 2,
+        Bit3 = 1 << 3,
+        Bit4 = 1 << 4,
+        Bit5 = 1 << 5,
+        Bit6 = 1 << 6
     }
 
     [TagStructure(Size = 0xCC, MaxVersion = CacheVersion.HaloOnline700123)]

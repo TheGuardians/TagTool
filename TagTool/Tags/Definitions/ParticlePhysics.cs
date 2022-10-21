@@ -31,7 +31,8 @@ namespace TagTool.Tags.Definitions
             CollideWithVehicles = 1 << 4,
             CollideWithBipeds = 1 << 5,
             Swarm = 1 << 6,
-            Wind = 1 << 7
+            Wind = 1 << 7,
+            Bit8 = 1 << 8
         }
 
         [TagStructure(Size = 0x18)]

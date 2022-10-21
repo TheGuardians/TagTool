@@ -2207,8 +2207,15 @@ namespace TagTool.Tags.Definitions
         public class Decal : TagStructure
 		{
             public short DecalPaletteIndex;
-            public FlagBits Flags;
-            public byte Unknown1;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte EditingBoundToBsp;
+            [TagField(Length = 1, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Padding1;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ushort ManualBspFlags;
+
             public RealQuaternion Rotation;
             public RealPoint3d Position;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
