@@ -637,7 +637,23 @@ namespace TagTool.Tags.Definitions
             [Flags]
             public enum ZoneSetPvsFlags : ushort
             {
-                EmptyDebugPvs = 1 << 0
+                None = 0,
+                Bit0 = 1 << 0,
+                Bit1 = 1 << 1,
+                Bit2 = 1 << 2,
+                Bit3 = 1 << 3,
+                Bit4 = 1 << 4,
+                Bit5 = 1 << 5,
+                Bit6 = 1 << 6,
+                Bit7 = 1 << 7,
+                Bit8 = 1 << 8,
+                Bit9 = 1 << 9,
+                Bit10 = 1 << 10,
+                Bit11 = 1 << 11,
+                Bit12 = 1 << 12,
+                Bit13 = 1 << 13,
+                Bit14 = 1 << 14,
+                Bit15 = 1 << 15,
             }
 
             [TagStructure(Size = 0x4)]
@@ -1195,6 +1211,7 @@ namespace TagTool.Tags.Definitions
 
             public enum SourceValue : sbyte
             {
+                None = -1,
                 Structure,
                 Editor,
                 Dynamic,
@@ -2598,18 +2615,19 @@ namespace TagTool.Tags.Definitions
                 public List<SquadPoint> PatrolPoints;
             }
 
+            [Flags]
             public enum SpawnPointFlags : ushort
             {
                 None = 0,
                 InfectionFormExplode = 1 << 0,
-                Nothing = 1 << 2,
-                AlwaysPlace = 1 << 3,
-                InitiallyHidden = 1 << 4,
-                VehicleDestroyedWhenNoDriver = 1 << 5,
-                VehicleOpen = 1 << 6,
-                ActorSurfaceEmerge = 1 << 7,
-                ActorSurfaceEmergeAuto = 1 << 8,
-                ActorSurfaceEmergeUpwards = 1 << 9
+                Nothing = 1 << 1,
+                AlwaysPlace = 1 << 2,
+                InitiallyHidden = 1 << 3,
+                VehicleDestroyedWhenNoDriver = 1 << 4,
+                VehicleOpen = 1 << 5,
+                ActorSurfaceEmerge = 1 << 6,
+                ActorSurfaceEmergeAuto = 1 << 7,
+                ActorSurfaceEmergeUpwards = 1 << 8
             }
 
             [TagStructure(Size = 0x88, MaxVersion = CacheVersion.Halo3Retail)]
@@ -2722,10 +2740,11 @@ namespace TagTool.Tags.Definitions
             public uint Unknown;
 
             [Flags]
-            public enum ZoneFlagsOld : int
+            public enum ZoneFlagsOld : uint
             {
                 None,
-                UsesManualBspIndex = 1 << 0
+                UsesManualBspIndex = 1 << 0,
+                GiantsZone = 1 << 1
             }
 
             [Flags]
@@ -3331,7 +3350,13 @@ namespace TagTool.Tags.Definitions
                 public enum ControlFlagsValue : ushort
                 {
                     None,
-                    MagicLift = 1 << 0
+                    MagicLift = 1 << 0,
+                    VehicleOnly = 1 << 1,
+                    Railing = 1 << 2,
+                    Vault = 1 << 3,
+                    //ODST
+                    Down = 1 << 4,
+                    SurvivalOnly = 1 << 5
                 }
             }
 
@@ -3608,7 +3633,16 @@ namespace TagTool.Tags.Definitions
         public enum CutsceneTitleFont : short
         {
             TerminalFont,
-            SubtitleFont
+            BodyTextFont,
+            TitleFont,
+            SuperLargeFont,
+            LargeBodyTextFont,
+            SplitScreenHudMessageFont,
+            FullScreenHudMessageFont,
+            EnglishBodyTextFont,
+            HudNumberFont,
+            SubtitleFont,
+            MainMenuFont
         }
 
         [TagStructure(Size = 0x28, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -4583,7 +4617,7 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0xCC, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0xE8, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloReach11883)]
+            [TagStructure(Size = 0x84, MinVersion = CacheVersion.HaloReach)]
             public class Task : TagStructure
 			{
                 public TaskFlags Flags;
@@ -4606,11 +4640,13 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public float FollowZClamp;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.HaloReach)]
                 public FollowPlayerFlags FollowPlayers;
-
-                [TagField(Length = 2, MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
                 public byte[] Unused = new byte[2];
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float PlayerFrontRadius;
 
                 /// <summary>
                 /// Exhaust this task after it has been active for this long.
@@ -4623,9 +4659,6 @@ namespace TagTool.Tags.Definitions
                 /// </summary>
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public float ExhaustionDelay;
-
-                [TagField(MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883)]
-                public uint Unknown23;
 
                 [TagField(Length = 32, MaxVersion = CacheVersion.HaloOnline700123)]
                 public string EntryScriptName;
@@ -4716,6 +4749,7 @@ namespace TagTool.Tags.Definitions
 
                 public enum MovementValue : short
                 {
+                    Default,
                     Run,
                     Walk,
                     Crouch
@@ -4725,7 +4759,8 @@ namespace TagTool.Tags.Definitions
                 {
                     None,
                     Player,
-                    Squad
+                    Squad,
+                    LeadPlayer
                 }
 
                 [Flags]
@@ -5484,6 +5519,11 @@ namespace TagTool.Tags.Definitions
         Bit3 = 1 << 3,
         Bit4 = 1 << 4,
         CharactersUsePreviousMissionWeapons = 1 << 5,
+        Bit6 = 1 << 6,
+        Bit7 = 1 << 7,
+        Bit8 = 1 << 8,
+        Bit9 = 1 << 9,
+        Bit10 = 1 << 10
     }
 
     [Flags]

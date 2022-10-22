@@ -873,7 +873,7 @@ namespace TagTool.Tags.Definitions
         public NewWeaponFlags NewFlags;
 
         [Flags]
-        public enum OldWeaponFlags : int
+        public enum OldWeaponFlags : uint
         {
             None = 0,
             VerticalHeatDisplay = 1 << 0,
@@ -906,6 +906,8 @@ namespace TagTool.Tags.Definitions
             WeaponUsesOldDualFireErrorCode = 1 << 27, // removed in later games
             AllowsUnaimedLunge = 1 << 28,
             CannotBeUsedByPlayer = 1 << 29,
+            HoldFpFiringAnimation = 1 << 30,    
+            StrictDeviationAngle = 1u << 31 //  // deviation angle is allowed to be less than primary autoaim angle - for the rocket launcher
         }
 
         [Flags]

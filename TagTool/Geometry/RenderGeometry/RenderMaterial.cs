@@ -71,13 +71,7 @@ namespace TagTool.Geometry
         public class Property : TagStructure
 		{
             public PropertyType Type;
-
-            [TagField(Flags = TagFieldFlags.Padding, Length = 2, MaxVersion = CacheVersion.Halo3ODST)]
-            public byte[] Padding;
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public ushort Unknown1;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+ 
             public short ShortValue;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]

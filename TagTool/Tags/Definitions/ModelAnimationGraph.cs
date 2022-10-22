@@ -895,10 +895,13 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum InheritanceListFlags : int
+        public enum InheritanceListFlags : uint
         {
             None = 0,
-            TightenNodes = 1 << 0
+            TightenNodes = 1 << 0,
+            Bit1 = 1 << 1,
+            // ODST
+            Bit2 = 1 << 2
         }
 
         [TagStructure(Size = 0x30)]

@@ -199,7 +199,7 @@ namespace TagTool.Tags.Definitions
             public GlobalAiJumpHeight LeapJumpSpeed;
 
             [Flags]
-            public enum AiPropertiesFlags : int
+            public enum AiPropertiesFlags : uint
             {
                 None = 0,
                 DestroyableCover = 1 << 0,
@@ -208,7 +208,8 @@ namespace TagTool.Tags.Definitions
                 NonFlightBlocking = 1 << 3,
                 DynamicCoverFromCentre = 1 << 4,
                 HasCornerMarkers = 1 << 5,
-                IdleWhenFlying = 1 << 6
+                Inspectable = 1 << 6,
+                IdleWhenFlying = 1 << 7
             }
 
             public enum AiSizeEnum : short

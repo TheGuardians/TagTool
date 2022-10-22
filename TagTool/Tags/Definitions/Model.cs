@@ -227,7 +227,8 @@ namespace TagTool.Tags.Definitions
                     public enum FlagsValue : byte
                     {
                         None,
-                        CopyStatesToAllPermutations = 1 << 0
+                        CopyStatesToAllPermutations = 1 << 0,
+                        Bit1 = 1 << 1
                     }
 
                     [TagStructure(Size = 0x20, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1080,6 +1081,7 @@ namespace TagTool.Tags.Definitions
 
                 public enum TypeValue : short
                 {
+                    None = -1,
                     Hinge,
                     LimitedHinge,
                     Ragdoll,

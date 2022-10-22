@@ -373,7 +373,8 @@ namespace TagTool.Tags.Definitions
             public FlagsValue Flags;
             public List<Vertex> Vertices;
 
-            public enum FlagsValue : int
+            [Flags]
+            public enum FlagsValue : uint
             {
                 None = 0,
                 AiCantHearThroughThisShit = 1 << 0,
