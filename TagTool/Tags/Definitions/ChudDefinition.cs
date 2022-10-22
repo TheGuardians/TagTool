@@ -267,9 +267,9 @@ namespace TagTool.Tags.Definitions
                 public enum PDA : ushort
                 {
                     None,
-                    SplitscreenPDAOpen = 1 << 0,
-                    SplitscreenPDAClose = 1 << 1,
-                    CameraUnknown = 1 << 2,
+                    PdaActive = 1 << 0,
+                    PdaInactive = 1 << 1,
+                    FirstPerson = 1 << 2 // Combine this with PDA active to have elements hide in third person without the PDA up
                 }
 
                 [Flags]
@@ -320,8 +320,8 @@ namespace TagTool.Tags.Definitions
                     TalkingPlayerAvailable = 1 << 3,
                     ArmingMeterAvailable = 1 << 4,
                     TimeLeftAvailable = 1 << 5,
-                    FriendlyPosession = 1 << 6,
-                    EnemyPosession = 1 << 7,
+                    FriendlyPossession = 1 << 6,
+                    EnemyPossession = 1 << 7,
                     VariantCustomA = 1 << 8,
                     VariantCustomB = 1 << 9,
                     VariantCustomC = 1 << 10,
@@ -344,8 +344,8 @@ namespace TagTool.Tags.Definitions
                     TalkingPlayerAvailable = 1 << 3,
                     ArmingMeterAvailable = 1 << 4,
                     TimeLeftAvailable = 1 << 5,
-                    FriendlyPosession = 1 << 6,
-                    EnemyPosession = 1 << 7,
+                    FriendlyPossession = 1 << 6,
+                    EnemyPossession = 1 << 7,
                     VariantCustomA = 1 << 8,
                     VariantCustomB = 1 << 9,
                     VariantCustomC = 1 << 10,
@@ -564,7 +564,7 @@ namespace TagTool.Tags.Definitions
                     Consumable2Unknown = 1 << 7,
                     Consumable3Unknown = 1 << 8,
                     Consumable4Unknown = 1 << 9,
-                    Bit10 = 1 << 10,
+                    EnemyVisionActive = 1 << 10,
                     Bit11 = 1 << 11,
                     HitMarkerLow = 1 << 12,
                     HitMarkerMedium = 1 << 13,
@@ -594,20 +594,7 @@ namespace TagTool.Tags.Definitions
                     None,
                     BinocularsEnabled = 1 << 0,
                     UnitIsZoomedLevel1 = 1 << 1,
-                    UnitIsZoomedLevel2 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    UnitIsZoomedLevel2 = 1 << 2
                 }
 
                 [Flags]
@@ -616,19 +603,7 @@ namespace TagTool.Tags.Definitions
                     None = 1 << 0,
                     IsSingleWielding = 1 << 1,
                     IsDualWielding = 1 << 2,
-                    HasSupportWeapon = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    HasSupportWeapon = 1 << 3
                 }
 
                 [Flags]
@@ -659,12 +634,7 @@ namespace TagTool.Tags.Definitions
                     None,
                     AmmoUsed = 1 << 0,
                     AmmoPickup = 1 << 1,
-                    AmmoThreshold = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7
+                    AmmoThreshold = 1 << 2
                 }
 
                 [Flags]
@@ -680,8 +650,8 @@ namespace TagTool.Tags.Definitions
                     LockAvailable = 1 << 6,
                     PlasmaTrack = 1 << 7,
                     LockUnavailable = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
+                    TargetUnobstructed = 1 << 9,
+                    TargetObstructed = 1 << 10,
                 }
 
                 [Flags]
@@ -700,19 +670,11 @@ namespace TagTool.Tags.Definitions
                     SourceIsPrimaryWeapon = 1 << 0,
                     SourceIsDualWeapon = 1 << 1,
                     SourceIsBackpacked = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
+                    Hidden = 1 << 3,
+                    PickupMessage = 1 << 4,
                     Bit5 = 1 << 5,
                     Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    Bit7 = 1 << 7
                 }
 
                 [Flags]
@@ -728,9 +690,7 @@ namespace TagTool.Tags.Definitions
                     HasFragGrenades = 1 << 6,
                     HasPlasmaGrenades = 1 << 7,
                     HasSpikeGrenades = 1 << 8,
-                    HasFireGrenades = 1 << 9,
-                    Unknown1 = 1 << 10,
-                    Unknown2 = 1 << 11,
+                    HasFireGrenades = 1 << 9
                 }
 
                 [Flags]
@@ -1123,13 +1083,7 @@ namespace TagTool.Tags.Definitions
                 public OutputScalarValue OutputScalarF;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown2;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown3;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown4;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown5;
+                public Rectangle2d ScissorRect;
 
                 public enum ChudShaderType : short
                 {
@@ -1606,8 +1560,8 @@ namespace TagTool.Tags.Definitions
                     LocalB,
                     LocalC,
                     LocalD,
-                    Unknown6,
-                    Unknown7
+                    FlashAnimation,
+                    ScalarAnimationB
                 }
             }
 

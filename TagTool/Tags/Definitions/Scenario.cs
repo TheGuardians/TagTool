@@ -91,21 +91,13 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<CampaignPlayer> CampaignPlayers;
 
-        public uint Unknown9;
-        public uint Unknown10;
-        public uint Unknown11;
-
-        public uint Unknown12;
-        public uint Unknown13;
-        public uint Unknown14;
-
-        public uint Unknown15;
-        public uint Unknown16;
-        public uint Unknown17;
+        public List<GNullBlock> PredictedResources;
+        public List<ScenarioFunctionBlock> Functions;
 
         public byte[] EditorScenarioData;
 
         public List<Comment> Comments;
+        public List<UnusedScenarioEnvironmentObject> ScenarioEnvironmentObjects;
         public List<ObjectName> ObjectNames;
         public List<SceneryInstance> Scenery;
         public List<ScenarioPaletteEntry> SceneryPalette;
@@ -161,11 +153,7 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "motl" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag MultiplayerObjectTypes;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint Unknown200;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint Unknown201;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint Unknown202;
+        public List<ScenarioRequisitionPalette> PlaytestReqPalette; // requisition for SvE, activated via an init.txt option for playtest balance
 
         public List<SoftCeiling> SoftCeilings;
         public List<PlayerStartingProfileBlock> PlayerStartingProfile;
@@ -187,8 +175,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<ScenarioNamedLocationVolumeBlock> NamedLocationVolumes;
 
-        [TagField(ValidTags = new[] { "ssdf" }, MinVersion = CacheVersion.HaloReach)]
-        public CachedTag SpawnSettings;
+        [TagField(ValidTags = new[] { "airs" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag Airstrike;
 
         public List<PlayerSpawnInfluencerBlock> EnemyForbidInfluence;
         public List<PlayerSpawnInfluencerBlock> EnemyBiasInfluence;
@@ -345,16 +333,10 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<Interpolator> Interpolators;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public uint Unknown127;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public uint Unknown128;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public uint Unknown129;
+        public List<HsReference> SharedReferences;
 
-        public uint Unknown130;
-        public uint Unknown131;
-        public uint Unknown132;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public List<ScreenEffectReference> ScreenEffectReferences;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         public List<SimulationDefinitionTableBlock> SimulationDefinitionTable;
@@ -992,6 +974,84 @@ namespace TagTool.Tags.Definitions
             public StringId PlayerRepresentationName;
         }
 
+        [TagStructure(Size = 0x78)]
+        public class ScenarioFunctionBlock : TagStructure
+        {
+            public ScenarioFunctionFlags Flags;
+            [TagField(Length = 32)]
+            public string Name;
+            public float Period; // this is the period for the above function (lower values make the function oscillate quickly, higher values make it oscillate slowly) (seconds)
+            public short ScalePeriodBy; // multiply this function by the above period
+            public GlobalPeriodicFunctionsEnum Function;
+            public short ScaleFunctionBy; // multiply this function by the result of the above function
+            public GlobalPeriodicFunctionsEnum WobbleFunction; // the curve used for the wobble
+            public float WobblePeriod; // the length of time it takes for the magnitude of this function to complete a wobble (seconds)
+            public float WobbleMagnitude; // the amount of random wobble in the magnitude (percent)
+            public float SquareWaveThreshold; // if non-zero, all values above the square wave threshold are snapped to 1.0, and all values below it are snapped to 0.0 to create a square wave.
+            public short StepCount; // the number of discrete values to snap to (e.g., a step count of 5 would snap the function to 0.00,0.25,0.50,0.75 or 1.00)
+            public GlobalTransitionFunctionsEnum MapTo;
+            public short SawtoothCount; // the number of times this function should repeat (e.g., a sawtooth count of 5 would give the function a value of 1.0 at each of 0.25,0.50,0.75 as well as at 1.0
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] WBP;
+            public short ScaleResultBy; // multiply this function (from a weapon, vehicle, etc.) final result of all of the above math
+            public FunctionBoundsModeEnum BoundsMode; // controls how the bounds, below, are used
+            public Bounds<float> Bounds;
+            public float RuntimeInverseBoundsRange;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] OFLIM;
+            public short TurnOffWith; // if the specified function is off, so is this function
+            [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
+            public byte[] FX;
+            public float RuntimeReciprocalSawtoothCount;
+            public float RuntimeReciprocalBoundsRange;
+            public float RuntimeReciprocalStepCount;
+            public float RuntimeOneOverPeriod;
+
+            [Flags]
+            public enum ScenarioFunctionFlags : uint
+            {
+                Scripted = 1 << 0, // the level script will set this value; the other settings here will be ignored.
+                Invert = 1 << 1, // result of function is one minus actual result
+                Additive = 1 << 2,
+                AlwaysActive = 1 << 3 // function does not deactivate when at or below lower bound
+            }
+
+            public enum GlobalPeriodicFunctionsEnum : short
+            {
+                One,
+                Zero,
+                Cosine,
+                CosineVariablePeriod,
+                DiagonalWave,
+                DiagonalWaveVariablePeriod,
+                Slide,
+                SlideVariablePeriod,
+                Noise,
+                Jitter,
+                Wander,
+                Spark
+            }
+
+            public enum GlobalTransitionFunctionsEnum : short
+            {
+                Linear,
+                Early,
+                VeryEarly,
+                Late,
+                VeryLate,
+                Cosine,
+                One,
+                Zero
+            }
+
+            public enum FunctionBoundsModeEnum : short
+            {
+                Clip,
+                ClipAndNormalize,
+                ScaleToFit
+            }
+        }
+
         [TagStructure(Size = 0x130)]
         public class Comment : TagStructure
 		{
@@ -1009,6 +1069,20 @@ namespace TagTool.Tags.Definitions
             {
                 Generic
             }
+        }
+
+        [TagStructure(Size = 0x40)]
+        public class UnusedScenarioEnvironmentObject : TagStructure
+        {
+            public short Bsp;
+            public short RuntimeObjectType;
+            public int UniqueId;
+            [TagField(Length = 0x4, Flags = Padding)]
+            public byte[] WOQHKQB;
+            public Tag ObjectDefinitionTag;
+            public int Object;
+            [TagField(Length = 0x2C, Flags = Padding)]
+            public byte[] YMRTLZ;
         }
 
         [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1249,23 +1323,9 @@ namespace TagTool.Tags.Definitions
         public class ScenarioPaletteEntry : TagStructure
 		{
             public CachedTag Object;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown2;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown4;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown5;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown6;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown7;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown8;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Length = 0x20, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
         }
 
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1779,6 +1839,43 @@ namespace TagTool.Tags.Definitions
             Acceleration,
             SoftKill,
             SlipSurface
+        }
+
+        [TagStructure(Size = 0x50)]
+        public class ScenarioRequisitionPalette : TagStructure
+        {
+            [TagField(ValidTags = new[] { "obje", "vehi", "scen", "mach" })]
+            public CachedTag Name;
+            [TagField(ValidTags = new[] { "obje", "vehi", "scen", "mach" })]
+            public CachedTag SecondName;
+            [TagField(ValidTags = new[] { "obje", "vehi", "scen", "mach" })]
+            public CachedTag ThirdName;
+            public StringId DisplayName;
+            public RequisitionSubmenuGlobalEnum Submenu; // controls which requisition submenu this object should appear in
+            public int MaximumAllowed; // cant buy more if there are too many in play
+            public float PricePerInstance;
+            public StringId ModelVariantName;
+            public float BountyForDestruction;
+            public short MinFireteamTier; // 0=Bronze, 1=Silver, or 2=Gold
+            public sbyte AdditionalFragGrenades;
+            public sbyte AdditionalPlasmaGrenades;
+            public ScenarioRequisitionPalettePresence BuiltInPalettesForWhichItemIsEnabledByDefault;
+
+            public enum RequisitionSubmenuGlobalEnum : int
+            {
+                Weapons,
+                Equipment,
+                Vehicles
+            }
+
+            [Flags]
+            public enum ScenarioRequisitionPalettePresence : uint
+            {
+                EmptyPalette = 1 << 0,
+                FullPalette = 1 << 1,
+                SpartanPalette = 1 << 2,
+                ElitePalette = 1 << 3
+            }
         }
 
         [TagStructure(Size = 0xC)]
@@ -4368,6 +4465,24 @@ namespace TagTool.Tags.Definitions
             public TagFunction Function;
             public short AcceleratorInterpolatorIndex;
             public short MultiplierInterpolatorIndex;
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class HsReference : TagStructure
+        {
+            public CachedTag Reference;
+        }
+
+        [TagStructure(Size = 0x2C)]
+        public class ScreenEffectReference : TagStructure
+        {
+            [TagField(Length = 0x10, Flags = Padding)]
+            public byte[] HLYWEJXGX;
+            public CachedTag ScreenEffect;
+            public StringId PrimaryInput; // interpolator
+            public StringId SecondaryInput; // interpolator
+            public short RuntimePrimaryInputInterpolatorIndex;
+            public short RuntimeSecondaryInputInterpolatorIndex;
         }
 
         [TagStructure(Size = 0x4)]
