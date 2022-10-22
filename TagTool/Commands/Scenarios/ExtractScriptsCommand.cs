@@ -66,7 +66,7 @@ namespace TagTool.Commands.Scenarios
             {
                 case "FunctionName":
                     indentWriter.Write(expr.StringAddress == 0 ? OpcodeLookup(expr.Opcode) : ReadScriptString(stringReader, expr.StringAddress));
-                    if ((expr.Opcode == 0 || expr.Opcode == 1 || expr.Opcode == 22) && nextExprValid && parentExprk.Flags != HsSyntaxNodeFlags.ScriptReference)
+                    if (((parentExprk.Opcode <= 1) && parentExprk.Flags != HsSyntaxNodeFlags.ScriptReference) && nextExprValid)
                         indentWriter.WriteLine();
                     break; //Trust the string table, its faster than going through the dictionary with OpcodeLookup.
 
@@ -147,7 +147,7 @@ namespace TagTool.Commands.Scenarios
                     break;
             }
             
-            if (nextExprValid && (parentExprk.Opcode != 0 || (parentExprk.Opcode == 0 && parentExprk.Flags == HsSyntaxNodeFlags.ScriptReference)) && parentExprk.Opcode != 1 && parentExprk.Opcode != 22)
+            if (nextExprValid && !((parentExprk.Opcode <= 1) && parentExprk.Flags != HsSyntaxNodeFlags.ScriptReference))
                 indentWriter.Write(' ');
         }
 
@@ -157,16 +157,19 @@ namespace TagTool.Commands.Scenarios
 
             if (!shouldSkip)
             {
-                if (parentExpr.Opcode > 19 && parentExpr.Opcode != 22)
-                    indentWriter.Write(' ');
-
                 indentWriter.Indent++;
+
+                if ((expr.Opcode <= 1) && expr.Flags != HsSyntaxNodeFlags.ScriptReference && parentExpr.Opcode != 2)
+                    indentWriter.WriteLine();
+
                 indentWriter.Write('(');
             }
 
             var prevExpr = expr;
+            var nestedExpression = true;
             for (var exprIndex = (ushort)(Definition.ScriptExpressions.IndexOf(expr) + 1); GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[exprIndex].ValueType) != "Invalid"; exprIndex = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index)
             {
+                nestedExpression = false;
                 if (shouldSkipFirst)
                 {
                     shouldSkipFirst = false;
@@ -180,12 +183,44 @@ namespace TagTool.Commands.Scenarios
                     break;
             }
 
+            if (nestedExpression)
+            {
+                var exprIdx = (ushort)(Definition.ScriptExpressions.IndexOf(expr) + 2);
+                var expression = Definition.ScriptExpressions[exprIdx];
+                var valueType = GetHsTypeAsString(Cache.Version, expression.ValueType);
+                indentWriter.Write($"<ERROR DECOMPILING GROUP EXPRESSION: {expression.Flags.ToString()} {valueType}>");
+            }
+
             if (!shouldSkip)
             {
-                if (parentExpr.Opcode < 3 || parentExpr.Opcode == 22)
-                    indentWriter.WriteLine(')');
+                var exprIndex = (ushort)(Definition.ScriptExpressions.IndexOf(expr));
+                var nextExpr = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+                var nextExprValid = false;
+                if (nextExpr < Definition.ScriptExpressions.Count)
+                    nextExprValid = GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[nextExpr].ValueType) != "Invalid";
+
+                if (((parentExpr.Opcode <= 2) && parentExpr.Flags != HsSyntaxNodeFlags.ScriptReference))
+                {
+                    indentWriter.WriteLine(")");
+                }
                 else
-                    indentWriter.Write(')');
+                {
+                    HsSyntaxNode nextExprHandle = null;
+                    if(nextExprValid)
+                        nextExprHandle = Definition.ScriptExpressions[nextExpr];
+                    
+                    if (nextExprValid && !(((nextExprHandle.Opcode <= 2) && nextExprHandle.Flags != HsSyntaxNodeFlags.ScriptReference)))
+                    {
+                        if ((expr.Opcode <= 2) && expr.Flags != HsSyntaxNodeFlags.ScriptReference)
+                        {
+                            indentWriter.WriteLine(")");
+                        }
+                        else
+                            indentWriter.Write(") ");
+                    }
+                    else
+                        indentWriter.Write(")");
+                }
 
                 indentWriter.Indent--;
             }
