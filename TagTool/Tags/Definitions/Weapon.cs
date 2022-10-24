@@ -944,7 +944,7 @@ namespace TagTool.Tags.Definitions
             AllowsUnaimedLunge = 1 << 27,
             CannotBeUsedByPlayer = 1 << 28,
             Bit29 = 1 << 29,
-            Bit30 = 1 << 30,
+            StrictDeviationAngle = 1 << 30,
             Bit31 = 1u << 31
         }
     }

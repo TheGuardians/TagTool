@@ -155,6 +155,7 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public Player_Special Player_SpecialFlags;
+
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public Player_Special_H3 Player_SpecialFlags_H3;
 
@@ -162,9 +163,10 @@ namespace TagTool.Tags.Definitions
                 public Inverse InverseFlags;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public PDA2 PDA2Flags;
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public short UnusedFlags3;
+                public ODSTNotHiddenState NotHiddenStateFlags;
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 2, Flags = Padding)]
+                public byte[] Padding0;
 
                 //HO EXCLUSIVE FLAGS
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
@@ -270,10 +272,10 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum PDA2 : ushort
+                public enum ODSTNotHiddenState : ushort
                 {
                     None,
-                    VisibleInPDA = 1 << 0,
+                    PdaActive = 1 << 0,
                 }
 
                 [Flags]
@@ -372,16 +374,16 @@ namespace TagTool.Tags.Definitions
                     SavedFilmNormalMode = 1 << 3,
                     PlayerTrainingAvailable = 1 << 4,
                     CampaignObjectiveAvailable = 1 << 5,
-                    SurvivalState = 1 << 6,
-                    BeaconEnabled = 1 << 7,
-                    UserWaypointEnabled = 1 << 8,
-                    Bit9 = 1 << 9,
+                    SurvivalObjectiveAvailable = 1 << 6,
+                    UserPlacedWaypointBeacon = 1 << 7,
+                    UserPlacedWaypointUserPlaced = 1 << 8,
+                    SavedFilmControlsActive = 1 << 9,
                     Achievement1 = 1 << 10,
                     Achievement2 = 1 << 11,
                     Achievement3 = 1 << 12,
                     Achievement4 = 1 << 13,
                     Achievement5 = 1 << 14,
-                    ARGEnabled = 1 << 15,
+                    ArgEnabled = 1 << 15,
                 }
 
                 [Flags]
@@ -394,16 +396,16 @@ namespace TagTool.Tags.Definitions
                     SavedFilmNormalMode = 1 << 3,
                     PlayerTrainingAvailable = 1 << 4,
                     CampaignObjectiveAvailable = 1 << 5,
-                    SurvivalState = 1 << 6,
-                    BeaconEnabled = 1 << 7, //unused, kept for odst porting
+                    SurvivalObjectiveAvailable = 1 << 6,
+                    UserPlacedWaypointBeacon = 1 << 7, //unused, kept for odst porting
                     Achievement1 = 1 << 8,
                     Achievement2 = 1 << 9,
                     Achievement3 = 1 << 10,
                     Achievement4 = 1 << 11,
                     Achievement5 = 1 << 12,
-                    GameTimeUnknown = 1 << 13,
-                    UserWaypointEnabled = 1 << 14, //unused, kept for odst porting
-                    ARGEnabled = 1 << 15, //unused, kept for odst porting
+                    SavedFilmControlsActive = 1 << 13,
+                    UserPlacedWaypointUserPlaced = 1 << 14, //unused, kept for odst porting
+                    ArgEnabled = 1 << 15, //unused, kept for odst porting
                 }
 
 
@@ -538,7 +540,7 @@ namespace TagTool.Tags.Definitions
                     PickupPlasmaGrenades = 1 << 1,
                     PickupSpikeGrenades = 1 << 2,
                     PickupFireGrenades = 1 << 3,
-                    Bit4 = 1 << 4,
+                    GrenadesEmpty = 1 << 4,
                     LivesAdded = 1 << 5,
                     Consumable1Unknown = 1 << 6,
                     Consumable2Unknown = 1 << 7,
@@ -560,11 +562,11 @@ namespace TagTool.Tags.Definitions
                     PickupPlasmaGrenades = 1 << 1,
                     PickupSpikeGrenades = 1 << 2,
                     PickupFireGrenades = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
+                    GrenadesEmpty = 1 << 4,
+                    Zoom0To1 = 1 << 5,
+                    Zoom1To2 = 1 << 6,
+                    Zoom1To0 = 1 << 7,
+                    Zoom2To0 = 1 << 8,
                     LivesAdded = 1 << 9,
                 }
 
@@ -670,7 +672,8 @@ namespace TagTool.Tags.Definitions
                     HasFragGrenades = 1 << 6,
                     HasPlasmaGrenades = 1 << 7,
                     HasSpikeGrenades = 1 << 8,
-                    HasFireGrenades = 1 << 9
+                    HasFireGrenades = 1 << 9,
+                    Bit10_HO = 1 << 10
                 }
 
                 [Flags]
@@ -1275,7 +1278,7 @@ namespace TagTool.Tags.Definitions
                     MetagameP3Score,
                     MetagameP4Score,
                     MetagameTimeMultiplier,
-                    MetagameSkullDifficultyModifer,
+                    MetagameSkullDifficultyModifier,
                     MotionSensorRange,
                     NetworkLatency,
                     NetworkLatencyQuality,
@@ -1334,7 +1337,7 @@ namespace TagTool.Tags.Definitions
                     MetagameP3Score,
                     MetagameP4Score,
                     MetagameTimeMultiplier,
-                    MetagameSkullDifficultyModifer,
+                    MetagameSkullDifficultyModifier,
                     MotionSensorRange,
                     NetworkLatency,
                     NetworkLatencyQuality,
@@ -1421,7 +1424,7 @@ namespace TagTool.Tags.Definitions
                     MetagameP3Score,
                     MetagameP4Score,
                     MetagameTimeMultiplier,
-                    MetagameSkullDifficultyModifer,
+                    MetagameSkullDifficultyModifier,
                     MotionSensorRange,
                     NetworkLatency,
                     NetworkLatencyQuality,
