@@ -275,6 +275,7 @@
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\Utils\BitmapUtilsPC.cs" />
+    <Compile Include="Bitmaps\Utils\SquishLib.cs" />
     <Compile Include="Bitmaps\XboxGraphics.cs" />
     <Compile Include="BlamFile\MapFileBuilder.cs" />
     <Compile Include="BlamFile\MapVariantGenerator.cs" />

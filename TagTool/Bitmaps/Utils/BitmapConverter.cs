@@ -586,7 +586,7 @@ namespace TagTool.Bitmaps.Utils
             }
         }
 
-        private static byte[] EncodeDXN(byte[] rgba, int width, int height, out int mipCount, bool generateMips = false)
+        public static byte[] EncodeDXN(byte[] rgba, int width, int height, out int mipCount, bool generateMips = false, bool resize = false)
         {
             string tempBitmap = $@"Temp\{Guid.NewGuid().ToString()}.dds";
 
@@ -601,7 +601,7 @@ namespace TagTool.Bitmaps.Utils
 
                 ProcessStartInfo info = new ProcessStartInfo($@"{Program.TagToolDirectory}\Tools\nvcompress.exe")
                 {
-                    Arguments = $"-bc5 -normal -tonormal {(generateMips ? "" : "-nomips")} {tempBitmap} {tempBitmap}",
+                    Arguments = $"-bc5 -normal -tonormal {(generateMips ? "" : "-nomips")} {(!resize ? "" : "-resize")} {tempBitmap} {tempBitmap}",
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     UseShellExecute = false,
@@ -627,7 +627,7 @@ namespace TagTool.Bitmaps.Utils
             }
         }
 
-        private static void GenerateCompressedMipMaps(BaseBitmap bitmap)
+        public static void GenerateCompressedMipMaps(BaseBitmap bitmap)
         {
             string tempBitmap = $@"Temp\{Guid.NewGuid().ToString()}.dds";
 

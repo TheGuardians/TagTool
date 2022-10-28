@@ -1,6 +1,12 @@
 using TagTool.Cache;
 using System;
 using TagTool.Tags.Definitions;
+using TagTool.Bitmaps.Utils;
+using System.Diagnostics;
+using System.IO;
+using TagTool.Bitmaps.DDS;
+using TagTool.Commands;
+using TagTool.IO;
 
 /***************************************************************
 * The following code is derived from the HaloDeveloper project
@@ -182,7 +188,7 @@ namespace TagTool.Bitmaps
         public static byte[] ConvertAY8ToA8Y8(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width * 2];
-            for(int i =0; i < height*width * 2; i += 2)
+            for (int i = 0; i < height * width * 2; i += 2)
             {
                 int index = i / 2;
                 buffer[i] = data[index];
@@ -205,61 +211,55 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
-        // TODO: fix/refactor
         private static byte[] DecodeCtx1(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[width * height * 4];
-            int index = 0;
 
-            for (int i = 0; i < (width * height); i += 16)
+            const float bfScale = 255.0f / 127.0f;
+            const float bfOffset = 128.0f / 127.0f;
+
+            for (int vtPos = 0; vtPos < (height / 4); vtPos++)
             {
-                int c1 = (data[index + 1] << 8) | data[index];
-                int c2 = (data[index + 3] << 8) | data[index + 2];
-
-                RGBAColor[] colorArray = new RGBAColor[4];
-                colorArray[0].R = data[index];
-                colorArray[0].G = data[index + 1];
-                colorArray[1].R = data[index + 2];
-                colorArray[1].G = data[index + 3];
-
-                if (c1 > c2)
+                for (int hzPos = 0; hzPos < (width / 4); hzPos++)
                 {
-                    colorArray[2] = GradientColors(colorArray[0], colorArray[1]);
-                    colorArray[3] = GradientColors(colorArray[1], colorArray[0]);
-                }
-                else
-                {
-                    colorArray[2] = GradientColorsHalf(colorArray[0], colorArray[1]);
-                    colorArray[3] = colorArray[0];
-                }
+                    int dataI = (vtPos * (width / 4) + hzPos) * 8;
 
-                int cData = ((data[index + 5] | (data[index + 4] << 8)) | (data[index + 7] << 0x10)) | (data[index + 6] << 0x18);
-                int chunkNum = i / 16;
+                    byte _2_g = (byte)(data[dataI + 0] + (byte)((1.0f / 3.0f) * (float)(data[dataI + 2] - data[dataI + 0])));
+                    byte _2_r = (byte)(data[dataI + 1] + (byte)((1.0f / 3.0f) * (float)(data[dataI + 3] - data[dataI + 0])));
+                    byte _3_g = (byte)(data[dataI + 0] + (byte)((2.0f / 3.0f) * (float)(data[dataI + 2] - data[dataI + 0])));
+                    byte _3_r = (byte)(data[dataI + 1] + (byte)((2.0f / 3.0f) * (float)(data[dataI + 3] - data[dataI + 0])));
 
-                int xPos = chunkNum % (width / 4);
-                int yPos = (chunkNum - xPos) / (width / 4);
-
-                int sizeh = (height < 4) ? height : 4;
-                int sizew = (width < 4) ? width : 4;
-
-                for (int j = 0; j < sizeh; j++)
-                {
-                    for (int k = 0; k < sizew; k++)
+                    byte[][] colours = new byte[][]
                     {
-                        RGBAColor color = colorArray[cData & 3];
-                        cData = cData >> 2;
-                        int temp = (((((yPos * 4) + j) * width) + (xPos * 4)) + k) * 4;
-                        float x = ((((float)color.R) / 255f) * 2f) - 1f;
-                        float y = ((((float)color.G) / 255f) * 2f) - 1f;
-                        float z = (float)Math.Sqrt((double)Math.Max(0f, Math.Min((float)1f, (float)((1f - (x * x)) - (y * y)))));
-                        buffer[temp] = (byte)(((z + 1f) / 2f) * 255f);
-                        buffer[temp + 1] = (byte)color.G;
-                        buffer[temp + 2] = (byte)color.R;
-                        buffer[temp + 3] = 0xFF;
+                        new byte[] { 0x00, data[dataI + 0], data[dataI + 1], 0xFF },
+                        new byte[] { 0x00, data[dataI + 2], data[dataI + 3], 0xFF },
+                        new byte[] { 0x00, _2_g,            _2_r,            0xFF },
+                        new byte[] { 0x00, _3_g,            _3_r,            0xFF }
+                    };
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        for (int j = 0; j < 4; j++)
+                        {
+                            var colourBgra = colours[(data[dataI + 4 + i] >> j * 2) & 0x3];
+
+                            float fR = (colourBgra[2] / 255.0f) * bfScale - bfOffset;
+                            float fG = (colourBgra[1] / 255.0f) * bfScale - bfOffset;
+                            float nPart = (fR * fR + fG * fG);
+                            nPart = nPart > 1.0f ? 1.0f : nPart < 0.0f ? 0.0f : nPart;
+                            float fB = (float)Math.Sqrt(1.0f - nPart);
+                            byte bChannel = (byte)(((fB + bfOffset) / bfScale) * 255.0f);
+
+                            int outIndex = ((vtPos * 4 + i) * width + (hzPos * 4 + j)) * 4;
+                            buffer[outIndex + 0] = colourBgra[2];
+                            buffer[outIndex + 1] = colourBgra[1];
+                            buffer[outIndex + 2] = bChannel;
+                            buffer[outIndex + 3] = colourBgra[3];
+                        }
                     }
                 }
-                index += 8;
             }
+
             return buffer;
         }
 
@@ -294,7 +294,7 @@ namespace TagTool.Bitmaps
                 }
                 float gMin = DenormalizeSigned((sbyte)data[i + 8]);
                 float gMax = DenormalizeSigned((sbyte)data[i + 9]);
-   
+
                 byte[] gIndices = new byte[16];
                 temp = ((data[i + 12] << 16) | (data[i + 11] << 8)) | data[i + 10];
                 indices = 0;
@@ -567,7 +567,7 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[(alignedWidth * alignedHeight * DXNbpp) >> 3];
 
             int b = 0;  // buffer block index (dxn)
-            for(int i =0; i < ctx1ImageSize; i += CTX1TexelPitch, b += DXNTexelPitch)
+            for (int i = 0; i < ctx1ImageSize; i += CTX1TexelPitch, b += DXNTexelPitch)
             {
                 // convert X,Y min and max components (swap X and Y at the same time)
                 byte minX = data[i + 0];
@@ -579,10 +579,10 @@ namespace TagTool.Bitmaps
                 buffer[b + 1] = maxX;
                 buffer[b + 8] = minY;
                 buffer[b + 9] = maxY;
-                
+
                 byte[] Ctx1indices = new byte[16];
                 // convert indices
-                for(int k = 0; k < 4; k++)
+                for (int k = 0; k < 4; k++)
                 {
                     Ctx1indices[(k * 4 + 0)] = (byte)((data[i + 4 + k] & 0xC0) >> 6);
                     Ctx1indices[(k * 4 + 1)] = (byte)((data[i + 4 + k] & 0x30) >> 4);
@@ -626,11 +626,11 @@ namespace TagTool.Bitmaps
         {
             byte[] result = new byte[indices.Length];
 
-            for(int i = 0; i< 16; i++)
+            for (int i = 0; i < 16; i++)
             {
                 byte index = indices[i];
 
-                if(c0 > c1)
+                if (c0 > c1)
                 {
                     if (index == 2)
                         index = 4;
@@ -645,7 +645,7 @@ namespace TagTool.Bitmaps
                         index = 4;
                 }
 
-                result[i] = index; 
+                result[i] = index;
             }
             return result;
         }
@@ -849,6 +849,7 @@ namespace TagTool.Bitmaps
             }
             return buffer;
         }
+
         // TODO: fix/refactor
         private static byte[] DecodeDxt3(byte[] data, int width, int height)
         {
@@ -1493,6 +1494,26 @@ namespace TagTool.Bitmaps
 
                 case BitmapFormat.V8U8:
                     data = EncodeV8U8(bitm, virtualWidth, virtualHeight);
+                    break;
+
+                case BitmapFormat.Dxn:
+                    var dxnCompressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxn, bitm, virtualWidth, virtualHeight);
+                    data = dxnCompressor.CompressTexture();
+                    break;
+
+                case BitmapFormat.Dxt1:
+                    var dxt1Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt1 | SquishLib.SquishFlags.kColourIterativeClusterFit, bitm, virtualWidth, virtualHeight);
+                    data = dxt1Compressor.CompressTexture();
+                    break;
+
+                case BitmapFormat.Dxt3:
+                    var dxt3Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt3 | SquishLib.SquishFlags.kColourIterativeClusterFit, bitm, virtualWidth, virtualHeight);
+                    data = dxt3Compressor.CompressTexture();
+                    break;
+
+                case BitmapFormat.Dxt5:
+                    var dxt5Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 | SquishLib.SquishFlags.kColourIterativeClusterFit, bitm, virtualWidth, virtualHeight);
+                    data = dxt5Compressor.CompressTexture();
                     break;
 
                 default:
