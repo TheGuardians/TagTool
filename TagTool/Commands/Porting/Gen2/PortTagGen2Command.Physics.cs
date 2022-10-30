@@ -413,11 +413,11 @@ namespace TagTool.Commands.Porting.Gen2
             return new PhysicsModel.PolyhedronFourVector
             {
                 FourVectorsX = gen2vector.FourVectorsX,
-                FourVectorsXRadius = gen2vector.FourVectorsXRadius,
+                FourVectorsXW = gen2vector.FourVectorsXRadius,
                 FourVectorsY = gen2vector.FourVectorsY,
-                FourVectorsYRadius = gen2vector.FourVectorsYRadius,
+                FourVectorsYW = gen2vector.FourVectorsYRadius,
                 FourVectorsZ = gen2vector.FourVectorsZ,
-                FourVectorsZRadius = gen2vector.FourVectorsZRadius
+                FourVectorsZW = gen2vector.FourVectorsZRadius
             };
         }
 

@@ -381,15 +381,15 @@ namespace TagTool.Geometry
                 fourvert.FourVectorsX.I = v0.AsArray[0].AsFloat;
                 fourvert.FourVectorsX.J = v1.AsArray[0].AsFloat;
                 fourvert.FourVectorsX.K = v2.AsArray[0].AsFloat;
-                fourvert.FourVectorsXRadius = v3.AsArray[0].AsFloat;
+                fourvert.FourVectorsXW = v3.AsArray[0].AsFloat;
                 fourvert.FourVectorsY.I = v0.AsArray[1].AsFloat;
                 fourvert.FourVectorsY.J = v1.AsArray[1].AsFloat;
                 fourvert.FourVectorsY.K = v2.AsArray[1].AsFloat;
-                fourvert.FourVectorsYRadius = v3.AsArray[1].AsFloat;
+                fourvert.FourVectorsYW = v3.AsArray[1].AsFloat;
                 fourvert.FourVectorsZ.I = v0.AsArray[2].AsFloat;
                 fourvert.FourVectorsZ.J = v1.AsArray[2].AsFloat;
                 fourvert.FourVectorsZ.K = v2.AsArray[2].AsFloat;
-                fourvert.FourVectorsZRadius = v3.AsArray[2].AsFloat;
+                fourvert.FourVectorsZW = v3.AsArray[2].AsFloat;
 
                 phmo.PolyhedronFourVectors.Add(fourvert);
             }
