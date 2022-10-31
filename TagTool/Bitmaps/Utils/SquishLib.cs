@@ -43,6 +43,8 @@ namespace TagTool.Bitmaps.Utils
 {
 	public static class SquishLib
     {
+		public static bool HaloS3TC = true;
+
         [Flags]
         public enum SquishFlags : uint
         {
@@ -65,7 +67,9 @@ namespace TagTool.Bitmaps.Utils
             //! Use a uniform metric for colour error.
             kColourMetricUniform = (1 << 6),
             //! Weight the colour by alpha during cluster fit (disabled by default).
-            kWeightColourByAlpha = (1 << 7)
+            kWeightColourByAlpha = (1 << 7),
+            //! Compressor constructed with compressed texture data
+            kAlreadyCompressed = (1 << 10)
         };
 
         public struct SourceBlock
@@ -106,6 +110,9 @@ namespace TagTool.Bitmaps.Utils
                 int g = FloatToInt(63.0f * colour.J, 63);
                 int b = FloatToInt(31.0f * colour.K, 31);
 
+				if (HaloS3TC) // in HaloS3TC swap R and B channels
+                    return (b << 11) | (g << 5) | r;
+
                 // pack into a single value
                 return (r << 11) | (g << 5) | b;
             }
@@ -136,7 +143,7 @@ namespace TagTool.Bitmaps.Utils
                 int b = FloatTo565(end);
 
                 // remap the indices
-                byte[] remapped = Enumerable.Repeat((byte)0, 16).ToArray();
+                byte[] remapped = new byte[16];
                 if (a <= b)
                 {
                     // use the indices directly
@@ -172,7 +179,7 @@ namespace TagTool.Bitmaps.Utils
                 int b = FloatTo565(end);
 
                 // remap the indices
-                byte[] remapped = Enumerable.Repeat((byte)0, 16).ToArray();
+                byte[] remapped = new byte[16];
                 if (a < b)
                 {
                     // swap a and b
@@ -349,11 +356,15 @@ namespace TagTool.Bitmaps.Utils
 
 		public class Compressor
 		{
-			public Compressor(SquishFlags flags, byte[] rgba, int width, int height)
-			{
-				Rgba = rgba;
-				Width = width;
-				Height = height;
+			public Compressor(SquishFlags flags, byte[] data, int width, int height)
+            {
+                Width = width;
+                Height = height;
+
+                if ((flags & SquishFlags.kAlreadyCompressed) != 0)
+					CompressedData = data;
+				else
+					Rgba = data;
 
 				// FixFlags()
 				// grab the flag bits
@@ -374,7 +385,7 @@ namespace TagTool.Bitmaps.Utils
                 Flags = (SquishFlags)(method | fit | metric | extra);
             }
 
-			public byte[] CompressTexture()
+            public byte[] CompressTexture()
 			{
 				int size = GetStorageRequirements();
 				List<byte> dxtImage = new List<byte>();
@@ -388,9 +399,9 @@ namespace TagTool.Bitmaps.Utils
                     for (int x = 0; x < Width; x += 4)
                     {
                         // build the 4x4 block of pixels
-                        byte[] sourceRgba = Enumerable.Repeat((byte)0, 16 * 4).ToArray();
+                        byte[] sourceRgba = new byte[16 * 4];
 						int rgbaOffset = 0;
-                        //var targetPixel = sourceRgba;
+
                         int mask = 0;
                         for (int py = 0; py < 4; ++py)
                         {
@@ -427,7 +438,7 @@ namespace TagTool.Bitmaps.Utils
                         }
 
 						// compress it into the output
-						byte[] tempBlock = Enumerable.Repeat((byte)0, bytesPerBlock).ToArray();
+						byte[] tempBlock = new byte[bytesPerBlock];
                         CompressMasked(sourceRgba, (uint)mask, tempBlock, (uint)Flags);
 
                         // advance
@@ -438,8 +449,64 @@ namespace TagTool.Bitmaps.Utils
 				if (size != dxtImage.Count)
 					Console.WriteLine($"##DXT COMPRESSOR: Expected size \"{size}\" bytes did not match actual size of \"{dxtImage.Count}\" bytes.");
 
-                return dxtImage.ToArray();
+				CompressedData = dxtImage.ToArray();
+                return CompressedData;
 			}
+
+			public byte[] DecompressTexture()
+			{
+				Rgba = new byte[Width * Height * 4];
+
+				// initialise the block input
+				var sourceBlocks = CompressedData;
+                int bytesPerBlock = ((Flags & SquishFlags.kDxt1) != 0) ? 8 : 16;
+				int blockOffset = 0;
+
+				byte[] tempBlock = new byte[bytesPerBlock];
+
+                // loop over blocks
+                for (int y = 0; y < Height; y += 4)
+                {
+                    for (int x = 0; x < Width; x += 4)
+                    {
+						// decompress the block
+						Buffer.BlockCopy(sourceBlocks, blockOffset, tempBlock, 0, bytesPerBlock);
+                        byte[] targetRgba = Decompress(tempBlock, (uint)Flags);
+
+                        // write the decompressed pixels to the correct image locations
+                        int rgbaOffset = 0;
+                        for (int py = 0; py < 4; ++py)
+                        {
+                            for (int px = 0; px < 4; ++px)
+                            {
+                                // get the target location
+                                int sx = x + px;
+                                int sy = y + py;
+                                if (sx < Width && sy < Height)
+                                {
+									// copy the rgba value
+									Rgba[4 * (Width * sy + sx) + 0] = targetRgba[rgbaOffset + 0];
+                                    Rgba[4 * (Width * sy + sx) + 1] = targetRgba[rgbaOffset + 1];
+                                    Rgba[4 * (Width * sy + sx) + 2] = targetRgba[rgbaOffset + 2];
+                                    Rgba[4 * (Width * sy + sx) + 3] = targetRgba[rgbaOffset + 3];
+
+									rgbaOffset += 4;
+                                }
+                                else
+                                {
+                                    // skip this pixel as its outside the image
+									rgbaOffset += 4;
+                                }
+                            }
+                        }
+
+						// advance
+						blockOffset += bytesPerBlock;
+                    }
+                }
+
+				return Rgba;
+            }
 
             public int GetStorageRequirements()
             {
@@ -456,8 +523,9 @@ namespace TagTool.Bitmaps.Utils
                 return blockcount * blocksize;
             }
 
+            private byte[] Rgba;
+            private byte[] CompressedData;
             private readonly SquishFlags Flags;
-            private readonly byte[] Rgba;
 			private readonly int Width;
 			private readonly int Height;
         }
@@ -466,7 +534,7 @@ namespace TagTool.Bitmaps.Utils
         {
 			public Sym3x3()
 			{
-				m_x = Enumerable.Repeat(0.0f, 6).ToArray();
+				m_x = new float[6];
             }
             public Sym3x3(float s)
             {
@@ -606,19 +674,10 @@ namespace TagTool.Bitmaps.Utils
 				Count = 0;
 				Transparent = false;
 
-				// init arrays with 16 elements each
-				List<RealVector3d> points = new List<RealVector3d>();
-				List<float> weights = new List<float>();
-				List<int> remap = new List<int>();
-				for (int i = 0; i < 16; i++)
-				{
-					points.Add(new RealVector3d());
-					weights.Add(0.0f);
-					remap.Add(0);
-				}
-				Points = points.ToArray();
-				Weights = weights.ToArray();
-				Remap = remap.ToArray();
+				// init arrays
+				Points = new RealVector3d[16];
+				Weights = new float[16];
+				Remap = new int[16];
 
 				// check the compression mode for dxt1
 				bool isDxt1 = ((flags & (uint)SquishFlags.kDxt1) != 0);
@@ -769,8 +828,8 @@ namespace TagTool.Bitmaps.Utils
 				if (m_error < m_besterror)
 				{
 					// remap the indices
-					byte[] indices = Enumerable.Repeat((byte)0, 16).ToArray(); // [16]
-					m_colours.RemapIndices(new byte[] { m_index }, indices);
+					byte[] indices = new byte[16];
+                    m_colours.RemapIndices(new byte[] { m_index }, indices);
 
                     // save the block
                     ColourBlock.WriteColourBlock3(m_start, m_end, indices, block);
@@ -797,7 +856,7 @@ namespace TagTool.Bitmaps.Utils
 				if( m_error < m_besterror )
 				{
                     // remap the indices
-                    byte[] indices = Enumerable.Repeat((byte)0, 16).ToArray(); // [16]
+                    byte[] indices = new byte[16];
                     m_colours.RemapIndices(new byte[] { m_index }, indices);
 
                     // save the block
@@ -938,7 +997,7 @@ namespace TagTool.Bitmaps.Utils
                 };
 
                 // match each point to the closest code
-                byte[] closest = Enumerable.Repeat((byte)0, 16).ToArray();
+                byte[] closest = new byte[16];
                 float error = 0.0f;
                 for (int i = 0; i < count; ++i)
                 {
@@ -966,7 +1025,7 @@ namespace TagTool.Bitmaps.Utils
                 if (error < m_besterror)
                 {
                     // remap the indices
-                    byte[] indices = Enumerable.Repeat((byte)0, 16).ToArray();
+                    byte[] indices = new byte[16];
                     m_colours.RemapIndices(closest, indices);
 
                     // save the block
@@ -992,7 +1051,7 @@ namespace TagTool.Bitmaps.Utils
 				};
 
                 // match each point to the closest code
-                byte[] closest = Enumerable.Repeat((byte)0, 16).ToArray();
+                byte[] closest = new byte[16];
                 float error = 0.0f;
                 for (int i = 0; i < count; ++i)
                 {
@@ -1020,7 +1079,7 @@ namespace TagTool.Bitmaps.Utils
                 if (error < m_besterror)
                 {
                     // remap the indices
-                    byte[] indices = Enumerable.Repeat((byte)0, 16).ToArray();
+                    byte[] indices = new byte[16];
                     m_colours.RemapIndices(closest, indices);
 
                     // save the block
@@ -1044,7 +1103,7 @@ namespace TagTool.Bitmaps.Utils
                 // init arrays
                 List<byte[]> orderList = new List<byte[]>();
 				for (int i = 0; i < kMaxIterations; i++)
-                    orderList.Add(Enumerable.Repeat((byte)0, 16).ToArray());
+                    orderList.Add(new byte[16]);
 				m_order = orderList.ToArray();
 
 				List<RealVector4d> pointWeightsList = new List<RealVector4d>();
@@ -1083,7 +1142,7 @@ namespace TagTool.Bitmaps.Utils
                 RealVector3d[] values = m_colours.GetPoints();
 
 				// build the list of dot products
-				float[] dps = Enumerable.Repeat(0.0f, 16).ToArray();
+				float[] dps = new float[16];
 				byte[] order = m_order[iteration];
 				for( int i = 0; i < count; ++i )
 				{
@@ -1158,7 +1217,7 @@ namespace TagTool.Bitmaps.Utils
                 RealVector4d beststart = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
                 RealVector4d bestend = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
                 RealVector4d besterror = m_besterror;
-                byte[] bestindices = Enumerable.Repeat((byte)0, 16).ToArray();
+                byte[] bestindices = new byte[16];
                 int bestiteration = 0;
                 int besti = 0, bestj = 0;
 
@@ -1250,7 +1309,7 @@ namespace TagTool.Bitmaps.Utils
                     // remap the indices
                     byte[] order = m_order[bestiteration];
 
-                    byte[] unordered = Enumerable.Repeat((byte)0, 16).ToArray();
+                    byte[] unordered = new byte[16];
                     for (int m = 0; m < besti; ++m)
                         unordered[order[m]] = 0;
                     for (int m = besti; m < bestj; ++m)
@@ -1289,7 +1348,7 @@ namespace TagTool.Bitmaps.Utils
                 RealVector4d beststart = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
                 RealVector4d bestend = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
                 RealVector4d besterror = m_besterror;
-                byte[] bestindices = Enumerable.Repeat((byte)0, 16).ToArray();
+                byte[] bestindices = new byte[16];
                 int bestiteration = 0;
                 int besti = 0, bestj = 0, bestk = 0;
 
@@ -1393,7 +1452,7 @@ namespace TagTool.Bitmaps.Utils
                     // remap the indices
                     byte[] order = m_order[bestiteration];
 
-                    byte[] unordered = Enumerable.Repeat((byte)0, 16).ToArray();
+                    byte[] unordered = new byte[16];
                     for (int m = 0; m < besti; ++m)
                         unordered[order[m]] = 0;
                     for (int m = besti; m < bestj; ++m)
@@ -1424,7 +1483,175 @@ namespace TagTool.Bitmaps.Utils
             private RealVector4d m_besterror;
         }
 
-		public static void Compress(byte[] rgba, byte[] block, uint flags)
+		public static byte[] Decompress(byte[] block, uint flags)
+		{
+			byte[] rgba = new byte[64];
+
+            // get the block locations
+            var colourBlock = block;
+            var alphaBock = block;
+            if ((flags & ((uint)SquishFlags.kDxt3 | (uint)SquishFlags.kDxt5)) != 0)
+                colourBlock = block.Skip(8).Take(block.Length - 8).ToArray(); // skip 8 bytes in array
+
+            // decompress colour
+            DecompressColour(rgba, colourBlock, (flags & (uint)SquishFlags.kDxt1) != 0);
+
+            // decompress alpha separately if necessary
+            if ((flags & (uint)SquishFlags.kDxt3) != 0)
+                DecompressAlphaDxt3(rgba, alphaBock);
+            else if ((flags & (uint)SquishFlags.kDxt5) != 0)
+                DecompressAlphaDxt5(rgba, alphaBock);
+
+			return rgba;
+        }
+
+		private static void DecompressColour(byte[] rgba, byte[] block, bool isDxt1)
+		{
+			const bool d3d9 = true;
+
+            // unpack the endpoints
+            byte[] codes = new byte[16];
+            int a = Unpack565((ushort)((int)block[0] | ((int)block[1] << 8)), codes, 0);
+            int b = Unpack565((ushort)((int)block[2] | ((int)block[3] << 8)), codes, 4);
+
+            // generate the midpoints
+            for (int i = 0; i < 3; ++i)
+            {
+                int c = codes[i];
+                int d = codes[4 + i];
+
+                if (isDxt1 && a <= b)
+                {
+                    codes[8 + i] = (byte)((c + d) / 2);
+                    codes[12 + i] = 0;
+                }
+                else
+                {
+                    codes[8 + i] = (byte)((2 * c + d + (d3d9 ? 1 : 0)) / 3);
+                    codes[12 + i] = (byte)((c + 2 * d + (d3d9 ? 1 : 0)) / 3);
+                }
+            }
+
+            // fill in alpha for the intermediate values
+            codes[8 + 3] = 255;
+            codes[12 + 3] = (isDxt1 && a <= b) ? (byte)0 : (byte)255;
+
+            // unpack the indices
+            byte[] indices = new byte[16];
+            for (int i = 0; i < 4; ++i)
+            {
+                byte packed = block[4 + i];
+
+                indices[4 * i + 0] = (byte)(packed & 0x3);
+                indices[4 * i + 1] = (byte)((packed >> 2) & 0x3);
+                indices[4 * i + 2] = (byte)((packed >> 4) & 0x3);
+                indices[4 * i + 3] = (byte)((packed >> 6) & 0x3);
+            }
+
+            // store out the colours
+            for (int i = 0; i < 16; ++i)
+            {
+                int offset = 4 * indices[i];
+                for (int j = 0; j < 4; ++j)
+                    rgba[4 * i + j] = codes[offset + j];
+            }
+        }
+
+		private static int Unpack565(ushort packedValue, byte[] colours, int colourOffset)
+		{
+            // get the components in the stored range
+            byte red = (byte)((packedValue >> 11) & 0x1f);
+            byte green = (byte)((packedValue >> 5) & 0x3f);
+            byte blue = (byte)(packedValue & 0x1f);
+
+            // scale up to 8 bits (identical to HaloS3TC)
+            colours[colourOffset + 0] = (byte)((red << 3) | (red >> 2));
+            colours[colourOffset + 1] = (byte)((green << 2) | (green >> 4));
+            colours[colourOffset + 2] = (byte)((blue << 3) | (blue >> 2));
+            colours[colourOffset + 3] = 0xFF;
+
+			if (HaloS3TC) // in HaloS3TC swap R and B channels
+            {
+				byte tempRed = colours[colourOffset + 0];
+				colours[colourOffset + 0] = colours[colourOffset + 2];
+				colours[colourOffset + 2] = tempRed;
+            }
+
+            return (int)packedValue;
+		}
+
+		private static void DecompressAlphaDxt3(byte[] rgba, byte[] block)
+		{
+            // unpack the alpha values pairwise
+            for (int i = 0; i < 8; ++i)
+            {
+                // quantise down to 4 bits
+                byte quant = block[i];
+
+                // unpack the values
+                byte lo = (byte)(quant & 0x0f);
+                byte hi = (byte)(quant & 0xf0);
+
+                // convert back up to bytes
+                rgba[8 * i + 3] = (byte)(lo | (lo << 4));
+                rgba[8 * i + 7] = (byte)(hi | (hi >> 4));
+            }
+        }
+
+		private static void DecompressAlphaDxt5(byte[] rgba, byte[] block)
+		{
+            int alpha0 = block[0];
+            int alpha1 = block[1];
+
+            // compare the values to build the codebook
+            byte[] codes = new byte[8];
+            codes[0] = (byte)alpha0;
+            codes[1] = (byte)alpha1;
+            if (alpha0 <= alpha1)
+            {
+                // use 5-alpha codebook
+                for (int i = 1; i < 5; ++i)
+                    codes[1 + i] = (byte)(((5 - i) * alpha0 + i * alpha1) / 5);
+                codes[6] = 0;
+                codes[7] = 255;
+            }
+            else
+            {
+                // use 7-alpha codebook
+                for (int i = 1; i < 7; ++i)
+                    codes[1 + i] = (byte)(((7 - i) * alpha0 + i * alpha1) / 7);
+            }
+
+            // decode the indices
+            byte[] indices = new byte[16];
+			int blockOffset = 2;
+			int destIndex = 0;
+            for (int i = 0; i < 2; ++i)
+            {
+                // grab 3 bytes
+                int value = 0;
+                for (int j = 0; j < 3; ++j)
+                {
+                    int _byte = block[blockOffset];
+					blockOffset++;
+                    value |= (_byte << 8 * j);
+                }
+
+                // unpack 8 3-bit values from it
+                for (int j = 0; j < 8; ++j)
+                {
+                    int index = (value >> 3 * j) & 0x7;
+					indices[destIndex] = (byte)index;
+					destIndex++;
+                }
+            }
+
+            // write out the indexed codebook values
+            for (int i = 0; i < 16; ++i)
+                rgba[4 * i + 3] = codes[indices[i]];
+        }
+
+        public static void Compress(byte[] rgba, byte[] block, uint flags)
 		{
 			// compress with full mask
 			CompressMasked(rgba, 0xffff, block, flags);
@@ -1553,7 +1780,7 @@ namespace TagTool.Bitmaps.Utils
             FixRange(ref min7, ref max7, 7);
 
             // set up the 5-alpha code book
-            byte[] codes5 = Enumerable.Repeat((byte)0, 8).ToArray();
+            byte[] codes5 = new byte[8];
             codes5[0] = (byte)min5;
             codes5[1] = (byte)max5;
             for (int i = 1; i < 5; ++i)
@@ -1562,15 +1789,15 @@ namespace TagTool.Bitmaps.Utils
             codes5[7] = 255;
 
             // set up the 7-alpha code book
-            byte[] codes7 = Enumerable.Repeat((byte)0, 8).ToArray();
+            byte[] codes7 = new byte[8];
             codes7[0] = (byte)min7;
             codes7[1] = (byte)max7;
             for (int i = 1; i < 7; ++i)
                 codes7[1 + i] = (byte)(((7 - i) * min7 + i * max7) / 7);
 
             // fit the data to both code books
-            byte[] indices5 = Enumerable.Repeat((byte)0, 16).ToArray();
-            byte[] indices7 = Enumerable.Repeat((byte)0, 16).ToArray();
+            byte[] indices5 = new byte[16];
+            byte[] indices7 = new byte[16];
             int err5 = FitCodes(singleChannelData, mask, codes5, indices5);
             int err7 = FitCodes(singleChannelData, mask, codes7, indices7);
 
@@ -1595,8 +1822,8 @@ namespace TagTool.Bitmaps.Utils
                 greenList.Add(rgba[i + 1]);
             byte[] greenChannel = greenList.ToArray();
 
-            byte[] redBlock = Enumerable.Repeat((byte)0, 8).ToArray();
-            byte[] greenBlock = Enumerable.Repeat((byte)0, 8).ToArray();
+            byte[] redBlock = new byte[8];
+            byte[] greenBlock = new byte[8];
 
             CompressAlphaDxt5(redChannel, mask, redBlock);
             CompressAlphaDxt5(greenChannel, mask, greenBlock);
@@ -1614,7 +1841,7 @@ namespace TagTool.Bitmaps.Utils
             if (alpha0 > alpha1)
             {
                 // swap the indices
-                byte[] swapped = Enumerable.Repeat((byte)0, 16).ToArray();
+                byte[] swapped = new byte[16];
                 for (int i = 0; i < 16; ++i)
                 {
                     byte index = indices[i];
