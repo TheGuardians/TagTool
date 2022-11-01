@@ -21,6 +21,9 @@ namespace TagTool.Commands.Porting
         [Description("Enable legacy Gen1 collision BSP generator")]
         public bool Gen1Collision = false;
 
+        [Description("Convert CTX1 bitmaps to DXN (default is DXT1)")]
+        public bool HqNormalMapConversion = false;
+
         public static PortingOptions Current = new PortingOptions();
     }
 }

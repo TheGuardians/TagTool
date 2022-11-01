@@ -59,7 +59,7 @@ namespace TagTool.Ai
 
         public enum DialogueObjectTypesEnum : short
         {
-            NONE,
+            None,
             Player,
             Actor,
             Biped,
@@ -79,6 +79,11 @@ namespace TagTool.Ai
             PostcombatLost,
             PlayerMasterchief,
             PlayerDervish,
+            PlayerRookie,
+            PlayerBuck,
+            PlayerDutch,
+            PlayerMickey,
+            PlayerRomeo,
             Heretic,
             MajorlyScary,
             LastManInVehicle,

@@ -947,14 +947,15 @@ namespace TagTool.Tags.Definitions
         BothFirstAndThird
     }
 
-    public enum EffectEventPartScales : int
+    [Flags]
+    public enum EffectEventPartScales : uint
     {
-        Velocity,
-        VelocityDelta,
-        VelocityConeAngle,
-        AngularVelocity,
-        AngularVelocityDelta,
-        TypeSpecificScale
+        Velocity = 1 << 0,
+        VelocityDelta = 1 << 1,
+        VelocityConeAngle = 1 << 2,
+        AngularVelocity = 1 << 3,
+        AngularVelocityDelta = 1 << 4,
+        TypeSpecificScale = 1 << 5
     }
 
     public enum ParticleCoordinateSystem : short

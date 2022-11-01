@@ -69,7 +69,10 @@ namespace TagTool.Tags.Definitions
             [Flags]
             public enum BeamAppearanceFlags : ushort
             {
-                Doublesided = 1 << 0
+                Doublesided = 1 << 0,
+                Bit1 = 1 << 1,
+                Bit2 = 1 << 2,
+                Fogged = 1 << 3
             }
 
             public enum BeamProfileShapeEnum : byte

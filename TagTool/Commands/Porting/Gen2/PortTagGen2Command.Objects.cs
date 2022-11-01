@@ -23,28 +23,28 @@ namespace TagTool.Commands.Porting.Gen2
                 case TagTool.Tags.Definitions.Gen2.Crate crate:
                     Crate newcrate = new Crate();
                     TranslateTagStructure(crate, newcrate);
-                    newcrate.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Crate };
+                    newcrate.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Crate };
                     return newcrate;
                 case TagTool.Tags.Definitions.Gen2.Scenery scenery:
                     Scenery newscenery = new Scenery();
                     TranslateTagStructure(scenery, newscenery);
-                    newscenery.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
+                    newscenery.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
                     newscenery = FixupScenery(scenery, newscenery, cacheStream);
                     return newscenery;
                 case TagTool.Tags.Definitions.Gen2.Weapon weapon:
                     Weapon newweapon = new Weapon();
                     TranslateTagStructure(weapon, newweapon);
-                    newweapon.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Weapon };
+                    newweapon.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Weapon };
                     return FixupWeapon(weapon, newweapon);
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                     Vehicle newvehicle = new Vehicle();
                     TranslateTagStructure(vehicle, newvehicle);
-                    newvehicle.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle };
+                    newvehicle.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle };
                     return FixupVehicle(vehicle, newvehicle);
                 case TagTool.Tags.Definitions.Gen2.Projectile projectile:
                     Projectile newprojectile = new Projectile();
                     TranslateTagStructure(projectile, newprojectile);
-                    newprojectile.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Projectile };
+                    newprojectile.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Projectile };
                     return newprojectile;
                 case TagTool.Tags.Definitions.Gen2.CameraTrack track:
                     CameraTrack newtrack = new CameraTrack();
@@ -53,22 +53,22 @@ namespace TagTool.Commands.Porting.Gen2
                 case TagTool.Tags.Definitions.Gen2.DeviceMachine devicemachine:
                     DeviceMachine newdevicemachine = new DeviceMachine();
                     TranslateTagStructure(devicemachine, newdevicemachine);
-                    newdevicemachine.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Machine };
+                    newdevicemachine.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Machine };
                     return newdevicemachine;
                 case TagTool.Tags.Definitions.Gen2.Equipment equipment:
                     Equipment newequipment = new Equipment();
                     TranslateTagStructure(equipment, newequipment);
-                    newequipment.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Equipment };
+                    newequipment.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Equipment };
                     return newequipment;
                 case TagTool.Tags.Definitions.Gen2.DeviceControl devicecontrol:
                     DeviceControl newdevicecontrol = new DeviceControl();
                     TranslateTagStructure(devicecontrol, newdevicecontrol);
-                    newdevicecontrol.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Control };
+                    newdevicecontrol.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Control };
                     return newdevicecontrol;
                 case TagTool.Tags.Definitions.Gen2.Biped biped:
                     Biped newbiped = new Biped();
                     TranslateTagStructure(biped, newbiped);
-                    newbiped.ObjectType = new GameObjectType { Halo3ODST = GameObjectTypeHalo3ODST.Biped };
+                    newbiped.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Biped };
                     return FixupBiped(biped, newbiped);
                 default:
                     return null;

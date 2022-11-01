@@ -45,15 +45,19 @@ namespace TagTool.Tags.Definitions
             public SpecialMovementFlags SpecialMovement1;
 
             [Flags]
-            public enum SpecialMovementFlags : int
+            public enum SpecialMovementFlags : uint
             {
-                None = 0,
+                None,
                 Jump = 1 << 0,
                 Climb = 1 << 1,
                 Vault = 1 << 2,
                 Mount = 1 << 3,
                 Hoist = 1 << 4,
-                WallJump = 1 << 5
+                WallJump = 1 << 5,
+                Na = 1 << 6,
+                Rail = 1 << 7,
+                Seam = 1 << 8,
+                Door = 1 << 9
             }
         }
 

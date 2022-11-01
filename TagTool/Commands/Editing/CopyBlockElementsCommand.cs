@@ -100,7 +100,10 @@ namespace TagTool.Commands.Editing
             var blockValue = field.GetValue(Owner) as IList;
 
             if (blockValue == null)
+            {
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return new TagToolError(CommandError.ArgInvalid, $"Invalid index specified \"{args[0]}\"");
+            }
 
             if (count < 0)
             {
@@ -108,7 +111,10 @@ namespace TagTool.Commands.Editing
             }
 
             if ((index + count) < 0 || (index + count) > blockValue.Count)
+            {
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return new TagToolError(CommandError.ArgInvalid, $"Invalid index: \"{index}\", and count: \"{count}\"");
+            }
 
             ElementType = field.FieldType.GenericTypeArguments[0];
             Elements = new List<object>();

@@ -275,6 +275,7 @@
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
     <Compile Include="Bitmaps\Utils\BitmapUtilsPC.cs" />
+    <Compile Include="Bitmaps\Utils\SquishLib.cs" />
     <Compile Include="Bitmaps\XboxGraphics.cs" />
     <Compile Include="BlamFile\MapFileBuilder.cs" />
     <Compile Include="BlamFile\MapVariantGenerator.cs" />
@@ -419,6 +420,7 @@
     <Compile Include="Commands\StructureDesigns\StructureDesignContextFactory.cs" />
     <Compile Include="Commands\StructureDesigns\ExtractStructureDesignCommand.cs" />
     <Compile Include="Commands\Tags\TagResourceReportCommand.cs" />
+    <Compile Include="Commands\Tags\CheckTagCommand.cs" />
     <Compile Include="Common\BitStream.cs" />
     <Compile Include="Common\ColorConversion.cs" />
     <Compile Include="Common\GameTitle.cs" />

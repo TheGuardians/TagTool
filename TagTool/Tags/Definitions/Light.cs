@@ -79,7 +79,7 @@ namespace TagTool.Tags.Definitions
         public float Unknown22;
 
         [Flags]
-        public enum LightFlags : int
+        public enum LightFlags : uint
         {
             None = 0,
             AllowShadowsAndGels = 1 << 0, // CPU lights can have shadows and gels
@@ -93,7 +93,27 @@ namespace TagTool.Tags.Definitions
             NeverPriorityCull = 1 << 8, // never cull this light because of low priority
             AffectedByGameCanUseFlashlights = 1 << 9,
             ScreenspaceSpecularLighting = 1 << 10,
-            AlwaysOnForWeapon = 1 << 11
+            AlwaysOnForWeapon = 1 << 11,
+            Bit12 = 1 << 12,
+            Bit13 = 1 << 13,
+            Bit14 = 1 << 14,
+            Bit15 = 1 << 15,
+            Bit16 = 1 << 16,
+            Bit17 = 1 << 17,
+            Bit18 = 1 << 18,
+            Bit19 = 1 << 19,
+            Bit20 = 1 << 20,
+            Bit21 = 1 << 21,
+            Bit22 = 1 << 22,
+            Bit23 = 1 << 23,
+            Bit24 = 1 << 24,
+            Bit25 = 1 << 25,
+            Bit26 = 1 << 26,
+            Bit27 = 1 << 27,
+            Bit28 = 1 << 28,
+            Bit29 = 1 << 29,
+            Bit30 = 1 << 30,
+            ElDewritoForgeLight = 1u << 31, // Legacy
         }
 
         public enum TypeValue : short

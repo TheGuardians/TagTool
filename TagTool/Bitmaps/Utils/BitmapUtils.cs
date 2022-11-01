@@ -725,7 +725,8 @@ namespace TagTool.Bitmaps
             switch (format)
             {
                 case BitmapFormat.Ctx1:
-                    return BitmapFormat.Dxn;
+                    return Commands.Porting.PortingOptions.Current.HqNormalMapConversion ? 
+                        BitmapFormat.Dxn : BitmapFormat.Dxt1;
 
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.ReachDxnMonoAlpha:
@@ -778,7 +779,7 @@ namespace TagTool.Bitmaps
             if (destinationFormat == format && !requireDecompression)
                 return data;
 
-            if(format == BitmapFormat.Ctx1)
+            /*if(format == BitmapFormat.Ctx1)
             {
                 if (type == BitmapType.Array) //DXN array unsupported
                 {
@@ -795,11 +796,18 @@ namespace TagTool.Bitmaps
                     format = BitmapFormat.Dxn;
                 }
             }
-            else if(format != destinationFormat)
+            else */if(format != destinationFormat)
             {
-                byte[] uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)width, (int)height);
-
-                uncompressedData = TrimAlignedBitmap(format, destinationFormat, (int)width, (int)height, uncompressedData);
+                byte[] uncompressedData;
+                if (format == BitmapFormat.Ctx1 && (width % 4 != 0 || height % 4 != 0))
+                {
+                    uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)width, (int)height);
+                }
+                else
+                {
+                    uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)width, (int)height);
+                    uncompressedData = TrimAlignedBitmap(format, destinationFormat, (int)width, (int)height, uncompressedData);
+                }
 
                 data = BitmapDecoder.EncodeBitmap(uncompressedData, destinationFormat, (int)width, (int)height);
                 format = destinationFormat;

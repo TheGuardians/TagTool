@@ -65,7 +65,7 @@ namespace TagTool.Tags.Definitions
         public byte[] Padding1;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public GameObjectType SuperDetonationObjectTypes;
+        public GameObjectType16 SuperDetonationObjectTypes;
         public CachedTag AttachedSuperDetonationDamage;
         public float MaterialEffectRadius; // radius within we will generate material effects
         public CachedTag FlybySound;
@@ -148,7 +148,8 @@ namespace TagTool.Tags.Definitions
             AIStimulusWhenAttached = 1 << 16,
             OverPeneDetonation = 1 << 17,
             NoImpactEffectsOnBounce = 1 << 18,
-            RC1OverpenetrationFixes = 1 << 19
+            RC1OverpenetrationFixes = 1 << 19,
+            Bit20 = 1 << 20
         }
 
         public enum DetonationTimerModes : short

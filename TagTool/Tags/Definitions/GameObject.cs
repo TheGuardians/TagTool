@@ -13,7 +13,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "object", Tag = "obje", Size = 0x178, MinVersion = CacheVersion.HaloReach)]
     public class GameObject : TagStructure
 	{
-        public GameObjectType ObjectType;
+        public GameObjectType16 ObjectType;
 
         [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.HaloReach)]
         public byte[] pad = new byte[2];
@@ -199,7 +199,7 @@ namespace TagTool.Tags.Definitions
             public GlobalAiJumpHeight LeapJumpSpeed;
 
             [Flags]
-            public enum AiPropertiesFlags : int
+            public enum AiPropertiesFlags : uint
             {
                 None = 0,
                 DestroyableCover = 1 << 0,
@@ -208,7 +208,8 @@ namespace TagTool.Tags.Definitions
                 NonFlightBlocking = 1 << 3,
                 DynamicCoverFromCentre = 1 << 4,
                 HasCornerMarkers = 1 << 5,
-                IdleWhenFlying = 1 << 6
+                Inspectable = 1 << 6,
+                IdleWhenFlying = 1 << 7
             }
 
             public enum AiSizeEnum : short
@@ -500,8 +501,9 @@ namespace TagTool.Tags.Definitions
         }
     }
 
-    public enum GameObjectTypeHalo2 : short
+    public enum GameObjectTypeHalo2
     {
+        None = -1,
         Biped,
 		Vehicle,
 		Weapon,
@@ -517,7 +519,7 @@ namespace TagTool.Tags.Definitions
 		Creature
     }
 
-    public enum GameObjectTypeHalo3Retail : sbyte
+    public enum GameObjectTypeHalo3Retail
     {
         None = -1,
         Biped,
@@ -536,7 +538,7 @@ namespace TagTool.Tags.Definitions
         EffectScenery
     }
 
-    public enum GameObjectTypeHalo3ODST : sbyte
+    public enum GameObjectTypeHalo3ODST
     {
         None = -1,
         Biped,
@@ -556,7 +558,7 @@ namespace TagTool.Tags.Definitions
         EffectScenery
     }
 
-    public enum GameObjectTypeHaloOnline : sbyte
+    public enum GameObjectTypeHaloOnline
     {
         None = -1,
         Biped,
@@ -577,7 +579,7 @@ namespace TagTool.Tags.Definitions
         EffectScenery
     }
 
-    public enum GameObjectTypeHaloReach : sbyte
+    public enum GameObjectTypeHaloReach
     {
         None = -1,
         Biped,
@@ -596,32 +598,159 @@ namespace TagTool.Tags.Definitions
         EffectScenery
     }
 
-    // todo: properly fix
-    [TagStructure(Size = 0x2)]
-    public class GameObjectType : TagStructure
-	{
-        [TagField(MaxVersion = CacheVersion.Halo2Vista, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x1)]
+    public class GameObjectType8 : TagStructure
+    {
+        [TagField(EnumType = typeof(sbyte), MaxVersion = CacheVersion.Halo2Vista, Platform = CachePlatform.Original)]
         public GameObjectTypeHalo2 Halo2;
 
-        [TagField(Gen = CacheGeneration.Third, Platform = CachePlatform.Original)]
-        public sbyte Unknown1;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
         public GameObjectTypeHalo3Retail Halo3Retail;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
+        [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
         public GameObjectTypeHalo3ODST Halo3ODST;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
         public GameObjectTypeHaloOnline HaloOnline;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(EnumType = typeof(sbyte), MinVersion = CacheVersion.HaloReach)]
         public GameObjectTypeHalo3Retail HaloReach;
 
-        [TagField(Platform = CachePlatform.MCC)]
-        [TagField(Gen = CacheGeneration.HaloOnline)]
-        public sbyte Unknown2;
+        public Enum GetValue(CacheVersion version)
+        {
+            if (version <= CacheVersion.Halo2Vista)
+                return Halo2;
+            else if (version <= CacheVersion.Halo3Retail)
+                return Halo3Retail;
+            else if (version <= CacheVersion.HaloOnline449175)
+                return Halo3ODST;
+            else if (version <= CacheVersion.HaloOnline700123)
+                return HaloOnline;
+            else if (version <= CacheVersion.HaloReach)
+                return HaloReach;
+            else
+                throw new FormatException(version.ToString());
+        }
+
+        public void SetValue(CacheVersion version, Enum value)
+        {
+            if (version <= CacheVersion.Halo2Vista)
+                Halo2 = value.ConvertLexical<GameObjectTypeHalo2>();
+            else if (version <= CacheVersion.Halo3Retail)
+                Halo3Retail = value.ConvertLexical<GameObjectTypeHalo3Retail>();
+            else if (version <= CacheVersion.HaloOnline449175)
+                Halo3ODST = value.ConvertLexical<GameObjectTypeHalo3ODST>();
+            else if (version <= CacheVersion.HaloOnline700123)
+                HaloOnline = value.ConvertLexical<GameObjectTypeHaloOnline>();
+            else if (version <= CacheVersion.HaloReach)
+                HaloReach = value.ConvertLexical<GameObjectTypeHalo3Retail>();
+            else
+                throw new FormatException(version.ToString());
+        }
     }
+
+    [TagStructure(Size = 0x2)]
+    public class GameObjectType16 : TagStructure
+    {
+        [TagField(EnumType = typeof(short), MaxVersion = CacheVersion.Halo2Vista, Platform = CachePlatform.Original)]
+        public GameObjectTypeHalo2 Halo2;
+
+        [TagField(EnumType = typeof(short), MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+        public GameObjectTypeHalo3Retail Halo3Retail;
+
+        [TagField(EnumType = typeof(short), MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
+        public GameObjectTypeHalo3ODST Halo3ODST;
+
+        [TagField(EnumType = typeof(short), MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
+        public GameObjectTypeHaloOnline HaloOnline;
+
+        [TagField(EnumType = typeof(short), MinVersion = CacheVersion.HaloReach)]
+        public GameObjectTypeHalo3Retail HaloReach;
+
+        public Enum GetValue(CacheVersion version)
+        {
+            if (version <= CacheVersion.Halo2Vista)
+                return Halo2;
+            else if (version <= CacheVersion.Halo3Retail)
+                return Halo3Retail;
+            else if (version <= CacheVersion.HaloOnline449175)
+                return Halo3ODST;
+            else if (version <= CacheVersion.HaloOnline700123)
+                return HaloOnline;
+            else if (version <= CacheVersion.HaloReach)
+                return HaloReach;
+            else
+                throw new FormatException(version.ToString());
+        }
+
+        public void SetValue(CacheVersion version, Enum value)
+        {
+            if (version <= CacheVersion.Halo2Vista)
+                Halo2 = value.ConvertLexical<GameObjectTypeHalo2>();
+            else if (version <= CacheVersion.Halo3Retail)
+                Halo3Retail = value.ConvertLexical<GameObjectTypeHalo3Retail>();
+            else if (version <= CacheVersion.HaloOnline449175)
+                Halo3ODST = value.ConvertLexical<GameObjectTypeHalo3ODST>();
+            else if (version <= CacheVersion.HaloOnline700123)
+                HaloOnline = value.ConvertLexical<GameObjectTypeHaloOnline>();
+            else if (version <= CacheVersion.HaloReach)
+                HaloReach = value.ConvertLexical<GameObjectTypeHalo3Retail>();
+            else
+                throw new FormatException(version.ToString());
+        }
+    }
+
+    [TagStructure(Size = 0x4)]
+    public class GameObjectType32 : TagStructure
+    {
+        [TagField(EnumType = typeof(int), MaxVersion = CacheVersion.Halo2Vista, Platform = CachePlatform.Original)]
+        public GameObjectTypeHalo2 Halo2;
+
+        [TagField(EnumType = typeof(int), MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+        public GameObjectTypeHalo3Retail Halo3Retail;
+
+        [TagField(EnumType = typeof(int), MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
+        public GameObjectTypeHalo3ODST Halo3ODST;
+
+        [TagField(EnumType = typeof(int), MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
+        public GameObjectTypeHaloOnline HaloOnline;
+
+        [TagField(EnumType = typeof(int), MinVersion = CacheVersion.HaloReach)]
+        public GameObjectTypeHalo3Retail HaloReach;
+
+        public Enum GetValue(CacheVersion version)
+        {
+            if (version <= CacheVersion.Halo2Vista)
+                return Halo2;
+            else if (version <= CacheVersion.Halo3Retail)
+                return Halo3Retail;
+            else if (version <= CacheVersion.HaloOnline449175)
+                return Halo3ODST;
+            else if (version <= CacheVersion.HaloOnline700123)
+                return HaloOnline;
+            else if (version <= CacheVersion.HaloReach)
+                return HaloReach;
+            else
+                throw new FormatException(version.ToString());
+        }
+
+        public void SetValue(CacheVersion version, Enum value)
+        {
+            if (version <= CacheVersion.Halo2Vista)
+                Halo2 = value.ConvertLexical<GameObjectTypeHalo2>();
+            else if (version <= CacheVersion.Halo3Retail)
+                Halo3Retail = value.ConvertLexical<GameObjectTypeHalo3Retail>();
+            else if (version <= CacheVersion.HaloOnline449175)
+                Halo3ODST = value.ConvertLexical<GameObjectTypeHalo3ODST>();
+            else if (version <= CacheVersion.HaloOnline700123)
+                HaloOnline = value.ConvertLexical<GameObjectTypeHaloOnline>();
+            else if (version <= CacheVersion.HaloReach)
+                HaloReach = value.ConvertLexical<GameObjectTypeHalo3Retail>();
+            else
+                throw new FormatException(version.ToString());
+        }
+    }
+
 
     [Flags]
     public enum ObjectTypeFlagsHalo2 : ushort
@@ -719,25 +848,6 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295)]
         public ObjectTypeFlagsHaloOnline HaloOnline;
-    }
-
-    [TagStructure(Size = 0x1)]
-    public class ScenarioObjectType : TagStructure
-	{
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public GameObjectTypeHalo2 Halo2;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
-        public GameObjectTypeHalo3Retail Halo3Retail;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
-        public GameObjectTypeHalo3ODST Halo3ODST;
-
-        [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
-        public GameObjectTypeHaloOnline HaloOnline;
-
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public GameObjectTypeHaloReach HaloReach;
     }
 
     [Flags]

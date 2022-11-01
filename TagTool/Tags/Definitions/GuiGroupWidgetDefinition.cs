@@ -21,7 +21,9 @@ namespace TagTool.Tags.Definitions
             DoNotApplyOldContentUpscaling = 1 << 0,
             OverrideTemplateFlags = 1 << 1,
             EnableAnimationDebugging = 1 << 2,
-            NotLoadedUponInitialization = 1 << 3
+            NotLoadedUponInitialization = 1 << 3,
+            Bit4 = 1 << 4,
+            Bit5 = 1 << 5
         }
     }
 }

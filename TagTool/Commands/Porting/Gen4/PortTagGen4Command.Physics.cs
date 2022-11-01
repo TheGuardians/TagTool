@@ -288,11 +288,11 @@ namespace TagTool.Commands.Porting.Gen4
                 physicsModel.PolyhedronFourVectors.Add(new PhysicsModel.PolyhedronFourVector
                 {
                     FourVectorsX = gen4vector.FourVectorsX,
-                    FourVectorsXRadius = gen4vector.HavokWFourVectorsX,
+                    FourVectorsXW = gen4vector.HavokWFourVectorsX,
                     FourVectorsY = gen4vector.FourVectorsY,
-                    FourVectorsYRadius = gen4vector.HavokWFourVectorsY,
+                    FourVectorsYW = gen4vector.HavokWFourVectorsY,
                     FourVectorsZ = gen4vector.FourVectorsZ,
-                    FourVectorsZRadius = gen4vector.HavokWFourVectorsZ
+                    FourVectorsZW = gen4vector.HavokWFourVectorsZ
                 });
             }
 

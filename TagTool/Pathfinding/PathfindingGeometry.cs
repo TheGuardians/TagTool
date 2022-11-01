@@ -151,7 +151,7 @@ namespace TagTool.Pathfinding
 
         public int ObjectUniqueID;
         public short OriginBspIndex;
-        public ScenarioObjectType ObjectType;
+        public GameObjectType8 ObjectType;
         public Scenario.ScenarioInstance.SourceValue Source;
 
         [TagStructure(Size = 0x18)]

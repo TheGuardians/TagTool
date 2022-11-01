@@ -424,7 +424,8 @@ namespace TagTool.Geometry
             OpaqueShadowCasting,
             OpaqueNonshadowing,
             Transparent,
-            LightmapOnly
+            LightmapOnly,
+            Unknown6 // ODST
         }
 
         [Flags]

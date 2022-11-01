@@ -374,7 +374,8 @@ namespace TagTool.Tags.Definitions
                     InheritRespawnTime = 1 << 0,
                     RespawnWithTeam = 1 << 1,
                     RespawnAtLocation = 1 << 2,
-                    RespawnOnKills = 1 << 3
+                    RespawnOnKills = 1 << 3,
+                    Bit4 = 1 << 4 // HO
                 }
             }
 

@@ -156,6 +156,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new OpenCacheFileCommand(contextStack, cache));
             context.AddCommand(new DiffTagCommand(cache, portingCache ?? cache));
             context.AddCommand(new VerifyStringsCommand(cache));
+            context.AddCommand(new CheckTagCommand(portingCache ?? cache));
         }
     }
 }

@@ -117,21 +117,21 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float ExposureDeboost;
 
-            public float HueShiftLeft; // degrees [0-360] shifts hue R>G>B
-            public float HueShiftRight; // degrees [0-360] shifts hue R>G>B
+            public float HueLeft; // degrees [0-360] shifts hue R>G>B
+            public float HueRight; // degrees [0-360] shifts hue R>G>B
 
             public float Saturation; // [0-1]#increases saturation
             public float Desaturation; // [0-1]#decreases saturation
 
-            public float ContrastEnhance; // [0-1]
+            public float ContrastEnhance; ///[0-1]#contrast increase
 
-            public float GammaEnhance; // [0-10]    
-            public float GammaReduce; // [0-10]
+            public float GammaEnhance; ///[0-10]#gamma increase    
+            public float GammaReduce; ///[0-10]#gamma decrease
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float BrightNoise;
+            public float BrightNoise; ///[0-1]#add bright noise contribution, 0 turns it off, 1: full on
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float DarkNoise;
+            public float DarkNoise; ///[0-1]#add dark noise contribution, 0 turns it off, 1: full on
 
             public RealRgbColor ColorFilter; ///#this color is multiplied on top
             public RealRgbColor ColorFloor; ///#this color is subtracted
@@ -142,11 +142,11 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float RadialBlur; ///{motion suck}:[-2, 2]#adds motion-blur towards or away from this screen effect
+            public float MotionSuck; ///{motion suck}:[-2, 2]#adds motion-blur towards or away from this screen effect
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public RealVector3d RadialBlurDirection; ///{motion suck direction}!:[do not edit]#do not edit" />
+            public RealVector3d MotionSuckDirection; ///{motion suck direction}!:[do not edit]#do not edit" />
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -159,22 +159,26 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public float VisionMode; ///[0-1]#turns on the global vision mode
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float HudTransparency; ///[0-1]#fades the chud
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            public float VisionNoise; ///[0-1]#adds noise to the vision mode
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float FovIn;
+            public float HudFade; ///[0-1]#fades the chud
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float FovOut;
+            public float FovIn; ///[0-1]#zooms in the field of view
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float ScreenShake;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float FovOut; ///[0-1]#zooms out the field of view
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public float ScreenShake; ///[0-1]#shakes the entire screen
+
+            [TagField(ValidTags = new[] { "rmss" }, MinVersion = CacheVersion.Halo3ODST)]
             public CachedTag ScreenShader; ///#applies this shader to the entire screen
 
             [Flags]

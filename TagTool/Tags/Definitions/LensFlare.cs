@@ -27,18 +27,21 @@ namespace TagTool.Tags.Definitions
 
         public float OcclusionRadius;
 
-        public UnknownFlagsValue UnknownFlags;
-
         public OcclusionOffsetDirectionValue OcclusionOffsetDirection;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+        public byte[] PANTS;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        public OcclusionInnerRadiusScaleEnum OcclusionInnerRadiusScale;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float UnknownReach;
+        public float OcclusionInnerRadiusScaleReach; // percent of the corona to occlude against (ie 0.25, 0.125, etc)
 
-        public uint Unknown1;
-        public uint Unknown2;
+        public float NearFadeBeginDistance; // distance where the lens flare starts to fade in (world units)
+        public float NearFadeEndDistance; // distance where the lens flare is fully faded in (world units)
 
-        public float NearFadeDistance;
-        public float FarFadeDistance;
+        public float NearFadeDistance; // distance at which the lens flare brightness is maximum (world units)
+        public float FarFadeDistance; // distance at which the lens flare brightness is minimum; set to zero to disable distance fading (world units)
         public CachedTag Bitmap;
         public FlagsValue Flags;
         public short RuntimeFlags;
@@ -81,11 +84,15 @@ namespace TagTool.Tags.Definitions
         public List<RotationBlock> AgeRotation;
 
         [Flags]
-        public enum UnknownFlagsValue : short
+        public enum OcclusionInnerRadiusScaleEnum : short
         {
-            None = 0,
-            Bit0 = 1 << 0,
-            Bit1 = 1 << 1
+            None,
+            _12,
+            _14,
+            _18,
+            _116,
+            _132,
+            _164
         }
 
         public enum OcclusionOffsetDirectionValue : short

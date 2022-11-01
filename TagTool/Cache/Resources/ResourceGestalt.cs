@@ -10,17 +10,7 @@ namespace TagTool.Cache.Resources
     [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x214, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.Original)]
     public class ResourceGestalt : TagStructure
 	{
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-        public MapTypeHalo3RetailValue MapTypeHalo3Retail;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        public MapTypeHalo3OdstValue MapTypeHalo3Odst;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        public MapSubTypeHalo3OdstValue MapSubTypeHalo3Odst;
-
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public MapTypeHalo3RetailValue MapSubTypeHaloReach;
+        public ScenarioTypeEnum MapType;
 
         public ScenarioFlags Flags;
 
@@ -77,27 +67,14 @@ namespace TagTool.Cache.Resources
         public int CampaignId;
         public int MapId;
 
-        public enum MapTypeHalo3RetailValue : short
+        public enum ScenarioTypeEnum : short
         {
             SinglePlayer,
             Multiplayer,
-            MainMenu
-        }
-        
-        public enum MapTypeHalo3OdstValue : sbyte
-        {
-            SinglePlayer,
-            Multiplayer,
-            MainMenu
-        }
-
-        public enum MapSubTypeHalo3OdstValue : sbyte
-        {
-            None,
-            Hub,
-            Level,
-            Scene,
-            Cinematic
+            MainMenu,
+            MultiplayerShared,
+            SinglePlayerShared,
+            SoundsShared
         }
     }
 }

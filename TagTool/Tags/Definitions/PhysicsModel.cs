@@ -814,11 +814,11 @@ namespace TagTool.Tags.Definitions
         public class PolyhedronFourVector : TagStructure
 		{
             public RealVector3d FourVectorsX;
-            public float FourVectorsXRadius;
+            public float FourVectorsXW;
             public RealVector3d FourVectorsY;
-            public float FourVectorsYRadius;
+            public float FourVectorsYW;
             public RealVector3d FourVectorsZ;
-            public float FourVectorsZRadius;
+            public float FourVectorsZW;
         }
 
         [TagStructure(Size = 0x10, Align = 0x10)]

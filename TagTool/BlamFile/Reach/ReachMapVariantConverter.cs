@@ -385,9 +385,9 @@ namespace TagTool.BlamFile.Reach
             }
 
             public ObjectTypeInfo this[GameObjectTypeHalo3ODST type] => ObjectTypes[type];
-            public ObjectTypeInfo this[GameObjectType type] => ObjectTypes[ConvertObjectType(type)];
+            public ObjectTypeInfo this[GameObjectType16 type] => ObjectTypes[ConvertObjectType(type)];
 
-            public GameObjectTypeHalo3ODST ConvertObjectType(GameObjectType objectType)
+            public GameObjectTypeHalo3ODST ConvertObjectType(GameObjectType16 objectType)
             {
                 int index = (int)objectType.Halo3Retail;
                 if (objectType.Halo3Retail > GameObjectTypeHalo3Retail.Equipment)

@@ -373,7 +373,8 @@ namespace TagTool.Tags.Definitions
             public FlagsValue Flags;
             public List<Vertex> Vertices;
 
-            public enum FlagsValue : int
+            [Flags]
+            public enum FlagsValue : uint
             {
                 None = 0,
                 AiCantHearThroughThisShit = 1 << 0,
@@ -692,14 +693,14 @@ namespace TagTool.Tags.Definitions
             {
                 public int UniqueId;
                 public short OriginBspIndex;
-                public ScenarioObjectType Type;
+                public GameObjectType8 Type;
                 public Scenario.ObjectSource Source;
             }
 
             [TagStructure(Size = 0x4)]
             public class PvsBoundObjectReferencesBlock : TagStructure
             {
-                public GameObjectType ObjectType;
+                public GameObjectType16 ObjectType;
                 public short PlacementIndex;
             }
 

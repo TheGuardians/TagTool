@@ -33,7 +33,8 @@ namespace TagTool.Tags.Definitions
             DoNotApplyOldContentUpscaling = 1 << 0,
             OverrideTemplateFlags = 1 << 1,
             EnableAnimationDebugging = 1 << 2,
-            BBackShouldntDisposeScreen = 1 << 3
+            BBackShouldntDisposeScreen = 1 << 3,
+            OverlaysOtherScreens = 1 << 4
         }
 
         [TagStructure(Size = 0x10)]
