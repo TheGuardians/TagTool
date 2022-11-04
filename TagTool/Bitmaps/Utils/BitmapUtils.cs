@@ -836,7 +836,7 @@ namespace TagTool.Bitmaps
             return TrimAlignedBitmap(format, BitmapFormat.A8R8G8B8, (int)width, (int)height, uncompressedData);
         }
 
-        private static byte[] TrimAlignedBitmap(BitmapFormat originalFormat, BitmapFormat destinationFormat, int width, int height, byte[] data)
+        public static byte[] TrimAlignedBitmap(BitmapFormat originalFormat, BitmapFormat destinationFormat, int width, int height, byte[] data)
         {
             byte[] result = new byte[width * height * 4];
             uint blockSize;
