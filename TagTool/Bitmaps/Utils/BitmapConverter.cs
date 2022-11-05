@@ -88,110 +88,81 @@ namespace TagTool.Bitmaps.Utils
             if (primaryData == null && secondaryData == null)
                 return null;
 
-            byte[] resultData;
-            bool swapCubemapFaces = cachePlatform != CachePlatform.MCC;
- 
-            using (var result = new MemoryStream())
+            var result = new MemoryStream();
+            int mipLevelCount = definition.MipmapCount;
+            int layerCount = definition.BitmapType == BitmapType.CubeMap ? 6 : definition.Depth;
+            bool swapCubemapFaces = definition.BitmapType == BitmapType.CubeMap && cachePlatform != CachePlatform.MCC;
+
+            if (definition.BitmapType == BitmapType.Array && mipLevelCount > 1)
+                mipLevelCount = 1;
+
+            foreach (var (layerIndex, mipLevel) in GetBitmapSurfacesEnumerable(layerCount, mipLevelCount, forDDS))
             {
-                int mipLevelCount = definition.MipmapCount;
-                int layerCount = definition.BitmapType == BitmapType.CubeMap ? 6 : definition.Depth;
+                int sourceLayerIndex = layerIndex;
 
-                if (definition.BitmapType == BitmapType.Array && mipLevelCount > 1)
+                if (swapCubemapFaces) // swap cubemap faces
                 {
-                    mipLevelCount = 1;
-                    definition.MipmapCount = 1;
-                    bitmap.Images[imageIndex].MipmapCount = 0;
+                    if (layerIndex == 1)
+                        sourceLayerIndex = 2;
+                    else if (layerIndex == 2)
+                        sourceLayerIndex = 1;
                 }
 
-                if (!forDDS)
-                {
-                    // order for d3d9, all faces first, then mipmaps
-                    for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
-                    {
-                        for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
-                        {
-                            if (definition.BitmapType == BitmapType.CubeMap && swapCubemapFaces) // swap cubemap faces
-                            {
-                                if (layerIndex == 1)
-                                    layerIndex = 2;
-                                else if (layerIndex == 2)
-                                    layerIndex = 1;
-                            }
-
-                            if(cachePlatform == CachePlatform.MCC)
-                                ConvertGen3BitmapDataMCC(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
-                            else
-                                ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
-
-                            if (definition.BitmapType == BitmapType.CubeMap && swapCubemapFaces)
-                            {
-                                if (layerIndex == 2)
-                                    layerIndex = 1;
-                                else if (layerIndex == 1)
-                                    layerIndex = 2;
-                            }
-                        }
-                    }
-                }
+                if (cachePlatform == CachePlatform.MCC)
+                    ConvertGen3BitmapDataMCC(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, sourceLayerIndex, isPaired, pairIndex, otherDefinition, version);
                 else
-                {
-                    for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
-                    {
-                        if (definition.BitmapType == BitmapType.CubeMap && swapCubemapFaces) // swap cubemap faces
-                        {
-                            if (layerIndex == 1)
-                                layerIndex = 2;
-                            else if (layerIndex == 2)
-                                layerIndex = 1;
-                        }
-
-                        for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
-                        {
-                            if(cachePlatform == CachePlatform.MCC)
-                                ConvertGen3BitmapDataMCC(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
-                            else
-                                ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, layerIndex, isPaired, pairIndex, otherDefinition, version);
-
-                        }
-
-                        if (definition.BitmapType == BitmapType.CubeMap && swapCubemapFaces)
-                        {
-                            if (layerIndex == 2)
-                                layerIndex = 1;
-                            else if (layerIndex == 1)
-                                layerIndex = 2;
-                        }
-                    }
-                }
-
-                resultData = result.ToArray();
-            }
-            
-
-            // fix enum from reach
-            if (version >= CacheVersion.HaloReach)
-            {
-                if (bitmap.Images[imageIndex].Format >= (BitmapFormat)38)
-                    bitmap.Images[imageIndex].Format -= 5;
+                    ConvertGen3BitmapData(result, primaryData, secondaryData, definition, bitmap, imageIndex, mipLevel, sourceLayerIndex, isPaired, pairIndex, otherDefinition, version);
             }
 
             BaseBitmap resultBitmap = new BaseBitmap(bitmap.Images[imageIndex]);
+            resultBitmap.Data = result.ToArray();
+            resultBitmap.MipMapCount = mipLevelCount;
+            PostProcessResultBitmap(bitmap, imageIndex, cachePlatform, tagName, resultBitmap, version);
+
+            return resultBitmap;
+        }
+
+        private static IEnumerable<(int layerIndex, int mipLevel)> GetBitmapSurfacesEnumerable(int layerCount, int mipLevelCount, bool forDDS)
+        {
+            if (!forDDS)
+            {
+                // order for d3d9, all faces first, then mipmaps
+                for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
+                    for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
+                        yield return (layerIndex, mipLevel);
+            }
+            else
+            {
+                for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
+                    for (int mipLevel = 0; mipLevel < mipLevelCount; mipLevel++)
+                        yield return (layerIndex, mipLevel);
+            }
+        }
+
+        private static void PostProcessResultBitmap(Bitmap bitmap, int imageIndex, CachePlatform cachePlatform, string tagName, BaseBitmap resultBitmap, CacheVersion version)
+        {
+            // fix enum from reach
+            if (version >= CacheVersion.HaloReach)
+            {
+                if (resultBitmap.Format >= (BitmapFormat)38)
+                    resultBitmap.Format -= 5;
+            }
 
             if (cachePlatform == CachePlatform.MCC)
             {
-                if (bitmap.Images[imageIndex].Format == BitmapFormat.V8U8 ||
-                    bitmap.Images[imageIndex].Format == BitmapFormat.V16U16)
+                if (resultBitmap.Format == BitmapFormat.V8U8 ||
+                    resultBitmap.Format == BitmapFormat.V16U16)
                 {
                     resultBitmap.UpdateFormat(BitmapFormat.Dxn);
                 }
             }
             // fix dxt5 bumpmaps (h3 wraith bump)
             else if (bitmap.Usage == Bitmap.BitmapUsageGlobalEnum.BumpMapfromHeightMap &&
-                bitmap.Images[imageIndex].Format == BitmapFormat.Dxt5 &&
+                resultBitmap.Format == BitmapFormat.Dxt5 &&
                 tagName != @"levels\multi\zanzibar\bitmaps\palm_frond_a_bump") // this tag is actually an alpha test bitmap, ignore it
             {
                 // convert to raw RGBA
-                byte[] rawData = BitmapDecoder.DecodeBitmap(resultData, bitmap.Images[imageIndex].Format, bitmap.Images[imageIndex].Width, bitmap.Images[imageIndex].Height);
+                byte[] rawData = BitmapDecoder.DecodeBitmap(resultBitmap.Data, resultBitmap.Format, bitmap.Images[imageIndex].Width, bitmap.Images[imageIndex].Height);
 
                 // (0<->1) to (-1<->1)
                 for (int i = 0; i < rawData.Length; i += 4)
@@ -203,22 +174,22 @@ namespace TagTool.Bitmaps.Utils
                 }
 
                 // encode as DXN. unfortunately mips have artifacts, maybe this can be fixed?
-                resultData = EncodeDXN(rawData, bitmap.Images[imageIndex].Width, bitmap.Images[imageIndex].Height, out resultBitmap.MipMapCount, true);
+                resultBitmap.Data = EncodeDXN(rawData, bitmap.Images[imageIndex].Width, bitmap.Images[imageIndex].Height, out resultBitmap.MipMapCount, true);
                 resultBitmap.UpdateFormat(BitmapFormat.Dxn);
                 resultBitmap.Flags |= BitmapFlags.Compressed;
             }
             else
             {
                 // fix slope_water bitmap conversion
-                if (bitmap.Images[imageIndex].Format == BitmapFormat.V8U8)
+                if (resultBitmap.Format == BitmapFormat.V8U8)
                 {
                     resultBitmap.MipMapCount = 0;
                     resultBitmap.Curve = BitmapImageCurve.Unknown;
                 }
 
-                var newFormat = BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format);
+                var newFormat = BitmapUtils.GetEquivalentBitmapFormat(resultBitmap.Format);
 
-                if (bitmap.Images[imageIndex].Format == BitmapFormat.Ctx1 && bitmap.Images[imageIndex].Type == BitmapType.Array)
+                if (resultBitmap.Format == BitmapFormat.Ctx1 && bitmap.Images[imageIndex].Type == BitmapType.Array)
                     newFormat = BitmapFormat.A8R8G8B8;
 
                 resultBitmap.UpdateFormat(newFormat);
@@ -234,15 +205,10 @@ namespace TagTool.Bitmaps.Utils
                     resultBitmap.Flags |= BitmapFlags.Compressed;
             }
 
-            //
-            // Update resource definition/image, truncate DXN to level 4x4
-            //
-
-            resultBitmap.Data = resultData;
-                
-            if(resultBitmap.Format == BitmapFormat.Dxn) // wouldn't be required if d3d9 supported non power of two DXN and with mips less than 4x4
+            // truncate DXN to level 4x4
+            if (resultBitmap.Format == BitmapFormat.Dxn) // wouldn't be required if d3d9 supported non power of two DXN and with mips less than 4x4
             {
-                if(resultBitmap.Type == BitmapType.Array || resultBitmap.Type == BitmapType.Texture3D)
+                if (resultBitmap.Type == BitmapType.Array || resultBitmap.Type == BitmapType.Texture3D)
                 {
                     resultBitmap.MipMapCount = 0;
                 }
@@ -284,14 +250,12 @@ namespace TagTool.Bitmaps.Utils
                         resultBitmap.Data = raw;
                     }
                 }
-                    
+
             }
 
-                
+
             if (resultBitmap.Type == BitmapType.Array) // for HO, arrays use the index of Texture3D
                 resultBitmap.Type = BitmapType.Texture3D;
-
-            return resultBitmap;     
         }
 
         private unsafe static void ConvertGen3BitmapDataMCC(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, CacheVersion version)
@@ -360,185 +324,7 @@ namespace TagTool.Bitmaps.Utils
 
         private static void ConvertGen3BitmapData(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, CacheVersion version)
         {
-            byte[] data;
-            uint levelOffset;
-
-            var d3dFormat = definition.D3DFormat;
-            var isTiled = Direct3D.D3D9x.D3D.IsTiled(d3dFormat);
-
-            uint blockWidth;
-            uint blockHeight;
-
-            uint alignedWidth = (uint)definition.Width >> level;
-            uint alignedHeight = (uint)definition.Height >> level;
-
-            if (alignedWidth < 1) alignedWidth = 1;
-            if (alignedHeight < 1) alignedHeight = 1;
-
-            uint alignedDepth = definition.Depth;
-            var gpuFormat = XboxGraphics.XGGetGpuFormat(d3dFormat);
-            uint bitsPerPixel = XboxGraphics.XGBitsPerPixelFromGpuFormat(gpuFormat);
-
-            XboxGraphics.XGGetBlockDimensions(gpuFormat, out blockWidth, out blockHeight);
-            XboxGraphics.XGPOINT point = new XboxGraphics.XGPOINT();
-            if (definition.MipmapCount > 1)
-                XboxGraphics.GetMipTailLevelOffsetCoords((uint)definition.Width, (uint)definition.Height, definition.Depth, (uint)level, gpuFormat, false, false, point);
-
-            var textureType = BitmapUtils.GetXboxBitmapD3DTextureType(definition);
-            Direct3D.D3D9x.D3D.AlignTextureDimensions(ref alignedWidth, ref alignedHeight, ref alignedDepth, bitsPerPixel, gpuFormat, textureType, isTiled);
-
-            if (level > 0)
-            {
-                // align to next power of two
-                if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedWidth))
-                {
-                    alignedWidth = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedWidth);
-                    if (alignedWidth < 0) alignedWidth = 0;
-                    alignedWidth = 1u << (int)alignedWidth;
-                }
-
-                if (!Direct3D.D3D9x.D3D.IsPowerOfTwo((int)alignedHeight))
-                {
-                    alignedHeight = Direct3D.D3D9x.D3D.Log2Ceiling((int)alignedHeight);
-                    if (alignedHeight < 0) alignedHeight = 0;
-                    alignedHeight = 1u << (int)alignedHeight;
-                }
-            }
-
-            // hacks when the point is outside of the first aligned texture, compute how many tiles you need and extract them (non-square only)
-            if (point.X >= 32)
-                alignedWidth *= (uint)(1 + point.X / 32);
-            if (point.Y >= 32)
-                alignedHeight *= (uint)(1 + point.Y / 32);
-
-            uint texelPitch = blockWidth * blockHeight * bitsPerPixel / 8;
-            uint size = alignedWidth * alignedHeight * bitsPerPixel / 8;
-
-            // documentation says that each packed mip level should be aligned to 4KB, required to make untiling work smoothly
-            size = (uint)((size + 0xFFF) & ~0xFFF);
-
-            int tileOffset = 0;
-
-            if (!isPaired)
-            {
-                bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
-                if ((level == 0 && useHighResBuffer) || primaryData == null)
-                {
-                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level);
-                    uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
-                    data = new byte[alignedSecondaryLength];
-                    Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
-                }
-                else
-                {
-                    levelOffset = BitmapUtils.GetXboxBitmapLevelOffset(definition, layerIndex, level, useHighResBuffer);
-                    uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
-                    data = new byte[alignedPrimaryLength];
-                    Array.Copy(primaryData, 0, data, 0, primaryData.Length);
-                }
-            }
-            else
-            {
-                bool useHighResBuffer = definition.HighResInSecondaryResource > 0;
-                var bitmap1 = pairIndex == 0 ? definition : otherDefinition;
-                var bitmap2 = pairIndex == 0 ? otherDefinition : definition;
-
-                if (level == 0 && useHighResBuffer)
-                {
-                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex);
-                    uint alignedSecondaryLength = (uint)((secondaryData.Length + 0x3FFF) & ~0x3FFF);
-                    data = new byte[alignedSecondaryLength];
-                    Array.Copy(secondaryData, 0, data, 0, secondaryData.Length);
-                }
-                else
-                {
-                    levelOffset = BitmapUtils.GetXboxInterleavedBitmapOffset(bitmap1, bitmap2, layerIndex, level, pairIndex, useHighResBuffer);
-                    uint alignedPrimaryLength = (uint)((primaryData.Length + 0x3FFF) & ~0x3FFF);
-                    data = new byte[alignedPrimaryLength];
-                    Array.Copy(primaryData, 0, data, 0, primaryData.Length);
-                }
-            }
-
-            tileOffset += (int)levelOffset;
-
-            byte[] tempResult = new byte[size];
-
-            // check if data has enough memory for the requested, size, sometimes it does not (truncated to save memory)
-            uint copySize = size;
-            if (size + tileOffset >= data.Length)
-                copySize = (uint)(data.Length - tileOffset);
-
-            Array.Copy(data, tileOffset, tempResult, 0, copySize);
-            data = tempResult;
-
-            uint nBlockWidth;
-            uint nBlockHeight;
-            if (isTiled)
-            {
-                //
-                // Untile texture
-                //
-
-                byte[] result = new byte[size];
-
-                nBlockWidth = alignedWidth / blockWidth;
-                nBlockHeight = alignedHeight / blockHeight;
-                for (int i = 0; i < nBlockHeight; i++)
-                {
-                    for (int j = 0; j < nBlockWidth; j++)
-                    {
-                        int destinationIndex = (int)(i * nBlockWidth + j);  // offset in terms block
-                        int destinationOffset = (int)(destinationIndex * texelPitch);
-                        uint tiledIndex = XboxGraphics.XGAddress2DTiledOffset((uint)j, (uint)i, nBlockWidth, texelPitch); // returns offset in terms of block
-                        uint tiledOffset = tiledIndex * texelPitch;
-                        Array.Copy(data, tiledOffset, result, destinationOffset, texelPitch);
-                    }
-                }
-                data = result;
-            }
-
-            // find level size aligned to block size
-
-            int levelWidth = definition.Width >> level;
-            int levelHeight = definition.Height >> level;
-
-            if (levelWidth < 1)
-                levelWidth = 1;
-            if (levelHeight < 1)
-                levelHeight = 1;
-
-            if (levelWidth % blockWidth != 0)
-                levelWidth = (int)(levelWidth + blockWidth - levelWidth % blockWidth);
-
-            if (levelHeight % blockHeight != 0)
-                levelHeight = (int)(levelHeight + blockHeight - levelHeight % blockHeight);
-
-            byte[] finalData = new byte[levelWidth * levelHeight * bitsPerPixel >> 3];
-
-            nBlockWidth = (uint)(levelWidth / blockWidth);
-            nBlockHeight = (uint)(levelHeight / blockHeight);
-
-            uint sliceBlockWidth = alignedWidth / blockWidth;
-
-            // skip these loops if the bitmap is already the proper format
-            if (point.X != 0 || point.Y != 0 || finalData.Length != data.Length)
-            {
-                for (int i = 0; i < nBlockHeight; i++)
-                {
-                    for (int j = 0; j < nBlockWidth; j++)
-                    {
-                        uint offset = (uint)(((i + point.Y) * sliceBlockWidth) + j + point.X) * texelPitch;
-                        uint destOffset = (uint)((i * nBlockWidth) + j) * texelPitch;
-                        Array.Copy(data, offset, finalData, destOffset, texelPitch);
-                    }
-                }
-            }
-            else
-            {
-                Array.Copy(data, 0, finalData, 0, data.Length);
-            }
-
-            XboxGraphics.XGEndianSwapSurface(d3dFormat, finalData);
+            byte[] finalData = XboxBitmapUtils.GetXboxBitmapLevelData(primaryData, secondaryData, definition, level, layerIndex, isPaired, pairIndex, otherDefinition);
 
             uint actualWidth = Math.Max(1, (uint)definition.Width >> level);
             uint actualHeight = Math.Max(1, (uint)definition.Height >> level);
