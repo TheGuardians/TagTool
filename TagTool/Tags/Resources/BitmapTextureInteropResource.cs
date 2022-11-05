@@ -36,7 +36,7 @@ namespace TagTool.Tags.Resources
         public short Width;
         public short Height;
         public byte Depth;
-        public byte MipmapCount;
+        public sbyte MipmapCount;
         public BitmapType BitmapType;
         public byte HighResInSecondaryResource;
 
