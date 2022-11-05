@@ -211,56 +211,63 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
-        private static byte[] DecodeCtx1(byte[] data, int width, int height)
+        private static byte[] DecodeCtx1(byte[] data, int width, int height, bool swapXY = false, bool computeZ = true)
         {
-            byte[] buffer = new byte[width * height * 4];
+            var buffer = new byte[width * height * 4];
+            int xBlocks = width / 4;
+            int yBlocks = height / 4;
 
-            const float bfScale = 255.0f / 127.0f;
-            const float bfOffset = 128.0f / 127.0f;
-
-            for (int vtPos = 0; vtPos < (height / 4); vtPos++)
+            var vectors = new RGBAColor[4];
+            for (int i = 0; i < yBlocks; i++)
             {
-                for (int hzPos = 0; hzPos < (width / 4); hzPos++)
+                for (int j = 0; j < xBlocks; j++)
                 {
-                    int dataI = (vtPos * (width / 4) + hzPos) * 8;
+                    int srcIndex = (i * xBlocks + j) * 8;
+                    vectors[0] = new RGBAColor(data[srcIndex + 1], data[srcIndex + 0], 0, 0);
+                    vectors[1] = new RGBAColor(data[srcIndex + 3], data[srcIndex + 2], 0, 0);
+                    vectors[2].R = (byte)((2 * vectors[0].R + vectors[1].R + 1) / 3);
+                    vectors[2].G = (byte)((2 * vectors[0].G + vectors[1].G + 1) / 3);
+                    vectors[3].R = (byte)((vectors[0].R + 2 * vectors[1].R + 1) / 3);
+                    vectors[3].G = (byte)((vectors[0].G + 2 * vectors[1].G + 1) / 3);
 
-                    byte _2_g = (byte)(data[dataI + 0] + (byte)((1.0f / 3.0f) * (float)(data[dataI + 2] - data[dataI + 0])));
-                    byte _2_r = (byte)(data[dataI + 1] + (byte)((1.0f / 3.0f) * (float)(data[dataI + 3] - data[dataI + 0])));
-                    byte _3_g = (byte)(data[dataI + 0] + (byte)((2.0f / 3.0f) * (float)(data[dataI + 2] - data[dataI + 0])));
-                    byte _3_r = (byte)(data[dataI + 1] + (byte)((2.0f / 3.0f) * (float)(data[dataI + 3] - data[dataI + 0])));
+                    var code = (uint)((data[srcIndex + 7] << 24) | (data[srcIndex + 6] << 16) | (data[srcIndex + 5] << 8) | (data[srcIndex + 4]));
 
-                    byte[][] colours = new byte[][]
+                    for (int k = 0; k < 4; k++)
                     {
-                        new byte[] { 0x00, data[dataI + 0], data[dataI + 1], 0xFF },
-                        new byte[] { 0x00, data[dataI + 2], data[dataI + 3], 0xFF },
-                        new byte[] { 0x00, _2_g,            _2_r,            0xFF },
-                        new byte[] { 0x00, _3_g,            _3_r,            0xFF }
-                    };
-
-                    for (int i = 0; i < 4; i++)
-                    {
-                        for (int j = 0; j < 4; j++)
+                        for (int m = 0; m < 4; m++)
                         {
-                            var colourBgra = colours[(data[dataI + 4 + i] >> j * 2) & 0x3];
+                            int destIndex = ((width * ((i * 4) + k)) * 4) + (((j * 4) + m) * 4);
 
-                            float fR = (colourBgra[2] / 255.0f) * bfScale - bfOffset;
-                            float fG = (colourBgra[1] / 255.0f) * bfScale - bfOffset;
-                            float nPart = (fR * fR + fG * fG);
-                            nPart = nPart > 1.0f ? 1.0f : nPart < 0.0f ? 0.0f : nPart;
-                            float fB = (float)Math.Sqrt(1.0f - nPart);
-                            byte bChannel = (byte)(((fB + bfOffset) / bfScale) * 255.0f);
+                            RGBAColor vector = vectors[(int)(code & 3)];
 
-                            int outIndex = ((vtPos * 4 + i) * width + (hzPos * 4 + j)) * 4;
-                            buffer[outIndex + 0] = colourBgra[2];
-                            buffer[outIndex + 1] = colourBgra[1];
-                            buffer[outIndex + 2] = bChannel;
-                            buffer[outIndex + 3] = colourBgra[3];
+                            RGBAColor color;
+                            color.R = vector.R;
+                            color.G = vector.G;
+                            color.B = computeZ ? CalculateNormalZ(vector.R, vector.G) : (byte)0;
+                            color.A = 0xFF;
+
+                            if(swapXY)
+                                (color.R, color.G) = (color.G, color.R);
+
+                            buffer[destIndex + 0] = color.B;
+                            buffer[destIndex + 1] = color.G;
+                            buffer[destIndex + 2] = color.R;
+                            buffer[destIndex + 3] = color.A;
+
+                            code >>= 2;
                         }
                     }
                 }
             }
-
             return buffer;
+        }
+
+        static byte CalculateNormalZ(byte r, float g)
+        {
+            float x = (r / 255f * 2f) - 1f;
+            float y = (g / 255f * 2f) - 1f;
+            float z = (float)Math.Sqrt(Math.Max(0f, Math.Min(1f, (1f - (x * x)) - (y * y))));
+            return (byte)(((z + 1f) / 2f) * 255f);
         }
 
         public static byte[] DecodeDxnSigned(byte[] data, int width, int height, bool swapRG = false)
@@ -1497,22 +1504,22 @@ namespace TagTool.Bitmaps
                     break;
 
                 case BitmapFormat.Dxn:
-                    var dxnCompressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxn, bitm, virtualWidth, virtualHeight);
+                    var dxnCompressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxn | SquishLib.SquishFlags.kSourceBgra, bitm, virtualWidth, virtualHeight);
                     data = dxnCompressor.CompressTexture();
                     break;
 
                 case BitmapFormat.Dxt1:
-                    var dxt1Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt1 | SquishLib.SquishFlags.kColourIterativeClusterFit, bitm, virtualWidth, virtualHeight);
+                    var dxt1Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt1 | SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra, bitm, virtualWidth, virtualHeight);
                     data = dxt1Compressor.CompressTexture();
                     break;
 
                 case BitmapFormat.Dxt3:
-                    var dxt3Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt3 | SquishLib.SquishFlags.kColourIterativeClusterFit, bitm, virtualWidth, virtualHeight);
+                    var dxt3Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt3 | SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra, bitm, virtualWidth, virtualHeight);
                     data = dxt3Compressor.CompressTexture();
                     break;
 
                 case BitmapFormat.Dxt5:
-                    var dxt5Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 | SquishLib.SquishFlags.kColourIterativeClusterFit, bitm, virtualWidth, virtualHeight);
+                    var dxt5Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 | SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra, bitm, virtualWidth, virtualHeight);
                     data = dxt5Compressor.CompressTexture();
                     break;
 
@@ -1744,9 +1751,9 @@ namespace TagTool.Bitmaps
 
         private struct RGBAColor
         {
-            public int R, G, B, A;
+            public byte R, G, B, A;
 
-            public RGBAColor(int Red, int Green, int Blue, int Alpha)
+            public RGBAColor(byte Red, byte Green, byte Blue, byte Alpha)
             {
                 R = Red;
                 G = Green;

@@ -795,8 +795,17 @@ namespace TagTool.Bitmaps
                     data = BitmapDecoder.Ctx1ToDxn(data, (int)width, (int)height);
                     format = BitmapFormat.Dxn;
                 }
+            }*/
+            if (format == BitmapFormat.Ctx1 && type == BitmapType.Array) //DXN array unsupported
+            {
+                destinationFormat = BitmapFormat.A8R8G8B8;
+                requireDecompression = false;
+
+                data = ConvertNonMultipleBlockSizeBitmap(data, width, height, format);
+                data = BitmapDecoder.EncodeBitmap(data, destinationFormat, (int)width, (int)height);
+                format = destinationFormat;
             }
-            else */if(format != destinationFormat)
+            else if(format != destinationFormat)
             {
                 byte[] uncompressedData;
                 if (format == BitmapFormat.Ctx1 && (width % 4 != 0 || height % 4 != 0))

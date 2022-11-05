@@ -69,7 +69,9 @@ namespace TagTool.Bitmaps.Utils
             //! Weight the colour by alpha during cluster fit (disabled by default).
             kWeightColourByAlpha = (1 << 7),
             //! Compressor constructed with compressed texture data
-            kAlreadyCompressed = (1 << 10)
+            kAlreadyCompressed = (1 << 10),
+            //! Source is BGRA rather than RGBA
+            kSourceBgra = (1 << 11)
         };
 
         public struct SourceBlock
@@ -109,9 +111,6 @@ namespace TagTool.Bitmaps.Utils
                 int r = FloatToInt(31.0f * colour.I, 31);
                 int g = FloatToInt(63.0f * colour.J, 63);
                 int b = FloatToInt(31.0f * colour.K, 31);
-
-				if (HaloS3TC) // in HaloS3TC swap R and B channels
-                    return (b << 11) | (g << 5) | r;
 
                 // pack into a single value
                 return (r << 11) | (g << 5) | b;
@@ -366,23 +365,8 @@ namespace TagTool.Bitmaps.Utils
 				else
 					Rgba = data;
 
-				// FixFlags()
-				// grab the flag bits
-				uint flagsUint = (uint)flags;
-                uint method = flagsUint & ((uint)SquishFlags.kDxt1 | (uint)SquishFlags.kDxt3 | (uint)SquishFlags.kDxt5 | (uint)SquishFlags.kDxn);
-                uint fit = flagsUint & ((uint)SquishFlags.kColourIterativeClusterFit | (uint)SquishFlags.kColourClusterFit | (uint)SquishFlags.kColourRangeFit);
-                uint metric = flagsUint & ((uint)SquishFlags.kColourMetricPerceptual | (uint)SquishFlags.kColourMetricUniform);
-                uint extra = flagsUint & (uint)SquishFlags.kWeightColourByAlpha;
-
-                // set defaults
-                if (method != (uint)SquishFlags.kDxt3 && method != (uint)SquishFlags.kDxt5 && method != (uint)SquishFlags.kDxn)
-                    method = (uint)SquishFlags.kDxt1;
-                if (fit != (uint)SquishFlags.kColourRangeFit)
-                    fit = (uint)SquishFlags.kColourClusterFit;
-                if (metric != (uint)SquishFlags.kColourMetricUniform)
-                    metric = (uint)SquishFlags.kColourMetricPerceptual;
-
-                Flags = (SquishFlags)(method | fit | metric | extra);
+                // grab the flag bits
+                Flags = (SquishFlags)FixFlags((uint)flags);
             }
 
             public byte[] CompressTexture()
@@ -420,7 +404,10 @@ namespace TagTool.Bitmaps.Utils
                                     byte b = Rgba[4 * (Width * sy + sx) + 2];
                                     byte a = Rgba[4 * (Width * sy + sx) + 3];
 
-									sourceRgba[rgbaOffset + 0] = r;
+                                    if((Flags & SquishFlags.kSourceBgra) != 0)
+                                        (r, b) = (b, r); // bgra -> rgba
+
+                                    sourceRgba[rgbaOffset + 0] = r;
                                     sourceRgba[rgbaOffset + 1] = g;
                                     sourceRgba[rgbaOffset + 2] = b;
                                     sourceRgba[rgbaOffset + 3] = a;
@@ -471,7 +458,7 @@ namespace TagTool.Bitmaps.Utils
                     {
 						// decompress the block
 						Buffer.BlockCopy(sourceBlocks, blockOffset, tempBlock, 0, bytesPerBlock);
-                        byte[] targetRgba = Decompress(tempBlock, (uint)Flags);
+                        byte[] targetRgba = Decompress(tempBlock, Flags);
 
                         // write the decompressed pixels to the correct image locations
                         int rgbaOffset = 0;
@@ -484,11 +471,19 @@ namespace TagTool.Bitmaps.Utils
                                 int sy = y + py;
                                 if (sx < Width && sy < Height)
                                 {
-									// copy the rgba value
-									Rgba[4 * (Width * sy + sx) + 0] = targetRgba[rgbaOffset + 0];
-                                    Rgba[4 * (Width * sy + sx) + 1] = targetRgba[rgbaOffset + 1];
-                                    Rgba[4 * (Width * sy + sx) + 2] = targetRgba[rgbaOffset + 2];
-                                    Rgba[4 * (Width * sy + sx) + 3] = targetRgba[rgbaOffset + 3];
+									byte r = targetRgba[rgbaOffset + 0];
+                                    byte g = targetRgba[rgbaOffset + 1];
+                                    byte b = targetRgba[rgbaOffset + 2];
+                                    byte a = targetRgba[rgbaOffset + 3];
+
+									if((Flags & SquishFlags.kSourceBgra) != 0)
+										(r, b) = (b, r); // rgba -> bgra
+
+                                    // copy the rgba value
+                                    Rgba[4 * (Width * sy + sx) + 0] = r;
+                                    Rgba[4 * (Width * sy + sx) + 1] = g;
+                                    Rgba[4 * (Width * sy + sx) + 2] = b;
+                                    Rgba[4 * (Width * sy + sx) + 3] = a;
 
 									rgbaOffset += 4;
                                 }
@@ -1483,23 +1478,24 @@ namespace TagTool.Bitmaps.Utils
             private RealVector4d m_besterror;
         }
 
-		public static byte[] Decompress(byte[] block, uint flags)
+		// NOTE that the return value is RGBA not BGRA
+		private static byte[] Decompress(byte[] block, SquishFlags flags)
 		{
 			byte[] rgba = new byte[64];
 
             // get the block locations
             var colourBlock = block;
             var alphaBock = block;
-            if ((flags & ((uint)SquishFlags.kDxt3 | (uint)SquishFlags.kDxt5)) != 0)
+            if ((flags & SquishFlags.kDxt3) != 0 || (flags & SquishFlags.kDxt5) != 0)
                 colourBlock = block.Skip(8).Take(block.Length - 8).ToArray(); // skip 8 bytes in array
 
             // decompress colour
-            DecompressColour(rgba, colourBlock, (flags & (uint)SquishFlags.kDxt1) != 0);
+            DecompressColour(rgba, colourBlock, (flags & SquishFlags.kDxt1) != 0);
 
             // decompress alpha separately if necessary
-            if ((flags & (uint)SquishFlags.kDxt3) != 0)
+            if ((flags & SquishFlags.kDxt3) != 0)
                 DecompressAlphaDxt3(rgba, alphaBock);
-            else if ((flags & (uint)SquishFlags.kDxt5) != 0)
+            else if ((flags & SquishFlags.kDxt5) != 0)
                 DecompressAlphaDxt5(rgba, alphaBock);
 
 			return rgba;
@@ -1569,13 +1565,6 @@ namespace TagTool.Bitmaps.Utils
             colours[colourOffset + 1] = (byte)((green << 2) | (green >> 4));
             colours[colourOffset + 2] = (byte)((blue << 3) | (blue >> 2));
             colours[colourOffset + 3] = 0xFF;
-
-			if (HaloS3TC) // in HaloS3TC swap R and B channels
-            {
-				byte tempRed = colours[colourOffset + 0];
-				colours[colourOffset + 0] = colours[colourOffset + 2];
-				colours[colourOffset + 2] = tempRed;
-            }
 
             return (int)packedValue;
 		}
@@ -1979,7 +1968,7 @@ namespace TagTool.Bitmaps.Utils
             uint method = flags & ((uint)SquishFlags.kDxt1 | (uint)SquishFlags.kDxt3 | (uint)SquishFlags.kDxt5 | (uint)SquishFlags.kDxn);
             uint fit = flags & ((uint)SquishFlags.kColourIterativeClusterFit | (uint)SquishFlags.kColourClusterFit | (uint)SquishFlags.kColourRangeFit);
             uint metric = flags & ((uint)SquishFlags.kColourMetricPerceptual | (uint)SquishFlags.kColourMetricUniform);
-            uint extra = flags & (uint)SquishFlags.kWeightColourByAlpha;
+            uint extra = flags & ((uint)SquishFlags.kWeightColourByAlpha | (uint)SquishFlags.kSourceBgra);
 
             // set defaults
             if (method != (uint)SquishFlags.kDxt3 && method != (uint)SquishFlags.kDxt5 && method != (uint)SquishFlags.kDxn)
