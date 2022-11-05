@@ -31,7 +31,7 @@ namespace TagTool.Tags.Resources
     [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
     [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-    public class BitmapTextureInteropDefinition
+    public class BitmapTextureInteropDefinition : TagStructure
     {
         public short Width;
         public short Height;

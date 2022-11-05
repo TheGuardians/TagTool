@@ -42,8 +42,21 @@ namespace TagTool.Bitmaps.Utils
 
         public static int GetTexture3DOffset(Image bitmap, int x, int y, int z, int mipmapIndex)
         {
-            // TODO
-            throw new NotImplementedException();
+            int width = bitmap.Width;
+            int height = bitmap.Height;
+            int depth = bitmap.Depth;
+            int align = bitmap.Flags.HasFlag(BitmapFlags.Compressed) ? 4 : 1;
+            int bitsPerPixel = BitmapFormatUtils.GetBitsPerPixel(bitmap.Format);
+
+            int offset = 0;
+            for (int i = 0; i < mipmapIndex; ++i)
+            {
+                offset += width * height * depth;
+                width = Math.Max(width >> 1, align);
+                height = Math.Max(height >> 1, align);
+                depth = Math.Max(depth >> 1, align);
+            }
+            return (bitsPerPixel * (offset + width * (y + z * height) + x) / 8);
         }
 
         public static int GetTextureCubemapOffset(Image bitmap, int x, int y, int z, int mipmapIndex)

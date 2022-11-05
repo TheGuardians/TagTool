@@ -27,6 +27,11 @@ public class BaseBitmap
 
     public BaseBitmap() { }
 
+    public BaseBitmap(Bitmap.Image image, byte[] data) : this(image)
+    {
+        Data = data;
+    }
+
     public BaseBitmap(Bitmap.Image image)
     {
         Height = image.Height;
