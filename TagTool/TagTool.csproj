@@ -1751,8 +1751,8 @@
   </ItemDefinitionGroup>
   <PropertyGroup>
     <PostBuildEvent>cd $(ProjectDir)$(OutDir)
-xcopy "$(ProjectDir)..\Physics" "Physics" /e /i /h /Y
-xcopy "$(ProjectDir)..\Tools" "Tools" /e /i /h /Y
+xcopy "$(ProjectDir)..\Physics" "Physics" /e /i /h /Y /d
+xcopy "$(ProjectDir)..\Tools" "Tools" /e /i /h /Y /d
 
 IF "$(PlatformName)" == "x64" (
     del "Tools\meshoptimizer32.dll"
@@ -1776,7 +1776,7 @@ move "AssimpNet.dll" "Tools"
 
 cd $(ProjectDir)
 if ERRORLEVEL == 0 (
-    xcopy "$(ProjectDir)..\Tools\HaloShaderGenerator.dll" "$(ProjectDir)$(OutDir)" /e /i /h /Y 2&gt;nul 1&gt;nul
+    xcopy "$(ProjectDir)..\Tools\HaloShaderGenerator.dll" "$(ProjectDir)$(OutDir)" /e /i /h /Y /d 2&gt;nul 1&gt;nul
     SET ERRORLEVEL=0
 )
 EXIT %25ERRORLEVEL%25</PostBuildEvent>

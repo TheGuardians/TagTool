@@ -23,8 +23,7 @@ namespace TagTool.Geometry
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshReader"/> class.
         /// </summary>
-        /// <param name="version">The engine version to target.</param>
-        /// <param name="platform"></param>
+        /// <param name="cache">The cache to target.</param>
         /// <param name="mesh">The mesh.</param>
         public MeshReader(GameCache cache, Mesh mesh)
         {

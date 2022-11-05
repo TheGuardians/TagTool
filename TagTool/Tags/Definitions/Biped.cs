@@ -91,7 +91,7 @@ namespace TagTool.Tags.Definitions
         public short PhysicsControlNodeIndex;
 
         [TagField(Length = 2, Flags = Padding)]
-        public byte[] Padding1;
+        public byte[] Padding3;
 
         public float CosineStationaryTurningThreshold;
         public float CrouchTransitionVelocity;

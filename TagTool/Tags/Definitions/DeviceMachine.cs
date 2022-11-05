@@ -19,10 +19,10 @@ namespace TagTool.Tags.Definitions
         public PathfindingPolicyValue PathfindingPolicy;
 
         [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding3;
+        public byte[] Padding4;
 
         [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public byte[] Padding4;
+        public byte[] Padding5;
  
         public enum TypeValue : short
         {
