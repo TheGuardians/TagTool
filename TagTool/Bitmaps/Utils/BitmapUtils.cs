@@ -323,6 +323,9 @@ namespace TagTool.Bitmaps
 
         public static byte[] ConvertXboxFormats(byte[] data, uint width, uint height, BitmapFormat format, BitmapType type, bool requireDecompression, CacheVersion version)
         {
+            // TODO: clean this up
+
+
             // fix enum from reach
             if (version >= CacheVersion.HaloReach) 
             {
@@ -340,6 +343,9 @@ namespace TagTool.Bitmaps
 
             if (destinationFormat == format && !requireDecompression)
                 return data;
+
+
+            
 
             /*if(format == BitmapFormat.Ctx1)
             {
@@ -369,14 +375,19 @@ namespace TagTool.Bitmaps
             }
             else if(format != destinationFormat)
             {
+                int blockDimension = BitmapFormatUtils.GetBlockDimension(format);
+                int alignedWidth = BitmapUtils.RoundSize((int)width, blockDimension);
+                int alignedHeight = BitmapUtils.RoundSize((int)height, blockDimension);
+
+
                 byte[] uncompressedData;
                 if (format == BitmapFormat.Ctx1 && (width % 4 != 0 || height % 4 != 0))
                 {
-                    uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)width, (int)height);
+                    uncompressedData = BitmapDecoder.DecodeBitmap(data, format, alignedWidth, alignedHeight);
                 }
                 else
                 {
-                    uncompressedData = BitmapDecoder.DecodeBitmap(data, format, (int)width, (int)height);
+                    uncompressedData = BitmapDecoder.DecodeBitmap(data, format, alignedWidth, alignedHeight);
                     uncompressedData = TrimAlignedBitmap(format, destinationFormat, (int)width, (int)height, uncompressedData);
                 }
 

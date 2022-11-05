@@ -322,13 +322,6 @@ namespace TagTool.Bitmaps.Utils
             uint actualWidth = Math.Max(1, (uint)definition.Width >> level);
             uint actualHeight = Math.Max(1, (uint)definition.Height >> level);
 
-            if (BitmapUtils.IsCompressedFormat(bitmap.Images[imageIndex].Format))
-            {
-                int blockDimension = BitmapFormatUtils.GetBlockDimension(bitmap.Images[imageIndex].Format);
-                actualWidth = (uint)BitmapUtils.RoundSize((int)actualWidth, blockDimension);
-                actualHeight = (uint)BitmapUtils.RoundSize((int)actualHeight, blockDimension);
-            }
-
             bool requireDecompression = BitmapUtils.RequiresDecompression(BitmapUtils.GetEquivalentBitmapFormat(bitmap.Images[imageIndex].Format), (uint)definition.Width, (uint)definition.Height);
             finalData = BitmapUtils.ConvertXboxFormats(finalData, actualWidth, actualHeight, bitmap.Images[imageIndex].Format, bitmap.Images[imageIndex].Type, requireDecompression, version);
 
