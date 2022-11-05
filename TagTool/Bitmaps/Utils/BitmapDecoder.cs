@@ -26,16 +26,6 @@ namespace TagTool.Bitmaps
 {
     public static class BitmapDecoder
     {
-        public static byte[] ConvertFromLinearTexture(byte[] data, int width, int height, BitmapFormat texture)
-        {
-            return ModifyLinearTexture(data, width, height, texture, false);
-        }
-
-        public static byte[] ConvertToLinearTexture(byte[] data, int width, int height, BitmapFormat texture)
-        {
-            return ModifyLinearTexture(data, width, height, texture, true);
-        }
-
         private static byte[] DecodeP8(byte[] data, int width, int height)
         {
             var buffer = new byte[data.Length * 4];
@@ -1529,26 +1519,6 @@ namespace TagTool.Bitmaps
             return data;
         }
 
-        private static RGBAColor GradientColors(RGBAColor Color1, RGBAColor Color2)
-        {
-            RGBAColor color;
-            color.R = (byte)(((Color1.R * 2) + Color2.R) / 3);
-            color.G = (byte)(((Color1.G * 2) + Color2.G) / 3);
-            color.B = (byte)(((Color1.B * 2) + Color2.B) / 3);
-            color.A = 0xFF;
-            return color;
-        }
-
-        private static RGBAColor GradientColorsHalf(RGBAColor Color1, RGBAColor Color2)
-        {
-            RGBAColor color;
-            color.R = (byte)((Color1.R / 2) + (Color2.R / 2));
-            color.G = (byte)((Color1.G / 2) + (Color2.G / 2));
-            color.B = (byte)((Color1.B / 2) + (Color2.B / 2));
-            color.A = 0xFF;
-            return color;
-        }
-
         private static byte[] ModifyLinearTexture(byte[] data, int width, int height, BitmapFormat texture, bool toLinear)
         {
             byte[] destinationArray = new byte[data.Length];
@@ -1676,79 +1646,6 @@ namespace TagTool.Bitmaps
             return ((Macro + Micro) + ((offsetT & 16) >> 4));
         }
 
-        public static byte[] Swizzle(byte[] raw, int offset, int width, int height, int depth, int bitCount, bool deswizzle)
-        {
-            if (raw.Length == 0)
-                return new byte[0];
-
-            if (depth < 1) depth = 1;
-
-            bitCount /= 8;
-            int a = 0, b = 0;
-            int tempsize = raw.Length; // width * height * bitCount;
-            byte[] data = new byte[tempsize];
-            MaskSet masks = new MaskSet(width, height, depth);
-
-            offset = 0;
-
-            for (int z = 0; z < depth; z++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        if (deswizzle)
-                        {
-                            a = ((((z * height) + y) * width) + x) * bitCount;
-                            b = Swizzle(x, y, z, masks) * bitCount;
-
-                            // a = ((y * width) + x) * bitCount;
-                            // b = (Swizzle(x, y, -1, masks)) * bitCount;
-                        }
-                        else
-                        {
-                            b = ((((z * height) + y) * width) + x) * bitCount;
-                            a = Swizzle(x, y, z, masks) * bitCount;
-
-                            // b = ((y * width) + x) * bitCount;
-                            // a = (Swizzle(x, y, -1, masks)) * bitCount;
-                        }
-
-                        for (int i = offset; i < bitCount + offset; i++)
-                            data[a + i] = raw[b + i];
-                    }
-                }
-            }
-
-            // for(int u = 0; u < offset; u++)
-            // data[u] = raw[u];
-            // for(int v = offset + (height * width * depth * bitCount); v < data.Length; v++)
-            // 	data[v] = raw[v];
-            return data;
-        }
-
-        private static int Swizzle(int x, int y, int z, MaskSet masks)
-        {
-            return SwizzleAxis(x, masks.x) | SwizzleAxis(y, masks.y) | (z == -1 ? 0 : SwizzleAxis(z, masks.z));
-        }
-
-        private static int SwizzleAxis(int val, int mask)
-        {
-            int bit = 1;
-            int result = 0;
-
-            while (bit <= mask)
-            {
-                int test = mask & bit;
-                if (test != 0) result |= val & bit;
-                else val <<= 1;
-
-                bit <<= 1;
-            }
-
-            return result;
-        }
-
         private struct RGBAColor
         {
             public byte R, G, B, A;
@@ -1759,43 +1656,6 @@ namespace TagTool.Bitmaps
                 G = Green;
                 B = Blue;
                 A = Alpha;
-            }
-        }
-
-        private class MaskSet
-        {
-            public readonly int x;
-            public readonly int y;
-            public readonly int z;
-
-            public MaskSet(int w, int h, int d)
-            {
-                int bit = 1;
-                int index = 1;
-
-                while (bit < w || bit < h || bit < d)
-                {
-                    // if (bit == 0) { break; }
-                    if (bit < w)
-                    {
-                        x |= index;
-                        index <<= 1;
-                    }
-
-                    if (bit < h)
-                    {
-                        y |= index;
-                        index <<= 1;
-                    }
-
-                    if (bit < d)
-                    {
-                        z |= index;
-                        index <<= 1;
-                    }
-
-                    bit <<= 1;
-                }
             }
         }
     }

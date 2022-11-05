@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assimp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -183,7 +184,7 @@ namespace TagTool.Bitmaps.Utils
                 // fix slope_water bitmap conversion
                 if (resultBitmap.Format == BitmapFormat.V8U8)
                 {
-                    resultBitmap.MipMapCount = 0;
+                    resultBitmap.MipMapCount = 1;
                     resultBitmap.Curve = BitmapImageCurve.Unknown;
                 }
 
@@ -210,7 +211,7 @@ namespace TagTool.Bitmaps.Utils
             {
                 if (resultBitmap.Type == BitmapType.Array || resultBitmap.Type == BitmapType.Texture3D)
                 {
-                    resultBitmap.MipMapCount = 0;
+                    resultBitmap.MipMapCount = 1;
                 }
                 else
                 {
@@ -224,30 +225,7 @@ namespace TagTool.Bitmaps.Utils
                     {
                         // Remove lowest DXN mipmaps to prevent issues with D3D memory allocation.
 
-                        int dataSize = BitmapUtils.RoundSize(resultBitmap.Width, 4) * BitmapUtils.RoundSize(resultBitmap.Height, 4);
-
-                        int mipMapCount = resultBitmap.MipMapCount;
-                        if (mipMapCount > 0)
-                        {
-                            var width = resultBitmap.Width;
-                            var height = resultBitmap.Height;
-
-                            for (mipMapCount = 0; mipMapCount < resultBitmap.MipMapCount; mipMapCount++)
-                            {
-                                width /= 2;
-                                height /= 2;
-
-                                if (width < 4 || height < 4)
-                                    break;
-
-                                dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
-                            }
-                        }
-
-                        resultBitmap.MipMapCount = mipMapCount;
-                        byte[] raw = new byte[dataSize];
-                        Array.Copy(resultBitmap.Data, raw, dataSize);
-                        resultBitmap.Data = raw;
+                        TrimLowestMipmaps(resultBitmap);
                     }
                 }
 
@@ -258,11 +236,34 @@ namespace TagTool.Bitmaps.Utils
                 resultBitmap.Type = BitmapType.Texture3D;
         }
 
+        private static void TrimLowestMipmaps(BaseBitmap resultBitmap)
+        {
+            int dataSize = 0;
+            int mipMapCount;
+            int width = resultBitmap.Width;
+            int height = resultBitmap.Height;
+            for (mipMapCount = 0; mipMapCount < resultBitmap.MipMapCount; mipMapCount++)
+            {
+                if (width < 4 || height < 4)
+                    break;
+
+                dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
+                width /= 2;
+                height /= 2;
+            }
+
+            resultBitmap.MipMapCount = mipMapCount;
+            byte[] raw = new byte[dataSize];
+            Array.Copy(resultBitmap.Data, raw, dataSize);
+            resultBitmap.Data = raw;
+        }
+
         private unsafe static void ConvertGen3BitmapDataMCC(Stream resultStream, byte[] primaryData, byte[] secondaryData, BitmapTextureInteropDefinition definition, Bitmap bitmap, int imageIndex, int level, int layerIndex, bool isPaired, int pairIndex, BitmapTextureInteropDefinition otherDefinition, CacheVersion version)
         {
-            int mipCount = 0;
             var pixelDataOffset = BitmapUtilsPC.GetTextureOffset(bitmap.Images[imageIndex], level);
             var pixelDataSize = BitmapUtilsPC.GetMipmapPixelDataSize(bitmap.Images[imageIndex], level);
+            int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
+            int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
 
             byte[] pixelData = new byte[pixelDataSize];
             if (level == 0 && definition.HighResInSecondaryResource > 0 || primaryData == null)
@@ -279,32 +280,24 @@ namespace TagTool.Bitmaps.Utils
             if(bitmap.Images[imageIndex].Format == BitmapFormat.Dxn)
             {
                 // convert bc5_snorm to ati2n_unorm
-                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
-                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 byte[] rgba = BitmapDecoder.DecodeDxnSigned(pixelData, width, height, true);
-                pixelData = EncodeDXN(rgba, width, height, out mipCount);
+                pixelData = EncodeDXN(rgba, width, height, out var _);
             }
             else if (bitmap.Images[imageIndex].Format == BitmapFormat.V8U8)
             {
                 // convert R8G8_SNORM to ati2n_unorm
-                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
-                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 var rgba = BitmapDecoder.DecodeV8U8(pixelData, width, height, true);
-                pixelData = EncodeDXN(rgba, width, height, out mipCount);
+                pixelData = EncodeDXN(rgba, width, height, out var _);
             }
             else if (bitmap.Images[imageIndex].Format == BitmapFormat.V16U16)
             {
                 // convert R16G16_SNORM to ati2n_unorm
-                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
-                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 var rgba = BitmapDecoder.DecodeV16U16(pixelData, width, height, true);
-                pixelData = EncodeDXN(rgba, width, height, out mipCount);
+                pixelData = EncodeDXN(rgba, width, height, out var _);
             }
             else if (bitmap.Images[imageIndex].Format == BitmapFormat.A2R10G10B10)
             {
                 // convert DXGI_FORMAT_R10G10B10A2_UNORM to A2R10G10B10
-                int width = BitmapUtilsPC.GetMipmapWidth(bitmap.Images[imageIndex], level);
-                int height = BitmapUtilsPC.GetMipmapHeight(bitmap.Images[imageIndex], level);
                 fixed(byte *ptr = pixelData)
                 {
                     for (int i = 0; i < width * height; i++)
@@ -367,7 +360,7 @@ namespace TagTool.Bitmaps.Utils
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.A16B16G16R16F:
                 case BitmapFormat.A32B32G32R32F:
-                    bitmap.MipMapCount = 0;
+                    bitmap.MipMapCount = 1;
                     break;
                 default:
                     throw new Exception($"Unsupported format for mipmap generation {bitmap.Format}");
@@ -405,7 +398,7 @@ namespace TagTool.Bitmaps.Utils
                 {
                     ddsFile = new DDSFile();
                     ddsFile.Read(reader);
-                    mipCount = ddsFile.Header.MipMapCount - 1;
+                    mipCount = ddsFile.Header.MipMapCount;
                     return ddsFile.BitmapData;
                 }
             }
@@ -454,7 +447,7 @@ namespace TagTool.Bitmaps.Utils
                     break;
 
                 default:
-                    bitmap.MipMapCount = 0;
+                    bitmap.MipMapCount = 1;
                     if (File.Exists(tempBitmap))
                         File.Delete(tempBitmap);
                     return;
@@ -475,47 +468,20 @@ namespace TagTool.Bitmaps.Utils
             Process nvcompress = Process.Start(info);
             nvcompress.WaitForExit();
 
-            byte[] result;
             using (var ddsStream = File.OpenRead(tempBitmap))
             {
                 header.Read(new EndianReader(ddsStream));
                 var dataSize = (int)(ddsStream.Length - ddsStream.Position);
 
-                int mipMapCount = header.MipMapCount - 1;
-
                 bitmap.Width = header.Width;
                 bitmap.Height = header.Height;
+                bitmap.Data = new byte[dataSize];
+                bitmap.MipMapCount = Math.Max(1, header.MipMapCount - 1);
+                ddsStream.Read(bitmap.Data, 0, dataSize);
 
                 // Remove lowest DXN mipmaps to prevent issues with D3D memory allocation.
                 if (bitmap.Format == BitmapFormat.Dxn)
-                {
-                    dataSize = BitmapUtils.RoundSize(bitmap.Width, 4) * BitmapUtils.RoundSize(bitmap.Height, 4);
-                    if (mipMapCount > 0)
-                    {
-                        if (bitmap.Format == BitmapFormat.Dxn)
-                        {
-                            var width = bitmap.Width;
-                            var height = bitmap.Height;
-
-                            dataSize = BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
-
-                            mipMapCount = 0;
-                            while ((width >= 8) && (height >= 8))
-                            {
-                                width /= 2;
-                                height /= 2;
-                                dataSize += BitmapUtils.RoundSize(width, 4) * BitmapUtils.RoundSize(height, 4);
-                                mipMapCount++;
-                            }
-                        }
-                    }
-
-                }
-                bitmap.MipMapCount = mipMapCount;
-                byte[] raw = new byte[dataSize];
-                ddsStream.Read(raw, 0, dataSize);
-                result = raw;
-                bitmap.Data = result;
+                    TrimLowestMipmaps(bitmap);
             }
 
             if (File.Exists(tempBitmap))
@@ -543,7 +509,7 @@ namespace TagTool.Bitmaps.Utils
                     channelCount = 4;
                     break;
                 default:
-                    bitmap.MipMapCount = 0;
+                    bitmap.MipMapCount = 1;
                     return;
 
             }
