@@ -109,15 +109,14 @@ namespace TagTool.Cache.Gen3
             if (!IsResourceValid(tagResource))
                 return null;
 
-            byte[] primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
-            byte[] secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
+            Memory<byte> primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
+            Memory<byte> secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
 
-            if (primaryResourceData == null)
+            if (primaryResourceData.IsEmpty)
                 primaryResourceData = new byte[0];
 
-            if (secondaryResourceData == null)
+            if (secondaryResourceData.IsEmpty)
                 secondaryResourceData = new byte[0];
-
 
             //
             // Reorganize primary and secondary resources into a single contiguous data[]
@@ -137,7 +136,7 @@ namespace TagTool.Cache.Gen3
             var primaryRunningOffset = 0;
             foreach(var subPage in primarySubPageTable.Subpages)
             {
-                Array.Copy(primaryResourceData, primaryRunningOffset, data, subPage.Offset, subPage.Size);
+                primaryResourceData.CopyTo(primaryRunningOffset, data, subPage.Offset, subPage.Size);
                 primaryRunningOffset += subPage.Size;
             }
 
@@ -146,7 +145,7 @@ namespace TagTool.Cache.Gen3
                 var secondaryRunningOffset = 0;
                 foreach (var subPage in secondarySubPageTable.Subpages)
                 {
-                    Array.Copy(secondaryResourceData, secondaryRunningOffset, data, subPage.Offset, subPage.Size);
+                    secondaryResourceData.CopyTo(secondaryRunningOffset, data, subPage.Offset, subPage.Size);
                     secondaryRunningOffset += subPage.Size;
                 }
             }
@@ -257,21 +256,22 @@ namespace TagTool.Cache.Gen3
 
             ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
 
-            byte[] primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
-            byte[] secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
+            Memory<byte> primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
+            Memory<byte> secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
 
-            if (primaryResourceData == null && secondaryResourceData == null && (definitionType ==  typeof(BitmapTextureInteropResource) || definitionType == typeof(BitmapTextureInterleavedInteropResource)))
+            if (primaryResourceData.IsEmpty && secondaryResourceData.IsEmpty && (definitionType ==  typeof(BitmapTextureInteropResource) || definitionType == typeof(BitmapTextureInterleavedInteropResource)))
                 return null;
 
-            if (primaryResourceData == null)
+            if (primaryResourceData.IsEmpty)
                 primaryResourceData = new byte[0];
 
-            if (secondaryResourceData == null)
+            if (secondaryResourceData.IsEmpty)
                 secondaryResourceData = new byte[0];
 
+
             using (var definitionDataStream = new MemoryStream(resourceDefinitionData))
-            using (var dataStream = new MemoryStream(primaryResourceData))
-            using (var secondaryDataStream = new MemoryStream(secondaryResourceData))
+            using (var dataStream = new FixedMemoryStream(primaryResourceData))
+            using (var secondaryDataStream = new FixedMemoryStream(secondaryResourceData))
             using (var definitionDataReader = new EndianReader(definitionDataStream, Cache.Endianness))
             using (var dataReader = new EndianReader(dataStream, Cache.Endianness))
             using (var secondaryDataReader = new EndianReader(secondaryDataStream, Cache.Endianness))
@@ -283,7 +283,7 @@ namespace TagTool.Cache.Gen3
             }
         }
 
-        private byte[] ReadSegmentData(ResourceData resource, int pageIndex, int offset, int sizeIndex)
+        private Memory<byte> ReadSegmentData(ResourceData resource, int pageIndex, int offset, int sizeIndex)
         {
             var page = ResourceLayoutTable.Pages[pageIndex];
 
@@ -293,10 +293,6 @@ namespace TagTool.Cache.Gen3
                 decompressed = ReadPageData(resource, page);
                 ResourcePageCache.AddPage(pageIndex, decompressed);
             }
-            else
-            {
-                //Console.WriteLine("Cache hit");
-            }
 
             int length;
             if (sizeIndex != -1)
@@ -304,9 +300,7 @@ namespace TagTool.Cache.Gen3
             else
                 length = decompressed.Length - offset;
 
-            var data = new byte[length];
-            Array.Copy(decompressed, offset, data, 0, length);
-            return data;
+            return decompressed.AsMemory(offset, length);
         }
 
         private ResourceSubpageTable GetPrimarySubpageTable(DatumHandle ID)
@@ -339,7 +333,7 @@ namespace TagTool.Cache.Gen3
                 return ResourceLayoutTable.SubpageTables[segment.OptionalSizeIndex];
         }
 
-        private byte[] GetPrimaryResource(DatumHandle ID)
+        private Memory<byte> GetPrimaryResource(DatumHandle ID)
         {
             var resource = ResourceGestalt.TagResources[ID.Index];
 
@@ -357,7 +351,7 @@ namespace TagTool.Cache.Gen3
             return ReadSegmentData(resource, segment.RequiredPageIndex, segment.RequiredSegmentOffset, segment.RequiredSizeIndex);
         }
 
-        private byte[] GetSecondaryResource(DatumHandle ID)
+        private Memory<byte> GetSecondaryResource(DatumHandle ID)
         {
             var resource = ResourceGestalt.TagResources[ID.Index];
 
@@ -438,4 +432,6 @@ namespace TagTool.Cache.Gen3
             return decompressed;
         }
     }
+
+    
 }

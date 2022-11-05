@@ -440,6 +440,7 @@
     <Compile Include="Havok\HavokMoppGenerator.cs" />
     <Compile Include="Havok\HavokMoppUtil.cs" />
     <Compile Include="Havok\PerMeshMoppGenerator.cs" />
+    <Compile Include="IO\FixedMemoryStream.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RealVector4d.cs" />
@@ -1737,6 +1738,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting">
       <Version>4.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
+      <Version>5.0.0</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
