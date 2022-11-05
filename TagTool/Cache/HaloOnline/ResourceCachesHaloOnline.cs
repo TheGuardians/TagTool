@@ -34,9 +34,9 @@ namespace TagTool.Cache.HaloOnline
             Directory = Cache.Directory;
         }
 
-        public override Stream OpenCacheRead(ResourceLocation location) => LoadResourceCache(location).File.OpenRead();
+        public override Stream OpenCacheRead(ResourceLocation location) => LoadResourceCache(location).File.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
-        public override Stream OpenCacheReadWrite(ResourceLocation location) => LoadResourceCache(location).File.Open(FileMode.Open, FileAccess.ReadWrite);
+        public override Stream OpenCacheReadWrite(ResourceLocation location) => LoadResourceCache(location).File.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
         public override Stream OpenCacheWrite(ResourceLocation location) => LoadResourceCache(location).File.OpenWrite();
 
