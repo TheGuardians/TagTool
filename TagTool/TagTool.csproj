@@ -1427,7 +1427,7 @@
     <Compile Include="Audio\CustomPlayback.cs" />
     <Compile Include="Audio\LanguagePermutation.cs" />
     <Compile Include="Audio\RuntimePermutation.cs" />
-    <Compile Include="Audio\UnknownBlock.cs" />
+    <Compile Include="Audio\PitchRangeDistance.cs" />
     <Compile Include="Audio\Language.cs" />
     <Compile Include="Audio\PitchRange.cs" />
     <Compile Include="Audio\Permutation.cs" />

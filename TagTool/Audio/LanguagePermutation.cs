@@ -3,7 +3,8 @@ using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x94, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x94, Version = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x94, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     public class LanguagePermutation : TagStructure
 	{
         public int ParentPermutationIndex;

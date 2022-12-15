@@ -5,6 +5,7 @@ using TagTool.Tags;
 namespace TagTool.Cache.MCC
 {
     [TagStructure(Size = 0x4000, MaxVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0x4000, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
     public class CacheFileHeaderMCC : CacheFileHeader
     {
@@ -58,15 +59,16 @@ namespace TagTool.Cache.MCC
         public byte[] RSASignature;
         public CacheFileSectionTable SectionTable;
         [TagField(Length = 0x3B00, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 0x3B00, MaxVersion = CacheVersion.Halo3ODST)]
         [TagField(Length = 0x9B00, MinVersion = CacheVersion.HaloReach)]
         public byte[] Unknown1;
-        public Tag FooterSiganture;
+        public Tag FooterSignature;
 
         public override string GetBuild() => Build;
 
         public override CacheFileType GetCacheType() => CacheType;
 
-        public override Tag GetFootTag() => FooterSiganture;
+        public override Tag GetFootTag() => FooterSignature;
 
         public override Tag GetHeadTag() => HeaderSignature;
 

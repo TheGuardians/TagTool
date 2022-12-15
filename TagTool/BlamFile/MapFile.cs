@@ -188,6 +188,9 @@ namespace TagTool.BlamFile
                     case CacheFileHeaderMCC.HaloEngineVersion.Halo3:
                         cacheVersion = CacheVersion.Halo3Retail;
                         break;
+                    case CacheFileHeaderMCC.HaloEngineVersion.Halo3ODST:
+                        cacheVersion = CacheVersion.Halo3ODST;
+                        break;
                     case CacheFileHeaderMCC.HaloEngineVersion.HaloReach:
                         cacheVersion = CacheVersion.HaloReach;
                         break;

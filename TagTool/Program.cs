@@ -92,13 +92,16 @@ namespace TagTool.Commands
                 //sometimes drag&drop files have quotes placed around them, remove the quotes
                 tagCacheFile = tagCacheFile.Replace("\"", "").Replace("\'", "");
 
+                if (string.IsNullOrWhiteSpace(tagCacheFile))
+                    continue;
+
                 if (!tagCacheFile.Contains(".map") && !tagCacheFile.EndsWith(".dat"))
                     tagCacheFile += "\\tags.dat";
 
                 if (File.Exists(tagCacheFile))
-					fileInfo = new FileInfo(tagCacheFile);
-				else
-					new TagToolError(CommandError.CustomError,"Invalid path to a tag cache!");
+                    fileInfo = new FileInfo(tagCacheFile);
+                else
+                    new TagToolError(CommandError.CustomError, "Invalid path to a tag cache!");
             }
 
             GameCache gameCache = null;

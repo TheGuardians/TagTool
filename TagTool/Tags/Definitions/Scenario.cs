@@ -9,8 +9,10 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "scenario", Tag = "scnr", Size = 0x7B8, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "scenario", Tag = "scnr", Size = 0x834, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "scenario", Tag = "scnr", Size = 0x7B8, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "scenario", Tag = "scnr", Size = 0x778, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "scenario", Tag = "scnr", Size = 0x834, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "scenario", Tag = "scnr", Size = 0x800, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "scenario", Tag = "scnr", Size = 0x824, MaxVersion = CacheVersion.HaloOnline449175)]
     [TagStructure(Name = "scenario", Tag = "scnr", Size = 0x834, MinVersion = CacheVersion.HaloOnline498295)]
     public class Scenario : TagStructure
@@ -33,6 +35,9 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public ScenarioRuntimeTriggerVolumeFlags RuntimeTriggerVolumeFlags;
+
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public int MCCUnknown;
 
         public int CampaignId;
         public int MapId;
@@ -91,7 +96,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<CampaignPlayer> CampaignPlayers;
 
+        [TagField(Platform = CachePlatform.Original)]
         public List<GNullBlock> PredictedResources;
+        [TagField(Platform = CachePlatform.Original)]
         public List<ScenarioFunctionBlock> Functions;
 
         public byte[] EditorScenarioData;
@@ -292,7 +299,7 @@ namespace TagTool.Tags.Definitions
         //public List<GNullBlock> Unused2;
         //[TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         //public List<GNullBlock> Unused3;
-        [TagField(Flags = Padding, Length = 36, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(Flags = Padding, Length = 36, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         public byte[] Padding3UnusedBlocks;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -322,7 +329,7 @@ namespace TagTool.Tags.Definitions
         public List<EditorFolder> EditorFolders;
         public CachedTag TerritoryLocationNameStrings;
 
-        [TagField(Length = 0x8, Flags = Padding)]
+        [TagField(Length = 0x8, Flags = Padding, Platform = CachePlatform.Original)]
         public byte[] Padding2;
 
         public List<TagReferenceBlock> MissionDialogue;
@@ -381,8 +388,8 @@ namespace TagTool.Tags.Definitions
         [TagField(Flags = Padding, Length = 12)]
         public byte[] Unused;
 
-        [TagField(Platform = CachePlatform.MCC)]
-        public List<NullBlock> ScavengerHuntObjects;
+        [TagField(Version = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public List<NullBlock> ScavengerHuntObjectsH3;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public CachedTag MissionVisionModeEffect;
@@ -395,6 +402,13 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public List<TagReferenceBlock> Unknown155;
+
+        [TagField(Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+        public List<NullBlock> StructuredBufferInterops;
+
+        [TagField(Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+        public List<NullBlock> ScavengerHuntObjectsODST;
+
 
         [Flags]
         public enum BspFlags : int
@@ -1908,7 +1922,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x58, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x58, Version = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x68, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x58, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
@@ -2419,10 +2433,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x68, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x68, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x6C, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloReach11883)]
         public class Squad : TagStructure
 		{
+            [TagField(Platform = CachePlatform.MCC, Version = CacheVersion.Halo3ODST)]
+            public WavePlacementFilterEnum WavePlacementFilter;
+
             /// <summary>
             /// The name of the squad.
             /// </summary>
@@ -2476,7 +2494,7 @@ namespace TagTool.Tags.Definitions
 
             // Filter which squads in Firefight waves can be spawned into this squad
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public WavePlacementFilterEnum WavePlacementFilter;
+            public WavePlacementFilterEnum WavePlacementFilterReach;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
             public StringId ModuleId;
