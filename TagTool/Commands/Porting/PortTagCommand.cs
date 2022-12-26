@@ -500,6 +500,16 @@ namespace TagTool.Commands.Porting
                             part.Type = null;
                     }
             }
+
+            if (definition is Equipment eqip)
+            {
+                eqip.UseDuration = 5;
+                eqip.NumberOfUses = 1;
+                Enum.TryParse(eqip.EquipmentFlagsReach.ToString(), out eqip.EquipmentFlags);
+
+                if (eqip.EquipmentFlagsReach.HasFlag(Equipment.EquipmentFlagBitsReach.ThirdPersonCameraWhileActive))
+                    eqip.EquipmentFlags |= Equipment.EquipmentFlagBits.ThirdPersonCameraAlways;
+            }
         }
 
         public void CullNewObjects<T>(List<Scenario.ScenarioPaletteEntry> palette, List<T> instanceList, Dictionary<string,string> replacements)

@@ -67,7 +67,10 @@ namespace TagTool.Cache.Resources
 
         public int CampaignId;
         public int MapId;
+
+        [TagField(Platform = CachePlatform.MCC)]
         public int Unknown0;
+        [TagField(Platform = CachePlatform.MCC)]
         public int Unknown1;
 
         public enum ScenarioTypeEnum : short

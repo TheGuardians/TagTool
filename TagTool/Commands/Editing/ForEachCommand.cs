@@ -211,7 +211,7 @@ namespace TagTool.Commands.Editing
 
         private string GetLabel(IList elements, int index)
         {
-            if (index < 0 || index >= elements.Count)
+            if (index < 0 || index >= elements.Count || elements.GetType().GetGenericArguments().Count() == 0)
                 return null;
 
             foreach (var info in TagStructure.GetTagFieldEnumerable(elements.GetType().GetGenericArguments()[0], Cache.Version, Cache.Platform))
