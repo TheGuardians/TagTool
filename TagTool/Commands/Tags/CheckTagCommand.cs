@@ -195,7 +195,7 @@ namespace TagTool.Commands.Tags
             {
                 Cache.StringTable.GetString(stringId);
             }
-            catch (Exception ex)
+            catch
             {
                 AddProblem($"Invalid StringId: {CurrentFieldPath} {stringId}");
             }

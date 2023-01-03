@@ -19,10 +19,11 @@ namespace TagTool.Geometry
         private readonly GameCache CacheContext;
         private readonly StringWriter _faceWriter = new StringWriter();
         private uint _baseIndex = 1;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjExtractor"/> class.
         /// </summary>
+        /// <param name="cache">The cache to target</param>
         /// <param name="writer">The stream to write the output file to.</param>
         public ObjExtractor(GameCache cache, TextWriter writer)
         {

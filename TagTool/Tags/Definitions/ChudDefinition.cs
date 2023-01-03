@@ -13,22 +13,13 @@ namespace TagTool.Tags.Definitions
     {
         public List<HudWidget> HudWidgets;
         public ChudAmmunitionInfo HudAmmunitionInfo;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<NullBlock> CompiledWidgetData;
 
-        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
-        public class ChudAmmunitionInfo : TagStructure
-        {
-            public int LowAmmoLoadedThreshold;
-            public int LowAmmoReserveThreshold;
-            public int LowBatteryThreshold;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int FtMemberWeaponSequence;
-        }
-
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x7C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class HudWidgetBase : TagStructure
         {
             [TagField(Flags = Label)]
@@ -42,13 +33,18 @@ namespace TagTool.Tags.Definitions
             public WidgetLayerEnum SortLayer;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public sbyte SpecialHudType;
-            [TagField(Length = 3, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
-            public byte[] Padding1;
+            public ChudScriptingClassReach ScriptingClassReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short ImportInput;
+            public sbyte PostprocessedIntermediateListIndex;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short ImportRangeInput;
+            public WidgetFlagsReach BaseFlagsReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public WidgetLayerEnum SortLayerReach;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ChudExternalInputReach ImportInput;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ChudExternalInputReach ImportRangeInput;
 
             // TODO: consolidate
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -324,8 +320,8 @@ namespace TagTool.Tags.Definitions
                     VariantCustomA = 1 << 8,
                     VariantCustomB = 1 << 9,
                     VariantCustomC = 1 << 10,
-                    AttackerBombDropped = 1 << 11,
-                    AttackerBombPickedUp = 1 << 12,
+                    AttackerObjectiveDropped = 1 << 11, // ???
+                    AttackerBombPickedUp = 1 << 12, // not really
                     DefenderTeamIsDead = 1 << 13,
                     AttackerTeamIsDead = 1 << 14,
                     RoundStartPeriod = 1 << 15,
@@ -1614,7 +1610,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public CachedTag DatasourceTemplate;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<NullBlock> Datasource;
+            public DataSourceStruct DataSource;
 
             public List<BitmapWidget> BitmapWidgets;
             public List<TextWidget> TextWidgets;
@@ -1659,7 +1655,7 @@ namespace TagTool.Tags.Definitions
                     ExtendBorder = 1 << 2, // stretch edges
                     UseTextureCam = 1 << 3,
                     UseWrapSampling = 1 << 4, // looping
-                    AutoPermute = 1 << 5,
+                    SpriteFromPlayerCharacterType = 1 << 5,
                     Player1Emblem = 1 << 6,
                     Player2Emblem = 1 << 7,
                     Player3Emblem = 1 << 8,
@@ -1678,9 +1674,9 @@ namespace TagTool.Tags.Definitions
                     UseTextureCam = 1 << 3,
                     UseWrapSampling = 1 << 4, // looping
                     SpriteFromPlayerCharacterType = 1 << 5,
-                    SpriteFromSurivalRounds = 1 << 6,
-                    SpriteFromUnknon1 = 1 << 7,
-                    SpriteFromUnknon2 = 1 << 8,
+                    SpriteFromSurvivalRounds = 1 << 6,
+                    AutoPermuteExternalInput0 = 1 << 7,
+                    AutoPermuteExternalInput1 = 1 << 8,
                     Player1Emblem = 1 << 9,
                     Player2Emblem = 1 << 10,
                     Player3Emblem = 1 << 11,
@@ -1699,9 +1695,9 @@ namespace TagTool.Tags.Definitions
                     UseTextureCam = 1 << 3,
                     UseWrapSampling = 1 << 4, // looping
                     SpriteFromPlayerCharacterType = 1 << 5,
-                    SpriteFromSurivalRounds = 1 << 6,
-                    SpriteFromUnknon1 = 1 << 7,
-                    SpriteFromUnknon2 = 1 << 8,
+                    SpriteFromSurvivalRounds = 1 << 6,
+                    AutoPermuteExternalInput0 = 1 << 7,
+                    AutoPermuteExternalInput1 = 1 << 8,
                     Player1Emblem = 1 << 9,
                     Player2Emblem = 1 << 10,
                     Player3Emblem = 1 << 11,
@@ -1722,9 +1718,9 @@ namespace TagTool.Tags.Definitions
                     UseTextureCam = 1 << 3,
                     UseWrapSampling = 1 << 4, // looping
                     SpriteFromPlayerCharacterType = 1 << 5,
-                    SpriteFromSurivalRounds = 1 << 6,
-                    SpriteFromUnknon1 = 1 << 7,
-                    SpriteFromUnknon2 = 1 << 8,
+                    SpriteFromSurvivalRounds = 1 << 6,
+                    AutoPermuteExternalInput0 = 1 << 7,
+                    AutoPermuteExternalInput1 = 1 << 8,
                     Player1Emblem = 1 << 9,
                     Player2Emblem = 1 << 10,
                     Player3Emblem = 1 << 11,
@@ -1877,10 +1873,20 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
+        public class ChudAmmunitionInfo : TagStructure
+        {
+            public int LowAmmoLoadedThreshold;
+            public int LowAmmoReserveThreshold;
+            public int LowBatteryThreshold;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int FtMemberWeaponSequence;
+        }
+
         [TagStructure(Size = 0x0)]
         public class NullBlock : TagStructure
         {
-
         }
 
         public enum ChudScriptingClass : short
@@ -1900,6 +1906,19 @@ namespace TagTool.Tags.Definitions
             Consumable
         }
 
+        public enum ChudScriptingClassReach : byte
+        {
+            UndefinedUseParent,
+            WeaponStats,
+            Crosshair,
+            Shield,
+            Grenades,
+            Messages,
+            MotionSensor,
+            ChapterTitle,
+            Cinematics
+        }
+
         [Flags]
         public enum WidgetFlags : byte
         {
@@ -1909,6 +1928,17 @@ namespace TagTool.Tags.Definitions
             ResetTimerOnInputChange = 1 << 2,
             WeaponSwapHack = 1 << 3,
             EquipmentHack = 1 << 4
+        }
+
+        [Flags]
+        public enum WidgetFlagsReach : byte
+        {
+            DieOnActive = 1 << 0,
+            SkipInputUpdateWhenUnreadying = 1 << 1,
+            ResetTimerOnInputChange = 1 << 2,
+            InheritSortLayer = 1 << 3,
+            SpecialSavedFilmLayer = 1 << 4,
+            NoCurvatureAndOnTop = 1 << 5
         }
 
         public enum WidgetLayerEnum : byte
@@ -1922,5 +1952,242 @@ namespace TagTool.Tags.Definitions
             Inherited,
             SavedFilm
         }
+
+        public enum ChudExternalInputReach : short
+        {
+            Zero,
+            One,
+            DatasourceDataIndex,
+            DatasourceRenderSlot,
+            ImpulseValue,
+            DebugSlide1,
+            DebugSlide100,
+            HsObjectFunction1,
+            HsObjectFunction2,
+            HsObjectFunction3,
+            HsObjectFunction4,
+            ScriptedHsVariable1,
+            ScriptedHsVariable2,
+            ScriptedHsVariable3,
+            ScriptedHsVariable4,
+            ScriptedHsVariable5,
+            ScriptedHsVariable6,
+            ScriptedHsVariable7,
+            ScriptedHsVariable8,
+            ScriptedHsVariable9,
+            ScriptedHsVariable10,
+            VehicleHealth,
+            VehicleHealthPercentage,
+            UnshieldedVitality,
+            UnshieldedRecentDamage,
+            ShieldAmount,
+            ShieldAmount2,
+            ShieldAmount3,
+            ShieldAmount4,
+            ShieldRecentDamage,
+            ShieldRecentDamage2,
+            ShieldRecentDamage3,
+            ShieldRecentDamage4,
+            ShieldPercentage,
+            VehicleShieldPercentage,
+            VehicleBoostMeter,
+            VehicleBoostRecharge,
+            CameraYaw,
+            CameraPitch,
+            CameraRoll,
+            MotionSensorRange,
+            AltitudeF,
+            AltitudeFraction,
+            GameHeat,
+            OutOfBoundsTimer,
+            TransientCookies,
+            TotalCookies,
+            WeaponAmmoLoaded,
+            WeaponAmmoReserve,
+            WeaponAmmoPickup,
+            WeaponHeat,
+            WeaponHeatPercentage,
+            WeaponBattery,
+            WeaponPickup,
+            WeaponAutoaimScale,
+            WeaponBarrelErrorScale,
+            WeaponBarrelPinnedErrorScale,
+            WeaponAutoaimTarget,
+            WeaponAutoaimTargetDistance,
+            AirstrikeDistanceToTarget,
+            AirstrikeWarmupTime,
+            AirstrikeLaunchesLeft,
+            AirstrikeLaunchState,
+            GrenadeSelected,
+            GrenadeCount,
+            GrenadePickup,
+            WeaponCharge,
+            WeaponReloadPercentage,
+            BarrelRecoveryPercentage,
+            WeaponTetherPercentage,
+            LockingAmount,
+            FlavaTgtDistance,
+            FlavaTgtElevation,
+            EquipmentEnergy,
+            EquipmentEnergyMinimumActivationEnergy,
+            PlayerDistance,
+            MedalSequenceIndex,
+            ProgressionToastCurrentProgress,
+            ProgressionToastGoal,
+            ProgressionToastSequenceIndex,
+            CommendationCalloutSequenceIndex,
+            ScriptedObjectHealth,
+            ScriptedObjectRecentBodyDamage,
+            ScriptedObjectRecentShieldDamage,
+            ScriptedObjectDistance, // meters
+            ScriptedObjectElevation, // meters
+            ScriptedObjectCombatStatus,
+            ScriptedObjectPriorityOnscreenSequenceIndex,
+            ScriptedObjectPriorityOffscreenSequenceIndex,
+            LicensePlateIconIndex,
+            LicensePlateDesignatorIconIndex,
+            MetagameTime,
+            MetagameTransientScore,
+            MetagameP1Score,
+            MetagameP2Score,
+            MetagameP3Score,
+            MetagameP4Score,
+            MetagamePlayerScore,
+            MetagameTimeMultiplier,
+            MetagameSkullDiffMult,
+            MetagameTotalMultiplier,
+            MetagameNegTransScore,
+            SurvivalModeSet,
+            SurvivalModeRound,
+            SurvivalModeWave,
+            SurvivalModeLives,
+            SurvivalModeEnemyLives,
+            SurvivalModeBonusRoundTimer,
+            SurvivalModeBonusRoundPoints,
+            EnemyPlayerKills,
+            SBFriendlyScore,
+            SBEnemyScore,
+            SBMaxScore,
+            ArmingMeterFrac,
+            MegaloEngineIconIndex,
+            MegaloOmniWidgetMeterValue,
+            MegaloOmniWidgetAugmentationIconSequenceIndex,
+            MegaloProgressBarMeterValue,
+            CampaignFtShield,
+            CampaignFtPossibleActionObjDist, // meters
+            CampaignFtPendingTargetObjDist, // meters
+            CampaignFtCurrentTargetObjDist, // meters
+            MpObjFt1Shield,
+            MpObjFt2Shield,
+            MpObjFt3Shield,
+            MpObjFt1Meter,
+            MpObjFt2Meter,
+            MpObjFt3Meter,
+            MpObjFt1Yaw,
+            MpObjFt2Yaw,
+            MpObjFt3Yaw,
+            MpObjFt1DamageYaw,
+            MpObjFt2DamageYaw,
+            MpObjFt3DamageYaw,
+            FtMemberShield,
+            FtMemberMeter,
+            FtMemberYaw,
+            FtMemberDamageYaw,
+            BudgetFraction,
+            BudgetLeft,
+            SFTotalTime,
+            SFMarkerTime,
+            SFChapWidth,
+            SFBufferedTheta,
+            SFCurrPosTheta,
+            SFRecordStartTheta,
+            SFPieFraction,
+            NetworkLatency,
+            NetworkLatencyQuality,
+            NetworkHostQuality,
+            NetworkLocalQuality
+        }
+
+        [TagStructure(Size = 0x1C)]
+        public class DataSourceStruct : TagStructure
+        {
+            [TagField(ValidTags = new[] { "wdst" })]
+            public CachedTag DatasourceTemplate;
+            public List<ChudWidgetDatasourceBaseBlock> Datasource;
+
+            [TagStructure(Size = 0x20)]
+            public class ChudWidgetDatasourceBaseBlock : TagStructure
+            {
+                public ChudDatasourceFlags Flags;
+                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                public byte[] SVHELRNN;
+                public ChudDatasourceTypeEnum Type;
+                public short RenderMaximum;
+                public List<ChudDatasourceResolutionBlock> Resolutions;
+                public List<ChudDatasourcePositionBlock> Positions; // As offsets from the previous one
+
+                [Flags]
+                public enum ChudDatasourceFlags : byte
+                {
+                    Extend = 1 << 0, // Use the final datasource position offset over and over
+                    Center = 1 << 1, // Center the elements around the first position using the second position as the offset between them
+                    EvenlySpace = 1 << 2, // Evenly space elements between the first two positions
+                    Reverse = 1 << 3 // Iterate over the datasource in reverse order
+                }
+
+                public enum ChudDatasourceTypeEnum : short
+                {
+                    Grenades,
+                    Players,
+                    MetagamePlayers,
+                    FireteamMembers,
+                    CampaignFireteamMembers,
+                    Medals,
+                    ProgressionToasts,
+                    ScriptedObjects,
+                    Skulls,
+                    TrackingObjects, // projectiles tracking the current player
+                    OmniWidgetsTopLeft,
+                    OmniWidgetsTopCenter,
+                    OmniWidgetsTopRight,
+                    OmniWidgetsHighLeft,
+                    OmniWidgetsHighCenter,
+                    OmniWidgetsHighRight,
+                    OmniWidgetsLowLeft,
+                    OmniWidgetsLowCenter,
+                    OmniWidgetsLowRight,
+                    OmniWidgetsBottomLeft,
+                    OmniWidgetsBottomCenter,
+                    OmniWidgetsBottomRight
+                }
+
+                [TagStructure(Size = 0x4)]
+                public class ChudDatasourceResolutionBlock : TagStructure
+                {
+                    public ChudCurvatureResFlags ResFlags;
+                    [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                    public byte[] ASFYUIHHIER;
+                    public short RenderMaximum;
+
+                    [Flags]
+                    public enum ChudCurvatureResFlags : byte
+                    {
+                        FullscreenWide = 1 << 0,
+                        FullscreenStandard = 1 << 1,
+                        Halfscreen = 1 << 2,
+                        QuarterscreenWide = 1 << 3,
+                        QuarterscreenStandard = 1 << 4
+                    }
+                }
+
+                [TagStructure(Size = 0x10)]
+                public class ChudDatasourcePositionBlock : TagStructure
+                {
+                    public RealPoint2d OriginOffset;
+                    public RealPoint2d WidgetScale;
+                }
+            }
+        }
+
     }
 }

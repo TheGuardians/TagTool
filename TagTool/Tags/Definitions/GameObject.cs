@@ -88,10 +88,11 @@ namespace TagTool.Tags.Definitions
 
         public List<Attachment> Attachments;
 
-        [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 0xC)]
-        public byte[] WaterPhysicsHullSurfaceBlock = new byte[0xC];
-        [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 0xC)]
-        public byte[] JetwashBlock = new byte[0xC];
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<WaterPhysicsHullSurface> HullSurfaces;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<JetwashBlock> Jetwash;
 
         public List<TagReferenceBlock> Widgets;
 
@@ -911,5 +912,58 @@ namespace TagTool.Tags.Definitions
     {
         None = 0,
         DoesNotAffectProjectileAiming = 1 << 0
+    }
+
+    [TagStructure(Size = 0x18)]
+    public class WaterPhysicsHullSurface : TagStructure
+    {
+        public WaterPhysicsHullSurfaceDefinitionFlags Flags;
+        [TagField(Length = 0x2, Flags = Padding)]
+        public byte[] pad0;
+        public StringId MarkerName;
+        public float Radius;
+        public List<WaterPhysicsMaterialOverride> Drag;
+
+        [Flags]
+        public enum WaterPhysicsHullSurfaceDefinitionFlags : ushort
+        {
+            WorksOnLand = 1 << 0, // drives on an extruded version of everything physical in your level
+            EffectsOnly = 1 << 1
+        }
+
+        [TagStructure(Size = 0x3C)]
+        public class WaterPhysicsMaterialOverride : TagStructure
+        {
+            public StringId Material;
+            public WaterPhysicsDragPropertiesStruct Drag;
+
+            [TagStructure(Size = 0x38)]
+            public class WaterPhysicsDragPropertiesStruct : TagStructure
+            {
+                public PhysicsForceFunctionStruct Pressure;
+                public PhysicsForceFunctionStruct Suction;
+                public float LinearDamping;
+                public float AngularDamping;
+
+                [TagStructure(Size = 0x18)]
+                public class PhysicsForceFunctionStruct : TagStructure
+                {
+                    public TagFunction VelocityToPressure;
+                    public float MaxVelocity; // wu/s
+                }
+            }
+        }
+    }
+
+    [TagStructure(Size = 0x24)]
+    public class JetwashBlock : TagStructure
+    {
+        public StringId MarkerName;
+        public float Radius;
+        public int MaximumTraces; // traces per second
+        public float MaximumEmissionLength; // world units
+        public Bounds<Angle> TraceYawAngle; // degrees
+        public Bounds<Angle> TracePitchAngle; // degrees
+        public float ParticleOffset; // world units
     }
 }

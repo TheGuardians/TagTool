@@ -487,6 +487,9 @@ namespace TagTool.Audio
             else if (value.Equals("WeaponReadyThirdPerson"))
                 value = "WeaponReady";
 
+            else if (value.Equals("EquipmentEffect"))
+                value = "ObjectLooping";
+
             // Fix the surround sound class
 
             else if (value.Equals("FirstPersonInside"))

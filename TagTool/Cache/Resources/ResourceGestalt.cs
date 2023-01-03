@@ -6,7 +6,8 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache.Resources
 {
-    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x220, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x228, MaxVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x220, Version = CacheVersion.HaloReach11883, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x214, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.Original)]
     public class ResourceGestalt : TagStructure
 	{
@@ -66,6 +67,11 @@ namespace TagTool.Cache.Resources
 
         public int CampaignId;
         public int MapId;
+
+        [TagField(Platform = CachePlatform.MCC)]
+        public int Unknown0;
+        [TagField(Platform = CachePlatform.MCC)]
+        public int Unknown1;
 
         public enum ScenarioTypeEnum : short
         {

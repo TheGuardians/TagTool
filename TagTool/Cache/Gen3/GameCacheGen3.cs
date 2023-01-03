@@ -47,6 +47,9 @@ namespace TagTool.Cache
         {
             var headerGen3 = (CacheFileHeaderGen3)BaseMapFile.Header;
 
+            if (Version == CacheVersion.Halo3Beta)
+                return (uint)(address - (headerGen3.VirtualBaseAddress.Get32BitValue() - headerGen3.GetTagMemoryHeader().MemoryBufferOffset));
+
             ulong tagDataSectionOffset = headerGen3.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection);
 
             if(Platform == CachePlatform.MCC)
@@ -116,7 +119,19 @@ namespace TagTool.Cache
 
             if(Platform == CachePlatform.MCC)
             {
-                FMODSoundCacheDirectory = new DirectoryInfo(Path.Combine(CacheFile.Directory.FullName, @"..\fmod\pc"));
+                if (CacheFile.Directory.FullName.Contains("steamapps\\workshop\\content"))
+                {
+                    string root = CacheFile.Directory.FullName.Split(new string[] { "workshop" }, StringSplitOptions.None)[0];
+                    string game = "halo3";
+
+                    if (Version != CacheVersion.Halo3Retail)
+                        game = Version.ToString();
+
+                    FMODSoundCacheDirectory = new DirectoryInfo(Path.Combine(root, "common\\Halo The Master Chief Collection", game, "fmod\\pc"));
+                }
+                else
+                    FMODSoundCacheDirectory = new DirectoryInfo(Path.Combine(CacheFile.Directory.FullName, @"..\fmod\pc"));
+
                 if(FMODSoundCacheDirectory.Exists)
                     FMODSoundCache = new FMODSoundCache(FMODSoundCacheDirectory);
             }

@@ -45,14 +45,12 @@ namespace TagTool.Bitmaps.DDS
 
         public DDSHeader(Bitmap.Image image)
         {
-            var mipMapCount = image.MipmapCount != 0 ? (1 + image.MipmapCount) : 0;
-            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type);
+            CreateHeaderFromType(image.Height, image.Width, image.Depth, image.MipmapCount, image.Format, image.Type);
         }
 
         public DDSHeader(BaseBitmap image)
         {
-            var mipMapCount = image.MipMapCount != 0 ? (1 + image.MipMapCount) : 0;
-            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type);
+            CreateHeaderFromType(image.Height, image.Width, image.Depth, image.MipMapCount, image.Format, image.Type);
         }
 
         public DDSHeader(uint width, uint height, uint depth, uint mipmapCount, BitmapFormat format, BitmapType type)
@@ -137,11 +135,9 @@ namespace TagTool.Bitmaps.DDS
                 case BitmapType.Array:
                     CreateHeaderVolume(mipMapCount, depth, format);
                     break;
-
                 case BitmapType.CubeMap:
                     CreateHeaderCubemap(mipMapCount, format);
                     break;
-
             }
 
             return;
@@ -150,16 +146,6 @@ namespace TagTool.Bitmaps.DDS
         private void CreateHeaderTexture2D(int mipMapCount, BitmapFormat format)
         {
             Depth = 0;
-
-            if (mipMapCount > 0)
-            {
-                MipMapCount = 1 + mipMapCount;
-                Flags |= DDSFlags.MipMapCount;
-                Caps |= DDSComplexityFlags.MipMap | DDSComplexityFlags.Complex;
-            }
-            else
-                MipMapCount = 0;
-
             SetTextureFormat(mipMapCount, format);
         }
 
@@ -176,34 +162,38 @@ namespace TagTool.Bitmaps.DDS
         {
             Caps |= DDSComplexityFlags.Complex;
             Caps2 |= DDSSurfaceInfoFlags.CubeMapAllFaces;
-
             SetTextureFormat(mipMapCount, format);
         }
 
         private void SetTextureFormat(int mipMapCount, BitmapFormat format)
         {
-            if (mipMapCount > 0)
+            if (mipMapCount > 1)
             {
                 MipMapCount = mipMapCount;
                 Flags |= DDSFlags.MipMapCount;
+                Caps |= DDSComplexityFlags.MipMap;
             }
             else
+            {
                 MipMapCount = 0;
+                Flags &= ~DDSFlags.MipMapCount;
+                Caps &= ~DDSComplexityFlags.MipMap;
+            }
 
             if (BitmapUtils.IsCompressedFormat(format))
             {
-                Flags |= DDSFlags.LinearSize;
                 int blockSize = BitmapFormatUtils.GetBlockSize(format);
                 int blockDimension = BitmapFormatUtils.GetBlockDimension(format);
                 var nearestWidth = blockDimension * ((Height + (blockDimension - 1)) / blockDimension);
                 var nearestHeight = blockDimension * ((Width + (blockDimension - 1)) / blockDimension); ;
                 PitchOrLinearSize = (nearestWidth * nearestHeight / 16) * blockSize;
+                Flags |= DDSFlags.LinearSize;
             }
             else
             {
-                Flags |= DDSFlags.Pitch;
                 int bitsPerPixel = BitmapFormatUtils.GetBitsPerPixel(format);
                 PitchOrLinearSize = (Width * bitsPerPixel + 7) / 8;
+                Flags |= DDSFlags.Pitch;
             }
 
             PixelFormat = new PixelFormat(format);
