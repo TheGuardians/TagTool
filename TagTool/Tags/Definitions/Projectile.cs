@@ -12,7 +12,10 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "projectile", Tag = "proj", Size = 0x1F8, MinVersion = CacheVersion.HaloReach)]
     public class Projectile : GameObject
     {
+        [TagField(MaxVersion = CacheVersion.HaloOnline235640)]
         public ProjectileFlags Flags;
+        [TagField(MinVersion = CacheVersion.HaloOnline301003)]
+        public ProjectileFlagsHO FlagsHO;
         public DetonationTimerModes DetonationTimerStarts;
         public AiSoundVolume ImpactVolumeForAi;
         public float CollisionRadius; // world units
@@ -150,6 +153,35 @@ namespace TagTool.Tags.Definitions
             NoImpactEffectsOnBounce = 1 << 18,
             RC1OverpenetrationFixes = 1 << 19,
             Bit20 = 1 << 20
+        }
+
+        [Flags]
+        public enum ProjectileFlagsHO : int
+        {
+            None,
+            OrientedAlongVelocity = 1 << 0,
+            AiMustUseBallisticAiming = 1 << 1,
+            DetonationMaxTimeIfAttached = 1 << 2,
+            HasSuperCombiningExplosion = 1 << 3,
+            DamageScalesBasedOnDistance = 1 << 4,
+            TravelsInstantaneously = 1 << 5,
+            SteeringAdjustsOrientation = 1 << 6,
+            DoNotNoiseUpSteering = 1 << 7,
+            CanTrackBehindItself = 1 << 8,
+            RobotronSteering = 1 << 9,
+            AffectedByPhantomVolumes = 1 << 10,
+            ExpensiveChubbyTest = 1 << 11,
+            NotifiesTargetUnits = 1 << 12,
+            UseGroundDetonationWhenAttached = 1 << 13,
+            AIMinorTrackingThreat = 1 << 14,
+            DangerousWhenInactive = 1 << 15,
+            AIStimulusWhenAttached = 1 << 16,
+            OverPeneDetonation = 1 << 17,
+            NoImpactEffectsOnBounce = 1 << 18,
+            RC1OverpenetrationFixes = 1 << 19,
+            UnknownBit20 = 1 << 20,
+            UnknownBit21 = 1 << 21,
+            SupportsTethering = 1 << 22
         }
 
         public enum DetonationTimerModes : short
