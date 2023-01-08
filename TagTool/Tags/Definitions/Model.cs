@@ -68,7 +68,7 @@ namespace TagTool.Tags.Definitions
 
         //Halo Reach preserves an old H3/ODST style targets block here, but we will ignore it in favor of unifying the blocks between versions
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<Target> ReachTargetsOld;
+        public List<TargetOldReach> ReachTargetsOld;
 
         public List<Target> Targets;
 
@@ -147,7 +147,8 @@ namespace TagTool.Tags.Definitions
         {
             AmbientOcclusion,
             Linear,
-            Quadratic
+            Quadratic,
+            Undefined // HO
         }
 
         public enum PRTShadowBounces : byte
@@ -226,7 +227,8 @@ namespace TagTool.Tags.Definitions
                     public enum FlagsValue : byte
                     {
                         None,
-                        CopyStatesToAllPermutations = 1 << 0
+                        CopyStatesToAllPermutations = 1 << 0,
+                        Bit1 = 1 << 1
                     }
 
                     [TagStructure(Size = 0x20, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -457,6 +459,7 @@ namespace TagTool.Tags.Definitions
 
                 public enum TypeValue : short
                 {
+                    None = -1,
                     Hinge,
                     LimitedHinge,
                     Ragdoll,
@@ -1078,6 +1081,7 @@ namespace TagTool.Tags.Definitions
 
                 public enum TypeValue : short
                 {
+                    None = -1,
                     Hinge,
                     LimitedHinge,
                     Ragdoll,
@@ -1104,10 +1108,7 @@ namespace TagTool.Tags.Definitions
             public short Variant;
             public float TargetingRelevance;
             public float AoeExclusionRadius;
-            public TargetLockOnFlags LockOnFlags;
-            public float LockOnDistance;
-            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-            public StringId TargetFilter;
+            public TargetLockOnData LockOnData;
 
             [Flags]
             public enum ByteFlags : byte
@@ -1115,45 +1116,58 @@ namespace TagTool.Tags.Definitions
                 None = 0,
                 AoeTopLevel = 1 << 0,
                 AoeTestObstruction = 1 << 1,
-                ShowsTrackingReticle = 1 << 2
+                ShowsTrackingReticle = 1 << 2,
+            }
+        }
+
+        [TagStructure(Size = 0x24)]
+        public class TargetOldReach : TagStructure
+        {
+            public StringId MarkerName; // multiple markers become multiple spheres of the same radius
+            public float Size; // sphere radius
+            public Angle ConeAngle; // the target is only visible when viewed within this angle of the marker's x axis
+            public short DamageSection; // the target is associated with this damage section
+            public short Variant; // the target will only appear with this variant
+            public float TargetingRelevance; // higher relevances turn into stronger magnetisms
+            public float AoeExclusionRadius; // ignored if zero
+            public TargetLockOnData LockOnData;
+        }
+
+        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloOnlineED)]
+        public class TargetLockOnData : TagStructure
+        {
+            [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+            public FlagsValueOld FlagsOld;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+            public FlagsValue Flags;
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0x3, MinVersion = CacheVersion.HaloOnlineED)]
+            public byte[] Padding1;
+            public float LockOnDistance;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+            public StringId TrackingType; // a weapon can track/lock on this target if this string is in the weapon's tracking block
+
+            [Flags]
+            public enum FlagsValueOld : uint
+            {
+                None = 0,
+                LockedByHumanTracking = 1 << 0,
+                LockedByPlasmaTracking = 1 << 1,
+                Headshot = 1 << 2,
+                Vulnerable = 1 << 3,
+                AlwaysLockedByPlasmaTracking = 1 << 4,
+                IgnoredOnLocalPhysics = 1 << 5,
+                UseForNetworkLeadVectorOnly = 1 << 6,
+                Bit7 = 1 << 7   //unknown
             }
 
-            [TagStructure(Size = 0x4)]
-            public class TargetLockOnFlags : TagStructure
+            [Flags]
+            public enum FlagsValue : byte
             {
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public FlagsValue Flags;
-
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                public HOFlagsValue Flags_HO;
-
-                [Flags]
-                public enum FlagsValue : int
-                {
-                    None = 0,
-                    LockedByHumanTracking = 1 << 0,
-                    LockedByPlasmaTracking = 1 << 1,
-                    Headshot = 1 << 2,
-                    Vulnerable = 1 << 3,
-                    AlwaysLockedByPlasmaTracking = 1 << 4,
-                    IgnoredOnLocalPhysics = 1 << 5,
-                    UseForNetworkLeadVectorOnly = 1 << 6,
-                    Bit7 = 1 << 7   //unknown
-                }
-
-                [Flags]
-                public enum HOFlagsValue : int
-                {
-                    None = 0,
-                    Headshot = 1 << 0,
-                    LockedByPlasmaTracking = 1 << 1,    //unconfirmed
-                    LockedByHumanTracking = 1 << 2, //unconfirmed
-                    AlwaysLockedByPlasmaTracking = 1 << 3,
-                    Vulnerable = 1 << 4,    //unconfirmed
-                    IgnoredOnLocalPhysics = 1 << 5,
-                    UseForNetworkLeadVectorOnly = 1 << 6,
-                    Bit7 = 1 << 7
-                }
+                Headshot = 1 << 0,
+                Vulnerable = 1 << 1,
+                IgnoredOnLocalPhysics = 1 << 2,
+                UseForNetworkLeadVectorOnly = 1 << 3
             }
         }
 

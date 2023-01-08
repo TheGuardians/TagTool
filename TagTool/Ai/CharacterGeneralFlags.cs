@@ -6,13 +6,14 @@ namespace TagTool.Ai
     /// Bitwise flags for <see cref="CharacterGeneralProperties"/>.
     /// </summary>
     [Flags]
-    public enum CharacterGeneralFlags : int
+    public enum CharacterGeneralFlags : uint
     {
         None = 0,
         Swarm = 1 << 0,
         Flying = 1 << 1,
         DualWields = 1 << 2,
         UsesGravemind = 1 << 3,
+        GravemindChorus = 1 << 4,
         DoNotTradeWeapon = 1 << 5,
         DoNotStowWeapon = 1 << 6,
         HeroCharacter = 1 << 7,

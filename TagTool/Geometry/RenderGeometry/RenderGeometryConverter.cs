@@ -154,7 +154,7 @@ namespace TagTool.Geometry
             //
 
             foreach(var clusterVisibility in geometry.MeshClusterVisibility)
-                clusterVisibility.MoppData = HavokConverter.ConvertHkpMoppData(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, clusterVisibility.MoppData);
+                clusterVisibility.MoppCode = HavokConverter.ConvertHkpMoppData(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, clusterVisibility.MoppCode);
 
             //
             // Port resource definition
@@ -521,7 +521,7 @@ namespace TagTool.Geometry
             //
 
             foreach (var clusterVisibility in geometry.MeshClusterVisibility)
-                clusterVisibility.MoppData = HavokConverter.ConvertHkpMoppData(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, clusterVisibility.MoppData);
+                clusterVisibility.MoppCode = HavokConverter.ConvertHkpMoppData(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, clusterVisibility.MoppCode);
 
             //
             // Port resource definition

@@ -91,18 +91,11 @@ namespace TagTool.Commands.Porting
                             instancedGeometry.RenderBsp[j] = ConvertCollisionBsp(instancedGeometry.RenderBsp[j]);
                     }
 
-                    if (instancedGeometry.CollisionInfo.Surfaces.Count > 0 &&
-                    (instancedGeometry.Polyhedra != null && instancedGeometry.Polyhedra.Count > 0) || 
-                    (instancedGeometry.CollisionMoppCodes != null && instancedGeometry.CollisionMoppCodes.Count > 0))
-                    {
-                        var moppCode = HavokMoppGenerator.GenerateMoppCode(instancedGeometry.CollisionInfo);
-                        if (moppCode == null)
-                            new TagToolError(CommandError.OperationFailed, "Failed to generate mopp code!");
-
-                        moppCode.Data.AddressType = CacheAddressType.Data;
-                        instancedGeometry.CollisionMoppCodes = new TagBlock<TagHkpMoppCode>(CacheAddressType.Definition);
-                        instancedGeometry.CollisionMoppCodes.Add(moppCode);
-                    }
+                    var extraData = new InstancedGeometryBlock.ExtraDataBlock();
+                    extraData.Polyhedra = new TagBlock<InstancedGeometryBlock.PolyhedronBlock>(CacheAddressType.Data, instancedGeometry.Polyhedra.ToList());
+                    extraData.PolyhedraFourVectors = new TagBlock<InstancedGeometryBlock.PolyhedronFourVector>(CacheAddressType.Data, instancedGeometry.PolyhedraFourVectors.ToList());
+                    extraData.PolyhedraPlaneEquations = new TagBlock<InstancedGeometryBlock.PolyhedronPlaneEquation>(CacheAddressType.Data, instancedGeometry.PolyhedraPlaneEquations.ToList());
+                    instancedGeometry.ExtraData = new TagBlock<InstancedGeometryBlock.ExtraDataBlock>(CacheAddressType.Definition) { extraData };
 
                     instancedGeometry.CollisionInfo = convertedCollisionBsp;
                 });

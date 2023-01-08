@@ -541,7 +541,7 @@ namespace TagTool.Commands.Porting
             instance.ParentId = new ScenarioObjectParentStruct() { NameIndex = -1 };
             instance.Position = position;
             instance.Rotation = rotation;
-            instance.ObjectType = new ScenarioObjectType() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
+            instance.ObjectType = new GameObjectType8() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
             instance.Source = ScenarioInstance.SourceValue.Editor;
             instance.BspPolicy = ScenarioInstance.BspPolicyValue.Default;
             instance.UniqueHandle = new DatumHandle(0xffffffff);

@@ -40,9 +40,7 @@ namespace TagTool.Tags.Definitions.Common
 		EnglishBodyText,        // larbie,   10pt
 		HudNumberText,          // conduit,  18pt
 		SubtitleFont,           // conduit,  16pt
-		MainMenuFont,           // pragmata, 14pt
-		Value11,                // null
-		Value12                 // null
+		MainMenuFont            // pragmata, 14pt
 	}
 
 	public enum WidgetFontValue_ODST : short

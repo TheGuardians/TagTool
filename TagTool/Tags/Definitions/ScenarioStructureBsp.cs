@@ -85,6 +85,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public CollisionKdHierarchyStatic InstanceKdHierarchy;
 
+       
+
         public Bounds<float> WorldBoundsX;
         public Bounds<float> WorldBoundsY;
         public Bounds<float> WorldBoundsZ;
@@ -92,7 +94,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public List<SurfaceReference> StructureSurfacesH2;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         public List<StructureSurface> StructureSurfaces;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
@@ -189,6 +192,8 @@ namespace TagTool.Tags.Definitions
         public List<BspPreplacedDecalReferenceBlock> PreplacedDecals;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public RenderGeometry PreplacedDecalGeometry;
+
+      
 
         public List<StructureBspSoundClusterBlock> AcousticsSoundClusters;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -368,7 +373,8 @@ namespace TagTool.Tags.Definitions
             public FlagsValue Flags;
             public List<Vertex> Vertices;
 
-            public enum FlagsValue : int
+            [Flags]
+            public enum FlagsValue : uint
             {
                 None = 0,
                 AiCantHearThroughThisShit = 1 << 0,
@@ -538,10 +544,11 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x118, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x118, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0xDC, MaxVersion = CacheVersion.HaloOnline106708, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0xE0, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x8C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class Cluster : TagStructure
         {
             public Bounds<float> BoundsX;
@@ -686,25 +693,27 @@ namespace TagTool.Tags.Definitions
             {
                 public int UniqueId;
                 public short OriginBspIndex;
-                public ScenarioObjectType Type;
+                public GameObjectType8 Type;
                 public Scenario.ObjectSource Source;
             }
 
             [TagStructure(Size = 0x4)]
             public class PvsBoundObjectReferencesBlock : TagStructure
             {
-                public GameObjectType ObjectType;
+                public GameObjectType16 ObjectType;
                 public short PlacementIndex;
             }
 
             [TagStructure(Size = 0x10)]
             public class StructureClusterCubemap : TagStructure
             {
-                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
                 public RealPoint3d Position;
                 public short ScenarioCubemapIndex;
                 public short CubemapBitmapIndex;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
+                [TagField(Version = CacheVersion.HaloOnlineED)]
                 public List<CubemapReferencePointsBlock> ReferencePoints;
 
                 [TagStructure(Size = 0x10)]

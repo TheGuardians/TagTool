@@ -13,22 +13,13 @@ namespace TagTool.Tags.Definitions
     {
         public List<HudWidget> HudWidgets;
         public ChudAmmunitionInfo HudAmmunitionInfo;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<NullBlock> CompiledWidgetData;
 
-        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
-        public class ChudAmmunitionInfo : TagStructure
-        {
-            public int LowAmmoLoadedThreshold;
-            public int LowAmmoReserveThreshold;
-            public int LowBatteryThreshold;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public int FtMemberWeaponSequence;
-        }
-
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x7C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class HudWidgetBase : TagStructure
         {
             [TagField(Flags = Label)]
@@ -42,13 +33,18 @@ namespace TagTool.Tags.Definitions
             public WidgetLayerEnum SortLayer;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public sbyte SpecialHudType;
-            [TagField(Length = 3, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
-            public byte[] Padding1;
+            public ChudScriptingClassReach ScriptingClassReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short ImportInput;
+            public sbyte PostprocessedIntermediateListIndex;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public short ImportRangeInput;
+            public WidgetFlagsReach BaseFlagsReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public WidgetLayerEnum SortLayerReach;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ChudExternalInputReach ImportInput;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ChudExternalInputReach ImportRangeInput;
 
             // TODO: consolidate
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -117,10 +113,7 @@ namespace TagTool.Tags.Definitions
 
                 public ChudSandboxEditorState EditorFlags;
 
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public ChudHindsightState_H3 EngineGeneralFlags_H3;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public ChudHindsightState_ED EngineGeneralFlags;
+                public ChudHindsightState HindsightState;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public Skulls SkullFlags;
@@ -158,6 +151,7 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public Player_Special Player_SpecialFlags;
+
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public Player_Special_H3 Player_SpecialFlags_H3;
 
@@ -165,9 +159,10 @@ namespace TagTool.Tags.Definitions
                 public Inverse InverseFlags;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-                public PDA2 PDA2Flags;
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public short UnusedFlags3;
+                public ODSTNotHiddenState NotHiddenStateFlags;
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 2, Flags = Padding)]
+                public byte[] Padding0;
 
                 //HO EXCLUSIVE FLAGS
                 [TagField(MinVersion = CacheVersion.HaloOnlineED)]
@@ -227,8 +222,8 @@ namespace TagTool.Tags.Definitions
                     Assault = 1 << 10,
                     VIP = 1 << 11,
                     Infection = 1 << 12,
-                    Editor = 1 << 13,
-                    Unused = 1 << 14,
+                    Unused = 1 << 13,
+                    Editor = 1 << 14,
                     Theater = 1 << 15
                 }
 
@@ -267,16 +262,16 @@ namespace TagTool.Tags.Definitions
                 public enum PDA : ushort
                 {
                     None,
-                    SplitscreenPDAOpen = 1 << 0,
-                    SplitscreenPDAClose = 1 << 1,
-                    CameraUnknown = 1 << 2,
+                    PdaActive = 1 << 0,
+                    PdaInactive = 1 << 1,
+                    FirstPerson = 1 << 2 // Combine this with PDA active to have elements hide in third person without the PDA up
                 }
 
                 [Flags]
-                public enum PDA2 : ushort
+                public enum ODSTNotHiddenState : ushort
                 {
                     None,
-                    VisibleInPDA = 1 << 0,
+                    PdaActive = 1 << 0,
                 }
 
                 [Flags]
@@ -320,13 +315,13 @@ namespace TagTool.Tags.Definitions
                     TalkingPlayerAvailable = 1 << 3,
                     ArmingMeterAvailable = 1 << 4,
                     TimeLeftAvailable = 1 << 5,
-                    FriendlyPosession = 1 << 6,
-                    EnemyPosession = 1 << 7,
+                    FriendlyPossession = 1 << 6,
+                    EnemyPossession = 1 << 7,
                     VariantCustomA = 1 << 8,
                     VariantCustomB = 1 << 9,
                     VariantCustomC = 1 << 10,
-                    AttackerBombDropped = 1 << 11,
-                    AttackerBombPickedUp = 1 << 12,
+                    AttackerObjectiveDropped = 1 << 11, // ???
+                    AttackerBombPickedUp = 1 << 12, // not really
                     DefenderTeamIsDead = 1 << 13,
                     AttackerTeamIsDead = 1 << 14,
                     RoundStartPeriod = 1 << 15,
@@ -344,8 +339,8 @@ namespace TagTool.Tags.Definitions
                     TalkingPlayerAvailable = 1 << 3,
                     ArmingMeterAvailable = 1 << 4,
                     TimeLeftAvailable = 1 << 5,
-                    FriendlyPosession = 1 << 6,
-                    EnemyPosession = 1 << 7,
+                    FriendlyPossession = 1 << 6,
+                    EnemyPossession = 1 << 7,
                     VariantCustomA = 1 << 8,
                     VariantCustomB = 1 << 9,
                     VariantCustomC = 1 << 10,
@@ -375,16 +370,16 @@ namespace TagTool.Tags.Definitions
                     SavedFilmNormalMode = 1 << 3,
                     PlayerTrainingAvailable = 1 << 4,
                     CampaignObjectiveAvailable = 1 << 5,
-                    SurvivalState = 1 << 6,
-                    BeaconEnabled = 1 << 7,
-                    UserWaypointEnabled = 1 << 8,
-                    Bit9 = 1 << 9,
+                    SurvivalObjectiveAvailable = 1 << 6,
+                    UserPlacedWaypointBeacon = 1 << 7,
+                    UserPlacedWaypointUserPlaced = 1 << 8,
+                    SavedFilmControlsActive = 1 << 9,
                     Achievement1 = 1 << 10,
                     Achievement2 = 1 << 11,
                     Achievement3 = 1 << 12,
                     Achievement4 = 1 << 13,
                     Achievement5 = 1 << 14,
-                    ARGEnabled = 1 << 15,
+                    ArgEnabled = 1 << 15,
                 }
 
                 [Flags]
@@ -397,16 +392,16 @@ namespace TagTool.Tags.Definitions
                     SavedFilmNormalMode = 1 << 3,
                     PlayerTrainingAvailable = 1 << 4,
                     CampaignObjectiveAvailable = 1 << 5,
-                    SurvivalState = 1 << 6,
-                    BeaconEnabled = 1 << 7, //unused, kept for odst porting
+                    SurvivalObjectiveAvailable = 1 << 6,
+                    UserPlacedWaypointBeacon = 1 << 7, //unused, kept for odst porting
                     Achievement1 = 1 << 8,
                     Achievement2 = 1 << 9,
                     Achievement3 = 1 << 10,
                     Achievement4 = 1 << 11,
                     Achievement5 = 1 << 12,
-                    GameTimeUnknown = 1 << 13,
-                    UserWaypointEnabled = 1 << 14, //unused, kept for odst porting
-                    ARGEnabled = 1 << 15, //unused, kept for odst porting
+                    SavedFilmControlsActive = 1 << 13,
+                    UserPlacedWaypointUserPlaced = 1 << 14, //unused, kept for odst porting
+                    ArgEnabled = 1 << 15, //unused, kept for odst porting
                 }
 
 
@@ -422,7 +417,7 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum ChudHindsightState_H3 : ushort
+                public enum ChudHindsightState : ushort
                 {
                     None,
                     SensorRange10m = 1 << 0,
@@ -438,27 +433,10 @@ namespace TagTool.Tags.Definitions
                     MetagameP4Talking = 1 << 10,
                     TransientScoreAvail = 1 << 11,
                     MetagameMultikillAvail = 1 << 12,
-                    MetagameNegScoreAvail = 1 << 13
-                }
-
-                [Flags]
-                public enum ChudHindsightState_ED : ushort
-                {
-                    None,
-                    SensorRange10m = 1 << 0,
-                    SensorRange25m = 1 << 1,
-                    SensorRange75m = 1 << 2,
-                    SensorRange150m = 1 << 3,
-                    MetagameP1Talking = 1 << 4,
-                    MetagameP2Enabled = 1 << 5,
-                    MetagameP2Talking = 1 << 6,
-                    MetagameP3Enabled = 1 << 7,
-                    MetagameP3Talking = 1 << 8,
-                    MetagameP4Enabled = 1 << 9,
-                    MetagameP4Talking = 1 << 10,
-                    TransientScoreAvail = 1 << 11,
-                    MetagameMultikillAvail = 1 << 12,
-                    MetagameNegScoreAvail = 1 << 13
+                    MetagameNegScoreAvail = 1 << 13,
+                    //ODST
+                    MetagameTeamScoring = 1 << 14,
+                    MetagameFfaScoring = 1 << 15
                 }
 
                 [Flags]
@@ -558,13 +536,13 @@ namespace TagTool.Tags.Definitions
                     PickupPlasmaGrenades = 1 << 1,
                     PickupSpikeGrenades = 1 << 2,
                     PickupFireGrenades = 1 << 3,
-                    Bit4 = 1 << 4,
+                    GrenadesEmpty = 1 << 4,
                     LivesAdded = 1 << 5,
                     Consumable1Unknown = 1 << 6,
                     Consumable2Unknown = 1 << 7,
                     Consumable3Unknown = 1 << 8,
                     Consumable4Unknown = 1 << 9,
-                    Bit10 = 1 << 10,
+                    EnemyVisionActive = 1 << 10,
                     Bit11 = 1 << 11,
                     HitMarkerLow = 1 << 12,
                     HitMarkerMedium = 1 << 13,
@@ -580,11 +558,11 @@ namespace TagTool.Tags.Definitions
                     PickupPlasmaGrenades = 1 << 1,
                     PickupSpikeGrenades = 1 << 2,
                     PickupFireGrenades = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
+                    GrenadesEmpty = 1 << 4,
+                    Zoom0To1 = 1 << 5,
+                    Zoom1To2 = 1 << 6,
+                    Zoom1To0 = 1 << 7,
+                    Zoom2To0 = 1 << 8,
                     LivesAdded = 1 << 9,
                 }
 
@@ -594,20 +572,7 @@ namespace TagTool.Tags.Definitions
                     None,
                     BinocularsEnabled = 1 << 0,
                     UnitIsZoomedLevel1 = 1 << 1,
-                    UnitIsZoomedLevel2 = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    UnitIsZoomedLevel2 = 1 << 2
                 }
 
                 [Flags]
@@ -616,19 +581,7 @@ namespace TagTool.Tags.Definitions
                     None = 1 << 0,
                     IsSingleWielding = 1 << 1,
                     IsDualWielding = 1 << 2,
-                    HasSupportWeapon = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    HasSupportWeapon = 1 << 3
                 }
 
                 [Flags]
@@ -659,12 +612,7 @@ namespace TagTool.Tags.Definitions
                     None,
                     AmmoUsed = 1 << 0,
                     AmmoPickup = 1 << 1,
-                    AmmoThreshold = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
-                    Bit5 = 1 << 5,
-                    Bit6 = 1 << 6,
-                    Bit7 = 1 << 7
+                    AmmoThreshold = 1 << 2
                 }
 
                 [Flags]
@@ -680,8 +628,8 @@ namespace TagTool.Tags.Definitions
                     LockAvailable = 1 << 6,
                     PlasmaTrack = 1 << 7,
                     LockUnavailable = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
+                    TargetUnobstructed = 1 << 9,
+                    TargetObstructed = 1 << 10,
                 }
 
                 [Flags]
@@ -700,19 +648,11 @@ namespace TagTool.Tags.Definitions
                     SourceIsPrimaryWeapon = 1 << 0,
                     SourceIsDualWeapon = 1 << 1,
                     SourceIsBackpacked = 1 << 2,
-                    Bit3 = 1 << 3,
-                    Bit4 = 1 << 4,
+                    Hidden = 1 << 3,
+                    PickupMessage = 1 << 4,
                     Bit5 = 1 << 5,
                     Bit6 = 1 << 6,
-                    Bit7 = 1 << 7,
-                    Bit8 = 1 << 8,
-                    Bit9 = 1 << 9,
-                    Bit10 = 1 << 10,
-                    Bit11 = 1 << 11,
-                    Bit12 = 1 << 12,
-                    Bit13 = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15
+                    Bit7 = 1 << 7
                 }
 
                 [Flags]
@@ -729,8 +669,7 @@ namespace TagTool.Tags.Definitions
                     HasPlasmaGrenades = 1 << 7,
                     HasSpikeGrenades = 1 << 8,
                     HasFireGrenades = 1 << 9,
-                    Unknown1 = 1 << 10,
-                    Unknown2 = 1 << 11,
+                    Bit10_HO = 1 << 10
                 }
 
                 [Flags]
@@ -1123,13 +1062,7 @@ namespace TagTool.Tags.Definitions
                 public OutputScalarValue OutputScalarF;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown2;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown3;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown4;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public short Unknown5;
+                public Rectangle2d ScissorRect;
 
                 public enum ChudShaderType : short
                 {
@@ -1341,7 +1274,7 @@ namespace TagTool.Tags.Definitions
                     MetagameP3Score,
                     MetagameP4Score,
                     MetagameTimeMultiplier,
-                    MetagameSkullDifficultyModifer,
+                    MetagameSkullDifficultyModifier,
                     MotionSensorRange,
                     NetworkLatency,
                     NetworkLatencyQuality,
@@ -1400,7 +1333,7 @@ namespace TagTool.Tags.Definitions
                     MetagameP3Score,
                     MetagameP4Score,
                     MetagameTimeMultiplier,
-                    MetagameSkullDifficultyModifer,
+                    MetagameSkullDifficultyModifier,
                     MotionSensorRange,
                     NetworkLatency,
                     NetworkLatencyQuality,
@@ -1487,7 +1420,7 @@ namespace TagTool.Tags.Definitions
                     MetagameP3Score,
                     MetagameP4Score,
                     MetagameTimeMultiplier,
-                    MetagameSkullDifficultyModifer,
+                    MetagameSkullDifficultyModifier,
                     MotionSensorRange,
                     NetworkLatency,
                     NetworkLatencyQuality,
@@ -1606,8 +1539,8 @@ namespace TagTool.Tags.Definitions
                     LocalB,
                     LocalC,
                     LocalD,
-                    Unknown6,
-                    Unknown7
+                    FlashAnimation,
+                    ScalarAnimationB
                 }
             }
 
@@ -1677,7 +1610,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public CachedTag DatasourceTemplate;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<NullBlock> Datasource;
+            public DataSourceStruct DataSource;
 
             public List<BitmapWidget> BitmapWidgets;
             public List<TextWidget> TextWidgets;
@@ -1722,7 +1655,7 @@ namespace TagTool.Tags.Definitions
                     ExtendBorder = 1 << 2, // stretch edges
                     UseTextureCam = 1 << 3,
                     UseWrapSampling = 1 << 4, // looping
-                    AutoPermute = 1 << 5,
+                    SpriteFromPlayerCharacterType = 1 << 5,
                     Player1Emblem = 1 << 6,
                     Player2Emblem = 1 << 7,
                     Player3Emblem = 1 << 8,
@@ -1741,9 +1674,9 @@ namespace TagTool.Tags.Definitions
                     UseTextureCam = 1 << 3,
                     UseWrapSampling = 1 << 4, // looping
                     SpriteFromPlayerCharacterType = 1 << 5,
-                    SpriteFromSurivalRounds = 1 << 6,
-                    SpriteFromUnknon1 = 1 << 7,
-                    SpriteFromUnknon2 = 1 << 8,
+                    SpriteFromSurvivalRounds = 1 << 6,
+                    AutoPermuteExternalInput0 = 1 << 7,
+                    AutoPermuteExternalInput1 = 1 << 8,
                     Player1Emblem = 1 << 9,
                     Player2Emblem = 1 << 10,
                     Player3Emblem = 1 << 11,
@@ -1762,9 +1695,9 @@ namespace TagTool.Tags.Definitions
                     UseTextureCam = 1 << 3,
                     UseWrapSampling = 1 << 4, // looping
                     SpriteFromPlayerCharacterType = 1 << 5,
-                    SpriteFromSurivalRounds = 1 << 6,
-                    SpriteFromUnknon1 = 1 << 7,
-                    SpriteFromUnknon2 = 1 << 8,
+                    SpriteFromSurvivalRounds = 1 << 6,
+                    AutoPermuteExternalInput0 = 1 << 7,
+                    AutoPermuteExternalInput1 = 1 << 8,
                     Player1Emblem = 1 << 9,
                     Player2Emblem = 1 << 10,
                     Player3Emblem = 1 << 11,
@@ -1785,9 +1718,9 @@ namespace TagTool.Tags.Definitions
                     UseTextureCam = 1 << 3,
                     UseWrapSampling = 1 << 4, // looping
                     SpriteFromPlayerCharacterType = 1 << 5,
-                    SpriteFromSurivalRounds = 1 << 6,
-                    SpriteFromUnknon1 = 1 << 7,
-                    SpriteFromUnknon2 = 1 << 8,
+                    SpriteFromSurvivalRounds = 1 << 6,
+                    AutoPermuteExternalInput0 = 1 << 7,
+                    AutoPermuteExternalInput1 = 1 << 8,
                     Player1Emblem = 1 << 9,
                     Player2Emblem = 1 << 10,
                     Player3Emblem = 1 << 11,
@@ -1853,7 +1786,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public ushort FontReach; // short
 
-                [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+                [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
                 public byte[] FontPadding;
 
                 public StringId InputString;
@@ -1940,10 +1873,20 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
+        public class ChudAmmunitionInfo : TagStructure
+        {
+            public int LowAmmoLoadedThreshold;
+            public int LowAmmoReserveThreshold;
+            public int LowBatteryThreshold;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public int FtMemberWeaponSequence;
+        }
+
         [TagStructure(Size = 0x0)]
         public class NullBlock : TagStructure
         {
-
         }
 
         public enum ChudScriptingClass : short
@@ -1963,6 +1906,19 @@ namespace TagTool.Tags.Definitions
             Consumable
         }
 
+        public enum ChudScriptingClassReach : byte
+        {
+            UndefinedUseParent,
+            WeaponStats,
+            Crosshair,
+            Shield,
+            Grenades,
+            Messages,
+            MotionSensor,
+            ChapterTitle,
+            Cinematics
+        }
+
         [Flags]
         public enum WidgetFlags : byte
         {
@@ -1972,6 +1928,17 @@ namespace TagTool.Tags.Definitions
             ResetTimerOnInputChange = 1 << 2,
             WeaponSwapHack = 1 << 3,
             EquipmentHack = 1 << 4
+        }
+
+        [Flags]
+        public enum WidgetFlagsReach : byte
+        {
+            DieOnActive = 1 << 0,
+            SkipInputUpdateWhenUnreadying = 1 << 1,
+            ResetTimerOnInputChange = 1 << 2,
+            InheritSortLayer = 1 << 3,
+            SpecialSavedFilmLayer = 1 << 4,
+            NoCurvatureAndOnTop = 1 << 5
         }
 
         public enum WidgetLayerEnum : byte
@@ -1985,5 +1952,242 @@ namespace TagTool.Tags.Definitions
             Inherited,
             SavedFilm
         }
+
+        public enum ChudExternalInputReach : short
+        {
+            Zero,
+            One,
+            DatasourceDataIndex,
+            DatasourceRenderSlot,
+            ImpulseValue,
+            DebugSlide1,
+            DebugSlide100,
+            HsObjectFunction1,
+            HsObjectFunction2,
+            HsObjectFunction3,
+            HsObjectFunction4,
+            ScriptedHsVariable1,
+            ScriptedHsVariable2,
+            ScriptedHsVariable3,
+            ScriptedHsVariable4,
+            ScriptedHsVariable5,
+            ScriptedHsVariable6,
+            ScriptedHsVariable7,
+            ScriptedHsVariable8,
+            ScriptedHsVariable9,
+            ScriptedHsVariable10,
+            VehicleHealth,
+            VehicleHealthPercentage,
+            UnshieldedVitality,
+            UnshieldedRecentDamage,
+            ShieldAmount,
+            ShieldAmount2,
+            ShieldAmount3,
+            ShieldAmount4,
+            ShieldRecentDamage,
+            ShieldRecentDamage2,
+            ShieldRecentDamage3,
+            ShieldRecentDamage4,
+            ShieldPercentage,
+            VehicleShieldPercentage,
+            VehicleBoostMeter,
+            VehicleBoostRecharge,
+            CameraYaw,
+            CameraPitch,
+            CameraRoll,
+            MotionSensorRange,
+            AltitudeF,
+            AltitudeFraction,
+            GameHeat,
+            OutOfBoundsTimer,
+            TransientCookies,
+            TotalCookies,
+            WeaponAmmoLoaded,
+            WeaponAmmoReserve,
+            WeaponAmmoPickup,
+            WeaponHeat,
+            WeaponHeatPercentage,
+            WeaponBattery,
+            WeaponPickup,
+            WeaponAutoaimScale,
+            WeaponBarrelErrorScale,
+            WeaponBarrelPinnedErrorScale,
+            WeaponAutoaimTarget,
+            WeaponAutoaimTargetDistance,
+            AirstrikeDistanceToTarget,
+            AirstrikeWarmupTime,
+            AirstrikeLaunchesLeft,
+            AirstrikeLaunchState,
+            GrenadeSelected,
+            GrenadeCount,
+            GrenadePickup,
+            WeaponCharge,
+            WeaponReloadPercentage,
+            BarrelRecoveryPercentage,
+            WeaponTetherPercentage,
+            LockingAmount,
+            FlavaTgtDistance,
+            FlavaTgtElevation,
+            EquipmentEnergy,
+            EquipmentEnergyMinimumActivationEnergy,
+            PlayerDistance,
+            MedalSequenceIndex,
+            ProgressionToastCurrentProgress,
+            ProgressionToastGoal,
+            ProgressionToastSequenceIndex,
+            CommendationCalloutSequenceIndex,
+            ScriptedObjectHealth,
+            ScriptedObjectRecentBodyDamage,
+            ScriptedObjectRecentShieldDamage,
+            ScriptedObjectDistance, // meters
+            ScriptedObjectElevation, // meters
+            ScriptedObjectCombatStatus,
+            ScriptedObjectPriorityOnscreenSequenceIndex,
+            ScriptedObjectPriorityOffscreenSequenceIndex,
+            LicensePlateIconIndex,
+            LicensePlateDesignatorIconIndex,
+            MetagameTime,
+            MetagameTransientScore,
+            MetagameP1Score,
+            MetagameP2Score,
+            MetagameP3Score,
+            MetagameP4Score,
+            MetagamePlayerScore,
+            MetagameTimeMultiplier,
+            MetagameSkullDiffMult,
+            MetagameTotalMultiplier,
+            MetagameNegTransScore,
+            SurvivalModeSet,
+            SurvivalModeRound,
+            SurvivalModeWave,
+            SurvivalModeLives,
+            SurvivalModeEnemyLives,
+            SurvivalModeBonusRoundTimer,
+            SurvivalModeBonusRoundPoints,
+            EnemyPlayerKills,
+            SBFriendlyScore,
+            SBEnemyScore,
+            SBMaxScore,
+            ArmingMeterFrac,
+            MegaloEngineIconIndex,
+            MegaloOmniWidgetMeterValue,
+            MegaloOmniWidgetAugmentationIconSequenceIndex,
+            MegaloProgressBarMeterValue,
+            CampaignFtShield,
+            CampaignFtPossibleActionObjDist, // meters
+            CampaignFtPendingTargetObjDist, // meters
+            CampaignFtCurrentTargetObjDist, // meters
+            MpObjFt1Shield,
+            MpObjFt2Shield,
+            MpObjFt3Shield,
+            MpObjFt1Meter,
+            MpObjFt2Meter,
+            MpObjFt3Meter,
+            MpObjFt1Yaw,
+            MpObjFt2Yaw,
+            MpObjFt3Yaw,
+            MpObjFt1DamageYaw,
+            MpObjFt2DamageYaw,
+            MpObjFt3DamageYaw,
+            FtMemberShield,
+            FtMemberMeter,
+            FtMemberYaw,
+            FtMemberDamageYaw,
+            BudgetFraction,
+            BudgetLeft,
+            SFTotalTime,
+            SFMarkerTime,
+            SFChapWidth,
+            SFBufferedTheta,
+            SFCurrPosTheta,
+            SFRecordStartTheta,
+            SFPieFraction,
+            NetworkLatency,
+            NetworkLatencyQuality,
+            NetworkHostQuality,
+            NetworkLocalQuality
+        }
+
+        [TagStructure(Size = 0x1C)]
+        public class DataSourceStruct : TagStructure
+        {
+            [TagField(ValidTags = new[] { "wdst" })]
+            public CachedTag DatasourceTemplate;
+            public List<ChudWidgetDatasourceBaseBlock> Datasource;
+
+            [TagStructure(Size = 0x20)]
+            public class ChudWidgetDatasourceBaseBlock : TagStructure
+            {
+                public ChudDatasourceFlags Flags;
+                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+                public byte[] SVHELRNN;
+                public ChudDatasourceTypeEnum Type;
+                public short RenderMaximum;
+                public List<ChudDatasourceResolutionBlock> Resolutions;
+                public List<ChudDatasourcePositionBlock> Positions; // As offsets from the previous one
+
+                [Flags]
+                public enum ChudDatasourceFlags : byte
+                {
+                    Extend = 1 << 0, // Use the final datasource position offset over and over
+                    Center = 1 << 1, // Center the elements around the first position using the second position as the offset between them
+                    EvenlySpace = 1 << 2, // Evenly space elements between the first two positions
+                    Reverse = 1 << 3 // Iterate over the datasource in reverse order
+                }
+
+                public enum ChudDatasourceTypeEnum : short
+                {
+                    Grenades,
+                    Players,
+                    MetagamePlayers,
+                    FireteamMembers,
+                    CampaignFireteamMembers,
+                    Medals,
+                    ProgressionToasts,
+                    ScriptedObjects,
+                    Skulls,
+                    TrackingObjects, // projectiles tracking the current player
+                    OmniWidgetsTopLeft,
+                    OmniWidgetsTopCenter,
+                    OmniWidgetsTopRight,
+                    OmniWidgetsHighLeft,
+                    OmniWidgetsHighCenter,
+                    OmniWidgetsHighRight,
+                    OmniWidgetsLowLeft,
+                    OmniWidgetsLowCenter,
+                    OmniWidgetsLowRight,
+                    OmniWidgetsBottomLeft,
+                    OmniWidgetsBottomCenter,
+                    OmniWidgetsBottomRight
+                }
+
+                [TagStructure(Size = 0x4)]
+                public class ChudDatasourceResolutionBlock : TagStructure
+                {
+                    public ChudCurvatureResFlags ResFlags;
+                    [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                    public byte[] ASFYUIHHIER;
+                    public short RenderMaximum;
+
+                    [Flags]
+                    public enum ChudCurvatureResFlags : byte
+                    {
+                        FullscreenWide = 1 << 0,
+                        FullscreenStandard = 1 << 1,
+                        Halfscreen = 1 << 2,
+                        QuarterscreenWide = 1 << 3,
+                        QuarterscreenStandard = 1 << 4
+                    }
+                }
+
+                [TagStructure(Size = 0x10)]
+                public class ChudDatasourcePositionBlock : TagStructure
+                {
+                    public RealPoint2d OriginOffset;
+                    public RealPoint2d WidgetScale;
+                }
+            }
+        }
+
     }
 }

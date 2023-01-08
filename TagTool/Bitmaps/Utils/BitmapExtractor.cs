@@ -56,29 +56,32 @@ namespace TagTool.Bitmaps
             }
         }
 
-        public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
+        public static BaseBitmap ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex, string tagName, bool forDDS = true)
         {
             if (cache is GameCacheHaloOnlineBase)
             {
-                byte[] data = ExtractBitmapData(cache, bitmap, imageIndex);
-                DDSHeader header = new DDSHeader(bitmap.Images[imageIndex]);
-                return new DDSFile(header, data);
+                return new BaseBitmap(bitmap.Images[imageIndex], ExtractBitmapData(cache, bitmap, imageIndex));
             }
             else if (CacheVersionDetection.GetGeneration(cache.Version) ==  CacheGeneration.Third)
             {
-                var baseBitmap = BitmapConverter.ConvertGen3Bitmap(cache, bitmap, imageIndex, true);
-                if (baseBitmap == null)
-                    return null;
-                return new DDSFile(baseBitmap);
+                return BitmapConverter.ConvertGen3Bitmap(cache, bitmap, imageIndex, tagName, forDDS);
             }
-            else
-                return null;
-            
+
+            return null;
         }
 
-        public static byte[] ExtractBitmapToDDSArray(GameCache cache, Bitmap bitmap, int imageIndex)
+        public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex, string tagName)
         {
-            var ddsFile = ExtractBitmap(cache, bitmap, imageIndex);
+            var baseBitmap = ExtractBitmap(cache, bitmap, imageIndex, tagName, true);
+            if (baseBitmap == null)
+                return null;
+
+            return new DDSFile(baseBitmap);
+        }
+
+        public static byte[] ExtractBitmapToDDSArray(GameCache cache, Bitmap bitmap, int imageIndex, string tagName)
+        {
+            var ddsFile = ExtractBitmap(cache, bitmap, imageIndex, tagName);
             var stream = new MemoryStream();
             using(var writer = new EndianWriter(stream))
             {

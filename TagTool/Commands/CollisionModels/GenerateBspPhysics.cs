@@ -10,6 +10,7 @@ using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Tags.Definitions;
 using TagTool.Tags;
 using System.Diagnostics;
+using TagTool.Havok;
 
 namespace TagTool.Commands.CollisionModels
 {
@@ -51,7 +52,7 @@ namespace TagTool.Commands.CollisionModels
 
         unsafe public bool generate_mopp_codes(ref CollisionModel.Region.Permutation Permutation)
         {
-            var moppCodes = Havok.HavokMoppGenerator.GenerateMoppCode(Bsp);
+            var moppCodes = HavokMoppGenerator.GenerateCollisionMopp(Bsp);
             if(moppCodes == null)
             {
                 Console.WriteLine("No moppcodes produced!");

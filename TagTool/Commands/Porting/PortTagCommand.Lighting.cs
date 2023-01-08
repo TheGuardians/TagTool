@@ -10,6 +10,8 @@ using TagTool.Geometry;
 using TagTool.Tags.Resources;
 using TagTool.Lighting;
 using TagTool.Commands.Bitmaps;
+using TagTool.Havok;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting
 {
@@ -205,6 +207,13 @@ namespace TagTool.Commands.Porting
                 {
                     if (staticPerVertexLighting.VertexBufferIndex != -1)
                     {
+                        if (staticPerVertexLighting.VertexBufferIndex >= lightmapResourceDefinition.VertexBuffers.Count)
+                        {
+                            new TagToolWarning("Invalid per vertex lighting buffer index!");
+                            staticPerVertexLighting.VertexBufferIndex = -1;
+                            continue;
+                        }
+
                         staticPerVertexLighting.VertexBuffer = lightmapResourceDefinition.VertexBuffers[staticPerVertexLighting.VertexBufferIndex].Definition;
                         VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, staticPerVertexLighting.VertexBuffer);
                         var d3dPointer = new D3DStructure<VertexBufferDefinition>();
@@ -348,7 +357,20 @@ namespace TagTool.Commands.Porting
                     staticPerVertexLighting.VertexBufferIndex = -1;
                 }
             }
+
+
+            Console.WriteLine("Generating cluster per mesh mopp...");
+            Lbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.PerMeshMoppBlock>();
+            for (int i = 0; i < Lbsp.Geometry.Meshes.Count; i++)
+            {
+                var mesh = Lbsp.Geometry.Meshes[i];
+                if (mesh.Type == VertexType.World && mesh.Parts.Count > 0)
+                    Lbsp.Geometry.MeshClusterVisibility.Add(PerMeshMoppGenerator.Generate(CacheContext, mesh));
+                else
+                    Lbsp.Geometry.MeshClusterVisibility.Add(new RenderGeometry.PerMeshMoppBlock());
+            }
             
+
             Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
 
             return Lbsp;
@@ -356,72 +378,68 @@ namespace TagTool.Commands.Porting
 
         private CameraFxSettings ConvertCameraFxSettings(CameraFxSettings cfxs, string blamTagName)
         {
-            cfxs.SsaoProperties = new CameraFxSettings.SsaoPropertiesBlock
+            cfxs.Ssao = new CameraFxSettings.SsaoPropertiesBlock
             {
-                Flags = CameraFxSettings.FlagsValue.UseDefault
+                Flags = CameraFxSettings.SsaoPropertiesBlock.SsaoFlags.UseDefault
             };
-            cfxs.ColorGrading = new CameraFxSettings.CameraFxValue
+            cfxs.ColorGrading = new CameraFxSettings.ColorGradingBlock
             {
-                Flags = CameraFxSettings.FlagsValue.UseDefault
+                Flags = CameraFxSettings.ColorGradingBlock.CameraFxParameterFlagsCg.UseDefault
             };
 
             // todo: convert
             if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 cfxs.AutoExposureAntiBloom = new CameraFxSettings.CameraFxValue();
-
                 cfxs.AutoExposureAntiBloom.Flags |= CameraFxSettings.FlagsValue.UseDefault;
-                cfxs.BloomPoint.Flags |= CameraFxSettings.FlagsValue.UseDefault;
-                cfxs.InherentBloom.Flags |= CameraFxSettings.FlagsValue.UseDefault;
-                cfxs.BloomIntensity.Flags |= CameraFxSettings.FlagsValue.UseDefault;
             }
 
             switch (blamTagName)
             {
                 // citadel godrays
                 case @"levels\dlc\fortress\fortress_fx":
-                    cfxs.GodraysProperties = new CameraFxSettings.GodraysPropertiesBlock
+                    cfxs.Lightshafts = new CameraFxSettings.LightshaftsBlock
                     {
                         Flags = CameraFxSettings.FlagsValue.MaximumChangeIsRelative | CameraFxSettings.FlagsValue.Fixed2,
-                        Radius = 57.0f,
-                        AngleBias = 125.0f,
-                        Color = new RealRgbColor(0.9882353f, 0.9372549f, 0.6039216f),
-                        Strength = 5000.0f,
-                        PowerExponent = 0.9f,
-                        BlurSharpness = 1.0f,
-                        DecoratorDarkening = 0.7f,
-                        HemiRejectionFalloff = 4.0f
+                        Pitch = 57.0f,
+                        Heading = 125.0f,
+                        Tint = new RealRgbColor(0.9882353f, 0.9372549f, 0.6039216f),
+                        DepthClamp = 5000.0f,
+                        IntensityClamp = 0.9f,
+                        FalloffRadius = 1.0f,
+                        Intensity = 0.7f,
+                        BlurRadius = 4.0f
                     };
                     break;
 
                 // rat's nest godrays
                 case @"levels\dlc\armory\sky\armory_camera":
-                    cfxs.GodraysProperties = new CameraFxSettings.GodraysPropertiesBlock
+                    cfxs.Lightshafts = new CameraFxSettings.LightshaftsBlock
                     {
                         Flags = CameraFxSettings.FlagsValue.MaximumChangeIsRelative | CameraFxSettings.FlagsValue.Fixed2,
-                        Radius = 67.5f,
-                        AngleBias = -156.0f,
-                        Color = new RealRgbColor(1f, 0.7333333f, 0.4745098f),
-                        Strength = 5000.0f,
-                        PowerExponent = 0.6f,
-                        BlurSharpness = 0.08f,
-                        DecoratorDarkening = 1.0f,
-                        HemiRejectionFalloff = 8.0f
+                        Pitch = 67.5f,
+                        Heading = -156.0f,
+                        Tint = new RealRgbColor(1f, 0.7333333f, 0.4745098f),
+                        DepthClamp = 5000.0f,
+                        IntensityClamp = 0.6f,
+                        FalloffRadius = 0.08f,
+                        Intensity = 1.0f,
+                        BlurRadius = 8.0f
                     };
                     break;
 
                 default:
-                    cfxs.GodraysProperties = new CameraFxSettings.GodraysPropertiesBlock
+                    cfxs.Lightshafts = new CameraFxSettings.LightshaftsBlock
                     {
                         Flags = CameraFxSettings.FlagsValue.UseDefault,
-                        Radius = 0.0f,
-                        AngleBias = 0.0f,
-                        Color = new RealRgbColor(1.0f, 1.0f, 1.0f),
-                        Strength = 5000.0f,
-                        PowerExponent = 0.0f,
-                        BlurSharpness = 0.5f,
-                        DecoratorDarkening = 2.0f,
-                        HemiRejectionFalloff = 1.0f
+                        Pitch = 0.0f,
+                        Heading = 0.0f,
+                        Tint = new RealRgbColor(1.0f, 1.0f, 1.0f),
+                        DepthClamp = 5000.0f,
+                        IntensityClamp = 0.0f,
+                        FalloffRadius = 0.5f,
+                        Intensity = 2.0f,
+                        BlurRadius = 1.0f
                     };
                     break;
             }

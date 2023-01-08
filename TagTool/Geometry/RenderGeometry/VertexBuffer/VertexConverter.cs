@@ -142,11 +142,7 @@ namespace TagTool.Geometry
                     case VertexBufferFormat.TinyPosition:
                         ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) =>
                         {
-                            if (inVersion >= CacheVersion.HaloReach)
-                                v.Position = v.Position * 1.0f / ushort.MaxValue;
-                            else
-                                v.Position = ConvertPositionShort(v.Position);
-
+                            v.Position = ConvertPositionShort(v.Position);
                             v.Variant = (ushort)((v.Variant >> 8) & 0xFF);
                             v.Normal = ConvertNormal(v.Normal);
                             outVertexStream.WriteTinyPositionVertex(v);

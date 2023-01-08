@@ -1,6 +1,12 @@
 using TagTool.Cache;
 using System;
 using TagTool.Tags.Definitions;
+using TagTool.Bitmaps.Utils;
+using System.Diagnostics;
+using System.IO;
+using TagTool.Bitmaps.DDS;
+using TagTool.Commands;
+using TagTool.IO;
 
 /***************************************************************
 * The following code is derived from the HaloDeveloper project
@@ -20,16 +26,6 @@ namespace TagTool.Bitmaps
 {
     public static class BitmapDecoder
     {
-        public static byte[] ConvertFromLinearTexture(byte[] data, int width, int height, BitmapFormat texture)
-        {
-            return ModifyLinearTexture(data, width, height, texture, false);
-        }
-
-        public static byte[] ConvertToLinearTexture(byte[] data, int width, int height, BitmapFormat texture)
-        {
-            return ModifyLinearTexture(data, width, height, texture, true);
-        }
-
         private static byte[] DecodeP8(byte[] data, int width, int height)
         {
             var buffer = new byte[data.Length * 4];
@@ -182,7 +178,7 @@ namespace TagTool.Bitmaps
         public static byte[] ConvertAY8ToA8Y8(byte[] data, int width, int height)
         {
             byte[] buffer = new byte[height * width * 2];
-            for(int i =0; i < height*width * 2; i += 2)
+            for (int i = 0; i < height * width * 2; i += 2)
             {
                 int index = i / 2;
                 buffer[i] = data[index];
@@ -205,62 +201,63 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
-        // TODO: fix/refactor
-        private static byte[] DecodeCtx1(byte[] data, int width, int height)
+        private static byte[] DecodeCtx1(byte[] data, int width, int height, bool swapXY = false, bool computeZ = true)
         {
-            byte[] buffer = new byte[width * height * 4];
-            int index = 0;
+            var buffer = new byte[width * height * 4];
+            int xBlocks = width / 4;
+            int yBlocks = height / 4;
 
-            for (int i = 0; i < (width * height); i += 16)
+            var vectors = new RGBAColor[4];
+            for (int i = 0; i < yBlocks; i++)
             {
-                int c1 = (data[index + 1] << 8) | data[index];
-                int c2 = (data[index + 3] << 8) | data[index + 2];
-
-                RGBAColor[] colorArray = new RGBAColor[4];
-                colorArray[0].R = data[index];
-                colorArray[0].G = data[index + 1];
-                colorArray[1].R = data[index + 2];
-                colorArray[1].G = data[index + 3];
-
-                if (c1 > c2)
+                for (int j = 0; j < xBlocks; j++)
                 {
-                    colorArray[2] = GradientColors(colorArray[0], colorArray[1]);
-                    colorArray[3] = GradientColors(colorArray[1], colorArray[0]);
-                }
-                else
-                {
-                    colorArray[2] = GradientColorsHalf(colorArray[0], colorArray[1]);
-                    colorArray[3] = colorArray[0];
-                }
+                    int srcIndex = (i * xBlocks + j) * 8;
+                    vectors[0] = new RGBAColor(data[srcIndex + 1], data[srcIndex + 0], 0, 0);
+                    vectors[1] = new RGBAColor(data[srcIndex + 3], data[srcIndex + 2], 0, 0);
+                    vectors[2].R = (byte)((2 * vectors[0].R + vectors[1].R + 1) / 3);
+                    vectors[2].G = (byte)((2 * vectors[0].G + vectors[1].G + 1) / 3);
+                    vectors[3].R = (byte)((vectors[0].R + 2 * vectors[1].R + 1) / 3);
+                    vectors[3].G = (byte)((vectors[0].G + 2 * vectors[1].G + 1) / 3);
 
-                int cData = ((data[index + 5] | (data[index + 4] << 8)) | (data[index + 7] << 0x10)) | (data[index + 6] << 0x18);
-                int chunkNum = i / 16;
+                    var code = (uint)((data[srcIndex + 7] << 24) | (data[srcIndex + 6] << 16) | (data[srcIndex + 5] << 8) | (data[srcIndex + 4]));
 
-                int xPos = chunkNum % (width / 4);
-                int yPos = (chunkNum - xPos) / (width / 4);
-
-                int sizeh = (height < 4) ? height : 4;
-                int sizew = (width < 4) ? width : 4;
-
-                for (int j = 0; j < sizeh; j++)
-                {
-                    for (int k = 0; k < sizew; k++)
+                    for (int k = 0; k < 4; k++)
                     {
-                        RGBAColor color = colorArray[cData & 3];
-                        cData = cData >> 2;
-                        int temp = (((((yPos * 4) + j) * width) + (xPos * 4)) + k) * 4;
-                        float x = ((((float)color.R) / 255f) * 2f) - 1f;
-                        float y = ((((float)color.G) / 255f) * 2f) - 1f;
-                        float z = (float)Math.Sqrt((double)Math.Max(0f, Math.Min((float)1f, (float)((1f - (x * x)) - (y * y)))));
-                        buffer[temp] = (byte)(((z + 1f) / 2f) * 255f);
-                        buffer[temp + 1] = (byte)color.G;
-                        buffer[temp + 2] = (byte)color.R;
-                        buffer[temp + 3] = 0xFF;
+                        for (int m = 0; m < 4; m++)
+                        {
+                            int destIndex = ((width * ((i * 4) + k)) * 4) + (((j * 4) + m) * 4);
+
+                            RGBAColor vector = vectors[(int)(code & 3)];
+
+                            RGBAColor color;
+                            color.R = vector.R;
+                            color.G = vector.G;
+                            color.B = computeZ ? CalculateNormalZ(vector.R, vector.G) : (byte)0;
+                            color.A = 0xFF;
+
+                            if(swapXY)
+                                (color.R, color.G) = (color.G, color.R);
+
+                            buffer[destIndex + 0] = color.B;
+                            buffer[destIndex + 1] = color.G;
+                            buffer[destIndex + 2] = color.R;
+                            buffer[destIndex + 3] = color.A;
+
+                            code >>= 2;
+                        }
                     }
                 }
-                index += 8;
             }
             return buffer;
+        }
+
+        static byte CalculateNormalZ(byte r, float g)
+        {
+            float x = (r / 255f * 2f) - 1f;
+            float y = (g / 255f * 2f) - 1f;
+            float z = (float)Math.Sqrt(Math.Max(0f, Math.Min(1f, (1f - (x * x)) - (y * y))));
+            return (byte)(((z + 1f) / 2f) * 255f);
         }
 
         public static byte[] DecodeDxnSigned(byte[] data, int width, int height, bool swapRG = false)
@@ -294,7 +291,7 @@ namespace TagTool.Bitmaps
                 }
                 float gMin = DenormalizeSigned((sbyte)data[i + 8]);
                 float gMax = DenormalizeSigned((sbyte)data[i + 9]);
-   
+
                 byte[] gIndices = new byte[16];
                 temp = ((data[i + 12] << 16) | (data[i + 11] << 8)) | data[i + 10];
                 indices = 0;
@@ -567,7 +564,7 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[(alignedWidth * alignedHeight * DXNbpp) >> 3];
 
             int b = 0;  // buffer block index (dxn)
-            for(int i =0; i < ctx1ImageSize; i += CTX1TexelPitch, b += DXNTexelPitch)
+            for (int i = 0; i < ctx1ImageSize; i += CTX1TexelPitch, b += DXNTexelPitch)
             {
                 // convert X,Y min and max components (swap X and Y at the same time)
                 byte minX = data[i + 0];
@@ -579,10 +576,10 @@ namespace TagTool.Bitmaps
                 buffer[b + 1] = maxX;
                 buffer[b + 8] = minY;
                 buffer[b + 9] = maxY;
-                
+
                 byte[] Ctx1indices = new byte[16];
                 // convert indices
-                for(int k = 0; k < 4; k++)
+                for (int k = 0; k < 4; k++)
                 {
                     Ctx1indices[(k * 4 + 0)] = (byte)((data[i + 4 + k] & 0xC0) >> 6);
                     Ctx1indices[(k * 4 + 1)] = (byte)((data[i + 4 + k] & 0x30) >> 4);
@@ -626,11 +623,11 @@ namespace TagTool.Bitmaps
         {
             byte[] result = new byte[indices.Length];
 
-            for(int i = 0; i< 16; i++)
+            for (int i = 0; i < 16; i++)
             {
                 byte index = indices[i];
 
-                if(c0 > c1)
+                if (c0 > c1)
                 {
                     if (index == 2)
                         index = 4;
@@ -645,7 +642,7 @@ namespace TagTool.Bitmaps
                         index = 4;
                 }
 
-                result[i] = index; 
+                result[i] = index;
             }
             return result;
         }
@@ -849,6 +846,7 @@ namespace TagTool.Bitmaps
             }
             return buffer;
         }
+
         // TODO: fix/refactor
         private static byte[] DecodeDxt3(byte[] data, int width, int height)
         {
@@ -1495,30 +1493,30 @@ namespace TagTool.Bitmaps
                     data = EncodeV8U8(bitm, virtualWidth, virtualHeight);
                     break;
 
+                case BitmapFormat.Dxn:
+                    var dxnCompressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxn | SquishLib.SquishFlags.kSourceBgra, bitm, virtualWidth, virtualHeight);
+                    data = dxnCompressor.CompressTexture();
+                    break;
+
+                case BitmapFormat.Dxt1:
+                    var dxt1Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt1 | SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra, bitm, virtualWidth, virtualHeight);
+                    data = dxt1Compressor.CompressTexture();
+                    break;
+
+                case BitmapFormat.Dxt3:
+                    var dxt3Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt3 | SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra, bitm, virtualWidth, virtualHeight);
+                    data = dxt3Compressor.CompressTexture();
+                    break;
+
+                case BitmapFormat.Dxt5:
+                    var dxt5Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 | SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra, bitm, virtualWidth, virtualHeight);
+                    data = dxt5Compressor.CompressTexture();
+                    break;
+
                 default:
                     throw new NotSupportedException($"Unsupported bitmap format for encoding {format}.");
             }
             return data;
-        }
-
-        private static RGBAColor GradientColors(RGBAColor Color1, RGBAColor Color2)
-        {
-            RGBAColor color;
-            color.R = (byte)(((Color1.R * 2) + Color2.R) / 3);
-            color.G = (byte)(((Color1.G * 2) + Color2.G) / 3);
-            color.B = (byte)(((Color1.B * 2) + Color2.B) / 3);
-            color.A = 0xFF;
-            return color;
-        }
-
-        private static RGBAColor GradientColorsHalf(RGBAColor Color1, RGBAColor Color2)
-        {
-            RGBAColor color;
-            color.R = (byte)((Color1.R / 2) + (Color2.R / 2));
-            color.G = (byte)((Color1.G / 2) + (Color2.G / 2));
-            color.B = (byte)((Color1.B / 2) + (Color2.B / 2));
-            color.A = 0xFF;
-            return color;
         }
 
         private static byte[] ModifyLinearTexture(byte[] data, int width, int height, BitmapFormat texture, bool toLinear)
@@ -1646,129 +1644,6 @@ namespace TagTool.Bitmaps
             int Micro = (((offsetT & (((TexelPitch << 6) - 1) & ~31)) + ((offsetT & 15) << 1)) >> (3 + logBPP)) & ~1;
 
             return ((Macro + Micro) + ((offsetT & 16) >> 4));
-        }
-
-        public static byte[] Swizzle(byte[] raw, int offset, int width, int height, int depth, int bitCount, bool deswizzle)
-        {
-            if (raw.Length == 0)
-                return new byte[0];
-
-            if (depth < 1) depth = 1;
-
-            bitCount /= 8;
-            int a = 0, b = 0;
-            int tempsize = raw.Length; // width * height * bitCount;
-            byte[] data = new byte[tempsize];
-            MaskSet masks = new MaskSet(width, height, depth);
-
-            offset = 0;
-
-            for (int z = 0; z < depth; z++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        if (deswizzle)
-                        {
-                            a = ((((z * height) + y) * width) + x) * bitCount;
-                            b = Swizzle(x, y, z, masks) * bitCount;
-
-                            // a = ((y * width) + x) * bitCount;
-                            // b = (Swizzle(x, y, -1, masks)) * bitCount;
-                        }
-                        else
-                        {
-                            b = ((((z * height) + y) * width) + x) * bitCount;
-                            a = Swizzle(x, y, z, masks) * bitCount;
-
-                            // b = ((y * width) + x) * bitCount;
-                            // a = (Swizzle(x, y, -1, masks)) * bitCount;
-                        }
-
-                        for (int i = offset; i < bitCount + offset; i++)
-                            data[a + i] = raw[b + i];
-                    }
-                }
-            }
-
-            // for(int u = 0; u < offset; u++)
-            // data[u] = raw[u];
-            // for(int v = offset + (height * width * depth * bitCount); v < data.Length; v++)
-            // 	data[v] = raw[v];
-            return data;
-        }
-
-        private static int Swizzle(int x, int y, int z, MaskSet masks)
-        {
-            return SwizzleAxis(x, masks.x) | SwizzleAxis(y, masks.y) | (z == -1 ? 0 : SwizzleAxis(z, masks.z));
-        }
-
-        private static int SwizzleAxis(int val, int mask)
-        {
-            int bit = 1;
-            int result = 0;
-
-            while (bit <= mask)
-            {
-                int test = mask & bit;
-                if (test != 0) result |= val & bit;
-                else val <<= 1;
-
-                bit <<= 1;
-            }
-
-            return result;
-        }
-
-        private struct RGBAColor
-        {
-            public int R, G, B, A;
-
-            public RGBAColor(int Red, int Green, int Blue, int Alpha)
-            {
-                R = Red;
-                G = Green;
-                B = Blue;
-                A = Alpha;
-            }
-        }
-
-        private class MaskSet
-        {
-            public readonly int x;
-            public readonly int y;
-            public readonly int z;
-
-            public MaskSet(int w, int h, int d)
-            {
-                int bit = 1;
-                int index = 1;
-
-                while (bit < w || bit < h || bit < d)
-                {
-                    // if (bit == 0) { break; }
-                    if (bit < w)
-                    {
-                        x |= index;
-                        index <<= 1;
-                    }
-
-                    if (bit < h)
-                    {
-                        y |= index;
-                        index <<= 1;
-                    }
-
-                    if (bit < d)
-                    {
-                        z |= index;
-                        index <<= 1;
-                    }
-
-                    bit <<= 1;
-                }
-            }
         }
     }
 }

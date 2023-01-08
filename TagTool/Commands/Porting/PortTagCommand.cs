@@ -327,6 +327,12 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            if(definition is AreaScreenEffect sefc)
+            {
+                foreach (var screenEffect in sefc.ScreenEffects)
+                    screenEffect.ContrastEnhance = 0;
+            }
+
             if(definition is Scenario scenario)
             {
                 scenario.Bipeds.Clear();
@@ -493,6 +499,16 @@ namespace TagTool.Commands.Porting
                         if (name == "decal_system")
                             part.Type = null;
                     }
+            }
+
+            if (definition is Equipment eqip)
+            {
+                eqip.UseDuration = 5;
+                eqip.NumberOfUses = 1;
+                Enum.TryParse(eqip.EquipmentFlagsReach.ToString(), out eqip.EquipmentFlags);
+
+                if (eqip.EquipmentFlagsReach.HasFlag(Equipment.EquipmentFlagBitsReach.ThirdPersonCameraWhileActive))
+                    eqip.EquipmentFlags |= Equipment.EquipmentFlagBits.ThirdPersonCameraAlways;
             }
         }
 
@@ -1011,9 +1027,9 @@ namespace TagTool.Commands.Porting
 
                                 foreach (var target in hlmt.Targets)
                                 {
-                                    if (target.TargetFilter == StringId.Invalid && CacheContext.StringTable.GetString(target.MarkerName) == "target_main")
+                                    if (target.LockOnData.TrackingType == StringId.Invalid && CacheContext.StringTable.GetString(target.MarkerName) == "target_main")
                                     {
-                                        target.TargetFilter = CacheContext.StringTable.GetStringId("bipeds");
+                                        target.LockOnData.TrackingType = CacheContext.StringTable.GetStringId("bipeds");
                                     }
                                 }
 
@@ -1075,10 +1091,10 @@ namespace TagTool.Commands.Porting
                     {
                         if (BlamCache.Version <= CacheVersion.Halo3ODST)
                         {
-                            if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetLockOnFlags.FlagsValue.LockedByHumanTracking))
-                                target.TargetFilter = CacheContext.StringTable.GetStringId("flying_vehicles");
-                            else if (target.LockOnFlags.Flags.HasFlag(Model.Target.TargetLockOnFlags.FlagsValue.LockedByPlasmaTracking))
-                                target.TargetFilter = CacheContext.StringTable.GetStringId("bipeds");
+                            if (target.LockOnData.FlagsOld.HasFlag(Model.TargetLockOnData.FlagsValueOld.LockedByHumanTracking))
+                                target.LockOnData.TrackingType = CacheContext.StringTable.GetStringId("flying_vehicles");
+                            else if (target.LockOnData.FlagsOld.HasFlag(Model.TargetLockOnData.FlagsValueOld.LockedByPlasmaTracking))
+                                target.LockOnData.TrackingType = CacheContext.StringTable.GetStringId("bipeds");
                         }
                     }
                     if(BlamCache.Version >= CacheVersion.HaloReach)
@@ -1483,10 +1499,17 @@ namespace TagTool.Commands.Porting
                 case DamageReportingType damageReportingType:
 					return ConvertDamageReportingType(damageReportingType);
 
-                case GameObjectType gameObjectType:
-					return ConvertGameObjectType(gameObjectType);
+                case GameObjectType8 gameObjectType:
+                    gameObjectType.SetValue(CacheContext.Version, gameObjectType.GetValue(BlamCache.Version));
+                    return gameObjectType;
+                case GameObjectType16 gameObjectType:
+                    gameObjectType.SetValue(CacheContext.Version, gameObjectType.GetValue(BlamCache.Version));
+                    return gameObjectType;
+                case GameObjectType32 gameObjectType:
+                    gameObjectType.SetValue(CacheContext.Version, gameObjectType.GetValue(BlamCache.Version));
+                    return gameObjectType;
 
-				case ObjectTypeFlags objectTypeFlags:
+                case ObjectTypeFlags objectTypeFlags:
 					return ConvertObjectTypeFlags(objectTypeFlags);
 
                 case GameObject.MultiplayerObjectBlock multiplayer when BlamCache.Version >= CacheVersion.HaloReach:
@@ -1511,19 +1534,11 @@ namespace TagTool.Commands.Porting
                 case BarrelFlags barrelflags:
                     return ConvertBarrelFlags(barrelflags);
 
-                case Model.Target.TargetLockOnFlags targetflags:
-                    return ConvertTargetFlags(targetflags);
-
-                case RenderMaterial.PropertyType propertyType when BlamCache.Version < CacheVersion.Halo3Retail:
-					if (!Enum.TryParse(propertyType.Halo2.ToString(), out propertyType.Halo3))
-						throw new NotSupportedException(propertyType.Halo2.ToString());
-					return propertyType;
+                case Model.TargetLockOnData lockOnData:
+                    return ConvertTargetLockOnData(lockOnData);
 
 				case RenderMethod renderMethod:
                     return ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderMethod, definition, blamTagName);
-
-				case ScenarioObjectType scenarioObjectType:
-					return ConvertScenarioObjectType(scenarioObjectType);
 
                 case Scenario.MultiplayerObjectProperties scnrObj when BlamCache.Version >= CacheVersion.HaloReach:
                     {
@@ -1882,16 +1897,11 @@ namespace TagTool.Commands.Porting
             return barrelflags;
         }
 
-        private object ConvertTargetFlags(Model.Target.TargetLockOnFlags target)
+        private object ConvertTargetLockOnData(Model.TargetLockOnData data)
         {
-            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
-                return target;
-
-            if (BlamCache.Version <= CacheVersion.Halo3ODST)
-                if (!Enum.TryParse(target.Flags.ToString(), out target.Flags_HO))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            return target;
+            if(BlamCache.Version < CacheVersion.HaloOnlineED)
+                data.Flags = data.FlagsOld.ConvertLexical<Model.TargetLockOnData.FlagsValue>();
+            return data;
         }
 
         private PhysicsModel.PhantomTypeFlags ConvertPhantomTypeFlags(string tagName, PhysicsModel.PhantomTypeFlags flags)
@@ -1927,6 +1937,15 @@ namespace TagTool.Commands.Porting
                     if (!Enum.TryParse(flags.Halo3Retail.ToString(), out flags.Halo3ODST))
                         throw new FormatException(BlamCache.Version.ToString());
                     break;
+                case CacheVersion.HaloReach:
+                    {
+                        flags.HaloReach &= ~PhysicsModel.PhantomTypeFlags.HaloReachBits.IgnoresGarbage;
+                        flags.HaloReach &= ~PhysicsModel.PhantomTypeFlags.HaloReachBits.IgnoresGroundedBipeds;
+
+                        if (!Enum.TryParse(flags.HaloReach.ToString(), out flags.Halo3ODST))
+                            throw new FormatException(BlamCache.Version.ToString());
+                    }
+                    break;
             }
 
             return flags;
@@ -1935,50 +1954,6 @@ namespace TagTool.Commands.Porting
 		private TagFunction ConvertTagFunction(TagFunction function)
 		{
 			return TagFunction.ConvertTagFunction(CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian, function);
-		}
-
-        private GameObjectType ConvertGameObjectType(GameObjectType objectType)
-		{
-            if (BlamCache.Version <= CacheVersion.Halo2Vista)
-                if (!Enum.TryParse(objectType.Halo2.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
-				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
-					throw new FormatException(BlamCache.Version.ToString());
-
-            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
-                if (!Enum.TryParse(objectType.HaloOnline.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            if (BlamCache.Version >= CacheVersion.HaloReach)
-                if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            // todo: properly convert type
-            if (BlamCache.Endianness != CacheContext.Endianness && BlamCache.Endianness == EndianFormat.BigEndian)
-                objectType.Unknown2 = objectType.Unknown1;
-            else if (BlamCache.Endianness != CacheContext.Endianness)
-                objectType.Unknown1 = objectType.Unknown2;
-
-            return objectType;
-		}
-
-		private ScenarioObjectType ConvertScenarioObjectType(ScenarioObjectType objectType)
-        {
-            if (BlamCache.Version <= CacheVersion.Halo2Vista)
-                if (!Enum.TryParse(objectType.Halo2.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            if (BlamCache.Version == CacheVersion.Halo3Retail)
-				if (!Enum.TryParse(objectType.Halo3Retail.ToString(), out objectType.Halo3ODST))
-					throw new FormatException(BlamCache.Version.ToString());
-
-            if (BlamCache.Version >= CacheVersion.HaloReach)
-                if (!Enum.TryParse(objectType.HaloReach.ToString(), out objectType.Halo3ODST))
-                    throw new FormatException(BlamCache.Version.ToString());
-
-            return objectType;
 		}
 
 		private StringId ConvertStringId(StringId stringId)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Common;
+using TagTool.Serialization;
 using TagTool.Tags;
 
 namespace TagTool.Cache.HaloOnline
@@ -28,12 +29,14 @@ namespace TagTool.Cache.HaloOnline
         public ResourceCachesHaloOnline(GameCacheHaloOnlineBase cache)
         {
             Cache = cache;
+            Serializer = new ResourceSerializer(Cache.Version, Cache.Platform);
+            Deserializer = new ResourceDeserializer(Cache.Version, Cache.Platform);
             Directory = Cache.Directory;
         }
 
-        public override Stream OpenCacheRead(ResourceLocation location) => LoadResourceCache(location).File.OpenRead();
+        public override Stream OpenCacheRead(ResourceLocation location) => LoadResourceCache(location).File.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
-        public override Stream OpenCacheReadWrite(ResourceLocation location) => LoadResourceCache(location).File.Open(FileMode.Open, FileAccess.ReadWrite);
+        public override Stream OpenCacheReadWrite(ResourceLocation location) => LoadResourceCache(location).File.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
         public override Stream OpenCacheWrite(ResourceLocation location) => LoadResourceCache(location).File.OpenWrite();
 

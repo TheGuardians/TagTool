@@ -16,10 +16,13 @@ namespace TagTool.Commands.Porting
         public string ReachLightmapCache = null;
 
         [Description("Enable reach decorator porting (WIP)")]
-        public bool ReachDecorators = false;
+        public bool ReachDecorators = true;
 
         [Description("Enable legacy Gen1 collision BSP generator")]
         public bool Gen1Collision = false;
+
+        [Description("Convert CTX1 bitmaps to DXN (default is DXT1)")]
+        public bool HqNormalMapConversion = false;
 
         public static PortingOptions Current = new PortingOptions();
     }

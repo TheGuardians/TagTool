@@ -193,6 +193,32 @@ namespace TagTool.Havok
         public RealQuaternion AabbHalfExtents;
         public RealQuaternion AAbbCenter;
     }
+
+    [TagStructure(Size = 0x14, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x28, Platform = CachePlatform.MCC)]
+    public class HkConvexShape : TagStructure
+    {
+        public HkpShape Base;
+        public float Radius;
+    }
+
+    [TagStructure(Size = 0x60, Align = 16, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x80, Align = 16, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
+    [TagStructure(Size = 0x70, Align = 16, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x90, Align = 16, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+    public class HkConvexVerticesShape : TagStructure
+    {
+        public HkConvexShape Base;
+        [TagField(Align = 16)]
+        public RealQuaternion AabbHalfExtents;
+        public RealQuaternion AabbCenter;
+        public HkArrayBase FourVectors;
+        public int NumVertices;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public PlatformUnsignedValue ConvexPiecePtr;
+        public HkArrayBase PlaneEquations;
+        public PlatformUnsignedValue Connectivity;
+    }
 }
 
 namespace TagTool.Havok.Gen2

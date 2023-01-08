@@ -27,8 +27,24 @@ namespace TagTool.Tags.Definitions
         public float RuntimeMaxRadius;
 
         [Flags]
-        public enum DecalSystemFlags : int
+        public enum DecalSystemFlags : uint
         {
+            RandomRotation = 1 << 0,
+            RandomUMirror = 1 << 1,
+            RandomVMirror = 1 << 2,
+            ForceQuaduseWithCare = 1 << 3,
+            ForcePlanar = 1 << 4,
+            RestrictToSingleMaterial = 1 << 5,
+            UsePrimaryCollisionOnly = 1 << 6,
+            DontCollideWithStructure = 1 << 7,
+            DontCollideWithInstances = 1 << 8,
+            DrawsOnlyInVisionMode = 1 << 9,
+        }
+
+        [Flags]
+        public enum DecalSystemFlagsReach : uint
+        {
+            // TODO: conversion
             RandomRotation = 1 << 0,
             RandomUMirror = 1 << 1,
             RandomVMirror = 1 << 2,
@@ -86,7 +102,9 @@ namespace TagTool.Tags.Definitions
                 SpecularModulate = 1 << 0,
                 BumpModulate = 1 << 1,
                 RandomSpriteSequence = 1 << 2,
-                AdditiveBlendMode = 1 << 3
+                AdditiveBlendMode = 1 << 3,
+                Bit4 = 1 << 4,
+                Bit5 = 1 << 5
             }
 
             public enum DecalPass : uint

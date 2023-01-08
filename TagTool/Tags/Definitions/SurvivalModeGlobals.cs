@@ -7,19 +7,28 @@ using System;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x4C, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-    [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x64, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x58, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "survival_mode_globals", Tag = "smdt", Size = 0x48, MinVersion = CacheVersion.HaloOnlineED)]
     public class SurvivalModeGlobals : TagStructure
     {
+        [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        [TagField(Version = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public uint Unknown;
+
         [TagField(ValidTags = new [] { "unic" })] public CachedTag SurvivalModeStrings;
         [TagField(ValidTags = new [] { "snd!" })] public CachedTag CountdownSound;
         [TagField(ValidTags = new [] { "snd!" })] public CachedTag RespawnSound;
 
         public List<SurvivalEvent> SurvivalEvents;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Version = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
         public List<ArmorCustomization> ArmorCustomizations;
+
+        [TagField(Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+        public List<Wave> Waves;
+
+        [TagField(ValidTags = new[] { "sdzg" }, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+        public CachedTag RequiredResources;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public uint UnknownHO;
@@ -176,6 +185,15 @@ namespace TagTool.Tags.Definitions
                     }
                 }
             }
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class Wave
+        {
+            public StringId Name;
+
+            [TagField(ValidTags = new[] { "wave" })]
+            public CachedTag WaveTemplate;
         }
     }
 }

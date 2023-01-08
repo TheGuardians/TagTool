@@ -14,7 +14,11 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "physics_model", Tag = "phmo", Size = 0x19C, MinVersion = CacheVersion.HaloReach)]
     public class PhysicsModel : TagStructure
 	{
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public PhysicsModelFlags Flags;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public ReachPhysicsModelFlags FlagsReach;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float MassScale;
@@ -33,7 +37,7 @@ namespace TagTool.Tags.Definitions
 		public sbyte ImportVersion;
 
         [TagField(Flags = Padding, Length = 3, MinVersion = CacheVersion.Halo3Retail)]
-        public byte[] Unused;
+        public byte[] Padding0;
 
         public List<DampedSpringMotor> DampedSpringMotors;
         public List<PositionMotor> PositionMotors;
@@ -101,6 +105,12 @@ namespace TagTool.Tags.Definitions
             UsePhysicsForCollision = 1 << 3
         }
 
+        [Flags]
+        public enum ReachPhysicsModelFlags : uint
+        {
+            MoppCodesDirty = 1 << 0
+        }
+
         [TagStructure(Size = 0x18)]
         public class DampedSpringMotor : TagStructure
 		{
@@ -137,8 +147,11 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
             public Halo3ODSTBits Halo3ODST;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+            [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
             public HaloOnlineBits HaloOnline;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public HaloReachBits HaloReach;
 
             [Flags]
             public enum Halo2Bits : uint
@@ -152,7 +165,7 @@ namespace TagTool.Tags.Definitions
                 IgnoresBipeds = 1u << 5,
                 IgnoresVehicles = 1u << 6,
                 IgnoresWeapons = 1u << 7,
-                IgnoresEquipement = 1u << 8,
+                IgnoresEquipment = 1u << 8,
                 IgnoresGarbage = 1u << 9,
                 IgnoresProjectiles = 1u << 10,
                 IgnoresScenery = 1u << 11,
@@ -162,11 +175,11 @@ namespace TagTool.Tags.Definitions
                 IgnoresSoundScenery = 1u << 15,
                 IgnoresCrates = 1u << 16,
                 IgnoresCreatures = 1u << 17,
-                Unknown19 = 1u << 19,
-                Unknown20 = 1u << 20,
-                Unknown21 = 1u << 21,
-                Unknown22 = 1u << 22,
-                Unknown23 = 1u << 23,
+                Unused0 = 1u << 19,
+                Unused1 = 1u << 20,
+                Unused2 = 1u << 21,
+                Unused3 = 1u << 22,
+                Unused4 = 1u << 23,
                 LocalizesPhysics = 1 << 24,
                 DisableLinearDamping = 1 << 25,
                 DisableAngularDamping = 1 << 26,
@@ -189,7 +202,7 @@ namespace TagTool.Tags.Definitions
                 IgnoresBipeds = 1u << 5,
                 IgnoresVehicles = 1u << 6,
                 IgnoresWeapons = 1u << 7,
-                IgnoresEquipement = 1u << 8,
+                IgnoresEquipment = 1u << 8,
                 IgnoresTerminals = 1u << 9,
                 IgnoresProjectiles = 1u << 10,
                 IgnoresScenery = 1u << 11,
@@ -200,19 +213,19 @@ namespace TagTool.Tags.Definitions
                 IgnoresCreatures = 1u << 16,
                 IgnoresGiants = 1u << 17,
                 IgnoresEffectScenery = 1u << 18,
-                Unused1 = 1u << 19,     
-                Unknown1 = 1u << 20,
-                Unknown2 = 1u << 21,
-                Unknown3 = 1u << 22,
-                Unknown4 = 1u << 23,
+                Unused0 = 1u << 19,     
+                Unused1 = 1u << 20,
+                Unused2 = 1u << 21,
+                Unused3 = 1u << 22,
+                Unused4 = 1u << 23,
                 LocalizesPhysics = 1u << 24,
                 DisableLinearDamping = 1u << 25,
                 DisableAngularDamping = 1u << 26,
                 IgnoresDeadBipeds = 1u << 27,
-                Unknown5 = 1u << 28,
-                Unknown6 = 1u << 29,
-                Unknown7 = 1u << 30,
-                AccelerateAlongInputDirection = 1u << 31
+                ReciprocalAcc = 1u << 28,
+                ReciprocalAccOnly = 1u << 29,
+                LatchingDisabled = 1u << 30,
+                MirroredAxis = 1u << 31
             }
 
             [Flags]
@@ -227,7 +240,7 @@ namespace TagTool.Tags.Definitions
                 IgnoresBipeds = 1u << 5,
                 IgnoresVehicles = 1u << 6,
                 IgnoresWeapons = 1u << 7,
-                IgnoresEquipement = 1u << 8,
+                IgnoresEquipment = 1u << 8,
                 IgnoresARGDevices = 1u << 9,
                 IgnoresTerminals = 1u << 10,
                 IgnoresProjectiles = 1u << 11,
@@ -239,18 +252,18 @@ namespace TagTool.Tags.Definitions
                 IgnoresCreatures = 1u << 17,
                 IgnoresGiants = 1u << 18,
                 IgnoresEffectScenery = 1u << 19,
-                Unknown1 = 1u << 20,
-                Unknown2 = 1u << 21,
-                Unknown3 = 1u << 22,
-                Unknown4 = 1u << 23,
+                Unused0 = 1u << 20,
+                Unused1 = 1u << 21,
+                Unused2 = 1u << 22,
+                Unused3 = 1u << 23,
                 LocalizesPhysics = 1u << 24,
                 DisableLinearDamping = 1 << 25,
                 DisableAngularDamping = 1 << 26,
                 IgnoresDeadBipeds = 1u << 27,
-                Unknown5 = 1u << 28,
-                Unknown6 = 1u << 29,
-                Unknown7 = 1u << 30,
-                AccelerateAlongInputDirection = 1u << 31
+                ReciprocalAcc = 1u << 28,
+                ReciprocalAccOnly = 1u << 29,
+                LatchingDisabled = 1u << 30,
+                MirroredAxis = 1u << 31
             }
 
             [Flags]
@@ -266,7 +279,7 @@ namespace TagTool.Tags.Definitions
                 IgnoresVehicles = 1u << 6,
                 IgnoresWeapons = 1u << 7,
                 IgnoresArmor = 1u << 8,
-                IgnoresEquipement = 1u << 9,
+                IgnoresEquipment = 1u << 9,
                 IgnoresARGDevices = 1u << 10,
                 IgnoresTerminals = 1u << 11,
                 IgnoresProjectiles = 1u << 12,
@@ -278,17 +291,53 @@ namespace TagTool.Tags.Definitions
                 IgnoresCreatures = 1u << 18,
                 IgnoresGiants = 1u << 19,
                 IgnoresEffectScenery = 1u << 20,
-                Unknown21 = 1u << 21,
-                Unknown22 = 1u << 22,
-                Unknown23 = 1u << 23,
+                Unused0 = 1u << 21,
+                Unused1 = 1u << 22,
+                Unused2 = 1u << 23,
                 LocalizesPhysics = 1u << 24,
                 DisableLinearDamping = 1 << 25,
                 DisableAngularDamping = 1 << 26,
                 Unknown27 = 1 << 27,
                 IgnoresDeadBipeds = 1u << 28,
-                Unknown29 = 1u << 29,
-                Unknown30 = 1u << 30,
-                AccelerateAlongInputDirection = 1u << 31
+                ReciprocalAcc = 1u << 29,
+                ReciprocalAccOnly = 1u << 30,
+                MirroredAxis = 1u << 31
+            }
+            [Flags]
+            public enum HaloReachBits : uint
+            {
+                GeneratesEffects = 1 << 0,
+                UseAccelerationAsForce = 1 << 1,
+                NegatesGravity = 1 << 2,
+                IgnoresPlayers = 1 << 3,
+                IgnoresNonPlayers = 1 << 4,
+                IgnoresBipeds = 1 << 5,
+                IgnoresVehicles = 1 << 6,
+                IgnoresWeapons = 1 << 7,
+                IgnoresEquipment = 1 << 8,
+                IgnoresGarbage = 1 << 9,
+                IgnoresProjectiles = 1 << 10,
+                IgnoresScenery = 1 << 11,
+                IgnoresMachines = 1 << 12,
+                IgnoresControls = 1 << 13,
+                IgnoresSoundScenery = 1 << 14,
+                IgnoresCrates = 1 << 15,
+                IgnoresCreatures = 1 << 16,
+                IgnoresGiants = 1 << 17,
+                IgnoresEffectScenery = 1 << 18,
+                Unused0 = 1 << 19,
+                Unused1 = 1 << 20,
+                Unused2 = 1 << 21,
+                Unused3 = 1 << 22,
+                IgnoresGroundedBipeds = 1 << 23,
+                LocalizesPhysics = 1 << 24,
+                DisableLinearDamping = 1 << 25,
+                DisableAngularDamping = 1 << 26,
+                IgnoresDeadBipeds = 1 << 27,
+                ReciprocalAcc = 1 << 28,
+                ReciprocalAccOnly = 1 << 29,
+                LatchingDisabled = 1 << 30,
+                MirroredAxis = 1u << 31
             }
         }
 
@@ -308,19 +357,21 @@ namespace TagTool.Tags.Definitions
         public class PhantomType : TagStructure
 		{
             public PhantomTypeFlags Flags;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float BrittleTimer;
+
             public PhantomTypeSize MinimumSize;
             public PhantomTypeSize MaximumSize;
 
             [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused1;
+            public byte[] Padding0;
 
             public StringId MarkerName;
             public StringId AlignmentMarkerName;
 
             [TagField(Flags = Padding, Length = 8)]
-            public byte[] Unused2;
+            public byte[] Padding1;
 
             public float HookesLawE;
             public float LinearDeadRadius;
@@ -332,14 +383,14 @@ namespace TagTool.Tags.Definitions
             public float DirectionMaxVelocity;
 
             [TagField(Flags = Padding, Length = 28)]
-            public byte[] Unused3;
+            public byte[] Padding2;
 
             public float AlignmentHookesLawE;
             public float AlignmentAcceleration;
             public float AlignmentMaxVelocity;
 
             [TagField(Flags = Padding, Length = 8)]
-            public byte[] Unused4;
+            public byte[] Padding3;
         }
 
         public enum ConstraintType : short
@@ -636,7 +687,7 @@ namespace TagTool.Tags.Definitions
             public short Count;
             public PlatformUnsignedValue Userdata;
             public int Type;
-            [TagField(Length = 4, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+            [TagField(Length = 4, Flags = Padding, Platform = CachePlatform.MCC)]
             public byte[] Padding1;
         }
 
@@ -763,11 +814,11 @@ namespace TagTool.Tags.Definitions
         public class PolyhedronFourVector : TagStructure
 		{
             public RealVector3d FourVectorsX;
-            public float FourVectorsXRadius;
+            public float FourVectorsXW;
             public RealVector3d FourVectorsY;
-            public float FourVectorsYRadius;
+            public float FourVectorsYW;
             public RealVector3d FourVectorsZ;
-            public float FourVectorsZRadius;
+            public float FourVectorsZW;
         }
 
         [TagStructure(Size = 0x10, Align = 0x10)]

@@ -13,6 +13,8 @@ namespace TagTool.Cache.HaloOnline
     public abstract class ResourceCachesHaloOnlineBase : ResourceCache
     {
         public GameCacheHaloOnlineBase Cache;
+        public TagDeserializer Deserializer;
+        public TagSerializer Serializer;
 
         public PageableResource GetPageableResource(TagResourceReference resourceReference)
         {
@@ -168,8 +170,7 @@ namespace TagTool.Cache.HaloOnline
             using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
             {
                 var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
-                var serializer = new ResourceSerializer(Cache.Version, Cache.Platform);
-                serializer.Serialize(context, resourceDefinition);
+                Serializer.Serialize(context, resourceDefinition);
 
                 var data = dataStream.ToArray();
                 var definitionData = definitionStream.ToArray();
@@ -279,10 +280,9 @@ namespace TagTool.Cache.HaloOnline
             using (var dataReader = new EndianReader(dataStream, EndianFormat.LittleEndian))
             {
                 var context = new ResourceDefinitionSerializationContext(dataReader, definitionDataReader, tagResource.DefinitionAddress.Type);
-                var deserializer = new ResourceDeserializer(Cache.Version, Cache.Platform);
                 // deserialize without access to the data
                 definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
-                return deserializer.Deserialize(context, definitionType);
+                return Deserializer.Deserialize(context, definitionType);
             }
         }
 
@@ -366,8 +366,7 @@ namespace TagTool.Cache.HaloOnline
             using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
             {
                 var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
-                var serializer = new ResourceSerializer(Cache.Version, Cache.Platform);
-                serializer.Serialize(context, resourceDefinition);
+                Serializer.Serialize(context, resourceDefinition);
 
                 var data = dataStream.ToArray();
                 var definitionData = definitionStream.ToArray();

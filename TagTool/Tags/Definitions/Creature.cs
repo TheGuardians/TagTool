@@ -72,14 +72,29 @@ namespace TagTool.Tags.Definitions
     }
 
     [Flags]
-    public enum CreatureFlags : int
+    public enum CreatureFlags : uint
     {
         None = 0,
-        ImmuneToFallingDamage = 1 << 0,
-        RotateWhileAirborne = 1 << 1,
-        ZappedByShields = 1 << 2,
-        AttachUponImpact = 1 << 3,
-        NotOnMotionSensor = 1 << 4,
-        ForceGroundMovement = 1 << 5
+        Unused = 1 << 0,
+        InfectionForm = 1 << 1,
+        ImmuneToFallingDamage = 1 << 2,
+        RotateWhileAirborne = 1 << 3,
+        ZappedByShields = 1 << 4,
+        AttachUponImpact = 1 << 5,
+        NotOnMotionSensor = 1 << 6
+    }
+
+    [Flags]
+    public enum CreatureFlagsReach : uint
+    {
+        // TODO: convert
+        None = 0,
+        Unused = 1 << 0,
+        ImmuneToFallingDamage = 1 << 1,
+        RotateWhileAirborne = 1 << 2,
+        ZappedByShields = 1 << 3,
+        AttachUponImpact = 1 << 4,
+        NotOnMotionSensor = 1 << 5,
+        ForceGroundMovement = 1 << 6
     }
 }

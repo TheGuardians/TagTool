@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry;
@@ -33,49 +34,40 @@ namespace TagTool.Commands.Porting
                 {
                     var buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.Gen3Info.VertexBufferIndex].Definition;
                         
-                    if(BlamCache.Version >= CacheVersion.HaloReach)
+                    var offset = grid.VertexBufferOffset;
+                    grid.Vertices = new List<TinyPositionVertex>();
+                    using (var stream = new MemoryStream(buffer.Data.Data))
                     {
-                        grid.HaloOnlineInfo = new ScenarioStructureBsp.Cluster.DecoratorGrid.HaloOnlineDecoratorInfo()
-                        {
-                            PaletteIndex = grid.Gen3Info.PaletteIndex,
-                            Variant = 0,
-                            VertexBufferIndex = grid.Gen3Info.VertexBufferIndex
-                        };
-                        grid.GridSize *= 1.0f / ushort.MaxValue;
-                        newDecoratorGrids.Add(grid);
+                        var vertexStream = VertexStreamFactory.Create(BlamCache.Version, BlamCache.Platform, stream);
+                        stream.Position = offset;
+
+                        for (int i = 0; i < grid.Amount; i++)
+                            grid.Vertices.Add(vertexStream.ReadTinyPositionVertex());
                     }
+
+                    if (grid.Amount == 0)
+                        newDecoratorGrids.Add(grid);
                     else
                     {
-                        var offset = grid.VertexBufferOffset;
-                        grid.Vertices = new List<TinyPositionVertex>();
-                        using (var stream = new MemoryStream(buffer.Data.Data))
-                        {
-                            var vertexStream = VertexStreamFactory.Create(BlamCache.Version, BlamCache.Platform, stream);
-                            stream.Position = offset;
+                        // Get the new grids
+                        var newGrids = ConvertDecoratorGrid(grid.Vertices, grid);
 
-                            for (int i = 0; i < grid.Amount; i++)
-                                grid.Vertices.Add(vertexStream.ReadTinyPositionVertex());
-                        }
-
-                        if (grid.Amount == 0)
-                            newDecoratorGrids.Add(grid);
-                        else
-                        {
-                            // Get the new grids
-                            var newGrids = ConvertDecoratorGrid(grid.Vertices, grid);
-
-                            // Add all to list
-                            foreach (var newGrid in newGrids)
-                                newDecoratorGrids.Add(newGrid);
-                        }
+                        // Add all to list
+                        foreach (var newGrid in newGrids)
+                            newDecoratorGrids.Add(newGrid);
                     }
                 }
                 cluster.DecoratorGrids = newDecoratorGrids;
                 
-                if (BlamCache.Version >= CacheVersion.HaloReach)
+                if(CacheContext.Version == CacheVersion.HaloOnlineED && BlamCache.Version < CacheVersion.HaloReach)
                 {
                     foreach (var cubemap in cluster.ClusterCubemaps)
-                        cubemap.Position = cubemap.ReferencePoints[0].ReferencePoint;
+                    {
+                        cubemap.ReferencePoints = new List<ScenarioStructureBsp.Cluster.StructureClusterCubemap.CubemapReferencePointsBlock>()
+                        {
+                            new ScenarioStructureBsp.Cluster.StructureClusterCubemap.CubemapReferencePointsBlock() { ReferencePoint = cubemap.Position }
+                        };
+                    }
                 }
             }
 
@@ -90,7 +82,7 @@ namespace TagTool.Commands.Porting
             sbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(geometry);
 
             sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp, out StructureBspTagResources sbspTagResources);
-            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, instance);
+            sbsp.PathfindingResource = ConvertStructureBspCacheFileTagResources(sbsp, sbspTagResources, instance);
             sbsp.UseResourceItems = 1;
 
             //
@@ -108,23 +100,62 @@ namespace TagTool.Commands.Porting
             //
 
             // Without this 005_intro crash on cortana sbsp       
-            sbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
+            sbsp.Geometry.MeshClusterVisibility = new List<RenderGeometry.PerMeshMoppBlock>();
 
             if (BlamCache.Version >= CacheVersion.HaloReach)
             {
                 // Temporary fix for collision - prior to sbsp version 3, instance buckets were used for collision
                 sbsp.ImportVersion = 2;
-                InstanceBucketGenerator.Generate(sbsp, sbspTagResources);
 
+                ConvertInstanceBucketsReach(sbsp, sbspTagResources);
                 ConvertReachEnvironmentMopp(sbsp);
             }
 
             return sbsp;
         }
 
-        public CollisionBspPhysicsDefinition ConvertCollisionBspPhysicsReach(CollisionBspPhysicsReach bspPhysicsReach)
+        void ConvertInstanceBucketsReach(ScenarioStructureBsp sbsp, StructureBspTagResources resources)
         {
-            var bspPhysics = new CollisionBspPhysicsDefinition();
+            for (int i = 0; i < sbsp.Clusters.Count; i++)
+            {
+                var cluster = sbsp.Clusters[i];
+                var clusterMesh = sbsp.Geometry.Meshes[cluster.MeshIndex];
+
+                clusterMesh.InstanceBuckets = new List<Mesh.InstancedBucketBlock>();
+
+                var instanceGroupSphere = sbsp.ClusterToInstanceGroupSpheres[i];
+                for (int j = 0; j < instanceGroupSphere.InstanceGroupIndices.Count; j++)
+                {
+                    var instanceSphere = sbsp.InstanceGroupToInstanceSpheres[instanceGroupSphere.InstanceGroupIndices[j].Index];
+                    for (int k = 0; k < instanceSphere.InstanceIndices.Count; k++)
+                    {
+                        int instanceIndex = instanceSphere.InstanceIndices[k].Index;
+                        if (instanceIndex < 0 || instanceIndex >= sbsp.InstancedGeometryInstances.Count)
+                            continue;
+
+                        var instance = sbsp.InstancedGeometryInstances[instanceIndex];
+                        var defintion = resources.InstancedGeometry[instance.DefinitionIndex];
+
+                        var instanceBucket = clusterMesh.InstanceBuckets.FirstOrDefault(x => x.MeshIndex == defintion.MeshIndex && x.DefinitionIndex == instance.DefinitionIndex);
+                        if (instanceBucket == null)
+                        {
+                            instanceBucket = new Mesh.InstancedBucketBlock();
+                            instanceBucket.MeshIndex = defintion.MeshIndex;
+                            instanceBucket.DefinitionIndex = instance.DefinitionIndex;
+                            instanceBucket.Instances = new List<Mesh.InstancedBucketBlock.InstanceIndexBlock>();
+                            clusterMesh.InstanceBuckets.Add(instanceBucket);
+                        }
+
+                        if(!instanceBucket.Instances.Any(x => x.InstanceIndex == instanceIndex))
+                            instanceBucket.Instances.Add(new Mesh.InstancedBucketBlock.InstanceIndexBlock() { InstanceIndex = (short)instanceIndex });
+                    }
+                }
+            }
+        }
+
+        public InstancedGeometryPhysics ConvertCollisionBspPhysicsReach(InstancedGeometryPhysicsReach bspPhysicsReach)
+        {
+            var bspPhysics = new InstancedGeometryPhysics();
             bspPhysics.MoppBvTreeShape = new Havok.CMoppBvTreeShape()
             {
                 ReferencedObject = new Havok.HkpReferencedObject(),
@@ -139,15 +170,7 @@ namespace TagTool.Commands.Porting
             else if (bspPhysicsReach.PoopShape.Count > 0)
             {
                 var poop = bspPhysicsReach.PoopShape[0];
-                bspPhysics.GeometryShape = new CollisionGeometryShape()
-                {
-                    ReferencedObject = new Havok.HkpReferencedObject(),
-                    Type = 2,
-                    AABB_Center = poop.AabbCenter,
-                    AABB_Half_Extents = poop.AabbHalfExtents,
-                    CollisionGeometryShapeType = 2,
-                    Scale = poop.Scale
-                };
+                bspPhysics.PoopShape = new TagTool.Tags.TagBlock<DecomposedPoopShape>() { poop };
             }
 
             return bspPhysics;
@@ -171,6 +194,9 @@ namespace TagTool.Commands.Porting
                 newGrid.HaloOnlineInfo.PaletteIndex = grid.Gen3Info.PaletteIndex;
                 newGrid.HaloOnlineInfo.VertexBufferIndex = grid.Gen3Info.VertexBufferIndex; // this doesn't change as each vertex buffer corresponds to the palette index
 
+                if(BlamCache.Version >= CacheVersion.HaloReach)
+                    newGrid.GridSize /= ushort.MaxValue;
+
                 decoratorGrids.Add(newGrid);
             }
             return decoratorGrids;
@@ -179,24 +205,20 @@ namespace TagTool.Commands.Porting
         List<DecoratorData> ParseVertices(List<TinyPositionVertex> vertices)
         {
             List<DecoratorData> decoratorData = new List<DecoratorData>();
-            var currentIndex = 0;
-            while(currentIndex < vertices.Count)
+
+            int currentIndex = 0;
+            while (currentIndex < vertices.Count)
             {
-                var currentVertex = vertices[currentIndex];
-                var currentVariant = (currentVertex.Variant >> 8) & 0xFF;
+                var currentVariant = (vertices[currentIndex].Variant >> 8) & 0xff;
 
-                DecoratorData data = new DecoratorData(0,(short)currentVariant,currentIndex*16);
-
-                while(currentIndex < vertices.Count && currentVariant == ((currentVertex.Variant >> 8) & 0xFF))
+                DecoratorData data = new DecoratorData(0, (short)currentVariant, currentIndex * 16);
+                decoratorData.Add(data);
+                while (currentIndex < vertices.Count && currentVariant == ((vertices[currentIndex].Variant >> 8) & 0xff))
                 {
-                    currentVertex = vertices[currentIndex];
                     data.Amount++;
                     currentIndex++;
                 }
-
-                decoratorData.Add(data);
             }
-
             return decoratorData;
         }
 
@@ -301,17 +323,6 @@ namespace TagTool.Commands.Porting
 
             int ConvertShapeKey(int key)
             {
-                int type = key >> 29;
-                if (type == 3)
-                {
-                    int instanceIndex = key & 0xffff;
-                    if (instanceIndex < 0 || instanceIndex >= sbsp.InstancedGeometryInstances.Count)
-                        return -1;
-
-                    var instance = sbsp.InstancedGeometryInstances[instanceIndex];
-                    if (instance.BspPhysics.Count > 0 && instance.BspPhysicsReach[0].PoopShape.Count > 0)
-                        return (2 << 29) | instanceIndex;
-                }
                 return key;
             }
         }

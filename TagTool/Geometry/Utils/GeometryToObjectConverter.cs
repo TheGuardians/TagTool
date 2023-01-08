@@ -228,7 +228,7 @@ namespace TagTool.Geometry.Utils
         {
             var scenery = new Scenery()
             {
-                ObjectType = new GameObjectType() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery }, // TODO: generic object type
+                ObjectType = new GameObjectType16() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery }, // TODO: generic object type
                 BoundingRadius = boundingSphere,
                 AccelerationScale = 1.0f,
                 SweetenerSize = GameObject.SweetenerSizeValue.Large,
@@ -389,7 +389,12 @@ namespace TagTool.Geometry.Utils
 
                     foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
                     {
-                        permutation.BspPhysics.Add(ConvertData(bspPhysics));
+                        var data = ConvertData(bspPhysics);
+                        permutation.BspPhysics.Add(new CollisionBspPhysicsDefinition()
+                        {
+                            GeometryShape = data.GeometryShape,
+                            MoppBvTreeShape = data.MoppBvTreeShape
+                        });
                     }
 
                     //mopps
@@ -593,7 +598,7 @@ namespace TagTool.Geometry.Utils
                 mesh
             };
 
-            renderGeometry.MeshClusterVisibility = new List<RenderGeometry.MoppClusterVisiblity>();
+            renderGeometry.MeshClusterVisibility = new List<RenderGeometry.PerMeshMoppBlock>();
             if (meshindex != -1 && meshindex < Lbsp.Geometry.MeshClusterVisibility.Count)
                 renderGeometry.MeshClusterVisibility.Add(Lbsp.Geometry.MeshClusterVisibility[meshindex].DeepClone());
 

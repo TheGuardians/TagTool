@@ -321,7 +321,7 @@ namespace TagTool.Tags.Definitions.Gen2
             {
                 DetroyableCover = 1 << 0,
                 PathfindingIgnoreWhenDead = 1 << 1,
-                DynamicCover = 1 << 2
+                DynamicCover = 1 << 2,
             }
 
             public enum AiSizeValue : short

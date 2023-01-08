@@ -20,8 +20,8 @@ namespace TagTool.Serialization
 	/// </summary>
     public class TagDeserializer
     {
-        public CacheVersion Version { get; }
-        public CachePlatform CachePlatform { get; }
+        public CacheVersion Version { get; protected set; }
+        public CachePlatform CachePlatform { get; protected set; }
 
         /// <summary>
         /// Constructs a tag deserializer for a specific engine version.

@@ -6,7 +6,8 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xE4, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xE4, Platform = CachePlatform.Original, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xDC, MinVersion = CacheVersion.HaloReach)]
     public class CameraFxSettings : TagStructure
@@ -17,7 +18,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CameraFxValue AutoExposureAntiBloom;
 
-        public CameraFxStrength BloomPoint;
+        public CameraFxStrength BloomPoint; // aka highlight bloom
         public CameraFxStrength InherentBloom;
         public CameraFxStrength BloomIntensity;
 
@@ -34,26 +35,16 @@ namespace TagTool.Tags.Definitions
         public CameraFxStrength SelfIllumScale;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public SsaoPropertiesBlock SsaoProperties;
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public SsaoPropertiesBlock Ssao;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public CameraFxValue ColorGrading;
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public ColorGradingBlock ColorGrading;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<UnknownBlock1> Unknown33;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<UnknownBlock2> Unknown34;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<UnknownBlock3> Unknown35;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<UnknownBlock4> Unknown36;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<UnknownBlock5> Unknown37;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<UnknownBlock6> Unknown38;
-
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        public GodraysPropertiesBlock GodraysProperties;
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public LightshaftsBlock Lightshafts;
 
         [Flags]
         public enum FlagsValue : ushort
@@ -118,128 +109,195 @@ namespace TagTool.Tags.Definitions
             public short BlingSpikes;
         }
 
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x10)]
         public class SsaoPropertiesBlock : TagStructure
         {
-            public FlagsValue Flags;
+            public SsaoFlags Flags;
+            public float Intensity;
+            public float Radius;
+            public float SampleZThreshold;
 
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused = new byte[2];
-
-            public float SsaoRadius;
-            public float SsaoBlurRadius;
-            public float SsaoBackDropStrength;
+            [Flags]
+            public enum SsaoFlags : uint
+            {
+                UseDefault = 1 << 0,
+                Enable = 1 << 1,
+                Unused0 = 1 << 2,
+                Unused1 = 1 << 3,
+                Fixed = 1 << 4
+            }
         }
 
-        [TagStructure(Size = 0x58)]
-        public class UnknownBlock1 : TagStructure
-		{
-            public float Unknown;
-            public int Unknown2;
-            public TagFunction Unknown3 = new TagFunction { Data = new byte[0] };
-            public TagFunction Unknown4 = new TagFunction { Data = new byte[0] };
-            public TagFunction Unknown5 = new TagFunction { Data = new byte[0] };
-            public TagFunction Unknown6 = new TagFunction { Data = new byte[0] };
-        }
+        [TagStructure(Size = 0x50)]
+        public class ColorGradingBlock : TagStructure
+        {
+            public CameraFxParameterFlagsCg Flags;
+            public float BlendTime;
+            public List<ColorGradingCurvesEditorBlock> CurvesEditor;
+            public List<ColorGradingBrightnessContrastBlock> BrightnessContrast;
+            public List<ColorGradingHslvBlock> HueSaturationLightnessVibrance;
+            public List<ColorGradingColorizeEffectBlock> ColorizeEffect;
+            public List<ColorGradingSelectiveColorBlock> SelectiveColor;
+            public List<ColorGradingColorBalanceBlock> ColorBalance;
 
-        [TagStructure(Size = 0xC)]
-        public class UnknownBlock2 : TagStructure
-		{
-            public int Unknown;
-            public float Unknown2;
-            public float Unknown3;
-        }
+            [Flags]
+            public enum CameraFxParameterFlagsCg : uint
+            {
+                UseDefault = 1 << 0,
+                Enable = 1 << 1,
+                Unused0 = 1 << 2,
+                Unused1 = 1 << 3,
+                Fixed = 1 << 4
+            }
 
-        [TagStructure(Size = 0x14)]
-        public class UnknownBlock3 : TagStructure
-		{
-            public float Unknown;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-        }
+            [TagStructure(Size = 0x58)]
+            public class ColorGradingCurvesEditorBlock : TagStructure
+            {
+                public CameraFxParameterFlagsEnable Flags;
+                public ColGradCurvesEditorMode Mode;
+                public ColorGradingScalarFunctionStruct BrightnessCurve;
+                public ColorGradingScalarFunctionStruct RedCurve;
+                public ColorGradingScalarFunctionStruct GreenCurve;
+                public ColorGradingScalarFunctionStruct BlueCurve;
 
-        [TagStructure(Size = 0x14)]
-        public class UnknownBlock4 : TagStructure
-		{
-            public float Unknown;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-        }
+                [Flags]
+                public enum CameraFxParameterFlagsEnable : uint
+                {
+                    Enable = 1 << 0
+                }
 
-        [TagStructure(Size = 0x94)]
-        public class UnknownBlock5 : TagStructure
-		{
-            public int Unknown;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-            public float Unknown11;
-            public float Unknown12;
-            public float Unknown13;
-            public float Unknown14;
-            public float Unknown15;
-            public float Unknown16;
-            public float Unknown17;
-            public float Unknown18;
-            public float Unknown19;
-            public float Unknown20;
-            public float Unknown21;
-            public float Unknown22;
-            public float Unknown23;
-            public float Unknown24;
-            public float Unknown25;
-            public float Unknown26;
-            public float Unknown27;
-            public float Unknown28;
-            public float Unknown29;
-            public float Unknown30;
-            public float Unknown31;
-            public float Unknown32;
-            public float Unknown33;
-            public float Unknown34;
-            public float Unknown35;
-            public float Unknown36;
-            public float Unknown37;
-        }
+                public enum ColGradCurvesEditorMode : int
+                {
+                    RGB,
+                    Brightness
+                }
 
-        [TagStructure(Size = 0x28)]
-        public class UnknownBlock6 : TagStructure
-		{
-            public int Unknown;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
+                [TagStructure(Size = 0x14)]
+                public class ColorGradingScalarFunctionStruct : TagStructure
+                {
+                    public MappingFunction Mapping;
+
+                    [TagStructure(Size = 0x14)]
+                    public class MappingFunction : TagStructure
+                    {
+                        public byte[] Data;
+                    }
+                }
+            }
+
+            [TagStructure(Size = 0xC)]
+            public class ColorGradingBrightnessContrastBlock : TagStructure
+            {
+                public CameraFxParameterFlagsEnable Flags;
+                public float Brightness;
+                public float Contrast;
+
+                [Flags]
+                public enum CameraFxParameterFlagsEnable : uint
+                {
+                    Enable = 1 << 0
+                }
+            }
+
+            [TagStructure(Size = 0x14)]
+            public class ColorGradingHslvBlock : TagStructure
+            {
+                public CameraFxParameterFlagsEnable Flags;
+                public float Hue;
+                public float Saturation;
+                public float Lightness;
+                public float Vibrance;
+
+                [Flags]
+                public enum CameraFxParameterFlagsEnable : uint
+                {
+                    Enable = 1 << 0
+                }
+            }
+
+            [TagStructure(Size = 0x14)]
+            public class ColorGradingColorizeEffectBlock : TagStructure
+            {
+                public CameraFxParameterFlagsEnable Flags;
+                public float Blendfactor;
+                public float Hue;
+                public float Saturation;
+                public float Lightness;
+
+                [Flags]
+                public enum CameraFxParameterFlagsEnable : uint
+                {
+                    Enable = 1 << 0
+                }
+            }
+
+            [TagStructure(Size = 0x94)]
+            public class ColorGradingSelectiveColorBlock : TagStructure
+            {
+                public CameraFxParameterFlagsEnable Flags;
+                public ColorGradingCmybStruct Reds;
+                public ColorGradingCmybStruct Yellows;
+                public ColorGradingCmybStruct Greens;
+                public ColorGradingCmybStruct Cyans;
+                public ColorGradingCmybStruct Blues;
+                public ColorGradingCmybStruct Magentas;
+                public ColorGradingCmybStruct Whites;
+                public ColorGradingCmybStruct Neutrals;
+                public ColorGradingCmybStruct Blacks;
+
+                [Flags]
+                public enum CameraFxParameterFlagsEnable : uint
+                {
+                    Enable = 1 << 0
+                }
+
+                [TagStructure(Size = 0x10)]
+                public class ColorGradingCmybStruct : TagStructure
+                {
+                    public float Cyan;
+                    public float Magenta;
+                    public float Yellow;
+                    public float Black;
+                }
+            }
+
+            [TagStructure(Size = 0x28)]
+            public class ColorGradingColorBalanceBlock : TagStructure
+            {
+                public CameraFxParameterFlagsEnable Flags;
+                public ColorGradingCmyStruct Shadows;
+                public ColorGradingCmyStruct Midtones;
+                public ColorGradingCmyStruct Highlights;
+
+                [Flags]
+                public enum CameraFxParameterFlagsEnable : uint
+                {
+                    Enable = 1 << 0
+                }
+
+                [TagStructure(Size = 0xC)]
+                public class ColorGradingCmyStruct : TagStructure
+                {
+                    public float CyanRed;
+                    public float MagentaGreen;
+                    public float YellowBlue;
+                }
+            }
         }
 
         [TagStructure(Size = 0x2C)]
-        public class GodraysPropertiesBlock : TagStructure
+        public class LightshaftsBlock : TagStructure
         {
             [TagField(EnumType = typeof(uint))]
             public FlagsValue Flags;
-            public float Radius;
-            public float AngleBias;
-            public RealRgbColor Color;
-            public float Strength;
-            public float PowerExponent;
-            public float BlurSharpness;
-            public float DecoratorDarkening;
-            public float HemiRejectionFalloff;
+            public float Pitch; // [0...90]
+            public float Heading; // [0...360]
+            public RealRgbColor Tint;
+            public float DepthClamp;
+            public float IntensityClamp; // [0...1]
+            public float FalloffRadius; // [0...2]
+            public float Intensity; // [0...50]
+            public float BlurRadius; // [0...20]
         }
     }
 }

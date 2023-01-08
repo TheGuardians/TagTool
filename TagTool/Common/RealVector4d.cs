@@ -16,7 +16,10 @@ namespace TagTool.Common
         public float W;
 
         public RealVector3d XYZ => new RealVector3d(I, J, K);
-
+        public RealVector4d XXXX => new RealVector4d(I, I, I, I);
+        public RealVector4d YYYY => new RealVector4d(J, J, J, J);
+        public RealVector4d ZZZZ => new RealVector4d(K, K, K, K);
+        public RealVector4d WWWW => new RealVector4d(W, W, W, W);
 
         public static RealVector4d Zero = new RealVector4d();
 

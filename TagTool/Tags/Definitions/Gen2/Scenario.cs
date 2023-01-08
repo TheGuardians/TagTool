@@ -379,7 +379,7 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             [TagField(Length = 32)]
             public string Name;
-            public GameObjectType ObjectType;
+            public GameObjectType16 ObjectType;
             public short PlacementIndex;
         }
 

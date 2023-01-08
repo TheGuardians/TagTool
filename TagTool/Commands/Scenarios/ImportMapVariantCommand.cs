@@ -25,7 +25,7 @@ namespace TagTool.Commands.Scenarios
 
                 "ImportMapVariant",
                 "Imports a map variant into the current scenario",
-                "ImportMapVariant [MapFile] <Path>",
+                "ImportMapVariant [MapFile] [!verify] <Path>",
                 "If optional argument MapFile is specified, the map variant will instead be stored directly in the .map file and become the default map.")
         {
             Cache = cache;
@@ -39,12 +39,18 @@ namespace TagTool.Commands.Scenarios
                 return new TagToolError(CommandError.ArgCount);
 
             bool importingIntoMapFile  = false;
+            bool shouldVerify = true;
 
             if(args.Count > 0)
             {
                 if(args[0].ToLower() == "mapfile")
                 {
                     importingIntoMapFile = true;
+                    args.RemoveAt(0);
+                }
+                if(args[0].ToLower() == "!verify")
+                {
+                    shouldVerify = false;
                     args.RemoveAt(0);
                 }
             }
@@ -63,7 +69,7 @@ namespace TagTool.Commands.Scenarios
                 {
                     if (blf.MapVariant.MapVariant.MapId != Definition.MapId)
                         throw new InvalidOperationException("Tried to import a map variant into a scenario with a different map id");
-                    ImportIntoScenario(blf);
+                    ImportIntoScenario(blf, shouldVerify);
                 }
             }
 
@@ -92,12 +98,12 @@ namespace TagTool.Commands.Scenarios
             }
         }
 
-        private void ImportIntoScenario(Blf mapVariantBlf)
+        private void ImportIntoScenario(Blf mapVariantBlf, bool verifyScnr)
         {
             using (var cacheStream = Cache.OpenCacheRead())
             {
                 var importer = new MapVariantImporter(cacheStream, Cache, Definition, mapVariantBlf);
-                importer.Import();
+                importer.Import(verifyScnr);
             }
         }
 
@@ -176,9 +182,10 @@ namespace TagTool.Commands.Scenarios
                 _objectTypes.Add(GameObjectTypeHalo3ODST.Crate, new ObjectTypeDefinition(_scenario.Crates, _scenario.CratePalette));
             }
 
-            public void Import()
+            public void Import(bool verifyScnr)
             {
-                VerifyCreatedOnScenario();
+                if(verifyScnr)
+                    VerifyCreatedOnScenario();
                 ImportPlacements();
                 HandleDeletedPlacements();
             }
@@ -399,7 +406,7 @@ namespace TagTool.Commands.Scenarios
                 instance.PaletteIndex = (short)GetOrAddScenarioPaletteEntry(type, tag);
                 instance.NameIndex = -1;
                 instance.UniqueHandle = DatumHandle.None;
-                instance.ObjectType = new ScenarioObjectType() { Halo3ODST = type };
+                instance.ObjectType = new GameObjectType8() { Halo3ODST = type };
                 instance.Source = ScenarioInstance.SourceValue.Editor;
 
                 if (instance.ParentId != null)

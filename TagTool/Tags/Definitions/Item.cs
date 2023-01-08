@@ -53,12 +53,13 @@ namespace TagTool.Tags.Definitions
 
 
         [Flags]
-        public enum ItemFlagBits : int
+        public enum ItemFlagBits : uint
         {
             None,
             AlwaysMaintainsZUp = 1 << 0,
             DestroyedByExplosions = 1 << 1,
-            UnaffectedByGravity = 1 << 2
+            UnaffectedByGravity = 1 << 2,
+            CrateStyleCollisionFilter = 1 << 3
         }
     }
 }

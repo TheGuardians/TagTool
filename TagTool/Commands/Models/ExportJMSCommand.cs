@@ -10,7 +10,7 @@ using System.Numerics;
 
 namespace TagTool.Commands.Models
 {
-    class ExportJMSCommand : Command
+    public class ExportJMSCommand : Command
     {
         private GameCache Cache { get; }
         private Model Definition { get; }
@@ -56,6 +56,9 @@ namespace TagTool.Commands.Models
                 default:
                     return new TagToolError(CommandError.ArgInvalid);
             }
+
+            if (!args[1].ToLower().EndsWith(".jms"))
+                args[1] += ".jms";
 
             var file = new FileInfo(args[1]);
 
@@ -104,6 +107,8 @@ namespace TagTool.Commands.Models
             }
 
             jms.Write(file);
+            Console.WriteLine($"Exported to \"{file.FullName}\".");
+
             return true;
         }
 

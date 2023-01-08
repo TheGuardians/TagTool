@@ -271,11 +271,11 @@ namespace TagTool.Commands.Tags
                     {
                         phmo.RigidBodies[massIndex].CenterOfMass = phmo.MassDistributions[massIndex].CenterOfMass;
                         phmo.RigidBodies[massIndex].CenterOfMassRadius = phmo.MassDistributions[massIndex].HavokWCenterOfMass;
-                        phmo.RigidBodies[massIndex].InertiaTensorX = phmo.MassDistributions[massIndex].InertiaTensorI;
+                        phmo.RigidBodies[massIndex].InertiaTensorX = phmo.MassDistributions[massIndex].InertiaTensorI * phmo.RigidBodies[massIndex].Mass;
                         phmo.RigidBodies[massIndex].InertiaTensorXRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorI;
-                        phmo.RigidBodies[massIndex].InertiaTensorY = phmo.MassDistributions[massIndex].InertiaTensorJ;
+                        phmo.RigidBodies[massIndex].InertiaTensorY = phmo.MassDistributions[massIndex].InertiaTensorJ * phmo.RigidBodies[massIndex].Mass;
                         phmo.RigidBodies[massIndex].InertiaTensorYRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorJ;
-                        phmo.RigidBodies[massIndex].InertiaTensorZ = phmo.MassDistributions[massIndex].InertiaTensorK;
+                        phmo.RigidBodies[massIndex].InertiaTensorZ = phmo.MassDistributions[massIndex].InertiaTensorK * phmo.RigidBodies[massIndex].Mass;
                         phmo.RigidBodies[massIndex].InertiaTensorZRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorK;
                     }
                     break;

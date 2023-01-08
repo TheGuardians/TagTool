@@ -83,9 +83,12 @@ namespace TagTool.Commands.Editing
 
             if (args.Count > 1)
                 if (args[1] != "*" && (!int.TryParse(args[1], out index) || index < 0))
+                {
+                    ContextReturn(previousContext, previousOwner, previousStructure);
                     return new TagToolError(CommandError.ArgInvalid, $"Invalid index specified: {args[1]}");
+                }
 
-			var field = TagStructure.GetTagFieldEnumerable(Structure)
+            var field = TagStructure.GetTagFieldEnumerable(Structure)
 				.Find(f => f.Name == fieldName || f.Name.ToLower() == fieldNameLow);
 
 			var fieldType = field?.FieldType;
@@ -113,7 +116,10 @@ namespace TagTool.Commands.Editing
             }
 
             if (index > blockValue.Count)
+            {
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return new TagToolError(CommandError.ArgInvalid, $"Invalid index \"{index}\"");
+            }
 
             for (var i = 0; i < CopyBlockElementsCommand.Elements.Count; i++)
             {

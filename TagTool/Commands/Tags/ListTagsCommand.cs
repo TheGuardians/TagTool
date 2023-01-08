@@ -64,7 +64,14 @@ namespace TagTool.Commands.Tags
                 if (option.Length == 1)
                 {
                     if (Cache.TagCache.TryParseGroupTag(option[0], out var tagGroup))
+                    {
                         options.TagGroups.Add(tagGroup.ToString());
+                    }
+                    // no further arguments, interpret this as search term
+                    else if (args.Count == 0)
+                    {
+                        options.Contains.Add(option[0]);
+                    }
                     else
                         invalidArgs.Add(option[0]);
                 }

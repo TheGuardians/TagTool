@@ -50,7 +50,9 @@ namespace TagTool.Ai
             Banshee,
             Phantom,
             Scarab,
-            Guntower
+            Guntower,
+            Engineer,
+            EngineerRechargeStation
         }
 
         public enum CampaignMetagameBucketClassEnum : sbyte

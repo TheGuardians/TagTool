@@ -56,9 +56,9 @@ namespace TagTool.Tags.Definitions
         public float ShakeRadius;
         public float EmpRadius;   
 		[TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public float AOESpikeRadius;
+        public float AoeSpikeRadius;
 		[TagField(MinVersion = CacheVersion.Halo3Retail)]
-		public float AOESpikeDamageBump;   
+		public float AoeSpikeDamageBump;   
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float ShieldRenderEffectsScale = 1.0f; 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -167,7 +167,9 @@ namespace TagTool.Tags.Definitions
             UsesOldEmpBehavior = 1 << 19,
             IgnoresDamageResistance = 1 << 20,
             ForceSKillOnDeath = 1 << 21,
-            CauseMagicDeceleration = 1 << 22
+            CauseMagicDeceleration = 1 << 22,
+            InhibitsMeleeAttacks = 1 << 23, // ODST
+            Bit24 = 1 << 24 // HO concussive blast
         }
 
         [Flags]
@@ -176,19 +178,19 @@ namespace TagTool.Tags.Definitions
             None = 0,
             DoesNotHurtOwner = 1 << 0,
             CanCauseHeadshots = 1 << 1,
-            IgnoresHeadshotObstructions = 1 << 2,
+            IgnoresHeadshotObstructions = 1 << 2, // arms, held weapons, attachments
             PingsResistantUnits = 1 << 3,
             DoesNotHurtFriends = 1 << 4,
             DoesNotPingUnits = 1 << 5,
             DetonatesExplosives = 1 << 6,
             OnlyHurtsShields = 1 << 7,
             CausesFlamingDeath = 1 << 8,
-            SkipsShields = 1 << 9,
-            Unknown10 = 1 << 10,
-            TransferDamageAlwaysUsesMinimum = 1 << 11,
+            DamageIndicatorsAlwaysPointDown = 1 << 9,
+            SkipsShields = 1 << 10,
+            TransferDmgAlwaysUsesMin = 1 << 11,
             IgnoreSeatScaleForDirDmg = 1 << 12,
             ForcesHardPingIfBodyDmg = 1 << 13,
-            ForcesHardPing = 1 << 14,
+            ForcesHardPingAlways = 1 << 14,
             DoesNotHurtPlayers = 1 << 15,
             EnablesSpecialDeath = 1 << 16,
             CannotCauseBetrayals = 1 << 17,
@@ -198,7 +200,8 @@ namespace TagTool.Tags.Definitions
             CauseMagicDeceleration = 1 << 21,
             AoeSkipObstructionTest = 1 << 22,
             DoesNotSpillOver = 1 << 23,
-            DoesNotHurtBoarders = 1 << 24
+            DoesNotHurtBoarders = 1 << 24,
+            DoesNotCauseBipedAoeEffect = 1 << 25
         }
 
         [TagStructure(Size = 0x70)]

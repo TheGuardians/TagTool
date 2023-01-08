@@ -176,11 +176,29 @@ namespace TagTool.Tags.Definitions
             Bit15 = 1 << 15
         }
 
+        [Flags]
+        public enum ReachAnimationTagReferenceFlags : ushort
+        {
+            AllowOnPlayer = 1 << 0,
+            LeftArmOnly = 1 << 1,
+            RightArmOnly = 1 << 2,
+            FirstPersonOnly = 1 << 3,
+            ThirdPersonOnly = 1 << 4,
+            ForwardOnly = 1 << 5,
+            ReverseOnly = 1 << 6,
+            FpNoAgedWeapons = 1 << 7
+        }
+
         [TagStructure(Size = 0x14)]
         public class AnimationTagReference : TagStructure
 		{
             public CachedTag Reference;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public AnimationTagReferenceFlags Flags;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ReachAnimationTagReferenceFlags FlagsReach;
 
             [TagField(Length = 2, Flags = Padding)]
             public byte[] Padding0;
@@ -877,10 +895,13 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum InheritanceListFlags : int
+        public enum InheritanceListFlags : uint
         {
             None = 0,
-            TightenNodes = 1 << 0
+            TightenNodes = 1 << 0,
+            Bit1 = 1 << 1,
+            // ODST
+            Bit2 = 1 << 2
         }
 
         [TagStructure(Size = 0x30)]

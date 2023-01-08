@@ -190,7 +190,9 @@ namespace TagTool.Tags.Definitions
         {
             None = 0,
             FrameAnimationOneShot = 1 << 0,
-            CanAnimateBackwards = 1 << 1
+            CanAnimateBackwards = 1 << 1,
+            Bit2 = 1 << 2,
+            Bit3 = 1 << 3
         }
 
         [TagStructure(Size = 0x10)]

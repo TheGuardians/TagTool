@@ -6,12 +6,13 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xC8, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xB8, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
-    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xC4, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xD4, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xC4, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xDC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
     public class SoundCacheFileGestalt : TagStructure
 	{
         [TagField(Platform = CachePlatform.MCC)]
-        public uint Unknown1;
+        public uint ContentType;
 
         public List<PlatformCodec> PlatformCodecs;
 
@@ -20,21 +21,14 @@ namespace TagTool.Tags.Definitions
         public List<ImportName> ImportNames;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownBlock> Unknown2;
+        public List<PitchRangeDistance> PitchRangeDistances;
 
         public List<PitchRangeParameter> PitchRangeParameters;
         public List<PitchRange> PitchRanges;
         public List<Permutation> Permutations;
 
-        // likely one of the two blocks bellow
-        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-        public uint UnknownMCC1;
-        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-        public uint UnknownMCC2;
-        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-        public uint UnknownMCC3;
-
         [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         public List<LanguagePermutation> LanguagePermutations;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -50,7 +44,7 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         public List<sbyte> RuntimePermutationFlags;
 
-        public TagFunction Unknown3 = new TagFunction { Data = new byte[0] };
+        public TagFunction NativeSampleData = new TagFunction { Data = new byte[0] };
         public uint Unknown4;
         public uint Unknown5;
 

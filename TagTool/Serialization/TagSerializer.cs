@@ -21,8 +21,8 @@ namespace TagTool.Serialization
     {
         public const int DefaultBlockAlign = 4;
 
-        public CacheVersion Version { get; }
-        public EndianFormat Format { get; }
+        public CacheVersion Version { get; protected set; }
+        public EndianFormat Format { get; protected set; }
         public CachePlatform CachePlatform { get; }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace TagTool.Serialization
         /// <param name="val">The value.</param>
         /// <param name="valueInfo">Information about the value. Can be <c>null</c>.</param>
         /// <param name="valueType">Type of the value.</param>
-        public void SerializeValue(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, TagFieldAttribute valueInfo, Type valueType)
+        public virtual void SerializeValue(ISerializationContext context, MemoryStream tagStream, IDataBlock block, object val, TagFieldAttribute valueInfo, Type valueType)
         {
             // Call the data block's PreSerialize callback to determine if the value should be mutated
             val = block.PreSerialize(valueInfo, val);
@@ -841,7 +841,7 @@ namespace TagTool.Serialization
             SerializeValue(context, tagStream, block, upper, null, boundsType);
         }
 
-        private void SerializeIndexBufferIndex(IDataBlock block, IndexBufferIndex val)
+        protected virtual void SerializeIndexBufferIndex(IDataBlock block, IndexBufferIndex val)
         {
             if (Version >= CacheVersion.HaloReach || Version == CacheVersion.HaloOnlineED)
             {

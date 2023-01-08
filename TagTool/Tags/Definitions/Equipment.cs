@@ -21,7 +21,6 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float CooldownTime;
 
-
         public float PhantomVolumeActivationTime;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -48,7 +47,7 @@ namespace TagTool.Tags.Definitions
         public EquipmentFlagBits EquipmentFlags;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint EquipmentFlagsReach;
+        public EquipmentFlagBitsReach EquipmentFlagsReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public short NumberOfUsesReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -151,7 +150,7 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public sbyte DamageReportingType;
-        [TagField(Length = 0x3, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+        [TagField(Length = 0x3, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
         public byte[] Padding1;
 
         public CachedTag HudInterface;
@@ -182,8 +181,8 @@ namespace TagTool.Tags.Definitions
         {
             None,
             PathfindingObstacle = 1 << 0,
-            EquipmentIsDangerousToAi = 1 << 1,
-            NeverDroppedByAi = 1 << 2,
+            GravityLiftCollisionGroup = 1 << 1,
+            EquipmentIsDangerousToAi = 1 << 2,
             ProtectsParentFromAoe = 1 << 3,
             ThirdPersonCameraAlways = 1 << 4,
             UseForcedPrimaryChangeColor = 1 << 5,
@@ -192,6 +191,37 @@ namespace TagTool.Tags.Definitions
             IsRemovedFromWorldOnDeactivation = 1 << 8,
             NotDroppedByPlayer = 1 << 9,
             IsDroppedByAi = 1 << 10
+        }
+
+        [Flags]
+        public enum EquipmentFlagBitsReach : uint
+        {
+            PathfindingObstacle = 1 << 0,
+            EquipmentIsDangerousToAi = 1 << 1,
+            // if an actor dies while carrying this, it gets deleted immediately
+            // does not affect dropping by players
+            NeverDroppedByAi = 1 << 2,
+            ProtectsParentFromAoe = 1 << 3,
+            ThirdPersonCameraWhileActive = 1 << 4,
+            ThirdPersonCameraAlways = 1 << 5,
+            HideReticuleWhileActive = 1 << 6,
+            CannotBeActiveWhileAirborne = 1 << 7, // if checked, this equipment cannot be activated if the user is airborne, and deactivates itself if the user becomes airborne
+            CannotActivateWhileAirborne = 1 << 8, // can't activate in midair, but doesn't turn off if you later become airborne
+            CannotActivateWhileStandingOnBiped = 1 << 9, // if you are standing on another biped you can not use this equipment
+            CannotBeActiveInVehicle = 1 << 10, // can't be activated in a seat, and deactivates if a vehicle is entered
+            SuppressesWeaponsWhileActive = 1 << 11, // firing your weapon turns off equipment
+            SuppressesMeleeWhileActive = 1 << 12, // meleeing turns off equipment
+            SuppressesGrenadesWhileActive = 1 << 13, // throwing a grenade turns off equipment
+            SuppressesDeviceInteractionWhileActive = 1 << 14,
+            UseForcedPrimaryChangeColor = 1 << 15,
+            UseForcedSecondaryChangeColor = 1 << 16,
+            DuckSoundWhileActive = 1 << 17,
+            BlocksTrackingWhileActive = 1 << 18,
+            ReadiesWeaponOnDeactivation = 1 << 19, // note - if this equipment has an animation cycle, the weapon is readied after the exit animation finishes.  Otherwise the weapon-ready happens immediately on deactivation
+            DropsSupportMustBeReadiedWeaponsOnActivation = 1 << 20,
+            HidesWeaponOnActivation = 1 << 21, // checking this flag will automatically cause the weapon to ready on deactivation
+            CanNotBePickedUpByPlayer = 1 << 22,
+            DoesNotActivateFromPrediction = 1 << 23 // used for evade to ensure that the equipment always activates from an event (more reliable).
         }
 
         [TagStructure(Size = 0x3C)]
@@ -231,7 +261,7 @@ namespace TagTool.Tags.Definitions
             public TypeValue Type;
 
             [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused = new byte[2];
+            public byte[] Padding2 = new byte[2];
 
             public enum TypeValue : short
             {
@@ -280,10 +310,13 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x80, MinVersion = CacheVersion.HaloReach)]
         public class InvincibilityBlock : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId InvincibilityMaterial;
             public short InvincibilityMaterialType;
-            public short Unused1;
+
+            [TagField(Length = 0x2, Flags = Padding)]
+            public byte[] Padding0;
+
             public float ShieldRechargeRate;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -305,7 +338,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public TagFunction ActiveVerticalVelocityDamping;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<NullBlock> ThresholdEffects;
+            public List<ThresholdEffect> ThresholdEffects;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public CachedTag ActivationEffect;
@@ -314,6 +347,15 @@ namespace TagTool.Tags.Definitions
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
             public CachedTag ShutdownEffect;
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class ThresholdEffect : TagStructure
+        {
+            public float ThresholdEnergyBurned; // how much energy you have to burn to play this effect (0-1)
+            public float EnergyAdjustment; // how much energy to add when playing this effect (-1 to 1)
+            [TagField(ValidTags = new[] { "effe" })]
+            public CachedTag Effect;
         }
 
         [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3ODST)]
@@ -372,7 +414,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x28)]
         public class TankModeBlock : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId NewPlayerMaterial;
             public uint Unknown;
             public float Duration;

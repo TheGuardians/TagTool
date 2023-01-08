@@ -90,8 +90,8 @@ namespace TagTool.Tags.Definitions
 
         public short PhysicsControlNodeIndex;
 
-        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
+        [TagField(Length = 2, Flags = Padding)]
+        public byte[] Padding3;
 
         public float CosineStationaryTurningThreshold;
         public float CrouchTransitionVelocity;
@@ -103,7 +103,7 @@ namespace TagTool.Tags.Definitions
         public short HeadNodeIndex;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        public uint FpCrouchMovingAnimationSpeedMultiplier;
+        public float FpCrouchMovingAnimSpeedScale;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<BipedWallProximityBlock> WallProximityFeelers;
@@ -131,22 +131,22 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float LandAimOffsetDuration;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float AimCompensateMinimumDistance;
+        public float AimCompensateMinDistance;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float AimCompensateMaximumDistance;
+        public float AimCompensateMaxDistance;
 
         public BipedPhysicsFlags PhysicsFlags;
         public float HeightStanding;
         public float HeightCrouching;
         public float Radius;
         public float Mass;
-        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+        [TagField(Flags = GlobalMaterial)]
         public StringId LivingMaterialName; // collision material used when character is alive
-        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+        [TagField(Flags = GlobalMaterial)]
         public StringId DeadMaterialName; // collision material used when character is dead
-        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+        [TagField(Flags = GlobalMaterial)]
         public short LivingGlobalMaterialIndex;
-        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+        [TagField(Flags = GlobalMaterial)]
         public short DeadGlobalMaterialIndex;
         public List<PhysicsModel.Sphere> DeadSphereShapes;
         public List<PhysicsModel.Pill> PillShapes;
@@ -160,7 +160,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag DeathSpawnCharacter; // when I die, out of the ashes of my death crawls a ...
         public short DeathSpawnCount;
 
-        [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+        [TagField(Length = 2, Flags = Padding)]
         public byte[] Padding2;
 
         public BipedLeapingDataStruct BipedLeapingData;

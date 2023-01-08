@@ -68,7 +68,10 @@ namespace TagTool.Tags.Definitions
                 Doublesided = 1 << 1,
                 ProfileOpacityFromScaleA = 1 << 2,
                 RandomUOffset = 1 << 3,
-                RandomVOffset = 1 << 4
+                RandomVOffset = 1 << 4,
+                OriginFade = 1 << 5,
+                Bit6 = 1 << 6,
+                Fogged = 1 << 7,
             }
 
             public enum ContrailProfileShapeEnum : sbyte

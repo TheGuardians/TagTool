@@ -301,6 +301,15 @@ namespace TagTool.Commands.Porting
                                     CompressionRate = type9.CompressionRate
                                 };
 
+                                //undo scaling normally performed for export
+                                for (var i = 0; i < type3.Translations.Count(); i++)
+                                {
+                                    for(var j = 0; j < type3.Translations[i].Count(); j++)
+                                    {
+                                        type3.Translations[i][j] = type3.Translations[i][j] / 100.0f;
+                                    }
+                                }                              
+
                                 byte[] animationcodecdata = type3.Write(CacheContext);
                                 member.PackedDataSizes.CompressedDataSize = animationcodecdata.Length;
                                 //set out stream position to the start of the animated data block and write out the new codec
@@ -472,6 +481,12 @@ namespace TagTool.Commands.Porting
                     };
 
                 }
+
+                foreach (var sound in definition.SoundReferences)
+                    Enum.TryParse(sound.FlagsReach.ToString(), out sound.Flags);
+
+                foreach (var effect in definition.SoundReferences)
+                    Enum.TryParse(effect.FlagsReach.ToString(), out effect.Flags);
 
                 //convert weapon types
                 foreach (var mode in definition.Modes)

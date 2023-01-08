@@ -1,11 +1,13 @@
 using System;
+using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Ai
 {
-    [TagStructure(Size = 0x34)]
+    [TagStructure(Size = 0x34, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach)]
     public class VocalizationPattern : TagStructure
     {
         public DialogueTypeEnum DialogueType;
@@ -21,27 +23,43 @@ namespace TagTool.Ai
         public ActorTypeEnum CauseActorType;
         public DialogueObjectTypesEnum CauseType;
         public StringId CauseAiTypeName;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public StringId CauseEquipmentTypeName;
+
         public DialogueObjectTypesEnum SpeakerObjectType;
 
-        [TagField(Length = 2, Flags = Padding)]
+        [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused;
 
         public SpeakerBehaviorEnum SpeakerBehavior;
         public DangerEnum DangerLevel;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public StyleAttitudeEnum Attitude;
+
         public SpatialRelationEnum SpeakerSubjectPosition;
         public SpatialRelationEnum SpeakerCausePosition;
         public DialogueConditionFlags Conditions;
+
         [TagField(EnumType = typeof(short))]
         public SpatialRelationEnum SpacialRelation;
         public DamageEnum DamageType;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public GameTypeEnum GameType;
+
         public ActorTypeEnum SubjectActorType;
         public DialogueObjectTypesEnum SubjectType;
+
+        [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x2, Flags = Padding)]
+        public byte[] PaddingReach;
+
         public StringId SubjectAiTypeName;
 
         public enum DialogueObjectTypesEnum : short
         {
-            NONE,
+            None,
             Player,
             Actor,
             Biped,
@@ -61,6 +79,11 @@ namespace TagTool.Ai
             PostcombatLost,
             PlayerMasterchief,
             PlayerDervish,
+            PlayerRookie,
+            PlayerBuck,
+            PlayerDutch,
+            PlayerMickey,
+            PlayerRomeo,
             Heretic,
             MajorlyScary,
             LastManInVehicle,
@@ -158,6 +181,15 @@ namespace TagTool.Ai
             Normal,
             Timid,
             Aggressive
+        }
+
+        public enum GameTypeEnum : short
+        {
+            None,
+            Sandbox,
+            Megalo,
+            Campaign,
+            Survival
         }
     }
 }

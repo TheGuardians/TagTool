@@ -7,7 +7,8 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Ai
 {
     [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x64, MinVersion = CacheVersion.HaloReach)]
     public class VocalizationDefinition : TagStructure
 	{
         [TagField(Flags = Label)]
@@ -38,6 +39,11 @@ namespace TagTool.Ai
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public float SkipFraction;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public short MissionMinValue; // The lowest mission id that we play this line in
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public short MissionMaxValue; // The highest mission id that we play this line in
 
         public StringId SampleLine;
         public List<AiVocalizationResponse> Responses;

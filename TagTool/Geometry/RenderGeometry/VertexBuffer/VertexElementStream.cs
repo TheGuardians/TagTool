@@ -351,6 +351,17 @@ namespace TagTool.Geometry
             return new RealVector3d(x, y, z);
         }
 
+        public RealVector3d ReadUHenD3N()
+        {
+            var val = Reader.ReadUInt32();
+
+            var x = (val & 0x7ff) / 2047.0f;
+            var y = ((val >> 11) & 0x7ff) / 2047.0f;
+            var z = ((val >> 22) & 0x3ff) / 1023.0f;
+
+            return new RealVector3d(x, y, z);
+        }
+
         public float ReadFloat8_1()
         {
             return DenormalizeUnsigned(Reader.ReadByte());

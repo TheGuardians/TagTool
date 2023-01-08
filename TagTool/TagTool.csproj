@@ -274,7 +274,11 @@
     <Compile Include="Audio\SoundDistanceParameters.cs" />
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
+    <Compile Include="Bitmaps\Utils\BitmapSampler.cs" />
     <Compile Include="Bitmaps\Utils\BitmapUtilsPC.cs" />
+    <Compile Include="Bitmaps\Utils\RGBAColor.cs" />
+    <Compile Include="Bitmaps\Utils\SquishLib.cs" />
+    <Compile Include="Bitmaps\Utils\XboxBitmapUtils.cs" />
     <Compile Include="Bitmaps\XboxGraphics.cs" />
     <Compile Include="BlamFile\MapFileBuilder.cs" />
     <Compile Include="BlamFile\MapVariantGenerator.cs" />
@@ -390,6 +394,7 @@
     <Compile Include="Cache\HaloOnline\StringTableHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
+    <Compile Include="Commands\Bitmaps\ReencodeBitmapCommand.cs" />
     <Compile Include="Commands\Forge\AddForgeItemCommand.cs" />
     <Compile Include="Commands\Forge\AddForgeCategoryCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\SetAnimationCommand.cs" />
@@ -418,6 +423,8 @@
     <Compile Include="Commands\Strings\VerifyStringsCommand.cs" />
     <Compile Include="Commands\StructureDesigns\StructureDesignContextFactory.cs" />
     <Compile Include="Commands\StructureDesigns\ExtractStructureDesignCommand.cs" />
+    <Compile Include="Commands\Tags\TagResourceReportCommand.cs" />
+    <Compile Include="Commands\Tags\CheckTagCommand.cs" />
     <Compile Include="Common\BitStream.cs" />
     <Compile Include="Common\ColorConversion.cs" />
     <Compile Include="Common\GameTitle.cs" />
@@ -431,6 +438,11 @@
     <Compile Include="Geometry\Jms\JmsPhmoExporter.cs" />
     <Compile Include="Geometry\Utils\InstanceBucketGenerator.cs" />
     <Compile Include="Geometry\Utils\Triangulator.cs" />
+    <Compile Include="Havok\CollisionMoppGenerator.cs" />
+    <Compile Include="Havok\HavokMoppGenerator.cs" />
+    <Compile Include="Havok\HavokMoppUtil.cs" />
+    <Compile Include="Havok\PerMeshMoppGenerator.cs" />
+    <Compile Include="IO\FixedMemoryStream.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RealVector4d.cs" />
@@ -781,7 +793,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Havok\HavokConverter.cs" />
     <Compile Include="Havok\HavokDatum.cs" />
-    <Compile Include="Havok\HavokMoppGenerator.cs" />
+    <Compile Include="Havok\HavokTool.cs" />
     <Compile Include="IO\ExtantStream.cs" />
     <Compile Include="IO\ModPackageStream.cs" />
     <Compile Include="IO\OffsetStream.cs" />
@@ -1415,7 +1427,7 @@
     <Compile Include="Audio\CustomPlayback.cs" />
     <Compile Include="Audio\LanguagePermutation.cs" />
     <Compile Include="Audio\RuntimePermutation.cs" />
-    <Compile Include="Audio\UnknownBlock.cs" />
+    <Compile Include="Audio\PitchRangeDistance.cs" />
     <Compile Include="Audio\Language.cs" />
     <Compile Include="Audio\PitchRange.cs" />
     <Compile Include="Audio\Permutation.cs" />
@@ -1729,6 +1741,9 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting">
       <Version>4.0.1</Version>
     </PackageReference>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
+      <Version>5.0.0</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemDefinitionGroup>
@@ -1738,8 +1753,8 @@
   </ItemDefinitionGroup>
   <PropertyGroup>
     <PostBuildEvent>cd $(ProjectDir)$(OutDir)
-xcopy "$(ProjectDir)..\Physics" "Physics" /e /i /h /Y
-xcopy "$(ProjectDir)..\Tools" "Tools" /e /i /h /Y
+xcopy "$(ProjectDir)..\Physics" "Physics" /e /i /h /Y /d
+xcopy "$(ProjectDir)..\Tools" "Tools" /e /i /h /Y /d
 
 IF "$(PlatformName)" == "x64" (
     del "Tools\meshoptimizer32.dll"
@@ -1763,7 +1778,7 @@ move "AssimpNet.dll" "Tools"
 
 cd $(ProjectDir)
 if ERRORLEVEL == 0 (
-    xcopy "$(ProjectDir)..\Tools\HaloShaderGenerator.dll" "$(ProjectDir)$(OutDir)" /e /i /h /Y 2&gt;nul 1&gt;nul
+    xcopy "$(ProjectDir)..\Tools\HaloShaderGenerator.dll" "$(ProjectDir)$(OutDir)" /e /i /h /Y /d 2&gt;nul 1&gt;nul
     SET ERRORLEVEL=0
 )
 EXIT %25ERRORLEVEL%25</PostBuildEvent>

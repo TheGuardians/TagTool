@@ -15,7 +15,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private TagResourceReference ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, CachedTag instance)
+        private TagResourceReference ConvertStructureBspCacheFileTagResources(ScenarioStructureBsp bsp, StructureBspTagResources bspResources, CachedTag instance)
         {
             if(BlamCache.Platform == CachePlatform.MCC)
                 return ConvertStructureBspCacheFileTagResourcesMCC(bsp);
@@ -81,30 +81,36 @@ namespace TagTool.Commands.Porting
 
             if(BlamCache.Version >= CacheVersion.HaloReach)
             {
-                bsp.InstancedGeometryInstances = new System.Collections.Generic.List<InstancedGeometryInstance>();
+                bsp.InstancedGeometryInstances = new List<InstancedGeometryInstance>();
                 bsp.InstancedGeometryInstances.AddRange(resourceDefinition.InstancedGeometryInstances);
 
                 // convert instances
                 foreach(var instancedgeo in bsp.InstancedGeometryInstances)
                 {
-                    if(instancedgeo.SeamBitVector.Skip(1).Any(x => x != 0))
+                    var definition = bspResources.InstancedGeometry[instancedgeo.DefinitionIndex];
+
+                    instancedgeo.Flags = instancedgeo.FlagsReach.ConvertLexical<InstancedGeometryInstance.InstancedGeometryFlags>();
+
+                    if (definition.Flags.HasFlag(InstancedGeometryBlock.InstancedGeometryDefinitionFlags.MiscoloredBsp))
+                        instancedgeo.Flags |= InstancedGeometryInstance.InstancedGeometryFlags.MiscoloredBsp;
+                    if (definition.Flags.HasFlag(InstancedGeometryBlock.InstancedGeometryDefinitionFlags.NoPhysics))
+                        instancedgeo.Flags |= InstancedGeometryInstance.InstancedGeometryFlags.NoPhysics;
+
+                    if (instancedgeo.SeamBitVector.Skip(1).Any(x => x != 0))
                         new TagToolWarning("Instanced seam bit vector truncated!");
 
                     instancedgeo.SeamBitVector = new uint[] { instancedgeo.SeamBitVector[0] };
               
                     instancedgeo.PathfindingPolicy = instancedgeo.LightmappingPolicyReach.ConvertLexical<Scenery.PathfindingPolicyValue>();
-
                     instancedgeo.LightmappingPolicy = instancedgeo.LightmappingPolicyReach.ConvertLexical<InstancedGeometryInstance.InstancedGeometryLightmappingPolicy>();
-                    if (instancedgeo.LightmappingPolicy == InstancedGeometryInstance.InstancedGeometryLightmappingPolicy.SingleProbe)
-                        instancedgeo.LightmappingPolicy = InstancedGeometryInstance.InstancedGeometryLightmappingPolicy.PerPixelShared;
 
                     if (instancedgeo.BspPhysicsReach.Count > 0)
                     {
-                        instancedgeo.BspPhysics = new List<CollisionBspPhysicsDefinition>()
+                        instancedgeo.BspPhysics = new List<InstancedGeometryPhysics>()
                         {
                             ConvertCollisionBspPhysicsReach(instancedgeo.BspPhysicsReach[0])
                         };
-                    };
+                    }
                 }
 
                 //convert cluster instanced geometry physics

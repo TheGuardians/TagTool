@@ -42,7 +42,7 @@ namespace TagTool.Cache
                     VirtualBaseAddress = header.VirtualBaseAddress,
                     Partitions = header.Partitions,
                     SectionTable = header.SectionTable,
-                    FooterSignature = header.FooterSiganture
+                    FooterSignature = header.FooterSignature
                 };
                 return adapter;
             }

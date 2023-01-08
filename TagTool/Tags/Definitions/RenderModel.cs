@@ -355,12 +355,24 @@ namespace TagTool.Tags.Definitions
                 public sbyte RegionIndex;
                 public sbyte PermutationIndex;
                 public sbyte NodeIndex;
-                public sbyte Unknown3;
+
+                [TagField(MaxVersion = CacheVersion.Halo3ODST, Length = 0x1, Flags = Padding)]
+                public byte[] Padding0;
+
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                public ReachMarkerFlagsDefinition Flags;
+
                 public RealPoint3d Translation;
                 public RealQuaternion Rotation;
                 public float Scale;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public RealPoint3d Direction;
+            }
+
+            [Flags]
+            public enum ReachMarkerFlagsDefinition : byte
+            {
+                HasNodeRelativeDirection = 1 << 0
             }
         }
 

@@ -14,6 +14,8 @@ namespace TagTool.Tags.Definitions
         public float DepoweredPositionTransitionTime;
         public float DepoweredPositionAccelerationTime;
         public LightmapFlagBits LightmapFlags;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding3;
 
         [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag OpenUp;
@@ -52,7 +54,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum LightmapFlagBits : int
+        public enum LightmapFlagBits : ushort
         {
             None,
             DoNotUseInLightmap = 1 << 0,
