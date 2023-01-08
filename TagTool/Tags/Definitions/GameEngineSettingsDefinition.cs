@@ -341,8 +341,12 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloOnlineED)]
             public class RespawnSetting : TagStructure
-			{
+            {
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public FlagsValue Flags;
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public FlagsValueHO FlagsHO;
                 public sbyte LivesPerRound;
                 public sbyte SharedTeamLives;
 
@@ -376,12 +380,26 @@ namespace TagTool.Tags.Definitions
                     RespawnAtLocation = 1 << 2,
                     RespawnOnKills = 1 << 3
                 }
+                [Flags]
+                public enum FlagsValueHO : ushort
+                {
+                    None,
+                    InheritRespawnTime = 1 << 0,
+                    RespawnWithTeam = 1 << 1,
+                    RespawnAtLocation = 1 << 2,
+                    RespawnOnKills = 1 << 3,
+                    EarlyRespawnEnabled = 1 << 4
+                }
             }
 
             [TagStructure(Size = 0x4)]
             public class SocialSetting : TagStructure
 			{
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public FlagsValue Flags;
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public FlagsValueHO FlagsHO;
 
                 [Flags]
                 public enum FlagsValue : int
@@ -395,6 +413,20 @@ namespace TagTool.Tags.Definitions
                     EnemyVoiceEnabled = 1 << 5,
                     OpenChannelVoiceEnabled = 1 << 6,
                     DeadPlayerVoiceEnabled = 1 << 7
+                }
+                [Flags]
+                public enum FlagsValueHO : int
+                {
+                    None,
+                    ObserversEnabled = 1 << 0,
+                    TeamChangingEnabled = 1 << 1,
+                    BalancedTeamChanging = 1 << 2,
+                    FriendlyFireEnabled = 1 << 3,
+                    BetrayalBootingEnabled = 1 << 4,
+                    EnemyVoiceEnabled = 1 << 5,
+                    OpenChannelVoiceEnabled = 1 << 6,
+                    DeadPlayerVoiceEnabled = 1 << 7,
+                    SpartansVsElitesEnabled = 1 << 8
                 }
             }
 
