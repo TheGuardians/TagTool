@@ -344,8 +344,7 @@ namespace TagTool.Tags.Definitions
             {
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public FlagsValue Flags;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public FlagsValueHO FlagsHO;
                 public sbyte LivesPerRound;
                 public sbyte SharedTeamLives;
@@ -378,8 +377,7 @@ namespace TagTool.Tags.Definitions
                     InheritRespawnTime = 1 << 0,
                     RespawnWithTeam = 1 << 1,
                     RespawnAtLocation = 1 << 2,
-                    RespawnOnKills = 1 << 3,
-                    Bit4 = 1 << 4 // HO
+                    RespawnOnKills = 1 << 3
                 }
                 [Flags]
                 public enum FlagsValueHO : ushort
@@ -398,8 +396,7 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public FlagsValue Flags;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public FlagsValueHO FlagsHO;
 
                 [Flags]
