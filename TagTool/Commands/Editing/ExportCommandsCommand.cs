@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Common;
@@ -142,7 +143,7 @@ namespace TagTool.Commands.Editing
                     }
                 default:
                     //if (data != null && data.ToString().Contains("|"))
-                    if (fieldName.Contains("Flags"))
+                    if (fieldName.Split('.').Last().Contains("Flags"))
                     {
                         string flaglist = data.ToString();
                         flaglist = flaglist.Replace(" ", string.Empty);
