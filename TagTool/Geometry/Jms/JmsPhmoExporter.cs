@@ -8,6 +8,7 @@ using TagTool.Common;
 using System.Numerics;
 using TagTool.Geometry.BspCollisionGeometry.Utils;
 using TagTool.Geometry.Utils;
+using System.Threading.Tasks.Sources;
 
 namespace TagTool.Geometry.Jms
 {
@@ -96,15 +97,14 @@ namespace TagTool.Geometry.Jms
                 //pill translation needs to be adjusted to include pill radius
                 var pillBottom = new Vector3(pill.Bottom.I, pill.Bottom.J, pill.Bottom.K) * 100.0f;
                 var pillTop = new Vector3(pill.Top.I, pill.Top.J, pill.Top.K) * 100.0f;
-                RealVector3d pillvec = (pill.Top - pill.Bottom) * 100.0f;
+                RealVector3d pillvec = (pill.Top - pill.Bottom);
                 Vector3 pillVector = new Vector3(pillvec.I, pillvec.J, pillvec.K);
                 Vector3 inverseVec = pillVector * (newpill.Radius / newpill.Height);
                 Vector3 newPos = pillBottom - inverseVec;
                 newpill.Translation = new RealVector3d(newPos.X, newPos.Y, newPos.Z);
-
-                //calculate quaternion rotation from pill vector
-                Matrix4x4 newMatrix = Matrix4x4.CreateLookAt(pillBottom, pillTop, new Vector3(0,1,0));
-                Quaternion newQuat = Quaternion.CreateFromRotationMatrix(newMatrix);
+                
+                Quaternion newQuat = Quaternion.CreateFromRotationMatrix(
+                    Matrix4x4.CreateLookAt(pillBottom, pillTop, FindVectorUpAxis(pillVector)));
                 newpill.Rotation = new RealQuaternion(newQuat.X, newQuat.Y, newQuat.Z, newQuat.W);                    
                
                 Jms.Capsules.Add(newpill);
@@ -142,7 +142,7 @@ namespace TagTool.Geometry.Jms
                 Jms.ConvexShapes.Add(newConvex);
             }
         }
-        public Matrix4x4 MatrixFromNode(RealQuaternion rotation, RealVector3d position)
+        private Matrix4x4 MatrixFromNode(RealQuaternion rotation, RealVector3d position)
         {
             var quat = new Quaternion(rotation.I, rotation.J, rotation.K, rotation.W);
 
@@ -150,6 +150,66 @@ namespace TagTool.Geometry.Jms
             rot.Translation = new Vector3(position.I, position.J, position.K);
 
             return rot;
+        }
+
+        private Quaternion QuatFromRealQuat(RealQuaternion q)
+        {
+            return new Quaternion(q.I, q.J, q.K, q.W);
+        }
+
+        /*
+        private Quaternion QuatFromVectors(Vector3 vectorA, Vector3 vectorB)
+        {
+            vectorA = Vector3.Normalize(vectorA);
+            vectorB = Vector3.Normalize(vectorB);
+            double F = Math.Acos(Vector3.Dot(vectorA, vectorB)) / 2.0;
+            Vector3 u = Vector3.Normalize(Vector3.Cross(vectorA, vectorB));
+            Vector3 mult = Vector3.Multiply((float)Math.Sin(F), u);
+            float cos = (float)Math.Cos(F);
+            return new Quaternion(mult.X, mult.Y, mult.Z, cos);
+        }
+        */
+
+        private Quaternion get_rotation_between(Vector3 u, Vector3 v)
+        {
+            float k_cos_theta = Vector3.Dot(u, v);
+            float k = (float)Math.Sqrt(u.LengthSquared() * v.LengthSquared());
+
+            if (k_cos_theta / k == -1)
+            {
+                // 180 degree rotation around any orthogonal vector
+                return new Quaternion(Vector3.Normalize(orthogonal(u)), 0);
+            }
+
+            return new Quaternion(Vector3.Cross(u, v), k_cos_theta + k);
+        }
+
+        private Vector3 orthogonal(Vector3 v)
+        {
+            Vector3 X_AXIS = new Vector3(1, 0, 0);
+            Vector3 Y_AXIS = new Vector3(0, 1, 0);
+            Vector3 Z_AXIS = new Vector3(0, 0, 1);
+
+            float x = Math.Abs(v.X);
+            float y = Math.Abs(v.Y);
+            float z = Math.Abs(v.Z);
+
+            Vector3 other = x < y ? (x < z ? X_AXIS : Z_AXIS) : (y < z ? Y_AXIS : Z_AXIS);
+            return Vector3.Cross(v, other);
+        }
+
+        private Vector3 FindVectorUpAxis(Vector3 v)
+        {
+            Vector3 X_AXIS = new Vector3(1, 0, 0);
+            Vector3 Y_AXIS = new Vector3(0, 1, 0);
+            Vector3 Z_AXIS = new Vector3(0, 0, 1);
+
+            float x = Math.Abs(v.X);
+            float y = Math.Abs(v.Y);
+            float z = Math.Abs(v.Z);
+
+            Vector3 other = x < y ? (x < z ? X_AXIS : Z_AXIS) : (y < z ? Y_AXIS : Z_AXIS);
+            return other;
         }
     }
 }
