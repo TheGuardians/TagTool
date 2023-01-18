@@ -32,6 +32,8 @@ namespace TagTool.Geometry.Jms
         public List<JmsCapsule> Capsules = new List<JmsCapsule>();
         private uint ConvexShapeCount;
         public List<JmsConvexShape> ConvexShapes = new List<JmsConvexShape>();
+        private uint SkylightCount;
+        public List<JmsSkylight> Skylights = new List<JmsSkylight>();
 
         public bool TryRead(FileInfo file)
         {
@@ -301,11 +303,17 @@ namespace TagTool.Geometry.Jms
 
                 //leave unpopulated for now
                 stream.WriteLine(";### SKYLIGHT ###");
-                stream.WriteLine("0");
+                stream.WriteLine(Skylights.Count);
                 stream.WriteLine(";\t<direction <x,y,z>>");
                 stream.WriteLine(";\t<radiant intensity <x,y,z>>");
                 stream.WriteLine(";\t<solid angle>");
                 stream.WriteLine();
+                for (var skylightindex = 0; skylightindex < Skylights.Count; skylightindex++)
+                {
+                    stream.WriteLine($";SKYLIGHT {skylightindex}");
+                    Skylights[skylightindex].Write(stream);
+                    stream.WriteLine();
+                }
             }
         }
 
@@ -602,6 +610,24 @@ namespace TagTool.Geometry.Jms
                 stream.WriteLine(ShapeVertexCount);
                 foreach(var shapevert in ShapeVertices)
                     WritePoint3d(shapevert, stream);
+            }
+        }
+
+        public class JmsSkylight : JmsElement
+        {
+            public RealVector3d Direction = new RealVector3d(0, 0, 0);
+            public RealVector3d RadiantIntensity = new RealVector3d(0, 0, 0);
+            public float SolidAngle = 0.0f;
+
+            public void Read(StreamReader stream)
+            {
+            }
+
+            public void Write(StreamWriter stream)
+            {
+                WriteVector3d(Direction, stream);
+                WriteVector3d(RadiantIntensity, stream);
+                WriteFloat(SolidAngle, stream);
             }
         }
 
