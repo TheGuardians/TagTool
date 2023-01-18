@@ -212,9 +212,11 @@ namespace TagTool.Commands.Tags
                 else if (tagFieldInfo.FieldType.IsGenericType && tagFieldInfo.FieldType.GetGenericTypeDefinition() == typeof(List<>))
                 {
                     var input = tagFieldInfo.GetValue(tagStruct);
+                    if (input == null)
+                        continue;
                     IEnumerable<object> enumerable = input as IEnumerable<object>;
                     if (enumerable == null)
-                        throw new InvalidOperationException("listData must be enumerable");
+                        continue;
                     foreach (object item in enumerable.OfType<object>())
                     {
                         ScanStructureForDeps((TagStructure)item, ref tagRefs);
