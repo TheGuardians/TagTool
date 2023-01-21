@@ -196,7 +196,7 @@ namespace TagTool.Geometry.Jms
                 Jms.Skylights.Add(new JmsFormat.JmsSkylight
                 {
                     Direction = skylight.Direction,
-                    RadiantIntensity = new RealVector3d(skylight.RadiantIntensity.Red, skylight.RadiantIntensity.Blue, skylight.RadiantIntensity.Green),
+                    RadiantIntensity = new RealVector3d(skylight.RadiantIntensity.Red, skylight.RadiantIntensity.Green, skylight.RadiantIntensity.Blue),
                     SolidAngle = skylight.Magnitude
                 });
         }
