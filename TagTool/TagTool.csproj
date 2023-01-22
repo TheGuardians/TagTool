@@ -431,6 +431,7 @@
     <Compile Include="Common\MathHelper.cs" />
     <Compile Include="Common\NativeInterop.cs" />
     <Compile Include="Common\RealRgbaColor.cs" />
+    <Compile Include="Geometry\Ass\AssFormat.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\CollisionBSPGen3Builder.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\VerifyBsp3d.cs" />
     <Compile Include="Geometry\Jms\JmsCollExporter.cs" />

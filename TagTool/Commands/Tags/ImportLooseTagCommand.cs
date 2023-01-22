@@ -27,7 +27,7 @@ namespace TagTool.Commands.Tags
             "ImportLooseTag",
             "Import a loose tag from Halo 3 MCC",
 
-            "ImportLooseTag <Tag> <Path>",
+            "ImportLooseTag <Destination Tag> <Source Path>",
 
             "")
         {
@@ -126,8 +126,8 @@ namespace TagTool.Commands.Tags
                         var newResourceReader = new EndianReader(outStream, Cache.Endianness);
                         newResourceReader.SeekTo(offset);
                         DataSerializationContext resourceContext = new DataSerializationContext(newResourceReader);
-                        var deserializer = new TagDeserializer(CacheVersion.Halo3Retail, CachePlatform.MCC);
-                        var jmadInfo = TagStructure.GetTagStructureInfo(typeof(ModelAnimationTagResource), CacheVersion.Halo3Retail, CachePlatform.MCC);
+                        var deserializer = new TagDeserializer(TagCache, TagPlatform);
+                        var jmadInfo = TagStructure.GetTagStructureInfo(typeof(ModelAnimationTagResource), TagCache, TagPlatform);
                         ModelAnimationTagResource animationResource = (ModelAnimationTagResource)deserializer.DeserializeStruct(newResourceReader, resourceContext, jmadInfo);
                         ModelAnimationGraph jmad = (ModelAnimationGraph)tagDef;
                         animationResource.GroupMembers.AddressType = CacheAddressType.Definition;
