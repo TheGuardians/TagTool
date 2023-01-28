@@ -220,7 +220,10 @@ namespace TagTool.Commands.Porting
                             bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInteropResource(bitmap.HardwareTextures[i]);
 
                         if (bitmapResourceDefinition == null)
+                        {
+                            new TagToolWarning($"Invalid resource for bitm {blamTag.Name}");
                             return false;
+                        }
                     }
                 }
                 else if (blamTag.Group.Tag == "Lbsp")
