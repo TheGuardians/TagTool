@@ -12,6 +12,7 @@ using TagTool.Common;
 using TagTool.Commands.Common;
 using System.Text.RegularExpressions;
 using TagTool.Commands;
+using System.Linq;
 
 namespace TagTool.Cache
 {
@@ -816,12 +817,20 @@ namespace TagTool.Cache
                 var args = response.Split(' ');
                 for (int x = 0; x < args.Length; x++)
                 {
-                    if (Enum.TryParse<ModifierFlags>(args[x].ToLower(), out var value) && args[x] != "SignedBit")
+                    if (Enum.TryParse<ModifierFlags>(args[x].ToLower().Trim(), out var value) && args[x] != "SignedBit")
                     {
                         Header.ModifierFlags |= value;
                     }
+                    else if (string.IsNullOrWhiteSpace(args[x]))
+                    {
+                        if (args.Count() == 1)
+                        {
+                            Header.ModifierFlags |= ModifierFlags.multiplayer;
+                            Console.WriteLine($"Flags not provided. Multiplayer assumed.");
+                        }
+                    }
                     else
-                        Console.WriteLine($"Could not parse flag \"{response}\"");
+                        new TagToolWarning($"Could not parse flag \"{args[x]}\"");
                 }
             }
             else

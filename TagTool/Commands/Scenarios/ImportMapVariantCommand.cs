@@ -55,13 +55,20 @@ namespace TagTool.Commands.Scenarios
                 }
             }
 
+            if (!args[0].EndsWith("sandbox.map"))
+                args[0] = Path.Combine(args[0], "sandbox.map");
+
+            if (!File.Exists(args[0]))
+                return new TagToolError(CommandError.FileNotFound);
+
             var sandboxMapFile = new FileInfo(args[0]);
+
             using (var stream = sandboxMapFile.OpenRead())
             {
                 var reader = new EndianReader(stream);
                 var blf = new Blf(Cache.Version, Cache.Platform);
                 if (!blf.Read(reader))
-                    return new TagToolError(CommandError.FileType, "Not a valid sandbox.map file");
+                    return new TagToolError(CommandError.FileType, $"{sandboxMapFile.FullName} is not a valid sandbox.map file");
 
                 if (importingIntoMapFile)
                     ImportIntoMapFile(blf);
