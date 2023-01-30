@@ -168,18 +168,26 @@ namespace TagTool.Commands.Porting
 
                 var groupTag = CacheContext.TagCache.TagDefinitions.GetTagGroupFromTag("Lbsp");
 
-                CachedTag edTag = edTag = CacheContext.TagCacheGenHO.AllocateTag(groupTag);
+                CachedTag edTag;
 
-                if (scenarioLightmap.Lightmaps.Count != 1)
-                    edTag.Name = $"{blamTagName}_{i}_data";
+                if (FlagIsSet(PortingFlags.Replace) && CacheContext.TagCache.TryGetCachedTag((scenarioLightmap.Lightmaps.Count != 1 ? $"{blamTagName}_{i}_data" : $"{blamTagName}_data")+".Lbsp", out CachedTag result))
+                {
+                    CacheContext.Serialize(cacheStream, result, Lbsp);
+                    edTag = result;
+                }
                 else
-                    edTag.Name = $"{blamTagName}_data";
+                {
+                    edTag = CacheContext.TagCacheGenHO.AllocateTag(groupTag);
 
-                CacheContext.Serialize(cacheStream, edTag, Lbsp);
+                    if (scenarioLightmap.Lightmaps.Count != 1)
+                        edTag.Name = $"{blamTagName}_{i}_data";
+                    else
+                        edTag.Name = $"{blamTagName}_data";
 
+                    CacheContext.Serialize(cacheStream, edTag, Lbsp);
+                }
                 scenarioLightmap.PerPixelLightmapDataReferences.Add(new ScenarioLightmap.DataReferenceBlock() { LightmapBspData = edTag });
             }
-
 
             scenarioLightmap.Airprobes.Clear();
 

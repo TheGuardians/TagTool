@@ -286,9 +286,15 @@ namespace TagTool.Commands.Porting
                     result = ConvertTagInternal(cacheStream, blamCacheStream, resourceStreams, blamTag);
 
                     if (result == null)
-                    new TagToolWarning($"null tag allocated for reference \"{blamTag.Name}.{blamTag.Group}\"");
+                        new TagToolWarning($"null tag allocated for reference \"{blamTag.Name}.{blamTag.Group}\"");
 
                     Flags = oldFlags;
+                }
+                else
+                if (blamTag.Name != null && blamTag.IsInGroup("bitm"))
+                {
+                    if(CacheContext.TagCache.TryGetTag($"{blamTag.Name}.{blamTag.Group}", out result))
+                        new TagToolWarning($"using bitm tag reference \"{blamTag.Name}.{blamTag.Group}\" from source cache");
                 }
 #if !DEBUG
             }
@@ -760,18 +766,6 @@ namespace TagTool.Commands.Porting
 					scenario.SandboxWeapons.Clear();
 					break;
 
-				case ScenarioStructureBsp bsp: // named instanced geometry instances, useless unless we decompile bsp's
-                    if (bsp.InstancedGeometryInstances != null)
-                    {
-                        foreach (var instance in bsp.InstancedGeometryInstances)
-                            instance.Name = StringId.Invalid;
-                    }
-                    if (bsp.InstancedGeometryInstanceNames != null)
-                    {
-                        foreach (var instance in bsp.InstancedGeometryInstanceNames)
-                            instance.Name = StringId.Invalid;
-                    }
-                    break;
                 case ShieldImpact shit when BlamCache.Version < CacheVersion.HaloOnlineED:
                     shit = PreConvertShieldImpact(shit, BlamCache.Version, CacheContext);
                     // These won't convert automatically due to versioning
