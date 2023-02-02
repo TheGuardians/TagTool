@@ -73,7 +73,7 @@ namespace TagTool.Commands.GUI
                 if (tag == null)
                     continue;
 
-                if (!whitelistedTagIndicies.Contains(tag.Index))
+                if (whitelistedTagIndicies.Count > 0 && !whitelistedTagIndicies.Contains(tag.Index))
                         continue;
 
                 if (ignoredTagIndicies.Contains(tag.Index))
