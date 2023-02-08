@@ -935,6 +935,10 @@ namespace TagTool.Commands.Porting
                     blamDefinition = FixupEffect(cacheStream, resourceStreams, effe, blamTag.Name);
                     break;
 
+                case Equipment eqip:
+                    Enum.TryParse(eqip.EquipmentFlagsH3.ToString(), out eqip.EquipmentFlags);
+                    break;
+
                 case GameObject gameobject:
                     //fix AI object avoidance
                     if (gameobject.Model != null)
