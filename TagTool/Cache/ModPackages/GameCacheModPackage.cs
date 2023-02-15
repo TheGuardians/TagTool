@@ -27,7 +27,7 @@ namespace TagTool.Cache
 
         public GameCacheHaloOnlineBase BaseCacheReference;
 
-        public GameCacheModPackage(GameCacheHaloOnlineBase baseCache, FileInfo file)
+        public GameCacheModPackage(GameCacheHaloOnlineBase baseCache, FileInfo file, bool largeResourceStream = false)
         {
             ModPackageFile = file;
             Version = CacheVersion.HaloOnlineED;
@@ -40,7 +40,7 @@ namespace TagTool.Cache
             BaseCacheReference = baseCache;
 
             // load mod package
-            BaseModPackage = new ModPackage(file);
+            BaseModPackage = new ModPackage(file, unmanagedResourceStream: largeResourceStream);
 
             ResourceCaches = new ResourceCachesModPackage(this, BaseModPackage);
             StringTableHaloOnline = BaseModPackage.StringTable;

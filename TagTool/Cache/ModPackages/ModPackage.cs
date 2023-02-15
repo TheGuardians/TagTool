@@ -28,6 +28,8 @@ namespace TagTool.Cache
 
         public ExtantStream ResourcesStream { get; set; }
 
+        public bool IsLarge { get; }
+
         public List<Stream> MapFileStreams { get; set; } = new List<Stream>();
 
         public Stream CampaignFileStream { get; set; } = new MemoryStream();
@@ -64,6 +66,8 @@ namespace TagTool.Cache
 
         public ModPackage(FileInfo file = null, bool unmanagedResourceStream=false)
         {
+            IsLarge = unmanagedResourceStream;
+
             if (file != null)
                 Load(file);
             else
@@ -528,7 +532,7 @@ namespace TagTool.Cache
             if (!GoToSectionHeaderOffset(reader, section))
                 return;
             Stream newResourceStream;
-            if(section.Size <= 0x7FFFFFFF)
+            if(section.Size <= 0x7FFFFFFF && !IsLarge)
             {
                 newResourceStream = new MemoryStream();
                 ResourcesStream = new ExtantStream(newResourceStream);
