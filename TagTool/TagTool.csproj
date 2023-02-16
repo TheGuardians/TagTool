@@ -1699,6 +1699,7 @@
   <ItemGroup>
     <Reference Include="JsonMoppNet">
       <HintPath>..\Tools\JsonMoppNet.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -1727,6 +1728,7 @@
     <ProjectReference Include="..\ShaderGenerator\HaloShaderGenerator\HaloShaderGenerator.csproj">
       <Project>{17bfeffb-1619-4647-ba40-3cd1d87fd774}</Project>
       <Name>HaloShaderGenerator</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -1756,6 +1758,7 @@
     <PostBuildEvent>cd $(ProjectDir)$(OutDir)
 xcopy "$(ProjectDir)..\Physics" "Physics" /e /i /h /Y /d
 xcopy "$(ProjectDir)..\Tools" "Tools" /e /i /h /Y /d
+xcopy "$(ProjectDir)..\ShaderGenerator\HaloShaderGenerator\bin\x64\$(ConfigurationName)" "Tools" /e /i /h /Y /d
 
 IF "$(PlatformName)" == "x64" (
     del "Tools\meshoptimizer32.dll"
@@ -1767,11 +1770,6 @@ IF "$(PlatformName)" == "x64" (
     ren "Tools\meshoptimizer32.dll" meshoptimizer.dll
     del "Tools\fmod64.dll"
 )
-
-del "JsonMoppNet.dll"
-move "LZ4.dll" "Tools"
-move "assimp.dll" "Tools"
-move "AssimpNet.dll" "Tools"
 
 :: md  "Tools\scripting"
 :: for /f "eol=: delims=" %25%25F in ('dir /b^|find "System"') do move /Y "%25%25F" "Tools\scripting"
