@@ -66,7 +66,7 @@ namespace TagTool.Commands.Scenarios
             {
                 case "FunctionName":
                     indentWriter.Write(expr.StringAddress == 0 ? OpcodeLookup(expr.Opcode) : ReadScriptString(stringReader, expr.StringAddress));
-                    if (((parentExprk.Opcode <= 1) && parentExprk.Flags != HsSyntaxNodeFlags.ScriptReference) && nextExprValid)
+                    if (((parentExprk.Opcode <= 1) && parentExprk.Flags != HsSyntaxNodeFlags.ScriptReference && parentExprk.Flags != HsSyntaxNodeFlags.ScriptIndex) && nextExprValid)
                         indentWriter.WriteLine();
                     break; //Trust the string table, its faster than going through the dictionary with OpcodeLookup.
 
@@ -147,7 +147,7 @@ namespace TagTool.Commands.Scenarios
                     break;
             }
             
-            if (nextExprValid && !((parentExprk.Opcode <= 1) && parentExprk.Flags != HsSyntaxNodeFlags.ScriptReference))
+            if (nextExprValid && !((parentExprk.Opcode <= 1) && parentExprk.Flags != HsSyntaxNodeFlags.ScriptReference && parentExprk.Flags != HsSyntaxNodeFlags.ScriptIndex))
                 indentWriter.Write(' ');
         }
 
@@ -159,7 +159,7 @@ namespace TagTool.Commands.Scenarios
             {
                 indentWriter.Indent++;
 
-                if ((expr.Opcode <= 1) && expr.Flags != HsSyntaxNodeFlags.ScriptReference && parentExpr.Opcode != 2)
+                if ((expr.Opcode <= 1) && expr.Flags != HsSyntaxNodeFlags.ScriptReference && expr.Flags != HsSyntaxNodeFlags.ScriptIndex && parentExpr.Opcode != 2)
                     indentWriter.WriteLine();
 
                 indentWriter.Write('(');
@@ -172,6 +172,9 @@ namespace TagTool.Commands.Scenarios
                 nestedExpression = false;
                 if (shouldSkipFirst)
                 {
+                    if (Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index == ushort.MaxValue || Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index + 1 > Definition.ScriptExpressions.Count)
+                        break;
+
                     shouldSkipFirst = false;
                     continue;
                 }
@@ -199,7 +202,7 @@ namespace TagTool.Commands.Scenarios
                 if (nextExpr < Definition.ScriptExpressions.Count)
                     nextExprValid = GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[nextExpr].ValueType) != "Invalid";
 
-                if (((parentExpr.Opcode <= 2) && parentExpr.Flags != HsSyntaxNodeFlags.ScriptReference))
+                if (((parentExpr.Opcode <= 2) && parentExpr.Flags != HsSyntaxNodeFlags.ScriptReference && parentExpr.Flags != HsSyntaxNodeFlags.ScriptIndex))
                 {
                     indentWriter.WriteLine(")");
                 }
@@ -209,9 +212,9 @@ namespace TagTool.Commands.Scenarios
                     if(nextExprValid)
                         nextExprHandle = Definition.ScriptExpressions[nextExpr];
                     
-                    if (nextExprValid && !(((nextExprHandle.Opcode <= 2) && nextExprHandle.Flags != HsSyntaxNodeFlags.ScriptReference)))
+                    if (nextExprValid && !(((nextExprHandle.Opcode <= 2) && nextExprHandle.Flags != HsSyntaxNodeFlags.ScriptReference && nextExprHandle.Flags != HsSyntaxNodeFlags.ScriptIndex)))
                     {
-                        if ((expr.Opcode <= 2) && expr.Flags != HsSyntaxNodeFlags.ScriptReference)
+                        if ((expr.Opcode <= 2) && expr.Flags != HsSyntaxNodeFlags.ScriptReference && expr.Flags != HsSyntaxNodeFlags.ScriptIndex)
                         {
                             indentWriter.WriteLine(")");
                         }
@@ -236,6 +239,7 @@ namespace TagTool.Commands.Scenarios
 
             switch (expr.Flags)
             {
+                case HsSyntaxNodeFlags.ScriptIndex:
                 case HsSyntaxNodeFlags.ScriptReference:
                 case HsSyntaxNodeFlags.Group:
                     WriteGroupExpression(parentExpr, expr, stringReader, indentWriter, shouldSkip);
@@ -298,7 +302,7 @@ namespace TagTool.Commands.Scenarios
                 indentWriter.WriteLine("; Globals");
                 foreach (var scriptGlobal in Definition.Globals)
                 {
-                    indentWriter.Write($"(global {GetHsTypeAsString(Cache.Version, scriptGlobal.Type).ToSnakeCase()} {scriptGlobal.Name} ");
+                    indentWriter.Write($"(global {GetHsTypeAsString(Cache.Version, scriptGlobal.Type).ToLower()} {scriptGlobal.Name} ");
 
                     var expr = Definition.ScriptExpressions[scriptGlobal.InitializationExpressionHandle.Index];
 
@@ -310,13 +314,59 @@ namespace TagTool.Commands.Scenarios
                 indentWriter.WriteLine();
 
                 //
+                // Export Externals
+                //
+
+                indentWriter.WriteLine("; Externs");
+                foreach(var script in Definition.Scripts)
+                {
+                    if (script.Type != HsScriptType.Extern)
+                        continue;
+
+                    indentWriter.Write($"(script {script.Type.ToString().ToLower()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToLower()} ");
+
+                    if (script.Parameters.Count == 0)
+                    {
+                        indentWriter.Write(script.ScriptName);
+                    }
+                    else
+                    {
+                        indentWriter.Write($"({script.ScriptName}");
+
+                        foreach (var parameter in script.Parameters)
+                        {
+                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToLower()} {parameter.Name})");
+                        }
+                        
+                        indentWriter.Write(')');
+                    }
+                    var expr = Definition.ScriptExpressions[script.RootExpressionHandle.Index];
+                    var shouldSkip = false;
+                    if (expr.Opcode == 0)
+                        shouldSkip = true;
+                    WriteExpression(expr, expr, scriptStringReader, indentWriter, shouldSkip);
+
+                    if (script != Definition.Scripts.Last())
+                    {
+                        indentWriter.WriteLine(')');
+                    }
+                    else
+                        indentWriter.Write(')');
+                }
+
+                indentWriter.WriteLine();
+
+                //
                 // Export scenario scripts
                 //
 
                 indentWriter.WriteLine("; Scripts");
                 foreach (var script in Definition.Scripts)
                 {
-                    indentWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToSnakeCase()} ");
+                    if (script.Type == HsScriptType.Extern)
+                        continue;
+
+                    indentWriter.Write($"(script {script.Type.ToString().ToLower()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToLower()} ");
 
                     if (script.Parameters.Count == 0)
                     {
@@ -328,7 +378,7 @@ namespace TagTool.Commands.Scenarios
 
                         foreach (var parameter in script.Parameters)
                         {
-                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToSnakeCase()} {parameter.Name})");
+                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToLower()} {parameter.Name})");
                         }
 
                         indentWriter.WriteLine(')');
