@@ -380,12 +380,14 @@ namespace TagTool.Scripting
 
             switch (expr.Flags)
             {
+                case HsSyntaxNodeFlags.ExternReference:
                 case HsSyntaxNodeFlags.ScriptIndex:
                 case HsSyntaxNodeFlags.ScriptReference:
                 case HsSyntaxNodeFlags.Group:
                     WriteGroupExpression(parentExpr, expr, stringReader, indentWriter, shouldSkip);
                     break;
 
+                case HsSyntaxNodeFlags.ExternExpression:
                 case HsSyntaxNodeFlags.Expression:
                     WriteValueExpression(parentExpr, expr, stringReader, indentWriter);
                     break;
