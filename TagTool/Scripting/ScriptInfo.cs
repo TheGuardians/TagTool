@@ -16141,11 +16141,14 @@ namespace TagTool.Scripting
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.StringId),
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.StringId),
                 },
+                [0x692] = new ScriptInfo(HsType.HaloOnlineValue.Void, "game_finished_wait_time_add")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real),
+                },
                 [0x694] = new ScriptInfo(HsType.HaloOnlineValue.Void, "background_set")
                 {
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Short),
                 },
-
                 [0x6A1] = new ScriptInfo(HsType.HaloOnlineValue.Void, "cinematic_scripting_start_animation_legacy")
                 {
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
@@ -16198,9 +16201,9 @@ namespace TagTool.Scripting
                 },
                 [0x6A7] = new ScriptInfo(HsType.HaloOnlineValue.Void, "mp_wake_script")
                 {
-                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.String),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Script),
                 },
-                [0x6A8] = new ScriptInfo(HsType.HaloOnlineValue.Short, "lobby_size"),
+                [0x6A8] = new ScriptInfo(HsType.HaloOnlineValue.Short, "dew_method_stub"),
             },
             [(CacheVersion.Halo3Retail, CachePlatform.MCC)] = new Dictionary<int, ScriptInfo>
             {

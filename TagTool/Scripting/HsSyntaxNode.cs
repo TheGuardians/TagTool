@@ -31,6 +31,7 @@ namespace TagTool.Scripting
         GlobalIndex = 1 << 2,
         DoNotGC = 1 << 3,
         ParameterIndex = 1 << 4,
+        Extern = 1 << 5, // ED
 
         Group = DoNotGC,
         Expression = Primitive | DoNotGC,
