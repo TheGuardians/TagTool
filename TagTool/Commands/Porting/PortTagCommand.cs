@@ -1532,9 +1532,6 @@ namespace TagTool.Commands.Porting
 				case WeaponFlags weaponFlags:
 					return ConvertWeaponFlags(weaponFlags);
 
-                case Projectile projectile:
-                    return ConvertProjectileFlags(projectile);
-
                 case Weapon.Trigger trigger:
                     return ConvertWeaponTrigger(trigger);
 
@@ -1887,17 +1884,6 @@ namespace TagTool.Commands.Porting
 				throw new FormatException(BlamCache.Version.ToString());
 
 			return weaponFlags;
-        }
-
-        private object ConvertProjectileFlags(Projectile projectile)
-        {
-            if (BlamCache.Version <= CacheVersion.HaloOnline235640)
-                return projectile;
-
-            if (!Enum.TryParse(projectile.FlagsHO.ToString(), out projectile.Flags))
-                throw new FormatException(BlamCache.Version.ToString());
-
-            return projectile;
         }
 
         private object ConvertWeaponTrigger(Weapon.Trigger trigger)
