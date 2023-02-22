@@ -220,7 +220,10 @@ namespace TagTool.Commands.Porting
                             bitmapResourceDefinition = BlamCache.ResourceCache.GetBitmapTextureInteropResource(bitmap.HardwareTextures[i]);
 
                         if (bitmapResourceDefinition == null)
+                        {
+                            new TagToolWarning($"Invalid resource for bitm {blamTag.Name}");
                             return false;
+                        }
                     }
                 }
                 else if (blamTag.Group.Tag == "Lbsp")
@@ -283,9 +286,15 @@ namespace TagTool.Commands.Porting
                     result = ConvertTagInternal(cacheStream, blamCacheStream, resourceStreams, blamTag);
 
                     if (result == null)
-                    new TagToolWarning($"null tag allocated for reference \"{blamTag.Name}.{blamTag.Group}\"");
+                        new TagToolWarning($"null tag allocated for reference \"{blamTag.Name}.{blamTag.Group}\"");
 
                     Flags = oldFlags;
+                }
+                else
+                if (blamTag.Name != null && blamTag.IsInGroup("bitm"))
+                {
+                    if(CacheContext.TagCache.TryGetTag($"{blamTag.Name}.{blamTag.Group}", out result))
+                        new TagToolWarning($"using bitm tag reference \"{blamTag.Name}.{blamTag.Group}\" from source cache");
                 }
 #if !DEBUG
             }
@@ -757,18 +766,6 @@ namespace TagTool.Commands.Porting
 					scenario.SandboxWeapons.Clear();
 					break;
 
-				case ScenarioStructureBsp bsp: // named instanced geometry instances, useless unless we decompile bsp's
-                    if (bsp.InstancedGeometryInstances != null)
-                    {
-                        foreach (var instance in bsp.InstancedGeometryInstances)
-                            instance.Name = StringId.Invalid;
-                    }
-                    if (bsp.InstancedGeometryInstanceNames != null)
-                    {
-                        foreach (var instance in bsp.InstancedGeometryInstanceNames)
-                            instance.Name = StringId.Invalid;
-                    }
-                    break;
                 case ShieldImpact shit when BlamCache.Version < CacheVersion.HaloOnlineED:
                     shit = PreConvertShieldImpact(shit, BlamCache.Version, CacheContext);
                     // These won't convert automatically due to versioning
@@ -936,6 +933,10 @@ namespace TagTool.Commands.Porting
 
                 case Effect effe:
                     blamDefinition = FixupEffect(cacheStream, resourceStreams, effe, blamTag.Name);
+                    break;
+
+                case Equipment eqip:
+                    Enum.TryParse(eqip.EquipmentFlagsH3.ToString(), out eqip.EquipmentFlags);
                     break;
 
                 case GameObject gameobject:
@@ -1531,6 +1532,9 @@ namespace TagTool.Commands.Porting
 				case WeaponFlags weaponFlags:
 					return ConvertWeaponFlags(weaponFlags);
 
+                case Weapon.Trigger trigger:
+                    return ConvertWeaponTrigger(trigger);
+
                 case BarrelFlags barrelflags:
                     return ConvertBarrelFlags(barrelflags);
 
@@ -1880,6 +1884,17 @@ namespace TagTool.Commands.Porting
 				throw new FormatException(BlamCache.Version.ToString());
 
 			return weaponFlags;
+        }
+
+        private object ConvertWeaponTrigger(Weapon.Trigger trigger)
+        {
+            if (BlamCache.Version <= CacheVersion.HaloOnline235640)
+                return trigger;
+
+            if (!Enum.TryParse(trigger.BehaviorHO.ToString(), out trigger.Behavior))
+                throw new FormatException(BlamCache.Version.ToString());
+
+            return trigger;
         }
 
         private object ConvertBarrelFlags(BarrelFlags barrelflags)

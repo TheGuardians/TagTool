@@ -190,6 +190,15 @@ namespace TagTool.Geometry.Jms
                     Name = material.Name,
                     MaterialName = $"({Jms.Materials.Count + 1}) {material.MaterialName}"
                 });
+
+            //add skylights
+            foreach (var skylight in mode.LightgenLights)
+                Jms.Skylights.Add(new JmsFormat.JmsSkylight
+                {
+                    Direction = skylight.Direction,
+                    RadiantIntensity = new RealVector3d(skylight.RadiantIntensity.Red, skylight.RadiantIntensity.Green, skylight.RadiantIntensity.Blue),
+                    SolidAngle = skylight.Magnitude
+                });
         }
 
         public void SmoothVertices(JmsFormat jms)

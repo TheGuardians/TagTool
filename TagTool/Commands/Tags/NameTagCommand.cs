@@ -7,7 +7,7 @@ using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Tags
 {
-    class NameTagCommand : Command
+    public class NameTagCommand : Command
     {
         public GameCache Cache { get; }
 

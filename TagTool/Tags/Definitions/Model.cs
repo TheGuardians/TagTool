@@ -760,15 +760,20 @@ namespace TagTool.Tags.Definitions
             public short IndirectDamageSection;
 
             [TagField(Flags = Padding, Length = 6)]
-            public byte[] Unused1 = new byte[6];
+            public byte[] Padding0 = new byte[6];
 
             public DamageReportingType CollisionDamageReportingType;
-
             public DamageReportingType ResponseDamageReportingType;
 
-            public short Unused2;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public short UnknownHO;
+
+            [TagField(Length = 0x2, Flags = Padding, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
+            public byte[] MQ;
+
             [TagField(Flags = Padding, Length = 20)]
-            public byte[] Unused5 = new byte[20];
+            public byte[] Padding1 = new byte[20];
 
             public float MaximumVitality;
             public float MinStunDamage;
@@ -776,8 +781,8 @@ namespace TagTool.Tags.Definitions
             public float RechargeTime;
             public float RechargeFraction;
 
-            [TagField(Length = 64)]
-            public byte[] UnknownRuntimeValues = new byte[64];
+            [TagField(Length = 64, Flags = Padding)]
+            public byte[] Padding2 = new byte[64];
 
             public float MaxShieldVitality;
             [TagField(Flags = GlobalMaterial)]
@@ -795,8 +800,10 @@ namespace TagTool.Tags.Definitions
             public CachedTag ShieldDamagedEffect;
             public CachedTag ShieldDepletedEffect;
             public CachedTag ShieldRechargingEffect;
+
             public List<DamageSection> DamageSections;
             public List<Node> Nodes;
+
             [TagField(Flags = GlobalMaterial)]
             public short GlobalShieldMaterialIndex;
             [TagField(Flags = GlobalMaterial)]
@@ -842,17 +849,17 @@ namespace TagTool.Tags.Definitions
                 public List<InstantResponse> InstantResponses;
 
                 [TagField(Flags = Padding, Length = 24)]
-                public byte[] Unused1 = new byte[24];
+                public byte[] NullBlocksPadding = new byte[24];
              
                 public float StunTime;
-                public float RechargeTime;             
+                public float RechargeTime;
                 public float RuntimeRechargeVelocity;
 
                 public StringId ResurrectionRestoredRegionName;
                 public short ResurrectionRegionRuntimeIndex;
 
                 [TagField(Flags = Padding, Length = 2)]
-                public byte[] Unused2 = new byte[2];
+                public byte[] Padding1 = new byte[2];
 
                 [Flags]
                 public enum FlagsValue : int
@@ -890,19 +897,16 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.HaloReach)]
                     public float BodyDamageThreshold;
 
-                    public CachedTag PrimaryTransitionEffect;
-                    
-                    public CachedTag SecondaryTransitionEffect;
+                    [TagField(ValidTags = new [] { "effe", "jpt!" })] public CachedTag PrimaryTransitionEffect;
+                    [TagField(ValidTags = new [] { "effe", "jpt!" })] public CachedTag SecondaryTransitionEffect;
+                    [TagField(ValidTags = new [] { "effe", "jpt!" })] public CachedTag TransitionDamageEffect;
 
-                    public CachedTag TransitionDamageEffect;
                     public StringId Region;
                     public NewStateValue NewState;
                     public short RuntimeRegionIndex;
                     
                     public StringId SecondaryRegion;
-                    
                     public NewStateValue SecondaryNewState;
-                    
                     public short SecondaryRuntimeRegionIndex;
                    
                     public short DestroyInstanceGroup; //block index, all possible instances from this group will be destroyed

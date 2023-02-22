@@ -380,7 +380,7 @@ namespace TagTool.Tags.Definitions
         public class SkygenLight : TagStructure
 		{
             public RealVector3d Direction;
-            public RealRgbColor Color;
+            public RealRgbColor RadiantIntensity;
             public float Magnitude;
         }
 

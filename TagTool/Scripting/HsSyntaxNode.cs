@@ -31,11 +31,14 @@ namespace TagTool.Scripting
         GlobalIndex = 1 << 2,
         DoNotGC = 1 << 3,
         ParameterIndex = 1 << 4,
+        Extern = 1 << 5, // ED
 
         Group = DoNotGC,
         Expression = Primitive | DoNotGC,
         ScriptReference = ScriptIndex | DoNotGC,
         GlobalsReference = Primitive | GlobalIndex | DoNotGC,
-        ParameterReference = Primitive | GlobalIndex | ParameterIndex | DoNotGC
+        ParameterReference = Primitive | GlobalIndex | ParameterIndex | DoNotGC,
+        ExternReference = DoNotGC | Extern,
+        ExternExpression = Primitive | DoNotGC | Extern
     }
 }

@@ -1601,6 +1601,9 @@ namespace TagTool.Scripting.Compiler
                 if (functionNameSymbol.Value != script.ScriptName)
                     continue;
 
+                if (script.Type == HsScriptType.Extern)
+                    return CompileExternMethodReference(group, functionNameSymbol, script);
+
                 var handle = AllocateExpression(
                     script.ReturnType.HaloOnline,
                     HsSyntaxNodeFlags.ScriptReference,
@@ -1639,6 +1642,47 @@ namespace TagTool.Scripting.Compiler
             }
 
             throw new KeyNotFoundException(functionNameSymbol.Value);
+        }
+
+        private DatumHandle CompileExternMethodReference(ScriptGroup group, ScriptSymbol functionNameSymbol, HsScript script)
+        {
+            var builtin = ScriptInfo.Scripts[(Cache.Version, Cache.Platform)].First(x => x.Value.Name == "dew_method_stub");
+            var scriptIndex = (short)Scripts.IndexOf(script);
+
+            var handle = AllocateExpression(script.ReturnType.HaloOnline, HsSyntaxNodeFlags.Group |  HsSyntaxNodeFlags.Extern, (ushort)builtin.Key, scriptIndex);
+            var expr = ScriptExpressions[handle.Index];
+
+            var functionNameHandle = AllocateExpression(HsType.HaloOnlineValue.FunctionName, HsSyntaxNodeFlags.Expression | HsSyntaxNodeFlags.Extern, (ushort)builtin.Key, scriptIndex);
+            var functionNameExpr = ScriptExpressions[functionNameHandle.Index];
+            functionNameExpr.StringAddress = CompileStringAddress(functionNameSymbol.Value);
+
+            Array.Copy(BitConverter.GetBytes(functionNameHandle.Value), expr.Data, 4);
+            Array.Copy(BitConverter.GetBytes(0), functionNameExpr.Data, 4);
+
+            IScriptSyntax parameters = group.Tail;
+            var prevExpr = functionNameExpr;
+
+            foreach (var parameter in script.Parameters)
+            {
+                if (!(parameters is ScriptGroup parametersGroup))
+                    throw new FormatException(group.ToString());
+
+                prevExpr.NextExpressionHandle = CompileExpression(parameter.Type.HaloOnline, parametersGroup.Head);
+                prevExpr = ScriptExpressions[prevExpr.NextExpressionHandle.Index];
+
+                parameters = parametersGroup.Tail;
+            }
+
+            // Compile variadic parameters
+            for (IScriptSyntax current = parameters;
+                current is ScriptGroup currentGroup;
+                current = currentGroup.Tail)
+            {
+                prevExpr.NextExpressionHandle = CompileExpression(HsType.HaloOnlineValue.Unparsed, currentGroup.Head);
+                prevExpr = ScriptExpressions[prevExpr.NextExpressionHandle.Index];
+            }
+
+            return handle;
         }
 
         private DatumHandle CompileGlobalReference(ScriptSymbol symbol, HsGlobal global)

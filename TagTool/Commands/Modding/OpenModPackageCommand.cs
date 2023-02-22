@@ -20,7 +20,7 @@ namespace TagTool.Commands.Modding
                 "OpenModPackage",
                 "Create context for an existing mod package.",
 
-                "OpenModPackage <.pak path>",
+                "OpenModPackage [large] <.pak path>",
 
                 "Create context for an existing mod package.")
         {
@@ -30,7 +30,15 @@ namespace TagTool.Commands.Modding
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
+            bool useLargeStreams = false;
+
+            if (args.Count > 1 && args[0].ToLower() == "large")
+            {
+                useLargeStreams = true;
+                args.RemoveAt(0);
+            }
+
+            if(args.Count != 1)
                 return new TagToolError(CommandError.ArgCount);
 
             string path = args[0];
@@ -56,7 +64,7 @@ namespace TagTool.Commands.Modding
 
             Console.WriteLine("Initializing cache...");
 
-            ModCache = new GameCacheModPackage(Cache, file);
+            ModCache = new GameCacheModPackage(Cache, file, largeResourceStream: useLargeStreams);
             Context = TagCacheContextFactory.Create(ContextStack, ModCache, $"{ModCache.BaseModPackage.Metadata.Name}.pak");
             ContextStack.Push(Context);
 

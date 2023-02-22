@@ -1651,6 +1651,10 @@ namespace TagTool.Commands.Porting
                     case "objectives_secondary_unavailable":
                         expr.Opcode = 0x4B2; // -> objectives_show
                         return true;
+                    case "mp_wake_script":
+                        expr.Opcode = 0x6A7; // ^
+                        UpdateMpWakeScript(cacheStream, scnr, expr);
+                        return true;
 
                     default:
                         return false;
@@ -1788,6 +1792,36 @@ namespace TagTool.Commands.Porting
             }
             else
                 return false;
+        }
+
+        private void UpdateMpWakeScript(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
+        {
+            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+            
+            var stringExpr = scnr.ScriptExpressions[exprIndex]; // <string> parameter
+
+            if(stringExpr.StringAddress != 0)
+            {
+                using (var scriptStringStream = new MemoryStream(scnr.ScriptStrings))
+                using (var scriptStringReader = new BinaryReader(scriptStringStream))
+                {
+                    var scriptName = "";
+                    scriptStringReader.BaseStream.Position = stringExpr.StringAddress;
+                    for (char c; (c = scriptStringReader.ReadChar()) != 0x00; scriptName += c);
+
+                    for(var i = 0; i < scnr.Scripts.Count; i++)
+                    {
+                        var script = scnr.Scripts[i];
+                        if(scriptName == script.ScriptName)
+                        {
+
+                            stringExpr.ValueType.Halo3Retail = HsType.Halo3RetailValue.Script;
+                            stringExpr.Data = BitConverter.GetBytes(i).ToArray();
+                            return;
+                        }
+                    }
+                }
+            }
         }
 
         private void UpdateAiTestSeat(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)

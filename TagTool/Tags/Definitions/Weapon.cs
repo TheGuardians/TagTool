@@ -375,7 +375,10 @@ namespace TagTool.Tags.Definitions
         {
             public TriggerFlags Flags;
             public InputValue Input;
+            [TagField(MaxVersion = CacheVersion.HaloOnline235640)]
             public BehaviorValue Behavior;
+            [TagField(MinVersion = CacheVersion.HaloOnline301003)]
+            public BehaviorValueHO BehaviorHO;
             public short PrimaryBarrel;
             public short SecondaryBarrel;
             public PredictionValue Prediction;
@@ -500,6 +503,19 @@ namespace TagTool.Tags.Definitions
                 LatchZoom,
                 LatchRocketlauncher,
                 SpewCharge,
+            }
+
+            public enum BehaviorValueHO : short
+            {
+                Spew,
+                Latch,
+                LatchAutofire,
+                Charge,
+                LatchZoom,
+                LatchRocketlauncher,
+                SpewCharge,
+                SwordCharge,
+                LatchTether,
             }
 
             public enum PredictionValue : short

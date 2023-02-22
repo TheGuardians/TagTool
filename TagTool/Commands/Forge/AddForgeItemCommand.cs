@@ -15,6 +15,7 @@ namespace TagTool.Commands.Forge
         private CachedTag Item;
         private string ItemName;
         private short PaletteCategoryIndex = -1;
+        private string PaletteCategoryName;
         private string ItemDescription;
 
         public AddForgeItemCommand(GameCache cache) :
@@ -26,8 +27,8 @@ namespace TagTool.Commands.Forge
                 "AddForgeItem <name> <category> [setters] [description] <tag name>",
 
                 "Adds an item to an existing Forge palette category."
-                + "\nName and Category must be in quotes if they contain spaces."
-                + "\nCategory must be either the block index or exact name of the category."
+                + "\nIf they contain spaces, put name and/or category in quotes."
+                + "\nCategory can be either a block index, exact name, or * for last created)."
                 + "\nWhen using \"setters\" argument, each setter must be on a new line"
                 + "\nwith the following format: <target> <type> <value>")
         {
@@ -76,25 +77,28 @@ namespace TagTool.Commands.Forge
 
                 if (!short.TryParse(args[1], out PaletteCategoryIndex))
                 {
-                    foreach (var cat in ForgeGlobals.PaletteCategories)
+                    if (args[1].ToLower() == "*" || args[1].ToLower() == "last")
+                        PaletteCategoryIndex = (short)(ForgeGlobals.PaletteCategories.Count() - 1);
+                    else
                     {
-                        if (cat.Name.ToLower() == args[1].ToLower())
+                        foreach (var category in ForgeGlobals.PaletteCategories)
                         {
-                            nameIndices.Add((short)ForgeGlobals.PaletteCategories.IndexOf(cat));
+                            if (category.Name.ToLower() == args[1].ToLower())
+                                nameIndices.Add((short)ForgeGlobals.PaletteCategories.IndexOf(category));
                         }
-                    }
 
-                    switch (nameIndices.Count)
-                    {
-                        case 0:
-                            return new TagToolError(CommandError.CustomError, "Category could not be found.");
-                        case 1:
-                            break;
-                        default:
-                            return new TagToolWarning("Multiple categories which this name were found. Category will be the last encountered.");
-                    }
+                        switch (nameIndices.Count)
+                        {
+                            case 0:
+                                return new TagToolError(CommandError.CustomError, "Category could not be found.");
+                            case 1:
+                                break;
+                            default:
+                                return new TagToolWarning("Multiple categories which this name were found. Category will be the last encountered.");
+                        }
 
-                    PaletteCategoryIndex = nameIndices.Last();
+                        PaletteCategoryIndex = nameIndices.Last();
+                    }
                 }
                 else if (PaletteCategoryIndex >= ForgeGlobals.PaletteCategories.Count || PaletteCategoryIndex < -1)
                     return new TagToolError(CommandError.CustomError, $"Category index must be less than the current category count of {ForgeGlobals.PaletteCategories.Count}.");
@@ -166,6 +170,7 @@ namespace TagTool.Commands.Forge
                     Setters = setterList
                 });
 
+                PaletteCategoryName = ForgeGlobals.PaletteCategories[PaletteCategoryIndex].Name;
                 Cache.Serialize(cacheStream, Cache.TagCache.GetTag($"multiplayer\\forge_globals.forg"), ForgeGlobals);
 
                 // check for multiplayerobject block
@@ -184,7 +189,7 @@ namespace TagTool.Commands.Forge
                 }
             }
 
-            Console.WriteLine($"\nItem added to category {PaletteCategoryIndex}.");
+            Console.WriteLine($"\nItem added to category {PaletteCategoryIndex}: \"{PaletteCategoryName}\".");
             return true;
         }
     }

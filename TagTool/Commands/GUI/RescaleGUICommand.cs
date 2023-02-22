@@ -28,13 +28,14 @@ namespace TagTool.Commands.GUI
         public override object Execute(List<string> args)
         {
             float scalefactor = 1.3125f;
-            if (args.Count == 1 && args[0] != "ignore" && !float.TryParse(args[0], out scalefactor))
+            if (args.Count == 1 && (args[0] != "ignore" && args[0] != "whitelist") && !float.TryParse(args[0], out scalefactor))
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
             else
-            if (args.Count == 2 && args[0] == "ignore" && !float.TryParse(args[1], out scalefactor))
+            if (args.Count == 2 && (args[0] == "ignore" || args[0] == "whitelist") && !float.TryParse(args[1], out scalefactor))
                 return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");
 
             var ignoredTagIndicies = new HashSet<int>();
+            var whitelistedTagIndicies = new HashSet<int>();
 
             if (args.Count > 0 && args[0] == "ignore")
             {
@@ -50,12 +51,30 @@ namespace TagTool.Commands.GUI
                     ignoredTagIndicies.Add(instance.Index);
                 }
             }
+            else
+            if (args.Count > 0 && args[0] == "whitelist")
+            {
+                Console.WriteLine("Please specify the tags to be rescaled:");
+
+                string whitelistLine;
+
+                while ((whitelistLine = Console.ReadLine()) != "")
+                {
+                    if (!Cache.TagCache.TryGetTag(whitelistLine, out var instance))
+                        continue;
+
+                    whitelistedTagIndicies.Add(instance.Index);
+                }
+            }
 
             List<string> TargetTagGroups = new List<string>{ "bmp3", "skn3", "txt3", "lst3", "grup", "bkey", "mdl3", "scn3" };
             foreach (var tag in Cache.TagCache.TagTable)
             {
                 if (tag == null)
                     continue;
+
+                if (whitelistedTagIndicies.Count > 0 && !whitelistedTagIndicies.Contains(tag.Index))
+                        continue;
 
                 if (ignoredTagIndicies.Contains(tag.Index))
                     continue;

@@ -69,7 +69,7 @@ namespace TagTool.Commands.Modding
             if (!useDialog)
                 modCache.BaseModPackage.Metadata.Name = args[0];
 
-            // initialze mod package with current HO cache
+            // initialize mod package with current HO cache
             Console.WriteLine($"Building initial tag cache from reference...");
 
             modCache.BaseModPackage.CacheNames = new List<string>();

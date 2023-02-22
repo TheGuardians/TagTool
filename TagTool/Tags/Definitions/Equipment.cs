@@ -43,8 +43,11 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public short NumberOfUses;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public EquipmentFlagBits EquipmentFlags;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
+        public EquipmentFlagBitsH3 EquipmentFlagsH3;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public EquipmentFlagBitsReach EquipmentFlagsReach;
@@ -74,13 +77,16 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<SuperShieldBlock> SuperShield;
+
         public List<MultiplayerPowerupBlock> MultiplayerPowerup;
         public List<SpawnerBlock> Spawner;
         public List<ProximityMineBlock> ProximityMine;
         public List<MotionTrackerNoiseBlock> MotionTrackerNoise;
         public List<ShowmeBlock> Showme;
+
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<InvisibilityBlock> Invisibility;
+
         public List<InvincibilityBlock> Invincibility;
         public List<RegeneratorBlock> Regenerator;
 
@@ -178,6 +184,28 @@ namespace TagTool.Tags.Definitions
 
         [Flags]
         public enum EquipmentFlagBits : ushort
+        {
+            None,
+            PathfindingObstacle = 1 << 0,
+            GravityLiftCollisionGroup = 1 << 1,
+            EquipmentIsDangerousToAi = 1 << 2,
+            ProtectsParentFromAoe = 1 << 3,
+            ThirdPersonCameraAlways = 1 << 4,
+            UseForcedPrimaryChangeColor = 1 << 5,
+            UseForcedSecondaryChangeColor = 1 << 6,
+            CanBeUsedInVehicle = 1 << 7,
+            CanNotBeUsedOnFoot = 1 << 8,
+            NotDroppedByPlayer = 1 << 9,
+            IsDroppedByAi = 1 << 10,
+            Bit11 = 1 << 11,
+            Bit12 = 1 << 12,
+            Bit13 = 1 << 13,
+            Bit14 = 1 << 14,
+            Bit15 = 1 << 15
+        }
+
+        [Flags]
+        public enum EquipmentFlagBitsH3 : ushort
         {
             None,
             PathfindingObstacle = 1 << 0,

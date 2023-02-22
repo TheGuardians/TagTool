@@ -16,18 +16,25 @@ namespace TagTool.Commands.Tags
 {
     class ImportLooseTagCommand : Command
     {
-        GameCacheHaloOnlineBase Cache { get; set; }
+        public GameCacheHaloOnlineBase Cache { get; set; }
+        private EndianFormat TagEndianness { get; set; }
+        private CacheVersion TagCache { get; set; }
+        private CachePlatform TagPlatform { get; set; }
+
         public ImportLooseTagCommand(GameCacheHaloOnlineBase cache) : base(
             false,
 
             "ImportLooseTag",
             "Import a loose tag from Halo 3 MCC",
 
-            "ImportLooseTag <Tag> <Path>",
+            "ImportLooseTag <Destination Tag> <Source Path>",
 
             "")
         {
             Cache = cache;
+            TagEndianness = EndianFormat.LittleEndian;
+            TagCache = CacheVersion.Halo3Retail;
+            TagPlatform = CachePlatform.MCC;
         }
 
         public override object Execute(List<string> args)
@@ -47,19 +54,19 @@ namespace TagTool.Commands.Tags
                 inStream.Read(tagData, 0, tagData.Length);
             }
 
-            var singleFileTagReader = new SingleTagFileReader(new PersistChunkReader(new MemoryStream(tagData), Cache.Endianness));
+            var singleFileTagReader = new SingleTagFileReader(new PersistChunkReader(new MemoryStream(tagData), TagEndianness));
 
             // read the layout
-            var layout = singleFileTagReader.ReadLayout(Cache.Endianness);
+            var layout = singleFileTagReader.ReadLayout(TagEndianness);
 
             // read and fixup the data
             var FixupContext = new HaloOnlinePersistContext(Cache);
             var newTagData = singleFileTagReader.ReadAndFixupData(0, layout, FixupContext, out uint mainStructOffset);
 
-            var newTagDataReader = new EndianReader(new MemoryStream(newTagData), Cache.Endianness);
+            var newTagDataReader = new EndianReader(new MemoryStream(newTagData), TagEndianness);
             newTagDataReader.SeekTo(mainStructOffset);
 
-            var deserializer = new TagDeserializer(CacheVersion.Halo3Retail, CachePlatform.MCC);
+            var deserializer = new TagDeserializer(TagCache, TagPlatform);
 
             var definitions = new Cache.Gen3.TagDefinitionsGen3();
             Type looseTagType = null;
@@ -82,10 +89,10 @@ namespace TagTool.Commands.Tags
             if (Cache.TagCache.TryGetCachedTag(tagname, out var instance))
                 return new TagToolError(CommandError.OperationFailed, "Tag name already exists in cache!");
 
-            var info = TagStructure.GetTagStructureInfo(looseTagType, CacheVersion.Halo3Retail, CachePlatform.MCC);
+            var info = TagStructure.GetTagStructureInfo(looseTagType, TagCache, TagPlatform);
 
             if (info.TotalSize != layout.RootStruct.Size)
-                return new TagToolError(CommandError.OperationFailed, $"Loose tag struct size ({layout.RootStruct.Size}) did not match known definition size ({info.TotalSize}). Check game version.");
+                return new TagToolError(CommandError.OperationFailed, $"Loose tag struct size (0x{layout.RootStruct.Size:X4}) did not match known definition size (0x{info.TotalSize:X4}). Check game version.");
 
             DataSerializationContext context = new DataSerializationContext(newTagDataReader);
             var result = deserializer.DeserializeStruct(newTagDataReader, context, info);
@@ -119,8 +126,8 @@ namespace TagTool.Commands.Tags
                         var newResourceReader = new EndianReader(outStream, Cache.Endianness);
                         newResourceReader.SeekTo(offset);
                         DataSerializationContext resourceContext = new DataSerializationContext(newResourceReader);
-                        var deserializer = new TagDeserializer(CacheVersion.Halo3Retail, CachePlatform.MCC);
-                        var jmadInfo = TagStructure.GetTagStructureInfo(typeof(ModelAnimationTagResource), CacheVersion.Halo3Retail, CachePlatform.MCC);
+                        var deserializer = new TagDeserializer(TagCache, TagPlatform);
+                        var jmadInfo = TagStructure.GetTagStructureInfo(typeof(ModelAnimationTagResource), TagCache, TagPlatform);
                         ModelAnimationTagResource animationResource = (ModelAnimationTagResource)deserializer.DeserializeStruct(newResourceReader, resourceContext, jmadInfo);
                         ModelAnimationGraph jmad = (ModelAnimationGraph)tagDef;
                         animationResource.GroupMembers.AddressType = CacheAddressType.Definition;
@@ -326,9 +333,22 @@ namespace TagTool.Commands.Tags
 
             public CachedTag GetTag(Tag groupTag, string name)
             {
+                if (!TagGroupValidForCache(groupTag, Cache.Version, Cache.Platform))
+                    return null;
                 if (Cache.TagCache.TryGetCachedTag($"{name}.{groupTag}", out CachedTag tag))
                     return tag;
                 return null;
+            }
+            public bool TagGroupValidForCache(Tag group, CacheVersion cache, CachePlatform platform)
+            {
+                var definitions = new Cache.Gen3.TagDefinitionsGen3();
+                var type = definitions.GetTagDefinitionType(group);
+                if (type == null)
+                    return false;
+                var attribute = TagStructure.GetTagStructureAttribute(type, cache, platform);
+                if (attribute == null)
+                    return false;
+                return true;
             }
         }
     }
