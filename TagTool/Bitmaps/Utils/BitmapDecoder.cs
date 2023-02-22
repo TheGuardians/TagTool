@@ -1283,10 +1283,14 @@ namespace TagTool.Bitmaps
             byte[] buffer = new byte[width * height * 4];
             for (int i = 0; i < (width * height * 2); i += 2)
             {
-                short temp = (short)(data[i + 1] | (data[i] << 8));
-                buffer[i * 2] = (byte)((byte)(temp & 0x1F)<<3);
-                buffer[(i * 2) + 1] = (byte)((byte)((temp >> 5) & 0x3F)<<2);
-                buffer[(i * 2) + 2] = (byte)((byte)((temp >> 11) & 0x1F)<<3);
+                ushort temp = (ushort)(data[i + 1] | ((ushort)(data[i]) << 8));
+                byte red = (byte)((temp >> 11) & 0x1f);
+                byte green = (byte)((temp >> 5) & 0x3f);
+                byte blue = (byte)(temp & 0x1f);
+
+                buffer[(i * 2) + 0] = (byte)((red << 3) | (red >> 2));
+                buffer[(i * 2) + 1] = (byte)((green << 2) | (green >> 4));
+                buffer[(i * 2) + 2] = (byte)((blue << 3) | (blue >> 2));
                 buffer[(i * 2) + 3] = 0xFF;
             }
             return buffer;

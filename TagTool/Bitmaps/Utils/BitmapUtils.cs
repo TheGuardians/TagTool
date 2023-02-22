@@ -310,7 +310,7 @@ namespace TagTool.Bitmaps
                     return BitmapFormat.Y8;
             
                 case BitmapFormat.A4R4G4B4:
-                case BitmapFormat.R5G6B5:
+                //case BitmapFormat.R5G6B5:
                 case BitmapFormat.V8U8:
                 case BitmapFormat.A8R8G8B8_reach:
                     return BitmapFormat.A8R8G8B8;
