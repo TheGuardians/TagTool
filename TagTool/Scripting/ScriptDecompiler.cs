@@ -3,8 +3,6 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Common;
@@ -15,20 +13,24 @@ namespace TagTool.Scripting
 {
     public class ScriptDecompiler
     {
-        private GameCache Cache;
-        private Scenario Definition;
+        public Scenario Definition { get; set; }
+        public BinaryReader scriptStringReader { get; set; }
+        public GameCache Cache { get; set; }
+        public List<GenericExpression> Globals = new List<GenericExpression>();
+        public List<GenericExpression> Scripts = new List<GenericExpression>();
 
         public ScriptDecompiler(GameCache cache, Scenario definition)
         {
             Cache = cache;
             Definition = definition;
+            var scriptStringStream = new MemoryStream(Definition.ScriptStrings);
+            scriptStringReader = new BinaryReader(scriptStringStream);
         }
 
         public void DecompileScripts(TextWriter scriptWriter)
         {
-            using (var scriptStringStream = new MemoryStream(Definition.ScriptStrings))
-            using (var scriptStringReader = new BinaryReader(scriptStringStream))
-            using (var baseTextWriter = new System.IO.StringWriter())
+            ParseScripts();
+
             using (var indentWriter = new IndentedTextWriter(scriptWriter, "	"))
             {
                 indentWriter.Indent = 0;
@@ -38,58 +40,14 @@ namespace TagTool.Scripting
                 //
 
                 indentWriter.WriteLine("; Globals");
-                foreach (var scriptGlobal in Definition.Globals)
+                for (var g = 0; g < Definition.Globals.Count; g++)
                 {
-                    indentWriter.Write($"(global {GetHsTypeAsString(Cache.Version, scriptGlobal.Type).ToLower()} {scriptGlobal.Name} ");
+                    var scriptGlobal = Definition.Globals[g];
+                    indentWriter.Write($"(global {GetHsTypeAsString(Cache.Version, scriptGlobal.Type).ToSnakeCase()} {scriptGlobal.Name} ");
 
-                    var expr = Definition.ScriptExpressions[scriptGlobal.InitializationExpressionHandle.Index];
-
-                    WriteExpression(expr, expr, scriptStringReader, indentWriter, false);
+                    WriteExpression(Globals[g], indentWriter);
 
                     indentWriter.WriteLine(')');
-                }
-
-                indentWriter.WriteLine();
-
-                //
-                // Export Externals
-                //
-
-                indentWriter.WriteLine("; Externs");
-                foreach (var script in Definition.Scripts)
-                {
-                    if (script.Type != HsScriptType.Extern)
-                        continue;
-
-                    indentWriter.Write($"(script {script.Type.ToString().ToLower()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToLower()} ");
-
-                    if (script.Parameters.Count == 0)
-                    {
-                        indentWriter.Write(script.ScriptName);
-                    }
-                    else
-                    {
-                        indentWriter.Write($"({script.ScriptName}");
-
-                        foreach (var parameter in script.Parameters)
-                        {
-                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToLower()} {parameter.Name})");
-                        }
-
-                        indentWriter.Write(')');
-                    }
-                    var expr = Definition.ScriptExpressions[script.RootExpressionHandle.Index];
-                    var shouldSkip = false;
-                    if (expr.Opcode == 0)
-                        shouldSkip = true;
-                    WriteExpression(expr, expr, scriptStringReader, indentWriter, shouldSkip);
-
-                    if (script != Definition.Scripts.Last())
-                    {
-                        indentWriter.WriteLine(')');
-                    }
-                    else
-                        indentWriter.Write(')');
                 }
 
                 indentWriter.WriteLine();
@@ -99,12 +57,10 @@ namespace TagTool.Scripting
                 //
 
                 indentWriter.WriteLine("; Scripts");
-                foreach (var script in Definition.Scripts)
+                for (var s = 0; s < Definition.Scripts.Count; s++)
                 {
-                    if (script.Type == HsScriptType.Extern)
-                        continue;
-
-                    indentWriter.Write($"(script {script.Type.ToString().ToLower()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToLower()} ");
+                    var script = Definition.Scripts[s];
+                    indentWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToSnakeCase()} ");
 
                     if (script.Parameters.Count == 0)
                     {
@@ -116,16 +72,14 @@ namespace TagTool.Scripting
 
                         foreach (var parameter in script.Parameters)
                         {
-                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToLower()} {parameter.Name})");
+                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToSnakeCase()} {parameter.Name})");
                         }
-
                         indentWriter.WriteLine(')');
                     }
-                    var expr = Definition.ScriptExpressions[script.RootExpressionHandle.Index];
-                    var shouldSkip = false;
-                    if (expr.Opcode == 0)
-                        shouldSkip = true;
-                    WriteExpression(expr, expr, scriptStringReader, indentWriter, shouldSkip);
+
+                    indentWriter.Indent++;
+                    WriteScript(Scripts[s], indentWriter);
+                    indentWriter.Indent--;
 
                     if (script != Definition.Scripts.Last())
                     {
@@ -138,40 +92,81 @@ namespace TagTool.Scripting
             }
         }
 
-        private string GetHsTypeAsString(CacheVersion version, HsType type)
+        private void ParseScripts()
         {
-            switch (version)
+            foreach (var scriptGlobal in Definition.Globals)
             {
-                case CacheVersion.Halo3Retail:
-                    return type.Halo3Retail.ToString();
-
-                case CacheVersion.Halo3ODST:
-                    return type.Halo3ODST.ToString();
-
-                case CacheVersion.HaloOnlineED:
-                case CacheVersion.HaloOnline106708:
-                    return type.HaloOnline.ToString();
-
-                default:
-                    new TagToolWarning($"No HsType found for cache \"{version}\". Defaulting to HaloOnline");
-                    return type.HaloOnline.ToString();
+                var exprIndex = scriptGlobal.InitializationExpressionHandle.Index;
+                Globals.Add(ParseExpression(exprIndex));
+            }
+            foreach (var script in Definition.Scripts)
+            {
+                var exprIndex = script.RootExpressionHandle.Index;
+                Scripts.Add(ParseExpression(exprIndex));
             }
         }
 
-        private byte[] SortExpressionDataArray(EndianFormat format, byte[] data, int dataLength)
+        private void WriteScript(GenericExpression expr, IndentedTextWriter indentWriter)
         {
-            if (format == EndianFormat.BigEndian)
+            for (var i = 1; i < expr.ChildExpressions.Count; i++)
             {
-                byte[] newData = new byte[dataLength];
-
-                // reverse the data array, but only to the specified length
-                for (int i = 0; i < dataLength; i++)
-                    newData[i] = data[(dataLength - 1) - i];
-
-                return newData;
+                WriteExpression(expr.ChildExpressions[i], indentWriter);
+                //multiline groups make their own newlines
+                if (expr.ChildExpressions[i].Type != GenericExpression.ExpressionType.MultilineGroup)
+                    indentWriter.WriteLine();
             }
+        }
 
-            return data;
+        private void WriteExpression(GenericExpression expr, IndentedTextWriter indentWriter)
+        {
+            switch (expr.Type)
+            {
+                case GenericExpression.ExpressionType.Group:
+                case GenericExpression.ExpressionType.ScriptReference:
+                    WriteGroupExpression(expr, indentWriter);
+                    break;
+                case GenericExpression.ExpressionType.MultilineGroup:
+                    WriteMultiLineGroupExpression(expr, indentWriter);
+                    break;
+                case GenericExpression.ExpressionType.Value:
+                    indentWriter.Write(expr.Name);
+                    break;
+            }
+        }
+
+        private void WriteGroupExpression(GenericExpression expr, IndentedTextWriter indentWriter)
+        {
+            indentWriter.Write('(');
+            for (var i = 0; i < expr.ChildExpressions.Count; i++)
+            {
+                WriteExpression(expr.ChildExpressions[i], indentWriter);
+                if (i < expr.ChildExpressions.Count - 1)
+                    indentWriter.Write(' ');
+            }
+            indentWriter.Write(')');
+        }
+
+        private void WriteMultiLineGroupExpression(GenericExpression expr, IndentedTextWriter indentWriter)
+        {
+            indentWriter.Write('(');
+            WriteExpression(expr.ChildExpressions[0], indentWriter);
+            indentWriter.Indent++;
+
+            //if statements have first member on the same line
+            if (expr.Opcode == 2)
+                indentWriter.Write(' ');
+            else
+                indentWriter.WriteLine();
+
+            for (var i = 1; i < expr.ChildExpressions.Count; i++)
+            {
+                WriteExpression(expr.ChildExpressions[i], indentWriter);
+                //multiline groups make their own newlines
+                if (expr.ChildExpressions[i].Type != GenericExpression.ExpressionType.MultilineGroup)
+                    indentWriter.WriteLine();
+            }
+            indentWriter.Indent--;
+            indentWriter.WriteLine(')');
         }
 
         private string ReadScriptString(BinaryReader reader, long address)
@@ -194,57 +189,52 @@ namespace TagTool.Scripting
             return result;
         }
 
-        private void WriteValueExpression(HsSyntaxNode parentExprk, HsSyntaxNode expr, BinaryReader stringReader, IndentedTextWriter indentWriter)
+        private GenericExpression ParseValueExpression(int exprIndex)
         {
-            var exprIndex = (ushort)(Definition.ScriptExpressions.IndexOf(expr));
-            var nextExpr = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
-            var nextExprValid = false;
-            if (nextExpr < Definition.ScriptExpressions.Count)
-                nextExprValid = GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[nextExpr].ValueType) != "Invalid";
+            var expr = Definition.ScriptExpressions[exprIndex];
+            GenericExpression result = new GenericExpression { Type = GenericExpression.ExpressionType.Value };
 
             var valueType = GetHsTypeAsString(Cache.Version, expr.ValueType);
             switch (valueType)
             {
                 case "FunctionName":
-                    indentWriter.Write(expr.StringAddress == 0 ? OpcodeLookup(expr.Opcode) : ReadScriptString(stringReader, expr.StringAddress));
-                    if (((parentExprk.Opcode <= 1) && parentExprk.Flags != HsSyntaxNodeFlags.ScriptReference && parentExprk.Flags != HsSyntaxNodeFlags.ScriptIndex) && nextExprValid)
-                        indentWriter.WriteLine();
+                    result.Name = expr.StringAddress == 0 ? OpcodeLookup(expr.Opcode) : ReadScriptString(scriptStringReader, expr.StringAddress);
                     break; //Trust the string table, its faster than going through the dictionary with OpcodeLookup.
 
                 case "Boolean":
-                    indentWriter.Write(expr.Data[0] == 0 ? "false" : "true");
+                    result.Name = expr.Data[0] == 0 ? "false" : "true";
                     break;
 
                 case "Real":
-                    indentWriter.Write(BitConverter.ToSingle(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0));
+                    result.Name = BitConverter.ToSingle(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0).ToString();
                     break;
 
                 case "Short":
-                    indentWriter.Write(BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0));
+                    result.Name = BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0).ToString();
                     break;
 
                 case "Long":
-                    indentWriter.Write(BitConverter.ToInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0));
+                    result.Name = BitConverter.ToInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0).ToString();
                     break;
                 case "String":
-                    indentWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
+                    result.Name = expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(scriptStringReader, expr.StringAddress)}\"";
                     break;
 
                 case "Script":
-                    indentWriter.Write(Definition.Scripts[BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0)].ScriptName);
+                    result.Name = Definition.Scripts[BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0)].ScriptName;
                     break;
 
                 case "StringId":
-                    indentWriter.Write($"\"{Cache.StringTable.GetString(new StringId(BitConverter.ToUInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0)))}\"");
+                    result.Name = $"\"{Cache.StringTable.GetString(new StringId(BitConverter.ToUInt32(SortExpressionDataArray(Cache.Endianness, expr.Data, 4), 0)))}\"";
                     break;
 
                 case "GameDifficulty":
                     switch (BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, expr.Data, 2), 0))
                     {
-                        case 0: indentWriter.Write("easy"); break;
-                        case 1: indentWriter.Write("normal"); break;
-                        case 2: indentWriter.Write("heroic"); break;
-                        case 3: indentWriter.Write("legendary"); break;
+                        case 0: result.Name = "easy"; break;
+                        case 1: result.Name = "normal"; break;
+                        case 2: result.Name = "heroic"; break;
+                        case 3: result.Name = "legendary"; break;
                         default: throw new NotImplementedException();
                     }
                     break;
@@ -274,135 +264,170 @@ namespace TagTool.Scripting
                 case "Damage":
                 case "StartingProfile":
                 case "DeviceGroup":
-                    indentWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
+                    result.Name = expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(scriptStringReader, expr.StringAddress)}\"";
                     break;
 
                 case "Team":
                 case "AiCommandScript":
                 case "AiLine":
-                    indentWriter.Write(expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(stringReader, expr.StringAddress)}\"");
+                    result.Name = expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(scriptStringReader, expr.StringAddress)}\"";
                     break;
 
                 default:
-                    indentWriter.Write($"<UNIMPLEMENTED VALUE: {expr.Flags.ToString()} {valueType}>");
+                    result.Name = $"<UNIMPLEMENTED VALUE: {expr.Flags.ToString()} {valueType}>";
                     break;
             }
 
-            if (nextExprValid && !((parentExprk.Opcode <= 1) && parentExprk.Flags != HsSyntaxNodeFlags.ScriptReference && parentExprk.Flags != HsSyntaxNodeFlags.ScriptIndex))
-                indentWriter.Write(' ');
+            return result;
         }
 
-        private void WriteGroupExpression(HsSyntaxNode parentExpr, HsSyntaxNode expr, BinaryReader stringReader, IndentedTextWriter indentWriter, bool shouldSkip)
+        private GenericExpression ParseGroupExpression(int exprIndex)
         {
-            bool shouldSkipFirst = shouldSkip;
-
-            if (!shouldSkip)
+            GenericExpression result = new GenericExpression();
+            var expr = Definition.ScriptExpressions[exprIndex];
+            result.Opcode = expr.Opcode;
+            switch (expr.Flags)
             {
-                indentWriter.Indent++;
-
-                if ((expr.Opcode <= 1) && expr.Flags != HsSyntaxNodeFlags.ScriptReference && expr.Flags != HsSyntaxNodeFlags.ScriptIndex && parentExpr.Opcode != 2)
-                    indentWriter.WriteLine();
-
-                indentWriter.Write('(');
-            }
-
-            var prevExpr = expr;
-            var nestedExpression = true;
-            for (var exprIndex = (ushort)(Definition.ScriptExpressions.IndexOf(expr) + 1); GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[exprIndex].ValueType) != "Invalid"; exprIndex = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index)
-            {
-                nestedExpression = false;
-                if (shouldSkipFirst)
-                {
-                    if (Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index == ushort.MaxValue || Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index + 1 > Definition.ScriptExpressions.Count)
-                        break;
-
-                    shouldSkipFirst = false;
-                    continue;
-                }
-                var nextExpr = Definition.ScriptExpressions[exprIndex];
-                WriteExpression(expr, nextExpr, stringReader, indentWriter, false);
-                prevExpr = nextExpr;
-
-                if (Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index == ushort.MaxValue || Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index + 1 > Definition.ScriptExpressions.Count)
+                case HsSyntaxNodeFlags.Group:
+                    result.Type = GenericExpression.ExpressionType.Group;
+                    if (expr.Opcode <= 6 && expr.Opcode != 4)
+                        result.Type = GenericExpression.ExpressionType.MultilineGroup;
+                    result.Name = OpcodeLookup(expr.Opcode);
+                    break;
+                case HsSyntaxNodeFlags.ScriptReference:
+                    result.Type = GenericExpression.ExpressionType.ScriptReference;
+                    result.Name = Definition.Scripts[expr.Opcode].ScriptName;
                     break;
             }
 
-            if (nestedExpression)
+            //This is the first expression within the group
+            int nextIndex = GetGroupStartExpressionIndex(exprIndex);
+
+            List<int> IndexHistory = new List<int> { nextIndex };
+            while (nextIndex != -1)
             {
-                var exprIdx = (ushort)(Definition.ScriptExpressions.IndexOf(expr) + 2);
-                var expression = Definition.ScriptExpressions[exprIdx];
-                var valueType = GetHsTypeAsString(Cache.Version, expression.ValueType);
-                indentWriter.Write($"<ERROR DECOMPILING GROUP EXPRESSION: {expression.Flags.ToString()} {valueType}>");
+                result.ChildExpressions.Add(ParseExpression(nextIndex));
+                nextIndex = GetNextExpressionIndex(nextIndex);
+                IndexHistory.Add(nextIndex);
             }
 
-            if (!shouldSkip)
-            {
-                var exprIndex = (ushort)(Definition.ScriptExpressions.IndexOf(expr));
-                var nextExpr = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
-                var nextExprValid = false;
-                if (nextExpr < Definition.ScriptExpressions.Count)
-                    nextExprValid = GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[nextExpr].ValueType) != "Invalid";
-
-                if (((parentExpr.Opcode <= 2) && parentExpr.Flags != HsSyntaxNodeFlags.ScriptReference && parentExpr.Flags != HsSyntaxNodeFlags.ScriptIndex))
-                {
-                    indentWriter.WriteLine(")");
-                }
-                else
-                {
-                    HsSyntaxNode nextExprHandle = null;
-                    if (nextExprValid)
-                        nextExprHandle = Definition.ScriptExpressions[nextExpr];
-
-                    if (nextExprValid && !(((nextExprHandle.Opcode <= 2) && nextExprHandle.Flags != HsSyntaxNodeFlags.ScriptReference && nextExprHandle.Flags != HsSyntaxNodeFlags.ScriptIndex)))
-                    {
-                        if ((expr.Opcode <= 2) && expr.Flags != HsSyntaxNodeFlags.ScriptReference && expr.Flags != HsSyntaxNodeFlags.ScriptIndex)
-                        {
-                            indentWriter.WriteLine(")");
-                        }
-                        else
-                            indentWriter.Write(") ");
-                    }
-                    else
-                        indentWriter.Write(")");
-                }
-
-                indentWriter.Indent--;
-            }
+            return result;
         }
 
-        private void WriteExpression(HsSyntaxNode parentExpr, HsSyntaxNode expr, BinaryReader stringReader, IndentedTextWriter indentWriter, bool shouldSkip)
+        private GenericExpression ParseExpression(int exprIndex)
         {
-            var exprIndex = (ushort)(Definition.ScriptExpressions.IndexOf(expr));
-            var nextExpr = Definition.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
-            var nextExprValid = false;
-            if (nextExpr < Definition.ScriptExpressions.Count)
-                nextExprValid = GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[nextExpr].ValueType) != "Invalid";
+            var expr = Definition.ScriptExpressions[exprIndex];
 
             switch (expr.Flags)
             {
                 case HsSyntaxNodeFlags.ExternReference:
-                case HsSyntaxNodeFlags.ScriptIndex:
                 case HsSyntaxNodeFlags.ScriptReference:
                 case HsSyntaxNodeFlags.Group:
-                    WriteGroupExpression(parentExpr, expr, stringReader, indentWriter, shouldSkip);
-                    break;
+                    return ParseGroupExpression(exprIndex);
 
                 case HsSyntaxNodeFlags.ExternExpression:
                 case HsSyntaxNodeFlags.Expression:
-                    WriteValueExpression(parentExpr, expr, stringReader, indentWriter);
-                    break;
+                    return ParseValueExpression(exprIndex);
 
                 case HsSyntaxNodeFlags.GlobalsReference:
                 case HsSyntaxNodeFlags.ParameterReference:
-                    indentWriter.Write(expr.StringAddress == 0 ? "none" : ReadScriptString(stringReader, expr.StringAddress));
-                    if (nextExprValid)
-                        indentWriter.Write(' ');
-                    break;
+                    return new GenericExpression
+                    {
+                        Name = expr.StringAddress == 0 ? "none" : ReadScriptString(scriptStringReader, expr.StringAddress),
+                        Type = GenericExpression.ExpressionType.Value,
+                        Opcode = expr.Opcode
+                    };
                 default:
-                    indentWriter.Write($"<UNIMPLEMENTED EXPR: {expr.Flags.ToString()} {GetHsTypeAsString(Cache.Version, expr.ValueType)}>");
-                    break;
+                    new TagToolError(CommandError.CustomError, $"<UNIMPLEMENTED EXPR: {expr.Flags.ToString()} {GetHsTypeAsString(Cache.Version, expr.ValueType)}>");
+                    return new GenericExpression();
             }
         }
 
+        private string GetHsTypeAsString(CacheVersion version, HsType type)
+        {
+            switch (version)
+            {
+                case CacheVersion.Halo3Retail:
+                    return type.Halo3Retail.ToString();
+
+                case CacheVersion.Halo3ODST:
+                    return type.Halo3ODST.ToString();
+
+                case CacheVersion.HaloOnlineED:
+                case CacheVersion.HaloOnline106708:
+                    return type.HaloOnline.ToString();
+
+                default:
+                    new TagToolWarning($"No HsType found for cache \"{version}\". Defaulting to HaloOnline");
+                    return type.HaloOnline.ToString();
+            }
+        }
+
+        private int GetGroupStartExpressionIndex(int exprIndex)
+        {
+            if (exprIndex < 0 || exprIndex >= Definition.ScriptExpressions.Count)
+                return -1;
+            var expr = Definition.ScriptExpressions[exprIndex];
+            int result = -1;
+            if (expr.Flags == HsSyntaxNodeFlags.Group || expr.Flags == HsSyntaxNodeFlags.ScriptReference)
+                switch (Cache.Endianness)
+                {
+                    case EndianFormat.LittleEndian:
+                        result = BitConverter.ToInt16(new byte[] { expr.Data[0], expr.Data[1] }, 0);
+                        return SanitizeExpressionIndex(result);
+                    default: //big endian
+                        result = BitConverter.ToInt16(new byte[] { expr.Data[3], expr.Data[2] }, 0);
+                        return SanitizeExpressionIndex(result);
+                }
+            else
+                return -1;
+        }
+
+        private int GetNextExpressionIndex(int exprIndex)
+        {
+            if (exprIndex < 0 || exprIndex >= Definition.ScriptExpressions.Count)
+                return -1;
+            var expr = Definition.ScriptExpressions[exprIndex];
+            return SanitizeExpressionIndex(expr.NextExpressionHandle.Index);
+        }
+
+        private int SanitizeExpressionIndex(int exprIndex)
+        {
+            return (exprIndex & 0xFFFF) == 0xFFFF ? -1 : exprIndex & 0xFFFF;
+        }
+
+        private byte[] SortExpressionDataArray(EndianFormat format, byte[] data, int dataLength)
+        {
+            if (format == EndianFormat.BigEndian)
+            {
+                byte[] newData = new byte[dataLength];
+
+                // reverse the data array, but only to the specified length
+                for (int i = 0; i < dataLength; i++)
+                    newData[i] = data[(dataLength - 1) - i];
+
+                return newData;
+            }
+
+            return data;
+        }
+
+    }
+
+    public class GenericExpression
+    {
+        public string Name = "";
+        public int Opcode = -1;
+        public ExpressionType Type = ExpressionType.Invalid;
+        public List<GenericExpression> ChildExpressions = new List<GenericExpression>();
+
+        public enum ExpressionType
+        {
+            Invalid,
+            Group,
+            MultilineGroup,
+            ScriptReference,
+            Value
+        }
     }
 }
