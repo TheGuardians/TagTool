@@ -53,6 +53,49 @@ namespace TagTool.Scripting
                 indentWriter.WriteLine();
 
                 //
+                // Export Externals
+                //
+
+                indentWriter.WriteLine("; Externs");
+                for (var s = 0; s < Definition.Scripts.Count; s++)
+                {
+                    var script = Definition.Scripts[s];
+                    if (script.Type != HsScriptType.Extern)
+                        continue;
+
+                    indentWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToSnakeCase()} ");
+
+                    if (script.Parameters.Count == 0)
+                    {
+                        indentWriter.WriteLine(script.ScriptName);
+                    }
+                    else
+                    {
+                        indentWriter.Write($"({script.ScriptName}");
+
+                        foreach (var parameter in script.Parameters)
+                        {
+                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToSnakeCase()} {parameter.Name})");
+                        }
+                        indentWriter.WriteLine(')');
+                    }
+
+                    indentWriter.Indent++;
+                    WriteScript(Scripts[s], indentWriter);
+                    indentWriter.Indent--;
+
+                    if (script != Definition.Scripts.Last())
+                    {
+                        indentWriter.WriteLine(')');
+                        indentWriter.WriteLine();
+                    }
+                    else
+                        indentWriter.Write(')');
+                }
+
+                indentWriter.WriteLine();
+
+                //
                 // Export scenario scripts
                 //
 
