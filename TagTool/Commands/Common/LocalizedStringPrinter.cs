@@ -8,7 +8,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Common
 {
-    static class LocalizedStringPrinter
+    public static class LocalizedStringPrinter
     {
         /// <summary>
         /// Filters a set of localized strings and prepares them for display.
@@ -41,7 +41,7 @@ namespace TagTool.Commands.Common
             return display;
         }
 
-        static string EncodeNonAsciiCharacters(string value)
+        public static string EncodeNonAsciiCharacters(string value)
         {
             var specialchars = new Dictionary<char, string>
             {
