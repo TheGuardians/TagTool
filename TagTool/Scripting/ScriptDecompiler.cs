@@ -341,6 +341,8 @@ namespace TagTool.Scripting
                     result.Name = OpcodeLookup(expr.Opcode);
                     break;
                 case HsSyntaxNodeFlags.ExternReference:
+                    result.Type = GenericExpression.ExpressionType.ScriptReference;
+                    break;
                 case HsSyntaxNodeFlags.ScriptReference:
                     result.Type = GenericExpression.ExpressionType.ScriptReference;
                     result.Name = Definition.Scripts[expr.Opcode].ScriptName;
