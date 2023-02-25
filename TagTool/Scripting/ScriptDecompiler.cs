@@ -43,7 +43,7 @@ namespace TagTool.Scripting
                 for (var g = 0; g < Definition.Globals.Count; g++)
                 {
                     var scriptGlobal = Definition.Globals[g];
-                    indentWriter.Write($"(global {GetHsTypeAsString(Cache.Version, scriptGlobal.Type).ToSnakeCase()} {scriptGlobal.Name} ");
+                    indentWriter.Write($"(global {GetHsTypeAsString(Cache.Version, scriptGlobal.Type).ToLower()} {scriptGlobal.Name} ");
 
                     WriteExpression(Globals[g], indentWriter);
 
@@ -63,11 +63,11 @@ namespace TagTool.Scripting
                     if (script.Type != HsScriptType.Extern)
                         continue;
 
-                    indentWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToSnakeCase()} ");
+                    indentWriter.Write($"(script {script.Type.ToString().ToLower()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToLower()} ");
 
                     if (script.Parameters.Count == 0)
                     {
-                        indentWriter.WriteLine(script.ScriptName);
+                        indentWriter.Write(script.ScriptName);
                     }
                     else
                     {
@@ -75,9 +75,9 @@ namespace TagTool.Scripting
 
                         foreach (var parameter in script.Parameters)
                         {
-                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToSnakeCase()} {parameter.Name})");
+                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToLower()} {parameter.Name})");
                         }
-                        indentWriter.WriteLine(')');
+                        indentWriter.Write(')');
                     }
 
                     indentWriter.Indent++;
@@ -87,7 +87,6 @@ namespace TagTool.Scripting
                     if (script != Definition.Scripts.Last())
                     {
                         indentWriter.WriteLine(')');
-                        indentWriter.WriteLine();
                     }
                     else
                         indentWriter.Write(')');
@@ -106,7 +105,7 @@ namespace TagTool.Scripting
                     if (script.Type == HsScriptType.Extern)
                         continue;
 
-                    indentWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToSnakeCase()} ");
+                    indentWriter.Write($"(script {script.Type.ToString().ToLower()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToLower()} ");
 
                     if (script.Parameters.Count == 0)
                     {
@@ -118,7 +117,7 @@ namespace TagTool.Scripting
 
                         foreach (var parameter in script.Parameters)
                         {
-                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToSnakeCase()} {parameter.Name})");
+                            indentWriter.Write($" ({GetHsTypeAsString(Cache.Version, parameter.Type).ToLower()} {parameter.Name})");
                         }
                         indentWriter.WriteLine(')');
                     }
@@ -418,7 +417,7 @@ namespace TagTool.Scripting
                 return -1;
             var expr = Definition.ScriptExpressions[exprIndex];
             int result = -1;
-            if (expr.Flags == HsSyntaxNodeFlags.Group || expr.Flags == HsSyntaxNodeFlags.ScriptReference)
+            if (expr.Flags == HsSyntaxNodeFlags.Group || expr.Flags == HsSyntaxNodeFlags.ScriptReference || expr.Flags == HsSyntaxNodeFlags.ExternReference)
                 switch (Cache.Endianness)
                 {
                     case EndianFormat.LittleEndian:
