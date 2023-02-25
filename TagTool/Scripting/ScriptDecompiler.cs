@@ -103,6 +103,9 @@ namespace TagTool.Scripting
                 for (var s = 0; s < Definition.Scripts.Count; s++)
                 {
                     var script = Definition.Scripts[s];
+                    if (script.Type == HsScriptType.Extern)
+                        continue;
+
                     indentWriter.Write($"(script {script.Type.ToString().ToSnakeCase()} {GetHsTypeAsString(Cache.Version, script.ReturnType).ToSnakeCase()} ");
 
                     if (script.Parameters.Count == 0)
@@ -337,6 +340,7 @@ namespace TagTool.Scripting
                         result.Type = GenericExpression.ExpressionType.MultilineGroup;
                     result.Name = OpcodeLookup(expr.Opcode);
                     break;
+                case HsSyntaxNodeFlags.ExternReference:
                 case HsSyntaxNodeFlags.ScriptReference:
                     result.Type = GenericExpression.ExpressionType.ScriptReference;
                     result.Name = Definition.Scripts[expr.Opcode].ScriptName;
