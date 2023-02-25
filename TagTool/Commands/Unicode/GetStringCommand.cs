@@ -8,7 +8,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Unicode
 {
-    class GetStringCommand : Command
+    public class GetStringCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }

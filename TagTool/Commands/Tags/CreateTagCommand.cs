@@ -9,7 +9,7 @@ using TagTool.Cache.Gen3;
 
 namespace TagTool.Commands.Tags
 {
-    class CreateTagCommand : Command
+    public class CreateTagCommand : Command
     {
         public GameCacheHaloOnlineBase Cache { get; }
 

@@ -14,7 +14,7 @@ using TagTool.Geometry;
 
 namespace TagTool.Commands.Tags
 {
-    class ImportLooseTagCommand : Command
+    public class ImportLooseTagCommand : Command
     {
         public GameCacheHaloOnlineBase Cache { get; set; }
         private EndianFormat TagEndianness { get; set; }

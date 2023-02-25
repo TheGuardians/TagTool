@@ -7,7 +7,7 @@ using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Shaders
 {
-    class UseShaderCacheCommand : Command
+    public class UseShaderCacheCommand : Command
     {
         public static GameCacheHaloOnline ShaderCache = null;
 

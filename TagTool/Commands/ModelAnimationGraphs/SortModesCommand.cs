@@ -7,7 +7,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.ModelAnimationGraphs
 {
-    class SortModesCommand : Command
+    public class SortModesCommand : Command
     {
         private GameCache Cache { get; }
         private ModelAnimationGraph Definition { get; }

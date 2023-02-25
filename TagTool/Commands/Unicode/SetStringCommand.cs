@@ -10,7 +10,7 @@ using System.Globalization;
 
 namespace TagTool.Commands.Unicode
 {
-    class SetStringCommand : Command
+    public class SetStringCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }

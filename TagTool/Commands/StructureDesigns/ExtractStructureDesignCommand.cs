@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace TagTool.Commands.StructureDesigns
 {
-    class ExtractStructureDesignCommand : Command
+    public class ExtractStructureDesignCommand : Command
     {
         private GameCache Cache { get; }
         private StructureDesign Definition { get; }
