@@ -7,6 +7,7 @@ using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using TagTool.Commands.Strings;
 
 namespace TagTool.Commands.Unicode
 {
@@ -45,8 +46,9 @@ namespace TagTool.Commands.Unicode
             var stringIdIndex = Cache.StringTable.IndexOf(stringIdStr);
             if (stringIdIndex < 0)
             {
-                Console.WriteLine("Unable to find stringID \"{0}\".", stringIdStr);
-                return true;
+                Console.WriteLine($"\"{stringIdStr}\" not found, creating a new StringID.");
+                new StringIdCommand(Cache).Execute(new List<string>() { "add", stringIdStr });
+                stringIdIndex = Cache.StringTable.IndexOf(stringIdStr);
             }
             var stringId = Cache.StringTable.GetStringId(stringIdIndex);
             if (stringId == StringId.Invalid)
