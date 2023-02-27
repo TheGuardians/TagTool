@@ -29,7 +29,7 @@ namespace TagTool.Commands.Common
                 if (str == null)
                     continue;
                 var stringId = stringTable.GetString(localizedString.StringID);
-                if (filter != null && !str.Contains(filter) && !stringId.Contains(filter))
+                if (filter != null && !str.ToLower().Contains(filter) && !stringId.ToLower().Contains(filter))
                     continue;
                 display.Add(new DisplayString
                 {
