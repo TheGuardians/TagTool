@@ -11,6 +11,7 @@ using TagTool.Tags.Resources;
 using TagTool.Tags;
 using TagTool.Common;
 using TagTool.Geometry;
+using static TagTool.Tags.Definitions.PhysicsModel;
 
 namespace TagTool.Commands.Tags
 {
@@ -268,22 +269,32 @@ namespace TagTool.Commands.Tags
                     break;
                 case "PhysicsModel":
                     PhysicsModel phmo = (PhysicsModel)tagDef;
-                    if (phmo.MassDistributions.Count != phmo.RigidBodies.Count &&
-                        phmo.MassDistributions.Count > 0 && phmo.RigidBodies.Count > 0)
+                    //fix phantom types
+                    foreach(var phantomtype in phmo.PhantomTypes)
                     {
-                        new TagToolWarning("Physics model mass distributions count != rigid bodies count!");
-                        break;
-                    }                      
-                    for(var massIndex = 0; massIndex < phmo.MassDistributions.Count; massIndex++)
+                        Enum.TryParse(phantomtype.Flags.Halo3Retail.ToString(), out phantomtype.Flags.Halo3ODST);
+                    }
+                    //add phantom shapes
+                    SetPhantomShapeFromRigidBody(phmo);
+                    //fix mass distributions
+                    foreach(var rigidbody in phmo.RigidBodies)
                     {
-                        phmo.RigidBodies[massIndex].CenterOfMass = phmo.MassDistributions[massIndex].CenterOfMass;
-                        phmo.RigidBodies[massIndex].CenterOfMassRadius = phmo.MassDistributions[massIndex].HavokWCenterOfMass;
-                        phmo.RigidBodies[massIndex].InertiaTensorX = phmo.MassDistributions[massIndex].InertiaTensorI * phmo.RigidBodies[massIndex].Mass;
-                        phmo.RigidBodies[massIndex].InertiaTensorXRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorI;
-                        phmo.RigidBodies[massIndex].InertiaTensorY = phmo.MassDistributions[massIndex].InertiaTensorJ * phmo.RigidBodies[massIndex].Mass;
-                        phmo.RigidBodies[massIndex].InertiaTensorYRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorJ;
-                        phmo.RigidBodies[massIndex].InertiaTensorZ = phmo.MassDistributions[massIndex].InertiaTensorK * phmo.RigidBodies[massIndex].Mass;
-                        phmo.RigidBodies[massIndex].InertiaTensorZRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorK;
+                        Shape phmoShape = GetPhysicsShape(phmo, rigidbody.ShapeType, rigidbody.ShapeIndex);
+                        if(phmoShape != null)
+                        {
+                            int massIndex = phmoShape.MassDistributionIndex;
+                            if(massIndex != -1)
+                            {
+                                rigidbody.CenterOfMass = phmo.MassDistributions[massIndex].CenterOfMass;
+                                rigidbody.CenterOfMassRadius = phmo.MassDistributions[massIndex].HavokWCenterOfMass;
+                                rigidbody.InertiaTensorX = phmo.MassDistributions[massIndex].InertiaTensorI * rigidbody.Mass;
+                                rigidbody.InertiaTensorXRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorI;
+                                rigidbody.InertiaTensorY = phmo.MassDistributions[massIndex].InertiaTensorJ * rigidbody.Mass;
+                                rigidbody.InertiaTensorYRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorJ;
+                                rigidbody.InertiaTensorZ = phmo.MassDistributions[massIndex].InertiaTensorK * rigidbody.Mass;
+                                rigidbody.InertiaTensorZRadius = phmo.MassDistributions[massIndex].HavokWInertiaTensorK;
+                            }
+                        }
                     }
                     break;
                 default:
@@ -292,6 +303,47 @@ namespace TagTool.Commands.Tags
                     break;
             }
 
+        }
+
+        private void SetPhantomShapeFromRigidBody(PhysicsModel phmo)
+        {
+            phmo.Phantoms = new List<Phantom>();
+            Shape shape = null;
+            foreach(var rigidBody in phmo.RigidBodies)
+            {
+                shape = GetPhysicsShape(phmo, rigidBody.ShapeType, rigidBody.ShapeIndex);
+                if (shape != null && shape.MaterialIndex != -1)
+                {
+                    Material material = phmo.Materials[shape.MaterialIndex];
+                    if(material.PhantomType != -1)
+                    {
+                        shape.PhantomIndex = (sbyte)phmo.Phantoms.Count;
+                        phmo.Phantoms.Add(new Phantom
+                        {
+                            ShapeType = rigidBody.ShapeType,
+                            ShapeIndex = rigidBody.ShapeIndex
+                        });
+                    }
+                }
+            }
+
+        }
+
+        private Shape GetPhysicsShape(PhysicsModel phmo, Havok.BlamShapeType shapeType, int shapeIndex)
+        {
+            switch (shapeType)
+            {
+                case Havok.BlamShapeType.Sphere:
+                    return shapeIndex == -1 ? null : phmo.Spheres[shapeIndex];
+                case Havok.BlamShapeType.Pill:
+                    return shapeIndex == -1 ? null : phmo.Pills[shapeIndex];
+                case Havok.BlamShapeType.Box:
+                    return shapeIndex == -1 ? null : phmo.Boxes[shapeIndex];
+                case Havok.BlamShapeType.Polyhedron:
+                    return shapeIndex == -1 ? null : phmo.Polyhedra[shapeIndex];
+                default:
+                    return null;
+            }
         }
 
         public RealVector3d point_to_vector(RealPoint3d point)
