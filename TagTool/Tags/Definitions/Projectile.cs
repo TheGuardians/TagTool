@@ -46,9 +46,9 @@ namespace TagTool.Tags.Definitions
 
         [TagField(ValidTags = new[] { "effe" })]
         public CachedTag DetonationStarted;
-        [TagField(ValidTags = new[] { "effe" })]
+        [TagField(ValidTags = new[] { "effe", "jpt!" })]
         public CachedTag AirborneDetonationEffect;
-        [TagField(ValidTags = new[] { "effe" })]
+        [TagField(ValidTags = new[] { "effe", "jpt!" })]
         public CachedTag GroundDetonationEffect;
         [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag DetonationDamage;
@@ -229,12 +229,12 @@ namespace TagTool.Tags.Definitions
             public ProjectileMaterialResponseFlags Flags;
             public MaterialResponseValue DefaultResponse;
 
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding1;
 
-            [TagField(Flags = TagFieldFlags.GlobalMaterial | TagFieldFlags.Label)]
+            [TagField(Flags = GlobalMaterial | Label)]
             public StringId MaterialName;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public short RuntimeMaterialIndex;
 
             [TagField(Flags = Padding, Length = 2)]
@@ -303,7 +303,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x34)]
         public class ProjectileMaterialResponseBlockNew : TagStructure
         {
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId MaterialName;
             public short RuntimeMaterialIndex;
             public MaterialPossibleResponseFlags ResponseFlags;
