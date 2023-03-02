@@ -1533,6 +1533,7 @@ namespace TagTool.Commands.Porting
 					return ConvertWeaponFlags(weaponFlags);
 
                 case Weapon.Trigger trigger:
+                    trigger = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, trigger, definition, blamTagName);
                     return ConvertWeaponTrigger(trigger);
 
                 case BarrelFlags barrelflags:
