@@ -7,7 +7,7 @@ namespace TagTool.Cache.MCC
     [TagStructure(Size = 0x4000, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Size = 0x4000, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0xA000, MinVersion = CacheVersion.HaloReach)]
-    [TagStructure(Size = 0x1E000, MinVersion = CacheVersion.Halo4, MaxVersion = CacheVersion.Groundhog)]
+    [TagStructure(Size = 0x1E000, MinVersion = CacheVersion.Halo4, MaxVersion = CacheVersion.Halo2AMP)]
     public class CacheFileHeaderMCC : CacheFileHeader
     {
         public Tag HeaderSignature;

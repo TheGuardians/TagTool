@@ -115,7 +115,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo4Beta:
                 case CacheVersion.Halo4E3:
                 case CacheVersion.Halo4PreRelease:
-                case CacheVersion.Groundhog:
+                case CacheVersion.Halo2AMP:
                     return new GameCacheGen4(map, file);
             }
 
