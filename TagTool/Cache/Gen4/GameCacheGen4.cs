@@ -100,6 +100,7 @@ namespace TagTool.Cache
                     break;
                 case CacheVersion.HaloReach:
                 case CacheVersion.Halo4:
+                case CacheVersion.Halo2AMP:
                     NetworkKey = "SneakerNetReigns";
                     break;
             }
