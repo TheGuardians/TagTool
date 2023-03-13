@@ -244,7 +244,7 @@ namespace TagTool.Cache
                 case "Sep 23 2021 02:46:19": // MCC Update 7
                 case "Feb 14 2022 19:18:28": // MCC Update 8
                 case "Jun 13 2022 13:44:24": // MCC Update 9
-                    version = CacheVersion.Groundhog; // This is the Added Version Detection for the Groundhog Build. not much is known of about this Build but it was confirmed as being a heavily modified Halo 4 Multiplayer Build.
+                    version = CacheVersion.Halo2AMP; // This is the Added Version Detection for the Groundhog Build. not much is known of about this Build but it was confirmed as being a heavily modified Halo 4 Multiplayer Build.
                     cachePlatform = CachePlatform.MCC;
                     break;
                 case "May 29 2019 00:44:52": // MCC Internal Test Build
@@ -438,7 +438,8 @@ namespace TagTool.Cache
                 case CacheVersion.Halo4Beta:
                 case CacheVersion.Halo4E3:
                 case CacheVersion.Halo4PreRelease:
-					return false;
+                case CacheVersion.Halo2AMP:
+                    return false;
 
                 case CacheVersion.HaloXbox:
                 case CacheVersion.HaloPC:
@@ -464,7 +465,6 @@ namespace TagTool.Cache
                 case CacheVersion.HaloOnline571627:
                 case CacheVersion.HaloOnline604673:
                 case CacheVersion.HaloOnline700123:
-                case CacheVersion.Groundhog:
                     return true;
 
 				default:
@@ -672,7 +672,7 @@ namespace TagTool.Cache
                 case CacheVersion.Halo4Alpha:
                 case CacheVersion.Halo4Beta:
                 case CacheVersion.Halo4:
-                case CacheVersion.Groundhog:
+                case CacheVersion.Halo2AMP:
                     return CacheGeneration.Fourth;
 
                 default:
@@ -733,8 +733,8 @@ namespace TagTool.Cache
                 case CacheVersion.HaloReach:
                 case CacheVersion.HaloReach11883:
                     return GameTitle.HaloReach;
-                case CacheVersion.Groundhog:
-                    return GameTitle.Groundhog;
+                case CacheVersion.Halo2AMP:
+                    return GameTitle.Halo2AMP;
                 case CacheVersion.Halo4Alpha:
                 case CacheVersion.Halo4Beta:
                 case CacheVersion.Halo4E3:
@@ -812,7 +812,7 @@ namespace TagTool.Cache
             -1, // Halo4E3
             -1, // Halo4PreRelease
             -1, // Halo 4
-            -1 // Groundhog
+            -1 // Halo2AMP
 
         };
     }
@@ -856,7 +856,7 @@ namespace TagTool.Cache
         Halo4Beta,
         Halo4E3,
         Halo4PreRelease,
-        Groundhog
+        Halo2AMP
     }
 
     public enum CacheGeneration : int
