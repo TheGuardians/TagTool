@@ -83,7 +83,7 @@ namespace TagTool.Cache
                     version = CacheVersion.Halo2Vista;
                     cachePlatform = CachePlatform.Original;
                     break;
-		case "06481.06.11.17.1330.alpha_relea": // The Fabled Holy Grail, Pimps at Sea
+		        case "06481.06.11.17.1330.alpha_relea": // The Fabled Holy Grail, Pimps at Sea
                 case "08117.07.03.07.1702.delta": // This is the March 7th Build of the Halo 3 Beta, I have added support for this build to allow the addition of cut content such as a player and enemy models that are not present in retail.
                 case "08172.07.03.08.2240.delta": // This is the March 8th Build of the Halo 3 Beta, not much is diffrent much March 7th. but for version detection purposes this is needed as some Tag offsets are diffrent.
                 case "Mar  9 2007 22:22:32": // This version is unique in which is uses the "343i" Style of Timestamping builds as opposed to the Bungie Style of Timestamping builds. This is the March 9th Build of the Halo 3 Beta, this build is the first to have the new build naming style.
@@ -244,7 +244,7 @@ namespace TagTool.Cache
                 case "Sep 23 2021 02:46:19": // MCC Update 7
                 case "Feb 14 2022 19:18:28": // MCC Update 8
                 case "Jun 13 2022 13:44:24": // MCC Update 9
-                    version = CacheVersion.Halo2AMP; // This is the Added Version Detection for the Groundhog Build. not much is known of about this Build but it was confirmed as being a heavily modified Halo 4 Multiplayer Build.
+                    version = CacheVersion.Halo2AMP; // This is the Added Version Detection for the Halo2AMP Build. not much is known of about this Build but it was confirmed as being a heavily modified Halo 4 Multiplayer Build.
                     cachePlatform = CachePlatform.MCC;
                     break;
                 case "May 29 2019 00:44:52": // MCC Internal Test Build
