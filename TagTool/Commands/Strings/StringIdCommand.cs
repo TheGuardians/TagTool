@@ -8,7 +8,7 @@ using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Strings
 {
-    class StringIdCommand : Command
+    public class StringIdCommand : Command
     {
         private GameCache Cache { get; }
 

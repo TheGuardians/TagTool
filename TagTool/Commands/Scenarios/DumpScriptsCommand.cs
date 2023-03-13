@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands.Common;
@@ -271,12 +272,12 @@ namespace TagTool.Commands.Scenarios
                     if (Definition.ScriptExpressions[index].NextExpressionHandle != DatumHandle.None)
                     {
                         ContextStack.Push(Definition.ScriptExpressions[index].NextExpressionHandle.Index);
-                        index += 1;
+                        index = BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, Definition.ScriptExpressions[index].Data, 4), 0) & 0xFFFF;
                         continue;
                     }
                     else
                     {
-                        index += 1;
+                        index = BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, Definition.ScriptExpressions[index].Data, 4), 0) & 0xFFFF;
                         continue;
                     }
                 }
@@ -295,6 +296,22 @@ namespace TagTool.Commands.Scenarios
 
                 index = Definition.ScriptExpressions[index].NextExpressionHandle.Index;
             }
-        }       
+        }
+
+        private byte[] SortExpressionDataArray(EndianFormat format, byte[] data, int dataLength)
+        {
+            if (format == EndianFormat.BigEndian)
+            {
+                byte[] newData = new byte[dataLength];
+
+                // reverse the data array, but only to the specified length
+                for (int i = 0; i < dataLength; i++)
+                    newData[i] = data[(dataLength - 1) - i];
+
+                return newData;
+            }
+
+            return data;
+        }
     }
 }

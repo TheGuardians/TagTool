@@ -8,7 +8,7 @@ using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
 
 namespace TagTool.Commands.Shaders
 {
-    class GenerateRenderMethodCommand : Command
+    public class GenerateRenderMethodCommand : Command
     {
         GameCache Cache;
 

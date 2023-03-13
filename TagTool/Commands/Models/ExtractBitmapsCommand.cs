@@ -9,7 +9,7 @@ using TagTool.IO;
 
 namespace TagTool.Commands.Models
 {
-    class ExtractBitmapsCommand : Command
+    public class ExtractBitmapsCommand : Command
     {
         private GameCache CacheContext { get; }
         private CachedTag Tag { get; }

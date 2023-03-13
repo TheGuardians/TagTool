@@ -8,7 +8,7 @@ using TagTool.Pathfinding;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
-    class ExtractPathfindingGeometryCommand : Command
+    public class ExtractPathfindingGeometryCommand : Command
     {
         private GameCache Cache { get; }
         private ScenarioStructureBsp Definition { get; }

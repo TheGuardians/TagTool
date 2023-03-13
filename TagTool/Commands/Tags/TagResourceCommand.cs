@@ -10,7 +10,7 @@ using TagTool.Cache.Resources;
 
 namespace TagTool.Commands.Tags
 {
-    class TagResourceCommand : Command
+    public class TagResourceCommand : Command
     {
         public GameCacheHaloOnlineBase Cache { get; }
 

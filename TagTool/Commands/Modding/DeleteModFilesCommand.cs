@@ -7,7 +7,7 @@ using TagTool.Extensions;
 
 namespace TagTool.Commands.Modding
 {
-    class DeleteModFilesCommand : Command
+    public class DeleteModFilesCommand : Command
     {
         public GameCacheModPackage Cache { get; }
 

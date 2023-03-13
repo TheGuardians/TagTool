@@ -75,6 +75,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("hf2p", "hf2p_globals"), typeof(Hf2pGlobals) },
             { new TagGroupGen3("hlmt", "model"), typeof(Model) },
             { new TagGroupGen3("hlsl", "hlsl_include"), typeof(HlslInclude) },
+            { new TagGroupGen3("hsc*", "scenario_hs_source_file"), typeof(ScenarioHsSourceFile) },
             { new TagGroupGen3("inpg", "input_globals"), typeof(InputGlobals) },
             { new TagGroupGen3("item", "obje", "item"), typeof(Item) },
             { new TagGroupGen3("jmad", "model_animation_graph"), typeof(ModelAnimationGraph) },

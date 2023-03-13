@@ -7,7 +7,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Video
 {
-    class ExtractBinkFileCommand : Command
+    public class ExtractBinkFileCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }

@@ -1533,6 +1533,7 @@ namespace TagTool.Commands.Porting
 					return ConvertWeaponFlags(weaponFlags);
 
                 case Weapon.Trigger trigger:
+                    trigger = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, trigger, definition, blamTagName);
                     return ConvertWeaponTrigger(trigger);
 
                 case BarrelFlags barrelflags:
@@ -1621,6 +1622,12 @@ namespace TagTool.Commands.Porting
                             break;
                     }
                     return guiTextWidget;
+                case GuiDefinition guidefinition:
+                    guidefinition = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, guidefinition, definition, blamTagName);
+                    if(FlagIsSet(PortingFlags.AutoRescaleGui))
+                        RescaleGUIDef(guidefinition, 1.3125f);
+                    break;
+
 
 				case Array _:
 				case IList _: // All arrays and List<T> implement IList, so we should just use that
@@ -1663,6 +1670,19 @@ namespace TagTool.Commands.Porting
 
 			return data;
 		}
+
+        public object RescaleGUIDef(GuiDefinition GUIdef, float scalefactor)
+        {
+            GUIdef.Bounds480i.Top = (short)(GUIdef.Bounds480i.Top * scalefactor);
+            GUIdef.Bounds480i.Left = (short)(GUIdef.Bounds480i.Left * scalefactor);
+            GUIdef.Bounds480i.Bottom = (short)(GUIdef.Bounds480i.Bottom * scalefactor);
+            GUIdef.Bounds480i.Right = (short)(GUIdef.Bounds480i.Right * scalefactor);
+            GUIdef.Bounds720p.Top = (short)(GUIdef.Bounds720p.Top * scalefactor);
+            GUIdef.Bounds720p.Left = (short)(GUIdef.Bounds720p.Left * scalefactor);
+            GUIdef.Bounds720p.Bottom = (short)(GUIdef.Bounds720p.Bottom * scalefactor);
+            GUIdef.Bounds720p.Right = (short)(GUIdef.Bounds720p.Right * scalefactor);
+            return GUIdef;
+        }
 
         private IList ConvertCollection(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, IList data, object definition, string blamTagName)
 		{

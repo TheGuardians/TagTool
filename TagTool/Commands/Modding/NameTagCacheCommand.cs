@@ -5,7 +5,7 @@ using System;
 
 namespace TagTool.Commands.Modding
 {
-    class NameTagCacheCommand : Command
+    public class NameTagCacheCommand : Command
     {
         private GameCacheModPackage Cache;
 

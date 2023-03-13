@@ -10,7 +10,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Scenarios
 {
-    class ImportScriptsCommand : Command
+    public class ImportScriptsCommand : Command
     {
         private Scenario scnr { get; }
 

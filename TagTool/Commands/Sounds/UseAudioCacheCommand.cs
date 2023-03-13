@@ -5,7 +5,7 @@ using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Sounds
 {
-    class UseAudioCacheCommand : Command
+    public class UseAudioCacheCommand : Command
     {
         public static DirectoryInfo AudioCacheDirectory = null;
 

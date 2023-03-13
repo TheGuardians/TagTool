@@ -21,9 +21,10 @@ namespace TagTool.Commands.Editing
                   "ListFields",
                   $"Lists the fields in the current {structure.Types[0].Name} definition.",
 
-                  "ListFields [filter]",
+                  "ListFields [filters]",
 
-                  $"Lists the fields in the current {structure.Types[0].Name} definition.")
+                  $"Lists the fields in the current {structure.Types[0].Name} definition." +
+                  $"\nUse commas to separate filters (ex. accel,bounds,crate).")
         {
             Cache = cache;
             Structure = structure;
@@ -36,7 +37,7 @@ namespace TagTool.Commands.Editing
                 return new TagToolError(CommandError.ArgCount);
 
             var match = (args.Count == 1);
-            var token = match ? args[0].ToLower() : "";
+            string[] tokens = match ? args[0].ToLower().Split(',') : new string[] { "" };
 
 			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(Structure))
 			{
@@ -45,8 +46,17 @@ namespace TagTool.Commands.Editing
 
 				var nameString = tagFieldInfo.Name;
 
-				if (match && !nameString.ToLower().Contains(token))
-					continue;
+				if (match)
+				{
+					var matchFound = false;
+					foreach (var token in tokens)
+					{
+						if (nameString.ToLower().Contains(token.Trim()))
+							matchFound = true;
+					}
+					if (!matchFound)
+						continue;
+				}
 
 				var fieldType = tagFieldInfo.FieldType;
 				var fieldValue = tagFieldInfo.GetValue(Value);

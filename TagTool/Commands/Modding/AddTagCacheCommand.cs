@@ -9,7 +9,7 @@ using TagTool.IO;
 
 namespace TagTool.Commands.Modding
 {
-    class AddTagCacheCommand : Command
+    public class AddTagCacheCommand : Command
     {
         private GameCacheModPackage Cache;
 

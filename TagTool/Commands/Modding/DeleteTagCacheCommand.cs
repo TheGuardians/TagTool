@@ -5,7 +5,7 @@ using System;
 
 namespace TagTool.Commands.Modding
 {
-    class DeleteTagCacheCommand : Command
+    public class DeleteTagCacheCommand : Command
     {
         private GameCacheModPackage Cache;
 

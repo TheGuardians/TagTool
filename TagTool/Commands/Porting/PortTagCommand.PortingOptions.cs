@@ -135,6 +135,9 @@ namespace TagTool.Commands.Porting
 			[PortingFlagDescription("Multipurpose Reach flag used for specific tweaks.")]
 			ReachMisc = 1 << 19,
 
+			[PortingFlagDescription("Auto rescale gui during porting")]
+			AutoRescaleGui = 1 << 20,
+
 			// No [PortingFlagDescription] here means we'll flag names as the description.
 			Default = Print | Recursive | Merge | Scripts | Squads | ForgePalette | Elites | Audio | Dialogue | MatchShaders | GenerateShaders
 		}
