@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Serialization;
 using TagTool.Tags;
@@ -52,8 +53,24 @@ namespace TagTool.Cache.HaloOnline
                 ResourceCacheHaloOnline resourceCache;
 
                 var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[location]));
+                Stream stream;
 
-                using (var stream = file.Open(FileMode.OpenOrCreate))
+                try
+                {
+                    stream = file.Open(FileMode.OpenOrCreate);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is IOException && ex.Message.EndsWith("used by another process."))
+                    {
+                        new TagToolWarning($"Another process using {ResourceCacheNames[location]}: opening read-only stream");
+                        stream = file.OpenRead();
+                    }
+                    else
+                        throw;
+                }
+
+                using (stream)
                 {
                     resourceCache = new ResourceCacheHaloOnline(Cache.Version, Cache.Platform, stream);
                 }

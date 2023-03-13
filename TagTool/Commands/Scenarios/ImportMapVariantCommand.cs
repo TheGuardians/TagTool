@@ -14,7 +14,7 @@ using static TagTool.Tags.Definitions.Scenario.MultiplayerObjectProperties;
 
 namespace TagTool.Commands.Scenarios
 {
-    class ImportMapVariantCommand : Command
+    public class ImportMapVariantCommand : Command
     {
         private GameCache Cache;
         private CachedTag Tag;

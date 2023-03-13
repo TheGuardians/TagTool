@@ -8,7 +8,7 @@ using TagTool.Video;
 
 namespace TagTool.Commands.Video
 {
-    class ImportBinkFileCommand : Command
+    public class ImportBinkFileCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }

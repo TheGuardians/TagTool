@@ -7,7 +7,7 @@ using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
 {
-    class ImportTagCommand : Command
+    public class ImportTagCommand : Command
     {
         private GameCacheHaloOnlineBase Cache { get; }
 

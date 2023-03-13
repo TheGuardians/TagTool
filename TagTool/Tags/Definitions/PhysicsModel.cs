@@ -610,7 +610,7 @@ namespace TagTool.Tags.Definitions
                 HasNoPhantomPowerVersion = 1 << 5, //don't check this flag without talking to eamon
                 InfiniteInertiaTensor = 1 << 6, //rigid body will never have angular velocity
                 bit7 = 1 << 7,
-                bit8 = 1 << 8,
+                IgnoresGravity = 1 << 8,
                 bit9 = 1 << 9,
                 bit10 = 1 << 10,
                 bit11 = 1 << 11,

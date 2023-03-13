@@ -46,9 +46,9 @@ namespace TagTool.Tags.Definitions
 
         [TagField(ValidTags = new[] { "effe" })]
         public CachedTag DetonationStarted;
-        [TagField(ValidTags = new[] { "effe" })]
+        [TagField(ValidTags = new[] { "effe", "jpt!" })]
         public CachedTag AirborneDetonationEffect;
-        [TagField(ValidTags = new[] { "effe" })]
+        [TagField(ValidTags = new[] { "effe", "jpt!" })]
         public CachedTag GroundDetonationEffect;
         [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag DetonationDamage;
@@ -152,7 +152,18 @@ namespace TagTool.Tags.Definitions
             OverPeneDetonation = 1 << 17,
             NoImpactEffectsOnBounce = 1 << 18,
             RC1OverpenetrationFixes = 1 << 19,
-            Bit20 = 1 << 20
+            Bit20 = 1 << 20,
+            Bit21 = 1 << 21,
+            Bit22 = 1 << 22,
+            Bit23 = 1 << 23,
+            Bit24 = 1 << 24,
+            Bit25 = 1 << 25,
+            Bit26 = 1 << 26,
+            Bit27 = 1 << 27,
+            Bit28 = 1 << 28,
+            Bit29 = 1 << 29,
+            Bit30 = 1 << 30,
+            Bit31 = 1 << 31
         }
 
         [Flags]
@@ -181,7 +192,16 @@ namespace TagTool.Tags.Definitions
             RC1OverpenetrationFixes = 1 << 19,
             UnknownBit20 = 1 << 20,
             UnknownBit21 = 1 << 21,
-            SupportsTethering = 1 << 22
+            SupportsTethering = 1 << 22,
+            Bit23 = 1 << 23,
+            Bit24 = 1 << 24,
+            Bit25 = 1 << 25,
+            Bit26 = 1 << 26,
+            Bit27 = 1 << 27,
+            Bit28 = 1 << 28,
+            Bit29 = 1 << 29,
+            Bit30 = 1 << 30,
+            Bit31 = 1 << 31
         }
 
         public enum DetonationTimerModes : short
@@ -209,12 +229,12 @@ namespace TagTool.Tags.Definitions
             public ProjectileMaterialResponseFlags Flags;
             public MaterialResponseValue DefaultResponse;
 
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+            [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding1;
 
-            [TagField(Flags = TagFieldFlags.GlobalMaterial | TagFieldFlags.Label)]
+            [TagField(Flags = GlobalMaterial | Label)]
             public StringId MaterialName;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public short RuntimeMaterialIndex;
 
             [TagField(Flags = Padding, Length = 2)]
@@ -283,7 +303,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x34)]
         public class ProjectileMaterialResponseBlockNew : TagStructure
         {
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId MaterialName;
             public short RuntimeMaterialIndex;
             public MaterialPossibleResponseFlags ResponseFlags;

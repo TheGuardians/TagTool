@@ -10,7 +10,7 @@ using TagTool.Common;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
-    class ExtractRenderGeometryCommand : Command
+    public class ExtractRenderGeometryCommand : Command
     {
         private GameCache CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }

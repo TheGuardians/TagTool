@@ -6,7 +6,7 @@ using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Tags
 {
-    class DuplicateTagCommand : Command
+    public class DuplicateTagCommand : Command
     {
         private GameCache Cache { get; }
 

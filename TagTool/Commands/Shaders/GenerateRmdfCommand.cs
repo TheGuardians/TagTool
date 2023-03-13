@@ -7,7 +7,7 @@ using TagTool.Shaders;
 
 namespace TagTool.Commands.Shaders
 {
-    class GenerateRmdfCommand : Command
+    public class GenerateRmdfCommand : Command
     {
         GameCache Cache;
 

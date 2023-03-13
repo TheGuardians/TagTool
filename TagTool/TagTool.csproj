@@ -1337,6 +1337,7 @@
     <Compile Include="Tags\Definitions\MapList.cs" />
     <Compile Include="Tags\Definitions\ModGlobalsDefinition.cs" />
     <Compile Include="Tags\Definitions\Rumble.cs" />
+    <Compile Include="Tags\Definitions\ScenarioHsSourceFile.cs" />
     <Compile Include="Tags\Definitions\ShaderGlass.cs" />
     <Compile Include="Tags\Definitions\TestDefinition.cs" />
     <Compile Include="Tags\Definitions\Hf2pGlobals.cs" />
@@ -1732,9 +1733,7 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Tags\Definitions\Gen3\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <PackageReference Include="AssimpNet">
       <Version>4.1.0</Version>

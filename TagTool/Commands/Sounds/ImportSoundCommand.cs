@@ -13,7 +13,7 @@ using TagTool.IO;
 
 namespace TagTool.Commands.Sounds
 {
-    class ImportSoundCommand : Command
+    public class ImportSoundCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }

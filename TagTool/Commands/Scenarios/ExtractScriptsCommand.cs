@@ -1,14 +1,14 @@
-﻿using TagTool.Cache;
-using TagTool.Common;
-using TagTool.Commands.Common;
-using TagTool.IO;
-using TagTool.Scripting;
-using TagTool.Tags.Definitions;
-using System;
+﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.CodeDom.Compiler;
+using TagTool.Cache;
+using TagTool.Commands.Common;
+using TagTool.Common;
+using TagTool.IO;
+using TagTool.Scripting;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Scenarios
 {
@@ -57,9 +57,6 @@ namespace TagTool.Commands.Scenarios
             }
 
             System.IO.Directory.CreateDirectory("haloscript");
-
-            
-
             using (var scriptFileStream = scriptFile.Create())
             using (var scriptWriter = new StreamWriter(scriptFileStream))
             {
@@ -68,6 +65,7 @@ namespace TagTool.Commands.Scenarios
             }
 
             Console.WriteLine($"\nDecompiled script extracted to \"{scriptFile.FullName}\"");
+
             return true;
         }
     }

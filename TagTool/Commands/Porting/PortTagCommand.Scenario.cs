@@ -405,6 +405,44 @@ namespace TagTool.Commands.Porting
             AddPrematchCamera(cacheStream, scnr, tagName);
 
             //
+            // Convert PlayerStartingProfiles
+            //
+
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
+            {
+                if (scnr.PlayerStartingProfile.Count >= 4)
+                {
+                    var profile_0 = scnr.PlayerStartingProfile[0];
+                    var profile_1 = scnr.PlayerStartingProfile[1];
+                    var profile_2 = scnr.PlayerStartingProfile[2];
+                    var profile_3 = scnr.PlayerStartingProfile[3];
+
+                    scnr.PlayerStartingProfile.Insert(1, profile_2);
+                    scnr.PlayerStartingProfile.Insert(2, profile_2); 
+                    scnr.PlayerStartingProfile.Insert(3, profile_2); 
+
+                    scnr.PlayerStartingProfile.Insert(4, profile_0);
+                    scnr.PlayerStartingProfile.Insert(5, profile_2);
+                    scnr.PlayerStartingProfile.Insert(6, profile_2);
+                    scnr.PlayerStartingProfile.Insert(7, profile_2);
+
+                    scnr.PlayerStartingProfile.Insert(8, profile_1);
+                    scnr.PlayerStartingProfile.Insert(9, profile_3);
+                    scnr.PlayerStartingProfile.Insert(10, profile_3);
+                    scnr.PlayerStartingProfile.Insert(11, profile_3);
+
+                    scnr.PlayerStartingProfile.Insert(12, profile_1);
+                    scnr.PlayerStartingProfile.Insert(13, profile_3);
+                    scnr.PlayerStartingProfile.Insert(14, profile_3);
+                    scnr.PlayerStartingProfile.Insert(15, profile_3);
+
+                    scnr.PlayerStartingProfile.RemoveAt(16);
+                    scnr.PlayerStartingProfile.RemoveAt(16);
+                    scnr.PlayerStartingProfile.RemoveAt(16);
+                }
+            }
+
+            //
             // Convert scripts
             //
 
@@ -1773,6 +1811,10 @@ namespace TagTool.Commands.Porting
                     case 0x44E: // objectives_primary_unavailable
                         expr.Opcode = 0x4B2; // -> objectives_show
                         return true;
+                    case 0x118: // unit_add_equipment
+                        expr.Opcode = 0x126; // ^
+                        UpdateUnitAddEquipmentScript(cacheStream, scnr, expr);
+                        return true;
 
                     default:
                         return false;
@@ -1792,6 +1834,41 @@ namespace TagTool.Commands.Porting
             }
             else
                 return false;
+        }
+
+        private void UpdateUnitAddEquipmentScript(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
+        {
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
+            {
+                var exprIndex = scnr.ScriptExpressions.IndexOf(expr);
+                var profileExpr = scnr.ScriptExpressions[exprIndex + 3]; // <StartingProfile> parameter
+
+                if (profileExpr.StringAddress != 0)
+                {
+                    if (profileExpr.ValueType.Halo3Retail.ToString() != "StartingProfile")
+                        return;
+
+                    using (var scriptStringStream = new MemoryStream(scnr.ScriptStrings))
+                    using (var scriptStringReader = new BinaryReader(scriptStringStream))
+                    {
+                        var profileName = "";
+                        scriptStringReader.BaseStream.Position = profileExpr.StringAddress;
+                        for (char c; (c = scriptStringReader.ReadChar()) != 0x00; profileName += c) ;
+
+                        var startingProfileIndex = scnr.PlayerStartingProfile.FindIndex(sp => sp.Name == profileName);
+
+                        if (startingProfileIndex == -1)
+                        {
+                            new TagToolWarning($"StartingProfile reference could not be converted {profileName}");
+                            return;
+                        }
+
+                        profileExpr.ValueType.Halo3Retail = HsType.Halo3RetailValue.StartingProfile;
+                        Array.Copy(BitConverter.GetBytes((short)startingProfileIndex), expr.Data, 2);
+                        return;
+                    }
+                }
+            }
         }
 
         private void UpdateMpWakeScript(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)

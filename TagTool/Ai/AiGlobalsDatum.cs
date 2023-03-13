@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.Tags;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using System;
 
 namespace TagTool.Ai
 {
@@ -55,8 +56,8 @@ namespace TagTool.Ai
         public float JumpStorey; // wu/tick
         public float JumpTower; // wu/tick
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown5;
+        [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] ReachPadding;
 
         public float MaxJumpDownHeightDown; // wu
         public float MaxJumpDownHeightStep; // wu
@@ -65,8 +66,8 @@ namespace TagTool.Ai
         public float MaxJumpDownHeightStorey; // wu
         public float MaxJumpDownHeightTower; // wu
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown6;
+        [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x4, Flags = TagFieldFlags.Padding)]
+        public byte[] ReachPadding1;
 
         public Bounds<float> HoistStep;
         public Bounds<float> HoistCrouch;
@@ -120,16 +121,11 @@ namespace TagTool.Ai
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<PerformanceTemplate> PerformanceTemplates;
 
-        // probably a block or padding
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown8;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown9;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public int Unknown10;
+        public List<AiGlobalsCustomStimuli> CustomStimuli;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<UnknownBlock1> UnknownBlock;
+        public List<AiCueTemplateBlock> CueTemplates;
 
         // Clump Throttling: helps you control how much guys will throttle when they want to stick with their squad
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -142,17 +138,17 @@ namespace TagTool.Ai
         public float KungFuDeactivationDelay;   // control how the kungfu circle works
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown25;
+        public short SuppressingFireCount;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown26;
+        public short UncoverCount;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown27;
+        public short LeapOnCoverCount;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown28;
+        public short DestroyCoverCount;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown29;
+        public short GuardCount;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown30;
+        public short InvestigateCount;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<VisionTrait> VisionTraits;
@@ -164,19 +160,18 @@ namespace TagTool.Ai
         public List<GrenadeTrait> GrenadeTraits;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown31;
+        public float MaxDecayTime;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown32;
+        public float DecayTimePing;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown33;
+        public float SearchPatternRadius;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown34;
+        public short SearchPatternShellCount;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown35;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown36;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown37;
+        public Bounds<short> SearchPatternCellsPerShellRange;
+
+        [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] ReachPadding2;
 
         [TagStructure(Size = 0xC)]
         public class GravemindPropertyBlock : TagStructure
@@ -196,11 +191,7 @@ namespace TagTool.Ai
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public StringId Name;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public uint Unknown1;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public uint Unknown2;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public uint Unknown3;
+            public List<AiGlobalsSquadTemplateSubFolderBlock> SubFolders;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public List<TagReferenceBlock> Templates;
         }
@@ -212,9 +203,7 @@ namespace TagTool.Ai
 
             public List<Character> Characters;
 
-            public uint Unknown1;
-            public uint Unknown2;
-            public uint Unknown3;
+            public List<AiGlobalsPerformanceTemplateBlock> Templates;
 
             [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
             public class Character : TagStructure
@@ -222,85 +211,146 @@ namespace TagTool.Ai
                 public StringId Name;
                 public List<TagReference> Templates;
             }
+
+            [TagStructure(Size = 0x10)]
+            public class AiGlobalsPerformanceTemplateBlock : TagStructure
+            {
+                [TagField(ValidTags = new[] { "pfmc" })]
+                public CachedTag ThespianTemplate;
+            }
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class AiGlobalsSquadTemplateSubFolderBlock : TagStructure
+        {
+            public StringId SubFolderName;
+            public List<AiGlobalsSquadTemplateBlock> Templates;
+
+            [TagStructure(Size = 0x10)]
+            public class AiGlobalsSquadTemplateBlock : TagStructure
+            {
+                [TagField(ValidTags = new[] { "sqtm" })]
+                public CachedTag SquadTemplate;
+            }
         }
 
         [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloReach)]
-        public class UnknownBlock1 : TagStructure
+        public class AiCueTemplateBlock : TagStructure
         {
             public StringId Name;
 
-            public List<UnknownBlock2> Unknown1;
-            public List<StringIdBlock> Unknown2;
-            public List<UnknownBlock4> Unknown3;
+            public List<FiringPointPayloadBlock> FiringPoints;
+            public List<StimulusPayloadBlock> Stimulus;
+            public List<CombatCuePayloadBlock> CombatCue;
 
             [TagStructure(Size = 0x4)]
-            public class UnknownBlock2 : TagStructure
+            public class FiringPointPayloadBlock : TagStructure
             {
-                public float Unknown;
+                public float StimulusType;
             }
 
             [TagStructure(Size = 0x4)]
-            public class StringIdBlock : TagStructure
+            public class StimulusPayloadBlock : TagStructure
             {
-                public StringId Value;
+                public StringId StimulusType;
             }
 
             [TagStructure(Size = 0x2C)]
-            public class UnknownBlock4 : TagStructure
+            public class CombatCuePayloadBlock : TagStructure
             {
-                public uint Unknown1;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
-                public uint Unknown10;
-                public uint Unknown11;
+                public RealPoint3d Position;
+                public short ReferenceFrame;
+                public short StructureBsp;
+                public GFiringPositionFlags Flags;
+                public GFiringPositionPostureFlags PostureFlags;
+                public short Area;
+                public short ClusterIndex;
+                public short BspIndex;
+                public short SectorIndex;
+                public RealEulerAngles2d Normal;
+                public Angle Facing;
+                public CombatCuePreferenceEnum Preference;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
+
+                [Flags]
+                public enum GFiringPositionFlags : ushort
+                {
+                    Open = 1 << 0,
+                    Partial = 1 << 1,
+                    Closed = 1 << 2,
+                    Mobile = 1 << 3,
+                    WallLean = 1 << 4,
+                    Perch = 1 << 5,
+                    GroundPoint = 1 << 6,
+                    DynamicCoverPoint = 1 << 7,
+                    AutomaticallyGenerated = 1 << 8
+                }
+
+                [Flags]
+                public enum GFiringPositionPostureFlags : ushort
+                {
+                    CornerLeft = 1 << 0,
+                    CornerRight = 1 << 1,
+                    Bunker = 1 << 2,
+                    BunkerHigh = 1 << 3,
+                    BunkerLow = 1 << 4
+                }
+
+                public enum CombatCuePreferenceEnum : short
+                {
+                    Low,
+                    High,
+                    Total
+                }
             }
+        }
+
+        [TagStructure(Size = 0x4)]
+        public class AiGlobalsCustomStimuli : TagStructure
+        {
+            public StringId Name;
         }
 
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
         public class VisionTrait : TagStructure
         {
-            public float Unknown1;
-            public float Unknown2;
+            public float VisionDistanceScale; // Scale the distance at which an AI can see their target.
+            public float VisionAngleScale; // Scale the angles of the AI's vision cone.
         }
 
         [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
         public class HearingTrait : TagStructure
         {
-            public float Unknown1;
+            public float HearingDistanceScale; // Scale the character's hearing distance.
         }
 
         [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
         public class LuckTrait : TagStructure
         {
-            public float Unknown1;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-            public float Unknown11;
+            public float EvasionChanceScale; // Scale the chance of evading fire.
+            public float GrenadeDiveChanceScale; // Scale the chance of diving from grenades.
+            public float BrokenKamikazeChanceScale; // Scale the chance of going kamikaze when broken.
+            public float LeaderDeadRetreatChanceScale; // Scale the chance of retreating when your leader dies.
+            public float DiveRetreatChanceScale; // Scale the chance of retreating after a dive.
+            public float ShieldDepletedBerserkChanceScale; // Scale the chance of berserking when your shield is depleted.
+            public float LeaderAbandonedBerserkChanceScale; // Scale the chance of a leader berserking when all his followers die.
+            public float MeleeAttackDelayTimerScale; // Scale the time between melee attacks.
+            public float MeleeChanceScale; // Scale the chance of meleeing.
+            public float MeleeLeapDelayTimerScale; // Scale the delay for performing melee leaps.
+            public float ThrowGrenadeDelayScale; // Scale the time between grenade throws.
         }
 
         [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
         public class GrenadeTrait : TagStructure
         {
-            public float Unknown1;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
+            public float VelocityScale; // Scale the velocity at which AI throws grenades
+            public float ThrowGrenadeDelayScale; // Scale the time between grenade throws.
+            public float DontDropGrenadesChanceScale;
+            public float GrenadeUncoverChanceScale;
+            public float RetreatThrowGrenadeChanceScale;
+            public float AntiVehicleGrenadeChanceScale;
+            public float ThrowGrenadeChanceScale;
         }
 
         [TagStructure(Size = 0x10)]

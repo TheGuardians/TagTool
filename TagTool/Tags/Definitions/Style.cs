@@ -12,10 +12,7 @@ namespace TagTool.Tags.Definitions
         public string Name;
 
         public CombatStatusDecayOptionsValue CombatStatusDecayOptions;
-
-        // check ODST ai\assaulting, ai\bunkering 
-        public short Unknown;
-
+        public StyleAttitudeEnum Attitude;
         public StyleControlFlags StyleControl;
 
         [TagField(Length = 7)]
@@ -29,6 +26,13 @@ namespace TagTool.Tags.Definitions
             LatchAtIdle,
             LatchAtAlert,
             LatchAtCombat
+        }
+
+        public enum StyleAttitudeEnum : short
+        {
+            Normal,
+            Timid,
+            Aggressive
         }
 
         [Flags]
