@@ -24,9 +24,12 @@ namespace TagTool.Commands.Editing
                   "CopyBlockElements",
                   "Copies block elements from one tag to another.",
 
-                  "CopyBlockElements <block name> [index = 0] [count = *]",
+                  "CopyBlockElements <block name> [index] [count]",
 
-                  "Copies block elements from one tag to another.")
+                  "Stores a copy of requested blocks for pasting elsewhere." +
+                  "\nNo index or count will copy the all blocks of the requested type." +
+                  "\nNo count will copy one element at the requested index." +
+                  "\nCount = * will copy all from the index to the end.")
         {
             ContextStack = contextStack;
             Cache = cache;
@@ -80,7 +83,7 @@ namespace TagTool.Commands.Editing
                 if (!int.TryParse(args[1], out index) || index < 0)
                     return new TagToolError(CommandError.ArgInvalid, $"Invalid index specified: {args[1]}");
 
-            var count = -1;
+            var count = (args.Count == 2) ? 1 : -1;
 
             if (args.Count > 2)
                 if (args[2] != "*" && (!int.TryParse(args[2], out count) || count < 1))
