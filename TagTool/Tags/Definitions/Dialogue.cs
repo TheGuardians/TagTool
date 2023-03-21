@@ -1,5 +1,6 @@
 using TagTool.Cache;
 using TagTool.Common;
+using static TagTool.Tags.TagFieldFlags;
 using System.Collections.Generic;
 using System;
 
@@ -8,10 +9,12 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "dialogue", Tag = "udlg", Size = 0x24)]
     public class Dialogue : TagStructure
 	{
+        [TagField(ValidTags = new[] { "adlg" })]
         public CachedTag GlobalDialogueInfo;
+
         public DialogueFlags Flags;
         public List<SoundReference> Vocalizations;
-        public StringId MissionDialogueDesignator;
+        public StringId MissionDialogueDesignator; // 3-letter mission dialogue designator name
 
         [Flags]
         public enum DialogueFlags : uint
@@ -27,7 +30,7 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public SoundReferenceFlags Flags;
 
-            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Length = 2, Flags = Padding)]
             public byte[] Padding0;
 
             public StringId Vocalization;
@@ -36,7 +39,7 @@ namespace TagTool.Tags.Definitions
             public CachedTag Sound;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<VocalizationSound> ReachSounds;
+            public List<VocalizationStimulus> Stimuli;
 
             [Flags]
             public enum SoundReferenceFlags : ushort
@@ -46,11 +49,24 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(MinVersion = CacheVersion.HaloReach, Size = 0x18)]
-            public class VocalizationSound : TagStructure
+            public class VocalizationStimulus : TagStructure
             {
-                public int Unknown1;
-                public StringId Name;
+                public VocalizationStimulusFlags Flags;
+
+                [TagField(Length = 0x2, Flags = Padding)]
+                public byte[] ReachPadding;
+
+                public StringId Stimulus;
+
+                [TagField(ValidTags = new[] { "snd!" })]
                 public CachedTag Sound;
+
+                [Flags]
+                public enum VocalizationStimulusFlags : ushort
+                {
+                    Additive = 1 << 0, // this stimulus should add to the default vocalization instead of replacing it
+                    DontSuppress = 1 << 1 // this stimulus cannot be suppressed
+                }
             }
         }
     }

@@ -146,11 +146,11 @@ namespace TagTool.Tags.Definitions
         public List<VisionBlock> Vision;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<NullBlock> SpeicalWeapon;
+        public List<NullBlock> SpecialWeapon;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<NullBlock> SpecialMove;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<NullBlock> EningeerShields;
+        public List<NullBlock> EngineerShields;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<NullBlock> Sprint;
 
@@ -455,7 +455,9 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x34)]
         public class MagPulseBlock : TagStructure
 		{
-            public CachedTag Unknown;
+            [TagField(ValidTags = new[] { "effe" })]
+            public CachedTag ActivationEffect;
+
             public CachedTag Unknown2;
             public CachedTag Unknown3;
             public uint Unknown4;

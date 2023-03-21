@@ -20,6 +20,7 @@ namespace TagTool.Tags.Definitions
     public class Globals : TagStructure
 	{
         [TagField(Flags = Padding, Length = 172, Platform = CachePlatform.Original)]
+        [TagField(Flags = Padding, Length = 172, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public byte[] Unused;
 
         public GameLanguage Language;
@@ -27,7 +28,7 @@ namespace TagTool.Tags.Definitions
         [TagField(Platform = CachePlatform.MCC)]
         public int MCCUnknown;
 
-        [TagField(Length = 12, Platform = CachePlatform.MCC)]
+        [TagField(Length = 12, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
         public LanguagePack[] LanguagePacksMCC = new LanguagePack[12];
 
         public List<HavokCleanupResource> HavokCleanupResources;
@@ -44,11 +45,10 @@ namespace TagTool.Tags.Definitions
         public List<GNullBlock> Empty;
         // ??????
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(ValidTags = new[] { "ldsc" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag LoadScreenGlobals;
 
         public List<TagReferenceBlock> Sounds;
-
         public List<CameraGlobalsDefinition> Camera;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -149,6 +149,9 @@ namespace TagTool.Tags.Definitions
         [TagField(Length = 12, Align = 0x4, Platform = CachePlatform.Original)]
         public LanguagePack[] LanguagePacks = new LanguagePack[12];
 
+        [TagField(Length = 12, Align = 0x16, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public LanguagePack[] LanguagePacksReachMCC = new LanguagePack[12];
+
         [TagField(Platform = CachePlatform.MCC)] public StringId GlobalWaterMaterialMCC;
         [TagField(Platform = CachePlatform.MCC)] public short GlobalWaterMaterialTypeMCC;
         [TagField(Platform = CachePlatform.MCC)] public short MCCUnknown_Short;
@@ -158,11 +161,8 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "smdt" }, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
         public CachedTag SurvivalGlobalsMCC;
 
-        [TagField(ValidTags = new[] { "rasg" })]
-        public CachedTag RasterizerGlobals;
-
-        [TagField(ValidTags = new[] { "cfxs" })]
-        public CachedTag DefaultCameraFxSettings;
+        [TagField(ValidTags = new[] { "rasg" })] public CachedTag RasterizerGlobals;
+        [TagField(ValidTags = new[] { "cfxs" })] public CachedTag DefaultCameraFxSettings;
 
         [TagField(ValidTags = new[] { "pdm!" }, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag PodiumDefinition;
@@ -173,23 +173,22 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "wxcg" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag WeatherGlobals;
 
-        [TagField(ValidTags = new[] { "jpt!" })]
-        public CachedTag CollisionDamageEffect;
-
-        [TagField(ValidTags = new[] { "cddf" })]
-        public CachedTag CollisionDamage;
+        [TagField(ValidTags = new[] { "jpt!" })] public CachedTag CollisionDamageEffect;
+        [TagField(ValidTags = new[] { "cddf" })] public CachedTag CollisionDamage;
 
         [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
         public StringId GlobalWaterMaterial;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public StringId GlobalAirMaterial;
 
         [TagField(Platform = CachePlatform.Original)]
-        public short GlobalWaterMaterialType;
+        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public short GlobalWaterMaterialIndex;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short GlobalAirMaterialType;
+        public short GlobalAirMaterialIndex;
 
         [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         public byte[] Padding5;
@@ -247,6 +246,8 @@ namespace TagTool.Tags.Definitions
         public List<GlobalCameraImpulseBlock> CameraImpulse;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<Material> AlternateMaterials;
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        public float UnknownReachMCC;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown266;

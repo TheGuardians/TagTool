@@ -545,8 +545,8 @@ namespace TagTool.Commands.Porting
                         if (CacheContext.StringTable.GetString(vocalization.Vocalization).Equals(CacheContext.StringTable.GetString(vocalizationReach.Vocalization)))
                         {
                             // we use index 0 because other indices are for different situation like stealth. 
-                            if(vocalizationReach.ReachSounds.Count > 0)
-                                vocalization.Sound = vocalizationReach.ReachSounds[0].Sound;
+                            if(vocalizationReach.Stimuli.Count > 0)
+                                vocalization.Sound = vocalizationReach.Stimuli[0].Sound;
 
                             break;
                         }

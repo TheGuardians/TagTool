@@ -131,10 +131,13 @@ namespace TagTool.Tags.Definitions
                 public EffectpartGameModeDefinition GameMode;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public DamageReportingType DamageReportingType;
-                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+                [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
                 public byte[] Padding1;
 
+                [TagField(ValidTags = new[] { "beam", "char", "cmoe", "cntl", "cpem", "decs", "drdf",
+                "gldf", "jpt!", "lens", "ligh", "ltvl", "obje", "rwrd", "sefc", "shit", "snd!" })]
                 public CachedTag Type;
+
                 public Bounds<float> VelocityBounds;
                 public RealEulerAngles2d VelocityOrientation;
                 public Angle VelocityConeAngle;

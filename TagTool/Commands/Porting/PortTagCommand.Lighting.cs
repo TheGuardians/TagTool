@@ -7,9 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags;
 using TagTool.Geometry;
-using TagTool.Tags.Resources;
 using TagTool.Lighting;
-using TagTool.Commands.Bitmaps;
 using TagTool.Havok;
 using TagTool.Commands.Common;
 
@@ -23,20 +21,22 @@ namespace TagTool.Commands.Porting
 
             foreach (var reflection in lensFlare.Reflections)
             {
-                if (BlamCache.Version >= CacheVersion.HaloReach)
+                // only H3Original and ODST have Rotation and Axis offsets swapped
+                if (BlamCache.Version == CacheVersion.Halo3ODST ||
+                   (BlamCache.Version == CacheVersion.Halo3Retail && BlamCache.Platform == CachePlatform.Original))
                 {
-                    reflection.RadiusBounds = reflection.RadiusBoundsReach;
-                    reflection.BrightnessBounds = reflection.BrightnessBoundsReach;
-                    reflection.RotationOffset_HO = reflection.RotationOffset_Reach;
-                    reflection.TintModulationFactor_HO = reflection.TintModulationFactor_Reach;
+                    reflection.RotationOffset = reflection.RotationOffsetH3;
                 }
-                else
+
+                // only H3MCC and HO have tint modulation factor after tint color
+                if (!((BlamCache.Version == CacheVersion.Halo3Retail && BlamCache.Platform == CachePlatform.MCC)
+                    || (BlamCache.Version > CacheVersion.HaloOnlineED && BlamCache.Version <= CacheVersion.HaloOnline700123)))
                 {
-                    reflection.RotationOffset_HO = reflection.RotationOffset_H3;
-                    reflection.TintModulationFactor_HO = reflection.TintModulationFactor_H3;
+                    reflection.TintModulationFactor = reflection.TintModulationFactorGen3;
                 }
-                reflection.Unknown2 = 0;
-                reflection.BitmapOverride = null;
+
+                reflection.UnknownHO = 0;
+                //reflection.BitmapOverride = null; // only H3MCC and HO have this cachedtag
 
                 var radius = new byte[52];
                 var scale = new byte[52];
