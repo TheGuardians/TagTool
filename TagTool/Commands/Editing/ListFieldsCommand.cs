@@ -21,10 +21,12 @@ namespace TagTool.Commands.Editing
                   "ListFields",
                   $"Lists the fields in the current {structure.Types[0].Name} definition.",
 
-                  "ListFields [filters]",
+                  "ListFields [filters] [!][value]",
 
                   $"Lists the fields in the current {structure.Types[0].Name} definition." +
-                  $"\nUse commas to separate filters (ex. accel,bounds,crate).")
+                  $"\nUse commas to separate filters (ex. accel,bounds,crate)."+
+                  "\n\nIf the value arg is provided, only fields with an equivalent value"
+                  +"\nare printed. Prefix with ! to only print fields that are not equivalent.")
         {
             Cache = cache;
             Structure = structure;
@@ -33,11 +35,12 @@ namespace TagTool.Commands.Editing
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 1)
+            if (args.Count > 2)
                 return new TagToolError(CommandError.ArgCount);
 
-            var match = (args.Count == 1);
+            var match = (args.Count >= 1);
             string[] tokens = match ? args[0].ToLower().Split(',') : new string[] { "" };
+            string valueToken = (args.Count == 2) ? args[1] : null;
 
 			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(Structure))
 			{
@@ -51,10 +54,22 @@ namespace TagTool.Commands.Editing
 					var matchFound = false;
 					foreach (var token in tokens)
 					{
-						if (nameString.ToLower().Contains(token.Trim()))
-							matchFound = true;
-					}
-					if (!matchFound)
+                        if (nameString.ToLower().Contains(token.Trim()))
+                        {
+                            matchFound = true;
+
+                            if (valueToken != null)
+                            {
+                                var value = tagFieldInfo.GetValue(Value).ToString();
+
+                                if (valueToken.StartsWith("!"))
+                                    matchFound = (value != valueToken.Substring(1));
+                                else
+                                    matchFound = (value == valueToken);
+                            }
+                        }
+                    }
+                    if (!matchFound)
 						continue;
 				}
 
