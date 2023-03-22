@@ -66,11 +66,21 @@ namespace TagTool.Commands.Common
             var width = commands.Max(c => c.Name.Length);
             var format = "{0,-" + width + "}  {1}";
 
+            int bufferWidth = 0;
+            try
+            {
+                bufferWidth = Console.BufferWidth;
+            }
+            catch (Exception ex) { }
+
             Console.WriteLine("Available commands for {0}:", context.Name);
             Console.WriteLine();
             foreach (var command in commands)
             {
-                Console.WriteLine(format, command.Name, Wrap(command.Description, wrap:Console.BufferWidth - (width + 4), padLeft: width + 3));
+                if (bufferWidth > 0)
+                    Console.WriteLine(format, command.Name, Wrap(command.Description, wrap: bufferWidth - (width + 4), padLeft: width + 3));
+                else
+                    Console.WriteLine(format, command.Name, command.Description);
                 ignore.Add(command.Name);
             }
             Console.WriteLine();
