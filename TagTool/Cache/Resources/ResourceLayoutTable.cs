@@ -18,7 +18,7 @@ namespace TagTool.Cache.Resources
         public List<ResourceSection> Sections;
 
         [TagStructure(Size=  0xC)]
-        public class UnknownBlockMCC
+        public class UnknownBlockMCC : TagStructure
         {
             public uint Unknown0;
             public uint Unknown4;

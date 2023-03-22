@@ -977,7 +977,7 @@ namespace TagTool.Tags.Definitions
                 public ChudWidgetAnimationStruct Unknown5;
 
                 [TagStructure(Size = 0x14)]
-                public class ChudWidgetAnimationStruct
+                public class ChudWidgetAnimationStruct : TagStructure
                 {
                     public byte Flags;
                     public byte Function;

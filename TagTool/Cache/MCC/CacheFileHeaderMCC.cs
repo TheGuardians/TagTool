@@ -96,7 +96,7 @@ namespace TagTool.Cache.MCC
         public override ulong GetTagTableHeaderOffset() => throw new NotImplementedException();
 
         [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
-        public class StringIDHeaderMCC
+        public class StringIDHeaderMCC : TagStructure
         {
             public int Count;
             public uint BufferOffset;

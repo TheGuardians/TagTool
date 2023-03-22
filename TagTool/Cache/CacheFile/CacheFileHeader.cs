@@ -39,6 +39,7 @@ namespace TagTool.Cache
                     SharedCacheType = header.SharedCacheType,
                     StringIdsHeader = header.GetStringIDHeader(),
                     TagNamesHeader = header.TagNamesHeader,
+                    Name = header.Name,
                     VirtualBaseAddress = header.VirtualBaseAddress,
                     Partitions = header.Partitions,
                     SectionTable = header.SectionTable,
@@ -103,7 +104,7 @@ namespace TagTool.Cache
 
     [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo3Beta)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
-    public class StringIDHeader
+    public class StringIDHeader : TagStructure
     {
         [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo3Beta)]
         public uint BufferAlignedOffset;

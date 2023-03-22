@@ -372,7 +372,7 @@ namespace TagTool.Tags.Definitions
             public List<StateResponse> StateResponses;
 
             [TagField(ValidTags = new[] { "bitm" })] public CachedTag ScoreboardEmblemBitmap;
-            [TagField(ValidTags = new[] { "bitm" })] public CachedTag ScoreboardDeadEmblemBitmap;
+            [TagField(ValidTags = new[] { "bitm" })] public CachedTag ScoreboardDeadBitmap;
             [TagField(ValidTags = new[] { "rm  " })] public CachedTag HillShader;
 
 

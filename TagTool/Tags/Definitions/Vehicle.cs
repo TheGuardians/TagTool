@@ -481,7 +481,7 @@ namespace TagTool.Tags.Definitions
             public float LandingAngularVelocity; // must be under this angular velocity to enter/maintain landing state
 
             [TagStructure(Size = 0x4C)]
-            public class InterpolationParametersStruct
+            public class InterpolationParametersStruct : TagStructure
             {
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public float InterpolationSpeedDomain;

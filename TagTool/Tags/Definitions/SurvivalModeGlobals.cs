@@ -188,7 +188,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class Wave
+        public class Wave : TagStructure
         {
             public StringId Name;
 
