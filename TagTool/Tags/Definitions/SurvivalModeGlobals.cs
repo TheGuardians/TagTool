@@ -16,8 +16,8 @@ namespace TagTool.Tags.Definitions
         public uint Unknown;
 
         [TagField(ValidTags = new [] { "unic" })] public CachedTag SurvivalModeStrings;
-        [TagField(ValidTags = new [] { "snd!" })] public CachedTag CountdownSound;
-        [TagField(ValidTags = new [] { "snd!" })] public CachedTag RespawnSound;
+        [TagField(ValidTags = new [] { "scmb", "snd!" })] public CachedTag CountdownSound;
+        [TagField(ValidTags = new [] { "scmb", "snd!" })] public CachedTag RespawnSound;
 
         public List<SurvivalEvent> SurvivalEvents;
 
@@ -70,19 +70,20 @@ namespace TagTool.Tags.Definitions
             [TagField(Length = 0x2, Flags = Padding)]
             public byte[] Padding1;
 
-            public CachedTag EnglishSound;
-            public CachedTag JapaneseSound;
-            public CachedTag GermanSound;
-            public CachedTag FrenchSound;
-            public CachedTag SpanishSound;
-            public CachedTag LatinAmericanSpanishSound;
-            public CachedTag ItalianSound;
-            public CachedTag KoreanSound;
-            public CachedTag ChineseTraditionalSound;
-            public CachedTag ChineseSimplifiedSound;
-            public CachedTag PortugueseSound;
-            public CachedTag PolishSound;
-            public CachedTag ProbablyRussianSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag EnglishSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag JapaneseSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag GermanSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag FrenchSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag SpanishSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag LatinAmericanSpanishSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag ItalianSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag KoreanSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag ChineseTraditionalSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag ChineseSimplifiedSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag PortugueseSound;
+            [TagField(ValidTags = new [] { "snd!" })] public CachedTag PolishSound;
+            
+            public CachedTag ProbablyRussianSound; // cfgt is referenced here?
 
             [Flags]
             public enum GameEngineEventFlagsDefinition : ushort

@@ -10,8 +10,12 @@ namespace TagTool.Tags.Definitions
     public class Antenna : TagStructure
 	{
         public StringId AttachmentMarkerName; // the marker name where the antenna should be attached
+
+        [TagField(ValidTags = new[] { "bitm" })]
         public CachedTag Bitmaps;
+        [TagField(ValidTags = new[] { "pphy" })]
         public CachedTag Physics;
+
         public float SpringStrengthCoefficient; // strength of the spring (larger values make the spring stronger)
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float TexelToWorldWidthScale;

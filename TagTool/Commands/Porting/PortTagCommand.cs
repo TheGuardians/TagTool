@@ -932,7 +932,7 @@ namespace TagTool.Commands.Porting
 					break;
 
                 case Effect effe:
-                    blamDefinition = FixupEffect(cacheStream, resourceStreams, effe, blamTag.Name);
+                    blamDefinition = ConvertEffect(cacheStream, resourceStreams, effe, blamTag.Name);
                     break;
 
                 case Equipment eqip:
@@ -1074,8 +1074,8 @@ namespace TagTool.Commands.Porting
 
                 case Light ligh when BlamCache.Version >= CacheVersion.HaloReach:
                     {
-                        ligh.DistanceDiffusion = 0.01f;
-                        ligh.AngularSmoothness = ligh.MaxIntensityRangeReach;
+                        ligh.DistanceDiffusion = ligh.DistanceDiffusionReach;
+                        ligh.AngularSmoothness = ligh.AngularFalloffSpeed;
 
                         if (ligh.GelBitmap != null)
                         {
@@ -1324,7 +1324,7 @@ namespace TagTool.Commands.Porting
                 }
         }
 
-        private Effect FixupEffect(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Effect effe, string blamTagName)
+        private Effect ConvertEffect(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Effect effe, string blamTagName)
         {
             if (BlamCache.Platform == CachePlatform.MCC)
             {
@@ -1400,6 +1400,15 @@ namespace TagTool.Commands.Porting
                                 particleSystem.Emitters[0].EmitterFlags &= ~Effect.Event.ParticleSystem.Emitter.FlagsValue.IsGpu;
                                 particleSystem.Emitters[0].EmitterFlags |= Effect.Event.ParticleSystem.Emitter.FlagsValue.IsCpu;
                                 break;
+                        }
+                    }
+                    if (BlamCache.Platform == CachePlatform.MCC && BlamCache.Version >= CacheVersion.HaloReach)
+                    {
+                        foreach (var emitter in particleSystem.Emitters)
+                        {
+                            emitter.RuntimeMGpu.Properties = emitter.RuntimeMGpu.RuntimeGpuBlocks?[0].Properties;
+                            emitter.RuntimeMGpu.Functions = emitter.RuntimeMGpu.RuntimeGpuBlocks?[0].Functions;
+                            emitter.RuntimeMGpu.Colors = emitter.RuntimeMGpu.RuntimeGpuBlocks?[0].Colors;
                         }
                     }
                 }
@@ -1628,8 +1637,16 @@ namespace TagTool.Commands.Porting
                         RescaleGUIDef(guidefinition, 1.3125f);
                     break;
 
+                case RuntimeGpuData runMGpu when BlamCache.Platform == CachePlatform.MCC:
+                    if (BlamCache.Version >= CacheVersion.Halo3ODST)
+                    {
+                        runMGpu.Properties = runMGpu.RuntimeGpuBlocks?[0].Properties;
+                        runMGpu.Functions = runMGpu.RuntimeGpuBlocks?[0].Functions;
+                        runMGpu.Colors = runMGpu.RuntimeGpuBlocks?[0].Colors;
+                    }
+                    return runMGpu;
 
-				case Array _:
+                case Array _:
 				case IList _: // All arrays and List<T> implement IList, so we should just use that
 					data = ConvertCollection(cacheStream, blamCacheStream, resourceStreams, data as IList, definition, blamTagName);
 					return data;

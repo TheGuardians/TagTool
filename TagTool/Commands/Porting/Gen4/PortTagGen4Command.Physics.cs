@@ -347,7 +347,7 @@ namespace TagTool.Commands.Porting.Gen4
                 physicsModel.ListShapes.Add(new PhysicsModel.ListShape
                 {
                     CollisionFilter = (uint)gen4listshape.CollisionFilter,
-                    ShapeSize = (uint)gen4listshape.ShapeSize,
+                    ShapeSize = gen4listshape.ShapeSize,
                     NumChildShapes = (uint)gen4listshape.NumChildShapes,
                     Shape = new Havok.HavokShapeReference
                     {

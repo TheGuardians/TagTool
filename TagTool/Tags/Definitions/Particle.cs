@@ -24,13 +24,14 @@ namespace TagTool.Tags.Definitions
 
         public ParticleBillboardStyleValue ParticleBillboardStyle;
 
-        [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
-        public byte[] Padding1;
-
         public short FirstSequenceIndex;
         public short SequenceCount;
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte Version;
+
         [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(Length = 1, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
         public byte[] Padding2;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -55,7 +56,7 @@ namespace TagTool.Tags.Definitions
         public float BlurWeight;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float IntensityScale;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(ValidTags = new[] { "bitm" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag Palette;
 
         public ParticlePropertyScalar AspectRatio;
@@ -66,7 +67,10 @@ namespace TagTool.Tags.Definitions
         public ParticlePropertyScalar FrameIndex;
         public ParticlePropertyScalar AnimationRate;
         public ParticlePropertyScalar PaletteAnimation;
+
+        [TagField(ValidTags = new[] { "pmdf" })]
         public CachedTag ParticleModel;
+
         public uint RuntimeMUsedParticleStates;
         public uint RuntimeMConstantPerParticleProperties;
         public uint RuntimeMConstantOverTimeProperties;
@@ -95,7 +99,7 @@ namespace TagTool.Tags.Definitions
             None = 0,
             DiesAtRest = 1 << 0,
             DiesOnStructureCollision = 1 << 1,
-            DiesInMedia = 1 << 2,
+            DiesInWater = 1 << 2,
             DiesInAir = 1 << 3,
             HasSweetener = 1 << 4,
             NoAttachments = 1 << 5,
@@ -107,7 +111,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class Attachment : TagStructure
 		{
-            [TagField(Flags = Label)]
+            [TagField(ValidTags = new[] { "effe", "snd!", "foot" }, Flags = Label)]
             public CachedTag Type;
             public TriggerValue Trigger;
             public byte Flags;

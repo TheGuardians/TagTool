@@ -39,7 +39,9 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Padding, Length = 2)]
             public byte[] Padding2;
 
+            [TagField(ValidTags = new[] { "vehi" })]
             public CachedTag Vehicle;
+
             public StringId VehicleVariant;
             public StringId ActivityName;
 

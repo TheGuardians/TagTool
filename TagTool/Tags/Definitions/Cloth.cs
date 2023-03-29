@@ -12,7 +12,10 @@ namespace TagTool.Tags.Definitions
         public ClothFlags Flags;
         public StringId MarkerAttachmentName;
         public StringId SecondaryAxisAttachmentName;
+
+        [TagField(ValidTags = new[] { "rmsh" })]
         public CachedTag Shader;
+
         public short GridXDimension;
         public short GridYDimension;
         public float GridSpacingX;

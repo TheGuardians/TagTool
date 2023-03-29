@@ -19,6 +19,8 @@ namespace TagTool.Commands.Porting
         {
             lensFlare.OcclusionReflectionIndex = 0;
 
+            // TO DO: verify reach conversions
+
             foreach (var reflection in lensFlare.Reflections)
             {
                 // only H3Original and ODST have Rotation and Axis offsets swapped

@@ -46,7 +46,10 @@ namespace TagTool.Tags.Definitions
             public float SoloPlayerFadeOutTime; // seconds
             public float SoloPlayerFadeInTime; // seconds
             public float GameMusicFadeOutTime; // seconds
+
+            [TagField(ValidTags = new[] { "snd!" })]
             public CachedTag PlayOnUnplayableSound;
+
             public float LeftRightBleed; // [0 = no bleed, 1 = swap left/right, 0.5 = mono
             public float RemoteVoiceBoost; // output= (1 + boost)*input
 

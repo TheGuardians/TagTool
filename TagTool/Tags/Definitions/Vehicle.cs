@@ -51,7 +51,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public StringId FlipOverMessageNew;
 
-        [TagField(ValidTags = new[] { "snd!" })]
+        [TagField(ValidTags = new[] { "scmb", "snd!" })]
         public CachedTag SuspensionSound;
         [TagField(ValidTags = new[] { "effe" })]
         public CachedTag SpecialEffect;
@@ -234,7 +234,10 @@ namespace TagTool.Tags.Definitions
             public float EngineMomentum; // higher moments make engine spin up slower
             public float EngineMaximumAngularVelocity; // higher moments make engine spin up slower
             public List<Gear> Gears;
+
+            [TagField(ValidTags = new[] { "scmb", "snd!" })]
             public CachedTag GearShiftSound;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public List<LoadAndCruiseBlock> LoadAndCruiseSound;
         }
@@ -788,10 +791,9 @@ namespace TagTool.Tags.Definitions
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short RuntimeGlobalMaterialIndex;
 
-            [TagField(Flags = Padding, Length = 2)]
+            [TagField(Flags = Padding, Length = 2, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Unused2 = new byte[2];
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public short DamageSourceRegionIndex;
             public StringId DamageSourceRegionName;
             public float DefaultStateError;
@@ -911,7 +913,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.HaloReach11883)]
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class Gear : TagStructure
         {
             public TorqueCurveStruct LoadedTorqueCurve;
@@ -924,8 +927,13 @@ namespace TagTool.Tags.Definitions
             public float MinTimeToDownshift; // seconds
             public float EngineDownshiftScale; // [0,1]
 
+            [TagField(Length = 4, Flags = Padding,
+                    Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+            public byte[] ReachMCCPadding;
+
             [TagStructure(Size = 0x18, MaxVersion = CacheVersion.HaloOnline700123)]
-            [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
+            [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
             public class TorqueCurveStruct : TagStructure
             {
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -943,6 +951,10 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public TagFunction Function;
+
+                [TagField(Length = 4, Flags = Padding,
+                    Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+                public byte[] ReachMCCPadding;
             }
         }
 

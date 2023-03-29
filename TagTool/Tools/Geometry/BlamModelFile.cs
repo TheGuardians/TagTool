@@ -138,13 +138,13 @@ namespace TagTool.Tools.Geometry
 
             // set lighting
 
-            mode.UnknownSHProbes = new List<RenderModel.UnknownSHProbe>();
+            mode.VolumeSamples = new List<RenderModel.VolumeSamplesBlock>();
             mode.SHBlue = DefaultLighting.SHBlue;
             mode.SHRed = DefaultLighting.SHRed;
             mode.SHGreen = DefaultLighting.SHGreen;
             foreach (var lightProbe in LightProbes)
             {
-                mode.UnknownSHProbes.Add(new RenderModel.UnknownSHProbe
+                mode.VolumeSamples.Add(new RenderModel.VolumeSamplesBlock
                 {
                     Position = lightProbe.Position,
                     Coefficients = lightProbe.Coefficients
@@ -296,7 +296,7 @@ namespace TagTool.Tools.Geometry
 
             LightProbes = new List<BMFLightProbe>();
 
-            foreach (var lightProbe in mode.UnknownSHProbes)
+            foreach (var lightProbe in mode.VolumeSamples)
             {
                 LightProbes.Add(new BMFLightProbe
                 {

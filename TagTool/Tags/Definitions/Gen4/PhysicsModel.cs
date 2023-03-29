@@ -829,7 +829,7 @@ namespace TagTool.Tags.Definitions.Gen4
         {
             public HavokShapeReferenceStruct ShapeReference;
             public int CollisionFilter;
-            public int ShapeSize;
+            public float ShapeSize;
             public int NumChildShapes;
             
             [TagStructure(Size = 0x4)]
@@ -860,22 +860,49 @@ namespace TagTool.Tags.Definitions.Gen4
             }
         }
         
-        [TagStructure(Size = 0x50)]
+        [TagStructure(Size = 0x50, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x80, Platform = CachePlatform.MCC)]
         public class MoppsBlockStruct : TagStructure
         {
             public HavokShapeStruct Base;
+
             [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
             [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;
+
+            [TagField(Platform = CachePlatform.Original)]
             public int MoppCodePointer;
+            [TagField(Platform = CachePlatform.Original)]
             public int MoppDataSkip;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public PlatformUnsignedValue MoppCodePointerMCC;
+            [TagField(Platform = CachePlatform.MCC)]
+            public PlatformUnsignedValue MoppDataSkipMCC;
+
             public int MoppDataSize;
+
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+            public byte[] PaddingMCC;
+
             public RealVector3d MCodeinfoCopy;
             public float HavokWMCodeinfoCopy;
+
+            [TagField(Platform = CachePlatform.Original)]
             public int ChildShapeVtable;
+            [TagField(Platform = CachePlatform.MCC)]
+            public PlatformUnsignedValue ChildShapeVtableMCC;
+
             public HavokShapeReferenceStruct ChildshapePointer;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public uint RuntimeShapePointerMCC;
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+            public byte[] PaddingMCC1;
+
             public int ChildSize;
+
             [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
             public byte[] Padding2;
             public float Scale;
@@ -1527,17 +1554,41 @@ namespace TagTool.Tags.Definitions.Gen4
             }
         }
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x10, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x24, Platform = CachePlatform.MCC)]
         public class HavokShapeStruct : TagStructure
         {
+            [TagField(Platform = CachePlatform.Original)]
             public int FieldPointerSkip;
+            [TagField(Platform = CachePlatform.MCC)]
+            public PlatformUnsignedValue FieldPointerSkipMCC;
+
             public short Size;
             public short Count;
+
+            [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
+            public byte[] PaddingMCC0;
+
+            [TagField(MinVersion = CacheVersion.Halo4)]
             public sbyte Type;
+            [TagField(MinVersion = CacheVersion.Halo4)]
             public sbyte Dispatchtype;
+            [TagField(MinVersion = CacheVersion.Halo4)]
             public sbyte BitsperKey;
+            [TagField(MinVersion = CacheVersion.Halo4)]
             public sbyte Codectype;
+
+            [TagField(Platform = CachePlatform.Original)]
             public int UserData;
+            [TagField(Platform = CachePlatform.MCC)]
+            public PlatformUnsignedValue UserDataMCC;
+
+            [TagField(MaxVersion = CacheVersion.HaloReach11883)]
+            public int ReachType;
+
+            [TagField(Length = 0x8, Flags = TagFieldFlags.Padding,
+                Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+            public byte[] PaddingMCC1;
         }
 
         [TagStructure(Size = 0x14)]

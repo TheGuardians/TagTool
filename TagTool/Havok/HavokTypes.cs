@@ -44,8 +44,8 @@ namespace TagTool.Havok
         // TOOD: consider endianess
         public BlamShapeType Type;
         public short Index;
-        [TagField(Length = 4, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
-        public byte[] Padding;
+        [TagField(Platform = CachePlatform.MCC)]
+        public int RuntimeShapePointer;
 
         public HavokShapeReference() { }
 

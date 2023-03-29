@@ -63,28 +63,22 @@ namespace TagTool.Tags.Definitions
         public float ShieldRenderEffectsScale = 1.0f; 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<PlayerResponseBlock> PlayerResponses;
+
+        [TagField(ValidTags = new[] { "drdf" })]
         public CachedTag DamageResponse;
+
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CameraImpulseStruct CameraImpulse;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public CameraShakeStruct CameraShake;
+
+        [TagField(ValidTags = new[] { "scmb", "snd!" })]
         public CachedTag Sound;
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public BreakingEffectStruct BreakingEffect;
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<DamageEffectSoundBlockStruct> DamageSounds;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float ForwardVelocity; // world units per second
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float ForwardRadius; // world units
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float ForwardExponent;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float OutwardVelocity; // world units per second
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float OutwardRadius; // world units
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float OutwardExponent;
+
+        public BreakingEffectStruct BreakingEffect;
 
         [Flags]
         public enum DamageEffectFlags : uint

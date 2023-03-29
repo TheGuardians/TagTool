@@ -15,20 +15,28 @@ namespace TagTool.Tags.Definitions
         public float NearClipPlaneDistance; // objects closer than this are not drawn
         public float ProjectionPlaneDistance; // distance at which objects are rendered when z=0 (normal size)
         public float FarClipPlaneDistance; // objects farther than this are not drawn
+
+        [TagField(ValidTags = new [] { "unic" })]
         public CachedTag GlobalStrings;
+        [TagField(ValidTags = new [] { "unic" })]
         public CachedTag DamageReportingStrings;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
+        [TagField(ValidTags = new[] { "unic" }, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(ValidTags = new[] { "unic" }, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
         public CachedTag InputStrings;
 
+        [TagField(ValidTags = new[] { "lsnd" })]
         public CachedTag MainMenuMusic;
+
         public int MusicFadeTime; // milliseconds
         public RealArgbColor TextColor;
         public RealArgbColor TextShadowColor;
         public List<ColorPreset> ColorPresets;
         public List<PlayerColor> PlayerTintColors;
+
+        [TagField(ValidTags = new[] { "uise" })]
         public CachedTag DefaultSounds;
+
         public List<GuiAlertDescription> AlertDescriptions;
         public List<Dialog> DialogDescriptions;
         public List<GlobalDataSource> GlobalDataSources;
@@ -258,6 +266,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class GlobalDataSource : TagStructure
 		{
+            [TagField(ValidTags = new[] { "dsrc" })]
             public CachedTag DataSource;
         }
 

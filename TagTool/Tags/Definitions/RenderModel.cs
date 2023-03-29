@@ -60,17 +60,17 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public RealRgbColor AnalyticalLightColor;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown10;
+        public float DirectSunLightMultiplier;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown11;
+        public float SkyDomeAndAllBounceLightMultiplier;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown12;
+        public float Sun1stBounceScaler;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown13;
+        public float SkyLight1stBounceScaler;
 
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public List<UnknownSHProbe> UnknownSHProbes;
+        public List<VolumeSamplesBlock> VolumeSamples;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<RuntimeNodeOrientation> RuntimeNodeOrientations;
@@ -385,7 +385,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x150)]
-        public class UnknownSHProbe : TagStructure
+        public class VolumeSamplesBlock : TagStructure
 		{
             public RealPoint3d Position;
             [TagField(Length = 81, MinVersion = CacheVersion.Halo3Beta)]

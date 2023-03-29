@@ -14,34 +14,37 @@ namespace TagTool.Tags.Definitions
         [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
 
-        public float MaximumDistance; // maximum distance the light reaches (the light can become very dark well before this distance if you set your distance diffusion low) (world units)
+        public float MaximumDistance; // max distance the light reaches (can become very dark well before this distance if you set your distance diffusion low) (world units)
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float UnknownIntensity;
+        public float AttenuationStartDistance;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown0;
+        public float LightRainVolumeRange;
 
         public float FrustumNearWidth; // width of the frustum at the near plane (world units)
         public float FrustumHeightScale; // how much the gel is stretched vertically (0.0 or 1.0 = aspect ratio same as gel)
         public float FrustumFieldOfView; // horizontal angle that the frustum light covers (0.0 = no spread, a straight beam of light)
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float UnknownAngle;
+        public float AngularHotspot; // inner falloff angle
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float MaxIntensityRangeReach;
+        public float AngularFalloffSpeed; // 1.0 for sharp edges, greater than 1.0 for smooth edges ([1 - 12])
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float FrustumMinimumViewDistanceReach;
+        public float DistanceDiffusionReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown1;
+        public float NearFadingDistance; // world units
+
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown2;
+        public float ShadowCutoffDistance;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown3;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short Unknown4;
+        public LightShadowQualityEnumeration ShadowQuality;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+        public short PaddingReach;
 
         public LightColorFunctionStruct Color;
         public LightScalarFunctionStruct Intensity;
+
+        [TagField(ValidTags = new[] { "bitm" })]
         public CachedTag GelBitmap; // requires 'expensive light'
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -49,34 +52,28 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float AngularSmoothness; // [0.2 - 8.0] less than 1.0 for sharp edges, greater than 1.0 for smooth edges
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float PercentSpherical; // [0.0 - 1.0] percentage of ambient (spherical) light
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float RainLightReduction; // 0 means no reduction, 1 means completely removed
+
         public float DestroyLightAfter; // automatically destroys the light after this many seconds (0 to disable)
+
         public LightPriorityEnumeration NearPriority; // priority when the light is fullscreen in size
         public LightPriorityEnumeration FarPriority; // priority when the light is very far away
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public LightPriorityBiasEnumeration TransitionDistance; // specifies where the transition occurs between near and far priority
 
-        [TagField(Length = 1, Flags = TagFieldFlags.Padding)]
+        [TagField(Length = 1, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
         public byte[] Padding1;
 
+        [TagField(ValidTags = new[] { "lens" })]
         public CachedTag LensFlare;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float RadiusModifer1;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float RadiusModifer2;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float RadiusModifer3;
-
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown18;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown19;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown20;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown21;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float Unknown22;
+        public ClipPlanesStruct ClipPlanes;
 
         [Flags]
         public enum LightFlags : uint
@@ -157,6 +154,26 @@ namespace TagTool.Tags.Definitions
             public TagFunction Function = new TagFunction { Data = new byte[0] };
         }
 
+        [TagStructure(Size = 0x44, MinVersion = CacheVersion.HaloReach)]
+        public class ClipPlanesStruct : TagStructure
+        {
+            public LightClipFlagsDefinition ClipFlags;
+
+            public int UnusedPaddingDontTouch; // often nonzero
+
+            public Bounds<float> ClipX; // world units
+            public Bounds<float> ClipY; // world units
+            public Bounds<float> ClipZ; // world units
+
+            [Flags]
+            public enum LightClipFlagsDefinition : uint
+            {
+                ClipX = 1 << 0,
+                ClipY = 1 << 1,
+                ClipZ = 1 << 2
+            }
+        }
+
         public enum LightTypeEnumDefinition : short
         {
             Sphere,
@@ -187,6 +204,14 @@ namespace TagTool.Tags.Definitions
             Middle,
             Far,
             VeryFar
+        }
+
+        public enum LightShadowQualityEnumeration : short
+        {
+            Shadow128x128,
+            Shadow256x256,
+            Shadow512x512,
+            Shadow800x800
         }
     }
 }

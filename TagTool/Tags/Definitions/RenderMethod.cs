@@ -13,8 +13,10 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x64, MinVersion = CacheVersion.HaloReach)]
     public class RenderMethod : TagStructure
     {
+        [TagField(ValidTags = new[] { "rmdf" })]
         public CachedTag BaseRenderMethod;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+
+        [TagField(ValidTags = new[] { "rm  " }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag Reference;
 
         public List<RenderMethodOptionIndex> Options;
@@ -82,7 +84,10 @@ namespace TagTool.Tags.Definitions
             [TagField(Flags = Label)]
             public StringId Name;
             public RenderMethodOption.ParameterBlock.OptionDataType ParameterType;
+
+            [TagField(ValidTags = new[] { "bitm" })]
             public CachedTag Bitmap;
+
             public float RealValue;
             public int IntBoolValue;
             public short BitmapFlags;
@@ -99,11 +104,16 @@ namespace TagTool.Tags.Definitions
             public List<RenderMethodAnimatedParameterBlock> AnimatedParameters;
         }
 
-        [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0xAC, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0xAC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x84, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x8C, Platform = CachePlatform.MCC, Version = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0xB4, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
         public class RenderMethodPostprocessBlock : TagStructure
         {
+            [TagField(ValidTags = new[] { "rmt2" })]
             public CachedTag Template;
+
             public List<TextureConstant> TextureConstants;
             public List<RealConstant> RealConstants;
             public List<uint> IntegerConstants;
@@ -121,6 +131,13 @@ namespace TagTool.Tags.Definitions
             public short[] QueryableProperties; 
             [TagField(Length = 0x1C, MinVersion = CacheVersion.HaloReach)]
             public short[] QueryablePropertiesReach;
+
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
+            public short AssetDatumSalt;
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
+            public short AssetDatumIndex;
+            [TagField(Length = 0x4, Flags = Padding, Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
+            public byte[] PaddingMCC;
 
             public enum BlendModeValue : uint
             {
@@ -149,11 +166,13 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x18, Platform = CachePlatform.Original)]
-            [TagStructure(Size = 0x1C, Platform = CachePlatform.MCC)]
+            [TagStructure(Size = 0x1C, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
+            [TagStructure(Size = 0x18, Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
             public class TextureConstant : TagStructure
             {
-                [TagField(Flags = Label)]
+                [TagField(ValidTags = new[] { "bitm" }, Flags = Label)]
                 public CachedTag Bitmap;
+
                 public short BitmapIndex;
                 public PackedSamplerAddressMode SamplerAddressMode;
 
@@ -166,17 +185,18 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public PackedSamplerFilterMode FilterModeReach;
 
-                [TagField(Platform = CachePlatform.MCC)]
+                [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
                 public byte ComparisonFunction;
+
                 public RenderMethodExternTextureMode ExternTextureMode;
                 public sbyte TextureTransformConstantIndex;
 
-                [TagField(Flags = Padding, Length = 0x1, Platform = CachePlatform.MCC)]
+                [TagField(Flags = Padding, Length = 0x1, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
                 public byte[] Padding0;
 
                 public TagBlockIndex TextureTransformOverlayIndices = new TagBlockIndex();
 
-                [TagField(Flags = Padding, Length = 0x2, Platform = CachePlatform.MCC)]
+                [TagField(Flags = Padding, Length = 0x2, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
                 public byte[] Padding1;
 
                 public enum SamplerFilterMode : byte

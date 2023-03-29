@@ -35,7 +35,7 @@ namespace TagTool.Tags.Definitions
 
             public StringId Vocalization;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(ValidTags = new[] { "snd!" }, MaxVersion = CacheVersion.HaloOnline700123)]
             public CachedTag Sound;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]

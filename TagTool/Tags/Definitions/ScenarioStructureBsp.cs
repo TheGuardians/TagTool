@@ -16,7 +16,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x394, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3AC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x3B8, MinVersion = CacheVersion.HaloOnline604673, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x51C, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x51C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "scenario_structure_bsp", Tag = "sbsp", Size = 0x548, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class ScenarioStructureBsp : TagStructure
     {
         [TagField(Flags = TagFieldFlags.Padding, Length = 12, MaxVersion = CacheVersion.Halo2Vista)]
@@ -85,8 +86,6 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public CollisionKdHierarchyStatic InstanceKdHierarchy;
 
-       
-
         public Bounds<float> WorldBoundsX;
         public Bounds<float> WorldBoundsY;
         public Bounds<float> WorldBoundsZ;
@@ -98,7 +97,8 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         public List<StructureSurface> StructureSurfaces;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(Version = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         public List<LargeStructureSurface> LargeStructureSurfaces;
 
@@ -240,6 +240,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown90;
 
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC, Length = 4, Flags = TagFieldFlags.Padding)]
+        public byte[] PaddingReachMCC;
+
         [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloOnline700123)]
         public class LocationNameBlock : TagStructure
         {
@@ -309,17 +312,17 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail)]
         public class CollisionMaterial : TagStructure
         {
-            [TagField(Flags = TagFieldFlags.Label, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(ValidTags = new[] { "rm  " }, Flags = TagFieldFlags.Label, MaxVersion = CacheVersion.Halo2Vista)]
             public CachedTag OldShader;
 
-            [TagField(Flags = TagFieldFlags.Label, MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(ValidTags = new[] { "rm  " }, Flags = TagFieldFlags.Label, MinVersion = CacheVersion.Halo3Retail)]
             public CachedTag RenderMethod;
 
             [TagField(Flags = TagFieldFlags.GlobalMaterial)]
             public short RuntimeGlobalMaterialIndex;
             public short ConveyorSurfaceIndex;
 
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(ValidTags = new[] { "rm  " }, MaxVersion = CacheVersion.Halo2Vista)]
             public CachedTag NewShader;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -469,8 +472,10 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Flags = TagFieldFlags.Label)]
             public StringId Name;
-            // if empty, uses default
-            public CachedTag ClusterCameraFxTag;
+
+            [TagField(ValidTags = new[] { "cfxs" })]
+            public CachedTag ClusterCameraFxTag; // if empty, uses default
+
             public CameraFxPaletteFlags Flags;
             [TagField(Length = 3, Flags = TagFieldFlags.Padding)]
             public byte[] Padding1;

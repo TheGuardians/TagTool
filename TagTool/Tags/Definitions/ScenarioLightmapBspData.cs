@@ -11,7 +11,8 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1B4, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x1E4, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x15C, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x15C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "scenario_lightmap_bsp_data", Tag = "Lbsp", Size = 0x168, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class ScenarioLightmapBspData : TagStructure
     {
         public ScenarioLightmapBspFlags Flags;
@@ -24,12 +25,14 @@ namespace TagTool.Tags.Definitions
         [TagField(Length = 9, MaxVersion = CacheVersion.HaloOnline700123)]
         public LuminanceScale[] CoefficientsMapScale;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(ValidTags = new[] { "bitm" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag Unknown1;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float Brightness;
 
+        [TagField(ValidTags = new[] { "bitm" })]
         public CachedTag LightmapSHCoefficientsBitmap;
+        [TagField(ValidTags = new[] { "bitm" })]
         public CachedTag LightmapDominantLightDirectionBitmap;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -43,11 +46,8 @@ namespace TagTool.Tags.Definitions
 
         public RenderGeometry Geometry;
 
-        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
-        public List<NullBlock> Unknown7;
-
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<Unknown1Block> Unknown8;
+        public List<TriangleMappingPerMeshBlock> PerMeshTriangleMapping;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<Airprobe> Airprobes;
@@ -129,14 +129,14 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC)]
-        public class Unknown1Block : TagStructure
+        public class TriangleMappingPerMeshBlock : TagStructure
         {
-            public List<Unknown1SubBlock> Data;
+            public List<TriangleMappingBlock> Mesh;
 
             [TagStructure(Size = 0x4)]
-            public class Unknown1SubBlock : TagStructure
+            public class TriangleMappingBlock : TagStructure
             {
-                public int Unknown;
+                public int Word;
             }
         }
 

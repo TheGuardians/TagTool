@@ -15,71 +15,54 @@ namespace TagTool.Tags.Definitions
         public ChudAmmunitionInfo HudAmmunitionInfo;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<NullBlock> CompiledWidgetData;
+        public List<ReachUpdateCacheBlock> WidgetUpdateCache;
 
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x7C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x7C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class HudWidgetBase : TagStructure
         {
             [TagField(Flags = Label)]
             public StringId Name;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public ChudScriptingClass ScriptingClass;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public WidgetFlags BaseFlags;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public WidgetLayerEnum SortLayer;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public ChudScriptingClass ScriptingClass;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public WidgetFlags BaseFlags;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public WidgetLayerEnum SortLayer;
 
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public ChudScriptingClassReach ScriptingClassReach;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public sbyte PostprocessedIntermediateListIndex;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public WidgetFlagsReach BaseFlagsReach;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public WidgetLayerEnum SortLayerReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)] public ChudScriptingClassReach ScriptingClassReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)] public sbyte PostprocessedIntermediateListIndex;
+            [TagField(MinVersion = CacheVersion.HaloReach)] public WidgetFlagsReach BaseFlagsReach;
+            [TagField(MinVersion = CacheVersion.HaloReach)] public WidgetLayerEnum SortLayerReach;
 
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public ChudExternalInputReach ImportInput;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public ChudExternalInputReach ImportRangeInput;
+            [TagField(MinVersion = CacheVersion.HaloReach)] public ChudExternalInputReach ExternalInputA;
+            [TagField(MinVersion = CacheVersion.HaloReach)] public ChudExternalInputReach ExternalInputB;
 
-            // TODO: consolidate
-            [TagField(MinVersion = CacheVersion.HaloReach)]
+            [TagField(ValidTags = new[] { "wsdt" }, MinVersion = CacheVersion.HaloReach)]
             public CachedTag StateDataTemplate;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<StateDatumReach> StateDataReach;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+
             public List<StateDatum> StateData;
           
-            [TagField(MinVersion = CacheVersion.HaloReach)]
+            [TagField(ValidTags = new[] { "wpdt" }, MinVersion = CacheVersion.HaloReach)]
             public CachedTag PlacementDataTemplate;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<PlacementDatumReach> PlacementDataReach;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+
             public List<PlacementDatum> PlacementData;
           
-            [TagField(MinVersion = CacheVersion.HaloReach)]
+            [TagField(ValidTags = new[] { "wadt" }, MinVersion = CacheVersion.HaloReach)]
             public CachedTag AnimationDataTemplate;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<AnimationDatumReach> AnimationDataReach;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+
             public List<AnimationDatum> AnimationData;
 
-            [TagField(MinVersion = CacheVersion.HaloReach)]
+            [TagField(ValidTags = new[] { "wrdt" }, MinVersion = CacheVersion.HaloReach)]
             public CachedTag RenderDataTemplate;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<RenderDatumReach> RenderDataReach;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+
             public List<RenderDatum> RenderData;
            
 
             [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline604673)]
-            [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x48, Version = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach)]
             public class StateDatum : TagStructure
             {
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
@@ -88,89 +71,122 @@ namespace TagTool.Tags.Definitions
                 public ChudGameStateH3MCC GameStateH3MCC;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public ChudGameStateODSTFlags GameStateODST;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudGameStateED GameState;
 
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudSkinState SkinState;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public PDA PDAFlags;
 
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudGameTeam GameTeam;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudWindowState WindowState;
 
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public ChudGameEngineState_Retail MultiplayerEventsFlags_H3;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudGameEngineState_ED MultiplayerEvents;
 
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudMiscState_ED UnitBaseFlags;
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public ChudMiscState_ODST UnitBaseFlags_ODST;
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public ChudMiscState_H3 UnitBaseFlags_H3;
 
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudSandboxEditorState EditorFlags;
-
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudHindsightState HindsightState;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public Skulls SkullFlags;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public SurvivalRounds SurvivalRoundFlags;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public SurvivalWaves SurvivalWaveFlags;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public SurvivalLives SurvivalLivesFlags;
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public SurvivalDifficulty SurvivalDifficultyFlags;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public ushort Unused;
+                [TagField(Length = 0x2, Flags = Padding, 
+                    MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+                public byte[] Padding0;
 
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public GeneralKudos GeneralKudosFlags;
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public GeneralKudos_H3 GeneralKudosFlags_H3;
 
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public UnitZoom UnitZoomFlags;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public UnitInventory UnitInventoryFlags;
 
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ushort Unused3;
 
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public UnitGeneral UnitGeneralFlags;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ushort Unused4;
 
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudWeaponImpulseState WeaponKudosFlags;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public WeaponStatus WeaponStatusFlags;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public WeaponTarget WeaponTargetFlags;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudWeaponMiscState WeaponTargetBFlags;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public Player_Special Player_SpecialFlags;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public Player_Special_H3 Player_SpecialFlags_H3;
 
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public Weapon_Special Weapon_SpecialFlags;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public Inverse InverseFlags;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public ODSTNotHiddenState NotHiddenStateFlags;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Length = 2, Flags = Padding)]
-                public byte[] Padding0;
+                public byte[] PaddingH3;
 
                 //HO EXCLUSIVE FLAGS
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public short UnusedFlags4;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public Consumable ConsumableFlags;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public EnergyMeter EnergyMeterFlags;
+
+                // Reach
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public List<ChudWidgetStateAndBlock> ActiveState;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public List<ChudWidgetStateAndBlock> FlashState;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public List<ChudWidgetStateAndBlock> HiddenState;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public short ActiveStateEditorRoot;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public short FlashStateEditorRoot;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public short HiddenStateEditorRoot;
+                [TagField(MinVersion = CacheVersion.HaloReach, Length = 2, Flags = Padding)]
+                public byte[] PaddingReach;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public List<ChudWidgetStateEditorBlock> StateEditorData;
 
                 [Flags]
                 public enum ChudGameStateED : ushort
@@ -763,27 +779,24 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach)]
-            public class StateDatumReach : TagStructure
-            {
-                public List<NullBlock> Unknown1;
-                public List<NullBlock> Unknown2;
-                public List<NullBlock> Unknown3;
-                public ushort Unknown4;
-                public ushort Unknown5;
-                public ushort Unknown6;
-                public ushort Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
-                public uint Unknown10;
-            }
-
             [TagStructure(Size = 0x1C)]
             public class PlacementDatum : TagStructure
             {
-                [TagField(Flags = Label)]
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ChudCurvatureResFlags WindowState;
+
+                [TagField(Flags = Label, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudAnchorType Anchor;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudWidgetPlacementFlags AnchorFlags;
+
+                [TagField(Flags = Label, MinVersion = CacheVersion.HaloReach)]
+                public ChudAnchorTypeReach AnchorReach;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ChudWidgetPlacementFlagsReach AnchorFlagsReach;
+                [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x1, Flags = Padding)]
+                public byte[] DSFKSLVJ;
+
                 public RealPoint2d Origin;
                 public RealPoint2d Offset;
                 public RealPoint2d Scale;
@@ -835,36 +848,7 @@ namespace TagTool.Tags.Definitions
                     MotionSensor
                 }
 
-                [Flags]
-                public enum ChudWidgetPlacementFlags : ushort
-                {
-                    MoreSoon = 1 << 0
-                }
-            }
-
-            [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
-            public class PlacementDatumReach : TagStructure
-            {
-                public ChudCurvatureResFlags WindowState;
-                public ChudAnchorTypeEnum AnchorType;
-                public ChudWidgetPlacementFlags AnchorFlags;
-                [TagField(Length = 0x1, Flags = Padding)]
-                public byte[] DSFKSLVJ;
-                public RealPoint2d Origin;
-                public RealPoint2d Offset;
-                public RealPoint2d Scale;
-
-                [Flags]
-                public enum ChudCurvatureResFlags : byte
-                {
-                    FullscreenWide = 1 << 0,
-                    FullscreenStandard = 1 << 1,
-                    Halfscreen = 1 << 2,
-                    QuarterscreenWide = 1 << 3,
-                    QuarterscreenStandard = 1 << 4
-                }
-
-                public enum ChudAnchorTypeEnum : sbyte
+                public enum ChudAnchorTypeReach : byte
                 {
                     Parent,
                     TopLeft,
@@ -875,18 +859,18 @@ namespace TagTool.Tags.Definitions
                     BottomCenter,
                     BottomRight,
                     MotionSensor,
-                    DDamge,
-                    Messaging,
-                    StateMsgLeft,
-                    StateMsgRight,
-                    MsgBottomState,
-                    MsgBottomPrim,
+                    Ddamge, //same as center
+                    Messaging, //uses notification offset in chgd
+                    StateMessageRight,
+                    StateMessageLeft,
+                    MessageBottomState,
+                    MessageBottomPrimary, //separate float for this in chgd
                     TrackedTarget,
                     TrackingObject,
                     Crosshair,
-                    BackpackWeapon,
+                    BackpackWeapon, //uses both x and y offsets
                     Grenade,
-                    Equipment,
+                    Equipment, //x offset always 0
                     WeaponTarget,
                     GhostReticule,
                     HologramTarget,
@@ -894,12 +878,12 @@ namespace TagTool.Tags.Definitions
                     Player,
                     ScriptedObject,
                     MetagameBar,
-                    MetagameP1,
-                    MetagameP2,
-                    MetagameP3,
-                    MetagameP4,
-                    SBFriendly,
-                    SBEnemy,
+                    MetagamePlayer1,
+                    MetagamePlayer2,
+                    MetagamePlayer3,
+                    MetagamePlayer4,
+                    ScoreboardFriendly,
+                    ScoreboardEnemy,
                     Territory1,
                     Territory2,
                     Territory3,
@@ -920,16 +904,33 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum ChudWidgetPlacementFlags : byte
+                public enum ChudWidgetPlacementFlags : ushort
+                {
+                    MoreSoon = 1 << 0
+                }
+
+                [Flags]
+                public enum ChudWidgetPlacementFlagsReach : byte
                 {
                     ClampPlacementToScreenCircle = 1 << 0,
                     ClampPlacementUnlessSplitscreen = 1 << 1,
                     DoNotRotate = 1 << 2
                 }
+
+                [Flags]
+                public enum ChudCurvatureResFlags : byte
+                {
+                    FullscreenWide = 1 << 0,
+                    FullscreenStandard = 1 << 1,
+                    Halfscreen = 1 << 2,
+                    QuarterscreenWide = 1 << 3,
+                    QuarterscreenStandard = 1 << 4
+                }
             }
 
             [TagStructure(Size = 0x78, MaxVersion = CacheVersion.Halo3ODST)]
-            [TagStructure(Size = 0x90, MinVersion = CacheVersion.HaloOnlineED)]
+            [TagStructure(Size = 0x90, MinVersion = CacheVersion.HaloOnlineED,  MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x64, MinVersion = CacheVersion.HaloReach)]
             public class AnimationDatum : TagStructure
             {
                 public ChudWidgetAnimationStruct Initializing;
@@ -937,21 +938,44 @@ namespace TagTool.Tags.Definitions
                 public ChudWidgetAnimationStruct Flashing;
                 public ChudWidgetAnimationStruct Readying;
                 public ChudWidgetAnimationStruct Unreadying;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudWidgetAnimationStruct Impulse;
 
                 [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3ODST)]
-                [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED)]
+                [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach)]
                 public class ChudWidgetAnimationStruct : TagStructure
                 {
+                    [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                    [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                     public ChudWidgetAnimationFlags Flags;
+                    [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                    [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                     public ChudWidgetAnimationInputTypeEnum InputType;
+
+                    [TagField(MinVersion = CacheVersion.HaloReach)]
+                    public ChudWidgetAnimationFlagsReach FlagsReach;
+                    [TagField(MinVersion = CacheVersion.HaloReach)]
+                    public ChudWidgetAnimationInputTypeReach InputTypeReach;
+
+                    [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x2, Flags = Padding)]
+                    public byte[] ReachAnimationPadding;
+
+                    [TagField(ValidTags = new[] { "chad" })]
                     public CachedTag Animation;
 
-                    [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                    [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                     public float StateUnknown;
 
                     [Flags]
                     public enum ChudWidgetAnimationFlags : ushort
+                    {
+                        PlayReverse = 1 << 0
+                    }
+
+                    [Flags]
+                    public enum ChudWidgetAnimationFlagsReach : sbyte
                     {
                         PlayReverse = 1 << 0
                     }
@@ -964,43 +988,36 @@ namespace TagTool.Tags.Definitions
                         UseCompassTarget, //? HO or invalid
                         UseUserTarget //? HO or invalid
                     }
-                }
-            }
 
-            [TagStructure(Size = 0x64, MinVersion = CacheVersion.HaloReach)]
-            public class AnimationDatumReach : TagStructure
-            {
-                public ChudWidgetAnimationStruct Unknown1;
-                public ChudWidgetAnimationStruct Unknown2;
-                public ChudWidgetAnimationStruct Unknown3;
-                public ChudWidgetAnimationStruct Unknown4;
-                public ChudWidgetAnimationStruct Unknown5;
-
-                [TagStructure(Size = 0x14)]
-                public class ChudWidgetAnimationStruct : TagStructure
-                {
-                    public byte Flags;
-                    public byte Function;
-                    public ushort Unknown1;
-                    public CachedTag Animation;
+                    public enum ChudWidgetAnimationInputTypeReach : sbyte
+                    {
+                        Time,
+                        Extern1,
+                        Extern2,
+                        Zero
+                    }
                 }
             }
 
             [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x48, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach)]
             public class RenderDatum : TagStructure
             {
-                [TagField(Flags = Label)]
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123, Flags = Label)]
                 public ChudShaderType ShaderType;
+                [TagField(MinVersion = CacheVersion.HaloReach, Flags = Label)]
+                public ChudShaderTypeReach ShaderTypeReach;
 
                 [TagField(Flags = TagFieldFlags.Padding, Length = 0x2, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3ODST)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 0x3, MinVersion = CacheVersion.HaloReach)]
                 public byte[] Padding;
 
                 [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudBlendMode BlendModeHO;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudRenderExternalInputHO ExternalInput;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudRenderExternalInputHO RangeInput;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
@@ -1013,56 +1030,82 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public ChudRenderExternalInput_H3MCC RangeInput_H3MCC;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public ChudRenderExternalInput_ODST ExternalInput_ODST;
-
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public ChudRenderExternalInput_ODST RangeInput_ODST;
 
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ArgbColor LocalColorA;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ArgbColor LocalColorB;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ArgbColor LocalColorC;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public ArgbColor LocalColorD;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)] public RealArgbColor LocalColorA_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public RealArgbColor LocalColorB_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public RealArgbColor LocalColorC_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public RealArgbColor LocalColorD_Reach;
+
                 public float LocalScalarA;
                 public float LocalScalarB;
                 public float LocalScalarC;
                 public float LocalScalarD;
 
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorA_Retail;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorB_Retail;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorC_Retail;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorD_Retail;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorE_Retail;
-                [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public OutputColorValue OutputColorF_Retail;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)] public OutputColorValue OutputColorA_Retail;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)] public OutputColorValue OutputColorB_Retail;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)] public OutputColorValue OutputColorC_Retail;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)] public OutputColorValue OutputColorD_Retail;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)] public OutputColorValue OutputColorE_Retail;
+                [TagField(MaxVersion = CacheVersion.Halo3ODST)] public OutputColorValue OutputColorF_Retail;
 
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputColorValueReach OutputColorA_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputColorValueReach OutputColorB_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputColorValueReach OutputColorC_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputColorValueReach OutputColorD_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputColorValueReach OutputColorE_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputColorValueReach OutputColorF_Reach;
+
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public OutputColorValue_HO OutputColorA;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public OutputColorValue_HO OutputColorB;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public OutputColorValue_HO OutputColorC;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public OutputColorValue_HO OutputColorD;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public OutputColorValue_HO OutputColorE;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public OutputColorValue_HO OutputColorF;
 
-                public OutputScalarValue OutputScalarA;
-                public OutputScalarValue OutputScalarB;
-                public OutputScalarValue OutputScalarC;
-                public OutputScalarValue OutputScalarD;
-                public OutputScalarValue OutputScalarE;
-                public OutputScalarValue OutputScalarF;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public OutputScalarValue OutputScalarA;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public OutputScalarValue OutputScalarB;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public OutputScalarValue OutputScalarC;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public OutputScalarValue OutputScalarD;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public OutputScalarValue OutputScalarE;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public OutputScalarValue OutputScalarF;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputScalarValueReach OutputScalarA_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputScalarValueReach OutputScalarB_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputScalarValueReach OutputScalarC_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputScalarValueReach OutputScalarD_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputScalarValueReach OutputScalarE_Reach;
+                [TagField(MinVersion = CacheVersion.HaloReach)] public OutputScalarValueReach OutputScalarF_Reach;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public Rectangle2d ScissorRect;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public ChudBlendModeReach BlendModeReach;
+                [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] ReachPadding;
 
                 public enum ChudShaderType : short
                 {
@@ -1091,7 +1134,32 @@ namespace TagTool.Tags.Definitions
                     CortanaComposite,
                     DirectionalDamageApply,
                     ReallySimple,
-                    Unknown // ?? not in H3
+                    Unknown // ?? not in H3 (DamageTrackerDontUse?)
+                }
+
+                public enum ChudShaderTypeReach : sbyte
+                {
+                    ReallySimple,
+                    AntiAlias,
+                    Meter,
+                    TextSimple,
+                    MeterShield,
+                    MeterGradient,
+                    Crosshair,
+                    DirectionalDamage,
+                    Solid,
+                    Sensor,
+                    MeterSingleColor,
+                    Navpoints,
+                    Medal,
+                    TextureCam,
+                    MeterChapter,
+                    MeterDoubleGradient,
+                    MeterRadialGradient,
+                    DistortionAndBlur,
+                    Emblem,
+                    DirectionalDamageApply,
+                    DamageTrackerDontUse
                 }
 
                 public enum ChudBlendMode : short
@@ -1109,6 +1177,28 @@ namespace TagTool.Tags.Definitions
                     InvAlphaBlend,
                     SeparateAlphaBlend,
                     SeparateAlphaBlendAdditive
+                }
+
+                public enum ChudBlendModeReach : short
+                {
+                    Opaque,
+                    Additive,
+                    Multiply,
+                    AlphaBlend,
+                    DoubleMultiply,
+                    PreMultipliedAlpha,
+                    Maximum,
+                    MultiplyAdd,
+                    AddSrcTimesDstAlpha,
+                    AddSrcTimesSrcAlpha,
+                    InvAlphaBlend,
+                    MotionBlurStatic,
+                    MotionBlurInhibit,
+                    ApplyShadowToShadowMask,
+                    AlphaBlendConstant,
+                    OverdrawApply,
+                    WetEffect,
+                    Minimum
                 }
 
                 public enum ChudRenderExternalInputHO : short
@@ -1531,6 +1621,60 @@ namespace TagTool.Tags.Definitions
                     WeaponOutlinePower
                 }
 
+                public enum OutputColorValueReach : short
+                {
+                    LocalA,
+                    LocalB,
+                    LocalC,
+                    LocalD,
+                    ColorAnimationA,
+                    ColorAnimationB,
+                    ScoreboardFriendly,
+                    ScoreboardEnemy,
+                    ArmingMeter,
+                    MetagamePlayer1,
+                    MetagamePlayer2,
+                    MetagamePlayer3,
+                    MetagamePlayer4,
+                    MetagamePlayerColor,
+                    CommendationGameTypeColor,
+                    CommendationCalloutLevelColor,
+                    ScriptedObjectPrimaryColor,
+                    ScriptedObjectSecondaryColor,
+                    PrimaryBackground,
+                    SecondaryBackground,
+                    HighlightForeground,
+                    WarningFlash,
+                    CrosshairNormal,
+                    CrosshairEnemy,
+                    CrosshairFriendly,
+                    NavpointNormal,
+                    NavpointFriendly,
+                    NavpointNeutral,
+                    NavpointEnemy,
+                    NavpointAllyDead,
+                    NavptLaserPointOpen,
+                    NavptLaserPointLocked,
+                    NavptText,
+                    MessageFlashSelf,
+                    MessageFlashFriendly,
+                    MessageFlashEnemy,
+                    MessageFlashNeutral,
+                    InvincibleShield,
+                    NavpointAllyFiring,
+                    NavpointAllyTakingDamage,
+                    NavpointAllySpeaking,
+                    NavpointAllyCoopSpawning,
+                    Custom0,
+                    Custom1,
+                    Custom2,
+                    NeutralTerritory,
+                    FireTeamTriangleClose,
+                    FireTeamTriangleFar,
+                    FireTeamTriangleBorderClose,
+                    FireTeamTriangleBorderFar
+                }
+
                 public enum OutputScalarValue : short
                 {
                     Input,
@@ -1542,81 +1686,48 @@ namespace TagTool.Tags.Definitions
                     FlashAnimation,
                     ScalarAnimationB
                 }
-            }
 
-            [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach)]
-            public class RenderDatumReach : TagStructure
-            {
-                public sbyte ShaderType;
-                [TagField(Length = 3, Flags = Padding)]
-                public byte[] Padding1;
-                public RealArgbColor LocalColorA;
-                public RealArgbColor LocalColorB;
-                public RealArgbColor LocalColorC;
-                public RealArgbColor LocalColorD;
-                public float LocalScalarA;
-                public float LocalScalarB;
-                public float LocalScalarC;
-                public float LocalScalarD;
-                public short OutputColorA;
-                public short OutputColorB;
-                public short OutputColorC;
-                public short OutputColorD;
-                public short OutputColorE;
-                public short OutputColorF;
-                public short OutputScalarA;
-                public short OutputScalarB;
-                public short OutputScalarC;
-                public short OutputScalarD;
-                public short OutputScalarE;
-                public short OutputScalarF;
-                public Rectangle2d ScissorRect;
-                public RenderBlendMode AlphaBlendMode;
-                [TagField(Length = 0x2, Flags = Padding)]
-                public byte[] VMOWELA;
-
-                public enum RenderBlendMode : short
+                public enum OutputScalarValueReach : short
                 {
-                    Opaque,
-                    Additive,
-                    Multiply,
-                    AlphaBlend,
-                    DoubleMultiply,
-                    PreMultipliedAlpha,
-                    Maximum,
-                    MultiplyAdd,
-                    AddSrcTimesDstalpha,
-                    AddSrcTimesSrcalpha,
-                    InverseAlphaBlend,
-                    MotionBlurStatic,
-                    MotionBlurInhibit,
-                    ApplyShadowToShadowMask,
-                    AlphaBlendConstant,
-                    OverdrawApply,
-                    WetEffect,
-                    Minimum
+                    Zero,
+                    One,
+                    Input,
+                    RangeInput,
+                    LocalA,
+                    LocalB,
+                    LocalC,
+                    LocalD,
+                    FlashAnimation,
+                    ScalarAnimationB
                 }
             }
         }
 
         [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3ODST)]
         [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x64, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x60, MinVersion = CacheVersion.HaloReach)]
         public class HudWidget : HudWidgetBase
         {
-            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(ValidTags = new[] { "cprl" }, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public CachedTag ParallaxData;
 
-            [TagField(MinVersion = CacheVersion.HaloReach)]
+            [TagField(ValidTags = new[] { "wdst" }, MinVersion = CacheVersion.HaloReach)]
             public CachedTag DatasourceTemplate;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public DataSourceStruct DataSource;
+            public List<ChudWidgetDatasourceBaseBlock> Datasource;
 
             public List<BitmapWidget> BitmapWidgets;
             public List<TextWidget> TextWidgets;
 
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<ChudWidgetObjectHighlightBlock> ObjectHighlightWidgets;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ReachHudWidgetStruct ReachValues;
+
+
             [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.HaloOnline700123)]
-            [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
+            [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach)]
             public class BitmapWidget : HudWidgetBase
             {
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1625,10 +1736,10 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public WidgetBitmapFlagsH3 FlagsH3;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                [TagField(Version = CacheVersion.Halo3ODST)]
                 public WidgetBitmapFlagsODST FlagsODST;
 
-                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
+                [TagField(Version = CacheVersion.HaloOnlineED)]
                 public WidgetBitmapFlagsHO Flags;
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -1637,7 +1748,9 @@ namespace TagTool.Tags.Definitions
                 [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.Halo3ODST)]
                 public byte[] Padding0;
 
+                [TagField(ValidTags = new[] { "bitm" })]
                 public CachedTag Bitmap;
+
                 public byte BitmapSequenceIndex;
 
                 [TagField(Length = 3, Flags = Padding)]
@@ -1714,43 +1827,35 @@ namespace TagTool.Tags.Definitions
                     None,
                     MirrorHorizontally = 1 << 0,
                     MirrorVertically = 1 << 1,
-                    ExtendBorder = 1 << 2, // stretch edges
-                    UseTextureCam = 1 << 3,
-                    UseWrapSampling = 1 << 4, // looping
-                    SpriteFromPlayerCharacterType = 1 << 5,
-                    SpriteFromSurvivalRounds = 1 << 6,
+                    RemoveTwoPixelPadding = 1 << 2, // stretch edges
+                    ExtendBorder = 1 << 3,
+                    UseTextureCam = 1 << 4, // looping
+                    UseWrapSampling = 1 << 5,
+                    AutoPermute = 1 << 6,
                     AutoPermuteExternalInput0 = 1 << 7,
                     AutoPermuteExternalInput1 = 1 << 8,
                     Player1Emblem = 1 << 9,
                     Player2Emblem = 1 << 10,
                     Player3Emblem = 1 << 11,
                     Player4Emblem = 1 << 12,
-                    ScaleAlphaByColOutA = 1 << 13,
-                    Bit14 = 1 << 14,
-                    Bit15 = 1 << 15,
-                    Bit16 = 1 << 16,
-                    Bit17 = 1 << 17,
-                    Bit18 = 1 << 18,
-                    Bit19 = 1 << 19,
-                    Bit20 = 1 << 20,
-                    Bit21 = 1 << 21,
-                    Bit22 = 1 << 22,
-                    Bit23 = 1 << 23,
-                    Bit24 = 1 << 24,
-                    Bit25 = 1 << 25,
-                    Bit26 = 1 << 26,
-                    Bit27 = 1 << 27,
-                    Bit28 = 1 << 28,
-                    Bit29 = 1 << 29,
-                    Bit30 = 1 << 30,
-                    Bit31 = 1u << 31
+                    EmblemMetagamePlayer = 1 << 13,
+                    ScaleAlphaByColOutA = 1 << 14,
+                    MpObjFt1Emblem = 1 << 15,
+                    MpObjFt2Emblem = 1 << 16,
+                    MpObjFt3Emblem = 1 << 17,
+                    FtMemberEmblem = 1 << 18,
+                    MpObjFt1Weapon = 1 << 19,
+                    MpObjFt2Weapon = 1 << 20,
+                    MpObjFt3Weapon = 1 << 21,
+                    FtMemberWeapon = 1 << 22,
+                    UsesManualBitmapTextureCoordinates = 1 << 23
                 }
             }
 
             [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
             [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original, MaxVersion = CacheVersion.HaloOnline700123)]
-            [TagStructure(Size = 0xC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
             public class TextWidget : HudWidgetBase
             {
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1760,33 +1865,28 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
                 public WidgetTextFlags_H3Original TextFlags_H3Original; // ushort
-
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public WidgetTextFlags_H3MCC TextFlags_H3MCC; // uint
-
-                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public WidgetTextFlags TextFlags; // uint
-
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public ushort FlagsReach; // ushort
+                public WidgetTextFlags_Reach FlagsReach; // ushort
 
                 // fonts
                 [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
                 public WidgetFontValue_H3Original Font_H3; // short
-
                 [TagField(EnumType = typeof(int), MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public WidgetFontValue_H3MCC Font_H3MCC; // int
-
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
                 public WidgetFontValue_ODST Font_ODST; // short
-
+                [TagField(Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+                public WidgetFontValue_ODST Font_ODSTMCC; // short
                 [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public WidgetFontValue Font; // short
-
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public ushort FontReach; // short
+                public WidgetFontValue_Reach FontReach; // short
 
-                [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+                [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public byte[] FontPadding;
 
                 public StringId InputString;
@@ -1870,6 +1970,56 @@ namespace TagTool.Tags.Definitions
                     Bit29 = 1 << 29,
                     Bit30 = 1 << 30,
                 }
+
+                [Flags]
+                public enum WidgetTextFlags_Reach : ushort
+                {
+                    None,
+                    StringIsANumber = 1 << 0,
+                    Force2DigitNumber = 1 << 1,
+                    Force3DigitNumber = 1 << 2,
+                    SuffixWithPlus = 1 << 3,
+                    SuffixWithM = 1 << 4,
+                    Decimal1Digit = 1 << 5,
+                    Decimal2Digits = 1 << 6,
+                    Decimal3Digits = 1 << 7,
+                    Decimal5Digits = 1 << 8,
+                    SuperHugeNumber = 1 << 9,
+                    SuffixWithX = 1 << 10,
+                    WrapWithBrackets = 1 << 11,
+                    FormatAsTime = 1 << 12,
+                    FormatAsHhmmssTime = 1 << 13,
+                    FormatAsBudgetNumber = 1 << 14,
+                    PrefixWithMinus = 1 << 15
+                }
+            }
+
+            [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
+            public class ChudWidgetObjectHighlightBlock : HudWidgetBase
+            {
+                public float IntensityMultiplier;
+            }
+
+            [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach)]
+            public class ReachHudWidgetStruct : TagStructure
+            {
+                public sbyte HiddenStateCacheStartIndex;
+                [TagField(Length = 0x3, Flags = Padding)]
+                public byte[] SFLKJER;
+                public short StateInvertCache;
+                public short StateCache0;
+                public short StateCache1;
+                public short StateCache2;
+                public short StateCache3;
+                public short StateCache4;
+                public short StateCache5;
+                public short StateCache6;
+                public short StateCache7;
+                public short StateCache8;
+                public short StateCache9;
+                public short StateCache10;
+                public short StateCache11;
+                public short StateCache12;
             }
         }
 
@@ -1880,13 +2030,236 @@ namespace TagTool.Tags.Definitions
             public int LowAmmoLoadedThreshold;
             public int LowAmmoReserveThreshold;
             public int LowBatteryThreshold;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public int FtMemberWeaponSequence;
         }
 
-        [TagStructure(Size = 0x0)]
-        public class NullBlock : TagStructure
+        [TagStructure(Size = 0x5C)]
+        public class ReachUpdateCacheBlock : TagStructure
         {
+            public ChudScriptingClassEnum ScriptingClass;
+            public sbyte IntermediateListIndex;
+            public ChudWidgetBaseFlags BaseFlags;
+            public sbyte AnimationExistsFlags;
+            public float InitializingAnimationStateDuration;
+            public float ActiveAnimationStateDuration;
+            public float FlashingAnimationStateDuration;
+            public float ReadyingAnimationStateDuration;
+            public float UnreadyingAnimationStateDuration;
+            public ChudRenderExternalInputEnum ExternalInputA;
+            public ChudRenderExternalInputEnum ExternalInputB;
+            public int StateCacheInvertFlags;
+            public sbyte FlashingStateCacheStartIndex;
+            public sbyte HiddenStateCacheStartIndex;
+            public short StateCache0;
+            public short StateCache1;
+            public short StateCache2;
+            public short StateCache3;
+            public short StateCache4;
+            public short StateCache5;
+            public short StateCache6;
+            public short StateCache7;
+            public short StateCache8;
+            public short StateCache9;
+            public short StateCache10;
+            public short StateCache11;
+            public short StateCache12;
+            public short StateCache13;
+            public short StateCache14;
+            public short StateCache15;
+            public short StateCache16;
+            public short StateCache17;
+            public short StateCache18;
+            public short StateCache19;
+            public short StateCache20;
+            public short StateCache21;
+            public short StateCache22;
+            public short StateCache23;
+            public short StateCache24;
+            public short StateCache25;
+            public short StateCache26;
+            public short StateCache27;
+            public short StateCache28;
+
+            public enum ChudScriptingClassEnum : sbyte
+            {
+                UndefinedUseParent,
+                WeaponStats,
+                Crosshair,
+                Shield,
+                Grenades,
+                Messages,
+                MotionSensor,
+                ChapterTitle,
+                Cinematics
+            }
+
+            [Flags]
+            public enum ChudWidgetBaseFlags : byte
+            {
+                DieOnActive = 1 << 0,
+                SkipInputUpdateWhenUnreadying = 1 << 1,
+                ResetTimerOnInputChange = 1 << 2,
+                InheritSortLayer = 1 << 3,
+                SpecialSavedFilmLayer = 1 << 4,
+                NoCurvatureAndOnTop = 1 << 5
+            }
+
+            public enum ChudRenderExternalInputEnum : short
+            {
+                Zero,
+                One,
+                DatasourceDataIndex,
+                DatasourceRenderSlot,
+                ImpulseValue,
+                DebugSlide1,
+                DebugSlide100,
+                HsObjectFunction1,
+                HsObjectFunction2,
+                HsObjectFunction3,
+                HsObjectFunction4,
+                ScriptedHsVariable1,
+                ScriptedHsVariable2,
+                ScriptedHsVariable3,
+                ScriptedHsVariable4,
+                ScriptedHsVariable5,
+                ScriptedHsVariable6,
+                ScriptedHsVariable7,
+                ScriptedHsVariable8,
+                ScriptedHsVariable9,
+                ScriptedHsVariable10,
+                VehicleHealth,
+                VehicleHealthPercentage,
+                UnshieldedVitality,
+                UnshieldedRecentDamage,
+                ShieldAmount,
+                ShieldAmount2,
+                ShieldAmount3,
+                ShieldAmount4,
+                ShieldRecentDamage,
+                ShieldRecentDamage2,
+                ShieldRecentDamage3,
+                ShieldRecentDamage4,
+                ShieldPercentage,
+                VehicleShieldPercentage,
+                VehicleBoostMeter,
+                VehicleBoostRecharge,
+                CameraYaw,
+                CameraPitch,
+                CameraRoll,
+                MotionSensorRange,
+                AltitudeF,
+                AltitudeFraction,
+                GameHeat,
+                OutOfBoundsTimer,
+                TransientCookies,
+                TotalCookies,
+                WeaponAmmoLoaded,
+                WeaponAmmoReserve,
+                WeaponAmmoPickup,
+                WeaponHeat,
+                WeaponHeatPercentage,
+                WeaponBattery,
+                WeaponPickup,
+                WeaponAutoaimScale,
+                WeaponBarrelErrorScale,
+                WeaponBarrelPinnedErrorScale,
+                WeaponAutoaimTarget,
+                WeaponAutoaimTargetDistance,
+                AirstrikeDistanceToTarget,
+                AirstrikeWarmupTime,
+                AirstrikeLaunchesLeft,
+                AirstrikeLaunchState,
+                GrenadeSelected,
+                GrenadeCount,
+                GrenadePickup,
+                WeaponCharge,
+                WeaponReloadPercentage,
+                BarrelRecoveryPercentage,
+                WeaponTetherPercentage,
+                LockingAmount,
+                FlavaTgtDistance,
+                FlavaTgtElevation,
+                EquipmentEnergy,
+                EquipmentEnergyMinimumActivationEnergy,
+                PlayerDistance,
+                MedalSequenceIndex,
+                ProgressionToastCurrentProgress,
+                ProgressionToastGoal,
+                ProgressionToastSequenceIndex,
+                CommendationCalloutSequenceIndex,
+                ScriptedObjectHealth,
+                ScriptedObjectRecentBodyDamage,
+                ScriptedObjectRecentShieldDamage,
+                ScriptedObjectDistance, // meters
+                ScriptedObjectElevation, // meters
+                ScriptedObjectCombatStatus,
+                ScriptedObjectPriorityOnscreenSequenceIndex,
+                ScriptedObjectPriorityOffscreenSequenceIndex,
+                LicensePlateIconIndex,
+                LicensePlateDesignatorIconIndex,
+                MetagameTime,
+                MetagameTransientScore,
+                MetagameP1Score,
+                MetagameP2Score,
+                MetagameP3Score,
+                MetagameP4Score,
+                MetagamePlayerScore,
+                MetagameTimeMultiplier,
+                MetagameSkullDiffMult,
+                MetagameTotalMultiplier,
+                MetagameNegTransScore,
+                SurvivalModeSet,
+                SurvivalModeRound,
+                SurvivalModeWave,
+                SurvivalModeLives,
+                SurvivalModeEnemyLives,
+                SurvivalModeBonusRoundTimer,
+                SurvivalModeBonusRoundPoints,
+                EnemyPlayerKills,
+                SBFriendlyScore,
+                SBEnemyScore,
+                SBMaxScore,
+                ArmingMeterFrac,
+                MegaloEngineIconIndex,
+                MegaloOmniWidgetMeterValue,
+                MegaloOmniWidgetAugmentationIconSequenceIndex,
+                MegaloProgressBarMeterValue,
+                CampaignFtShield,
+                CampaignFtPossibleActionObjDist, // meters
+                CampaignFtPendingTargetObjDist, // meters
+                CampaignFtCurrentTargetObjDist, // meters
+                MpObjFt1Shield,
+                MpObjFt2Shield,
+                MpObjFt3Shield,
+                MpObjFt1Meter,
+                MpObjFt2Meter,
+                MpObjFt3Meter,
+                MpObjFt1Yaw,
+                MpObjFt2Yaw,
+                MpObjFt3Yaw,
+                MpObjFt1DamageYaw,
+                MpObjFt2DamageYaw,
+                MpObjFt3DamageYaw,
+                FtMemberShield,
+                FtMemberMeter,
+                FtMemberYaw,
+                FtMemberDamageYaw,
+                BudgetFraction,
+                BudgetLeft,
+                SFTotalTime,
+                SFMarkerTime,
+                SFChapWidth,
+                SFBufferedTheta,
+                SFCurrPosTheta,
+                SFRecordStartTheta,
+                SFPieFraction,
+                NetworkLatency,
+                NetworkLatencyQuality,
+                NetworkHostQuality,
+                NetworkLocalQuality
+            }
         }
 
         public enum ChudScriptingClass : short
@@ -2108,86 +2481,458 @@ namespace TagTool.Tags.Definitions
             NetworkLocalQuality
         }
 
-        [TagStructure(Size = 0x1C)]
-        public class DataSourceStruct : TagStructure
+        [TagStructure(Size = 0x20)]
+        public class ChudWidgetDatasourceBaseBlock : TagStructure
         {
-            [TagField(ValidTags = new[] { "wdst" })]
-            public CachedTag DatasourceTemplate;
-            public List<ChudWidgetDatasourceBaseBlock> Datasource;
+            public ChudDatasourceFlags Flags;
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            public byte[] SVHELRNN;
+            public ChudDatasourceTypeEnum Type;
+            public short RenderMaximum;
+            public List<ChudDatasourceResolutionBlock> Resolutions;
+            public List<ChudDatasourcePositionBlock> Positions; // As offsets from the previous one
 
-            [TagStructure(Size = 0x20)]
-            public class ChudWidgetDatasourceBaseBlock : TagStructure
+            [Flags]
+            public enum ChudDatasourceFlags : byte
             {
-                public ChudDatasourceFlags Flags;
-                [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
-                public byte[] SVHELRNN;
-                public ChudDatasourceTypeEnum Type;
+                Extend = 1 << 0, // Use the final datasource position offset over and over
+                Center = 1 << 1, // Center the elements around the first position using the second position as the offset between them
+                EvenlySpace = 1 << 2, // Evenly space elements between the first two positions
+                Reverse = 1 << 3 // Iterate over the datasource in reverse order
+            }
+
+            public enum ChudDatasourceTypeEnum : short
+            {
+                Grenades,
+                Players,
+                MetagamePlayers,
+                FireteamMembers,
+                CampaignFireteamMembers,
+                Medals,
+                ProgressionToasts,
+                ScriptedObjects,
+                Skulls,
+                TrackingObjects, // projectiles tracking the current player
+                OmniWidgetsTopLeft,
+                OmniWidgetsTopCenter,
+                OmniWidgetsTopRight,
+                OmniWidgetsHighLeft,
+                OmniWidgetsHighCenter,
+                OmniWidgetsHighRight,
+                OmniWidgetsLowLeft,
+                OmniWidgetsLowCenter,
+                OmniWidgetsLowRight,
+                OmniWidgetsBottomLeft,
+                OmniWidgetsBottomCenter,
+                OmniWidgetsBottomRight
+            }
+
+            [TagStructure(Size = 0x4)]
+            public class ChudDatasourceResolutionBlock : TagStructure
+            {
+                public ChudCurvatureResFlags ResFlags;
+                [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
+                public byte[] ASFYUIHHIER;
                 public short RenderMaximum;
-                public List<ChudDatasourceResolutionBlock> Resolutions;
-                public List<ChudDatasourcePositionBlock> Positions; // As offsets from the previous one
 
                 [Flags]
-                public enum ChudDatasourceFlags : byte
+                public enum ChudCurvatureResFlags : byte
                 {
-                    Extend = 1 << 0, // Use the final datasource position offset over and over
-                    Center = 1 << 1, // Center the elements around the first position using the second position as the offset between them
-                    EvenlySpace = 1 << 2, // Evenly space elements between the first two positions
-                    Reverse = 1 << 3 // Iterate over the datasource in reverse order
+                    FullscreenWide = 1 << 0,
+                    FullscreenStandard = 1 << 1,
+                    Halfscreen = 1 << 2,
+                    QuarterscreenWide = 1 << 3,
+                    QuarterscreenStandard = 1 << 4
                 }
+            }
 
-                public enum ChudDatasourceTypeEnum : short
-                {
-                    Grenades,
-                    Players,
-                    MetagamePlayers,
-                    FireteamMembers,
-                    CampaignFireteamMembers,
-                    Medals,
-                    ProgressionToasts,
-                    ScriptedObjects,
-                    Skulls,
-                    TrackingObjects, // projectiles tracking the current player
-                    OmniWidgetsTopLeft,
-                    OmniWidgetsTopCenter,
-                    OmniWidgetsTopRight,
-                    OmniWidgetsHighLeft,
-                    OmniWidgetsHighCenter,
-                    OmniWidgetsHighRight,
-                    OmniWidgetsLowLeft,
-                    OmniWidgetsLowCenter,
-                    OmniWidgetsLowRight,
-                    OmniWidgetsBottomLeft,
-                    OmniWidgetsBottomCenter,
-                    OmniWidgetsBottomRight
-                }
-
-                [TagStructure(Size = 0x4)]
-                public class ChudDatasourceResolutionBlock : TagStructure
-                {
-                    public ChudCurvatureResFlags ResFlags;
-                    [TagField(Length = 0x1, Flags = TagFieldFlags.Padding)]
-                    public byte[] ASFYUIHHIER;
-                    public short RenderMaximum;
-
-                    [Flags]
-                    public enum ChudCurvatureResFlags : byte
-                    {
-                        FullscreenWide = 1 << 0,
-                        FullscreenStandard = 1 << 1,
-                        Halfscreen = 1 << 2,
-                        QuarterscreenWide = 1 << 3,
-                        QuarterscreenStandard = 1 << 4
-                    }
-                }
-
-                [TagStructure(Size = 0x10)]
-                public class ChudDatasourcePositionBlock : TagStructure
-                {
-                    public RealPoint2d OriginOffset;
-                    public RealPoint2d WidgetScale;
-                }
+            [TagStructure(Size = 0x10)]
+            public class ChudDatasourcePositionBlock : TagStructure
+            {
+                public RealPoint2d OriginOffset;
+                public RealPoint2d WidgetScale;
             }
         }
 
+        [TagStructure(Size = 0xC)]
+        public class ChudWidgetStateAndBlock : TagStructure
+        {
+            public List<ChudWidgetStateOrBlock> Or;
+
+            [TagStructure(Size = 0x8)]
+            public class ChudWidgetStateOrBlock : TagStructure
+            {
+                public ChudWidgetStateFlags Flags;
+                [TagField(Length = 0x3, Flags = Padding)]
+                public byte[] ReachPadding;
+                public ChudStateEnumReach Condition;
+
+                [Flags]
+                public enum ChudWidgetStateFlags : byte
+                {
+                    InvertCondition = 1 << 0 // Check if the condition is false
+                }
+
+                
+            }
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class ChudWidgetStateEditorBlock : TagStructure
+        {
+            public ChudWidgetStateFlags Flags;
+            public ChudWidgetStateEditorDataTypeEnum Type;
+            public ChudStateEnumReach Condition;
+            public short Parent;
+            public short FirstChild;
+            public short NextSibling;
+            [TagField(Length = 0x2, Flags = Padding)]
+            public byte[] XJZPOOP;
+
+            [Flags]
+            public enum ChudWidgetStateFlags : uint
+            {
+                InvertCondition = 1 << 0 // Check if the condition is false
+            }
+
+            public enum ChudWidgetStateEditorDataTypeEnum : int
+            {
+                State,
+                And,
+                Or
+            }
+        }
+
+        public enum ChudStateEnumReach : int
+        {
+            FlagDeletedFromCode,
+            WideFull,
+            StandardFull,
+            WideHalf,
+            WideQuarter,
+            StandardQuarter,
+            TextureCamAvailable,
+            ChudStateDebugFlag,
+            HsVariable1Active,
+            HsVariable2Active,
+            HsVariable3Active,
+            HsVariable4Active,
+            HsVariable5Active,
+            HsVariable6Active,
+            HsVariable7Active,
+            HsVariable8Active,
+            HsVariable9Active,
+            HsVariable10Active,
+            HsScreenTrainingActive,
+            HsScreenObjectiveActive,
+            HsScreenChapterTitleActive,
+            Spartan,
+            Elite,
+            Monitor,
+            FirstPersonCamera,
+            ThirdPersonCamera,
+            HealthMinorDamage,
+            HealthMediumDamage,
+            HealthHeavyDamage,
+            ShieldsMinorDamage,
+            ShieldsMediumDamage,
+            ShieldsHeavyDamage,
+            HasShields,
+            HasOvershieldLevel1,
+            HasOvershieldLevel2,
+            HasOvershieldLevel3,
+            PlayerTrainingAvailable,
+            HasMinimap,
+            SensorRange10m,
+            SensorRange25m,
+            SensorRange75m,
+            SensorRange150m,
+            Unarmed,
+            IsSingleWielding,
+            IsDualWielding,
+            HasSupportWeapon,
+            InSabre,
+            MotionTrackerEnabled,
+            MotionTrackerDisabled,
+            BinocularsActive,
+            BinocularsNotActive,
+            EquipmentActive,
+            EquipmentInactive,
+            EquipmentDisabledByPlayerTraits,
+            EquipmentReachedMinimumActivationEnergy,
+            LasingEnabled,
+            LasingDisabled,
+            PlayerIsFiring,
+            PlayerIsTalking,
+            PlayerIsBroadcasting,
+            VoiceNo,
+            VoiceBanned,
+            VoiceRadio,
+            VoiceRadioBrdcst,
+            VoiceOpen,
+            VoiceOpenBrdcst,
+            InSpace,
+            AirstrikeEnabled,
+            AirstrikeIsOffscreen,
+            GhostTargetAvailable,
+            HologramTargetAvailable,
+            AirstrikeTargetAvailable,
+            TargetTrackingAvailable,
+            TrackedTargetIsOffscreen,
+            HeatIsOnFire,
+            HeatIsOnBetrayalPenalty,
+            _3dMotionSensorEnabled,
+            OutOfBounds,
+            VtolAltitudeLocked,
+            MissileLocked,
+            MissileTracking,
+            MissileLockedReallyClose,
+            BackpackWeaponUnavailable,
+            Zoomed,
+            Unzoomed,
+            ZoomLvl1,
+            ZoomLvl2,
+            ZoomChanging0To1,
+            ZoomChanging1To2,
+            ZoomChanging1To0,
+            ZoomChanging2To0,
+            SniperFlavaAvailable,
+            GrenadesUnusable,
+            GrenadeSelected,
+            GrenadeUnselected,
+            GrenadePickup,
+            GrenadeEmpty,
+            WeaponIsRightHand,
+            WeaponIsLeftHand,
+            WeaponIsBackpacked,
+            CrosshairNormal,
+            CrosshairFriendly,
+            CrosshairEnemy,
+            CrosshairEnemyHeadshot,
+            CrosshairEnemyWeakpoint,
+            CrosshairInvincible,
+            PlasmaTrack,
+            AmmoLoadedLow,
+            AmmoLoadedEmpty,
+            AmmoReserveLow,
+            AmmoReserveEmpty,
+            BatteryLow,
+            BatteryEmpty,
+            Overheating,
+            LockingOnAvailable,
+            LockAvailable,
+            LockUnavailable,
+            LockedOnAvailable,
+            LockedOnUnavailable,
+            AmmoPickup,
+            SkullActive,
+            SkullIsPrimary,
+            SkullIsSecondary,
+            SkullIsCustom,
+            FireteamCommandModeAvailable,
+            FireteamPossibleActionObjectValid,
+            FireteamPendingActionObjectValid,
+            FireteamCurrentTargetObjectValid,
+            FireteamPossibleActionObjectOffscreen,
+            FireteamPendingActionObjectOffscreen,
+            FireteamCurrentTargetObjectOffscreen,
+            FireteamPendingDirectiveUnitValid,
+            FireteamCurrentDirectiveUnitValid,
+            FireteamPendingDirectiveUnitOffscreen,
+            FireteamCurrentDirectiveUnitOffscreen,
+            CampaignFireteamRegroupEnabled,
+            CampaignFireteamSlot1Open,
+            CampaignFireteamSlot2Open,
+            CampaignFireteamSlot3Open,
+            CampaignFireteamSlot4Open,
+            CampaignFireteamSlot5Open,
+            CampaignFtMemberActive,
+            CampaignFtMemberSlotOpen,
+            CampaignFtMemberDirectiveGiven,
+            CampaignFtMemberDirectiveComplete,
+            CampaignFtMemberHealthCritical,
+            CampaignFtMemberDead,
+            CampaignFtMemberSpeaking,
+            MedalValid,
+            ProgressionToastActive,
+            ProgressionToastLevelClear,
+            ProgressionToastLevelSteel,
+            ProgressionToastLevelBronze,
+            ProgressionToastLevelSilver,
+            ProgressionToastLevelGold,
+            ProgressionToastLevelOnyx,
+            ProgressionToastLevelMax,
+            PlayerActive,
+            PlayerAlive,
+            PlayerIsMe,
+            PlayerOnSameTeamFireteam,
+            PlayerIsEnemy,
+            PlayerSpeaking,
+            PlayerInLineOfSight,
+            PlayerTakingDamage,
+            PlayerIsShooting,
+            PlayerHasBeenSpotted,
+            PlayerIsBeingSpawnedOn,
+            PlayerOffscreen,
+            WatermarkCompassOn,
+            CommendationCalloutActive,
+            CommendationCalloutLevelSteel,
+            CommendationCalloutLevelBronze,
+            CommendationCalloutLevelSilver,
+            CommendationCalloutLevelGold,
+            CommendationCalloutLevelOnyx,
+            CommendationCalloutLevelMax,
+            TransientCookiesAvailable,
+            CampaignSolo,
+            CampaignCoop,
+            CampaignSurvival,
+            DifficultyEasy,
+            DifficultyNormal,
+            DifficultyHeroic,
+            DifficultyLegendary,
+            CampaignObjectiveAvailable,
+            MetagamePlayerActive,
+            MetagamePlayerTalking,
+            MetagameP1Talking,
+            MetagameP2Enabled,
+            MetagameP2Talking,
+            MetagameP3Enabled,
+            MetagameP3Talking,
+            MetagameP4Enabled,
+            MetagameP4Talking,
+            TransientScoreAvail,
+            MetagameMultikillAvail,
+            MetagameNegScoreAvail,
+            MetagameFfaScoring,
+            MetagameTeamScoring,
+            ScriptedObjectValid,
+            ScriptedObjectAlive,
+            ScriptedObjectOffscreen,
+            ScriptedObjectTakenRecentBodyDamage,
+            ScriptedObjectTakenRecentShieldDamage,
+            ScriptedObjectPriority0,
+            ScriptedObjectPriority1,
+            ScriptedObjectPriority2,
+            ScriptedObjectPriority3,
+            ScriptedObjectPriority4,
+            ScriptedObjectPriority5,
+            ScriptedObjectPriority6,
+            ScriptedObjectPriority7,
+            ScriptedObjectPriority8,
+            ScriptedObjectPriority9,
+            ScriptedObjectPriority10,
+            ScriptedObjectPriority11,
+            ScriptedObjectPriority12,
+            ScriptedObjectPriority13,
+            ScriptedObjectPriority14,
+            ScriptedObjectPriority15,
+            ScriptedObjectPriority16,
+            ScriptedObjectPriority17,
+            ScriptedObjectPriority18,
+            ScriptedObjectPriority19,
+            ScriptedObjectPriority20,
+            ScriptedObjectPriority21,
+            ScriptedObjectPriority22,
+            ScriptedObjectPriority23,
+            ScriptedObjectPriority24,
+            ScriptedObjectPriority25,
+            ScriptedObjectPriority26,
+            ScriptedObjectPriority27,
+            ScriptedObjectPriority28,
+            ScriptedObjectPriority29,
+            SurvivalWave0,
+            SurvivalWave1,
+            SurvivalWave2,
+            SurvivalWave3,
+            SurvivalWave4,
+            SurvivalWave5,
+            SurvivalWave6,
+            SurvivalWave7,
+            SurvivalWave8,
+            SurvivalWave9,
+            SurvivalRound0,
+            SurvivalRound1,
+            SurvivalRound2,
+            SurvivalRound3,
+            SurvivalRound4,
+            SurvivalRound5,
+            SurvivalRound6,
+            SurvivalRound7,
+            SurvivalRound8,
+            SurvivalRound9,
+            SurvivalLivesInfinite,
+            SurvivalLives0,
+            SurvivalLives1,
+            SurvivalLives2,
+            SurvivalLives3,
+            SurvivalLives4,
+            SurvivalLives5,
+            SurvivalBonusRound,
+            MultiFfa,
+            MultiTeam,
+            MpSandbox,
+            MpMegalo,
+            Offense,
+            Defense,
+            GameHasNoTeams,
+            PlayerIsSpecial,
+            PlayerSpecialAndDefense,
+            FriendlyScoreAvailable,
+            EnemyScoreAvailable,
+            VariantNameAvailable,
+            VariantObjectiveAvailable,
+            VariantObjectiveDesignatorAvailable,
+            TalkingPlayerAvailable,
+            ArmingMeterAvailable,
+            TimeLeftAvailable,
+            FriendlyPosession,
+            EnemyPosession,
+            VariantCustomA,
+            VariantCustomB,
+            VariantCustomC,
+            VariantCustomD,
+            VariantCustomE,
+            VariantCustomF,
+            RoundStartPeriod,
+            TestEnabled,
+            MegaloOmniWidgetAvailable,
+            MegaloOmniWidgetLabelStringAvailable,
+            MegaloOmniWidgetValueStringAvailable,
+            MegaloOmniWidgetMeterAvailable,
+            MegaloOmniWidgetIconAvailable,
+            MegaloProgressBarAvailable,
+            LastManStanding,
+            TeammateAttemptingToSpawn,
+            StatusReadyToSpawn,
+            StatusWaitingToSpawn,
+            StatusEnemyTerritory,
+            StatusTeammateDamage,
+            StatusEnemyNearby,
+            StatusProjectiles,
+            FtMember1,
+            FtMember2,
+            FtMember3,
+            FtMemberIsMember1,
+            FtMemberIsMember2,
+            FtMemberIsMember3,
+            FtMemberExists,
+            FtMemberAlive,
+            FtMemberIdle,
+            FtMemberArming,
+            FtMemberDisarming,
+            FtMemberDead,
+            FtMemberBuying,
+            FtMemberTakingDamage,
+            FtMemberShieldEmpty,
+            BudgetAvailable,
+            DefaultCrosshair,
+            ActiveCrosshair,
+            ManipulationCrosshair,
+            NotAllowedCrosshair,
+            ForgeScreenOpen,
+            FilmPlayback,
+            SavedFilmRecordingMode,
+            SavedFilmNormalMode
+        }
     }
 }

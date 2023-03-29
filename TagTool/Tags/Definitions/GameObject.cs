@@ -8,7 +8,8 @@ using TagTool.Tags.Definitions.Common;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "object", Tag = "obje", Size = 0xF8, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "object", Tag = "obje", Size = 0x104, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "object", Tag = "obje", Size = 0x104, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "object", Tag = "obje", Size = 0x114, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x120, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x178, MinVersion = CacheVersion.HaloReach)]
     public class GameObject : TagStructure
@@ -70,7 +71,7 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "foot" })]
         public CachedTag MaterialEffects;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "arms" }, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ArmorSounds;
 
         [TagField(ValidTags = new[] { "snd!", "scmb" })]
@@ -118,6 +119,9 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<PathfindingSphere> PathfindingSpheres;
+
+        [TagField(Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+        public CachedTag SimulationInterpolationODSTMCC;
 
         public enum LightmapShadowModeValue : short
         {
@@ -423,7 +427,10 @@ namespace TagTool.Tags.Definitions
 
             public StringId BoundaryCenterMarker;
             public StringId SpawnedObjectMarkerName;
+
+            [TagField(ValidTags = new[] { "obje" })]
             public CachedTag SpawnedObject;
+
             public StringId NyiBoundaryMaterial;
 
             [TagField(Length = (int)MultiplayerObjectBoundaryShape.Count)]
@@ -478,7 +485,9 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x20)]
             public class BoundaryShader : TagStructure
             {
+                [TagField(ValidTags = new[] { "rm  " })]
                 public CachedTag StandardShader;
+                [TagField(ValidTags = new[] { "rm  " })]
                 public CachedTag OpaqueShader;
             }
         }

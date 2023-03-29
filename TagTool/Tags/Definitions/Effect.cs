@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Damage;
+using static TagTool.Tags.Definitions.Gen4.BreakableSurface.ParticleSystemDefinitionBlockNew.ParticleSystemEmitterDefinitionBlock.GpuPropertyFunctionColorStruct;
 
 namespace TagTool.Tags.Definitions
 {
@@ -28,6 +29,8 @@ namespace TagTool.Tags.Definitions
 
         public short LoopStartEvent;
         public short LocalLocation0;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float RuntimeDangerRadius;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -37,13 +40,16 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x1, Flags = Padding)]
         public byte[] PaddingReach;
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float RuntimeDangerRadiusReach;
+
         public List<Location> Locations;
         public List<Event> Events;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<LoopingSounds> LoopingSoundBlock;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "lsnd" }, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag LoopingSound;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public sbyte LocationIndex;
@@ -136,7 +142,7 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(ValidTags = new[] { "beam", "char", "cmoe", "cntl", "cpem", "decs", "drdf",
                 "gldf", "jpt!", "lens", "ligh", "ltvl", "obje", "rwrd", "sefc", "shit", "snd!" })]
-                public CachedTag Type;
+                public CachedTag Type; // 020_base: effe | sandbox.map: hlmt
 
                 public Bounds<float> VelocityBounds;
                 public RealEulerAngles2d VelocityOrientation;
@@ -197,7 +203,9 @@ namespace TagTool.Tags.Definitions
                 [TagField(Length = 3, Flags = Padding)]
                 public byte[] Padding0;
 
+                [TagField(ValidTags = new[] { "prt3" })]
                 public CachedTag Particle;
+
                 public uint LocationIndex;
                 public ParticleCoordinateSystem CoordinateSystem;
                 public EffectEnvironment Environment;
@@ -282,10 +290,12 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0x2F0, MaxVersion = CacheVersion.Halo3Retail)]
-                [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-                [TagStructure(Size = 0x330, MinVersion = CacheVersion.HaloReach)]
+                [TagStructure(Size = 0x300, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+                [TagStructure(Size = 0x2EC, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
+                [TagStructure(Size = 0x330, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+                [TagStructure(Size = 0x31C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
                 public class Emitter : TagStructure
-				{
+                {
                     public StringId Name;
 
                     public EmissionShapeValue EmissionShape;
@@ -300,10 +310,10 @@ namespace TagTool.Tags.Definitions
                     [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x3, Flags = Padding)]
                     public byte[] Padding0;
 
-                    [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                    [TagField(ValidTags = new[] { "pecp" }, MinVersion = CacheVersion.Halo3ODST)]
                     public CachedTag CustomShape;
 
-                    [TagField(MinVersion = CacheVersion.HaloReach)]
+                    [TagField(ValidTags = new[] { "ebhd" }, MinVersion = CacheVersion.HaloReach)]
                     public CachedTag BoatHull;
 
                     public float BoundingRadiusEstimate;
@@ -336,7 +346,6 @@ namespace TagTool.Tags.Definitions
                     /// </summary>
                     [TagField(Format = "Degrees")]
                     public ParticlePropertyScalar EmissionAngle;
-
 
                     public ParticlePropertyScalar EmissionAxisAngle;
 
@@ -443,16 +452,16 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x38)]
-					public class TranslationalOffsetData : TagStructure
-					{
+                    public class TranslationalOffsetData : TagStructure
+                    {
                         public ParticlePropertyScalar Mapping;
                         public RealPoint3d StartingInterpolant;
                         public RealPoint3d EndingInterpolant;
                     }
 
                     [TagStructure(Size = 0x38)]
-					public class RelativeDirectionData : TagStructure
-					{
+                    public class RelativeDirectionData : TagStructure
+                    {
                         public ParticlePropertyScalar Mapping;
                         public RealEulerAngles3d DirectionAt0;
                         public RealEulerAngles3d DirectionAt1;
@@ -460,8 +469,9 @@ namespace TagTool.Tags.Definitions
 
                     [TagStructure(Size = 0x20, MaxVersion = CacheVersion.HaloOnline700123)]
                     [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
-					public class ParticleMovementData : TagStructure
-					{
+                    public class ParticleMovementData : TagStructure
+                    {
+                        [TagField(ValidTags = new[] { "pmov" })]
                         public CachedTag Template;
 
                         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -518,7 +528,7 @@ namespace TagTool.Tags.Definitions
 
                         [TagStructure(Size = 0x18)]
                         public class Movement : TagStructure
-						{
+                        {
                             public TypeValue Tyoe;
                             public FlagsValue Flags;
 
@@ -550,7 +560,7 @@ namespace TagTool.Tags.Definitions
 
                             [TagStructure(Size = 0x24)]
                             public class Parameter : TagStructure
-							{
+                            {
                                 public int ParameterId;
                                 public ParticlePropertyScalar Property;
                             }
@@ -558,22 +568,39 @@ namespace TagTool.Tags.Definitions
                     }
 
                     [TagStructure(Size = 0x38)]
-					public class ParticleSelfAccelerationData : TagStructure
-					{
+                    public class ParticleSelfAccelerationData : TagStructure
+                    {
                         public ParticlePropertyScalar Mapping;
                         public RealVector3d StartingInterpolant;
                         public RealVector3d EndingInterpolant;
                     }
 
-                    [TagStructure(Size = 0x30)]
+                    [TagStructure(Size = 0x30, Platform = CachePlatform.Original)]
+                    [TagStructure(Size = 0x30, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
+                    [TagStructure(Size = 0x1C, Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
                     public class RuntimeMGpuData : TagStructure
                     {
                         public ParticleProperties ConstantPerParticleProperties;
                         public ParticleProperties ConstantOverTimeProperties;
                         public ParticlePropertyScalar.ParticleStatesFlags UsedParticleStates;
+
+                        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
+                        public int StructuredScenarioInteropIndex;
+
+                        [TagField(Platform = CachePlatform.Original)]
+                        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
                         public List<Property> Properties; // 13 blocks (predefined usage, see Property.PropertyType)
+
+                        [TagField(Platform = CachePlatform.Original)]
+                        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
                         public List<Function> Functions; // indexed in Properties
+
+                        [TagField(Platform = CachePlatform.Original)]
+                        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
                         public List<GpuColor> Colors; // indexed in Properties
+
+                        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
+                        public List<ODSTMCCMGpuBlock> RuntimeGpuBlocks; // contains the above blocks in ODSTMCC
 
                         [TagStructure(Size = 0x10)]
                         public class Property : TagStructure
@@ -797,6 +824,15 @@ namespace TagTool.Tags.Definitions
                             ParticleTint = 1 << 15,
                             ParticleAlpha = 1 << 16,
                             ParticleAlphaBlackPoint = 1 << 17
+                        }
+
+                        [TagStructure(Size = 0x24)]
+                        public class ODSTMCCMGpuBlock : TagStructure
+                        {
+                            public List<Property> Properties;
+                            public List<Function> Functions;
+                            public List<GpuColor> Colors;
+
                         }
                     }
                 }

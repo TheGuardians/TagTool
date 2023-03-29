@@ -17,17 +17,20 @@ namespace TagTool.Tags.Definitions
         [TagField(Flags = Padding, Length = 8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused1;
 
-        [TagStructure(Size = 0x17C, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x1C8, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x17C, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x1C8, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x17C, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x168, Platform = CachePlatform.MCC, Version = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x1B4, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+
         public class LightVolumeDefinitionBlock : TagStructure
 		{
             public StringId LightVolumeName;
-
             public RenderMethod RenderMethod;
-
             public ushort AppearanceFlags;
+
             [TagField(Length = 2, Flags = Padding)]
-            public byte[] Padd0;
+            public byte[] Padding0;
 
             /// <summary>
             /// Average brightness head-on/side-view.

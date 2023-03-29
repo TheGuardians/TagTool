@@ -3,6 +3,7 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace TagTool.Tags.Definitions
 {
@@ -17,7 +18,7 @@ namespace TagTool.Tags.Definitions
         public DefaultTeamValue DefaultTeam; // short
         public ConstantSoundVolumeValue ConstantSoundVolume; // short
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(ValidTags = new[] { "bipd", "vehi" }, MinVersion = CacheVersion.HaloOnlineED)]
         public CachedTag HologramUnit;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -26,7 +27,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<UnitScreenEffectBlock> ScreenEffects;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "effe" }, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag IntegratedLightToggle;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public Angle CameraFieldOfView; // degrees
@@ -102,7 +103,10 @@ namespace TagTool.Tags.Definitions
 
         public float FeignDeathChance; // [0,1]
         public float FeignRepeatChance; // [0,1]
+
+        [TagField(ValidTags = new[] { "char" })]
         public CachedTag SpawnedTurretCharacter; // automatically created character when this unit is driven
+
         public Bounds<short> SpawnedActorCountBounds; // number of actors which we spawn
         public float SpawnedVelocity; // velocity at which we throw spawned actors
 
@@ -123,29 +127,35 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public GlobalMeleeClassEnum MeleeDamageClass;
-        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
+        [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x2, Flags = Padding)]
         public byte[] Padding1;
 
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag MeleeDamage;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(ValidTags = new[] { "jpt!" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag NativeMeleeOverride;
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag BoardingMeleeDamage;
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag BoardingMeleeResponse;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(ValidTags = new[] { "jpt!" }, MinVersion = CacheVersion.Halo3Retail)]
         public CachedTag EvictionMeleeDamage;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(ValidTags = new[] { "jpt!" }, MinVersion = CacheVersion.Halo3Retail)]
         public CachedTag EvictionMeleeResponse;
 
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag LandingMeleeDamage;
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag FlurryMeleeDamage;
+        [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag ObstacleSmashMeleeDamage;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "jpt!" }, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag ShieldPopDamage;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(ValidTags = new[] { "jpt!" }, MinVersion = CacheVersion.HaloOnlineED)]
         public CachedTag AssassinationDamage;
 
         public MotionSensorBlipSizeValue MotionSensorBlipSize; // short
@@ -196,7 +206,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
         public float EmpRadius;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(ValidTags = new[] { "effe" }, MinVersion = CacheVersion.Halo3Retail)]
         public CachedTag EmpEffect;
 
         public BoostBlock Boost;
@@ -204,10 +214,10 @@ namespace TagTool.Tags.Definitions
         public float LipsyncAttackWeight;
         public float LipsyncDecayWeight;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(ValidTags = new[] { "jpt!" }, MinVersion = CacheVersion.Halo3Retail)]
         public CachedTag DetachDamage;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(ValidTags = new[] { "weap" }, MinVersion = CacheVersion.Halo3Retail)]
         public CachedTag DetachedWeapon;
 
         [Flags]
@@ -291,6 +301,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
         public class BoostBlock : TagStructure
         {
+            [TagField(ValidTags = new[] { "cddf" })]
             public CachedTag BoostCollisionDamage;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public BoostFlagsValue BoostFlags;
@@ -411,7 +422,7 @@ namespace TagTool.Tags.Definitions
 
             public StringId CameraMarkerName;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public StringId CameraSubmergedMarkerName;
+            public StringId CameraSubmergedMarker;
 
             public Angle PitchAutoLevel;
             public Bounds<Angle> PitchRange;
@@ -488,6 +499,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class UnitCameraTrack : TagStructure
         {
+            [TagField(ValidTags = new[] { "trak" })]
             public CachedTag Track;
         }
 
@@ -583,6 +595,8 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class HudInterface : TagStructure
 		{
+            [TagField(ValidTags = new[] { "nhdt" }, MaxVersion = CacheVersion.Halo2Vista)]
+            [TagField(ValidTags = new[] { "chdt" }, MinVersion = CacheVersion.Halo3Retail)]
             public CachedTag UnitHudInterface;
         }
 
@@ -617,6 +631,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
         public class UnitWeapon : TagStructure
 		{
+            [TagField(ValidTags = new string[] { "weap" })]
             public CachedTag Weapon;
         }
 
@@ -627,7 +642,9 @@ namespace TagTool.Tags.Definitions
             public float AcquireTime;
             public float GraceTime;
             public float DecayTime;
+            [TagField(ValidTags = new[] { "scmb", "sndo", "lsnd", "snd!" })]
             public CachedTag TrackingSound;
+            [TagField(ValidTags = new[] { "scmb", "sndo", "lsnd", "snd!" })]
             public CachedTag LockedSound;
 
             [TagStructure(Size = 0x4, MinVersion = CacheVersion.Halo3Retail)]

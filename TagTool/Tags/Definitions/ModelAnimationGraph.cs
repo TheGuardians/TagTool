@@ -12,6 +12,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "model_animation_graph", Tag = "jmad", Size = 0x1B8, MinVersion = CacheVersion.HaloReach)]
     public class ModelAnimationGraph : TagStructure
 	{
+        [TagField(ValidTags = new[] { "jmad" })]
         public CachedTag ParentAnimationGraph;
         public AnimationInheritanceFlags InheritanceFlags;
         public AnimationPrivateFlags PrivateFlags;
@@ -36,7 +37,7 @@ namespace TagTool.Tags.Definitions
         public List<BlendScreen> BlendScreens;       
         public List<FootMarkersBlock> FootMarkers;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(ValidTags = new[] { "frms" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag FrameEvents;
 
         public List<Animation> Animations;
@@ -192,6 +193,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class AnimationTagReference : TagStructure
 		{
+            [TagField(ValidTags = new[] { "effe", "scmb", "snd!" })]
             public CachedTag Reference;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -279,7 +281,7 @@ namespace TagTool.Tags.Definitions
             public sbyte BlendScreenReach;
             [TagField(MinVersion = CacheVersion.HaloReach, Length = 0x1, Flags = Padding)]
             public byte[] PaddingReach;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
+            [TagField(ValidTags = new[] { "jmad" }, MinVersion = CacheVersion.HaloReach)]
             public CachedTag GraphReference;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short SharedAnimationIndex;
@@ -820,6 +822,7 @@ namespace TagTool.Tags.Definitions
                         public class OtherParticipant : TagStructure
 						{
                             public ParticipantFlags Flags;
+                            [TagField(ValidTags = new[] { "unit", "scen" })]
                             public CachedTag ObjectType;
 
                             public enum ParticipantFlags : int
@@ -907,6 +910,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class Inheritance : TagStructure
 		{
+            [TagField(ValidTags = new[] { "jmad" })]
             public CachedTag InheritedGraph;
             public List<NodeMapBlock> NodeMap;
             public List<NodeMapFlag> NodeMapFlags;

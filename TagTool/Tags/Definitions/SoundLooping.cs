@@ -155,11 +155,16 @@ namespace TagTool.Tags.Definitions
 			[TagField(Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Length = 2)]
 			public byte[] Padding2;
 			
-			public CachedTag In;
-			public CachedTag Loop;
-			public CachedTag Out;
-			public CachedTag AlternateLoop;
-			public CachedTag AlternateOut;
+			[TagField(ValidTags = new [] { "snd!" })]
+            public CachedTag In;
+			[TagField(ValidTags = new [] { "snd!" })]
+            public CachedTag Loop;
+			[TagField(ValidTags = new [] { "snd!" })]
+            public CachedTag Out;
+			[TagField(ValidTags = new [] { "snd!" })]
+            public CachedTag AlternateLoop;
+            [TagField(ValidTags = new [] { "snd!" })]
+            public CachedTag AlternateOut;
 
 			[TagField(MaxVersion = CacheVersion.HaloOnline700123)]
 			public OutputEffectValue OutputEffect;
@@ -167,8 +172,10 @@ namespace TagTool.Tags.Definitions
 			[TagField(Length = 2, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
 			public byte[] Padding3;
 
-			public CachedTag AlternateTransitionIn;
-			public CachedTag AlternateTransitionOut;
+            [TagField(ValidTags = new[] { "snd!" })]
+            public CachedTag AlternateTransitionIn;
+            [TagField(ValidTags = new[] { "snd!" })]
+            public CachedTag AlternateTransitionOut;
 
 			[TagField(MinVersion = CacheVersion.HaloReach)]
 			public float FadeInDurationReach; // seconds
@@ -274,7 +281,9 @@ namespace TagTool.Tags.Definitions
 		public class DetailSound : TagStructure
 		{
 			public StringId Name;
-			public CachedTag Sound;
+
+            [TagField(ValidTags = new[] { "snd!" })]
+            public CachedTag Sound;
 
 			[TagField(MinVersion = CacheVersion.HaloReach)]
 			public PeriodTypeReach PeriodType;

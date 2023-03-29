@@ -30,6 +30,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x10)]
         public class ScreenWidget : TagStructure
 		{
+            [TagField(ValidTags = new[] { "scn3" })]
             public CachedTag Widget;
         }
     }

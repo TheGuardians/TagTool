@@ -444,16 +444,16 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x1C)]
         public class NodeEdge : TagStructure
 		{
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public short NodeAGlobalMaterialIndex;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public short NodeBGlobalMaterialIndex;
             public short NodeA;
             public short NodeB;
             public List<Constraint> Constraints;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId NodeAMaterial;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId NodeBMaterial;
 
             [TagStructure(Size = 0x24)]
@@ -506,7 +506,7 @@ namespace TagTool.Tags.Definitions
 		[TagStructure(Size = 0x90, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Beta, Platform = CachePlatform.Original)]
 		[TagStructure(Size = 0xB0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0xC0, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)] 
-        [TagStructure(Size = 0xC0, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0xC0, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0xD0, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class RigidBody : TagStructure
 		{
@@ -559,13 +559,14 @@ namespace TagTool.Tags.Definitions
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public short ShapeIndex;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0x4, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+            [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
             public uint RuntimeShapePointerPad;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public float Mass;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0xC, Platform = CachePlatform.MCC)]
+            [TagField(Flags = Padding, Length = 0xC, 
+                Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
             public byte[] Pad6 = new byte[0xC];
 
             public RealVector3d CenterOfMass;
@@ -576,27 +577,42 @@ namespace TagTool.Tags.Definitions
             public float InertiaTensorYRadius;
             public RealVector3d InertiaTensorZ;
             public float InertiaTensorZRadius;
-            public uint RuntimeHavokGroupMask;
+
+            public uint CollisionGroupMask;
+
+            [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+            public uint ReachUnknownMCC;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public BlamShapeType ShapeType_Reach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public short ShapeIndex_Reach;
+
+            [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+            public uint RuntimeShapePointerReachMCC;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float Mass_Reach;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public uint Unknown10;
+
             public float BoundingSpherePad;
             public byte CollisionQualityOverrideType;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 1)]
+            [TagField(Flags = Padding, Length = 1)]
             public byte[] Pad3 = new byte[1];
 
             public short RuntimeFlags;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public float MassBodyOverride;
-            [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 8)]
-            public byte[] Pad4 = new byte[8];
+            [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 8)]
+            public byte[] PaddingReach = new byte[8];
+            
+            [TagField(Flags = Padding, Length = 8,
+                MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+            public byte[] PaddingReachMCC = new byte[8];
 
             [Flags]
             public enum RigidBodyFlags : short
@@ -609,14 +625,14 @@ namespace TagTool.Tags.Definitions
                 BestEarlyMoverBody = 1 << 4, //if you have either of the early mover flags set in the object definitoin this body will be choosen as the one to make every thing local to, otherwise I pick :-
                 HasNoPhantomPowerVersion = 1 << 5, //don't check this flag without talking to eamon
                 InfiniteInertiaTensor = 1 << 6, //rigid body will never have angular velocity
-                bit7 = 1 << 7,
+                Bit7 = 1 << 7,
                 IgnoresGravity = 1 << 8,
-                bit9 = 1 << 9,
-                bit10 = 1 << 10,
-                bit11 = 1 << 11,
-                bit12 = 1 << 12,
-                bit13 = 1 << 13,
-                bit14 = 1 << 14
+                Bit9 = 1 << 9,
+                Bit10 = 1 << 10,
+                Bit11 = 1 << 11,
+                Bit12 = 1 << 12,
+                Bit13 = 1 << 13,
+                Bit14 = 1 << 14
             }
 
             public enum MotionTypeValue : short
@@ -655,9 +671,9 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public byte Flags;
-            [TagField(MinVersion = CacheVersion.HaloReach, Flags = TagFieldFlags.Padding, Length = 3)]
+            [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 3)]
             public byte[] Pad4 = new byte[3];
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            [TagField(Flags = GlobalMaterial)]
             public StringId MaterialName;
             public short PhantomType;
             public byte ProxyCollisionGroup;
@@ -669,12 +685,19 @@ namespace TagTool.Tags.Definitions
         public class HavokShapeBase : TagStructure
         {
             public PlatformUnsignedValue FieldPointerSkip;
+
             public short Size;
             public short Count;
+
+            [TagField(Flags = Padding, Length = 4, Platform = CachePlatform.MCC)]
+            public byte[] Padding0;
+
             public PlatformUnsignedValue Userdata;
             public int ShapeType;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
+
+            [TagField(Flags = Padding, Length = 4, Platform = CachePlatform.MCC)]
             public byte[] Padding1;
+
             public float Radius;
         }
 
@@ -704,14 +727,18 @@ namespace TagTool.Tags.Definitions
         public class Shape : TagStructure
 		{
             public StringId Name;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public short MaterialIndex;
+
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public byte MaterialIndexReach;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public MaterialFlags MaterialFlags;
-            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+
+            [TagField(Flags = GlobalMaterial)]
             public short RuntimeMaterialType;
+
             public float RelativeMassScale;
             public float Friction;
             public float Restitution;
@@ -723,14 +750,27 @@ namespace TagTool.Tags.Definitions
 
             public HavokShapeBase ShapeBase;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0xC)]
+            [TagField(Flags = Padding, Length = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
             public byte[] Pad = new byte[0xC];
+
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+            public float ReachUnknownMCC0;
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+            public float ReachUnknownMCC1;
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+            public float ReachUnknownMCC2;
         }
 
         [TagStructure(Size = 0x30, Align = 0x10, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x50, Align = 0x10, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x50, Align = 0x10, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x60, Align = 0x10, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
         public class Sphere : Shape
         {
+            [TagField(Length = 16, Flags = Padding,
+                Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+            public byte[] ReachPaddingMCC;
+
             // translate shape
             public HavokShapeBase ConvexBase;
             public PlatformUnsignedValue FieldPointerSkip;
@@ -828,7 +868,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x50, Align = 0x10, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x60, Align = 0x10, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x60, Align = 0x10, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x70, Align = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x90, Align = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class List : TagStructure
@@ -842,9 +882,9 @@ namespace TagTool.Tags.Definitions
             public PlatformUnsignedValue FieldPointerSkip0;
             public byte DisableWelding;
             public byte CollectionType;
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0x2)]
+            [TagField(Flags = Padding, Length = 0x2)]
             public byte[] Pad0 = new byte[0x2];
-            [TagField(Flags = TagFieldFlags.Padding, Length = 4, Platform = CachePlatform.MCC)]
+            [TagField(Flags = Padding, Length = 4, Platform = CachePlatform.MCC)]
             public byte[] Padding3;
 
             // Child info array (Points to "ListShapes" block at runtime)
@@ -882,10 +922,14 @@ namespace TagTool.Tags.Definitions
 		{
             public Havok.HavokShapeReference Shape;
             public uint CollisionFilter;
-            public uint ShapeSize;
+            public float ShapeSize;
             public uint NumChildShapes;
-            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
-            public byte[] Padding1;
+            [TagField(Platform = CachePlatform.MCC)]
+            public uint MCCUnknown0;
+            [TagField(Platform = CachePlatform.MCC)]
+            public uint MCCUnknown1;
+            [TagField(Platform = CachePlatform.MCC)]
+            public uint MCCUnknown2;
         }
 
         [TagStructure(Size = 0x78, Align = 0x10)]
@@ -1004,7 +1048,7 @@ namespace TagTool.Tags.Definitions
             public RealVector3d BUp;
             public RealPoint3d BPosition;
             public short EdgeIndex;
-            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            [TagField(Length = 2, Flags = Padding)]
             public byte[] H;
         }
 
@@ -1017,8 +1061,8 @@ namespace TagTool.Tags.Definitions
             public BlamShapeType ShapeType;
             public short ShapeIndex;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0x4, Platform = CachePlatform.MCC)]
-            public byte[] Padding;
+            [TagField(Platform = CachePlatform.MCC)]
+            public uint RuntimeShapePointerPad;
 
             public PlatformUnsignedValue Unknown4;
             public PlatformUnsignedValue Unknown5;

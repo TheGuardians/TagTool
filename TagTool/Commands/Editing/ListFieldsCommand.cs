@@ -60,7 +60,10 @@ namespace TagTool.Commands.Editing
 
                             if (valueToken != null)
                             {
-                                var value = tagFieldInfo.GetValue(Value).ToString();
+                                var value = tagFieldInfo.GetValue(Value)?.ToString();
+
+                                if (value == null)
+                                    value = "null";
 
                                 if (valueToken.StartsWith("!"))
                                     matchFound = (value != valueToken.Substring(1));

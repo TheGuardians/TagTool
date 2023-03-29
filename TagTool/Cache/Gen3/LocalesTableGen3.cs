@@ -42,6 +42,9 @@ namespace TagTool.Cache.Gen3
                 if (baseMapFile.CachePlatform == CachePlatform.MCC && baseMapFile.Version <= CacheVersion.Halo3ODST)
                     localeBlock = matg.LanguagePacksMCC[languageIndex];
 
+                if (baseMapFile.CachePlatform == CachePlatform.MCC && baseMapFile.Version >= CacheVersion.HaloReach)
+                    localeBlock = matg.LanguagePacksReachMCC[languageIndex];
+
                 if (localeBlock.StringCount == 0)
                     continue;
 

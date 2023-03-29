@@ -58,7 +58,22 @@ namespace TagTool.Tags.Definitions.Common
 		MainMenuFont            // Agency,   23pt
 	}
 
-	public enum WidgetFontValue_H3Original : short
+    public enum WidgetFontValue_ODSTMCC : short
+    {
+        FullscreenHudMessage,
+        SplitScreenHudMessage,
+        Terminal,
+        BodyText,
+        Title,
+        SuperLarge,
+        LargeBodyText,
+        EnglishBodyText,
+        HudNumberText,
+        SubtitleFont,
+        MainMenuFont  
+    }
+
+    public enum WidgetFontValue_H3Original : short
 	{
 		Terminal,               // FixedSys 9 (terminal)
 		BodyText,               // Conduit 16 (button_key)
@@ -87,4 +102,19 @@ namespace TagTool.Tags.Definitions.Common
 		SubtitleFont,           // Conduit 16
 		MainMenuFont            // Pragmata 14
 	}
+
+    public enum WidgetFontValue_Reach : short
+    {
+        Terminal,
+        BodyText,
+        Title,
+        SuperLargeFont,
+        LargeBodyText,
+        SplitScreenHudMessage,
+        FullScreenHudMessage,
+        EnglishBodyText,
+        HudNumber,
+        SubtitleFont,
+        MainMenuFont
+    }
 }

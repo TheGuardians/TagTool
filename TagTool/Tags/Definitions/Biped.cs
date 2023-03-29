@@ -10,7 +10,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "biped", Tag = "bipd", Size = 0x1D4, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "biped", Tag = "bipd", Size = 0x21C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "biped", Tag = "bipd", Size = 0x240, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "biped", Tag = "bipd", Size = 0x2B0, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "biped", Tag = "bipd", Size = 0x2B0, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "biped", Tag = "bipd", Size = 0x2BC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class Biped : Unit
     {
         public Angle MovingTurningSpeed;
@@ -33,6 +34,13 @@ namespace TagTool.Tags.Definitions
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<UnitTrickDefinitionBlock> Tricks;
+
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        public float ReachMCCUnknown0;
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        public float ReachMCCUnknown1;
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        public float ReachMCCUnknown2;
 
         public float MaximumSoftLandingTime; // the longest amount of time the biped can take to recover from a soft landing (seconds)
         public float MinimumHardLandingTime; // the longest amount of time the biped can take to recover from a hard landing (seconds)
@@ -111,6 +119,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float HeadshotAccelerationScale; // when the biped ragdolls from a headshot it acceleartes based on this value.  0 defaults to the standard acceleration scale
 
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag AreaDamageEffect;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -155,8 +164,12 @@ namespace TagTool.Tags.Definitions
         public CharacterPhysicsFlyingStruct BipedFlyingPhysics;
 
         public List<ContactPoint> ContactPoints; // these are the points where the biped touches the ground
+
+        [TagField(ValidTags = new[] { "char" })]
         public CachedTag ReanimationCharacter; // when the flood reanimate this guy, he turns into a ...
+        [TagField(ValidTags = new[] { "mffn" })]
         public CachedTag ReanimationMorphMuffins; // the kind of muffins I create to cover my horrible transformation
+        [TagField(ValidTags = new[] { "char" })]
         public CachedTag DeathSpawnCharacter; // when I die, out of the ashes of my death crawls a ...
         public short DeathSpawnCount;
 

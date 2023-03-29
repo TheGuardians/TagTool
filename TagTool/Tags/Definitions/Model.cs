@@ -1,8 +1,10 @@
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Damage;
+using static TagTool.Tags.Definitions.Gen4.Model;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
@@ -19,7 +21,7 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "jmad" })] public CachedTag Animation;
         [TagField(ValidTags = new[] { "phmo" })] public CachedTag PhysicsModel;
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
+        [TagField(ValidTags = new[] { "impo" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag ImpostorModel;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public int ModelChecksum;
@@ -33,22 +35,22 @@ namespace TagTool.Tags.Definitions
         public float InstanceDisappearDistance;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short ImposterQuality; //TODO: verify definition
+        public ImposterQualityDefinition ImposterQuality;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public short ImposterPolicy; //TODO: verify definition
+        public ImposterPolicyDefinition ImposterPolicy;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float DecalReduceToL1SuperLow;
+        public float ImposterBrightnessAdjustment;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float DecalReduceToL2Low;
+        public float InstanceDisappearDistanceReach;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float DecalReduceToL3Medium;
+        public float MidrangeDetailDisappearDistance;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float DecalReduceToL4High;
+        public float CloseDetailDisappearDistance;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public float DecalReduceToL5SuperHigh;
+        public float TessellationMaxDrawDistance;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "mode" }, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag LodModel;
 
         public List<Variant> Variants;
@@ -118,13 +120,15 @@ namespace TagTool.Tags.Definitions
         public List<ShadowCastOverride> ShadowCastOverrides;
         public List<ShadowReceiveOverride> ShadowReceiveOverrides;
         public List<OcclusionSphere> OcclusionSpheres;
-       
+
+        [TagField(ValidTags = new[] { "shit" })]
         public CachedTag ShieldImpactThirdPerson;
+        [TagField(ValidTags = new[] { "shit" })]
         public CachedTag ShieldImpactFirstPerson;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "shit" }, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag OvershieldThirdPerson;
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "shit" }, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag OvershieldFirstPerson;
 
         //Reach has the model object data block inlined here
@@ -157,6 +161,20 @@ namespace TagTool.Tags.Definitions
             OneBounce,
             TwoBounces,
             ThreeBounces
+        }
+
+        public enum ImposterQualityDefinition : short
+        {
+            Default,
+            High,
+            Super
+        }
+
+        public enum ImposterPolicyDefinition : short
+        {
+            Default,
+            Never,
+            Always
         }
 
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3Retail)]
