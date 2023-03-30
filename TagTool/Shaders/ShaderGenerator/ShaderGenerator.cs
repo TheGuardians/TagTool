@@ -219,17 +219,28 @@ namespace TagTool.Shaders.ShaderGenerator
         {
             var pixl = new PixelShader {EntryPointShaders = new List<ShortOffsetCountBlock>(), Shaders = new List<PixelShaderBlock>() };
 
+            Dictionary<Task<ShaderGeneratorResult>, int> tasks = new Dictionary<Task<ShaderGeneratorResult>, int>(); // <task, entry point>
+
+
             foreach (ShaderStage entryPoint in Enum.GetValues(typeof(ShaderStage)))
             {
                 var entryBlock = new ShortOffsetCountBlock();
                 pixl.EntryPointShaders.Add(entryBlock);
-                if(generator.IsEntryPointSupported(entryPoint) && !generator.IsPixelShaderShared(entryPoint))
+
+                if (generator.IsEntryPointSupported(entryPoint) && !generator.IsPixelShaderShared(entryPoint))
                 {
-                    entryBlock.Count = 1;
-                    entryBlock.Offset = (byte)pixl.Shaders.Count;
-                    var result = generator.GeneratePixelShader(entryPoint);
-                    pixl.Shaders.Add(GeneratePixelShaderBlock(cache, result));
+                    Task<ShaderGeneratorResult> generatorTask = Task.Run(() => { return generator.GeneratePixelShader(entryPoint); });
+                    tasks.Add(generatorTask, (int)entryPoint);
                 }
+            }
+
+            Task.WaitAll(tasks.Keys.ToArray());
+
+            foreach (var task in tasks)
+            {
+                pixl.EntryPointShaders[task.Value].Count = 1;
+                pixl.EntryPointShaders[task.Value].Offset = (byte)pixl.Shaders.Count;
+                pixl.Shaders.Add(GeneratePixelShaderBlock(cache, task.Key.Result));
             }
             return pixl;
         }
