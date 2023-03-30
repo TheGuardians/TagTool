@@ -427,7 +427,12 @@ namespace TagTool.Serialization
                         invalid = false;
 
                 if (invalid)
-                    new TagToolWarning($"ERROR: Tag reference with invalid group found during serialization: {referencedTag.Name}.{referencedTag.Group.Tag}");
+                {
+                    var groups = string.Join(", ", valueInfo.ValidTags);
+                    new TagToolWarning($"Tag reference with invalid group found during deserialization:"
+                        + $"\n - {referencedTag.Name}.{referencedTag.Group.Tag}"
+                        + $"\n - valid groups: {groups}");
+                }
             }
 
             block.AddTagReference(referencedTag, valueInfo == null ? false : valueInfo.Flags.HasFlag(Short));

@@ -604,13 +604,13 @@ namespace TagTool.Tags.Definitions
             [TagField(Length = 3, Flags = Padding)]
             public byte[] Padding1;
 
-            [TagField(ValidTags = new[] { "proj" })]
+            [TagField(ValidTags = new[] { "obje" })]
             public CachedTag Projectile;
-            [TagField(ValidTags = new[] { "proj" })]
+            [TagField(ValidTags = new[] { "obje" })]
             public CachedTag SecondaryProjectile;
             [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag DamageEffect;
-            [TagField(ValidTags = new[] { "bloc", "jpt!" })]
+            [TagField(ValidTags = new[] { "obje" })]
             public CachedTag CrateProjectile;
             public float CrateProjectileSpeed;
 
