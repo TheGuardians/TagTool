@@ -604,10 +604,14 @@ namespace TagTool.Tags.Definitions
             [TagField(Length = 3, Flags = Padding)]
             public byte[] Padding1;
 
-            [TagField(ValidTags = new[] { "proj" })] public CachedTag Projectile;
-            [TagField(ValidTags = new[] { "proj" })] public CachedTag SecondaryProjectile;
-            [TagField(ValidTags = new[] { "jpt!" })] public CachedTag DamageEffect;
-            [TagField(ValidTags = new[] { "bloc" })] public CachedTag CrateProjectile;
+            [TagField(ValidTags = new[] { "proj" })]
+            public CachedTag Projectile;
+            [TagField(ValidTags = new[] { "proj" })]
+            public CachedTag SecondaryProjectile;
+            [TagField(ValidTags = new[] { "jpt!" })]
+            public CachedTag DamageEffect;
+            [TagField(ValidTags = new[] { "bloc", "jpt!" })]
+            public CachedTag CrateProjectile;
             public float CrateProjectileSpeed;
 
             // seconds for the ejection port to transition from 1.0 (open) to 0.0 (closed) after firing

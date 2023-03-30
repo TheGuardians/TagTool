@@ -1752,7 +1752,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x34, MinVersion = CacheVersion.HaloReach)]
         public class SoundSceneryInstance : ScenarioInstance
         {
-            public int VolumeType;
+            public SoundSceneryVolumeType VolumeType;
             public float Height;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public Bounds<float> OverrideDistance;
@@ -1760,6 +1760,13 @@ namespace TagTool.Tags.Definitions
             public float OverrideOuterConeGain;
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public SoundDistanceParameters DistanceParameters;
+
+            public enum SoundSceneryVolumeType : int
+            {
+                Sphere,
+                VerticalCylinder,
+                Pill
+            }
         }
 
         [TagStructure(Size = 0x18)]

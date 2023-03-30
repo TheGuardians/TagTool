@@ -369,6 +369,14 @@ namespace TagTool.Commands.Porting
                 //scenario.SoundScenery.Clear();
                 //scenario.SoundSceneryPalette.Clear();
 
+                foreach (var ssceInstance in scenario.SoundScenery)
+                {
+                    ssceInstance.OverrideDistance = new Bounds<float> { 
+                        Lower = ssceInstance.DistanceParameters.DontPlayDistance, 
+                        Upper = ssceInstance.DistanceParameters.MaximumDistance
+                    };
+                }
+
                 scenario.Flocks.Clear();
                 scenario.FlockPalette.Clear();
                 scenario.Creatures.Clear();
@@ -1602,6 +1610,11 @@ namespace TagTool.Commands.Porting
                             case "ffa_only":
                             case "team_only":
                             case "hh_drop_point":
+                            case "rally":
+                            case "rally_flag":
+                            case "race_flag":
+                            case "race_spawn":
+                            case "as_spawn":
                             case "none":
                                 break;
                             default:

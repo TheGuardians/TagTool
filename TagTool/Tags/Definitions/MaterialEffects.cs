@@ -14,45 +14,17 @@ namespace TagTool.Tags.Definitions
         public class Effect : TagStructure
 		{
             public List<OldMaterialEffectBlock> OldMaterials;
-            public List<SoundReference> Sounds;
-            public List<EffectReference> Effects;
+            public List<EffectBlock> Sounds;
+            public List<EffectBlock> Effects;
 
             [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3ODST)]
-            public class SoundReference : TagStructure
+            public class EffectBlock : TagStructure
 			{
-                [TagField(ValidTags = new[] { "scmb", "snd!", "lsnd" })]
-                public CachedTag Sound;
-                [TagField(ValidTags = new[] { "scmb", "snd!", "lsnd" })]
-                public CachedTag SecondarySound;
-                [TagField(Flags = GlobalMaterial)]
-                public StringId MaterialName;
-                [TagField(Flags = GlobalMaterial)]
-                public short RuntimeMaterialIndex; // formerly GlobalMaterialIndex
-                public SweetenerModeValue SweetenerMode;
-
-                [TagField(Flags = Padding, Length = 1)]
-                public byte[] Unused;
-
-                [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public float MaxVisibilityDistance;
-
-                public enum SweetenerModeValue : sbyte
-                {
-                    Default,
-                    Enabled,
-                    Disabled
-                }
-            }
-
-            [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3ODST)]
-            public class EffectReference : TagStructure
-            {
-                [TagField(ValidTags = new[] { "snd!", "lsnd", "effe" })]
-                public CachedTag EffectOrSound;
-                [TagField(ValidTags = new[] { "snd!", "lsnd", "effe" })]
-                public CachedTag Sound;
+                [TagField(ValidTags = new[] { "scmb", "snd!", "lsnd", "effe" })]
+                public CachedTag Primary;
+                [TagField(ValidTags = new[] { "scmb", "snd!", "lsnd", "effe" })]
+                public CachedTag Secondary;
                 [TagField(Flags = GlobalMaterial)]
                 public StringId MaterialName;
                 [TagField(Flags = GlobalMaterial)]
