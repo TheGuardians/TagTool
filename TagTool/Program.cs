@@ -148,7 +148,7 @@ namespace TagTool.Commands
                     commandRunner.RunCommand(line);
             }
 
-            Console.WriteLine("\nEnter \"help\" to list available commands. Enter \"exit\" to quit.");
+            Console.WriteLine("\nEnter \"help\" to list available commands. Enter \"quit\" to quit.");
             while (!commandRunner.EOF)
             {
                 // Read and parse a command
