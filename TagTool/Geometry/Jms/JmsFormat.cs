@@ -32,6 +32,10 @@ namespace TagTool.Geometry.Jms
         public List<JmsCapsule> Capsules = new List<JmsCapsule>();
         private uint ConvexShapeCount;
         public List<JmsConvexShape> ConvexShapes = new List<JmsConvexShape>();
+        private uint RagdollCount;
+        public List<JmsRagdoll> Ragdolls = new List<JmsRagdoll>();
+        private uint HingeCount;
+        public List<JmsHinge> Hinges = new List<JmsHinge>();
         private uint SkylightCount;
         public List<JmsSkylight> Skylights = new List<JmsSkylight>();
 
@@ -215,9 +219,8 @@ namespace TagTool.Geometry.Jms
                     stream.WriteLine();
                 }
 
-                //leave unpopulated for now
                 stream.WriteLine(";### RAGDOLLS ###");
-                stream.WriteLine(0);
+                stream.WriteLine(Ragdolls.Count);
                 stream.WriteLine(";\t<name>");
                 stream.WriteLine(";\t<attached index>");
                 stream.WriteLine(";\t<referenced index>");
@@ -231,10 +234,15 @@ namespace TagTool.Geometry.Jms
                 stream.WriteLine(";\t<max plane>");
                 stream.WriteLine(";\t<friction limit>");
                 stream.WriteLine();
+                for (var ragdollindex = 0; ragdollindex < Ragdolls.Count; ragdollindex++)
+                {
+                    stream.WriteLine($";RAGDOLL {ragdollindex}");
+                    Ragdolls[ragdollindex].Write(stream);
+                    stream.WriteLine();
+                }
 
-                //leave unpopulated for now
                 stream.WriteLine(";### HINGES ###");
-                stream.WriteLine(0);
+                stream.WriteLine(Hinges.Count);
                 stream.WriteLine(";\t<name>");
                 stream.WriteLine(";\t<body A index>");
                 stream.WriteLine(";\t<body B index>");
@@ -245,6 +253,12 @@ namespace TagTool.Geometry.Jms
                 stream.WriteLine(";\t<min angle>");
                 stream.WriteLine(";\t<max angle");
                 stream.WriteLine();
+                for (var hingeindex = 0; hingeindex < Hinges.Count; hingeindex++)
+                {
+                    stream.WriteLine($";HINGE {hingeindex}");
+                    Hinges[hingeindex].Write(stream);
+                    stream.WriteLine();
+                }
 
                 //leave unpopulated for now
                 stream.WriteLine(";### CAR_WHEEL ###");
@@ -610,6 +624,78 @@ namespace TagTool.Geometry.Jms
                 stream.WriteLine(ShapeVertexCount);
                 foreach(var shapevert in ShapeVertices)
                     WritePoint3d(shapevert, stream);
+            }
+        }
+
+        public class JmsRagdoll : JmsElement
+        {
+            public string Name = "default";
+            public int AttachedIndex = -1;
+            public int ReferencedIndex = -1;
+            public RealQuaternion AttachedTransformOrientation = new RealQuaternion(0, 0, 0, 0);
+            public RealVector3d AttachedTransformPosition = new RealVector3d(0, 0, 0);
+            public RealQuaternion ReferenceTransformOrientation = new RealQuaternion(0, 0, 0, 0);
+            public RealVector3d ReferenceTransformPosition = new RealVector3d(0, 0, 0);
+            public float MinTwist;
+            public float MaxTwist;
+            public float MinCone;
+            public float MaxCone;
+            public float MinPlane;
+            public float MaxPlane;
+            public float FrictionLimit;
+            public void Read(StreamReader stream)
+            {
+            }
+
+            public void Write(StreamWriter stream)
+            {
+                stream.WriteLine(Name);
+                stream.WriteLine(AttachedIndex);
+                stream.WriteLine(ReferencedIndex);
+                WriteQuaternion(AttachedTransformOrientation, stream);
+                WriteVector3d(AttachedTransformPosition, stream);
+                WriteQuaternion(ReferenceTransformOrientation, stream);
+                WriteVector3d(ReferenceTransformPosition, stream);
+                WriteFloat(MinTwist, stream);
+                WriteFloat(MaxTwist, stream);
+                WriteFloat(MinCone, stream);
+                WriteFloat(MaxCone, stream); 
+                WriteFloat(MinPlane, stream);
+                WriteFloat(MaxPlane, stream);
+                WriteFloat(FrictionLimit, stream);
+            }
+        }
+
+        public class JmsHinge : JmsElement
+        {
+            public string Name = "default";
+            public int BodyAIndex = -1;
+            public int BodyBIndex = -1;
+            public RealQuaternion BodyATransformOrientation = new RealQuaternion(0, 0, 0, 0);
+            public RealVector3d BodyATransformPosition = new RealVector3d(0, 0, 0);
+            public RealQuaternion BodyBTransformOrientation = new RealQuaternion(0, 0, 0, 0);
+            public RealVector3d BodyBTransformPosition = new RealVector3d(0, 0, 0);
+            public int IsLimited;
+            public float FrictionLimit;
+            public float MinAngle;
+            public float MaxAngle;
+            public void Read(StreamReader stream)
+            {
+            }
+
+            public void Write(StreamWriter stream)
+            {
+                stream.WriteLine(Name);
+                stream.WriteLine(BodyAIndex);
+                stream.WriteLine(BodyBIndex);
+                WriteQuaternion(BodyATransformOrientation, stream);
+                WriteVector3d(BodyATransformPosition, stream);
+                WriteQuaternion(BodyBTransformOrientation, stream);
+                WriteVector3d(BodyBTransformPosition, stream);
+                stream.WriteLine(IsLimited);
+                WriteFloat(FrictionLimit, stream);
+                WriteFloat(MinAngle, stream);
+                WriteFloat(MaxAngle, stream);
             }
         }
 
