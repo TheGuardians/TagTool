@@ -1,4 +1,5 @@
 ﻿using System;
+using TagTool.Commands.Common;
 using TagTool.Tags;
 
 namespace TagTool.Cache.Monolithic
@@ -80,7 +81,10 @@ namespace TagTool.Cache.Monolithic
                         ReadBlocks(chunkReader);
                         break;
                     case "stv2":
-                        ReadStructs(chunkReader);
+                        ReadStructs(chunkReader, false);
+                        break;
+                    case "stv4":
+                        ReadStructs(chunkReader, true);
                         break;
                     case "arr!":
                         ReadArrays(chunkReader);
@@ -90,6 +94,9 @@ namespace TagTool.Cache.Monolithic
                         break;
                     case "]==[":
                         ReadInteropDefinitions(chunkReader);
+                        break;
+                    default:
+                        new TagToolWarning($"Unknown chunk signature \"{chunk.Header.Signature}\" found!");
                         break;
                 }
             }
@@ -130,11 +137,11 @@ namespace TagTool.Cache.Monolithic
                 Blocks[i] = new TagPersistBlockDefinition(chunkReader);
         }
 
-        private void ReadStructs(PersistChunkReader chunkReader)
+        private void ReadStructs(PersistChunkReader chunkReader, bool isSTV4)
         {
             Structs = new TagPersistStructDefinition[LayoutHeader.StructCount];
             for (int i = 0; i < Structs.Length; i++)
-                Structs[i] = new TagPersistStructDefinition(chunkReader);
+                Structs[i] = new TagPersistStructDefinition(chunkReader, isSTV4);
         }
 
         private void ReadArrays(PersistChunkReader chunkReader)
@@ -234,11 +241,14 @@ namespace TagTool.Cache.Monolithic
             public int NameOffset;
             public int FirstFieldIndex;
 
-            public TagPersistStructDefinition(PersistChunkReader reader)
+            public TagPersistStructDefinition(PersistChunkReader reader, bool isSTV4)
             {
                 UniqueId = new Guid(reader.ReadBytes(16));
                 NameOffset = reader.ReadInt32();
                 FirstFieldIndex = reader.ReadInt32();
+                //STV4 chunks have an extra field
+                if (isSTV4)
+                    reader.ReadInt32();
             }
         }
 
