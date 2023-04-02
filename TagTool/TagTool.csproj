@@ -397,6 +397,8 @@
     <Compile Include="Commands\Bitmaps\ReencodeBitmapCommand.cs" />
     <Compile Include="Commands\Forge\AddForgeItemCommand.cs" />
     <Compile Include="Commands\Forge\AddForgeCategoryCommand.cs" />
+    <Compile Include="Commands\Gen4\Models\ModelContextFactory.cs" />
+    <Compile Include="Commands\Gen4\Models\ExportJMSCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\SetAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExportJMSCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\GenerateStructureSurfacesCommand.cs" />

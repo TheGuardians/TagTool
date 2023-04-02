@@ -72,10 +72,10 @@ namespace TagTool.Commands.Porting.Gen4
             switch (definition)
             {
                 case CollisionModelGen4 collisionModel:
-                    definition = ConvertCollisionModel(tag, collisionModel);
+                    definition = CollisionModelConverter.Convert(Gen4Cache, collisionModel);
                     break;
                 case PhysicsModelGen4 physicsModel:
-                    definition = ConvertPhysicsModel(tag, physicsModel);
+                    definition = PhysicsModelConverter.Convert(physicsModel);
                     break;
                 default:
                     throw new NotSupportedException($"{tag.Group} not supported");

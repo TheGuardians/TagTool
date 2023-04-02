@@ -3,17 +3,16 @@ using TagTool.Cache;
 using TagTool.Commands.CollisionModels;
 using TagTool.Commands.Common;
 using TagTool.Geometry.BspCollisionGeometry;
+using TagTool.Geometry.BspCollisionGeometry.Utils;
 using TagTool.Tags.Definitions;
 using CollisionModelGen4 = TagTool.Tags.Definitions.Gen4.CollisionModel;
 
 namespace TagTool.Commands.Porting.Gen4
 {
-    partial class PortTagGen4Command : Command
+    public static class CollisionModelConverter
 	{
-		public CollisionModel ConvertCollisionModel( CachedTag tag, CollisionModelGen4 gen4CollisionModel)
+		public static CollisionModel Convert(GameCacheGen4 Gen4Cache, CollisionModelGen4 gen4CollisionModel)
 		{
-			bool containsSuperNodes = false;
-
 			var collisionModelResource = Gen4Cache.ResourceCacheGen4.GetCollisionModelResourceGen4(gen4CollisionModel.RegionsResource);
 
 			var collisionModel = new CollisionModel()
@@ -56,17 +55,19 @@ namespace TagTool.Commands.Porting.Gen4
 					// Convert Bsps
 					for(int i = 0; i < gen4Permutation.ResourcebspCount; i++)
                     {
-						var gen4Bsp = collisionModelResource.Bsps[gen4Permutation.ResourcebspOffset + i];
-						if (gen4Bsp.Bsp.Bsp3dSupernodes.Count > 0)
+						var gen4Bsp = collisionModelResource.Bsps[gen4Permutation.ResourcebspOffset + i].Bsp;
+						if (gen4Bsp.Bsp3dSupernodes.Count > 0)
                         {
-							new TagToolWarning("Collision geometry contains super nodes.");
-							containsSuperNodes = true;
-						}
+                            SupernodeToNodeConverter supernodeConverter = new SupernodeToNodeConverter();
+							ResizeCollisionBSP resizer = new ResizeCollisionBSP();
+							var largebsp = resizer.GrowCollisionBsp(gen4Bsp);
+							gen4Bsp = resizer.ShrinkCollisionBsp(supernodeConverter.Convert(largebsp));
+                        }
 
 						permutation.Bsps.Add(new CollisionModel.Region.Permutation.Bsp()
 						{
-							Geometry = gen4Bsp.Bsp,
-							NodeIndex = gen4Bsp.NodeIndex,
+							Geometry = gen4Bsp,
+							NodeIndex = collisionModelResource.Bsps[gen4Permutation.ResourcebspOffset + i].NodeIndex,
 						});
 					}
 				}
@@ -96,13 +97,6 @@ namespace TagTool.Commands.Porting.Gen4
 					Radius = gen4PathFindingSphere.Radius
 				});
 			}
-
-			if(containsSuperNodes)
-            {
-                GenerateCollisionBSPCommand bspgeneration = new GenerateCollisionBSPCommand(ref collisionModel);
-                bspgeneration.Execute(new List<string>());
-            }
-
             return collisionModel;
 		}
 	}

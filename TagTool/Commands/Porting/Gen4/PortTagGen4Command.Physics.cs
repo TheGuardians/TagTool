@@ -7,9 +7,9 @@ using PhysicsModelGen4 = TagTool.Tags.Definitions.Gen4.PhysicsModel;
 
 namespace TagTool.Commands.Porting.Gen4
 {
-    partial class PortTagGen4Command : Command
+    public static class PhysicsModelConverter
     {
-        public PhysicsModel ConvertPhysicsModel(CachedTag tag, PhysicsModelGen4 gen4PhysicsModel)
+        public static PhysicsModel Convert(PhysicsModelGen4 gen4PhysicsModel)
         {
             var physicsModel = new PhysicsModel()
             {
@@ -102,7 +102,7 @@ namespace TagTool.Commands.Porting.Gen4
             }
 
             //convert node edges
-            foreach(var gen4edge in gen4PhysicsModel.NodeEdges)
+            foreach (var gen4edge in gen4PhysicsModel.NodeEdges)
             {
                 PhysicsModel.NodeEdge newEdge = new PhysicsModel.NodeEdge
                 {
@@ -116,7 +116,7 @@ namespace TagTool.Commands.Porting.Gen4
                 };
 
                 //constraints
-                foreach(var gen4constraint in gen4edge.Constraints)
+                foreach (var gen4constraint in gen4edge.Constraints)
                 {
                     PhysicsModel.NodeEdge.Constraint newConstraint = new PhysicsModel.NodeEdge.Constraint
                     {
@@ -129,7 +129,7 @@ namespace TagTool.Commands.Porting.Gen4
                     };
 
                     //ragdoll motors
-                    foreach(var gen4ragdoll in gen4constraint.RagdollMotors)
+                    foreach (var gen4ragdoll in gen4constraint.RagdollMotors)
                     {
                         newConstraint.RagdollMotors.Add(new PhysicsModel.NodeEdge.Constraint.RagdollMotor
                         {
@@ -151,7 +151,7 @@ namespace TagTool.Commands.Porting.Gen4
                         });
                     }
                     //Limited hinge motors
-                    foreach(var gen4hinge in gen4constraint.LimitedHingeMotors)
+                    foreach (var gen4hinge in gen4constraint.LimitedHingeMotors)
                     {
                         newConstraint.LimitedHingeMotors.Add(new PhysicsModel.NodeEdge.Constraint.LimitedHingeMotor
                         {
@@ -283,7 +283,7 @@ namespace TagTool.Commands.Porting.Gen4
             }
 
             //convert polyhedron fourvectors
-            foreach(var gen4vector in gen4PhysicsModel.PolyhedronFourVectors)
+            foreach (var gen4vector in gen4PhysicsModel.PolyhedronFourVectors)
             {
                 physicsModel.PolyhedronFourVectors.Add(new PhysicsModel.PolyhedronFourVector
                 {
@@ -473,7 +473,7 @@ namespace TagTool.Commands.Porting.Gen4
             return physicsModel;
         }
 
-        public void ConvertHavokShape(PhysicsModel.Shape newShape, PhysicsModelGen4.HavokPrimitiveStruct gen4shape)
+        public static void ConvertHavokShape(PhysicsModel.Shape newShape, PhysicsModelGen4.HavokPrimitiveStruct gen4shape)
         {
             newShape.Name = gen4shape.Name;
             newShape.MaterialIndex = gen4shape.Material;
@@ -489,7 +489,7 @@ namespace TagTool.Commands.Porting.Gen4
             return;
         }
 
-        public PhysicsModel.HavokShapeBase ConvertHavokShapeBase(PhysicsModelGen4.HavokConvexShapeStruct gen4shapebase)
+        public static PhysicsModel.HavokShapeBase ConvertHavokShapeBase(PhysicsModelGen4.HavokConvexShapeStruct gen4shapebase)
         {
             PhysicsModel.HavokShapeBase newShapeBase = new PhysicsModel.HavokShapeBase
             {
@@ -502,7 +502,7 @@ namespace TagTool.Commands.Porting.Gen4
             return newShapeBase;
         }
 
-        public PhysicsModel.HavokShapeBaseNoRadius ConvertHavokShapeBaseNoRadius(PhysicsModelGen4.HavokShapeStruct gen4shapebase)
+        public static PhysicsModel.HavokShapeBaseNoRadius ConvertHavokShapeBaseNoRadius(PhysicsModelGen4.HavokShapeStruct gen4shapebase)
         {
             PhysicsModel.HavokShapeBaseNoRadius newShapeBase = new PhysicsModel.HavokShapeBaseNoRadius
             {

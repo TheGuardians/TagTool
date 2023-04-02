@@ -176,7 +176,10 @@ namespace TagTool.Commands.Editing
                 switch (tag.Group.Tag.ToString())
                 {
                     case "jmad":
-                        CommandsGen4.ModelAnimationGraphs.AnimationContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen4.ModelAnimationGraph)definition);
+                        CommandsGen4.ModelAnimationGraphs.ModelContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen4.ModelAnimationGraph)definition);
+                        break;
+                    case "hlmt":
+                        CommandsGen4.Models.ModelContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen4.Model)definition);
                         break;
                 }
             }
