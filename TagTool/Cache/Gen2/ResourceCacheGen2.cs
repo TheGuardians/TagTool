@@ -73,7 +73,18 @@ namespace TagTool.Cache.Gen2
             return data;
         }
 
-
+        public override Tags.Resources.Gen4.BitmapTextureInteropResource GetBitmapTextureInteropResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.ModelAnimationTagResource GetModelAnimationTagResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.CollisionModelResource GetCollisionModelResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
 
         public override TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition)
         {

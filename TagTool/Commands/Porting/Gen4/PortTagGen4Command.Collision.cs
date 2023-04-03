@@ -11,9 +11,9 @@ namespace TagTool.Commands.Porting.Gen4
 {
     public static class CollisionModelConverter
 	{
-		public static CollisionModel Convert(GameCacheGen4 Gen4Cache, CollisionModelGen4 gen4CollisionModel)
+		public static CollisionModel Convert(GameCache Cache, CollisionModelGen4 gen4CollisionModel)
 		{
-			var collisionModelResource = Gen4Cache.ResourceCacheGen4.GetCollisionModelResourceGen4(gen4CollisionModel.RegionsResource);
+			var collisionModelResource = Cache.ResourceCache.GetCollisionModelResourceGen4(gen4CollisionModel.RegionsResource);
 
 			var collisionModel = new CollisionModel()
 			{

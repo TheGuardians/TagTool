@@ -69,6 +69,13 @@ namespace TagTool.Cache.Monolithic
         public override StructureBspTagResources GetStructureBspTagResources(TagResourceReference resourceReference)
             => GetTagResource<StructureBspTagResources>(resourceReference);
 
+        public override Tags.Resources.Gen4.BitmapTextureInteropResource GetBitmapTextureInteropResourceGen4(TagResourceReference resourceReference)
+            => GetTagResource<Tags.Resources.Gen4.BitmapTextureInteropResource>(resourceReference);
+        public override Tags.Resources.Gen4.ModelAnimationTagResource GetModelAnimationTagResourceGen4(TagResourceReference resourceReference)
+            => GetTagResource<Tags.Resources.Gen4.ModelAnimationTagResource>(resourceReference);
+        public override Tags.Resources.Gen4.CollisionModelResource GetCollisionModelResourceGen4(TagResourceReference resourceReference)
+            => GetTagResource<Tags.Resources.Gen4.CollisionModelResource>(resourceReference);
+
         public override object GetResourceDefinition(TagResourceReference resourceReference, Type definitionType)
             => GetTagResource(resourceReference, definitionType);
 

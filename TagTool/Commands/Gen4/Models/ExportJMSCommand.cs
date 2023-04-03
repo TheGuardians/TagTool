@@ -89,7 +89,7 @@ namespace TagTool.Commands.Gen4.Models
                 if (ExportCollision && Definition.CollisionModel != null)
                 {
                     CollisionModel coll = Cache.Deserialize<CollisionModel>(cacheStream, Definition.CollisionModel);
-                    TagTool.Tags.Definitions.CollisionModel gen3Coll = CollisionModelConverter.Convert((GameCacheGen4)Cache, coll);
+                    TagTool.Tags.Definitions.CollisionModel gen3Coll = CollisionModelConverter.Convert(Cache, coll);
                     JmsCollExporter exporter = new JmsCollExporter(Cache, jms);
                     exporter.Export(gen3Coll);
                 }

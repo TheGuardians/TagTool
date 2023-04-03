@@ -37,7 +37,7 @@ namespace TagTool.Cache.Gen3
             if (Cache.Version > CacheVersion.Halo3Beta && gen3Header.SectionTable.Sections[(int)CacheFileSectionType.ResourceSection].Size == 0)
                 return;
             // means resources but no tags, campaign.map for example. The resource section only contains pages for resources
-            else if (Cache.Version > CacheVersion.Halo3Beta &&gen3Header.SectionTable.Sections[(int)CacheFileSectionType.TagSection].Size == 0)
+            else if (Cache.Version > CacheVersion.Halo3Beta && gen3Header.SectionTable.Sections[(int)CacheFileSectionType.TagSection].Size == 0)
                 return;
             else
             {
@@ -46,7 +46,7 @@ namespace TagTool.Cache.Gen3
                     ResourceGestalt = Cache.Deserialize<ResourceGestalt>(cacheStream, Cache.TagCacheGen3.GlobalInstances["zone"]);
 
                     // there's probably a better way to determine which to use
-                    if(ResourceGestalt.LayoutTable.Sections.Count > 0)
+                    if (ResourceGestalt.LayoutTable.Sections.Count > 0)
                         ResourceLayoutTable = ResourceGestalt.LayoutTable;
                     else
                         ResourceLayoutTable = Cache.Deserialize<ResourceLayoutTable>(cacheStream, Cache.TagCacheGen3.GlobalInstances["play"]);
@@ -134,13 +134,13 @@ namespace TagTool.Cache.Gen3
                 return null;
 
             var primaryRunningOffset = 0;
-            foreach(var subPage in primarySubPageTable.Subpages)
+            foreach (var subPage in primarySubPageTable.Subpages)
             {
                 primaryResourceData.CopyTo(primaryRunningOffset, data, subPage.Offset, subPage.Size);
                 primaryRunningOffset += subPage.Size;
             }
 
-            if(secondarySubPageTable != null && secondaryResourceData.Length > 0)
+            if (secondarySubPageTable != null && secondaryResourceData.Length > 0)
             {
                 var secondaryRunningOffset = 0;
                 foreach (var subPage in secondarySubPageTable.Subpages)
@@ -186,6 +186,19 @@ namespace TagTool.Cache.Gen3
             if (ResourceLayoutTable.Sections[tagResource.SegmentIndex].RequiredPageIndex == -1)
                 return null;
             return GetResourceDefinition<StructureBspCacheFileTagResources>(resourceReference);
+        }
+
+        public override Tags.Resources.Gen4.BitmapTextureInteropResource GetBitmapTextureInteropResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.ModelAnimationTagResource GetModelAnimationTagResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.CollisionModelResource GetCollisionModelResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
         }
 
         public override TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition)

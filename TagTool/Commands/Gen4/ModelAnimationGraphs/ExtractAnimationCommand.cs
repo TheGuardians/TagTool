@@ -127,7 +127,7 @@ namespace TagTool.Commands.Gen4.ModelAnimationGraphs
         public AnimationResourceData BuildAnimationResourceData(AnimationGraphDefinitionsStruct.AnimationPoolBlockStruct animationblock)
         {
             var resourceref = Animation.TagResourceGroups[animationblock.SharedAnimationData[0].ResourceGroup].TagResource;
-            var resourcedata = ((GameCacheGen4)CacheContext).ResourceCacheGen4.GetModelAnimationTagResourceGen4(resourceref);
+            var resourcedata = CacheContext.ResourceCache.GetModelAnimationTagResourceGen4(resourceref);
             if (resourcedata == null)
                 return null;
             var resourcemember = resourcedata.GroupMembers[animationblock.SharedAnimationData[0].ResourceGroupMember];

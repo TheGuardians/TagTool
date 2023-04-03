@@ -127,7 +127,7 @@ namespace TagTool.Cache.Gen4
 
         // TODO: create an interface/adapter for BitmapTextureInteropResource
 
-        public Tags.Resources.Gen4.BitmapTextureInteropResource GetBitmapTextureInteropResourceGen4(TagResourceReference resourceReference)
+        public override Tags.Resources.Gen4.BitmapTextureInteropResource GetBitmapTextureInteropResourceGen4(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "bitmap_texture_interop_resource")
@@ -135,7 +135,7 @@ namespace TagTool.Cache.Gen4
             return GetResourceDefinition<Tags.Resources.Gen4.BitmapTextureInteropResource>(resourceReference);
         }
 
-        public Tags.Resources.Gen4.ModelAnimationTagResource GetModelAnimationTagResourceGen4(TagResourceReference resourceReference)
+        public override Tags.Resources.Gen4.ModelAnimationTagResource GetModelAnimationTagResourceGen4(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "model_animation_tag_resource")
@@ -143,7 +143,7 @@ namespace TagTool.Cache.Gen4
             return GetResourceDefinition<Tags.Resources.Gen4.ModelAnimationTagResource>(resourceReference);
         }
 
-        public Tags.Resources.Gen4.CollisionModelResource GetCollisionModelResourceGen4(TagResourceReference resourceReference)
+        public override Tags.Resources.Gen4.CollisionModelResource GetCollisionModelResourceGen4(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
             if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "collision_model_resource")
