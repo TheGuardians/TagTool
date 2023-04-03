@@ -19,7 +19,7 @@ namespace TagTool.Audio
         public List<LanguagePermutation> LanguagePermutations;
 
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-        public List<SoundEncodedDialogueSectionBlock> EncodedPermutationSection;
+        public List<EncodedPermutationSection> EncodedPermutationSections;
 
         [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown1;
@@ -99,7 +99,7 @@ namespace TagTool.Audio
         }
 
         [TagStructure(Size = 0x2C)]
-        public class SoundEncodedDialogueSectionBlock : TagStructure
+        public class EncodedPermutationSection : TagStructure
 		{
             public byte[] EncodedData; // legacy CE-H2 data, apparently can still be used
             public List<PermutationDialogueInfo> SoundDialogueInfo; // ditto
@@ -119,7 +119,7 @@ namespace TagTool.Audio
             public class SoundPermutationDialogueInfoNewBlock : TagStructure
 			{
                 [TagField(Platform = CachePlatform.MCC)]
-                public LaguageIndicesStruct LanguageIndices;
+                public LanguageIndicesStruct LanguageIndices;
 
                 public List<FacialAnimationBlock> FacialAnimation;
 
@@ -186,7 +186,7 @@ namespace TagTool.Audio
                 }
 
                 [TagStructure(Size = 0x30, Platform = CachePlatform.MCC)]
-                public class LaguageIndicesStruct : TagStructure
+                public class LanguageIndicesStruct : TagStructure
                 {
                     public int EnglishIndex;
                     public int JapaneseIndex;

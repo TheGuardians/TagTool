@@ -112,6 +112,9 @@ namespace TagTool.Commands.Porting
 
                     foreach (var blamTag in ParseLegacyTag(args.Last()))
                     {
+                        if (blamTag == null)
+                            return new TagToolError(CommandError.TagInvalid, args.Last());
+
                         ConvertTag(cacheStream, blamCacheStream, resourceStreams, blamTag);
                         Flags = oldFlags;
                     }
@@ -1653,9 +1656,12 @@ namespace TagTool.Commands.Porting
                 case RuntimeGpuData runMGpu when BlamCache.Platform == CachePlatform.MCC:
                     if (BlamCache.Version >= CacheVersion.Halo3ODST)
                     {
-                        runMGpu.Properties = runMGpu.RuntimeGpuBlocks?[0].Properties;
-                        runMGpu.Functions = runMGpu.RuntimeGpuBlocks?[0].Functions;
-                        runMGpu.Colors = runMGpu.RuntimeGpuBlocks?[0].Colors;
+                        if (runMGpu.RuntimeGpuBlocks?.Count > 0)
+                        {
+                            runMGpu.Properties = runMGpu.RuntimeGpuBlocks[0].Properties;
+                            runMGpu.Functions = runMGpu.RuntimeGpuBlocks[0].Functions;
+                            runMGpu.Colors = runMGpu.RuntimeGpuBlocks[0].Colors;
+                        }
                     }
                     return runMGpu;
 

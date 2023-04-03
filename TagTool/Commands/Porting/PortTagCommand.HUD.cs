@@ -15,14 +15,16 @@ namespace TagTool.Commands.Porting
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
+                {
                     if (BlamCache.Platform == CachePlatform.Original)
                         stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateH3);
                     else if (BlamCache.Platform == CachePlatform.MCC)
                         stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateH3MCC);
+
                     stateData.UnitBaseFlags = GetEquivalentFlags(stateData.UnitBaseFlags, stateData.UnitBaseFlags_H3);
                     stateData.Player_SpecialFlags = GetEquivalentFlags(stateData.Player_SpecialFlags, stateData.Player_SpecialFlags_H3);
                     break;
-
+                }
                 case CacheVersion.Halo3ODST:
                     stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateODST);
                     stateData.UnitBaseFlags = GetEquivalentFlags(stateData.UnitBaseFlags, stateData.UnitBaseFlags_ODST);
@@ -54,7 +56,7 @@ namespace TagTool.Commands.Porting
                     renderData.ExternalInput = GetEquivalentValue(renderData.ExternalInput, renderData.ExternalInput_H3MCC);
                     renderData.RangeInput = GetEquivalentValue(renderData.RangeInput, renderData.RangeInput_H3MCC);
                     break;
-                case CacheVersion.Halo3ODST when BlamCache.Platform == CachePlatform.Original:
+                case CacheVersion.Halo3ODST:
                     renderData.ExternalInput = GetEquivalentValue(renderData.ExternalInput, renderData.ExternalInput_ODST);
                     renderData.RangeInput = GetEquivalentValue(renderData.RangeInput, renderData.RangeInput_ODST);
                     break;
@@ -95,7 +97,7 @@ namespace TagTool.Commands.Porting
             switch (BlamCache.Version)
             {
                 case CacheVersion.Halo3Retail:
-                    
+                {
                     if (BlamCache.Platform == CachePlatform.Original)
                     {
                         textWidget.TextFlags = GetEquivalentFlags(textWidget.TextFlags, textWidget.TextFlags_H3Original);
@@ -107,6 +109,7 @@ namespace TagTool.Commands.Porting
                         textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_H3MCC);
                     }
                     break;
+                }
                 case CacheVersion.Halo3ODST:
                     textWidget.Font = GetEquivalentValue(textWidget.Font, textWidget.Font_ODST);
                     break;
