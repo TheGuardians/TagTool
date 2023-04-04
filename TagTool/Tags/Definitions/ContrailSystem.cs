@@ -12,6 +12,7 @@ namespace TagTool.Tags.Definitions
 	{
         public List<ContrailDefinitionBlock> Contrails;
 
+        [TagStructure(Size = 0x258, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x26C, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x294, MinVersion = CacheVersion.HaloReach)]
         public class ContrailDefinitionBlock : TagStructure

@@ -8,6 +8,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x170, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x160, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
     [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3DC, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x174, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class UserInterfaceSharedGlobalsDefinition : TagStructure
 	{
         public short IncTextUpdatePeriod; // milliseconds
@@ -123,21 +125,22 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public TagFunction PdaWaypointScaleFunction;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint PdaCameraVelocity;
+        public float PdaCameraVelocity; // pixels per second
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint PdaUnknownA;
+        public float CameraAutoMoveDelay;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint PdaOffscreenPlayerArrowRadius;
+        public float PlayerOffscreenMarkerTolerance; // pixels
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint PdaUnknownB;
+        public float PlayerOrientationDeadZone; // area around you where the PDA doesn't auto-orient you (pixels)
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint PdaAiWaypointRadius;
+        public float PdaAiClumpCullDistance; // wu
+
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public CachedTag PdaScreenEffect;      
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public RealArgbColor PdaColorA;
+        public RealArgbColor PdaPlayedColor;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public RealArgbColor PdaColorB;
+        public RealArgbColor PdaUnplayedColor;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public StringId PdaPoiWaypointPrefix;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -145,7 +148,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public uint PdaBriefOpenThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint UnknownC;
+        public float PdaTextFadetime;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<ARGBlock> ARG;

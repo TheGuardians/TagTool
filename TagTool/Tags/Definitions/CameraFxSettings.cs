@@ -7,7 +7,8 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xE4, Platform = CachePlatform.Original, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, Platform = CachePlatform.MCC, Version = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xE4, Platform = CachePlatform.MCC, Version = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0x170, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "camera_fx_settings", Tag = "cfxs", Size = 0xDC, MinVersion = CacheVersion.HaloReach)]
     public class CameraFxSettings : TagStructure
