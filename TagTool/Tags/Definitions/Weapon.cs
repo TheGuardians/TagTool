@@ -629,21 +629,8 @@ namespace TagTool.Tags.Definitions
 
             public float OverloadTime;// the next trigger fires this often while holding down this trigger
 
-            // -------- angle change (recoil)
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public Bounds<Angle> AngleChangePerShot; // angle change per shot of the weapon during firing
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float AngleChangeAccelerationTime; // seconds firing to reach final angle change per shot
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float AngleChangeDecelerationTime; // seconds idle to return to initial angle change per shot
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public AngleChangeFunctionValue AngleChangeFunction;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Length = 2, Flags = Padding)]
-            public byte[] Padding2;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float AngleChangeAccelerationRate;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float AngleChangeDecelerationRate;
+            public RecoilStruct VerticalRecoil;
 
             public float IlluminationRecoveryRate;
             public float EjectionPortRecoveryRate;
@@ -694,6 +681,23 @@ namespace TagTool.Tags.Definitions
                 public Angle FullErrorLookPitchRate; // yaw rate is doubled
                 public float LookPitchErrorPower; // use to soften or sharpen the rate ding
             }
+
+            [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.HaloOnline700123)]
+            public class RecoilStruct : TagStructure
+            {
+                public Bounds<Angle> AngleChangePerShot; // angle change per shot of the weapon during firing
+                public float AngleChangeAccelerationTime; // seconds firing to reach final angle change per shot
+                public float AngleChangeDecelerationTime; // seconds idle to return to initial angle change per shot
+                public AngleChangeFunctionValue AngleChangeFunction;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding2;
+
+                public float AngleChangeAccelerationRate;
+                public float AngleChangeDecelerationRate;
+            }
+
+
 
             public enum PredictionTypeValue : short
             {
@@ -920,7 +924,7 @@ namespace TagTool.Tags.Definitions
             CannotFireAtMaximumAge = 1 << 11,
             SecondaryTriggerOverridesGrenades = 1 << 12,
             SupportWeapon = 1 << 13,
-            HideFPWeaponWhenInIronSights = 1 << 14,
+            HideFPWeaponWhenInIronSights = 1 << 14, // EnablesIntegratedNightVision ?
             AIsUseWeaponMeleeDamage = 1 << 15,
             PreventsBinoculars = 1 << 16,
             LoopFPFiringAnimation = 1 << 17,
@@ -973,7 +977,7 @@ namespace TagTool.Tags.Definitions
             WeaponAgesWithEachKill = 1 << 26,
             AllowsUnaimedLunge = 1 << 27,
             CannotBeUsedByPlayer = 1 << 28,
-            Bit29 = 1 << 29,
+            HoldFpFiringAnimation = 1 << 29,
             StrictDeviationAngle = 1 << 30,
             Bit31 = 1u << 31
         }
