@@ -239,7 +239,7 @@ namespace TagTool.Geometry
         /// Set the runtime VertexBufferResources and IndexBufferResources fields given the resource definition
         /// </summary>
         /// <param name="resourceDefinition"></param>
-        public void SetResourceBuffers(RenderGeometryApiResourceDefinition resourceDefinition)
+        public void SetResourceBuffers(RenderGeometryApiResourceDefinition resourceDefinition, bool allowShared)
         {
             bool[] convertedVertexBuffers = new bool[resourceDefinition.VertexBuffers.Count];
             bool[] convertedIndexBuffers = new bool[resourceDefinition.IndexBuffers.Count];
@@ -256,14 +256,15 @@ namespace TagTool.Geometry
                     {
                         if (vertexBufferIndex < resourceDefinition.VertexBuffers.Count)
                         {
-                            if(convertedVertexBuffers[vertexBufferIndex] == false)
+                            if(convertedVertexBuffers[vertexBufferIndex] == false || allowShared)
                             {
                                 convertedVertexBuffers[vertexBufferIndex] = true;
                                 mesh.ResourceVertexBuffers[i] = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
                             }
                             else
                             {
-                                throw new System.Exception("Sharing vertex buffers is not supported");
+                                mesh.VertexBufferIndices[i] = -1;
+                                System.Console.WriteLine("Sharing vertex buffers not supported, ignoring it.");
                             }
                         }
                             
@@ -279,7 +280,7 @@ namespace TagTool.Geometry
                     {
                         if (indexBufferIndex < resourceDefinition.IndexBuffers.Count)
                         {
-                            if(convertedIndexBuffers[indexBufferIndex] == false)
+                            if(convertedIndexBuffers[indexBufferIndex] == false || allowShared)
                             {
                                 mesh.ResourceIndexBuffers[i] = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
                                 convertedIndexBuffers[indexBufferIndex] = true;

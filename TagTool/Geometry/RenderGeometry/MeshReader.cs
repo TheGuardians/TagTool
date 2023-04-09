@@ -179,6 +179,7 @@ namespace TagTool.Geometry
             { VertexBufferFormat.Unused1D, 1 },
             { VertexBufferFormat.SkinnedCompressed, 0 },
             { VertexBufferFormat.RigidCompressed, 0 },
+            { VertexBufferFormat.RigidBoned, 0 }
         };
     }
 }

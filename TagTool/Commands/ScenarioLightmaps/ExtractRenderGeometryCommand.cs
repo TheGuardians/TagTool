@@ -50,7 +50,7 @@ namespace TagTool.Commands.ScenarioLightmaps
             //
 
             var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
-            Definition.Geometry.SetResourceBuffers(definition);
+            Definition.Geometry.SetResourceBuffers(definition, false);
 
             using (var resourceStream = new MemoryStream())
             {

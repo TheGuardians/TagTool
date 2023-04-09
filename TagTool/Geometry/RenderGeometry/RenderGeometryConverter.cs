@@ -172,7 +172,7 @@ namespace TagTool.Geometry
                 };
             }
 
-            geometry.SetResourceBuffers(resourceDefinition);
+            geometry.SetResourceBuffers(resourceDefinition, false);
 
             // do conversion (PARTICLE INDEX BUFFERS, WATER CONVERSION TO DO)
 
@@ -247,7 +247,7 @@ namespace TagTool.Geometry
                         if (indexBuffer == null)
                             continue;
 
-                        IndexBufferConverter.ConvertIndexBuffer(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, indexBuffer);
+                        IndexBufferConverter.ConvertIndexBuffer(SourceCache.Version, SourceCache.Platform, DestCache.Version, DestCache.Platform, indexBuffer);
                     }
 
                     // create index buffers for decorators, gen3 didn't have them
@@ -539,7 +539,7 @@ namespace TagTool.Geometry
                 };
             }
 
-            geometry.SetResourceBuffers(resourceDefinition);
+            geometry.SetResourceBuffers(resourceDefinition, false);
 
             var generateParticles = false; // temp fix when pmdf geo is null
 
@@ -625,7 +625,7 @@ namespace TagTool.Geometry
                         if (indexBuffer == null)
                             continue;
 
-                        IndexBufferConverter.ConvertIndexBuffer(SourceCache.Version, DestCache.Version, SourceCache.Platform, DestCache.Platform, indexBuffer);
+                        IndexBufferConverter.ConvertIndexBuffer(SourceCache.Version, SourceCache.Platform, DestCache.Version, DestCache.Platform, indexBuffer);
                     }
 
                     // create index buffers for decorators, gen3 didn't have them

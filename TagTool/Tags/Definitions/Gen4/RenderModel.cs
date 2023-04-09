@@ -762,10 +762,17 @@ namespace TagTool.Tags.Definitions.Gen4
                 public CompressionFlags CompressionFlags1;
                 [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
                 public byte[] Padding;
-                public RealPoint3d PositionBounds0;
-                public RealPoint3d PositionBounds1;
-                public RealPoint2d TexcoordBounds0;
-                public RealPoint2d TexcoordBounds1;
+
+                public Bounds<float> X;
+                public Bounds<float> Y;
+                public Bounds<float> Z;
+                public Bounds<float> U;
+                public Bounds<float> V;
+
+                //public RealPoint3d PositionBounds0;
+                //public RealPoint3d PositionBounds1;
+                //public RealPoint2d TexcoordBounds0;
+                //public RealPoint2d TexcoordBounds1;
                 public float Unused0;
                 public float Unused1;
                 

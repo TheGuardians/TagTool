@@ -40,5 +40,7 @@ namespace TagTool.Geometry
         RigidCompressed = 0x24,    // Size 0x10
         SkinnedCompressed = 0x25,  // Size = 0x18
 
+        RigidBoned = 0x2F //Size = 0x18
+
     }
 }

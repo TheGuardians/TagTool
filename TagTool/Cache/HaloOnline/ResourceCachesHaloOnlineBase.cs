@@ -357,6 +357,10 @@ namespace TagTool.Cache.HaloOnline
         {
             throw new NotImplementedException();
         }
+        public override Tags.Resources.Gen4.RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinitionGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
 
         private TagResourceReference CreateResource<T>(T resourceDefinition, ResourceLocation location, TagResourceTypeGen3 resourceType)
         {

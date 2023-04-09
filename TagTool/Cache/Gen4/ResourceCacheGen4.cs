@@ -151,6 +151,14 @@ namespace TagTool.Cache.Gen4
             return GetResourceDefinition<Tags.Resources.Gen4.CollisionModelResource>(resourceReference);
         }
 
+        public override Tags.Resources.Gen4.RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinitionGen4(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "render_geometry_api_resource_definition")
+                return null;
+            return GetResourceDefinition<Tags.Resources.Gen4.RenderGeometryApiResourceDefinition>(resourceReference);
+        }
+
         public override BinkResource GetBinkResource(TagResourceReference resourceReference)
         {
             throw new NotImplementedException();

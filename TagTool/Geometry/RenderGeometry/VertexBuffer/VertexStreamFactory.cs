@@ -48,6 +48,7 @@ namespace TagTool.Geometry
 
                     case CacheVersion.HaloReach:
                     case CacheVersion.HaloReach11883:
+                    case CacheVersion.Halo4:
                         return new VertexStreamReach(stream);
 
                     default:

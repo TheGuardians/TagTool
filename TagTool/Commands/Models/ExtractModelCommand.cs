@@ -94,6 +94,8 @@ namespace TagTool.Commands.Models
 
 
             // Extract model and bitmaps (if requested)
+            var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(renderModel.Geometry.Resource);
+            renderModel.Geometry.SetResourceBuffers(resource, false);
             ModelExtractor extractor = new ModelExtractor(Cache, renderModel);
             if (!extractor.Export(exportFileFormat, exportFilePath, exportBitmapsFolder, modelVariant))
                 return new TagToolError(CommandError.OperationFailed, "Export failed");

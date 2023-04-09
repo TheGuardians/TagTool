@@ -100,6 +100,8 @@ namespace TagTool.Commands.Models
                 if (ExportRender && Definition.RenderModel != null)
                 {
                     RenderModel mode = Cache.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
+                    var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(mode.Geometry.Resource);
+                    mode.Geometry.SetResourceBuffers(resource, true);
                     JmsModeExporter exporter = new JmsModeExporter(Cache, jms);
                     exporter.Export(mode);
                 }

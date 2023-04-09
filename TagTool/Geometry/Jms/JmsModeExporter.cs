@@ -44,8 +44,6 @@ namespace TagTool.Geometry.Jms
 
             //build meshes
             ModelExtractor extractor = new ModelExtractor(Cache, mode);
-            var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(mode.Geometry.Resource);
-            mode.Geometry.SetResourceBuffers(resource);
             List<Triangle> Triangles = new List<Triangle>();
             foreach (var region in mode.Regions)
             {
@@ -58,10 +56,10 @@ namespace TagTool.Geometry.Jms
 
                     var vertices = new List<ModelExtractor.GenericVertex>();
                     //assign rigid node indices from mesh for rigid meshes
-                    if(Cache.Version >= CacheVersion.HaloReach)
+                    if (Cache.Version >= CacheVersion.HaloReach)
                     {
                         vertices = ModelExtractor.ReadVerticesReach(meshReader);
-                        if(mesh.ReachType == VertexTypeReach.Rigid || mesh.ReachType == VertexTypeReach.RigidCompressed)
+                        if (mesh.ReachType == VertexTypeReach.Rigid || mesh.ReachType == VertexTypeReach.RigidCompressed)
                         {
                             vertices.ForEach(v => v.Indices = new byte[4] { (byte)mesh.RigidNodeIndex, 0, 0, 0 });
                             vertices.ForEach(v => v.Weights = new float[4] { 1, 0, 0, 0 });
@@ -90,17 +88,17 @@ namespace TagTool.Geometry.Jms
                                 string renderMethodName = renderMethod.Name;
                                 if (renderMethodName == null)
                                     renderMethodName = $"{renderMethod.Group.Tag}_" + $"0x{renderMethod.Index:X4}";
-                                string[] nameParts = renderMethodName.Split(new string[] { "\\shaders\\" }, StringSplitOptions.None);
-                                if (nameParts.Length >= 1)
-                                    renderMaterialName = nameParts.Last();
-                                else
+                                List<string> delimiters = new List<string> { "\\shaders\\", "\\materials\\", "\\" };
+                                foreach(var delimiter in delimiters)
                                 {
-                                    nameParts = renderMethodName.Split('\\');
-                                    if (nameParts.Length >= 1)
+                                    string[] nameParts = renderMethodName.Split(new string[] { delimiter }, StringSplitOptions.None);
+                                    if (nameParts.Length > 1)
+                                    {
                                         renderMaterialName = nameParts.Last();
-                                    else
-                                        renderMaterialName = renderMethodName;
-                                }                                
+                                        break;
+                                    }
+                                    renderMaterialName = renderMethodName;
+                                }             
                             }
 
                             JmsFormat.JmsMaterial newMaterial = new JmsFormat.JmsMaterial
@@ -199,39 +197,6 @@ namespace TagTool.Geometry.Jms
                     RadiantIntensity = new RealVector3d(skylight.RadiantIntensity.Red, skylight.RadiantIntensity.Green, skylight.RadiantIntensity.Blue),
                     SolidAngle = skylight.Magnitude
                 });
-        }
-
-        public void SmoothVertices(JmsFormat jms)
-        {
-            //build list of identical vertices
-            List<List<int>> MatchingVertices = new List<List<int>>();
-            for(var i = 0; i < jms.Vertices.Count; i++)
-            {
-                bool matchFound = false;
-                foreach(var vertexset in MatchingVertices)
-                {
-                    if (Vector3.Distance(PointToVector(jms.Vertices[vertexset[0]].Position), PointToVector(jms.Vertices[i].Position)) < 0.01)
-                    {
-                        matchFound = true;
-                        vertexset.Add(i);
-                        break;
-                    }
-                }
-                if(!matchFound)
-                    MatchingVertices.Add(new List<int> { i });
-            }
-
-            //average vertex normals and apply
-            foreach(var vertexgroup in MatchingVertices)
-            {
-                List<RealVector3d> normals = vertexgroup.Select(v => jms.Vertices[v].Normal).ToList();
-                RealVector3d sum = new RealVector3d();
-                foreach (var normal in normals)
-                    sum += normal;
-                RealVector3d average = sum / normals.Count;
-                foreach (var vertex in vertexgroup)
-                    jms.Vertices[vertex].Normal = average;
-            }
         }
 
         private Vector3 PointToVector(RealPoint3d point)

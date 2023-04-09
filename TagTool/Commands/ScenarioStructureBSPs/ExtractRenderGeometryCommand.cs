@@ -53,7 +53,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
             var collresource = CacheContext.ResourceCache.GetStructureBspTagResources(Definition.CollisionBspResource);
             var definition = CacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
-            Definition.Geometry.SetResourceBuffers(definition);
+            Definition.Geometry.SetResourceBuffers(definition, false);
 
             using (var resourceStream = new MemoryStream())
             {

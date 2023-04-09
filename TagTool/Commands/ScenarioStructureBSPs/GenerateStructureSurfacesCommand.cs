@@ -50,7 +50,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
             var renderGeometry = lbsp.Geometry;
             var renderGeometryResource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(renderGeometry.Resource);
-            renderGeometry.SetResourceBuffers(renderGeometryResource);
+            renderGeometry.SetResourceBuffers(renderGeometryResource, false);
 
             var tagResources = Cache.ResourceCache.GetStructureBspTagResources(Definition.CollisionBspResource);
 

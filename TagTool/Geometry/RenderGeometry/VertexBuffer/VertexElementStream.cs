@@ -322,6 +322,16 @@ namespace TagTool.Geometry
             return new RealVector3d(x, y, z);
         }
 
+        public RealQuaternion ReadDec4N()
+        {
+            var val = Reader.ReadUInt32();
+            var x = DenormalizeSigned10BitInt((ushort)((val >> 0) & 0x3FF));
+            var y = DenormalizeSigned10BitInt((ushort)((val >> 10) & 0x3FF));
+            var z = DenormalizeSigned10BitInt((ushort)((val >> 20) & 0x3FF));
+            var w = DenormalizeUnsigned3BitInt((byte)((val >> 30) & 0x3));
+            return new RealQuaternion(x, y, z, w);
+        }
+
         public void WriteDec3N(RealVector3d v)
         {
             var x = NormalizeSigned10BitInt(v.I);

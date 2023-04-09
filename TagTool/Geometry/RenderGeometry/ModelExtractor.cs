@@ -42,10 +42,6 @@ namespace TagTool.Geometry
 
             DecoratorBitmap = decoratorBitmap;
 
-            // Deserialize the render_model resource
-            var resource = cacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(RenderModel.Geometry.Resource);
-            RenderModel.Geometry.SetResourceBuffers(resource);
-
             var meshes = RenderModel.Geometry.Meshes;
 
             // Index unindexed geo
@@ -956,6 +952,8 @@ namespace TagTool.Geometry
                     return ReadSkinnedCompressedVertices(vertexReader, mainBuffer.Count);
                 case VertexTypeReach.RigidCompressed:
                     return ReadRigidCompressedVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.RigidBoned:
+                    return ReadRigidBonedVertices(vertexReader, mainBuffer.Count);
                 default:
                     throw new InvalidOperationException("Only Rigid, RigidCompressed, Skinned, SkinnedCompressed, DualQuat, World and Decorator meshes are supported");
             }
@@ -1030,6 +1028,32 @@ namespace TagTool.Geometry
                     TexCoords = ToVector3D(rigid.Texcoord),
                     Tangents = ToVector3D(rigid.Tangent),
                     Binormals = ToVector3D(rigid.Binormal)
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Reads rigid boned vertices.
+        /// </summary>
+        /// <param name="reader">The vertex reader to read from.</param>
+        /// <param name="count">The number of vertices to read.</param>
+        /// <returns>The vertices that were read.</returns>
+        private static List<GenericVertex> ReadRigidBonedVertices(VertexStreamReach reader, int count)
+        {
+            var result = new List<GenericVertex>();
+            for (var i = 0; i < count; i++)
+            {
+                var rigid = reader.ReadReachRigidBonedVertex();
+                result.Add(new GenericVertex
+                {
+                    Position = ToVector3D(rigid.Position),
+                    Normal = ToVector3D(rigid.Normal),
+                    TexCoords = ToVector3D(rigid.Texcoord),
+                    Tangents = ToVector3D(rigid.Tangent),
+                    Binormals = ToVector3D(rigid.Binormal),
+                    Weights = rigid.BlendWeights,
+                    Indices = rigid.BlendIndices
                 });
             }
             return result;

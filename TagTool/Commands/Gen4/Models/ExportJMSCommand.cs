@@ -102,7 +102,12 @@ namespace TagTool.Commands.Gen4.Models
                 }
                 if (ExportRender && Definition.RenderModel != null)
                 {
-                    return new TagToolError(CommandError.OperationFailed, "Render model jms export not yet supported for Gen 4");
+                    RenderModel mode = Cache.Deserialize<RenderModel>(cacheStream, Definition.RenderModel);
+                    TagTool.Tags.Definitions.RenderModel modeGen3 = RenderModelConverter.Convert(Cache, mode);
+                    var resource = RenderModelConverter.ConvertResource(Cache, mode.RenderGeometry);
+                    modeGen3.Geometry.SetResourceBuffers(resource, true);
+                    JmsModeExporter exporter = new JmsModeExporter(Cache, jms);
+                    exporter.Export(modeGen3);
                 }
 
             }

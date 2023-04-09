@@ -475,7 +475,7 @@ namespace TagTool.Commands.Scenarios
                 VertexBufferIndices = new short[8] { -1, -1, -1, -1, -1, -1, -1, -1 },
                 IndexBufferIndices = new short[2] { -1, -1 },
             });
-            renderGeometry.SetResourceBuffers(resourceDef);
+            renderGeometry.SetResourceBuffers(resourceDef, false);
 
             return renderGeometry;
         }
@@ -597,7 +597,7 @@ namespace TagTool.Commands.Scenarios
             var geometry = new RenderGeometry();
             geometry.Meshes = new List<Mesh>() { mesh };
             geometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
-            geometry.SetResourceBuffers(resourceDefinition);
+            geometry.SetResourceBuffers(resourceDefinition, false);
             geometry.Resource = Cache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
 
             return geometry;

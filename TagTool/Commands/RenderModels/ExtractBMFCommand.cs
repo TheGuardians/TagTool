@@ -49,7 +49,7 @@ namespace TagTool.Commands.RenderModels
             using (var stream = Cache.OpenCacheRead())
             {
                 var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
-                Definition.Geometry.SetResourceBuffers(resource);
+                Definition.Geometry.SetResourceBuffers(resource, false);
 
                 geometryFormat.InitGen3(Cache, Definition);
 

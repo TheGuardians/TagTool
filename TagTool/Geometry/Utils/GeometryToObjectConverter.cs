@@ -85,7 +85,7 @@ namespace TagTool.Geometry.Utils
             }
            
             var resourceDefinition = SourceCache.ResourceCache.GetRenderGeometryApiResourceDefinition(Lbsp.Geometry.Resource);
-            Lbsp.Geometry.SetResourceBuffers(resourceDefinition);
+            Lbsp.Geometry.SetResourceBuffers(resourceDefinition, false);
 
             StructureBspResources = SourceCache.ResourceCache.GetStructureBspTagResources(StructureBsp.CollisionBspResource);
             StructureBspCacheFileResources = SourceCache.ResourceCache.GetStructureBspCacheFileTagResources(StructureBsp.PathfindingResource);

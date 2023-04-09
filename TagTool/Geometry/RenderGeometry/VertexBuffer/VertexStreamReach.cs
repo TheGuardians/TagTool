@@ -94,6 +94,19 @@ namespace TagTool.Geometry
                 BlendWeights = Stream.ReadUByte4N().ToArray()
             };
         }
+        public SkinnedVertex ReadReachRigidBonedVertex()
+        {
+            var position = Stream.ReadUShort4N();
+            return new SkinnedVertex
+            {
+                Position = position,
+                Texcoord = Stream.ReadUShort2N(),
+                Normal = Stream.ReadDHen3N(),
+                Tangent = Stream.ReadDec4N(),
+                BlendIndices = Stream.ReadUByte4(),
+                BlendWeights = new float[4] { 1, 0, 0, 0 }
+            };
+        }
 
         public FlatRigidVertex ReadFlatRigidVertex()
         {

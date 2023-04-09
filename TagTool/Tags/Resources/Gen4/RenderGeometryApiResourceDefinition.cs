@@ -12,8 +12,8 @@ namespace TagTool.Tags.Resources.Gen4
     {
         public TagBlock<VertexBuffersBlock> PcVertexBuffers;
         public TagBlock<IndexBuffersBlock> PcIndexBuffers;
-        public TagBlock<RenderVertexBufferBlock> XenonVertexBuffers;
-        public TagBlock<RenderIndexBufferBlock> XenonIndexBuffers;
+        public TagBlock<D3DStructure<TagTool.Geometry.VertexBufferDefinition>> XenonVertexBuffers;
+        public TagBlock<D3DStructure<TagTool.Geometry.IndexBufferDefinition>> XenonIndexBuffers;
         
         [TagStructure(Size = 0xC)]
         public class VertexBuffersBlock : TagStructure
