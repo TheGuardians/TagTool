@@ -103,7 +103,8 @@ namespace TagTool.Cache.Monolithic
             byte[] definitionData = new byte[0];
             if(xsyncState.Header.ControlDataSize > 0)
                 definitionData = xsyncState.ControlData.ToArray();
-            ApplyResourceDefinitionFixups(xsyncState.ControlFixups, definitionData);
+            if(xsyncState.ControlFixups != null)
+                ApplyResourceDefinitionFixups(xsyncState.ControlFixups, definitionData);
 
             var definitionReader = new EndianReader(new MemoryStream(definitionData), Backend.Format);
             var primaryDataReader = new EndianReader(new MemoryStream(primaryData), Backend.Format);
