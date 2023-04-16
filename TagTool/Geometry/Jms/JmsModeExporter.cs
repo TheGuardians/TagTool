@@ -7,6 +7,7 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Numerics;
 using Assimp;
+using TagTool.Pathfinding;
 
 namespace TagTool.Geometry.Jms
 {
@@ -76,6 +77,7 @@ namespace TagTool.Geometry.Jms
                     }
                         
                     ModelExtractor.DecompressVertices(vertices, new VertexCompressor(mode.Geometry.Compression[0]));
+
                     for (int partIndex = 0; partIndex < mesh.Parts.Count; partIndex++)
                     {
                         int newMaterialIndex = -1;
@@ -117,9 +119,16 @@ namespace TagTool.Geometry.Jms
                         }                        
 
                         var indices = ModelExtractor.ReadIndices(meshReader, mesh.Parts[partIndex]);
+
+                        //recalculate vertex normals
+                        Vector3[] vertexPositions = vertices.Select(v => Vector3fromVector3D(v.Position)).ToArray();
+                        Vector3[] vertexNormals = CalculateVertexNormals(vertexPositions, indices);
+                        for (var v = 0; v < vertexNormals.Length; v++)
+                            vertices[v].Normal = Vector3DfromVector3(vertexNormals[v]);
+
                         for(var j = 0; j < indices.Length; j += 3)
                         {
-                            Triangles.Add(new Triangle
+                            var newTriangle = new Triangle
                             {
                                 Vertices = new List<ModelExtractor.GenericVertex>
                                 {
@@ -128,7 +137,8 @@ namespace TagTool.Geometry.Jms
                                     vertices[indices[j + 2]],
                                 },
                                 MaterialIndex = newMaterialIndex
-                            });
+                            };
+                            Triangles.Add(newTriangle);
                         }
                     }
                 }
@@ -204,10 +214,58 @@ namespace TagTool.Geometry.Jms
             return new Vector3(point.X, point.Y, point.Z);
         }
 
-        struct Triangle
+        private class Triangle
         {
-            public List<ModelExtractor.GenericVertex> Vertices;
+            public List<int> VertexIndices = new List<int>();
+            public List<ModelExtractor.GenericVertex> Vertices = new List<ModelExtractor.GenericVertex>();
+            public Vector3 Normal;
             public int MaterialIndex;
+        }
+
+        public static Vector3[] CalculateVertexNormals(Vector3[] vertices, ushort[] indices)
+        {
+            Vector3[] vertexNormals = new Vector3[vertices.Length];
+
+            // Initialize all vertex normals to zero
+            for (int i = 0; i < vertexNormals.Length; i++)
+            {
+                vertexNormals[i] = Vector3.Zero;
+            }
+
+            // Calculate face normals and add them to vertex normals
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                int index1 = indices[i];
+                int index2 = indices[i + 1];
+                int index3 = indices[i + 2];
+
+                Vector3 v1 = vertices[index1];
+                Vector3 v2 = vertices[index2];
+                Vector3 v3 = vertices[index3];
+
+                Vector3 faceNormal = Vector3.Cross(v2 - v1, v3 - v1);
+
+                vertexNormals[index1] += faceNormal;
+                vertexNormals[index2] += faceNormal;
+                vertexNormals[index3] += faceNormal;
+            }
+
+            // Normalize vertex normals
+            for (int i = 0; i < vertexNormals.Length; i++)
+            {
+                vertexNormals[i] = Vector3.Normalize(vertexNormals[i]);
+            }
+
+            return vertexNormals;
+        }
+
+        private Vector3 Vector3fromVector3D(Vector3D input)
+        {
+            return new Vector3(input.X, input.Y, input.Z);
+        }
+        private Vector3D Vector3DfromVector3(Vector3 input)
+        {
+            return new Vector3D(input.X, input.Y, input.Z);
         }
     }
 }
