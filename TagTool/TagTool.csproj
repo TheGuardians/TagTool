@@ -1747,6 +1747,9 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting">
       <Version>4.0.1</Version>
     </PackageReference>
+    <PackageReference Include="Poly2Tri.NetStandard">
+      <Version>1.0.2</Version>
+    </PackageReference>
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
       <Version>5.0.0</Version>
     </PackageReference>
