@@ -182,7 +182,7 @@ namespace TagTool.Cache.Monolithic
             if (chunk.Header.Signature == "tgxc") // xsynced
             {
                 var resourceHandle = dataReader.ReadDatumIndex();
-                var xsyncState = new TagResourceXSyncState(TagId, chunkReader);
+                var xsyncState = new TagResourceXSyncState(TagId, chunkReader, chunk.Header.Version);
                 PersistContext.AddTagResource(resourceHandle, xsyncState);
             }
             else if (chunk.Header.Signature == "tg\0c")

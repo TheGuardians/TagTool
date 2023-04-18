@@ -69,9 +69,14 @@ namespace TagTool.Commands.Tags
 
             var deserializer = new TagDeserializer(TagCache, TagPlatform);
 
-            var definitions = new Cache.Gen3.TagDefinitionsGen3();
+            Dictionary<TagGroup, Type> TagTypes;
+            if (TagCache >= CacheVersion.Halo4)
+                TagTypes = new Cache.Gen4.TagDefinitionsGen4().Gen4Types;
+            else
+                TagTypes = new Cache.Gen3.TagDefinitionsGen3().Gen3Types;
+
             Type looseTagType = null;
-            foreach (KeyValuePair<TagGroup, Type> tagType in definitions.Gen3Types)
+            foreach (KeyValuePair<TagGroup, Type> tagType in TagTypes)
             {
                 if (tagType.Key.Tag == singleFileTagReader.Header.GroupTag)
                 {

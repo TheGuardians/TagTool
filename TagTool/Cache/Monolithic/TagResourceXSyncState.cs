@@ -6,6 +6,7 @@ using TagTool.Tags;
 
 namespace TagTool.Cache.Monolithic
 {
+    [TagStructure(Size = 0x6C)]
     public class TagResourceXSyncState
     {
         public XSyncStateHeader Header;
@@ -15,16 +16,18 @@ namespace TagTool.Cache.Monolithic
         public List<Guid> InteropTypes;
         public byte[] ControlData;
         public uint ResourceOwner;
+        public int Version;
 
         public TagResourceXSyncState()
         {
 
         }
 
-        public TagResourceXSyncState(uint resourceOwner, PersistChunkReader reader)
+        public TagResourceXSyncState(uint resourceOwner, PersistChunkReader reader, int version)
         {
             ResourceOwner = resourceOwner;
-            Header = reader.Deserialize<XSyncStateHeader>();
+            Version = version;
+            Header = ReadHeader(reader);
             ReadChunks(reader);
         }
 
@@ -64,9 +67,52 @@ namespace TagTool.Cache.Monolithic
             }
         }
 
+        public XSyncStateHeader ReadHeader(PersistChunkReader reader)
+        {
+            XSyncStateHeader header = new XSyncStateHeader();
+            switch (Version)
+            {
+                case 3:
+                    XSyncStateHeaderV3 headerV3 = reader.Deserialize<XSyncStateHeaderV3>();
+                    header = new XSyncStateHeader
+                    {
+                        CacheLocationOffset = headerV3.CacheLocationOffset,
+                        CacheLocationSize = headerV3.CacheLocationSize,
+                        OptionalLocationOffset = headerV3.OptionalLocationOffset,
+                        OptionalLocationSize = headerV3.OptionalLocationSize,
+                        ControlAlignmentBits = headerV3.ControlAlignmentBits,
+                        ControlDataSize = headerV3.ControlDataSize,
+                        ControlFixupCount = headerV3.ControlFixupCount,
+                        InteropUsageCount = headerV3.InteropUsageCount,
+                        RootAddress = headerV3.RootAddress
+                    };
+                    break;
+                default:
+                    header = reader.Deserialize<XSyncStateHeader>();
+                    break;
+            }
+            return header;
+        }
+
         [TagStructure(Size = 0x24)]
         public class XSyncStateHeader : TagStructure
         {
+            public uint CacheLocationOffset;
+            public uint CacheLocationSize;
+            public uint OptionalLocationOffset;
+            public uint OptionalLocationSize;
+            public int ControlAlignmentBits;
+            public int ControlDataSize;
+            public int ControlFixupCount;
+            public int InteropUsageCount;
+            public CacheAddress RootAddress;
+        }
+
+        [TagStructure(Size = 0x2C)]
+        public class XSyncStateHeaderV3 : TagStructure
+        {
+            public uint Unknown1;
+            public uint Unknown2;
             public uint CacheLocationOffset;
             public uint CacheLocationSize;
             public uint OptionalLocationOffset;
