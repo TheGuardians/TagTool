@@ -105,7 +105,7 @@ namespace TagTool.Commands.Shaders
                     for (int i = 0; i < args.Count; i++)
                         fakeOptions.Add(0);
 
-                    rmdfTag = GenerateRmdf(stream, shaderType, fakeOptions.ToArray());
+                    rmdfTag = GenerateRmdf(Cache, stream, shaderType, fakeOptions.ToArray());
                     if (rmdfTag == null)
                         return new TagToolError(CommandError.TagInvalid, $"Could not find or generate rmdf tag for \"{shaderType}\"");
                 }
@@ -146,13 +146,13 @@ namespace TagTool.Commands.Shaders
                 while (options.Count != rmdf.Categories.Count)
                     options.Add(0);
 
-                GenerateRenderMethodTemplate(stream, shaderType, options.ToArray(), rmdf);
+                GenerateRenderMethodTemplate(Cache, stream, shaderType, options.ToArray(), rmdf);
             }
 
             return true;
         }
 
-        HaloShaderGenerator.Generator.IShaderGenerator GetShaderGenerator(string shaderType, byte[] options, bool applyFixes = false)
+        public static HaloShaderGenerator.Generator.IShaderGenerator GetShaderGenerator(string shaderType, byte[] options, bool applyFixes = false)
         {
             switch (shaderType)
             {
@@ -176,7 +176,7 @@ namespace TagTool.Commands.Shaders
             return null;
         }
 
-        HaloShaderGenerator.Generator.IShaderGenerator GetGlobalShaderGenerator(string shaderType, bool applyFixes = false)
+        public static HaloShaderGenerator.Generator.IShaderGenerator GetGlobalShaderGenerator(string shaderType, bool applyFixes = false)
         {
             switch (shaderType)
             {
@@ -200,17 +200,17 @@ namespace TagTool.Commands.Shaders
             return null;
         }
 
-        private CachedTag GenerateRmdf(Stream stream, string shaderType, byte[] options)
+        public static CachedTag GenerateRmdf(GameCache cache, Stream stream, string shaderType, byte[] options)
         {
             var generator = GetShaderGenerator(shaderType, options, true);
             if (generator == null)
                 return null;
 
-            var rmdf = TagTool.Shaders.ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(Cache, stream, generator, shaderType, out _, out _);
-            CachedTag rmdfTag = Cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{shaderType}");
-            Cache.Serialize(stream, rmdfTag, rmdf);
-            if (Cache is GameCacheHaloOnlineBase)
-                (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+            var rmdf = TagTool.Shaders.ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(cache, stream, generator, shaderType, out _, out _);
+            CachedTag rmdfTag = cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{shaderType}");
+            cache.Serialize(stream, rmdfTag, rmdf);
+            if (cache is GameCacheHaloOnlineBase)
+                (cache as GameCacheHaloOnlineBase).SaveTagNames();
             return rmdfTag;
         }
 
@@ -366,7 +366,7 @@ namespace TagTool.Commands.Shaders
             return true;
         }
 
-        private void GenerateRenderMethodTemplate(Stream stream, string shaderType, byte[] options, RenderMethodDefinition rmdf)
+        public static void GenerateRenderMethodTemplate(GameCache cache, Stream stream, string shaderType, byte[] options, RenderMethodDefinition rmdf)
         {
             string rmt2Name = $"shaders\\{shaderType}_templates\\_{string.Join("_", options)}";
 
@@ -374,10 +374,10 @@ namespace TagTool.Commands.Shaders
 
             List<SDependentRenderMethodData> dependentRenderMethods = new List<SDependentRenderMethodData>();
 
-            if (Cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
+            if (cache.TagCache.TryGetTag(rmt2Name + ".rmt2", out var rmt2Tag))
             {
-                var origRmt2 = Cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
-                var dependents = (Cache as GameCacheHaloOnlineBase).TagCacheGenHO.NonNull().Where(t => ((Cache.HaloOnline.CachedTagHaloOnline)t).Dependencies.Contains(rmt2Tag.Index));
+                var origRmt2 = cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
+                var dependents = (cache as GameCacheHaloOnlineBase).TagCacheGenHO.NonNull().Where(t => ((Cache.HaloOnline.CachedTagHaloOnline)t).Dependencies.Contains(rmt2Tag.Index));
 
                 foreach (var dependent in dependents)
                 {
@@ -385,44 +385,44 @@ namespace TagTool.Commands.Shaders
                     
                     if (dependent.IsInGroup("rm  "))
                     { 
-                        definition = Cache.Deserialize(stream, dependent);
+                        definition = cache.Deserialize(stream, dependent);
                     }
                     else
                     {
                         switch (dependent.Group.Tag.ToString())
                         {
                             case "prt3":
-                                var prt3 = Cache.Deserialize<Particle>(stream, dependent);
+                                var prt3 = cache.Deserialize<Particle>(stream, dependent);
                                 definition = prt3.RenderMethod;
                                 break;
                             case "decs":
-                                var decs = Cache.Deserialize<DecalSystem>(stream, dependent);
+                                var decs = cache.Deserialize<DecalSystem>(stream, dependent);
                                 for (int i = 0; i < decs.Decal.Count; i++)
                                     if (decs.Decal[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
-                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, decs.Decal[i].RenderMethod, origRmt2, i);
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, cache, dependent, decs.Decal[i].RenderMethod, origRmt2, i);
                                 continue;
                             case "beam":
-                                var beam = Cache.Deserialize<BeamSystem>(stream, dependent);
+                                var beam = cache.Deserialize<BeamSystem>(stream, dependent);
                                 for (int i = 0; i < beam.Beams.Count; i++)
                                     if (beam.Beams[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
-                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, beam.Beams[i].RenderMethod, origRmt2, i);
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, cache, dependent, beam.Beams[i].RenderMethod, origRmt2, i);
                                 continue;
                             case "ltvl":
-                                var ltvl = Cache.Deserialize<LightVolumeSystem>(stream, dependent);
+                                var ltvl = cache.Deserialize<LightVolumeSystem>(stream, dependent);
                                 for (int i = 0; i < ltvl.LightVolumes.Count; i++)
                                     if (ltvl.LightVolumes[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
-                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, ltvl.LightVolumes[i].RenderMethod, origRmt2, i);
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, cache, dependent, ltvl.LightVolumes[i].RenderMethod, origRmt2, i);
                                 continue;
                             case "cntl":
-                                var cntl = Cache.Deserialize<ContrailSystem>(stream, dependent);
+                                var cntl = cache.Deserialize<ContrailSystem>(stream, dependent);
                                 for (int i = 0; i < cntl.Contrails.Count; i++)
                                     if (cntl.Contrails[i].RenderMethod.ShaderProperties[0].Template.Name == rmt2Name)
-                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, cntl.Contrails[i].RenderMethod, origRmt2, i);
+                                        SDependentRenderMethodData.AddDependant(dependentRenderMethods, cache, dependent, cntl.Contrails[i].RenderMethod, origRmt2, i);
                                 continue;
                         }
                     }
 
-                    SDependentRenderMethodData.AddDependant(dependentRenderMethods, Cache, dependent, (RenderMethod)definition, origRmt2);
+                    SDependentRenderMethodData.AddDependant(dependentRenderMethods, cache, dependent, (RenderMethod)definition, origRmt2);
                 }
             }
 
@@ -430,17 +430,17 @@ namespace TagTool.Commands.Shaders
 
             var generator = GetShaderGenerator(shaderType, options, true);
 
-            var glps = Cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
-            var glvs = Cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
+            var glps = cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
+            var glvs = cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);
 
-            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(Cache, stream, rmdf, glps, glvs, generator, rmt2Name);
+            var rmt2 = TagTool.Shaders.ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(cache, stream, rmdf, glps, glvs, generator, rmt2Name);
 
             if (rmt2Tag == null)
-                rmt2Tag = Cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
+                rmt2Tag = cache.TagCache.AllocateTag<RenderMethodTemplate>(rmt2Name);
 
-            Cache.Serialize(stream, rmt2Tag, rmt2);
-            Cache.SaveStrings();
-            (Cache as GameCacheHaloOnlineBase).SaveTagNames();
+            cache.Serialize(stream, rmt2Tag, rmt2);
+            cache.SaveStrings();
+            (cache as GameCacheHaloOnlineBase).SaveTagNames();
 
             Console.WriteLine($"Generated shader template \"{rmt2Name}\"");
 
@@ -453,7 +453,7 @@ namespace TagTool.Commands.Shaders
                 List<TextureConstant> reorderedTextureConstants = new List<TextureConstant>();
                 foreach (var textureName in rmt2.TextureParameterNames)
                 {
-                    int origIndex = dependent.OrderedTextures.IndexOf(Cache.StringTable.GetString(textureName.Name));
+                    int origIndex = dependent.OrderedTextures.IndexOf(cache.StringTable.GetString(textureName.Name));
                     if (origIndex != -1)
                         reorderedTextureConstants.Add(postprocess.TextureConstants[origIndex]);
                     else
@@ -464,7 +464,7 @@ namespace TagTool.Commands.Shaders
                 List<RealConstant> reorderedRealConstants = new List<RealConstant>();
                 foreach (var realName in rmt2.RealParameterNames)
                 {
-                    int origIndex = dependent.OrderedRealParameters.IndexOf(Cache.StringTable.GetString(realName.Name));
+                    int origIndex = dependent.OrderedRealParameters.IndexOf(cache.StringTable.GetString(realName.Name));
                     if (origIndex != -1)
                         reorderedRealConstants.Add(postprocess.RealConstants[origIndex]);
                     else
@@ -475,7 +475,7 @@ namespace TagTool.Commands.Shaders
                 List<uint> reorderedIntConstants = new List<uint>();
                 foreach (var intName in rmt2.IntegerParameterNames)
                 {
-                    int origIndex = dependent.OrderedIntParameters.IndexOf(Cache.StringTable.GetString(intName.Name));
+                    int origIndex = dependent.OrderedIntParameters.IndexOf(cache.StringTable.GetString(intName.Name));
                     if (origIndex != -1)
                         reorderedIntConstants.Add(postprocess.IntegerConstants[origIndex]);
                     else
@@ -486,7 +486,7 @@ namespace TagTool.Commands.Shaders
                 uint reorderedBoolConstants = 0;
                 for (int i = 0; i < rmt2.BooleanParameterNames.Count; i++)
                 {
-                    int origIndex = dependent.OrderedBoolParameters.IndexOf(Cache.StringTable.GetString(rmt2.BooleanParameterNames[i].Name));
+                    int origIndex = dependent.OrderedBoolParameters.IndexOf(cache.StringTable.GetString(rmt2.BooleanParameterNames[i].Name));
                     if (origIndex != -1)
                         reorderedBoolConstants |= ((postprocess.BooleanConstants >> origIndex) & 1) == 1 ? 1u << i : 0;
                 }
@@ -527,7 +527,7 @@ namespace TagTool.Commands.Shaders
                         {
                             var rmt2RoutingInfo = rmt2.RoutingInfo[j];
 
-                            string paramName = Cache.StringTable.GetString(rmt2.TextureParameterNames[rmt2RoutingInfo.SourceIndex].Name);
+                            string paramName = cache.StringTable.GetString(rmt2.TextureParameterNames[rmt2RoutingInfo.SourceIndex].Name);
 
                             foreach (var animatedParam in textureAnimatedParams)
                             {
@@ -558,7 +558,7 @@ namespace TagTool.Commands.Shaders
                         {
                             var rmt2RoutingInfo = rmt2.RoutingInfo[j];
 
-                            string paramName = Cache.StringTable.GetString(rmt2.RealParameterNames[rmt2RoutingInfo.SourceIndex].Name);
+                            string paramName = cache.StringTable.GetString(rmt2.RealParameterNames[rmt2RoutingInfo.SourceIndex].Name);
 
                             foreach (var animatedParam in realAnimatedParams)
                             {
@@ -589,7 +589,7 @@ namespace TagTool.Commands.Shaders
                         {
                             var rmt2RoutingInfo = rmt2.RoutingInfo[j];
 
-                            string paramName = Cache.StringTable.GetString(rmt2.RealParameterNames[rmt2RoutingInfo.SourceIndex].Name);
+                            string paramName = cache.StringTable.GetString(rmt2.RealParameterNames[rmt2RoutingInfo.SourceIndex].Name);
 
                             foreach (var animatedParam in realAnimatedParams)
                             {
@@ -614,36 +614,36 @@ namespace TagTool.Commands.Shaders
 
                 if (dependent.Tag.IsInGroup("rm  "))
                 {
-                    Cache.Serialize(stream, dependent.Tag, dependent.Definition);
+                    cache.Serialize(stream, dependent.Tag, dependent.Definition);
                 }
                 else
                 {
                     switch (dependent.Tag.Group.Tag.ToString())
                     {
                         case "prt3":
-                            var prt3 = Cache.Deserialize<Particle>(stream, dependent.Tag);
+                            var prt3 = cache.Deserialize<Particle>(stream, dependent.Tag);
                             prt3.RenderMethod = (RenderMethod)dependent.Definition;
-                            Cache.Serialize(stream, dependent.Tag, prt3);
+                            cache.Serialize(stream, dependent.Tag, prt3);
                             break;
                         case "decs":
-                            var decs = Cache.Deserialize<DecalSystem>(stream, dependent.Tag);
+                            var decs = cache.Deserialize<DecalSystem>(stream, dependent.Tag);
                             decs.Decal[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
-                            Cache.Serialize(stream, dependent.Tag, decs);
+                            cache.Serialize(stream, dependent.Tag, decs);
                             break;
                         case "beam":
-                            var beam = Cache.Deserialize<BeamSystem>(stream, dependent.Tag);
+                            var beam = cache.Deserialize<BeamSystem>(stream, dependent.Tag);
                             beam.Beams[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
-                            Cache.Serialize(stream, dependent.Tag, beam);
+                            cache.Serialize(stream, dependent.Tag, beam);
                             break;
                         case "ltvl":
-                            var ltvl = Cache.Deserialize<LightVolumeSystem>(stream, dependent.Tag);
+                            var ltvl = cache.Deserialize<LightVolumeSystem>(stream, dependent.Tag);
                             ltvl.LightVolumes[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
-                            Cache.Serialize(stream, dependent.Tag, ltvl);
+                            cache.Serialize(stream, dependent.Tag, ltvl);
                             break;
                         case "cntl":
-                            var cntl = Cache.Deserialize<ContrailSystem>(stream, dependent.Tag);
+                            var cntl = cache.Deserialize<ContrailSystem>(stream, dependent.Tag);
                             cntl.Contrails[dependent.EffectIndex].RenderMethod = (RenderMethod)dependent.Definition;
-                            Cache.Serialize(stream, dependent.Tag, cntl);
+                            cache.Serialize(stream, dependent.Tag, cntl);
                             break;
                     }
                 }
