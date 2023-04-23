@@ -68,13 +68,18 @@ namespace TagTool.Commands.Shaders
             if (rmdf.GlobalVertexShader == null || rmdf.GlobalPixelShader == null)
                 return new TagToolError(CommandError.TagInvalid, "A global shader was missing from rmdf");
 
+            List<CachedTag> regenTags = new List<CachedTag>();
             foreach (var tag in Cache.TagCache.NonNull())
             {
                 if (tag.Group.Tag != "rmt2" ||
                     tag.Name.StartsWith("ms30") ||
                     !tag.Name.Split('\\')[1].StartsWith(shaderType + "_templates"))
                     continue;
+                regenTags.Add(tag);
+            }
 
+            foreach (var tag in regenTags)
+            {
                 List<byte> options = new List<byte>();
 
                 foreach (var option in tag.Name.Split('\\')[2].Remove(0, 1).Split('_'))
