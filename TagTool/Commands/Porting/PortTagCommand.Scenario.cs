@@ -763,6 +763,10 @@ namespace TagTool.Commands.Porting
                     AddGametypeObjects(scnr);
             }
 
+            //
+            // Misc multiplayer fixups
+            //
+
             if (scnr.PlayerStartingProfile == null || scnr.PlayerStartingProfile.Count == 0)
             {
                 scnr.PlayerStartingProfile = new List<Scenario.PlayerStartingProfileBlock>() {
@@ -774,6 +778,36 @@ namespace TagTool.Commands.Porting
                         StartingFragGrenadeCount = 2
                     }
                 };
+            }
+            else if (scnr.MapType == ScenarioMapType.Multiplayer)
+            {
+                if (string.IsNullOrEmpty(scnr.PlayerStartingProfile[0].Name))
+                    scnr.PlayerStartingProfile[0].Name = "start_assault";
+
+                if (scnr.PlayerStartingProfile[0].PrimaryWeapon == null)
+                    scnr.PlayerStartingProfile[0].PrimaryWeapon = CacheContext.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap");
+            }
+
+            if (scnr.MapType == ScenarioMapType.Multiplayer && BlamCache.Version == CacheVersion.Halo3Retail)
+            {
+                var spawnpoint = -1;
+                for (int i = 0; i < scnr.SceneryPalette.Count; i++)
+                {
+                    if (scnr.SceneryPalette[i].Object?.Name == @"objects\multi\spawning\respawn_point")
+                    {
+                        spawnpoint = i;
+                        break;
+                    }
+                }
+
+                if (spawnpoint != -1)
+                {
+                    for (int i = 0; i < scnr.Scenery.Count; i++)
+                    {
+                        if (scnr.Scenery[i].PaletteIndex == spawnpoint)
+                            scnr.Scenery[i].Multiplayer.Team = MultiplayerTeamDesignator.Neutral;
+                    }
+                }
             }
 
             return scnr;
