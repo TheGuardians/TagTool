@@ -33,7 +33,7 @@ namespace TagTool.Commands.Porting.Gen2
             };
 
             //materials
-            TranslateList(gen2Model.Materials, model.Materials);
+            AutoConverter.TranslateList(gen2Model.Materials, model.Materials);
 
             //variants
             foreach (var gen2var in gen2Model.Variants)
@@ -66,7 +66,7 @@ namespace TagTool.Commands.Porting.Gen2
                             States = new List<Model.Variant.Region.Permutation.State>(),
                             RuntimeStatePermutationIndices = gen2perm.RuntimeStatePermutationIndices
                         };
-                        TranslateList(gen2perm.States, permutation.States);
+                        AutoConverter.TranslateList(gen2perm.States, permutation.States);
 
                         // Fixups for States block
                         // Reference proper permutation index from render model in model permutation index
@@ -90,7 +90,7 @@ namespace TagTool.Commands.Porting.Gen2
                                     }
                                 }
                             }
-                            TranslateEnum(gen2perm.States[i].PropertyFlags, out permutation.States[i].PropertyFlags, permutation.States[i].PropertyFlags.GetType());
+                            AutoConverter.TranslateEnum(gen2perm.States[i].PropertyFlags, out permutation.States[i].PropertyFlags, permutation.States[i].PropertyFlags.GetType());
                         }
 
                         region.Permutations.Add(permutation);
@@ -99,19 +99,19 @@ namespace TagTool.Commands.Porting.Gen2
                 }
                 model.Variants.Add(variant);
 
-                TranslateList(gen2var.Objects, variant.Objects);
+                AutoConverter.TranslateList(gen2var.Objects, variant.Objects);
             }
 
-            TranslateList(gen2Model.Targets, model.Targets);
+            AutoConverter.TranslateList(gen2Model.Targets, model.Targets);
             // Fixup Targets
             for (byte i = 0; i < model.Targets.Count; i++)
             {
                 model.Targets[i].LockOnData = new Model.TargetLockOnData();
-                TranslateEnum(gen2Model.Targets[i].LockOnData.Flags, out model.Targets[i].LockOnData.Flags, model.Targets[i].LockOnData.Flags.GetType());
+                AutoConverter.TranslateEnum(gen2Model.Targets[i].LockOnData.Flags, out model.Targets[i].LockOnData.Flags, model.Targets[i].LockOnData.Flags.GetType());
                 model.Targets[i].LockOnData.LockOnDistance = gen2Model.Targets[i].LockOnData.LockOnDistance;
             }
 
-            TranslateList(gen2Model.NewDamageInfo, model.NewDamageInfo);
+            AutoConverter.TranslateList(gen2Model.NewDamageInfo, model.NewDamageInfo);
 
             // Fixup NewDamageInfo
             if (gen2Model.NewDamageInfo.Count > 0)
@@ -121,13 +121,13 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //collision regions
-            TranslateList(gen2Model.CollisionRegions, model.CollisionRegions);
+            AutoConverter.TranslateList(gen2Model.CollisionRegions, model.CollisionRegions);
 
             //nodes
-            TranslateList(gen2Model.Nodes, model.Nodes);
+            AutoConverter.TranslateList(gen2Model.Nodes, model.Nodes);
 
             //model object data
-            TranslateList(gen2Model.ModelObjectData, model.ModelObjectData);
+            AutoConverter.TranslateList(gen2Model.ModelObjectData, model.ModelObjectData);
 
             return model;
         }

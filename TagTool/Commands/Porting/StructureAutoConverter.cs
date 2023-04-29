@@ -3,11 +3,45 @@ using System.Collections.Generic;
 using System.Linq;
 using TagTool.Tags;
 using TagTool.Commands.Common;
+using TagTool.Cache;
 
-namespace TagTool.Commands.Porting.Gen2
+namespace TagTool.Commands.Porting
 {
-	partial class PortTagGen2Command : Command
+    public class StructureAutoConverter
     {
+        private GameCacheInfo sourceCacheInfo;
+        private GameCacheInfo destCacheInfo;
+
+        public StructureAutoConverter(GameCacheInfo sourceCacheInfo, GameCacheInfo destCacheInfo)
+        {
+            this.sourceCacheInfo = sourceCacheInfo;
+            this.destCacheInfo = destCacheInfo;
+        }
+
+        public StructureAutoConverter(GameCache sourceCache, GameCache destCache)
+        {
+            this.sourceCacheInfo = new GameCacheInfo(sourceCache);
+            this.destCacheInfo = new GameCacheInfo(destCache);            
+        }
+
+        public class GameCacheInfo
+        {
+            public CacheVersion Version { get; set; }
+            public CachePlatform Platform { get; set; }
+
+            public GameCacheInfo(GameCache cache)
+            {
+                this.Version = cache.Version;
+                this.Platform = cache.Platform;
+            }
+
+            public GameCacheInfo(CacheVersion version, CachePlatform platform)
+            {
+                Version = version;
+                Platform = platform;
+            }
+        }
+
         public void TranslateTagStructure(TagStructure input, TagStructure output)
         {
             if (input == null || output == null)
@@ -18,8 +52,8 @@ namespace TagTool.Commands.Porting.Gen2
             Type inputtype = input.GetType();
             Type outputtype = output.GetType();
 
-            var inputinfo = TagStructure.GetTagStructureInfo(inputtype, Gen2Cache.Version, Gen2Cache.Platform);
-            var outputinfo = TagStructure.GetTagStructureInfo(outputtype, Cache.Version, Cache.Platform);
+            var inputinfo = TagStructure.GetTagStructureInfo(inputtype, sourceCacheInfo.Version, sourceCacheInfo.Platform);
+            var outputinfo = TagStructure.GetTagStructureInfo(outputtype, destCacheInfo.Version, destCacheInfo.Platform);
 
             //use an ordered list so we can use binary searches to decrease iterations
             List<TagFieldInfo> outputfieldlist = TagStructure.GetTagFieldEnumerable(outputinfo.Types[0], outputinfo.Version, outputinfo.CachePlatform)
@@ -112,12 +146,12 @@ namespace TagTool.Commands.Porting.Gen2
 
             string setstring = "";
             bool result = false;
-            string[] inputlist = input.ToString().ToUpper().Split(new string[]{", "}, StringSplitOptions.RemoveEmptyEntries);
+            string[] inputlist = input.ToString().ToUpper().Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string en in Enum.GetNames(enumType))
             {
                 if (inputlist.Contains(en.ToUpper()))
                 {
-                    if(result)
+                    if (result)
                         setstring += $",{en}";
                     else
                         setstring += $"{en}";
@@ -134,7 +168,7 @@ namespace TagTool.Commands.Porting.Gen2
         public void InitTagBlocks(object input)
         {
             var inputtype = input.GetType();
-            var inputinfo = TagStructure.GetTagStructureInfo(inputtype, Cache.Version, Cache.Platform);
+            var inputinfo = TagStructure.GetTagStructureInfo(inputtype, destCacheInfo.Version, destCacheInfo.Platform);
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(inputinfo.Types[0], inputinfo.Version, inputinfo.CachePlatform))
             {
                 if (tagFieldInfo.FieldType.IsGenericType && tagFieldInfo.FieldType.GetGenericTypeDefinition() == typeof(List<>))

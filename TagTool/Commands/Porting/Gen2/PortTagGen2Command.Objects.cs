@@ -22,52 +22,52 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 case TagTool.Tags.Definitions.Gen2.Crate crate:
                     Crate newcrate = new Crate();
-                    TranslateTagStructure(crate, newcrate);
+                    AutoConverter.TranslateTagStructure(crate, newcrate);
                     newcrate.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Crate };
                     return newcrate;
                 case TagTool.Tags.Definitions.Gen2.Scenery scenery:
                     Scenery newscenery = new Scenery();
-                    TranslateTagStructure(scenery, newscenery);
+                    AutoConverter.TranslateTagStructure(scenery, newscenery);
                     newscenery.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Scenery };
                     newscenery = FixupScenery(scenery, newscenery, cacheStream);
                     return newscenery;
                 case TagTool.Tags.Definitions.Gen2.Weapon weapon:
                     Weapon newweapon = new Weapon();
-                    TranslateTagStructure(weapon, newweapon);
+                    AutoConverter.TranslateTagStructure(weapon, newweapon);
                     newweapon.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Weapon };
                     return FixupWeapon(weapon, newweapon);
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                     Vehicle newvehicle = new Vehicle();
-                    TranslateTagStructure(vehicle, newvehicle);
+                    AutoConverter.TranslateTagStructure(vehicle, newvehicle);
                     newvehicle.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle };
                     return FixupVehicle(vehicle, newvehicle);
                 case TagTool.Tags.Definitions.Gen2.Projectile projectile:
                     Projectile newprojectile = new Projectile();
-                    TranslateTagStructure(projectile, newprojectile);
+                    AutoConverter.TranslateTagStructure(projectile, newprojectile);
                     newprojectile.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Projectile };
                     return newprojectile;
                 case TagTool.Tags.Definitions.Gen2.CameraTrack track:
                     CameraTrack newtrack = new CameraTrack();
-                    TranslateTagStructure(track, newtrack);
+                    AutoConverter.TranslateTagStructure(track, newtrack);
                     return newtrack;
                 case TagTool.Tags.Definitions.Gen2.DeviceMachine devicemachine:
                     DeviceMachine newdevicemachine = new DeviceMachine();
-                    TranslateTagStructure(devicemachine, newdevicemachine);
+                    AutoConverter.TranslateTagStructure(devicemachine, newdevicemachine);
                     newdevicemachine.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Machine };
                     return newdevicemachine;
                 case TagTool.Tags.Definitions.Gen2.Equipment equipment:
                     Equipment newequipment = new Equipment();
-                    TranslateTagStructure(equipment, newequipment);
+                    AutoConverter.TranslateTagStructure(equipment, newequipment);
                     newequipment.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Equipment };
                     return newequipment;
                 case TagTool.Tags.Definitions.Gen2.DeviceControl devicecontrol:
                     DeviceControl newdevicecontrol = new DeviceControl();
-                    TranslateTagStructure(devicecontrol, newdevicecontrol);
+                    AutoConverter.TranslateTagStructure(devicecontrol, newdevicecontrol);
                     newdevicecontrol.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Control };
                     return newdevicecontrol;
                 case TagTool.Tags.Definitions.Gen2.Biped biped:
                     Biped newbiped = new Biped();
-                    TranslateTagStructure(biped, newbiped);
+                    AutoConverter.TranslateTagStructure(biped, newbiped);
                     newbiped.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Biped };
                     return FixupBiped(biped, newbiped);
                 default:
@@ -94,7 +94,7 @@ namespace TagTool.Commands.Porting.Gen2
             });
             newweapon.WeaponFlags = new WeaponFlags();
 
-            TranslateEnum(gen2Tag.WeaponFlags, out newweapon.WeaponFlags.NewFlags, newweapon.WeaponFlags.NewFlags.GetType());
+            AutoConverter.TranslateEnum(gen2Tag.WeaponFlags, out newweapon.WeaponFlags.NewFlags, newweapon.WeaponFlags.NewFlags.GetType());
             return newweapon;
         }
 
@@ -133,10 +133,10 @@ namespace TagTool.Commands.Porting.Gen2
             vehi.FlipTimeNew = gen2Tag.TurnScale;
             vehi.FlippingAngularVelocityRangeNew = new Bounds<float>(gen2Tag.MinimumFlippingAngularVelocity, gen2Tag.MaximumFlippingAngularVelocity);
             vehi.PhysicsTypes = new Vehicle.VehiclePhysicsTypes();
-            TranslateEnum(gen2Tag.Flags1, out vehi.UnitFlags, vehi.UnitFlags.GetType());
+            AutoConverter.TranslateEnum(gen2Tag.Flags1, out vehi.UnitFlags, vehi.UnitFlags.GetType());
 
             vehi.HavokVehiclePhysics.PhantomShapes = new List<Vehicle.PhantomShape>();
-            TranslateList(gen2Tag.HavokVehiclePhysics.ShapePhantomShape, vehi.HavokVehiclePhysics.PhantomShapes);
+            AutoConverter.TranslateList(gen2Tag.HavokVehiclePhysics.ShapePhantomShape, vehi.HavokVehiclePhysics.PhantomShapes);
             //this makes the antigravity work
             if (vehi.HavokVehiclePhysics.PhantomShapes.Count > 0)
                 vehi.HavokVehiclePhysics.PhantomShapes[0].Flags = 1;
@@ -168,7 +168,7 @@ namespace TagTool.Commands.Porting.Gen2
                         WheelCircumference = gen2Tag.WheelCircumference,
                         GravityAdjust = 0.45f
                     };
-                    TranslateList(gen2Tag.Gears, newtank.Engine.Gears);
+                    AutoConverter.TranslateList(gen2Tag.Gears, newtank.Engine.Gears);
                     vehi.PhysicsTypes.HumanTank.Add(newtank);
                     break;
 
@@ -196,7 +196,7 @@ namespace TagTool.Commands.Porting.Gen2
                         WheelCircumference = gen2Tag.WheelCircumference,
                         GravityAdjust = 0.8f
                     };
-                    TranslateList(gen2Tag.Gears, newjeep.Engine.Gears);
+                    AutoConverter.TranslateList(gen2Tag.Gears, newjeep.Engine.Gears);
                     vehi.PhysicsTypes.HumanJeep.Add(newjeep);
                     break;
 
@@ -369,7 +369,7 @@ namespace TagTool.Commands.Porting.Gen2
             });
 
             newbiped.LockonDistance = gen2Tag.LockOnData.LockOnDistance;
-            TranslateEnum(gen2Tag.LockOnData.Flags, out newbiped.LockonFlags, newbiped.LockonFlags.GetType());
+            AutoConverter.TranslateEnum(gen2Tag.LockOnData.Flags, out newbiped.LockonFlags, newbiped.LockonFlags.GetType());
 
             newbiped.PhysicsFlags = gen2Tag.Physics.Flags;
             newbiped.HeightStanding = gen2Tag.Physics.HeightStanding;
@@ -400,8 +400,8 @@ namespace TagTool.Commands.Porting.Gen2
 
             newbiped.BipedGroundPhysics = new Biped.CharacterPhysicsGroundStruct();
             newbiped.BipedFlyingPhysics = new Biped.CharacterPhysicsFlyingStruct();
-            TranslateTagStructure(gen2Tag.Physics.GroundPhysics, newbiped.BipedGroundPhysics);
-            TranslateTagStructure(gen2Tag.Physics.FlyingPhysics, newbiped.BipedFlyingPhysics);
+            AutoConverter.TranslateTagStructure(gen2Tag.Physics.GroundPhysics, newbiped.BipedGroundPhysics);
+            AutoConverter.TranslateTagStructure(gen2Tag.Physics.FlyingPhysics, newbiped.BipedFlyingPhysics);
 
             return newbiped;
         }

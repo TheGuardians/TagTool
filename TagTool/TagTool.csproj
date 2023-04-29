@@ -402,6 +402,7 @@
     <Compile Include="Commands\ModelAnimationGraphs\SetAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExportJMSCommand.cs" />
     <Compile Include="Commands\Porting\Gen4\PortTagGen4Command.Models.cs" />
+    <Compile Include="Commands\Porting\StructureAutoConverter.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\GenerateStructureSurfacesCommand.cs" />
     <Compile Include="Commands\Shaders\RecompileShadersCommand.cs" />
     <Compile Include="Commands\Tags\ImportLooseTagCommand.cs" />
@@ -410,7 +411,6 @@
     <Compile Include="Commands\Porting\Gen2\Gen2BspGeometryConverter.cs" />
     <Compile Include="Commands\Porting\Gen2\Gen2RenderGeometryConverter.cs" />
     <Compile Include="Commands\Porting\Gen2\Gen2VertexDefinitions.cs" />
-    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.AutoConvert.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Bitmap.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Effects.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Light.cs" />

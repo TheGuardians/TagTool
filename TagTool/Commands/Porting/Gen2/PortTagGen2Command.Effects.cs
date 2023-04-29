@@ -11,6 +11,7 @@ using TagTool.Serialization;
 using TagTool.Cache.Gen2;
 using System.IO;
 using TagTool.Commands.Common;
+using TagTool.Commands.Porting;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -22,7 +23,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 case TagTool.Tags.Definitions.Gen2.DamageEffect damage:
                     DamageEffect newdamage = new DamageEffect();
-                    TranslateTagStructure(damage, newdamage);
+                    AutoConverter.TranslateTagStructure(damage, newdamage);
                     return newdamage;
                 default:
                     return null;

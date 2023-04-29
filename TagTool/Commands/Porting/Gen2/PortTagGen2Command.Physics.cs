@@ -21,7 +21,7 @@ namespace TagTool.Commands.Porting.Gen2
                 HighFrequencyDeactivationScale = gen2PhysicsModel.HighFreqDeactivationScale,
             };
 
-            InitTagBlocks(physicsModel);
+            AutoConverter.InitTagBlocks(physicsModel);
 
             //convert phantom types
             foreach (var gen2phantomtype in gen2PhysicsModel.PhantomTypes)
@@ -46,7 +46,7 @@ namespace TagTool.Commands.Porting.Gen2
                     AlignmentMaxVelocity = gen2phantomtype.AlignmentMaxVel
                 };
                 //fix up phantom type flags
-                TranslateEnum(gen2phantomtype.Flags, out newPhantomType.Flags.Halo3ODST, newPhantomType.Flags.Halo3ODST.GetType());
+                AutoConverter.TranslateEnum(gen2phantomtype.Flags, out newPhantomType.Flags.Halo3ODST, newPhantomType.Flags.Halo3ODST.GetType());
 
                 physicsModel.PhantomTypes.Add(newPhantomType);
             }
@@ -102,7 +102,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             //convert node edges
-            TranslateList(gen2PhysicsModel.NodeEdges, physicsModel.NodeEdges);
+            AutoConverter.TranslateList(gen2PhysicsModel.NodeEdges, physicsModel.NodeEdges);
 
             //convert pills
             foreach (var gen2pill in gen2PhysicsModel.Pills)
@@ -329,7 +329,7 @@ namespace TagTool.Commands.Porting.Gen2
             foreach(var gen2hinge in gen2PhysicsModel.LimitedHingeConstraints)
             {
                 PhysicsModel.LimitedHingeConstraint newHinge = new PhysicsModel.LimitedHingeConstraint();
-                TranslateTagStructure(gen2hinge.ConstraintBodies, newHinge);
+                AutoConverter.TranslateTagStructure(gen2hinge.ConstraintBodies, newHinge);
                 newHinge.LimitFriction = gen2hinge.LimitFriction;
                 newHinge.LimitAngleBounds = new TagTool.Common.Bounds<float>(gen2hinge.LimitMinAngle, gen2hinge.LimitMaxAngle);
                 physicsModel.LimitedHingeConstraints.Add(newHinge);
@@ -339,7 +339,7 @@ namespace TagTool.Commands.Porting.Gen2
             foreach(var gen2con in gen2PhysicsModel.HingeConstraints)
             {
                 PhysicsModel.HingeConstraint newCon = new PhysicsModel.HingeConstraint();
-                TranslateTagStructure(gen2con.ConstraintBodies, newCon);
+                AutoConverter.TranslateTagStructure(gen2con.ConstraintBodies, newCon);
                 physicsModel.HingeConstraints.Add(newCon);
             }
 
@@ -347,7 +347,7 @@ namespace TagTool.Commands.Porting.Gen2
             foreach(var gen2ragdoll in gen2PhysicsModel.RagdollConstraints)
             {
                 PhysicsModel.RagdollConstraint newRag = new PhysicsModel.RagdollConstraint();
-                TranslateTagStructure(gen2ragdoll.ConstraintBodies, newRag);
+                AutoConverter.TranslateTagStructure(gen2ragdoll.ConstraintBodies, newRag);
                 newRag.MaxFrictionTorque = gen2ragdoll.MaxFricitonTorque;
                 newRag.TwistRange = new TagTool.Common.Bounds<float>(gen2ragdoll.MinTwist, gen2ragdoll.MaxTwist);
                 newRag.ConeRange = new TagTool.Common.Bounds<float>(gen2ragdoll.MinCone, gen2ragdoll.MaxCone);
@@ -359,7 +359,7 @@ namespace TagTool.Commands.Porting.Gen2
             foreach(var gen2ball in gen2PhysicsModel.BallAndSocketConstraints)
             {
                 PhysicsModel.BallAndSocketConstraint newBall = new PhysicsModel.BallAndSocketConstraint();
-                TranslateTagStructure(gen2ball.ConstraintBodies, newBall);
+                AutoConverter.TranslateTagStructure(gen2ball.ConstraintBodies, newBall);
                 physicsModel.BallAndSocketConstraints.Add(newBall);
             }
 

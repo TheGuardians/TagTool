@@ -25,7 +25,7 @@ namespace TagTool.Commands.Porting.Gen2
             , Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             Scenario newScenario = new Scenario();
-            InitTagBlocks(newScenario);
+            AutoConverter.InitTagBlocks(newScenario);
 
             //default values for now, pulled from valhalla
             Cache.TagCache.TryGetTag<Wind>(@"levels\multi\riverworld\wind_riverworld", out var windTag);
@@ -56,7 +56,7 @@ namespace TagTool.Commands.Porting.Gen2
 
 
             // Starting Profiles
-            TranslateList(gen2Tag.PlayerStartingProfile, newScenario.PlayerStartingProfile);
+            AutoConverter.TranslateList(gen2Tag.PlayerStartingProfile, newScenario.PlayerStartingProfile);
 
             //soft surfaces
             newScenario.SoftSurfaces = new List<Scenario.SoftSurfaceBlock> { new Scenario.SoftSurfaceBlock() };
@@ -87,7 +87,7 @@ namespace TagTool.Commands.Porting.Gen2
                 newScenario.ZoneSetPvs[i].StructureBspMask = (Scenario.BspFlags)(((int)newScenario.ZoneSetPvs[0].StructureBspMask) | (1 << i));
                 newScenario.ZoneSetPvs[i].StructureBspPvs = new List<Scenario.ZoneSetPvsBlock.BspPvsBlock>();
                 newScenario.ZoneSetPvs[i].StructureBspPvs.Add(new Scenario.ZoneSetPvsBlock.BspPvsBlock());
-                InitTagBlocks(newScenario.ZoneSetPvs[i].StructureBspPvs[0]);
+                AutoConverter.InitTagBlocks(newScenario.ZoneSetPvs[i].StructureBspPvs[0]);
 
                 int pvsbits = 0;
                 for (var k = 0; k < currentbsp.Clusters.Count; k++)
@@ -215,7 +215,7 @@ namespace TagTool.Commands.Porting.Gen2
             newSbsp.UseResourceItems = 1; // use CollisionBspResource
             newSbsp.ImportVersion = 7;
 
-            InitTagBlocks(newSbsp);
+            AutoConverter.InitTagBlocks(newSbsp);
 
             //materials
             foreach (var material in gen2Tag.Materials)
@@ -786,7 +786,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Multiplayer = new Scenario.MultiplayerObjectProperties(),
                 };
                 newScenario.Scenery.Add(scenery);
-                TranslateEnum(gen2Tag.Scenery[scenobjindex].SceneryData.ValidMultiplayerGames, out scenery.Multiplayer.EngineFlags, scenery.Multiplayer.EngineFlags.GetType());
+                AutoConverter.TranslateEnum(gen2Tag.Scenery[scenobjindex].SceneryData.ValidMultiplayerGames, out scenery.Multiplayer.EngineFlags, scenery.Multiplayer.EngineFlags.GetType());
             }
 
             // Bipeds

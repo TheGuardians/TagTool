@@ -11,6 +11,7 @@ using TagTool.IO;
 using TagTool.Tags;
 using TagTool.Tags.Definitions.Gen2;
 using TagTool.BlamFile;
+using TagTool.Commands.Porting;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -22,11 +23,13 @@ namespace TagTool.Commands.Porting.Gen2
         PortingFlags PortFlags;
         private Dictionary<int, CachedTag> PortedTags = new Dictionary<int, CachedTag>();
         private List<int> InProgressTags = new List<int>();
+        private StructureAutoConverter AutoConverter;
 
         public PortTagGen2Command(GameCacheHaloOnlineBase cache, GameCacheGen2 gen2Cache) : base(false, "PortTag", "", "", "")
         {
             Cache = cache;
             Gen2Cache = gen2Cache;
+            AutoConverter = new StructureAutoConverter(Gen2Cache, Cache);
         }
 
         public override object Execute(List<string> args)
