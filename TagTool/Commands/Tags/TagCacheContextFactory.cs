@@ -64,6 +64,7 @@ namespace TagTool.Commands.Tags
             context.AddCommand(new DumpDisassembledShadersCommand(cache));
             context.AddCommand(new FindValueCommand(cache, null));
             context.AddCommand(new TagDependencyCommand(cache));
+            context.AddCommand(new GuessTagDefCommand(cache));
 
             // Halo Online Specific Commands
             if (cache is GameCacheHaloOnlineBase)

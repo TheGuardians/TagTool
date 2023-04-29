@@ -8,7 +8,7 @@ using TagTool.Tags;
 
 namespace TagTool.Cache.HaloOnline
 {
-    class ResourceCachesHaloOnline : ResourceCachesHaloOnlineBase
+    public class ResourceCachesHaloOnline : ResourceCachesHaloOnlineBase
     {
         public DirectoryInfo Directory;
 
