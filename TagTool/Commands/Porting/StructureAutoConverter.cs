@@ -18,6 +18,12 @@ namespace TagTool.Commands.Porting
             this.destCacheInfo = destCacheInfo;
         }
 
+        public StructureAutoConverter(CacheVersion sourceVersion, CachePlatform sourcePlatform, CacheVersion destVerstion, CachePlatform destPlatform)
+        {
+            sourceCacheInfo = new GameCacheInfo(sourceVersion, sourcePlatform);
+            destCacheInfo = new GameCacheInfo(destVerstion, destPlatform);
+        }
+
         public StructureAutoConverter(GameCache sourceCache, GameCache destCache)
         {
             this.sourceCacheInfo = new GameCacheInfo(sourceCache);
