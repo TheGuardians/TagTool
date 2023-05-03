@@ -109,7 +109,7 @@ namespace TagTool.Geometry
                             goto default;
                         default:
                             // Just copy the raw buffer over and pray that it works...
-                            var bufferData = new byte[buffer.Definition.Data.Size];
+                            var bufferData = new byte[buffer.Definition.Data.Data.Length];
                             inStream.Read(bufferData, 0, bufferData.Length);
                             outStream.Write(bufferData, 0, bufferData.Length);
                             break;

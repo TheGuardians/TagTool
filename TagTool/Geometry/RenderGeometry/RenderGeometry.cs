@@ -153,7 +153,7 @@ namespace TagTool.Geometry
         [TagStructure(Size = 0x2, MinVersion = CacheVersion.HaloReach)]
         public class StaticPerPixelLighting : TagStructure
 		{
-            [TagField(MaxVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<int> UnusedVertexBuffer;
 
             public short VertexBufferIndex;

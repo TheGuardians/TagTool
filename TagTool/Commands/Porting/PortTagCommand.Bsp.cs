@@ -32,7 +32,11 @@ namespace TagTool.Commands.Porting
 
                 foreach (var grid in cluster.DecoratorGrids)
                 {
-                    var buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.Gen3Info.VertexBufferIndex].Definition;
+                    VertexBufferDefinition buffer = null;
+                    if(CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                        buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.HaloOnlineInfo.VertexBufferIndex].Definition;
+                    else
+                        buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.Gen3Info.VertexBufferIndex].Definition;
                         
                     var offset = grid.VertexBufferOffset;
                     grid.Vertices = new List<TinyPositionVertex>();
@@ -72,12 +76,17 @@ namespace TagTool.Commands.Porting
             }
 
             // convert all the decorator vertex buffers
-            foreach(var d3dBuffer in blamDecoratorResourceDefinition.VertexBuffers)
+            // conversion already completed for halo online generation caches
+            if (!CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
             {
-                VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, d3dBuffer.Definition);
-                decoratorGeometry.VertexBuffers.Add(d3dBuffer);
+                for (var bufferindex = 0; bufferindex < blamDecoratorResourceDefinition.VertexBuffers.Count; bufferindex++)
+                {
+                    var d3dBuffer = blamDecoratorResourceDefinition.VertexBuffers[bufferindex];
+                    VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, d3dBuffer.Definition);
+                    decoratorGeometry.VertexBuffers.Add(d3dBuffer);
+                }
             }
-
+                
             sbsp.DecoratorGeometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(decoratorGeometry);
             sbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(geometry);
 
@@ -191,8 +200,17 @@ namespace TagTool.Commands.Porting
                 newGrid.VertexBufferOffset = grid.VertexBufferOffset + data.GeometryOffset;
 
                 newGrid.HaloOnlineInfo.Variant = data.Variant;
-                newGrid.HaloOnlineInfo.PaletteIndex = grid.Gen3Info.PaletteIndex;
-                newGrid.HaloOnlineInfo.VertexBufferIndex = grid.Gen3Info.VertexBufferIndex; // this doesn't change as each vertex buffer corresponds to the palette index
+                if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                {
+                    newGrid.HaloOnlineInfo.PaletteIndex = grid.HaloOnlineInfo.PaletteIndex;
+                    newGrid.HaloOnlineInfo.VertexBufferIndex = grid.HaloOnlineInfo.VertexBufferIndex;
+                    newGrid.HaloOnlineInfo.Variant = grid.HaloOnlineInfo.Variant;
+                }
+                else
+                {
+                    newGrid.HaloOnlineInfo.PaletteIndex = grid.Gen3Info.PaletteIndex;
+                    newGrid.HaloOnlineInfo.VertexBufferIndex = grid.Gen3Info.VertexBufferIndex; // this doesn't change as each vertex buffer corresponds to the palette index
+                }            
 
                 if(BlamCache.Version >= CacheVersion.HaloReach)
                     newGrid.GridSize /= ushort.MaxValue;
