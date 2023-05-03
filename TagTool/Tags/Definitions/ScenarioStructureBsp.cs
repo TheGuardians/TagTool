@@ -43,6 +43,8 @@ namespace TagTool.Tags.Definitions
         public byte[] Unused5;
         [TagField(Length = 4, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused6;
+        [TagField(Length = 4, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloOnline604673, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] UnusedMS30;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public FlagsValueReach FlagsReach;
