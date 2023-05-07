@@ -14,6 +14,7 @@ using TagTool.Tags;
 using System.Linq;
 using static System.Net.WebRequestMethods;
 using static TagTool.Tags.Definitions.Model.Variant;
+using Assimp.Unmanaged;
 
 namespace TagTool.Commands.Modding
 {
@@ -40,11 +41,20 @@ namespace TagTool.Commands.Modding
         {
             bool useLargeStreams = false;
 
-            if (args.Count > 1 && args[0].ToLower() == "large")
+            if (args.Count < 2)
+                return new TagToolError(CommandError.ArgCount);
+
+            if (args.Count > 2 && args[0].ToLower() == "large")
             {
                 useLargeStreams = true;
                 args.RemoveAt(0);
             }
+
+            if (!args[0].EndsWith(".pak"))
+                args[0] += ".pak";
+
+            if (!args[1].EndsWith(".pak"))
+                args[1] += ".pak";
 
             var infile = new FileInfo(args[0]);
             var outfile = new FileInfo(args[1]);
@@ -65,8 +75,16 @@ namespace TagTool.Commands.Modding
             newMod.SaveTagNames();
             newMod.SaveStrings();
 
+            if (newMod.BaseModPackage.Header.ModifierFlags == ModifierFlags.None)
+            {
+                newMod.BaseModPackage.Header.ModifierFlags |= ModifierFlags.multiplayer;
+                newMod.BaseModPackage.Header.ModifierFlags |= ModifierFlags.SignedBit;
+            }
+
             if (!newMod.SaveModPackage(outfile))
                 return new TagToolError(CommandError.OperationFailed, "Failed to save mod package.");
+            else
+                Console.WriteLine("Done!");
 
             return true;
 
@@ -141,13 +159,36 @@ namespace TagTool.Commands.Modding
                 if (tagFieldInfo.FieldType == typeof(CachedTag))
                 {
                     CachedTag tagRef = (CachedTag)tagFieldInfo.GetValue(input);
-                    if (newMod.TagCache.TryGetCachedTag($"{tagRef.Name}.{tagRef.Group}", out CachedTag newRef))
+                    CachedTag newRef;
+                    bool foundReference = newMod.TagCache.TryGetCachedTag($"{tagRef.Name}.{tagRef.Group}", out newRef);
+
+                    if(!foundReference)
                     {
-                        outputFieldInfo.SetValue(output, newRef);
+                        string fixedName = tagRef.Name;
+
+                        switch (tagRef.Group.ToString())
+                        {
+                            case "render_method_template":
+                                {
+                                    if (tagRef.Name.Contains("halogram_templates"))
+                                            fixedName += "_0_0";
+                                    else
+                                        fixedName += "_0";
+                                }
+                                break;
+                            case "bitmap":
+                                fixedName = "ms23\\" + fixedName;
+                                break;
+                        }
+
+                        foundReference = newMod.TagCache.TryGetCachedTag($"{fixedName}.{tagRef.Group}", out newRef);
                     }
+                    
+                    if (foundReference)
+                        outputFieldInfo.SetValue(output, newRef);
                     else
                     {
-                        new TagToolError(CommandError.CustomError, $"Referenced tag {tagRef.Name}.{tagRef.Group} not found!");
+                        new TagToolError(CommandError.CustomError, $"Referenced tag {tagRef.Name}.{tagRef.Group} not found in current base cache!");
                         result = false;
                     }
                 }
