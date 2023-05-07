@@ -15,6 +15,7 @@ using System.Linq;
 using static System.Net.WebRequestMethods;
 using static TagTool.Tags.Definitions.Model.Variant;
 using Assimp.Unmanaged;
+using TagTool.Cache.Resources;
 
 namespace TagTool.Commands.Modding
 {
@@ -24,6 +25,7 @@ namespace TagTool.Commands.Modding
         private CommandContextStack ContextStack { get; }
         private GameCacheModPackage oldMod { get; set; }
         private GameCacheModPackage newMod { get; set; }
+        private bool hasError = false;
 
         public UpdateModPackageCommand(CommandContextStack contextStack, GameCacheHaloOnline cache) :
             base(true,
@@ -67,7 +69,8 @@ namespace TagTool.Commands.Modding
             newMod = new GameCacheModPackage(Cache, useLargeStreams);
             InitializeModPackage();
             Console.WriteLine("Transferring modded tags...");
-            if (!TransferModdedTags())
+            TransferModdedTags();
+            if (hasError)
             {
                 Console.WriteLine("Failed to update mod package!");
                 return false;
@@ -90,9 +93,8 @@ namespace TagTool.Commands.Modding
 
         }
 
-        private bool TransferModdedTags()
+        private void TransferModdedTags()
         {
-            bool result = true;
             for (var i = 0; i < oldMod.BaseModPackage.GetTagCacheCount(); i++)
             {
                 oldMod.SetActiveTagCache(i);
@@ -118,60 +120,28 @@ namespace TagTool.Commands.Modding
                 {
                     object definition = oldMod.Deserialize(oldStream, moddedTags[j]);
                     object newDef = definition;
-                    if (!FixTags((TagStructure)definition, (TagStructure)newDef))
-                        result = false;
+                    FixTagData(definition);
                     newMod.Serialize(newStream, newTags[j], newDef);
                 }
             }
-            return result;
         }
 
-
-
-        public bool FixTags(TagStructure input, TagStructure output)
+        private object FixTagData(object data)
         {
-            if (input == null || output == null)
+            switch (data)
             {
-                return false;
-            }
-
-            Type inputtype = input.GetType();
-            Type outputtype = output.GetType();
-
-            var inputinfo = TagStructure.GetTagStructureInfo(inputtype, Cache.Version, Cache.Platform);
-            var outputinfo = TagStructure.GetTagStructureInfo(inputtype, Cache.Version, Cache.Platform);
-            List<TagFieldInfo> outputfieldlist = TagStructure.GetTagFieldEnumerable(outputinfo.Types[0], outputinfo.Version, outputinfo.CachePlatform).ToList();
-            List<TagFieldInfo> inputfieldlist = TagStructure.GetTagFieldEnumerable(inputinfo.Types[0], inputinfo.Version, inputinfo.CachePlatform).ToList();
-
-            bool result = true;
-            for (var i = 0; i < inputfieldlist.Count; i++)
-            {
-                var tagFieldInfo = inputfieldlist[i];
-                var outputFieldInfo = outputfieldlist[i];
-
-                //don't bother converting the value if it is null, padding, or runtime
-                if (tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Padding) ||
-                    tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.Runtime) ||
-                    tagFieldInfo.GetValue(input) == null)
-                    continue;
-
-                //fixup tagrefs
-                if (tagFieldInfo.FieldType == typeof(CachedTag))
-                {
-                    CachedTag tagRef = (CachedTag)tagFieldInfo.GetValue(input);
+                case CachedTag tagRef:
                     CachedTag newRef;
                     bool foundReference = newMod.TagCache.TryGetCachedTag($"{tagRef.Name}.{tagRef.Group}", out newRef);
-
-                    if(!foundReference)
+                    if (!foundReference)
                     {
                         string fixedName = tagRef.Name;
-
                         switch (tagRef.Group.ToString())
                         {
                             case "render_method_template":
                                 {
                                     if (tagRef.Name.Contains("halogram_templates"))
-                                            fixedName += "_0_0";
+                                        fixedName += "_0_0";
                                     else
                                         fixedName += "_0";
                                 }
@@ -180,90 +150,40 @@ namespace TagTool.Commands.Modding
                                 fixedName = "ms23\\" + fixedName;
                                 break;
                         }
-
                         foundReference = newMod.TagCache.TryGetCachedTag($"{fixedName}.{tagRef.Group}", out newRef);
                     }
-                    
                     if (foundReference)
-                        outputFieldInfo.SetValue(output, newRef);
+                        return newRef;
                     else
                     {
                         new TagToolError(CommandError.CustomError, $"Referenced tag {tagRef.Name}.{tagRef.Group} not found in current base cache!");
-                        result = false;
+                        hasError = true;
                     }
-                }
-                //fixup stringids
-                else if(tagFieldInfo.FieldType == typeof(StringId))
-                {
-                    StringId field = (StringId)tagFieldInfo.GetValue(input);
-                    string oldString = oldMod.StringTable.GetString(field);
-                    string newString = newMod.StringTable.GetString(field);
+                    return null;
+                case StringId stringId:
+                    string oldString = oldMod.StringTable.GetString(stringId);
+                    string newString = newMod.StringTable.GetString(stringId);
                     if (newString != oldString)
                     {
                         StringId newID = newMod.StringTable.AddString(oldString);
-                        outputFieldInfo.SetValue(output, newID);
-                    }                      
-                    else
-                        outputFieldInfo.SetValue(output, field);
-                }
-                //if its a sub-tagstructure, iterate into it
-                else if (IsTagStructure(tagFieldInfo.FieldType))
-                {
-                    var outstruct = Activator.CreateInstance(outputFieldInfo.FieldType);
-                    if(!FixTags((TagStructure)tagFieldInfo.GetValue(input), (TagStructure)outstruct))
-                        result = false;
-                    outputFieldInfo.SetValue(output, outstruct);
-                }
-                //if its a tagblock, call convertlist to iterate through and convert each one and return a converted list
-                else if (tagFieldInfo.FieldType.IsGenericType && tagFieldInfo.FieldType.GetGenericTypeDefinition() == typeof(List<>) &&
-                    outputFieldInfo.FieldType.IsGenericType && tagFieldInfo.FieldType.GetGenericTypeDefinition() == typeof(List<>))
-                {
-                    object inputlist = tagFieldInfo.GetValue(input);
-                    object outputlist = Activator.CreateInstance(outputFieldInfo.FieldType);
-                    if(!SearchList(inputlist, outputlist))
-                        result = false;
-                    outputFieldInfo.SetValue(output, outputlist);
-                }
-                //otherwise just set the value
-                else
-                {
-                    outputFieldInfo.SetValue(output, tagFieldInfo.GetValue(input));
-                }
+                        return newID;
+                    }
+                    return stringId;
+                case PageableResource resource:
+                    var rawResource = oldMod.ResourceCaches.ExtractRawResource(resource);
+                    resource.ChangeLocation(ResourceLocation.Mods);
+                    newMod.ResourceCaches.AddRawResource(resource, rawResource);
+                    return resource;
+                case TagStructure tagStruct:
+                    foreach (var field in tagStruct.GetTagFieldEnumerable(Cache.Version, Cache.Platform))
+                        field.SetValue(data, FixTagData(field.GetValue(tagStruct)));
+                    break;
+                case IList collection:
+                    for (var i = 0; i < collection.Count; i++)
+                        collection[i] = FixTagData(collection[i]);
+                    break;
             }
-            return result;
-        }
-
-        public bool SearchList(object input, object output)
-        {
-            if (input == null || output == null)
-            {
-                return false;
-            }
-
-            bool result = true;
-            Type outputtype = output.GetType();
-            //for simple list types such as List<short>, just assign value and return
-            if (outputtype.GenericTypeArguments[0].BaseType == typeof(ValueType))
-            {
-                output = input;
-                return result;
-            }               
-
-            IList collection = (IList)input;
-            //IEnumerable<object> enumerable = input as IEnumerable<object>;
-            //if (enumerable == null)
-            //    throw new InvalidOperationException("listData must be enumerable");
-
-            Type outputelementType = outputtype.GenericTypeArguments[0];
-            var addMethod = outputtype.GetMethod("Add");
-            foreach (object item in collection)
-            {              
-                var outputelement = Activator.CreateInstance(outputelementType);
-                if (!FixTags((TagStructure)item, (TagStructure)outputelement))
-                    result = false;
-                addMethod.Invoke(output, new[] { outputelement });
-            }
-            return result;
+            return data;
         }
         private void InitializeModPackage()
         {
@@ -280,9 +200,6 @@ namespace TagTool.Commands.Modding
             newMod.BaseModPackage.Files = oldMod.BaseModPackage.Files;
             newMod.BaseModPackage.FontPackage = oldMod.BaseModPackage.FontPackage;
             newMod.BaseModPackage.MapToCacheMapping = oldMod.BaseModPackage.MapToCacheMapping;
-
-            //copy over resources
-            newMod.BaseModPackage.ResourcesStream = oldMod.BaseModPackage.ResourcesStream;
 
             //initialize new tag caches
             newMod.BaseModPackage.CacheNames = new List<string>();
@@ -347,17 +264,6 @@ namespace TagTool.Commands.Modding
             }
 
             newMod.SetActiveTagCache(0);
-        }
-        public static bool IsTagStructure(Type type)
-        {
-            Type originalType = type;
-            while (type.BaseType != null)
-            {
-                if (type == typeof(TagStructure))
-                    return true;
-                type = type.BaseType;
-            }
-            return false;
         }
     }
 }
