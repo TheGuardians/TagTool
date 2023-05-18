@@ -3,7 +3,6 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace TagTool.Tags.Definitions
 {
@@ -45,7 +44,7 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "bitm" })]
         public CachedTag Bitmap;
 
-        public FlagsValue Flags;
+        public LensFlareFlags Flags;
         public short RuntimeFlags;
 
         public RotationFunctionValue RotationFunction;
@@ -105,7 +104,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum FlagsValue : ushort
+        public enum LensFlareFlags : ushort
         {
             None = 0,
             RotateOcclusionTestingBoxWithLensFlare = 1 << 0,
@@ -148,7 +147,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloReach)]
         public class Reflection : TagStructure
 		{
-            public FlagsValue Flags;
+            public ReflectionFlags Flags;
 
             [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail, Length = 0x2, Flags = Padding)]
             public byte[] H3MCCPadding0;
@@ -222,7 +221,7 @@ namespace TagTool.Tags.Definitions
             public float TintPower;
 
             [Flags]
-            public enum FlagsValue : ushort
+            public enum ReflectionFlags : ushort
             {
                 None = 0,
                 AlignRotationWithScreenCenter = 1 << 0,
@@ -230,7 +229,17 @@ namespace TagTool.Tags.Definitions
                 RadiusScaledByOcclusionFactor = 1 << 2,
                 OccludedBySolidObjects = 1 << 3,
                 IgnoreLightColor = 1 << 4,
-                NotAffectedByInnerOcclusion = 1 << 5
+                NotAffectedByInnerOcclusion = 1 << 5,
+                Bit6 = 1 << 6,
+                Bit7 = 1 << 7,
+                Bit8 = 1 << 8,
+                Bit9 = 1 << 9,
+                Bit10 = 1 << 10,
+                Bit11 = 1 << 11,
+                Bit12 = 1 << 12,
+                Bit13 = 1 << 13,
+                Bit14 = 1 << 14,
+                Bit15 = 1 << 15
             }
         }
         
