@@ -69,7 +69,17 @@ namespace TagTool.Geometry
         public TagResourceReference Resource;
 
         [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
-        public List<NullBlock> ConstantBufferInterop;
+        public List<ConstantBufferInteropBlock> ConstantBufferInterop;
+
+        [TagStructure(Size = 0xC)]
+        public class ConstantBufferInteropBlock : TagStructure
+        {
+            public uint InteropPointer;
+            public int Unknown;
+
+            [TagField(Length = 0x4, Flags = Padding)]
+            public byte[] Padding0;
+        }
 
         [TagStructure(Size = 0x20)]
         public class PerMeshPrtDataBlock : TagStructure

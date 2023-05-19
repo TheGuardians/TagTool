@@ -1085,7 +1085,13 @@ namespace TagTool.Commands.Porting
 
                 case Light ligh when BlamCache.Version >= CacheVersion.HaloReach:
                     {
-                        ligh.DistanceDiffusion = ligh.DistanceDiffusionReach;
+                        Enum.TryParse(ligh.ReachFlags.ToString(), out ligh.Flags);
+
+                        if (ligh.DistanceDiffusionReach == 0)
+                            ligh.DistanceDiffusion = 10f;
+                        else
+                            ligh.DistanceDiffusion = ligh.DistanceDiffusionReach;
+
                         ligh.AngularSmoothness = ligh.AngularFalloffSpeed;
 
                         if (ligh.GelBitmap != null)

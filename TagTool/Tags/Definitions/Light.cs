@@ -8,13 +8,22 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "light", Tag = "ligh", Size = 0xCC, MinVersion = CacheVersion.HaloReach)]
     public class Light : TagStructure
 	{
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public ReachLightMethodEnum LightMethod;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public sbyte Version;
+
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public LightFlags Flags;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public LightFlagsReach ReachFlags;
+
         public TypeValue Type;
 
         [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
         public byte[] Padding;
 
-        public float MaximumDistance; // max distance the light reaches (can become very dark well before this distance if you set your distance diffusion low) (world units)
+        public float MaximumDistance; // (wu) max distance the light reaches (can become very dark well before if distance diffusion is low)
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float AttenuationStartDistance;
@@ -62,6 +71,7 @@ namespace TagTool.Tags.Definitions
 
         public LightPriorityEnumeration NearPriority; // priority when the light is fullscreen in size
         public LightPriorityEnumeration FarPriority; // priority when the light is very far away
+
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public LightPriorityBiasEnumeration TransitionDistance; // specifies where the transition occurs between near and far priority
 
@@ -113,6 +123,31 @@ namespace TagTool.Tags.Definitions
             ElDewritoForgeLight = 1u << 31, // Legacy
         }
 
+        [Flags]
+        public enum LightFlagsReach : ushort
+        {
+            None = 0,
+            AllowShadowsAndGels = 1 << 0,
+            ShadowCasting = 1 << 1, // turns on shadow casting
+            RenderFirstPersonOnly = 1 << 2, // only render when camera is 1st person
+            RenderThirdPersonOnly = 1 << 3, // don't render when camera is 1st person
+            DontRenderSplitscreen = 1 << 4, // no rendering this light in splitscreen mode
+            RenderWhileActiveCamo = 1 << 5, // keep rendering this light when the attached player goes camo
+            RenderInMultiplayerOverride = 1 << 6, // overrides game settings that disable dynamic lights
+            MoveToCameraInFirstPerson = 1 << 7, // moves the light to match the camera
+            NeverPriorityCull = 1 << 8, // never cull this light because of low priority
+            AffectedByGameCanUseFlashlights = 1 << 9,
+            ScreenspaceSpecularLighting = 1 << 10, // uses expensive specular lighting on screenspace lights
+            AlwaysOnForWeapon = 1 << 11 // even it is dropped
+        }
+
+        public enum ReachLightMethodEnum : sbyte
+        {
+            Screenspace,
+            Inline,
+            ReRender
+        }
+
         public enum TypeValue : short
         {
             Sphere,
@@ -154,7 +189,7 @@ namespace TagTool.Tags.Definitions
             public TagFunction Function = new TagFunction { Data = new byte[0] };
         }
 
-        [TagStructure(Size = 0x44, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach)]
         public class ClipPlanesStruct : TagStructure
         {
             public LightClipFlagsDefinition ClipFlags;

@@ -9,9 +9,10 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1B4, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Beta)]
     [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x258, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x258, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x264, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class RenderModel : TagStructure
-	{
+    {
         public StringId Name;
         public FlagsValue Flags;
         public short Version;

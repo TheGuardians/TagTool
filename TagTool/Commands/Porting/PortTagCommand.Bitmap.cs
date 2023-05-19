@@ -30,6 +30,10 @@ namespace TagTool.Commands.Porting
                 if (resource == null)
                     return null;
                 resourceList.Add(resource);
+
+                //increment of Mipmapcount in BlamBitmap unnecessary for Reach
+                if (BlamCache.Version >= CacheVersion.HaloReach && bitmap.Images[i].MipmapCount > 0)
+                    bitmap.Images[i].MipmapCount--;
             }
 
             bitmap.HardwareTextures = resourceList;

@@ -242,9 +242,10 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x38, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
-        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class Image : TagStructure
-		{
+        {
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public Tag Signature = "bitm"; // The group tag signature of the image.
 
@@ -279,6 +280,9 @@ namespace TagTool.Tags.Definitions
             public int HighResPixelsSize;
             public int HardwareFormat;
             public PlatformUnsignedValue RuntimeTagBaseAddress;
+
+            [TagField(Platform = CachePlatform.MCC, Version = CacheVersion.HaloReach, Length = 8, Flags = Padding)]
+            public byte[] ReachMCCPadding;
         }
 
         public enum BitmapUsageFormatShort : short
