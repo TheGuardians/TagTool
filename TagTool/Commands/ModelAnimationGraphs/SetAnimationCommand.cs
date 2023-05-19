@@ -22,8 +22,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   "SetAnimation <mode:class:type:label> <index/last/-1> [addaction/addoverlay]",
 
                   "Assign an animation as an action or overlay."
-                  + "Animation name must contain 4 parts: a mode, weapon class, weapon type, and action/overlay name, separated by colons (:)."
-                  + "Index must be between 0 and the animation count, or -1 to disable the animation. Use \"last\" for the last animation in the list.")
+                  + "\nAnimation name must contain 4 parts: a mode, weapon class, weapon type, and action/overlay name, separated by colons (:)."
+                  + "\nIndex must be between 0 and the animation count, or -1 to disable the animation."
+                  + "\nUse \"last\" for the index of last animation.")
         {
             CacheContext = cachecontext;
             Animation = animation;

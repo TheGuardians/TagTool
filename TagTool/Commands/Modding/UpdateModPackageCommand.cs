@@ -149,6 +149,14 @@ namespace TagTool.Commands.Modding
                             case "bitmap":
                                 fixedName = "ms23\\" + fixedName;
                                 break;
+                            case "equipment":
+                                if (tagRef.Name == "objects\\equipment\\instantcover_equipment\\instantcover_equipment")
+                                    fixedName = "objects\\equipment\\instantcover_equipment\\instantcover_equipment_mp";
+                                break;
+                            case "sound_looping":
+                                if (tagRef.Name == "sound\\levels\\s3d_edge\\s3d_edge_main\\s3d_edge_main")
+                                    fixedName = "sound\\levels\\multi\\s3d_edge\\amb_tech_room\\amb_tech_room";
+                                break;
                         }
                         foundReference = newMod.TagCache.TryGetCachedTag($"{fixedName}.{tagRef.Group}", out newRef);
                     }

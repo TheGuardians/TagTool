@@ -46,6 +46,9 @@ namespace TagTool.Commands.Porting
         {
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
 
+            if (argStack.Count < 1)
+                return new TagToolError(CommandError.ArgCount);
+
             var portingFlags = ParsePortingFlags(argStack);
 
             using (var blamCacheStream = BlamCache.OpenCacheRead())

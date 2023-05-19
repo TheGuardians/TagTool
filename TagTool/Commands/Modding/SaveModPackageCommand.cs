@@ -42,7 +42,10 @@ namespace TagTool.Commands.Modding
                 path = args[0];
             }
 
-			var file = new System.IO.FileInfo(path);
+            if (!path.EndsWith(".pak"))
+                path += ".pak";
+
+            var file = new System.IO.FileInfo(path);
 
             if (!Cache.SaveModPackage(file))
                 return new TagToolError(CommandError.OperationFailed, "Failed to save mod package.");
