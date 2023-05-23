@@ -74,8 +74,14 @@ namespace TagTool.Geometry
                     indexCount += indices.Length;
             }
 
-            if (indexCount == 0)
+            if (indexCount == 0 || vertices.Count == 0)
                 return;
+
+            //recalculate vertex normals
+            RealQuaternion[] vertexPositions = vertices.Select(v => v.Position).ToArray();
+            RealVector3d[] vertexNormals = CalculateVertexNormals(vertexPositions, indicesList);
+            for (var v = 0; v < vertexNormals.Length; v++)
+                vertices[v].Normal = vertexNormals[v];
 
             foreach (var vertex in vertices)
                 _writer.WriteLine("v {0} {1} {2}", vertex.Position.I, vertex.Position.J, vertex.Position.K);
@@ -132,6 +138,56 @@ namespace TagTool.Geometry
             _faceWriter.Close();
         }
 
+        private RealVector3d[] CalculateVertexNormals(RealQuaternion[] vertices, List<ushort[]> indicesList)
+        {
+            Vector3[] vertexNormals = new Vector3[vertices.Length];
+
+            // Initialize all vertex normals to zero
+            for (int i = 0; i < vertexNormals.Length; i++)
+            {
+                vertexNormals[i] = Vector3.Zero;
+            }
+
+            // Calculate face normals and add them to vertex normals
+            foreach(var indices in indicesList)
+            {
+                for (int i = 0; i < indices.Length; i += 3)
+                {
+                    int index1 = indices[i];
+                    int index2 = indices[i + 1];
+                    int index3 = indices[i + 2];
+
+                    Vector3 v1 = Vector3FromRealQuaternion(vertices[index1]);
+                    Vector3 v2 = Vector3FromRealQuaternion(vertices[index2]);
+                    Vector3 v3 = Vector3FromRealQuaternion(vertices[index3]);
+
+                    Vector3 faceNormal = Vector3.Cross(v2 - v1, v3 - v1);
+
+                    vertexNormals[index1] += faceNormal;
+                    vertexNormals[index2] += faceNormal;
+                    vertexNormals[index3] += faceNormal;
+                }
+            }
+
+            // Normalize vertex normals
+            RealVector3d[] result = new RealVector3d[vertices.Length];
+            for (int i = 0; i < vertexNormals.Length; i++)
+            {
+                result[i] = RealQuaternionFromVector3(Vector3.Normalize(vertexNormals[i])).IJK;
+            }
+
+            return result;
+        }
+        private RealQuaternion RealQuaternionFromVector3(Vector3 input)
+        {
+            return new RealQuaternion(input.X, input.Y, input.Z);
+        }
+
+        private Vector3 Vector3FromRealQuaternion(RealQuaternion input)
+        {
+            return new Vector3(input.I, input.J, input.K);
+        }
+
         private static List<ObjVertex> ReadVerticesReach(MeshReader reader)
         {
             // Open a vertex reader on stream 0 (main vertex data)
@@ -151,6 +207,8 @@ namespace TagTool.Geometry
                     return ReadWorldVertices(vertexReader, mainBuffer.Count);
                 case VertexTypeReach.RigidCompressed:
                     return ReadRigidCompressedVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.RigidBoned:
+                    return ReadRigidBonedVertices(vertexReader, mainBuffer.Count);
                 default:
                     throw new InvalidOperationException("Only Rigid, Skinned, World meshes are supported");
             }
@@ -219,6 +277,28 @@ namespace TagTool.Geometry
             for (var i = 0; i < count; i++)
             {
                 var rigid = reader.ReadReachRigidVertex();
+                result.Add(new ObjVertex
+                {
+                    Position = rigid.Position,
+                    Normal = rigid.Normal,
+                    TexCoords = rigid.Texcoord,
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Reads rigid boned vertices.
+        /// </summary>
+        /// <param name="reader">The vertex reader to read from.</param>
+        /// <param name="count">The number of vertices to read.</param>
+        /// <returns>The vertices that were read.</returns>
+        private static List<ObjVertex> ReadRigidBonedVertices(VertexStreamReach reader, int count)
+        {
+            var result = new List<ObjVertex>();
+            for (var i = 0; i < count; i++)
+            {
+                var rigid = reader.ReadReachRigidBonedVertex();
                 result.Add(new ObjVertex
                 {
                     Position = rigid.Position,
@@ -323,7 +403,7 @@ namespace TagTool.Geometry
             // Use index buffer 0
             var indexBuffer = reader.IndexBuffers[0];
             if (indexBuffer == null)
-                throw new InvalidOperationException("Index buffer 0 is null");
+                return new ushort[0];
 
             // Read the indices
             var indexStream = reader.OpenIndexBufferStream(indexBuffer);

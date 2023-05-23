@@ -177,10 +177,9 @@ namespace TagTool.Commands.Modding
                         return newID;
                     }
                     return stringId;
-                case PageableResource resource:
-                    var rawResource = oldMod.ResourceCaches.ExtractRawResource(resource);
-                    resource.ChangeLocation(ResourceLocation.Mods);
-                    newMod.ResourceCaches.AddRawResource(resource, rawResource);
+                case TagResourceReference resource:
+                    var resourceDef = oldMod.ResourceCaches.GetResourceDefinition(resource, resource.HaloOnlinePageableResource.GetDefinitionType());
+                    newMod.ResourceCaches.ReplaceResource(resource.HaloOnlinePageableResource, resourceDef);
                     return resource;
                 case TagStructure tagStruct:
                     foreach (var field in tagStruct.GetTagFieldEnumerable(Cache.Version, Cache.Platform))

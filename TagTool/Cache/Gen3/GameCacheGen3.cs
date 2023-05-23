@@ -9,6 +9,7 @@ using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
+using TagTool.Commands.Common;
 
 namespace TagTool.Cache
 {
@@ -98,8 +99,17 @@ namespace TagTool.Cache
                         LocaleTables = new List<LocaleTable>();
                     else
                     {
-                        var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.GlobalInstances["matg"]);
-                        LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
+                        //Allow caches to open even if Globals cannot deserialize
+                        try
+                        {
+                            var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.GlobalInstances["matg"]);
+                            LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
+                        }
+                        catch
+                        {
+                            new TagToolWarning("Failed to build locales table (Invalid Globals definition?)");
+                            LocaleTables = new List<LocaleTable>();
+                        }                                          
                     }
                 }
             }
