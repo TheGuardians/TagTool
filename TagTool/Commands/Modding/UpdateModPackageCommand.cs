@@ -178,6 +178,8 @@ namespace TagTool.Commands.Modding
                     }
                     return stringId;
                 case TagResourceReference resource:
+                    if (resource.HaloOnlinePageableResource == null)
+                        return resource;
                     var resourceDef = oldMod.ResourceCaches.GetResourceDefinition(resource, resource.HaloOnlinePageableResource.GetDefinitionType());
                     newMod.ResourceCaches.ReplaceResource(resource.HaloOnlinePageableResource, resourceDef);
                     return resource;
