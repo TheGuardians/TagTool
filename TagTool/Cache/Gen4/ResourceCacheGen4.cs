@@ -150,7 +150,20 @@ namespace TagTool.Cache.Gen4
                 return null;
             return GetResourceDefinition<Tags.Resources.Gen4.CollisionModelResource>(resourceReference);
         }
-
+        public override Tags.Resources.Gen4.StructureBspCacheFileTagResources GetStructureBspCacheFileTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "structure_bsp_cache_file_tag_resources")
+                return null;
+            return GetResourceDefinition<Tags.Resources.Gen4.StructureBspCacheFileTagResources>(resourceReference);
+        }
+        public override Tags.Resources.Gen4.StructureBspTagResources GetStructureBspTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            var tagResource = GetTagResourceFromReference(resourceReference);
+            if (!IsResourceValid(tagResource) || GetResourceTypeName(tagResource) != "structure_bsp_tag_resources")
+                return null;
+            return GetResourceDefinition<Tags.Resources.Gen4.StructureBspTagResources>(resourceReference);
+        }
         public override Tags.Resources.Gen4.RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinitionGen4(TagResourceReference resourceReference)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);

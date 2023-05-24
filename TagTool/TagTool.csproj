@@ -399,6 +399,8 @@
     <Compile Include="Commands\Forge\AddForgeCategoryCommand.cs" />
     <Compile Include="Commands\Gen4\Models\ModelContextFactory.cs" />
     <Compile Include="Commands\Gen4\Models\ExportJMSCommand.cs" />
+    <Compile Include="Commands\Gen4\ScenarioStructureBSPs\BSPContextFactory.cs" />
+    <Compile Include="Commands\Gen4\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
     <Compile Include="Commands\Modding\UpdateModPackageCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\SetAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExportJMSCommand.cs" />
@@ -563,7 +565,6 @@
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractCollisionGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractPathfindingGeometryCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
-    <Compile Include="Commands\ScenarioStructureBSPs\GenerateJumpHintsCommand.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\MoppDataCommand.cs" />
     <Compile Include="Commands\Scenarios\CompileScriptsCommand.cs" />
     <Compile Include="Commands\Scenarios\CopyForgePaletteCommand.cs" />
@@ -1365,6 +1366,8 @@
     <Compile Include="Tags\Resources\Gen4\RenderVertexBufferDescriptor.cs" />
     <Compile Include="Tags\Resources\Gen4\SoundResourceDefinition.cs" />
     <Compile Include="Tags\Resources\Gen4\StitchableBitmapTextureInteropResource.cs" />
+    <Compile Include="Tags\Resources\Gen4\StructureBspCacheFileTagResources.cs" />
+    <Compile Include="Tags\Resources\Gen4\StructureBspTagResources.cs" />
     <Compile Include="Tags\Resources\Gen4\VectorartvertexBufferDescriptor.cs" />
     <Compile Include="Tags\Resources\ModelAnimationTagResource.cs" />
     <Compile Include="Tags\Resources\RenderGeometryApiResourceDefinition.cs" />

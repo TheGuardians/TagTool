@@ -361,6 +361,14 @@ namespace TagTool.Cache.HaloOnline
         {
             throw new NotImplementedException();
         }
+        public override Tags.Resources.Gen4.StructureBspTagResources GetStructureBspTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.StructureBspCacheFileTagResources GetStructureBspCacheFileTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
 
         private TagResourceReference CreateResource<T>(T resourceDefinition, ResourceLocation location, TagResourceTypeGen3 resourceType)
         {

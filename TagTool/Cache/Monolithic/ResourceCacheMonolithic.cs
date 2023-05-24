@@ -77,6 +77,10 @@ namespace TagTool.Cache.Monolithic
             => GetTagResource<Tags.Resources.Gen4.CollisionModelResource>(resourceReference);
         public override Tags.Resources.Gen4.RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinitionGen4(TagResourceReference resourceReference)
             => GetTagResource<Tags.Resources.Gen4.RenderGeometryApiResourceDefinition>(resourceReference);
+        public override Tags.Resources.Gen4.StructureBspTagResources GetStructureBspTagResourcesGen4(TagResourceReference resourceReference)
+            => GetTagResource<Tags.Resources.Gen4.StructureBspTagResources>(resourceReference);
+        public override Tags.Resources.Gen4.StructureBspCacheFileTagResources GetStructureBspCacheFileTagResourcesGen4(TagResourceReference resourceReference)
+            => GetTagResource<Tags.Resources.Gen4.StructureBspCacheFileTagResources>(resourceReference);
 
         public override object GetResourceDefinition(TagResourceReference resourceReference, Type definitionType)
             => GetTagResource(resourceReference, definitionType);

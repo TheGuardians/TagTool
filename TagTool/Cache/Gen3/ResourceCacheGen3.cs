@@ -204,6 +204,14 @@ namespace TagTool.Cache.Gen3
         {
             throw new NotImplementedException();
         }
+        public override Tags.Resources.Gen4.StructureBspTagResources GetStructureBspTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.StructureBspCacheFileTagResources GetStructureBspCacheFileTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
         public override TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition)
         {
             throw new NotImplementedException();

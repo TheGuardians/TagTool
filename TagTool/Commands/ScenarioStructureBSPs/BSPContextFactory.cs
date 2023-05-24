@@ -20,7 +20,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, ScenarioStructureBsp bsp)
         {
-            commandContext.AddCommand(new GenerateJumpHintsCommand(cache, tag, bsp));
             commandContext.AddCommand(new GenerateStructureSurfacesCommand(cache, tag, bsp));
             commandContext.AddCommand(new DumpRenderGeometryCommand(cache, bsp.DecoratorGeometry, "Decorator"));
             commandContext.AddCommand(new DumpRenderGeometryCommand(cache, bsp.Geometry, "Bsp"));

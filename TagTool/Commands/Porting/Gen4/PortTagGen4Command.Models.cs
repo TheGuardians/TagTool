@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RenderModelGen4 = TagTool.Tags.Definitions.Gen4.RenderModel;
+using ScenarioLightmapBspGen4 = TagTool.Tags.Definitions.Gen4.ScenarioLightmapBspData;
 using TagTool.Tags.Definitions;
 using TagTool.Cache;
 using TagTool.Geometry;
@@ -151,11 +152,77 @@ namespace TagTool.Commands.Porting.Gen4
             return newGeo;
         }
 
-        public static RenderGeometryApiResourceDefinition ConvertResource(GameCache Cache, RenderModelGen4.GlobalRenderGeometryStruct gen4Geometry)
+        public static RenderGeometry ConvertGeometry(ScenarioLightmapBspGen4.GlobalRenderGeometryStruct gen4Geometry)
         {
-            TagTool.Tags.Resources.Gen4.RenderGeometryApiResourceDefinition gen4Resource =
-    Cache.ResourceCache.GetRenderGeometryApiResourceDefinitionGen4(gen4Geometry.ApiResource);
+            RenderGeometry newGeo = new RenderGeometry();
 
+            //compression
+            newGeo.Compression = new List<RenderGeometryCompression>();
+            foreach (var compress in gen4Geometry.CompressionInfo)
+            {
+                newGeo.Compression.Add(new RenderGeometryCompression
+                {
+                    Flags = (RenderGeometryCompressionFlags)compress.CompressionFlags1,
+                    X = compress.X,
+                    Y = compress.Y,
+                    Z = compress.Z,
+                    U = compress.U,
+                    V = compress.V,
+                });
+            }
+
+            //meshes
+            newGeo.Meshes = new List<Mesh>();
+            foreach (var mesh in gen4Geometry.Meshes)
+            {
+                var newMesh = new Mesh
+                {
+                    Parts = new List<Part>(),
+                    SubParts = new List<SubPart>(),
+                    IndexBufferIndices = new short[2] { mesh.IndexBufferIndex, -1 },
+                    VertexBufferIndices = ConvertVertexBufferIndices(mesh.VertexBufferIndices),
+                    RigidNodeIndex = mesh.RigidNodeIndex,
+                    IndexBufferType = (PrimitiveType)mesh.IndexBufferType,
+                    ReachType = (VertexTypeReach)mesh.VertexType
+                };
+
+                //parts
+                foreach (var part in mesh.Parts)
+                {
+                    newMesh.Parts.Add(new Part
+                    {
+                        MaterialIndex = part.RenderMethodIndex,
+                        TransparentSortingIndex = part.TransparentSortingIndex,
+                        FirstIndex = part.IndexStart,
+                        IndexCount = part.IndexCount,
+                        FirstSubPartIndex = part.SubpartStart,
+                        SubPartCount = part.SubpartCount,
+                        TypeNew = (Part.PartTypeNew)part.PartType,
+                        VertexCount = part.BudgetVertexCount
+                    });
+                }
+
+                //subparts
+                foreach (var subpart in mesh.Subparts)
+                {
+                    newMesh.SubParts.Add(new SubPart
+                    {
+                        FirstIndex = subpart.IndexStart,
+                        IndexCount = subpart.IndexCount,
+                        PartIndex = subpart.PartIndex,
+                        VertexCount = subpart.BudgetVertexCount
+                    });
+                }
+                newGeo.Meshes.Add(newMesh);
+            }
+
+            newGeo.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
+
+            return newGeo;
+        }
+
+        public static RenderGeometryApiResourceDefinition ConvertResource(TagTool.Tags.Resources.Gen4.RenderGeometryApiResourceDefinition gen4Resource)
+        {
             RenderGeometryApiResourceDefinition newResource = new RenderGeometryApiResourceDefinition
             {
                 VertexBuffers = new TagBlock<D3DStructure<VertexBufferDefinition>>(),
@@ -173,6 +240,14 @@ namespace TagTool.Commands.Porting.Gen4
         }
 
         private static short[] ConvertVertexBufferIndices(RenderModelGen4.GlobalRenderGeometryStruct.GlobalMeshBlock.VertexBufferIndicesWordArray[] indicesArray)
+        {
+            List<short> VertexBufferIndices = new List<short>();
+            for (var i = 0; i < 8; i++)
+                VertexBufferIndices.Add((short)indicesArray[i].VertexBufferIndex);
+            return VertexBufferIndices.ToArray();
+        }
+
+        private static short[] ConvertVertexBufferIndices(ScenarioLightmapBspGen4.GlobalRenderGeometryStruct.GlobalMeshBlock.VertexBufferIndicesWordArray[] indicesArray)
         {
             List<short> VertexBufferIndices = new List<short>();
             for (var i = 0; i < 8; i++)

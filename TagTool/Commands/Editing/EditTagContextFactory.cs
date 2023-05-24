@@ -181,6 +181,9 @@ namespace TagTool.Commands.Editing
                     case "hlmt":
                         CommandsGen4.Models.ModelContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen4.Model)definition);
                         break;
+                    case "sbsp":
+                        CommandsGen4.ScenarioStructureBSPs.BSPContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen4.ScenarioStructureBsp)definition);
+                        break;
                 }
             }
 
