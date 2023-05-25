@@ -1511,6 +1511,9 @@ namespace TagTool.Commands.Porting
 					}
 
                 case TagHkpMoppCode hkpMoppCode:
+                    //Structure design mopp codes are NOT converted
+                    if (definition is StructureDesign)
+                        return hkpMoppCode;
                     hkpMoppCode.Data.Elements = HavokConverter.ConvertMoppCodes(BlamCache.Version, BlamCache.Platform, CacheContext.Version, hkpMoppCode.Data.Elements);
                     return hkpMoppCode;
 

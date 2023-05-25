@@ -408,6 +408,7 @@
     <Compile Include="Commands\Porting\StructureAutoConverter.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\GenerateStructureSurfacesCommand.cs" />
     <Compile Include="Commands\Shaders\RecompileShadersCommand.cs" />
+    <Compile Include="Commands\StructureDesigns\MoppDataCommand.cs" />
     <Compile Include="Commands\Tags\ImportLooseTagCommand.cs" />
     <Compile Include="Commands\Files\ConvertMapVariantCommand.cs" />
     <Compile Include="Commands\Gen2\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />

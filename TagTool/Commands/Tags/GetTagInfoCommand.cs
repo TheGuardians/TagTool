@@ -41,8 +41,10 @@ namespace TagTool.Commands.Tags
                 Console.Write(" -> {0}", tag.Group.GrandParentTag);
 
             Console.WriteLine();
-            Console.WriteLine("- Header offset: 0x{0:X}", hoTag.HeaderOffset);
+            Console.WriteLine("- Header Cache offset: 0x{0:X}", hoTag.HeaderOffset);
             Console.WriteLine("- Total size:    0x{0:X}", hoTag.TotalSize);
+            Console.WriteLine("- Header size:    0x{0:X}", hoTag.CalculateHeaderSize());
+            Console.WriteLine("- Dependency Count:    0x{0:X}", hoTag.Dependencies.Count);
             Console.WriteLine("- Definition offset (relative to header offset): 0x{0:X}", tag.DefinitionOffset);
             Console.WriteLine();
             Console.WriteLine("Use \"TagDependency List {0:X}\" to list this tag's dependencies.", tag.Index);

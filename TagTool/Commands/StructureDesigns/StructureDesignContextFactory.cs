@@ -21,6 +21,7 @@ namespace TagTool.Commands.StructureDesigns
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, StructureDesign sddt)
         {
             commandContext.AddCommand(new ExtractStructureDesignCommand(cache, sddt));
+            commandContext.AddCommand(new MoppDataCommand(sddt));
         }
     }
 }
