@@ -252,15 +252,33 @@ namespace TagTool.Scripting.Compiler
 
             var scriptReturnType = ParseHsType(declTailGroup.Head);
 
+            bool skipReturnType = false;
             if (scriptReturnType.HaloOnline == HsType.HaloOnlineValue.Invalid)
-                throw new FormatException(declTailGroup.Head.ToString());
+            {
+                var result = new HsType();
+                result.Halo3Retail = HsType.Halo3RetailValue.Void;
+                result.Halo3ODST = HsType.Halo3ODSTValue.Void;
+                result.HaloOnline = HsType.HaloOnlineValue.Void;
+                scriptReturnType = result;
+                skipReturnType = true;
+            }
 
             //
             // Compile the script name and parameters (if any)
             //
 
-            if (!(declTailGroup.Tail is ScriptGroup declTailTailGroup))
+            ScriptGroup declTailTailGroup;
+            if (!skipReturnType && !(declTailGroup.Tail is ScriptGroup))
                 throw new FormatException(declTailGroup.Tail.ToString());
+            else if (skipReturnType && !(declTailGroup.Head is ScriptSymbol))
+                throw new FormatException(declTailGroup.Head.ToString());
+            else
+            {
+                if (!skipReturnType)
+                    declTailTailGroup = (ScriptGroup)declTailGroup.Tail;
+                else
+                    declTailTailGroup = declTailGroup;
+            }
 
             string scriptName;
             var scriptParams = new List<HsScriptParameter>();
@@ -417,15 +435,33 @@ namespace TagTool.Scripting.Compiler
 
             var scriptReturnType = ParseHsType(declTailGroup.Head);
 
+            bool skipReturnType = false;
             if (scriptReturnType.HaloOnline == HsType.HaloOnlineValue.Invalid)
-                throw new FormatException(declTailGroup.Head.ToString());
+            {
+                var result = new HsType();
+                result.Halo3Retail = HsType.Halo3RetailValue.Void;
+                result.Halo3ODST = HsType.Halo3ODSTValue.Void;
+                result.HaloOnline = HsType.HaloOnlineValue.Void;
+                scriptReturnType = result;
+                skipReturnType = true;
+            }
 
             //
             // Compile the script name and parameters (if any)
             //
 
-            if (!(declTailGroup.Tail is ScriptGroup declTailTailGroup))
+            ScriptGroup declTailTailGroup;
+            if (!skipReturnType && !(declTailGroup.Tail is ScriptGroup))
                 throw new FormatException(declTailGroup.Tail.ToString());
+            else if (skipReturnType && !(declTailGroup.Head is ScriptSymbol))
+                throw new FormatException(declTailGroup.Head.ToString());
+            else
+            {
+                if (!skipReturnType)
+                    declTailTailGroup = (ScriptGroup)declTailGroup.Tail;
+                else
+                    declTailTailGroup = declTailGroup;
+            }
 
             string scriptName;
             var scriptParams = new List<HsScriptParameter>();
@@ -647,6 +683,8 @@ namespace TagTool.Scripting.Compiler
                 case HsType.HaloOnlineValue.TriggerVolume:
                     if (node is ScriptString triggerVolumeString)
                         return CompileTriggerVolumeExpression(triggerVolumeString);
+                    else if (node is ScriptSymbol triggerVolumeSymbolString)
+                        return CompileTriggerVolumeExpression(new ScriptString { Value = triggerVolumeSymbolString.Value });
                     else throw new FormatException(node.ToString());
 
                 case HsType.HaloOnlineValue.CutsceneFlag:
@@ -971,6 +1009,8 @@ namespace TagTool.Scripting.Compiler
                         return CompileVehicleExpression(new ScriptString { Value = "none" });
                     else if (node is ScriptString vehicleString)
                         return CompileVehicleExpression(vehicleString);
+                    else if (node is ScriptSymbol vehicleSymbolString)
+                        return CompileVehicleExpression(new ScriptString { Value = vehicleSymbolString.Value });
                     else throw new FormatException(node.ToString());
 
                 case HsType.HaloOnlineValue.Weapon:
@@ -2794,20 +2834,21 @@ namespace TagTool.Scripting.Compiler
 
         private DatumHandle CompileVehicleExpression(ScriptString vehicleString)
         {
-            var handle = AllocateExpression(HsType.HaloOnlineValue.Vehicle, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)vehicleString.Line);
+            ushort? vehicleOpcode = vehicleString.Value == "none" ? null : (ushort?)HsType.HaloOnlineValue.VehicleName;
+            var handle = AllocateExpression(HsType.HaloOnlineValue.Vehicle, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, vehicleOpcode, line: (short)vehicleString.Line);
 
             if (handle != DatumHandle.None)
             {
                 
                 var vehicleIndex = vehicleString.Value == "none" ? -1 :
-                    Definition.ObjectNames.Find(on => on.Name == vehicleString.Value).PlacementIndex;
+                    Definition.ObjectNames.FindIndex(on => on.Name == vehicleString.Value);
 
                 if (vehicleString.Value != "none" && vehicleIndex == -1)
                     throw new FormatException(vehicleString.Value);
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(vehicleString.Value);
-                Array.Copy(BitConverter.GetBytes(vehicleIndex), expr.Data, 4);
+                Array.Copy(BitConverter.GetBytes((short)vehicleIndex), expr.Data, 2);
             }
 
             return handle;
