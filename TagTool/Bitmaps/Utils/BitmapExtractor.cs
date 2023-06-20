@@ -10,7 +10,7 @@ namespace TagTool.Bitmaps
 {
     public static class BitmapExtractor
     {
-        public static byte[] ExtractBitmapData(GameCache cache, Bitmap bitmap, int imageIndex)
+        public static byte[] ExtractBitmapData(GameCache cache, Bitmap bitmap, int imageIndex, ref Bitmap.Image image)
         {
             var resourceReference = bitmap.HardwareTextures[imageIndex];
             var resourceDefinition = cache.ResourceCache.GetBitmapTextureInteropResource(resourceReference);
@@ -18,6 +18,8 @@ namespace TagTool.Bitmaps
             {
                 if(resourceDefinition != null)
                 {
+                    image.Width = resourceDefinition.Texture.Definition.Bitmap.Width;
+                    image.Height = resourceDefinition.Texture.Definition.Bitmap.Height;
                     return resourceDefinition.Texture.Definition.PrimaryResourceData.Data;
                 }
                 else
@@ -60,7 +62,8 @@ namespace TagTool.Bitmaps
         {
             if (cache is GameCacheHaloOnlineBase)
             {
-                return new BaseBitmap(bitmap.Images[imageIndex], ExtractBitmapData(cache, bitmap, imageIndex));
+                var image = bitmap.Images[imageIndex].DeepCloneV2();
+                return new BaseBitmap(image, ExtractBitmapData(cache, bitmap, imageIndex, ref image));
             }
             else if (CacheVersionDetection.GetGeneration(cache.Version) ==  CacheGeneration.Third)
             {
