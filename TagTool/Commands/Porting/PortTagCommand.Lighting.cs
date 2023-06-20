@@ -15,7 +15,7 @@ namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
-        private LensFlare ConvertLensFlare(LensFlare lensFlare)
+        private LensFlare ConvertLensFlare(LensFlare lensFlare, Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             lensFlare.OcclusionReflectionIndex = 0;
 
@@ -51,7 +51,11 @@ namespace TagTool.Commands.Porting
                     continue;
                 // not necessary to convert H3MCC reflection functions
                 if (BlamCache.Platform == CachePlatform.MCC && BlamCache.Version == CacheVersion.Halo3Retail)
+                {
+                    //port bitmap overrides
+                    reflection.BitmapOverride = ConvertTag(cacheStream, blamCacheStream, resourceStreams, reflection.BitmapOverride);
                     continue;
+                }
 
                 var radius = new byte[52];
                 var scale = new byte[52];

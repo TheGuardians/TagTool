@@ -975,6 +975,22 @@ namespace TagTool.Commands.Porting
                                         });
                                     }
                                 }
+
+                                // fix rare instances of coll with bsp physics lacking required model reference
+                                bool collFixed = false;
+                                foreach (var region in childcollisionmodel.Regions)
+                                    foreach (var permutation in region.Permutations.Where(x => x.BspPhysics.Any()))
+                                        foreach (var bspphysics in permutation.BspPhysics)
+                                        {
+                                            if (bspphysics.GeometryShape.Model == null)
+                                            {
+                                                bspphysics.GeometryShape.Model = childmodeltag;
+                                                collFixed = true;
+                                            }
+                                        }
+
+                                if (collFixed)
+                                    CacheContext.Serialize(cacheStream, childmodel.CollisionModel, childcollisionmodel);
                             }
                         }
                     };
@@ -1080,7 +1096,7 @@ namespace TagTool.Commands.Porting
 					break;
 
 				case LensFlare lens:
-					blamDefinition = ConvertLensFlare(lens);
+					blamDefinition = ConvertLensFlare(lens, cacheStream, blamCacheStream, resourceStreams);
 					break;
 
                 case Light ligh when BlamCache.Version >= CacheVersion.HaloReach:
@@ -1461,7 +1477,7 @@ namespace TagTool.Commands.Porting
                     break;
             }
 
-            int lodIndex = 0;
+            int lodIndex = decoratorSet.LodSettings.MaxValidLod;
             decoratorSet.LodSettings.StartFade = decoratorSet.LodSettings.TransitionsReach[lodIndex].StartPoint;
             decoratorSet.LodSettings.EndFade = decoratorSet.LodSettings.TransitionsReach[lodIndex].EndPoint;           
             return decoratorSet;

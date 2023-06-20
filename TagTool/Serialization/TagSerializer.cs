@@ -429,7 +429,7 @@ namespace TagTool.Serialization
                 if (invalid)
                 {
                     var groups = string.Join(", ", valueInfo.ValidTags);
-                    new TagToolWarning($"Tag reference with invalid group found during deserialization:"
+                    new TagToolWarning($"Tag reference with invalid group found during serialization:"
                         + $"\n - {referencedTag.Name}.{referencedTag.Group.Tag}"
                         + $"\n - valid groups: {groups}");
                 }

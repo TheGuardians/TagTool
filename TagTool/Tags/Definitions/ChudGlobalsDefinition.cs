@@ -128,13 +128,13 @@ namespace TagTool.Tags.Definitions
 
         //HO VALUES
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public float SprintFOVMultiplier = 1.0f;
+        public float SprintFovMultiplier = 1.0f;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public float SprintFOVTransitionInTime = 0.5f;
+        public float SprintFovTransitionInTime = 0.5f;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
-        public float SprintFOXTransitionOutTime = 1.0f;
+        public float SprintFovTransitionOutTime = 1.0f;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public CachedTag ParallaxData = null;

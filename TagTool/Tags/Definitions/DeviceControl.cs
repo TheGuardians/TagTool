@@ -24,7 +24,9 @@ namespace TagTool.Tags.Definitions
             On,
             Off,
             Call,
-            Generator,
+            // touching this device plays the 'on' effect set below and refills the unit's health.
+            // It also deletes itself if it runs out of charges (set in sapien)
+            HealthStation,
         }
 
         public enum TriggersWhenValue : short
