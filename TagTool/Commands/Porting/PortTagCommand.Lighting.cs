@@ -182,8 +182,9 @@ namespace TagTool.Commands.Porting
                 if (wasReplacing)
                     SetFlags(PortingFlags.Replace);
 
-                Lbsp.Airprobes = new List<Airprobe>();
-                Lbsp.Airprobes.AddRange(scenarioLightmap.Airprobes);
+                Lbsp.Airprobes = new List<Airprobe>(scenarioLightmap.Airprobes);
+                Lbsp.SceneryLightProbes = new List<SceneryLightProbe>(scenarioLightmap.SceneryLightProbes);
+                Lbsp.MachineLightProbes = new List<MachineLightProbes>(scenarioLightmap.MachineLightProbes);
 
                 var groupTag = CacheContext.TagCache.TagDefinitions.GetTagGroupFromTag("Lbsp");
 
@@ -209,6 +210,8 @@ namespace TagTool.Commands.Porting
             }
 
             scenarioLightmap.Airprobes.Clear();
+            scenarioLightmap.SceneryLightProbes.Clear();
+            scenarioLightmap.MachineLightProbes.Clear();
 
             return scenarioLightmap;
         }
