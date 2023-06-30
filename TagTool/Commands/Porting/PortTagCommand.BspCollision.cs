@@ -30,7 +30,7 @@ namespace TagTool.Commands.Porting
             if (resourceDefinition == null)
                 return null;
 
-            if (BlamCache.Version < CacheVersion.Halo3ODST)
+            if (BlamCache.Version < CacheVersion.Halo3ODST && BlamCache.Platform != CachePlatform.MCC)
             {
                 // convert surface planes
                 foreach(var instance in resourceDefinition.InstancedGeometry)
