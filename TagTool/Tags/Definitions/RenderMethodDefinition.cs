@@ -143,5 +143,15 @@ namespace TagTool.Tags.Definitions
             None,
             UseAutomaticMacros
         }
+
+        public bool ContainsCategory(GameCache cache, string categoryName)
+        {
+            foreach (var category in Categories)
+            {
+                if (cache.StringTable.GetString(category.Name) == categoryName)
+                    return true;
+            }
+            return false;
+        }
     }
 }

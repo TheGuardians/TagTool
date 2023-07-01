@@ -346,7 +346,8 @@ namespace TagTool.Commands.Porting
 
             // Check for ATOC materials and flag accordingly --
             // ATOC materials changed in ODST. We use a base of H3, so we need to re-enable the ATOC flag where necessary.
-            if (!finalRm.CategoryOptionSelected(CacheContext, rmdf, "alpha_test", "none") &&
+            if (rmdf.ContainsCategory(CacheContext, "alpha_test") &&
+                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "alpha_test", "none") &&
                 !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "cook_torrance") &&
                 !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "two_lobe_phong") &&
                 !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "default_skin") &&
@@ -355,6 +356,14 @@ namespace TagTool.Commands.Porting
                 newShaderProperty.Flags |= RenderMethodPostprocessFlags.EnableAlphaTest;
             else
                 newShaderProperty.Flags &= ~RenderMethodPostprocessFlags.EnableAlphaTest;
+
+            // Flag single pass accordingly (this should already be correct)
+            if (rmdf.ContainsCategory(CacheContext, "misc") && 
+                (finalRm.CategoryOptionSelected(CacheContext, rmdf, "misc", "first_person_always") ||
+                 finalRm.CategoryOptionSelected(CacheContext, rmdf, "misc", "first_person_never")))
+                newShaderProperty.Flags |= RenderMethodPostprocessFlags.ForceSinglePass;
+            else
+                newShaderProperty.Flags &= ~RenderMethodPostprocessFlags.ForceSinglePass;
 
             // apply post option->options fixups
             ApplyPostOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, rmdf);
