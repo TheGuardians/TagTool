@@ -408,5 +408,25 @@ namespace TagTool.Tags.Definitions
         {
             UseVSWithMisc = 1 << 0 // custom compiled shader
         }
+
+        public bool CategoryOptionSelected(GameCache cache, RenderMethodDefinition rmdf, string categoryName, string optionName)
+        {
+            for (int i = 0; i < rmdf.Categories.Count; i++)
+            {
+                if (cache.StringTable.GetString(rmdf.Categories[i].Name) == categoryName)
+                {
+                    for (int j = 0; j < rmdf.Categories[i].ShaderOptions.Count; j++)
+                    {
+                        if (cache.StringTable.GetString(rmdf.Categories[i].ShaderOptions[j].Name) == optionName)
+                        {
+                            return Options[i].OptionIndex == j;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            return false;
+        }
     }
 }

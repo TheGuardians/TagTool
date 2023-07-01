@@ -258,6 +258,9 @@ namespace TagTool.Commands.Porting
 
             finalRm.BaseRenderMethod = rmdfInstance;
 
+            // build new rm option indices
+            finalRm.Options = BuildRenderMethodOptionIndices(edRmt2Descriptor);
+
             // black has no options, skip conversion
             if (edRmt2Descriptor.Type == "black")
                 return finalRm;
@@ -273,15 +276,15 @@ namespace TagTool.Commands.Porting
             foreach (var a in edRmt2.BooleanParameterNames)
                 edBoolConstants.Add(CacheContext.StringTable.GetString(a.Name));
 
-            RenderMethodDefinition renderMethodDefinition = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdfInstance);
+            RenderMethodDefinition rmdf = CacheContext.Deserialize<RenderMethodDefinition>(cacheStream, rmdfInstance);
 
             // dictionaries for fast lookup
             //var optionParameters = Matcher.GetOptionParameters(rmt2Descriptor.Options.ToList(), renderMethodDefinition);
-            var optionBlocks = Matcher.GetOptionBlocks(edRmt2Descriptor.Options.ToList(), renderMethodDefinition);
-            var optionBitmaps = Matcher.GetOptionBitmaps(edRmt2Descriptor.Options.ToList(), renderMethodDefinition);
+            var optionBlocks = Matcher.GetOptionBlocks(edRmt2Descriptor.Options.ToList(), rmdf);
+            var optionBitmaps = Matcher.GetOptionBitmaps(edRmt2Descriptor.Options.ToList(), rmdf);
 
             List<string> methodNames = new List<string>();
-            foreach (var method in renderMethodDefinition.Categories)
+            foreach (var method in rmdf.Categories)
                 methodNames.Add(CacheContext.StringTable.GetString(method.Name));
 
             foreach (var a in edRealConstants)
@@ -299,7 +302,7 @@ namespace TagTool.Commands.Porting
             // newShaderProperty.BooleanConstants |= (GetDefaultValue(CacheContext.StringTable.GetString(edRmt2.BooleanParameterNames[a].Name), edRmt2Descriptor.Type, methodNames, optionBlocks) << a);
 
             // apply option->option conversion where applicable
-            ApplyDefaultOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
+            ApplyDefaultOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, rmdf);
 
             // Reorder blam bitmaps to match the HO rmt2 order
             // Reorder blam real constants to match the HO rmt2 order
@@ -341,18 +344,20 @@ namespace TagTool.Commands.Porting
             newShaderProperty.BlendMode = finalRm.ShaderProperties[0].BlendMode;
             newShaderProperty.Flags = finalRm.ShaderProperties[0].Flags;
 
-            // in these shaders alphatesting acts differently than in h3. disabling\enabling SW alpha testing works for now
-            // TODO: fix properly
-            if (blamTag.Name == @"objects\levels\dlc\lockout\shaders\celltower_lights" ||
-                blamTag.Name == @"objects\levels\dlc\lockout\shaders\celltower_lights_blue" ||
-                blamTag.Name == @"levels\dlc\sidewinder\shaders\side_tree_branch_snow")
-                newShaderProperty.Flags &= ~RenderMethodPostprocessFlags.EnableAlphaTest;
-            if (blamTag.Name == @"levels\atlas\sc110\shaders\tree_leaves_acacia" ||
-                (blamTag.Name == @"levels\solo\030_outskirts\shaders\outtree_leaf" && BlamCache.Version == CacheVersion.Halo3ODST)) // might be in h3 too, remove version if so
+            // Check for ATOC materials and flag accordingly --
+            // ATOC materials changed in ODST. We use a base of H3, so we need to re-enable the ATOC flag where necessary.
+            if (!finalRm.CategoryOptionSelected(CacheContext, rmdf, "alpha_test", "none") &&
+                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "cook_torrance") &&
+                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "two_lobe_phong") &&
+                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "default_skin") &&
+                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "glass") &&
+                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "organism"))
                 newShaderProperty.Flags |= RenderMethodPostprocessFlags.EnableAlphaTest;
+            else
+                newShaderProperty.Flags &= ~RenderMethodPostprocessFlags.EnableAlphaTest;
 
             // apply post option->options fixups
-            ApplyPostOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, renderMethodDefinition);
+            ApplyPostOptionFixups(newShaderProperty, originalRm.ShaderProperties[0], blamRmt2Descriptor, edRmt2Descriptor, edRmt2, bmRmt2, rmdf);
 
             // hackfix for cook_torrance -> cook_torrance_rim_fresnel (ms23)
             // in rim_fresnel material parameters are multiplied against the material texture, we want to negate this behaviour
@@ -475,9 +480,6 @@ namespace TagTool.Commands.Porting
             {
                 RebuildRenderMethodAnimationsFromRmt2(finalRm, blamRm, edRmt2, bmRmt2);
             }
-
-            // build new rm option indices
-            finalRm.Options = BuildRenderMethodOptionIndices(edRmt2Descriptor);
 
             return finalRm;
         }
