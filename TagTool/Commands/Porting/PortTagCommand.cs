@@ -1383,6 +1383,9 @@ namespace TagTool.Commands.Porting
                     if (BlamCache.Version < CacheVersion.Halo3ODST) //this value is inverted in ODST tags when compared to H3
                     {
                         particleSystem.NearRange = 1 / particleSystem.NearRange;
+
+                        if (particleSystem.Flags.HasFlag(Effect.Event.ParticleSystem.ParticleSystemFlags.OverrideNearFade))
+                            particleSystem.NearCutoff = particleSystem.NearFadeOverride;
                     }
 
                     if (BlamCache.Version >= CacheVersion.HaloReach)
