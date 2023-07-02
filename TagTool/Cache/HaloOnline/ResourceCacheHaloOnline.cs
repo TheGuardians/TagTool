@@ -28,7 +28,7 @@ namespace TagTool.Cache.HaloOnline
         public CachePlatform CachePlatform;
         public ResourceCacheHaloOnlineHeader Header;
 
-        private List<Resource> Resources;
+        public List<Resource> Resources;
 
         private const int ChunkHeaderSize = 0x8;
         private const int MaxDecompressedBlockSize = 0x7FFF8; // Decompressed chunks cannot exceed this size
@@ -201,7 +201,7 @@ namespace TagTool.Cache.HaloOnline
                 StreamUtil.Copy(resourceStream, resource.Offset + resource.ChunkSize, resource.Offset, resourceStream.Length - resource.Offset);
 
                 for (var i = 0; i < Resources.Count; i++)
-                    if (Resources[i].Offset > resource.Offset)
+                    if (Resources[i].Offset != uint.MaxValue && Resources[i].Offset > resource.Offset)
                         Resources[i].Offset = (Resources[i].Offset - resource.ChunkSize);
             }
 
@@ -315,7 +315,11 @@ namespace TagTool.Cache.HaloOnline
 
             // Update resource offsets
             for (var i = resourceIndex + 1; i < Resources.Count; i++)
-                Resources[i].Offset = (uint)(Resources[i].Offset + sizeDelta);
+            {
+                if (Resources[i].Offset != uint.MaxValue)
+                    Resources[i].Offset = (uint)(Resources[i].Offset + sizeDelta);
+            }
+               
             UpdateResourceTable(resourceStream);
             return roundedSize;
         }
@@ -355,7 +359,7 @@ namespace TagTool.Cache.HaloOnline
         // Utilities
         //
 
-        private class Resource
+        public class Resource
         {
             // Offset in the resource file
             public uint Offset;
