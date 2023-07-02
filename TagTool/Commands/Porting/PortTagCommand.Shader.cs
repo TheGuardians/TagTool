@@ -344,17 +344,19 @@ namespace TagTool.Commands.Porting
             newShaderProperty.BlendMode = finalRm.ShaderProperties[0].BlendMode;
             newShaderProperty.Flags = finalRm.ShaderProperties[0].Flags;
 
-            // Check for ATOC materials and flag accordingly --
-            // ATOC materials changed in ODST. We use a base of H3, so we need to re-enable the ATOC flag where necessary.
-            if (rmdf.ContainsCategory(CacheContext, "alpha_test") &&
-                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "alpha_test", "none") &&
-                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "cook_torrance") &&
-                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "two_lobe_phong") &&
-                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "default_skin") &&
-                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "glass") &&
-                !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "organism"))
-                newShaderProperty.Flags |= RenderMethodPostprocessFlags.EnableAlphaTest;
-            else
+            // We now disable ATOC completely, later games have conversion issues
+
+            //// Check for ATOC materials and flag accordingly --
+            //// ATOC materials changed in ODST. We use a base of H3, so we need to re-enable the ATOC flag where necessary.
+            //if (rmdf.ContainsCategory(CacheContext, "alpha_test") &&
+            //    !finalRm.CategoryOptionSelected(CacheContext, rmdf, "alpha_test", "none") &&
+            //    !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "cook_torrance") &&
+            //    !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "two_lobe_phong") &&
+            //    !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "default_skin") &&
+            //    !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "glass") &&
+            //    !finalRm.CategoryOptionSelected(CacheContext, rmdf, "material_model", "organism"))
+            //    newShaderProperty.Flags |= RenderMethodPostprocessFlags.EnableAlphaTest;
+            //else
                 newShaderProperty.Flags &= ~RenderMethodPostprocessFlags.EnableAlphaTest;
 
             // Flag single pass accordingly (this should already be correct)
