@@ -67,7 +67,7 @@ namespace TagTool.Cache.HaloOnline
         /// </summary>
         /// <param name="resource">The resource reference to initialize.</param>
         /// <param name="data">The pre-compressed data to store.</param>
-        public void AddRawResource(PageableResource resource, byte[] data)
+        public virtual void AddRawResource(PageableResource resource, byte[] data)
         {
             if (resource == null)
                 throw new ArgumentNullException("resource");
@@ -151,7 +151,13 @@ namespace TagTool.Cache.HaloOnline
                 var dataSize = (int)(dataStream.Length - dataStream.Position);
                 var data = new byte[dataSize];
                 dataStream.Read(data, 0, dataSize);
-                resource.Page.Index = cache.Add(stream, data, out uint compressedSize);
+
+                uint compressedSize;
+                if (resource.Page.Index != -1)
+                    compressedSize = cache.Compress(stream, resource.Page.Index, data);
+                else
+                    resource.Page.Index = cache.Add(stream, data, out compressedSize); 
+
                 resource.Page.CompressedBlockSize = compressedSize;
                 resource.Page.UncompressedBlockSize = (uint)dataSize;
                 resource.DisableChecksum();
@@ -199,7 +205,7 @@ namespace TagTool.Cache.HaloOnline
         /// </summary>
         /// <param name="resource">The resource whose data should be replaced. On success, the reference will be adjusted to account for the new data.</param>
         /// <param name="data">The raw, pre-compressed data to use.</param>
-        public void ReplaceRawResource(PageableResource resource, byte[] data)
+        public virtual void ReplaceRawResource(PageableResource resource, byte[] data)
         {
             if (resource == null)
                 throw new ArgumentNullException("resource");
@@ -370,7 +376,7 @@ namespace TagTool.Cache.HaloOnline
             throw new NotImplementedException();
         }
 
-        private TagResourceReference CreateResource<T>(T resourceDefinition, ResourceLocation location, TagResourceTypeGen3 resourceType)
+        protected virtual TagResourceReference CreateResource<T>(T resourceDefinition, ResourceLocation location, TagResourceTypeGen3 resourceType)
         {
             var resourceReference = new TagResourceReference();
             var pageableResource = new PageableResource();

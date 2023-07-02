@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Resources;
 using TagTool.Common;
+using TagTool.IO;
 using TagTool.Serialization;
+using TagTool.Tags;
 
 namespace TagTool.Cache.ModPackages
 {
@@ -54,7 +53,7 @@ namespace TagTool.Cache.ModPackages
             if (location == ResourceLocation.Mods)
                 return Package.ResourcesStream;
             else
-                return ModCache.BaseCacheReference.ResourceCaches.OpenCacheReadWrite(location);
+                return ModCache.BaseCacheReference.ResourceCaches.OpenCacheRead(location);
         }
 
         public override Stream OpenCacheWrite(ResourceLocation location)
@@ -62,14 +61,42 @@ namespace TagTool.Cache.ModPackages
             if (location == ResourceLocation.Mods)
                 return Package.ResourcesStream;
             else
-                return ModCache.BaseCacheReference.ResourceCaches.OpenCacheWrite(location);
+                return ModCache.BaseCacheReference.ResourceCaches.OpenCacheRead(location);
         }
 
         public void RebuildResourceDictionary()
         {
             throw new Exception("Not implemented");
         }
-        
+
+        protected override TagResourceReference CreateResource<T>(T resourceDefinition, ResourceLocation location, TagResourceTypeGen3 resourceType)
+        {
+            location = ResourceLocation.Mods;
+
+            return base.CreateResource(resourceDefinition, location, resourceType);
+        }
+
+        public override void ReplaceResource(PageableResource resource, Stream dataStream)
+        {
+            RelocateResource(resource);
+
+            base.ReplaceResource(resource, dataStream);
+        }
+
+        public override void ReplaceRawResource(PageableResource resource, byte[] data)
+        {
+            RelocateResource(resource);
+
+            base.ReplaceRawResource(resource, data);
+        }
+
+        public override void AddRawResource(PageableResource resource, byte[] data)
+        {
+            resource.ChangeLocation(ResourceLocation.Mods);
+
+            base.AddRawResource(resource, data);
+        }
+
         public override void AddResource(PageableResource resource, Stream dataStream)
         {
             // check hash of existing resources 
@@ -110,6 +137,17 @@ namespace TagTool.Cache.ModPackages
                 resource.DisableChecksum();
             }
         }
-        
+
+        private static void RelocateResource(PageableResource resource)
+        {
+            resource.GetLocation(out ResourceLocation location);
+            if(location != ResourceLocation.Mods)
+            {
+                // ensure sure we create a new resource
+                resource.Page.Index = -1;
+
+                resource.ChangeLocation(ResourceLocation.Mods);
+            }
+        }
     }
 }
