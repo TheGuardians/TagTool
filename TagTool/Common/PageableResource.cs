@@ -121,6 +121,12 @@ namespace TagTool.Common
             }
         }
 
+        public ResourceLocation GetLocation()
+        {
+            GetLocation(out ResourceLocation location);
+            return location;
+        }
+
         /// <summary>
         /// Gets the location of the resource by checking its location flags.
         /// </summary>
