@@ -5605,7 +5605,12 @@ namespace TagTool.Tags.Definitions
         Bit7 = 1 << 7,
         Bit8 = 1 << 8,
         Bit9 = 1 << 9,
-        Bit10 = 1 << 10
+        Bit10 = 1 << 10,
+        Bit11 = 1 << 11,
+        Bit12 = 1 << 12,
+        Bit13 = 1 << 13,
+        Bit14 = 1 << 14,
+        H3Compatibility = 1 << 15
     }
 
     [Flags]

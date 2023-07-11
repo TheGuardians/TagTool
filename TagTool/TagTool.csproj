@@ -1757,9 +1757,6 @@
     <PackageReference Include="Poly2Tri.NetStandard">
       <Version>1.0.2</Version>
     </PackageReference>
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
-      <Version>6.0.0</Version>
-    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemDefinitionGroup>

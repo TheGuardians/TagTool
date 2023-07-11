@@ -25,7 +25,10 @@ namespace TagTool.Commands.Porting
         {
             CurrentScenario = scnr;
 
-            foreach(var zoneset in scnr.ZoneSets)
+            if (CacheVersionDetection.GetGameTitle(BlamCache.Version) == GameTitle.Halo3)
+                scnr.Flags |= ScenarioFlags.H3Compatibility;
+
+            foreach (var zoneset in scnr.ZoneSets)
             {
                 // cex_ff_halo references bsps that don't exist, remove them
                 zoneset.Bsps &= (Scenario.BspFlags)(scnr.StructureBsps.Count >= 32 ? uint.MaxValue : ~(-1u << scnr.StructureBsps.Count));
