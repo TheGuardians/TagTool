@@ -965,7 +965,8 @@ namespace TagTool.Tags.Definitions
             Bit31 = 1 << 31
         }
 
-        [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x13C, MinVersion = CacheVersion.HaloReach)]
         public class ZoneSet : TagStructure
 		{
@@ -989,6 +990,11 @@ namespace TagTool.Tags.Definitions
             public ZoneFlags CinematicZones;
             public int HintPreviousZoneSet;
             public int AudibilityIndex;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public short ChocalateMountainOverride;
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding, Platform = CachePlatform.MCC)]
+            public byte[] PadMCC;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public List<PlanarFogZoneSetVisibilityBlock> PlanarFogVisibility;
@@ -4401,7 +4407,8 @@ namespace TagTool.Tags.Definitions
             public byte[] Padding0;
         }
 
-        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x6C, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x30, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
         public class SpawnDatum : TagStructure
 		{
@@ -4410,35 +4417,35 @@ namespace TagTool.Tags.Definitions
 
             public float GameObjectResetHeight;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown2;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown4;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown5;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown6;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown7;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown8;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown9;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown10;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown11;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown12;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown13;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown14;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public uint Unknown15;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<DynamicSpawnOverload> DynamicSpawnOverloads;

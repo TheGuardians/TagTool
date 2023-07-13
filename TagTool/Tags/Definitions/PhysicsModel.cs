@@ -922,7 +922,7 @@ namespace TagTool.Tags.Definitions
 		{
             public Havok.HavokShapeReference Shape;
             public uint CollisionFilter;
-            public float ShapeSize;
+            public int ShapeSize;
             public uint NumChildShapes;
             [TagField(Platform = CachePlatform.MCC)]
             public uint MCCUnknown0;
