@@ -14,9 +14,9 @@ namespace TagTool.Cache
 
         public StringIdResolverHalo3MCC()
         {
-            LengthBits = 7;
-            SetBits = 7;
-            IndexBits = 18;
+            LengthBits = 8;
+            SetBits = 8;
+            IndexBits = 16;
         }
 
         public override int GetMinSetStringIndex()
