@@ -8,8 +8,7 @@ using TagTool.Tags.Definitions.Common;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "object", Tag = "obje", Size = 0xF8, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "object", Tag = "obje", Size = 0x104, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
-    [TagStructure(Name = "object", Tag = "obje", Size = 0x114, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "object", Tag = "obje", Size = 0x104, Version = CacheVersion.Halo3ODST)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x120, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "object", Tag = "obje", Size = 0x178, MinVersion = CacheVersion.HaloReach)]
     public class GameObject : TagStructure
@@ -186,15 +185,16 @@ namespace TagTool.Tags.Definitions
             public RealEulerAngles3d Angles;
         }
 
-        [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
         public class AiProperty : TagStructure
 		{
             public AiPropertiesFlags AiFlags;
             public StringId AiTypeName;
 
-            [TagField(Length = 0x4, Flags = Padding, MaxVersion = CacheVersion.Halo3Retail)]
+            [TagField(Length = 0x4, Flags = Padding, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
             public byte[] Padding0;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]

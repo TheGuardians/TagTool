@@ -838,12 +838,14 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x24)]
+            [TagStructure(Size = 0x24, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0xC, Platform = CachePlatform.MCC)]
             public class StateResponse : TagStructure
 			{
+                [TagField(Platform = CachePlatform.Original)]
                 public GameEngineStatusFlags Flags;
 
-                [TagField(Length = 2, Flags = Padding)]
+                [TagField(Length = 2, Flags = Padding, Platform = CachePlatform.Original)]
                 public byte[] Padding0;
 
                 [TagField(Flags = Label)]
@@ -854,9 +856,11 @@ namespace TagTool.Tags.Definitions
 
                 public StringId FreeForAllMessage;
                 public StringId TeamMessage;
+
+                [TagField(Platform = CachePlatform.Original)]
                 public CachedTag Unused;
 
-                [TagField(Length = 4, Flags = Padding)]
+                [TagField(Length = 4, Flags = Padding, Platform = CachePlatform.Original)]
                 public byte[] Padding2;
 
                 [Flags]

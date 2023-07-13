@@ -12,7 +12,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x384, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline449175, Platform = CachePlatform.Original)]
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x390, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x2CC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
-    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x360, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "weapon", Tag = "weap", Size = 0x350, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x364, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "weapon", Tag = "weap", Size = 0x2D8, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class Weapon : Item
@@ -226,7 +226,7 @@ namespace TagTool.Tags.Definitions
 
         [TagField(ValidTags = new[] { "effe" })]
         public CachedTag AgeEffect;
-        [TagField(ValidTags = new[] { "weap" })]
+        [TagField(ValidTags = new[] { "weap" }, Platform = CachePlatform.Original)]
         public CachedTag AgedWeapon;
         [TagField(ValidTags = new[] { "foot" })]
         public CachedTag AgedMaterialEffects;

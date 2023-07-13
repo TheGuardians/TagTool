@@ -817,7 +817,7 @@ namespace TagTool.Commands.Porting.Gen2
                     EditorFolder = -1,
                     ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Biped },
                     Variant = bipdobj.PermutationData.VariantName,
-                    ActiveChangeColors = (Scenario.BipedInstance.ScenarioObjectActiveChangeColorFlags)bipdobj.PermutationData.ActiveChangeColors,
+                    ActiveChangeColors = (Scenario.ActiveChangeColorFlags)bipdobj.PermutationData.ActiveChangeColors,
 
                     BodyVitalityFraction = bipdobj.UnitData.BodyVitality,
                     Flags = (Scenario.BipedInstance.ScenarioUnitDatumFlags)bipdobj.UnitData.Flags

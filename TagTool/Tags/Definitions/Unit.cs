@@ -8,8 +8,9 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x130, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Name = "unit", Tag = "unit", Size = 0x214, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "unit", Tag = "unit", Size = 0x224, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x214, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x1C4, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "unit", Tag = "unit", Size = 0x224, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x2C8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x3A0, MinVersion = CacheVersion.HaloReach)]
     public class Unit : GameObject
@@ -27,10 +28,11 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<UnitScreenEffectBlock> ScreenEffects;
 
-        [TagField(ValidTags = new[] { "effe" }, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "effe" }, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         public CachedTag IntegratedLightToggle;
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public Angle CameraFieldOfView; // degrees
+        [TagField(Platform = CachePlatform.Original)]
         public float CameraStiffness;
         public UnitCameraBlock UnitCamera;
 
@@ -52,7 +54,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float SoftDeathDirectionSpeedThreshold; // moving faster than this means you will soft death in the movement direction. zero defaults to damage direction. (wu/s)
         public float HardDeathThreshold; // [0,1]
+        [TagField(Platform = CachePlatform.Original)]
         public float FeignDeathThreshold; // [0,1]
+        [TagField(Platform = CachePlatform.Original)]
         public float FeignDeathTime;
 
         // The duration of the pain function. 0 defaults to 0.5
@@ -83,7 +87,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float TerminalVelocityFallRatio;
 
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         public float StunnedMovementThreshold; // [0,1] if we take this much damage in a short space of time we will play our 'stunned movement' animations
         // 1.0 prevents moving while stunned
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -101,13 +105,17 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public float MaximumStunTime; // seconds
 
+        [TagField(Platform = CachePlatform.Original)]
         public float FeignDeathChance; // [0,1]
+        [TagField(Platform = CachePlatform.Original)]
         public float FeignRepeatChance; // [0,1]
 
         [TagField(ValidTags = new[] { "char" })]
         public CachedTag SpawnedTurretCharacter; // automatically created character when this unit is driven
 
+        [TagField(Platform = CachePlatform.Original)]
         public Bounds<short> SpawnedActorCountBounds; // number of actors which we spawn
+        [TagField(Platform = CachePlatform.Original)]
         public float SpawnedVelocity; // velocity at which we throw spawned actors
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -166,8 +174,10 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public StringId GroundedEquipmentVariantName;
 
+        [TagField(Platform = CachePlatform.Original)]
         public List<Posture> Postures;
         public List<HudInterface> HudInterfaces;
+        [TagField(Platform = CachePlatform.Original)]
         public List<DialogueVariant> DialogueVariants;
 
         /// <summary>
@@ -211,7 +221,9 @@ namespace TagTool.Tags.Definitions
 
         public BoostBlock Boost;
 
+        [TagField(Platform = CachePlatform.Original)]
         public float LipsyncAttackWeight;
+        [TagField(Platform = CachePlatform.Original)]
         public float LipsyncDecayWeight;
 
         [TagField(ValidTags = new[] { "jpt!" }, MinVersion = CacheVersion.Halo3Retail)]
@@ -409,9 +421,10 @@ namespace TagTool.Tags.Definitions
             UseAimingVectorInsteadOfMarkerForward = 1 << 3
         }
 
-        [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x78, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
         public class UnitCameraBlock : TagStructure
         {
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
@@ -691,7 +704,8 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xB0, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0xE4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0xE4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0xD4, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x13C, MinVersion = CacheVersion.HaloReach)]
         public class UnitSeat : TagStructure
 		{
@@ -737,6 +751,7 @@ namespace TagTool.Tags.Definitions
             public StringId EnterSeatString;
             public Angle YawMinimum;
             public Angle YawMaximum;
+            [TagField(Platform = CachePlatform.Original)]
             public CachedTag BuiltInGunner;
             public float EntryRadius; // how close to the entry marker a unit must be
             public Angle EntryMarkerConeAngle; // angle from marker forward the unit must be

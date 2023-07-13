@@ -13,7 +13,9 @@ namespace TagTool.Tags.Definitions
     {
         public List<HudGlobal> HudGlobals;
         public List<HudShader> HudShaders;
+        [TagField(Platform = CachePlatform.Original)]
         public List<ChudSuckProfile> SuckProfiles;
+        [TagField(Platform = CachePlatform.Original)]
         public List<CortanaEffectConfig> CortanaConfigs;
         public List<PlayerTrainingDatum> PlayerTrainingData;
         public CampaignMetagameStruct CampaignMetagame;
@@ -33,16 +35,22 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float MotionSensorLevelHeightRange = float.MaxValue; // if object outside this height range of player, up/down indicator is used respectively
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(Platform = CachePlatform.MCC)]
         public float ShieldMinorThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(Platform = CachePlatform.MCC)]
         public float ShieldMajorThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(Platform = CachePlatform.MCC)]
         public float ShieldCriticalThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(Platform = CachePlatform.MCC)]
         public float HealthMinorThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(Platform = CachePlatform.MCC)]
         public float HealthMajorThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(Platform = CachePlatform.MCC)]
         public float HealthCriticalThreshold;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
@@ -272,8 +280,9 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public float Unknown74;
 
-        [TagStructure(Size = 0x208, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x23C, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x208, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x1C8, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x23C, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x2B0, MinVersion = CacheVersion.HaloOnlineED)]
         public class HudGlobal : TagStructure
         {
@@ -339,6 +348,7 @@ namespace TagTool.Tags.Definitions
             public CachedTag SpikeGrenadeSwapSound;
             public CachedTag FirebombGrenadeSwapSound;
             public CachedTag DamageMicrotexture;
+            [TagField(Platform = CachePlatform.Original)]
             public CachedTag DamageNoise;
             public CachedTag DamageDirectionalArrow;
 
@@ -383,9 +393,14 @@ namespace TagTool.Tags.Definitions
             public CachedTag MedalHudAnimation2 = null;
 
             public CachedTag MedalAnimation;
+
+            [TagField(Platform = CachePlatform.Original)]
             public CachedTag CortanaChannel; // TestBitmap0
+            [TagField(Platform = CachePlatform.Original)]
             public CachedTag TestBitmap1;
+            [TagField(Platform = CachePlatform.Original)]
             public CachedTag TestBitmap2;
+
             public CachedTag JammerDamage;
             public CachedTag JammerDamageSound;
 
@@ -398,6 +413,7 @@ namespace TagTool.Tags.Definitions
             public float EquipmentVerticalOffsetNone;
             public float EquipmentHorizontalSize;
             public float ScoreboardSpacingSize;
+
             public float WaypointMinDistanceScale;
             public float WaypointMaxDistanceScale;
 
@@ -584,12 +600,13 @@ namespace TagTool.Tags.Definitions
                 }
             }
 
-            [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
+            [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline449175)]
             [TagStructure(Size = 0x18, MinVersion = CacheVersion.HaloOnline498295)]
             public class HudSound : TagStructure
             {
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
                 public CachedTag SpartanSound;
 
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
@@ -602,9 +619,10 @@ namespace TagTool.Tags.Definitions
 
                 public float Scale;
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(Platform = CachePlatform.MCC)]
                 public List<BipedData> Bipeds;
 
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
                 public CachedTag EliteSound;
 
                 [Flags]
@@ -668,6 +686,7 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3ODST)]
+                [TagStructure(Size = 0x14, Platform = CachePlatform.MCC)]
                 public class BipedData : TagStructure
                 {
                     [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
@@ -678,6 +697,9 @@ namespace TagTool.Tags.Definitions
 
                     [TagField(Flags = Padding, Length = 3, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                     public byte[] Unused = new byte[3];
+
+                    [TagField(Platform = CachePlatform.MCC)]
+                    public StringId CharacterVariantName;
 
                     public CachedTag Sound;
 
