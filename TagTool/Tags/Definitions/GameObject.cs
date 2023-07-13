@@ -98,7 +98,7 @@ namespace TagTool.Tags.Definitions
 
         public List<ChangeColor> ChangeColors;
 
-        [TagField(Gen = CacheGeneration.Third)]
+        [TagField(Gen = CacheGeneration.Third, Platform = CachePlatform.Original)]
         public List<PredictedResource> PredictedResources;
 
         [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -111,6 +111,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag SimulationInterpolation;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(Platform = CachePlatform.MCC)]
         public List<TagReferenceBlock> RevivingEquipment;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
