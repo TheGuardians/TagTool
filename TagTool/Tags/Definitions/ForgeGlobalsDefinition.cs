@@ -5,7 +5,7 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0xE0)]
+    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0xF0)]
     public class ForgeGlobalsDefinition : TagStructure
     {
         [TagField(ValidTags = new[] { "rm  " })]
@@ -20,6 +20,9 @@ namespace TagTool.Tags.Definitions
 
         [TagField(ValidTags = new[] { "obje" })]
         public CachedTag PrematchCameraObject;
+
+        [TagField(ValidTags = new[] { "obje" })]
+        public CachedTag PostmatchObject;
 
         [TagField(ValidTags = new[] { "obje" })]
         public CachedTag ModifierObject;
