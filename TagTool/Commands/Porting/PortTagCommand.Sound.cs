@@ -32,7 +32,7 @@ namespace TagTool.Commands.Porting
             ConcurrencyLimiter = new SemaphoreSlim(PortingOptions.Current.MaxThreads);
         }
 
-        private void WaitForPendingSoundConversion()
+        public void WaitForPendingSoundConversion()
         {
             Task.WaitAll(SoundConversionTasks.Values.ToArray());
         }

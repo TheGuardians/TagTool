@@ -313,7 +313,7 @@ namespace TagTool.Commands.Porting
             return result;
         }
 
-        private void ProcessDeferredActions()
+        public void ProcessDeferredActions()
         {
             while(_deferredActions.TryTake(out Action action))
             {
