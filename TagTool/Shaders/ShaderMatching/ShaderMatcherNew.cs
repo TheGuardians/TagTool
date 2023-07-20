@@ -322,7 +322,9 @@ namespace TagTool.Shaders.ShaderMatching
                 glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
             }
 
-            var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName, out PixelShader pixl, out VertexShader vtsh);
+            //var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName, out PixelShader pixl, out VertexShader vtsh);
+
+            var rmt2 = ShaderGenerator.ShaderGeneratorNew.GenerateTemplateSafe(BaseCache, BaseCacheStream, rmdf, tagName, out PixelShader pixl, out VertexShader vtsh);
 
             generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
 
@@ -416,10 +418,10 @@ namespace TagTool.Shaders.ShaderMatching
                             optionName = "always_calc_albedo";
                         if (methodName == "alpha_test" && optionName == "from_texture")
                             optionName = "simple";
-                        if (PortingCache.Version == CacheVersion.Halo3ODST && methodName == "material_model" && optionName == "cook_torrance")
-                            optionName = "cook_torrance_odst";
-                        if (methodName == "material_model" && optionName == "cook_torrance_rim_fresnel")
-                            optionName = "cook_torrance";
+                        //if (PortingCache.Version == CacheVersion.Halo3ODST && methodName == "material_model" && optionName == "cook_torrance")
+                        //    optionName = "cook_torrance_odst";
+                        //if (methodName == "material_model" && optionName == "cook_torrance_rim_fresnel")
+                        //    optionName = "cook_torrance";
                         if (PortingCache.Version == CacheVersion.HaloReach && methodName == "environment_mapping" && optionName == "dynamic")
                             optionName = "dynamic_reach";
 

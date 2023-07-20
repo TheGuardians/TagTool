@@ -6,7 +6,7 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Shaders.ShaderFunctions
 {
-    class ShaderFunctionHelper
+    public class ShaderFunctionHelper
     {
         public enum ParameterType
         {
