@@ -896,16 +896,12 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
-                case CinematicScene cisc:
+                case CinematicScene cisc when BlamCache.Version == CacheVersion.Halo3ODST:
                     foreach (var shot in cisc.Shots)
                     {
                         foreach (var frame in shot.CameraFrames)
                         {
-                            frame.NearFocalPlaneDistance *= -1.0f;
-                            frame.FarFocalPlaneDistance *= -1.0f;
-
-                            if (BlamCache.Version == CacheVersion.Halo3ODST)
-                                frame.FocalLength *= 0.65535f; // fov change in ODST affected cisc too it seems
+                            frame.FocalLength *= 0.65535f; // fov change in ODST affected cisc too it seems
                         }
                     }
                     break;
