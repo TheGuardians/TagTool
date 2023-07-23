@@ -697,7 +697,7 @@ namespace TagTool.Shaders.ShaderGenerator
             return stringId;
         }
 
-        private static bool AutoMacroIsParameter(string categoryName, HaloShaderGenerator.Globals.ShaderType shaderType)
+        public static bool AutoMacroIsParameter(string categoryName, HaloShaderGenerator.Globals.ShaderType shaderType)
         {
             switch (shaderType)
             {
@@ -1009,14 +1009,17 @@ namespace TagTool.Shaders.ShaderGenerator
                 parameterTypes[name] = (ParameterTypeFlags)Enum.Parse(typeof(ParameterTypeFlags), constant.RegisterType.ToString());
         }
 
-        public static List<RenderMethodOption.ParameterBlock> GatherParameters(GameCache cache, Stream stream, RenderMethodDefinition rmdf, List<byte> options)
+        public static List<RenderMethodOption.ParameterBlock> GatherParameters(GameCache cache, Stream stream, RenderMethodDefinition rmdf, List<byte> options, bool includeGlobal = true)
         {
             List<RenderMethodOption.ParameterBlock> allRmopParameters = new List<RenderMethodOption.ParameterBlock>();
 
-            if (rmdf.GlobalOptions != null)
+            if (includeGlobal)
             {
-                var globalRmop = cache.Deserialize<RenderMethodOption>(stream, rmdf.GlobalOptions);
-                allRmopParameters.AddRange(globalRmop.Parameters);
+                if (rmdf.GlobalOptions != null)
+                {
+                    var globalRmop = cache.Deserialize<RenderMethodOption>(stream, rmdf.GlobalOptions);
+                    allRmopParameters.AddRange(globalRmop.Parameters);
+                }
             }
 
             for (int i = 0; i < rmdf.Categories.Count; i++)
