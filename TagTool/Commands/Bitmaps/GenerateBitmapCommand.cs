@@ -45,6 +45,7 @@ namespace TagTool.Commands.Tags
 
             string imagePath = args[args.Count - 1];
             string tagname = args[args.Count - 2];
+            string exMsg = null;
 
             bool batchImport = false;
 
@@ -124,7 +125,11 @@ namespace TagTool.Commands.Tags
                                     break;
                             }
 
-                            PrepareTagAndImport(groupTag, currentFile, imageIndex, bitmap, curve);
+                            PrepareTagAndImport(groupTag, currentFile, imageIndex, bitmap, curve, ref exMsg);
+
+                            if(exMsg != null)
+                                return new TagToolError(CommandError.OperationFailed, "Importing image data failed: " + exMsg);
+
                             AddSequenceAndSprite(imageIndex, bitmap, currentFile.Name);
 
                             imageIndex++;
@@ -135,7 +140,11 @@ namespace TagTool.Commands.Tags
                     {
                         foreach (FileInfo file in fileList)
                         {
-                            PrepareTagAndImport(groupTag, file, imageIndex, bitmap, curve);
+                            PrepareTagAndImport(groupTag, file, imageIndex, bitmap, curve, ref exMsg);
+
+                            if (exMsg != null)
+                                return new TagToolError(CommandError.OperationFailed, "Importing image data failed: " + exMsg);
+
                             AddSequenceAndSprite(imageIndex, bitmap, file.Name);
 
                             imageIndex++;
@@ -170,7 +179,11 @@ namespace TagTool.Commands.Tags
                     {
                         var bitmap = Cache.Deserialize<Bitmap>(stream, instance);
                         bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
-                        PrepareTagAndImport(groupTag, file, 0, bitmap, curve);
+                        PrepareTagAndImport(groupTag, file, 0, bitmap, curve, ref exMsg);
+
+                        if (exMsg != null)
+                            return new TagToolError(CommandError.OperationFailed, "Importing image data failed: " + exMsg);
+
                         Cache.Serialize(stream, instance, bitmap);
                     }
 
@@ -202,7 +215,7 @@ namespace TagTool.Commands.Tags
             });
         }
 
-        private void PrepareTagAndImport(Tag groupTag, FileInfo file, int imageIndex, Bitmap bitmap, BitmapImageCurve curve)
+        private void PrepareTagAndImport(Tag groupTag, FileInfo file, int imageIndex, Bitmap bitmap, BitmapImageCurve curve, ref string msg)
         {
             bitmap.Images.Add(new Bitmap.Image { Signature = groupTag });
             bitmap.HardwareTextures.Add(new TagResourceReference());
@@ -231,7 +244,7 @@ namespace TagTool.Commands.Tags
 			}
 			catch (Exception ex)
 			{
-			    return new TagToolError(CommandError.OperationFailed, "Importing image data failed: " + ex.Message);
+                msg = ex.Message;
 			}
 #endif
         }
