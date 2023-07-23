@@ -101,14 +101,7 @@ namespace TagTool.Commands.Shaders
                 // get relevant rmdf
                 if (!Cache.TagCache.TryGetTag($"shaders\\{shaderType}.rmdf", out CachedTag rmdfTag))
                 {
-                    // don't need actual options yet - we just need to initialize the generator (input option indices are verified using rmdf, which we don't have yet)
-                    List<byte> fakeOptions = new List<byte>();
-                    for (int i = 0; i < args.Count; i++)
-                        fakeOptions.Add(0);
-
-                    rmdfTag = GenerateRmdf(Cache, stream, shaderType, fakeOptions.ToArray());
-                    if (rmdfTag == null)
-                        return new TagToolError(CommandError.TagInvalid, $"Could not find or generate rmdf tag for \"{shaderType}\"");
+                    return new TagToolError(CommandError.TagInvalid, $"Could not find rmdf tag for \"{shaderType}\"");
                 }
 
                 var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, rmdfTag);
@@ -199,20 +192,6 @@ namespace TagTool.Commands.Shaders
                 case "zonly":           return new HaloShaderGenerator.ZOnly.ZOnlyGenerator(applyFixes);
             }
             return null;
-        }
-
-        public static CachedTag GenerateRmdf(GameCache cache, Stream stream, string shaderType, byte[] options)
-        {
-            var generator = GetShaderGenerator(shaderType, options, true);
-            if (generator == null)
-                return null;
-
-            var rmdf = TagTool.Shaders.ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(cache, stream, generator, shaderType, out _, out _);
-            CachedTag rmdfTag = cache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{shaderType}");
-            cache.Serialize(stream, rmdfTag, rmdf);
-            if (cache is GameCacheHaloOnlineBase)
-                (cache as GameCacheHaloOnlineBase).SaveTagNames();
-            return rmdfTag;
         }
 
         public ShaderConstantTable BuildConstantTable(HaloShaderGenerator.ShaderGeneratorResult generatorResult, GameCache cache, bool pixelShader)

@@ -12,6 +12,7 @@ using TagTool.Common;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
 using static TagTool.Tags.Definitions.RenderMethodDefinition;
+using TagTool.Commands.Common;
 
 namespace TagTool.Shaders.ShaderGenerator
 {
@@ -48,10 +49,12 @@ namespace TagTool.Shaders.ShaderGenerator
             
             if (!cache.TagCache.TryGetTag<RenderMethodDefinition>(rmdfName, out CachedTag rmdfTag)) // generate
             {
-                rmdfTag = cache.TagCache.AllocateTag<RenderMethodDefinition>(rmdfName);
-                var rmdf = GenerateRenderMethodDefinition(cache, stream, generator, shaderType, out _, out _);
-                cache.Serialize(stream, rmdfTag, rmdf);
-                (cache as GameCacheHaloOnlineBase).SaveTagNames();
+                new TagToolError(CommandError.CustomMessage, $"No rmdf tag present for {shaderType}");
+                return false;
+                //rmdfTag = cache.TagCache.AllocateTag<RenderMethodDefinition>(rmdfName);
+                //var rmdf = GenerateRenderMethodDefinition(cache, stream, generator, shaderType, out _, out _);
+                //cache.Serialize(stream, rmdfTag, rmdf);
+                //(cache as GameCacheHaloOnlineBase).SaveTagNames();
             }
             else // can update
             {
