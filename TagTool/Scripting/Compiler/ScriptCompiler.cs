@@ -3153,23 +3153,28 @@ namespace TagTool.Scripting.Compiler
         private DatumHandle CompileSoundBudgetReferenceExpression(ScriptString soundBudgetReferenceString) =>
             throw new NotImplementedException();
 
-        private DatumHandle WriteTagToSourceFileReferences(ScriptString tagString)
+        private void WriteTagToSourceFileReferences(ScriptString tagString)
         {
-            var handle = AllocateExpression(HsType.HaloOnlineValue.Effect, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, line: (short)tagString.Line);
-
-            if (handle != DatumHandle.None)
+            if (Cache.TagCache.TryGetTag(tagString.Value, out var instance))
             {
-                if (Cache.TagCache.TryGetTag(tagString.Value, out var instance))
+                TagReferenceBlock tagReference = new TagReferenceBlock
                 {
-                    TagReferenceBlock tagReference = new TagReferenceBlock
-                    {
-                        Instance = instance
-                    };
-                    ScriptSourceFileReferences.Add(tagReference);
-                }
-            }
+                    Instance = instance
+                };
 
-            return handle;
+                bool hasReference = false;
+                foreach(var tagEntry in ScriptSourceFileReferences)
+                {
+                    if(tagEntry.Instance.Index == tagReference.Instance.Index)
+                    {
+                        hasReference = true;
+                        break;
+                    }
+                }
+
+                if (!hasReference)
+                    ScriptSourceFileReferences.Add(tagReference);
+            }
         }
     }
 }
