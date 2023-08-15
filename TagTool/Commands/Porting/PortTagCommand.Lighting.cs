@@ -28,7 +28,7 @@ namespace TagTool.Commands.Porting
                 if (BlamCache.Version == CacheVersion.Halo3ODST)
                     reflection.RotationOffset = -(reflection.RotationOffsetH3 - 90);
                 // retail H3: clockwise rotation from alt axis
-                else if (BlamCache.Version == CacheVersion.Halo3Retail)
+                else if (BlamCache.Version == CacheVersion.Halo3Retail && BlamCache.Platform == CachePlatform.Original)
                 {
                     if (BlamCache.Platform == CachePlatform.Original)
                         reflection.RotationOffset = reflection.RotationOffsetH3;
