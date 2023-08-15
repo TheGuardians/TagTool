@@ -1503,6 +1503,21 @@ namespace TagTool.Commands.Porting
 
 				case CachedTag tag:
 					{
+                        if (IgnoreBlamTagCommand.UserDefinedIgnoredBlamTagsIndicies.Contains(tag.Index))
+                        {
+                            //find equivalent in base cache otherwise use null
+                            foreach (var instance in CacheContext.TagCache.FindAllInGroup(tag.Group.Tag))
+                            {
+                                if (instance == null || instance.Name == null)
+                                    continue;
+
+                                if (instance.Name == tag.Name)
+                                    return instance;
+                            }
+
+                            return null;
+                        }
+
 						if (!FlagIsSet(PortingFlags.Recursive))
 						{
 							foreach (var instance in CacheContext.TagCache.FindAllInGroup(tag.Group.Tag))
