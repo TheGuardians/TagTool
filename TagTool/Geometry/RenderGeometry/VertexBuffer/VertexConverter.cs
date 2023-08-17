@@ -142,8 +142,10 @@ namespace TagTool.Geometry
                     case VertexBufferFormat.TinyPosition:
                         ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) =>
                         {
+                            if (!CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, inVersion))
+                                v.Variant = (ushort)UShort2Short(v.Variant);
+
                             v.Position = ConvertPositionShort(v.Position);
-                            v.Variant = (ushort)((v.Variant >> 8) & 0xFF);
                             v.Normal = ConvertNormal(v.Normal);
                             outVertexStream.WriteTinyPositionVertex(v);
                         });
@@ -287,6 +289,16 @@ namespace TagTool.Geometry
         public static RealVector3d GenerateReachBinormals(RealVector3d normal, RealVector3d tangent, float sign)
         {
             return RealVector3d.CrossProductNoNorm(normal, tangent) * sign;
+        }
+
+        /// <summary>
+        /// Convert ushort [0,65535] to short [-32767,32767]
+        /// </summary>
+        private static short UShort2Short(ushort value)
+        {
+            if (value <= short.MaxValue)
+                return (short)(value - short.MaxValue);
+            return (short)(value - short.MaxValue - 1);
         }
     }
 }
