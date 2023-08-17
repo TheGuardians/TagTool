@@ -52,8 +52,6 @@ namespace TagTool.Commands.Porting
                 // not necessary to convert H3MCC reflection functions
                 if (BlamCache.Platform == CachePlatform.MCC && BlamCache.Version == CacheVersion.Halo3Retail)
                 {
-                    //port bitmap overrides
-                    reflection.BitmapOverride = ConvertTag(cacheStream, blamCacheStream, resourceStreams, reflection.BitmapOverride);
                     continue;
                 }
 
