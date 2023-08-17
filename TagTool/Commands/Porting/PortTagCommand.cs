@@ -824,34 +824,16 @@ namespace TagTool.Commands.Porting
 						foreach (var screenEffect in sefc.ScreenEffects)
 							screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
                     }
-                    if (sefc.ScreenEffects.Count > 0 && sefc.ScreenEffects[0].Lifetime == 1.0f && sefc.ScreenEffects[0].MaximumDistance == 1.0f)
-                    {
-                        sefc.ScreenEffects[0].Lifetime = 1E+19f;
-                        sefc.ScreenEffects[0].MaximumDistance = 1E+19f;
-                    }
                     foreach (var screenEffect in sefc.ScreenEffects)
                     {
                         //convert flags
                         if (BlamCache.Version == CacheVersion.Halo3Retail)
-                            Enum.TryParse(screenEffect.Flags_H3.ToString(), out screenEffect.Flags);
-                        else if (BlamCache.Version == CacheVersion.Halo3ODST)
-                            Enum.TryParse(screenEffect.Flags_ODST.ToString(), out screenEffect.Flags);
+                            Enum.TryParse(screenEffect.Flags_H3.ToString(), out screenEffect.Flags_ODST);
+                        else if (BlamCache.Version >= CacheVersion.HaloOnline106708 && BlamCache.Version <= CacheVersion.HaloOnline700123)
+                            Enum.TryParse(screenEffect.Flags.ToString(), out screenEffect.Flags_ODST);
 
-                        if (screenEffect.InputVariable != null && screenEffect.InputVariable != StringId.Invalid)
-                        {
-                            //restore ODST stringid input variables using name field to store values
-                            screenEffect.Name = ConvertStringId(screenEffect.InputVariable);
-
-                            screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.SefcFlagBits.UseNameAsStringIDInput;
-                            if (screenEffect.RangeVariable != null && screenEffect.RangeVariable != StringId.Invalid)
-                            {
-                                screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.SefcFlagBits.InvertStringIDInput;
-                            }
-
-                            //fixup for vision mode saved film sefc always displaying
-                            if (BlamCache.StringTable.GetStringId("saved_film_vision_mode_intensity") == screenEffect.InputVariable)
-                                screenEffect.Name = CacheContext.StringTable.GetStringId("flashlight_intensity");
-                        }
+                        if (CacheContext.StringTable.GetString(screenEffect.InputVariable) == "saved_film_vision_mode_intensity")
+                            screenEffect.Flags_ODST |= AreaScreenEffect.ScreenEffectBlock.SefcFlagBits_ODST.DebugDisable; // prevents spawning and rendering
                     }
                     
                     break;
