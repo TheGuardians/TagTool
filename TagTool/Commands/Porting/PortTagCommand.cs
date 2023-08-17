@@ -1808,28 +1808,28 @@ namespace TagTool.Commands.Porting
 		{
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version, CacheContext.Platform))
             {
-                var attr = tagFieldInfo.Attribute;
-                if (!CacheVersionDetection.TestAttribute(attr, BlamCache.Version, BlamCache.Platform))
-                    continue;
-
-                // skip the field if no conversion is needed
-                if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) || tagFieldInfo.FieldType == typeof(string))
+                var attributes = tagFieldInfo.FieldInfo.GetCustomAttributes(false).OfType<TagFieldAttribute>().ToList();
+                if (attributes.Count == 0 || attributes.Any(attr => CacheVersionDetection.TestAttribute(attr, BlamCache.Version, BlamCache.Platform)))
                 {
-                    if(!tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
+                    // skip the field if no conversion is needed
+                    if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) || tagFieldInfo.FieldType == typeof(string))
+                    {
+                        if (!tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
+                            continue;
+                    }
+
+                    var oldValue = tagFieldInfo.GetValue(data);
+                    if (oldValue is null)
                         continue;
+
+                    // convert the field
+                    var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
+
+                    if (tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
+                        newValue = ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, tagFieldInfo, newValue);
+
+                    tagFieldInfo.SetValue(data, newValue);
                 }
-                   
-                var oldValue = tagFieldInfo.GetValue(data);
-                if (oldValue is null)
-                    continue;
-
-                // convert the field
-                var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
-
-                if(tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
-                    newValue = ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, tagFieldInfo, newValue);
-
-                tagFieldInfo.SetValue(data, newValue);
             }
 
             return UpgradeStructure(cacheStream, resourceStreams, data, definition, blamTagName);
