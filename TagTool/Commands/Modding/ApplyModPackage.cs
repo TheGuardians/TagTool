@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -45,6 +45,7 @@ namespace TagTool.Commands.Modding
             ModCache = modCache;
         }
 
+        private bool missingTagWarningShown = false;
         public override object Execute(List<string> args)
         {
             int tagCacheIndex = -1;
@@ -56,7 +57,7 @@ namespace TagTool.Commands.Modding
                 tagCacheIndex = 0;
             else
                 if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
-                    return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             if (tagCacheIndex != ModCache.GetCurrentTagCacheIndex())
             {
@@ -80,7 +81,6 @@ namespace TagTool.Commands.Modding
             // shut down base cache stream from mod cache and reopen once applying is complete
             using (CacheStream = BaseCache.OpenCacheReadWrite())
             {
-
                 for (int i = 0; i < ModCache.TagCache.Count; i++)
                 {
                     var modTag = ModCache.TagCache.GetTag(i);
@@ -88,7 +88,28 @@ namespace TagTool.Commands.Modding
                     if (modTag != null)
                     {
                         if (!TagMapping.ContainsKey(modTag.Index))
-                            ConvertCachedTagInstance(ModCache.BaseModPackage, modTag, false);
+                        {
+                            try
+                            {
+                                ConvertCachedTagInstance(ModCache.BaseModPackage, modTag, false);
+                            }
+                            catch (Exception ex)
+                            {
+                                if (!missingTagWarningShown)
+                                {
+                                    Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group} in the base cache, returning null tag reference.");
+                                    Console.WriteLine("Your base cache has some missing tags, would you like to continue anyways? (this could be problematic later on.) (y/n)");
+                                    string response = Console.ReadLine().ToLower();
+                                    if (response != "y")
+                                    {
+                                        Console.WriteLine("Command stopped by user.");
+                                        return false;
+                                    }
+
+                                    missingTagWarningShown = true;  // Set the flag to true after showing the warning
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -224,9 +245,6 @@ namespace TagTool.Commands.Modding
                     return cacheTag;
                 }
 
-                // Failed to find tag in base cache
-                Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group} in the base cache, returning null tag reference.");
-
                 // check if anything actually depends on this tag
                 if (!isTagReference)
                     return null;
@@ -287,7 +305,7 @@ namespace TagTool.Commands.Modding
                     return ConvertCollection(modPack, collection);
                 case CachedTag tag:
                     return ConvertCachedTagInstance(modPack, tag);
-                
+
             }
             return data;
         }
