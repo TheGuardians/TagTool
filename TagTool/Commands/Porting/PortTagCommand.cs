@@ -626,8 +626,6 @@ namespace TagTool.Commands.Porting
                     return null;//CacheContext.TagCache.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
 				case "glps":
                     return null;// CacheContext.TagCache.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
-				case "rmgl":
-					return CacheContext.TagCache.GetTag<Shader>(@"levels\multi\s3d_avalanche\materials\s3d_avalanche_collision_material_55");
 				case "rmt2":
                     // match rmt2 with current ones available, else return null
                     return FindClosestRmt2(cacheStream, blamCacheStream, blamTag);
@@ -1269,6 +1267,7 @@ namespace TagTool.Commands.Porting
                 case ShaderCustom rmcs:
                 case ShaderDecal rmd:
                 case ShaderHalogram rmhg:
+                case ShaderGlass rmgl:
                 case Shader rmsh:
                 case ShaderScreen rmss:
                 case ShaderWater rmw:

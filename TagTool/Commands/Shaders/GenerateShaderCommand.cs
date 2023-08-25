@@ -75,8 +75,6 @@ namespace TagTool.Commands.Shaders
             Cache = cache;
         }
 
-        static readonly List<string> UnsupportedShaderTypes = new List<string> { "glass" };
-
         public override object Execute(List<string> args)
         {
             if (args.Count < 2)
@@ -90,9 +88,6 @@ namespace TagTool.Commands.Shaders
                 return GenerateChudShader(args[1].ToLower());
             else if (shaderType == "glvs" || shaderType == "glps")
                 return GenerateGlobalShader(args[1].ToLower(), shaderType == "glps");
-
-            if (UnsupportedShaderTypes.Contains(shaderType))
-                return new TagToolError(CommandError.CustomMessage, $"Shader type \"{shaderType}\" is unsupported");
 
             args.RemoveAt(0); // we should only have options from this point
 
@@ -277,10 +272,6 @@ namespace TagTool.Commands.Shaders
 
         private object GenerateGlobalShader(string shaderType, bool pixel)
         {
-            var generator = GetGlobalShaderGenerator(shaderType, true);
-            if (generator == null)
-                return new TagToolError(CommandError.ArgInvalid, $"\"{shaderType}\"");
-
             var type = (HaloShaderGenerator.Globals.ShaderType)Enum.Parse(typeof(HaloShaderGenerator.Globals.ShaderType), shaderType, true);
 
             using (var stream = Cache.OpenCacheReadWrite())
@@ -366,7 +357,7 @@ namespace TagTool.Commands.Shaders
 
             // Generate template
 
-            var generator = GetShaderGenerator(shaderType, options, true);
+            //var generator = GetShaderGenerator(shaderType, options, true);
 
             var glps = cache.Deserialize<GlobalPixelShader>(stream, rmdf.GlobalPixelShader);
             var glvs = cache.Deserialize<GlobalVertexShader>(stream, rmdf.GlobalVertexShader);

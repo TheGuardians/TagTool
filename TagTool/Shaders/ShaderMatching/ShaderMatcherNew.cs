@@ -296,9 +296,9 @@ namespace TagTool.Shaders.ShaderMatching
         {
             generatedRmt2 = null;
 
-            var generator = rmt2Desc.GetGenerator(true);
-            if (generator == null)
-                return false;
+            //var generator = rmt2Desc.GetGenerator(true);
+            //if (generator == null)
+            //    return false;
 
             RenderMethodDefinition rmdf;
             CachedTag rmdfTag;
