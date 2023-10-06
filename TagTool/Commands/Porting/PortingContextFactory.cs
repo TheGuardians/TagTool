@@ -78,6 +78,7 @@ namespace TagTool.Commands.Porting
             context.AddCommand(new DiffTagCommand(currentCache, portingCache));
             context.AddCommand(new SetPortingOptionCommand());
             context.AddCommand(new NameBlamTagCommand(portingCache));
+            context.AddCommand(new IgnoreBlamTagCommand(portingCache));
             context.AddCommand(new ListBlamTagsCommand(portingCache));
         }
     }

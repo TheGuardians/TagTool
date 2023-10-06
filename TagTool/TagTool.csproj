@@ -404,6 +404,7 @@
     <Compile Include="Commands\Modding\UpdateModPackageCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\SetAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExportJMSCommand.cs" />
+    <Compile Include="Commands\Porting\IgnoreBlamTagCommand.cs" />
     <Compile Include="Commands\Porting\Gen4\PortTagGen4Command.Models.cs" />
     <Compile Include="Commands\Porting\StructureAutoConverter.cs" />
     <Compile Include="Commands\ScenarioStructureBSPs\GenerateStructureSurfacesCommand.cs" />
@@ -440,6 +441,8 @@
     <Compile Include="Common\MathHelper.cs" />
     <Compile Include="Common\NativeInterop.cs" />
     <Compile Include="Common\RealRgbaColor.cs" />
+    <Compile Include="Fonts\FontBitmapPacker.cs" />
+    <Compile Include="Fonts\FontPackage.cs" />
     <Compile Include="Geometry\Ass\AssFormat.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\CollisionBSPGen3Builder.cs" />
     <Compile Include="Geometry\BspCollisionGeometry\Utils\VerifyBsp3d.cs" />

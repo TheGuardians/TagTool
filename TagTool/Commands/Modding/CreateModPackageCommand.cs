@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace TagTool.Commands.Modding
 {
-    class CreateModPackageCommand : Command
+    public class CreateModPackageCommand : Command
     {
         private readonly GameCacheHaloOnline Cache;
         private CommandContextStack ContextStack { get; }
@@ -72,43 +72,8 @@ namespace TagTool.Commands.Modding
             // initialize mod package with current HO cache
             Console.WriteLine($"Building initial tag cache from reference...");
 
-            modCache.BaseModPackage.CacheNames = new List<string>();
-            modCache.BaseModPackage.TagCachesStreams = new List<ExtantStream>();
-            modCache.BaseModPackage.TagCacheNames = new List<Dictionary<int, string>>();
-
             var referenceStream = new MemoryStream(); // will be reused by all base caches
-            var writer = new EndianWriter(referenceStream, false);
-            var modTagCache = new TagCacheHaloOnline(Cache.Version, referenceStream, modCache.BaseModPackage.StringTable);
-
-            referenceStream.Seek(0, SeekOrigin.End);
-            for (var tagIndex = 0; tagIndex < Cache.TagCache.Count; tagIndex++)
-            {
-                var srcTag = Cache.TagCache.GetTag(tagIndex);
-
-                if (srcTag == null)
-                {
-                    modTagCache.AllocateTag(new TagGroupGen3());
-                    continue;
-                }
-
-                var emptyTag = (CachedTagHaloOnline)modTagCache.AllocateTag(srcTag.Group, srcTag.Name);
-                var cachedTagData = new CachedTagData
-                {
-                    Data = new byte[0],
-                    Group = (TagGroupGen3)emptyTag.Group,
-                };
-
-                var headerSize = CachedTagHaloOnline.CalculateHeaderSize(cachedTagData);
-                var alignedHeaderSize = (uint)((headerSize + 0xF) & ~0xF);
-                emptyTag.HeaderOffset = referenceStream.Position;
-                emptyTag.Offset = alignedHeaderSize;
-                emptyTag.TotalSize = alignedHeaderSize;
-                emptyTag.WriteHeader(writer, modTagCache.StringTableReference);
-                StreamUtil.Fill(referenceStream, 0, (int)(alignedHeaderSize - headerSize));
-            }
-        
-            modTagCache.UpdateTagOffsets(writer);
-           
+            BuildInitialTagCache(Cache, modCache, referenceStream);
 
             Console.WriteLine("Done!");
 
@@ -157,6 +122,45 @@ namespace TagTool.Commands.Modding
 
             return true;
 
+        }
+
+        public static void BuildInitialTagCache(GameCacheHaloOnline baseCache, GameCacheModPackage modCache, MemoryStream referenceStream)
+        {
+            modCache.BaseModPackage.CacheNames = new List<string>();
+            modCache.BaseModPackage.TagCachesStreams = new List<ExtantStream>();
+            modCache.BaseModPackage.TagCacheNames = new List<Dictionary<int, string>>();
+
+            var writer = new EndianWriter(referenceStream, false);
+            var modTagCache = new TagCacheHaloOnline(baseCache.Version, referenceStream, modCache.BaseModPackage.StringTable);
+
+            referenceStream.Seek(0, SeekOrigin.End);
+            for (var tagIndex = 0; tagIndex < baseCache.TagCache.Count; tagIndex++)
+            {
+                var srcTag = baseCache.TagCache.GetTag(tagIndex);
+
+                if (srcTag == null)
+                {
+                    modTagCache.AllocateTag(new TagGroupGen3());
+                    continue;
+                }
+
+                var emptyTag = (CachedTagHaloOnline)modTagCache.AllocateTag(srcTag.Group, srcTag.Name);
+                var cachedTagData = new CachedTagData
+                {
+                    Data = new byte[0],
+                    Group = (TagGroupGen3)emptyTag.Group,
+                };
+
+                var headerSize = CachedTagHaloOnline.CalculateHeaderSize(cachedTagData);
+                var alignedHeaderSize = (uint)((headerSize + 0xF) & ~0xF);
+                emptyTag.HeaderOffset = referenceStream.Position;
+                emptyTag.Offset = alignedHeaderSize;
+                emptyTag.TotalSize = alignedHeaderSize;
+                emptyTag.WriteHeader(writer, modTagCache.StringTableReference);
+                StreamUtil.Fill(referenceStream, 0, (int)(alignedHeaderSize - headerSize));
+            }
+
+            modTagCache.UpdateTagOffsets(writer);
         }
     }
 }

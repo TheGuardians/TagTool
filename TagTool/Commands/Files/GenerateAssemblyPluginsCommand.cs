@@ -1101,7 +1101,7 @@ namespace TagTool.Commands.Files
             if (!Directory.Exists(pluginsDirectory + "\\" + gameName))
                 Directory.CreateDirectory(pluginsDirectory + "\\" + gameName);
 
-            File.WriteAllLines(String.Format("{0}\\{1}\\{2}.xml", pluginsDirectory, gameName, tagGroup.ToString().Replace('<', '_').Replace('>', '_')), xmlNodesText.ToArray());
+            File.WriteAllLines(String.Format("{0}\\{1}\\{2}.xml", pluginsDirectory, gameName, tagGroup.ToString().Replace('<', '_').Replace('>', '_').Replace('*','_')), xmlNodesText.ToArray());
         }
     }
 }

@@ -132,14 +132,14 @@ namespace TagTool.Shaders.ShaderMatching
                 return null;
             }
 
-            if (!UpdatedRmdf.Contains(sourceRmt2Desc.Type)) // will update or generate rmdf as needed
-            {
-                if (!ShaderGenerator.RenderMethodDefinitionGenerator.UpdateRenderMethodDefinition(BaseCache, BaseCacheStream, sourceRmt2Desc.Type))
-                    Console.WriteLine($"WARNING: rmdf for shader type \"{sourceRmt2Desc.Type}\" could not be updated or generated.");
-                else
-                    Console.WriteLine($"Rmdf for shader type \"{sourceRmt2Desc.Type}\" updated or generated.");
-                UpdatedRmdf.Add(sourceRmt2Desc.Type);
-            }
+            //if (!UpdatedRmdf.Contains(sourceRmt2Desc.Type)) // will update or generate rmdf as needed
+            //{
+            //    if (!ShaderGenerator.RenderMethodDefinitionGenerator.UpdateRenderMethodDefinition(BaseCache, BaseCacheStream, sourceRmt2Desc.Type))
+            //        Console.WriteLine($"WARNING: rmdf for shader type \"{sourceRmt2Desc.Type}\" could not be updated or generated.");
+            //    else
+            //        Console.WriteLine($"Rmdf for shader type \"{sourceRmt2Desc.Type}\" updated or generated.");
+            //    UpdatedRmdf.Add(sourceRmt2Desc.Type);
+            //}
 
             // rebuild options to match base cache
             sourceRmt2Desc = RebuildRmt2Options(sourceRmt2Desc, BaseCacheStream, PortingCacheStream);
@@ -296,33 +296,32 @@ namespace TagTool.Shaders.ShaderMatching
         {
             generatedRmt2 = null;
 
-            var generator = rmt2Desc.GetGenerator(true);
-            if (generator == null)
-                return false;
+            //var generator = rmt2Desc.GetGenerator(true);
+            //if (generator == null)
+            //    return false;
 
-            GlobalPixelShader glps;
-            GlobalVertexShader glvs;
             RenderMethodDefinition rmdf;
             CachedTag rmdfTag;
             if (!BaseCache.TagCache.TryGetTag($"shaders\\{rmt2Desc.Type}.rmdf", out rmdfTag))
             {
-                Console.WriteLine($"Generating rmdf for \"{rmt2Desc.Type}\"");
-                rmdf = ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, rmt2Desc.Type, out glps, out glvs);
-                rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{rmt2Desc.Type}");
-                BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
-                (BaseCache as GameCacheHaloOnlineBase).SaveTagNames();
+                new TagToolError(CommandError.CustomMessage, $"No rmdf tag present for {rmt2Desc.Type}");
+                return false;
 
-                rmt2Desc = RebuildRmt2Options(rmt2Desc, BaseCacheStream, PortingCacheStream);
-                tagName = $"shaders\\{rmt2Desc.Type}_templates\\_{string.Join("_", rmt2Desc.Options)}";
+                //Console.WriteLine($"Generating rmdf for \"{rmt2Desc.Type}\"");
+                //rmdf = ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(BaseCache, BaseCacheStream, generator, rmt2Desc.Type, out glps, out glvs);
+                //rmdfTag = BaseCache.TagCache.AllocateTag<RenderMethodDefinition>($"shaders\\{rmt2Desc.Type}");
+                //BaseCache.Serialize(BaseCacheStream, rmdfTag, rmdf);
+                //(BaseCache as GameCacheHaloOnlineBase).SaveTagNames();
+                //
+                //rmt2Desc = RebuildRmt2Options(rmt2Desc, BaseCacheStream, PortingCacheStream);
+                //tagName = $"shaders\\{rmt2Desc.Type}_templates\\_{string.Join("_", rmt2Desc.Options)}";
             }
             else
             {
                 rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, rmdfTag);
-                glps = BaseCache.Deserialize<GlobalPixelShader>(BaseCacheStream, rmdf.GlobalPixelShader);
-                glvs = BaseCache.Deserialize<GlobalVertexShader>(BaseCacheStream, rmdf.GlobalVertexShader);
             }
 
-            var rmt2 = ShaderGenerator.ShaderGenerator.GenerateRenderMethodTemplate(BaseCache, BaseCacheStream, rmdf, glps, glvs, generator, tagName, out PixelShader pixl, out VertexShader vtsh);
+            var rmt2 = ShaderGenerator.ShaderGeneratorNew.GenerateTemplateSafe(BaseCache, BaseCacheStream, rmdf, tagName, out PixelShader pixl, out VertexShader vtsh);
 
             generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
 
@@ -416,10 +415,10 @@ namespace TagTool.Shaders.ShaderMatching
                             optionName = "always_calc_albedo";
                         if (methodName == "alpha_test" && optionName == "from_texture")
                             optionName = "simple";
-                        if (PortingCache.Version == CacheVersion.Halo3ODST && methodName == "material_model" && optionName == "cook_torrance")
-                            optionName = "cook_torrance_odst";
-                        if (methodName == "material_model" && optionName == "cook_torrance_rim_fresnel")
-                            optionName = "cook_torrance";
+                        //if (PortingCache.Version == CacheVersion.Halo3ODST && methodName == "material_model" && optionName == "cook_torrance")
+                        //    optionName = "cook_torrance_odst";
+                        //if (methodName == "material_model" && optionName == "cook_torrance_rim_fresnel")
+                        //    optionName = "cook_torrance";
                         if (PortingCache.Version == CacheVersion.HaloReach && methodName == "environment_mapping" && optionName == "dynamic")
                             optionName = "dynamic_reach";
 

@@ -46,7 +46,7 @@ namespace TagTool.Shaders
 
                     // allocate and fixup the shader tags
                     rmt2Tag = ConvertTemplate(shaderCache, destCacheStream, destCache, tagName, cachedRmt2, cachedPixl, cachedVtsh);
-                    GenerateRenderMethodDefinitionIfNeeded(destCacheStream, destCache, rmt2Tag);
+                    //GenerateRenderMethodDefinitionIfNeeded(destCacheStream, destCache, rmt2Tag);
                     return true;
                 }
             }
@@ -55,22 +55,22 @@ namespace TagTool.Shaders
             return false;
         }
 
-        private static void GenerateRenderMethodDefinitionIfNeeded(Stream destCacheStream, GameCache destCache, CachedTag rmt2Tag)
-        {
-            Rmt2Descriptor.TryParse(rmt2Tag.Name, out Rmt2Descriptor rmt2Desc);
-
-            var rmdfName = $"shaders\\{rmt2Desc.Type}";
-
-            if (!destCache.TagCache.TryGetTag($"{rmdfName}.rmdf", out CachedTag rmdfTag))
-            {
-                var generator = rmt2Desc.GetGenerator(true);
-                Console.WriteLine($"Generating rmdf for \"{rmt2Desc.Type}\"");
-                var rmdf = ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(destCache, destCacheStream, generator, rmt2Desc.Type, out _, out _);
-                rmdfTag = destCache.TagCache.AllocateTag<RenderMethodDefinition>(rmdfName);
-                destCache.Serialize(destCacheStream, rmdfTag, rmdf);
-                (destCache as GameCacheHaloOnlineBase).SaveTagNames();
-            }
-        }
+        //private static void GenerateRenderMethodDefinitionIfNeeded(Stream destCacheStream, GameCache destCache, CachedTag rmt2Tag)
+        //{
+        //    Rmt2Descriptor.TryParse(rmt2Tag.Name, out Rmt2Descriptor rmt2Desc);
+        //
+        //    var rmdfName = $"shaders\\{rmt2Desc.Type}";
+        //
+        //    if (!destCache.TagCache.TryGetTag($"{rmdfName}.rmdf", out CachedTag rmdfTag))
+        //    {
+        //        var generator = rmt2Desc.GetGenerator(true);
+        //        Console.WriteLine($"Generating rmdf for \"{rmt2Desc.Type}\"");
+        //        var rmdf = ShaderGenerator.RenderMethodDefinitionGenerator.GenerateRenderMethodDefinition(destCache, destCacheStream, generator, rmt2Desc.Type, out _, out _);
+        //        rmdfTag = destCache.TagCache.AllocateTag<RenderMethodDefinition>(rmdfName);
+        //        destCache.Serialize(destCacheStream, rmdfTag, rmdf);
+        //        (destCache as GameCacheHaloOnlineBase).SaveTagNames();
+        //    }
+        //}
 
         private static CachedTag ConvertTemplate(GameCache sourceCache, Stream destCacheStream, GameCache destCache, string tagName, RenderMethodTemplate rmt2, PixelShader pixl, VertexShader vtsh)
         {

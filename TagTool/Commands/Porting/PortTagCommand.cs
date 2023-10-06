@@ -313,7 +313,7 @@ namespace TagTool.Commands.Porting
             return result;
         }
 
-        private void ProcessDeferredActions()
+        public void ProcessDeferredActions()
         {
             while(_deferredActions.TryTake(out Action action))
             {
@@ -626,8 +626,6 @@ namespace TagTool.Commands.Porting
                     return null;//CacheContext.TagCache.GetTag<GlobalVertexShader>(@"shaders\shader_shared_vertex_shaders");
 				case "glps":
                     return null;// CacheContext.TagCache.GetTag<GlobalPixelShader>(@"shaders\shader_shared_pixel_shaders");
-				case "rmgl":
-					return CacheContext.TagCache.GetTag<Shader>(@"levels\multi\s3d_avalanche\materials\s3d_avalanche_collision_material_55");
 				case "rmt2":
                     // match rmt2 with current ones available, else return null
                     return FindClosestRmt2(cacheStream, blamCacheStream, blamTag);
@@ -824,34 +822,16 @@ namespace TagTool.Commands.Porting
 						foreach (var screenEffect in sefc.ScreenEffects)
 							screenEffect.HiddenFlags = AreaScreenEffect.HiddenFlagBits.UpdateThread | AreaScreenEffect.HiddenFlagBits.RenderThread;
                     }
-                    if (sefc.ScreenEffects.Count > 0 && sefc.ScreenEffects[0].Lifetime == 1.0f && sefc.ScreenEffects[0].MaximumDistance == 1.0f)
-                    {
-                        sefc.ScreenEffects[0].Lifetime = 1E+19f;
-                        sefc.ScreenEffects[0].MaximumDistance = 1E+19f;
-                    }
                     foreach (var screenEffect in sefc.ScreenEffects)
                     {
                         //convert flags
                         if (BlamCache.Version == CacheVersion.Halo3Retail)
-                            Enum.TryParse(screenEffect.Flags_H3.ToString(), out screenEffect.Flags);
-                        else if (BlamCache.Version == CacheVersion.Halo3ODST)
-                            Enum.TryParse(screenEffect.Flags_ODST.ToString(), out screenEffect.Flags);
+                            Enum.TryParse(screenEffect.Flags_H3.ToString(), out screenEffect.Flags_ODST);
+                        else if (BlamCache.Version >= CacheVersion.HaloOnline106708 && BlamCache.Version <= CacheVersion.HaloOnline700123)
+                            Enum.TryParse(screenEffect.Flags.ToString(), out screenEffect.Flags_ODST);
 
-                        if (screenEffect.InputVariable != null && screenEffect.InputVariable != StringId.Invalid)
-                        {
-                            //restore ODST stringid input variables using name field to store values
-                            screenEffect.Name = ConvertStringId(screenEffect.InputVariable);
-
-                            screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.SefcFlagBits.UseNameAsStringIDInput;
-                            if (screenEffect.RangeVariable != null && screenEffect.RangeVariable != StringId.Invalid)
-                            {
-                                screenEffect.Flags |= AreaScreenEffect.ScreenEffectBlock.SefcFlagBits.InvertStringIDInput;
-                            }
-
-                            //fixup for vision mode saved film sefc always displaying
-                            if (BlamCache.StringTable.GetStringId("saved_film_vision_mode_intensity") == screenEffect.InputVariable)
-                                screenEffect.Name = CacheContext.StringTable.GetStringId("flashlight_intensity");
-                        }
+                        if (CacheContext.StringTable.GetString(screenEffect.InputVariable) == "saved_film_vision_mode_intensity")
+                            screenEffect.Flags_ODST |= AreaScreenEffect.ScreenEffectBlock.SefcFlagBits_ODST.DebugDisable; // prevents spawning and rendering
                     }
                     
                     break;
@@ -896,16 +876,12 @@ namespace TagTool.Commands.Porting
                     }
                     break;
 
-                case CinematicScene cisc:
+                case CinematicScene cisc when BlamCache.Version == CacheVersion.Halo3ODST:
                     foreach (var shot in cisc.Shots)
                     {
                         foreach (var frame in shot.CameraFrames)
                         {
-                            frame.NearFocalPlaneDistance *= -1.0f;
-                            frame.FarFocalPlaneDistance *= -1.0f;
-
-                            if (BlamCache.Version == CacheVersion.Halo3ODST)
-                                frame.FocalLength *= 0.65535f; // fov change in ODST affected cisc too it seems
+                            frame.FocalLength *= 0.65535f; // fov change in ODST affected cisc too it seems
                         }
                     }
                     break;
@@ -1291,6 +1267,7 @@ namespace TagTool.Commands.Porting
                 case ShaderCustom rmcs:
                 case ShaderDecal rmd:
                 case ShaderHalogram rmhg:
+                case ShaderGlass rmgl:
                 case Shader rmsh:
                 case ShaderScreen rmss:
                 case ShaderWater rmw:
@@ -1507,6 +1484,21 @@ namespace TagTool.Commands.Porting
 
 				case CachedTag tag:
 					{
+                        if (IgnoreBlamTagCommand.UserDefinedIgnoredBlamTagsIndicies.Contains(tag.Index))
+                        {
+                            //find equivalent in base cache otherwise use null
+                            foreach (var instance in CacheContext.TagCache.FindAllInGroup(tag.Group.Tag))
+                            {
+                                if (instance == null || instance.Name == null)
+                                    continue;
+
+                                if (instance.Name == tag.Name)
+                                    return instance;
+                            }
+
+                            return null;
+                        }
+
 						if (!FlagIsSet(PortingFlags.Recursive))
 						{
 							foreach (var instance in CacheContext.TagCache.FindAllInGroup(tag.Group.Tag))
@@ -1797,28 +1789,28 @@ namespace TagTool.Commands.Porting
 		{
             foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version, CacheContext.Platform))
             {
-                var attr = tagFieldInfo.Attribute;
-                if (!CacheVersionDetection.TestAttribute(attr, BlamCache.Version, BlamCache.Platform))
-                    continue;
-
-                // skip the field if no conversion is needed
-                if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) || tagFieldInfo.FieldType == typeof(string))
+                var attributes = tagFieldInfo.FieldInfo.GetCustomAttributes(false).OfType<TagFieldAttribute>().ToList();
+                if (attributes.Count == 0 || attributes.Any(attr => CacheVersionDetection.TestAttribute(attr, BlamCache.Version, BlamCache.Platform)))
                 {
-                    if(!tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
+                    // skip the field if no conversion is needed
+                    if ((tagFieldInfo.FieldType.IsValueType && tagFieldInfo.FieldType != typeof(StringId)) || tagFieldInfo.FieldType == typeof(string))
+                    {
+                        if (!tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
+                            continue;
+                    }
+
+                    var oldValue = tagFieldInfo.GetValue(data);
+                    if (oldValue is null)
                         continue;
+
+                    // convert the field
+                    var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
+
+                    if (tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
+                        newValue = ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, tagFieldInfo, newValue);
+
+                    tagFieldInfo.SetValue(data, newValue);
                 }
-                   
-                var oldValue = tagFieldInfo.GetValue(data);
-                if (oldValue is null)
-                    continue;
-
-                // convert the field
-                var newValue = ConvertData(cacheStream, blamCacheStream, resourceStreams, oldValue, definition, blamTagName);
-
-                if(tagFieldInfo.Attribute.Flags.HasFlag(TagFieldFlags.GlobalMaterial))
-                    newValue = ConvertGlobalMaterialTypeField(cacheStream, blamCacheStream, tagFieldInfo, newValue);
-
-                tagFieldInfo.SetValue(data, newValue);
             }
 
             return UpgradeStructure(cacheStream, resourceStreams, data, definition, blamTagName);

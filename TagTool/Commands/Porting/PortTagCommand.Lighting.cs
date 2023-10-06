@@ -28,7 +28,7 @@ namespace TagTool.Commands.Porting
                 if (BlamCache.Version == CacheVersion.Halo3ODST)
                     reflection.RotationOffset = -(reflection.RotationOffsetH3 - 90);
                 // retail H3: clockwise rotation from alt axis
-                else if (BlamCache.Version == CacheVersion.Halo3Retail)
+                else if (BlamCache.Version == CacheVersion.Halo3Retail && BlamCache.Platform == CachePlatform.Original)
                 {
                     if (BlamCache.Platform == CachePlatform.Original)
                         reflection.RotationOffset = reflection.RotationOffsetH3;
@@ -52,8 +52,6 @@ namespace TagTool.Commands.Porting
                 // not necessary to convert H3MCC reflection functions
                 if (BlamCache.Platform == CachePlatform.MCC && BlamCache.Version == CacheVersion.Halo3Retail)
                 {
-                    //port bitmap overrides
-                    reflection.BitmapOverride = ConvertTag(cacheStream, blamCacheStream, resourceStreams, reflection.BitmapOverride);
                     continue;
                 }
 

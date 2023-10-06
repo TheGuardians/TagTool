@@ -18,6 +18,7 @@ namespace TagTool.Scripting.Compiler
         private List<HsScript> Scripts;
         private List<HsGlobal> Globals;
         private List<HsSyntaxNode> ScriptExpressions;
+        private List<TagReferenceBlock> ScriptSourceFileReferences;
 
         private BinaryWriter StringWriter;
         private Dictionary<string, uint> StringOffsets;
@@ -33,6 +34,7 @@ namespace TagTool.Scripting.Compiler
             Scripts = new List<HsScript>();
             Globals = new List<HsGlobal>();
             ScriptExpressions = new List<HsSyntaxNode>();
+            ScriptSourceFileReferences = new List<TagReferenceBlock>();
 
             StringWriter = new BinaryWriter(new MemoryStream());
             StringOffsets = new Dictionary<string, uint>();
@@ -66,6 +68,7 @@ namespace TagTool.Scripting.Compiler
             Definition.Globals = Globals;
             Definition.ScriptExpressions = ScriptExpressions;
             Definition.ScriptStrings = (StringWriter.BaseStream as MemoryStream).ToArray();
+            Definition.ScriptSourceFileReferences = ScriptSourceFileReferences;
         }
 
         private void PrecompileToplevel(IScriptSyntax node)
@@ -2244,6 +2247,8 @@ namespace TagTool.Scripting.Compiler
                 if (!Cache.TagCache.TryGetTag<Sound>(soundString.Value, out var instance))
                     throw new FormatException(soundString.Value);
 
+                WriteTagToSourceFileReferences(new ScriptString { Value = soundString.Value + "." + instance.Group.ToString() });
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(soundString.Value);
                 Array.Copy(BitConverter.GetBytes(instance?.Index ?? -1), expr.Data, 4);
@@ -2260,6 +2265,8 @@ namespace TagTool.Scripting.Compiler
             {
                 if (!Cache.TagCache.TryGetTag<Effect>(effectString.Value, out var instance))
                     throw new FormatException(effectString.Value);
+
+                WriteTagToSourceFileReferences(new ScriptString { Value = effectString.Value + "." + instance.Group.ToString() });
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(effectString.Value);
@@ -2278,6 +2285,8 @@ namespace TagTool.Scripting.Compiler
                 if (!Cache.TagCache.TryGetTag<DamageEffect>(damageString.Value, out var instance))
                     throw new FormatException(damageString.Value);
 
+                WriteTagToSourceFileReferences(new ScriptString { Value = damageString.Value + "." + instance.Group.ToString() });
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(damageString.Value);
                 Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
@@ -2294,6 +2303,8 @@ namespace TagTool.Scripting.Compiler
             {
                 if (!Cache.TagCache.TryGetTag<SoundLooping>(loopingSoundString.Value, out var instance))
                     throw new FormatException(loopingSoundString.Value);
+
+                WriteTagToSourceFileReferences(new ScriptString { Value = loopingSoundString.Value + "." + instance.Group.ToString() });
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(loopingSoundString.Value);
@@ -2312,6 +2323,8 @@ namespace TagTool.Scripting.Compiler
                 if (!Cache.TagCache.TryGetTag<ModelAnimationGraph>(animationGraphString.Value, out var instance))
                     throw new FormatException(animationGraphString.Value);
 
+                WriteTagToSourceFileReferences(new ScriptString { Value = animationGraphString.Value + "." + instance.Group.ToString() });
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(animationGraphString.Value);
                 Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
@@ -2329,6 +2342,8 @@ namespace TagTool.Scripting.Compiler
                 if (!Cache.TagCache.TryGetTag<DamageEffect>(damageEffectString.Value, out var instance))
                     throw new FormatException(damageEffectString.Value);
 
+                WriteTagToSourceFileReferences(new ScriptString { Value = damageEffectString.Value + "." + instance.Group.ToString() });
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(damageEffectString.Value);
                 Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
@@ -2343,11 +2358,10 @@ namespace TagTool.Scripting.Compiler
 
             if (handle != DatumHandle.None)
             {
-                if (!Cache.TagCache.TryGetTag(objectDefinitionString.Value, out var instance) ||
-                    !instance.IsInGroup("obje"))
-                {
+                if (!Cache.TagCache.TryGetTag(objectDefinitionString.Value, out var instance) || !instance.IsInGroup("obje"))
                     throw new FormatException(objectDefinitionString.Value);
-                }
+
+                WriteTagToSourceFileReferences(new ScriptString { Value = objectDefinitionString.Value + "." + instance.Group.ToString() });
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(objectDefinitionString.Value);
@@ -2366,6 +2380,8 @@ namespace TagTool.Scripting.Compiler
                 if (!Cache.TagCache.TryGetTag<Bitmap>(bitmapString.Value, out var instance))
                     throw new FormatException(bitmapString.Value);
 
+                WriteTagToSourceFileReferences(new ScriptString { Value = bitmapString.Value + "." + instance.Group.ToString() });
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(bitmapString.Value);
                 Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
@@ -2383,6 +2399,8 @@ namespace TagTool.Scripting.Compiler
                 if (!Cache.TagCache.TryGetTag<RenderMethod>(shaderString.Value, out var instance))
                     throw new FormatException(shaderString.Value);
 
+                WriteTagToSourceFileReferences(new ScriptString { Value = shaderString.Value + "." + instance.Group.ToString() });
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(shaderString.Value);
                 Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
@@ -2398,9 +2416,9 @@ namespace TagTool.Scripting.Compiler
             if (handle != DatumHandle.None)
             {
                 if (!Cache.TagCache.TryGetTag<RenderModel>(renderModelString.Value, out var instance))
-                {
                     throw new FormatException(renderModelString.Value);
-                }
+
+                WriteTagToSourceFileReferences(new ScriptString { Value = renderModelString.Value + "." + instance.Group.ToString() });
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(renderModelString.Value);
@@ -2418,6 +2436,8 @@ namespace TagTool.Scripting.Compiler
             {
                 if (!Cache.TagCache.TryGetTag<ScenarioStructureBsp>(structureDefinitionString.Value, out var instance))
                     throw new FormatException(structureDefinitionString.Value);
+
+                WriteTagToSourceFileReferences(new ScriptString { Value = structureDefinitionString.Value + "." + instance.Group.ToString() });
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(structureDefinitionString.Value);
@@ -2439,6 +2459,8 @@ namespace TagTool.Scripting.Compiler
                 if (!Cache.TagCache.TryGetTag<Cinematic>(cinematicDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicDefinitionString.Value);
 
+                WriteTagToSourceFileReferences(new ScriptString { Value = cinematicDefinitionString.Value + "." + instance.Group.ToString() });
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cinematicDefinitionString.Value);
                 Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
@@ -2455,6 +2477,8 @@ namespace TagTool.Scripting.Compiler
             {
                 if (!Cache.TagCache.TryGetTag<CinematicScene>(cinematicSceneDefinitionString.Value, out var instance))
                     throw new FormatException(cinematicSceneDefinitionString.Value);
+
+                WriteTagToSourceFileReferences(new ScriptString { Value = cinematicSceneDefinitionString.Value + "." + instance.Group.ToString() });
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cinematicSceneDefinitionString.Value);
@@ -2473,6 +2497,8 @@ namespace TagTool.Scripting.Compiler
                 if (!Cache.TagCache.TryGetTag<Bink>(binkDefinitionString.Value, out var instance))
                     throw new FormatException(binkDefinitionString.Value);
 
+                WriteTagToSourceFileReferences(new ScriptString { Value = binkDefinitionString.Value + "." + instance.Group.ToString() });
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(binkDefinitionString.Value);
                 Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
@@ -2490,6 +2516,8 @@ namespace TagTool.Scripting.Compiler
                 if (!Cache.TagCache.TryGetTag(anyTagString.Value, out var instance))
                     throw new FormatException(anyTagString.Value);
 
+                WriteTagToSourceFileReferences(new ScriptString { Value = anyTagString.Value + "." + instance.Group.ToString() });
+
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(anyTagString.Value);
                 Array.Copy(BitConverter.GetBytes(instance.Index), expr.Data, 4);
@@ -2506,6 +2534,8 @@ namespace TagTool.Scripting.Compiler
             {
                 if (!Cache.TagCache.TryGetTag(anyTagNotResolvingString.Value, out var instance))
                     throw new FormatException(anyTagNotResolvingString.Value);
+
+                WriteTagToSourceFileReferences(new ScriptString { Value = anyTagNotResolvingString.Value + "." + instance.Group.ToString() });
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(anyTagNotResolvingString.Value);
@@ -3122,5 +3152,29 @@ namespace TagTool.Scripting.Compiler
 
         private DatumHandle CompileSoundBudgetReferenceExpression(ScriptString soundBudgetReferenceString) =>
             throw new NotImplementedException();
+
+        private void WriteTagToSourceFileReferences(ScriptString tagString)
+        {
+            if (Cache.TagCache.TryGetTag(tagString.Value, out var instance))
+            {
+                TagReferenceBlock tagReference = new TagReferenceBlock
+                {
+                    Instance = instance
+                };
+
+                bool hasReference = false;
+                foreach(var tagEntry in ScriptSourceFileReferences)
+                {
+                    if(tagEntry.Instance.Index == tagReference.Instance.Index)
+                    {
+                        hasReference = true;
+                        break;
+                    }
+                }
+
+                if (!hasReference)
+                    ScriptSourceFileReferences.Add(tagReference);
+            }
+        }
     }
 }

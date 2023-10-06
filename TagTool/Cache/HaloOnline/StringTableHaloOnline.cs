@@ -10,6 +10,8 @@ namespace TagTool.Cache.HaloOnline
 {
     public class StringTableHaloOnline : StringTable
     {
+        private object _cacheLock = new object();
+
         public StringTableHaloOnline(CacheVersion version, Stream stream)
         {
             Version = version;
@@ -34,6 +36,17 @@ namespace TagTool.Cache.HaloOnline
             var strIndex = Count;
             Add(newString);
             return GetStringId(strIndex);
+        }
+
+        /// <summary>
+        /// AddString() but blocks other threads
+        /// </summary>
+        public StringId AddStringBlocking(string newString)
+        {
+            lock (_cacheLock) // block while adding to main id list
+            {
+                return AddString(newString);
+            }
         }
 
         public void Save(Stream stream)

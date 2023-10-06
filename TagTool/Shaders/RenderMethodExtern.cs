@@ -61,7 +61,8 @@ namespace TagTool.Shaders
         emblem_clan_chest_texture,
         //texture_global_target_ibr, // MS30
         global_depth_constants,
-        global_camera_forward
+        global_camera_forward,
+        z_camera_pixel_size
     }
 
     public enum RenderMethodExternReach : int
