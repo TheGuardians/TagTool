@@ -17,10 +17,14 @@ namespace TagTool.Commands.Porting
                 case CacheVersion.Halo3Retail:
                 {
                     if (BlamCache.Platform == CachePlatform.Original)
+                    {
                         stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateH3);
-                    else if (BlamCache.Platform == CachePlatform.MCC)
+                    }else if (BlamCache.Platform == CachePlatform.MCC)
+                    {
                         stateData.GameState = GetEquivalentFlags(stateData.GameState, stateData.GameStateH3MCC);
-
+                        stateData.EditorFlags = GetEquivalentFlags(stateData.EditorFlags, stateData.EditorFlagsMCC);
+                        stateData.HindsightState = GetEquivalentFlags(stateData.HindsightState, stateData.HindsightStateMCC);
+                    }
                     stateData.UnitBaseFlags = GetEquivalentFlags(stateData.UnitBaseFlags, stateData.UnitBaseFlags_H3);
                     stateData.Player_SpecialFlags = GetEquivalentFlags(stateData.Player_SpecialFlags, stateData.Player_SpecialFlags_H3);
                     break;

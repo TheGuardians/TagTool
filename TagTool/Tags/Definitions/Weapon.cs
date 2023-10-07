@@ -906,11 +906,14 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Size = 0x4)]
     public class WeaponFlags : TagStructure
     {
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
         public OldWeaponFlags OldFlags;
 
-        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
         public NewWeaponFlags NewFlags;
+        
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public NewWeaponFlagsMCC NewFlagsMCC;
 
         [Flags]
         public enum OldWeaponFlags : uint
@@ -986,6 +989,38 @@ namespace TagTool.Tags.Definitions
             HoldFpFiringAnimation = 1 << 29,
             StrictDeviationAngle = 1 << 30,
             Bit31 = 1u << 31
+        }
+        
+        [Flags]
+        public enum NewWeaponFlagsMCC : uint
+        {
+            None = 0,
+            MustBeReadied = 1 << 0,
+            DoesNotCountTowardsMaximum = 1 << 1,
+            AimAssistsOnlyWhenZoomed = 1 << 2,
+            PreventsGrenadeThrowing = 1 << 3,
+            PreventsMeleeAttack = 1 << 4,
+            DetonatesWhenDropped = 1 << 5,
+            CannotFireAtMaximumAge = 1 << 6,
+            SecondaryTriggerOverridesGrenades = 1 << 7,
+            SupportWeapon = 1 << 8,
+            AIsUseWeaponMeleeDamage = 1 << 9,
+            PreventsBinoculars = 1 << 10,
+            LoopFPFiringAnimation = 1 << 11,
+            PreventsCrouching = 1 << 12,
+            CannotFireWhileBoosting = 1 << 13,
+            UsesEmptyMeleeOnEmpty = 1 << 14,
+            ThirdPersonCamera = 1 << 15,
+            CanBeDualWielded = 1 << 16,
+            CanOnlyBeDualWielded = 1 << 17,
+            MeleeOnly = 1 << 18,
+            CannotFireIfParentDead = 1 << 19,
+            WeaponAgesWithEachKill = 1 << 20,
+            WeaponUsesOldDualFireErrorCode = 1 << 21,
+            AllowsUnaimedLunge = 1 << 22,
+            CannotBeUsedByPlayer = 1 << 23,
+            HoldFpFiringAnimation = 1 << 24,
+            StrictDeviationAngle = 1 << 25,
         }
     }
 

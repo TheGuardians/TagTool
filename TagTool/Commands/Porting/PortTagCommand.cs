@@ -1953,6 +1953,14 @@ namespace TagTool.Commands.Porting
             if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
                 return weaponFlags;
 
+            if(BlamCache.Platform == CachePlatform.MCC)
+            {
+                if (!Enum.TryParse(weaponFlags.NewFlagsMCC.ToString(), out weaponFlags.NewFlags))
+                    throw new FormatException(BlamCache.Version.ToString());
+
+                return weaponFlags;
+            }
+
             if (weaponFlags.OldFlags.HasFlag(WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode))
 				weaponFlags.OldFlags &= ~WeaponFlags.OldWeaponFlags.WeaponUsesOldDualFireErrorCode;
 

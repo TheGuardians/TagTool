@@ -58,7 +58,8 @@ namespace TagTool.Tags.Definitions
             public List<RenderDatum> RenderData;
            
 
-            [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
+            [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x2C, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             [TagStructure(Size = 0x38, MaxVersion = CacheVersion.Halo3ODST)]
             [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline604673)]
             [TagStructure(Size = 0x48, Version = CacheVersion.HaloOnline700123)]
@@ -76,6 +77,9 @@ namespace TagTool.Tags.Definitions
 
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public ChudSkinState SkinState;
+
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                public ChudSandboxEditorState EditorFlagsMCC;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
                 public PDA PDAFlags;
@@ -97,10 +101,13 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
                 public ChudMiscState_H3 UnitBaseFlags_H3;
 
-                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
                 public ChudSandboxEditorState EditorFlags;
-                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
                 public ChudHindsightState HindsightState;
+                
+                [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+                public ChudHindsightStateMCC HindsightStateMCC;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
                 public Skulls SkullFlags;
@@ -244,7 +251,7 @@ namespace TagTool.Tags.Definitions
                 }
 
                 [Flags]
-                public enum ChudGameStateH3MCC : ushort
+                public enum ChudGameStateH3MCC : uint
                 {
                     None,
                     CampaignSolo = 1 << 0,
@@ -262,7 +269,9 @@ namespace TagTool.Tags.Definitions
                     Infection = 1 << 12,
                     Editor = 1 << 13,
                     Theater = 1 << 14,
-                    Unused = 1 << 15
+                    CampaignSurvival = 1 << 15,
+                    MpGunGame = 1 << 16,
+                    Unused = 1 << 17
                 }
 
                 [Flags]
@@ -454,6 +463,29 @@ namespace TagTool.Tags.Definitions
                     MetagameTeamScoring = 1 << 14,
                     MetagameFfaScoring = 1 << 15
                 }
+                
+                [Flags]
+                public enum ChudHindsightStateMCC : uint
+                {
+                    None,
+                    SensorRange10m = 1 << 0,
+                    SensorRange25m = 1 << 1,
+                    SensorRange75m = 1 << 2,
+                    SensorRange150m = 1 << 3,
+                    MetagameP1Talking = 1 << 4,
+                    MetagameP2Enabled = 1 << 5,
+                    MetagameP2Talking = 1 << 6,
+                    MetagameP3Enabled = 1 << 7,
+                    MetagameP3Talking = 1 << 8,
+                    MetagameP4Enabled = 1 << 9,
+                    MetagameP4Talking = 1 << 10,
+                    TransientScoreAvail = 1 << 11,
+                    MetagameMultikillAvail = 1 << 12,
+                    MetagameNegScoreAvail = 1 << 13,
+                    //ODST
+                    MetagameTeamScoring = 1 << 14,
+                    MetagameFfaScoring = 1 << 15
+                }
 
                 [Flags]
                 public enum Skulls : ushort
@@ -612,8 +644,8 @@ namespace TagTool.Tags.Definitions
                     SelectedFireGrenades = 1 << 5,
                     BinocularsActive = 1 << 6,
                     BinocularsNotActive = 1 << 7,
-                    ThirdPersonCamera = 1 << 8,
-                    FirstPersonCamera = 1 << 9,
+                    FirstPersonCamera = 1 << 8,
+                    ThirdPersonCamera = 1 << 9,
                     IsSpeaking = 1 << 10,
                     IsTappingToTalk = 1 << 11,
                     HasOvershieldLevel1 = 1 << 12,
