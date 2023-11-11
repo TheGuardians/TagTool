@@ -55,6 +55,7 @@ namespace TagTool.Commands.Forge
                 switch (Item.Group.ToString().ToLower())
                 {
                     case "effect_scenery":
+                    case "sound_scenery":
                         itemType = ForgeGlobalsDefinition.PaletteItemType.Effects;
                         break;
                     case "equipment":

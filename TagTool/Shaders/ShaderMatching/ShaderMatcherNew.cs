@@ -184,6 +184,9 @@ namespace TagTool.Shaders.ShaderMatching
                 int score = 0;
                 for (int i = 0; i < sourceRmt2Desc.Options.Length; i++)
                 {
+                    if (i >= destRmt2Desc.Options.Length)
+                        continue;
+
                     if (sourceRmt2Desc.Options[i] == destRmt2Desc.Options[i])
                     {
                         score += 1 + weights[i];
