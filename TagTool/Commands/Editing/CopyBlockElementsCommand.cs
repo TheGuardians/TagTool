@@ -123,7 +123,7 @@ namespace TagTool.Commands.Editing
             Elements = new List<object>();
 
             for (var i = index; i < (index + count); i++)
-                Elements.Add(blockValue[i]);
+                Elements.Add(blockValue[i].DeepCloneV2());
             
             var itemString = index < 2 ? "element" : "elements";
             Console.WriteLine($"Successfully copied {count} {itemString}.");
