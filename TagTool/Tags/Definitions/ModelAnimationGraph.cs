@@ -469,6 +469,28 @@ namespace TagTool.Tags.Definitions
                 DropWeaponKeyframe
             }
 
+            public enum FrameEventTypeED : short
+            {
+                PrimaryKeyframe,
+                SecondaryKeyframe,
+                TertiaryKeyframe,
+                LeftFoot,
+                RightFoot,
+                AllowInterruption,
+                TransitionA,
+                TransitionB,
+                TransitionC,
+                TransitionD,
+                BothFeetShuffle,
+                BodyImpact,
+                LeftBackFoot,
+                RightBackFoot,
+                RagdollKeyframe,
+                DropWeaponKeyframe,
+                AssassinationA,
+                AssassinationB
+            }
+
             public enum FrameEventTypeReach : short
             {
                 None,
@@ -505,7 +527,9 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public FrameEventType Type;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
+                public FrameEventTypeED TypeED;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
                 public FrameEventTypeHO TypeHO;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public FrameEventTypeReach ReachType;
