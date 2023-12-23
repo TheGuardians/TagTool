@@ -1994,6 +1994,8 @@ namespace TagTool.Commands.Porting
 
             if(BlamCache.Platform == CachePlatform.MCC)
             {
+                weaponFlags.NewFlagsMCC &= ~WeaponFlags.NewWeaponFlagsMCC.WeaponUsesOldDualFireErrorCode;
+
                 if (!Enum.TryParse(weaponFlags.NewFlagsMCC.ToString(), out weaponFlags.NewFlags))
                     throw new FormatException(BlamCache.Version.ToString());
 
