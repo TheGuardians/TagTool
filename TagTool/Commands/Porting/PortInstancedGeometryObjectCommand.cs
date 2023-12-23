@@ -29,7 +29,7 @@ namespace TagTool.Commands.Porting
                 "PortInstancedGeometryObject",
                 "Converts one or more instanced geometry instances to objects.",
 
-                "PortInstancedGeometryObject [PortingFlags] [BspIndex] [nocenter] [forgepalette] [allunique] [<Instance index or name> [New Tagname]]",
+                "PortInstancedGeometryObject [PortingFlags] [BspIndex] [nocenter] [forge] [allunique] [<Instance index or name> [New Tagname]]",
                 "When porting multiple, provide each on a new line after arguments."
                 + "\nWhen the cache file scenario has only one BSP (most MP levels), providing a BspIndex is unnecessary."
                 + "\n\nUse \"forgepalette\" to add your ported instances to the forge palette."
@@ -45,10 +45,6 @@ namespace TagTool.Commands.Porting
         public override object Execute(List<string> args)
         {
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
-
-            if (argStack.Count < 1)
-                return new TagToolError(CommandError.ArgCount);
-
             var portingFlags = ParsePortingFlags(argStack);
 
             using (var blamCacheStream = BlamCache.OpenCacheRead())
@@ -80,7 +76,7 @@ namespace TagTool.Commands.Porting
                     centergeometry = false;
                 }
                 // Get forge palette category for all instances, if provided
-                if (argStack.Count > 0 && argStack.Peek().ToLower().StartsWith("forgepalette"))
+                if (argStack.Count > 0 && argStack.Peek().ToLower().StartsWith("forge"))
                 {
                     var argParameters = argStack.Peek().Split(':');
                     if (argParameters.Count() == 1)

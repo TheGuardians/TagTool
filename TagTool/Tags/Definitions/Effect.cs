@@ -529,7 +529,7 @@ namespace TagTool.Tags.Definitions
                         [TagStructure(Size = 0x18)]
                         public class Movement : TagStructure
                         {
-                            public TypeValue Tyoe;
+                            public TypeValue Type;
                             public FlagsValue Flags;
 
                             [TagField(Flags = Padding, Length = 1)]

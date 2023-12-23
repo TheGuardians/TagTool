@@ -255,6 +255,7 @@
     <Compile Include="Animations\Common\StaticCodecHeader.cs" />
     <Compile Include="Animations\Common\AnimationCodecType.cs" />
     <Compile Include="Animations\Common\FrameInfoType.cs" />
+    <Compile Include="Animations\JmadHelper.cs" />
     <Compile Include="Audio\BlamSound.cs" />
     <Compile Include="Audio\Converter\ASF.cs" />
     <Compile Include="Audio\Converter\FSB4.cs" />
@@ -402,6 +403,8 @@
     <Compile Include="Commands\Gen4\ScenarioStructureBSPs\BSPContextFactory.cs" />
     <Compile Include="Commands\Gen4\ScenarioStructureBSPs\ExtractRenderGeometryCommand.cs" />
     <Compile Include="Commands\Modding\UpdateModPackageCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\ListInheritanceCommand.cs" />
+    <Compile Include="Commands\ModelAnimationGraphs\SetInheritanceCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\SetAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExportJMSCommand.cs" />
     <Compile Include="Commands\Porting\IgnoreBlamTagCommand.cs" />

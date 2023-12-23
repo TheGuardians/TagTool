@@ -53,7 +53,14 @@ namespace TagTool.Commands.RenderModels
                 r => r.Permutations.Select(p => Cache.StringTable.GetString(p.Name)) ).Distinct().OrderBy(v => v).ToList();
 
             var exportFilePath = args[0];
-            var exportFileFormat = args[0].Contains(".") ? Path.GetExtension(args[0]).Replace(".", "") : "amf";
+
+            var exportFileFormat = Path.GetExtension(args[0]).Replace(".", "").ToLower();
+            if (string.IsNullOrWhiteSpace(exportFileFormat))
+            {
+                exportFileFormat = "amf";
+                exportFilePath += $"\\*.{exportFileFormat}";
+            }
+
             var filterArg = args.Count > 1 && (variants.Contains(args[1].ToLower()) || args[1] == "?" || args[1] == "*") ? args[1] : "*";
             var extractBitmaps = (args.Count == 2 && filterArg != "dds" && args[1] == "dds") || (args.Count == 3 && args[2] == "dds");
 

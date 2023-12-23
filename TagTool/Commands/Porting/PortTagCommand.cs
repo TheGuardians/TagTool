@@ -1341,10 +1341,28 @@ namespace TagTool.Commands.Porting
                     if (paletteCategory == -1)
                         paletteCategory = (short)(forg.PaletteCategories.Count() - 1);
 
+                    var itemType = ForgeGlobalsDefinition.PaletteItemType.Prop;
+                    switch(objectTag.Group.ToString())
+                    {
+                        case "weapon":
+                            itemType = ForgeGlobalsDefinition.PaletteItemType.Weapon;
+                            break;
+                        case "equipment":
+                            itemType = ForgeGlobalsDefinition.PaletteItemType.Equipment;
+                            break;
+                        case "vehicle":
+                            itemType = ForgeGlobalsDefinition.PaletteItemType.Vehicle;
+                            break;
+                        case "effect_scenery":
+                        case "sound_scenery":
+                            itemType = ForgeGlobalsDefinition.PaletteItemType.Effects;
+                            break;
+                    }
+
                     forg.Palette.Add(new ForgeGlobalsDefinition.PaletteItem()
                     {
                         Name = paletteItemName,
-                        Type = ForgeGlobalsDefinition.PaletteItemType.Prop,
+                        Type = itemType,
                         CategoryIndex = (short)paletteCategory,
                         DescriptionIndex = -1,
                         MaxAllowed = 0,
