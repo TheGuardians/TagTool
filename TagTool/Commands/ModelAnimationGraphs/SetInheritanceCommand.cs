@@ -34,8 +34,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
                   + "\nSpecifics are label paths (i.e. mode:weaponclass:weapontype:action/overlay) and multiple can be given at once."
                   + "\n\t- e.g. \'combat\' \'scorpion_d:enter\' \'crouch:unarmed:any:throw_grenade\'\n"
 
-                  + "\nSpecifics can also be keywords that represent many groups of modes."
+                  + "\nSpecifics can also be optional qualifiers to the inheritance operation."
                   + "\n\t- \'vehicles\' will inherit any new vehicle-based driver, passenger, gunner, and boarding modes."
+                  + "\n\t- \'fp\' is required for inheritance between first person animation graphs."
                   )
         {
             CacheContext = cachecontext;
@@ -46,6 +47,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
         public override object Execute(List<string> args)
         {
             List<string> specifics = new List<string> { };
+            bool firstperson = false;
+            bool vehicles = false;
 
             if(args.Count == 0)
                 return new TagToolError(CommandError.ArgCount);
@@ -66,7 +69,20 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 if (short.TryParse(arg, out short givenIndex))
                     Index = givenIndex;
                 else
-                    specifics.Add(arg);
+                {
+                    switch(arg.ToLower())
+                    {
+                        case "fp":
+                            firstperson = true;
+                            break;
+                        case "vehicles":
+                            vehicles = true;
+                            break;
+                        default:
+                            specifics.Add(arg);
+                            break;
+                    }
+                }
             }
 
             var foundIndex = Animation.InheritanceList.FindIndex(x => x.InheritedGraph == newTag);
@@ -89,14 +105,21 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
                 var thisRoot = JmadHelper.GetRootNode(Animation).ZPosition;
                 var newRoot = JmadHelper.GetRootNode(newJmad).ZPosition;
-                block.RootZOffset = thisRoot / newRoot;
 
-                block.Flags |= InheritanceListFlags.TightenNodes;
-                block.NodeMapFlags = new List<Inheritance.NodeMapFlag>
+                if (thisRoot == 0.0f || newRoot == 0.0f)
+                    block.RootZOffset = 1.0f;
+                else
+                    block.RootZOffset = thisRoot / newRoot;
+
+                if (!firstperson)
                 {
-                    new Inheritance.NodeMapFlag{ LocalNodeFlags = 2071986171 },
-                    new Inheritance.NodeMapFlag{ LocalNodeFlags = 1275 }
-                };
+                    block.Flags |= InheritanceListFlags.TightenNodes;
+                    block.NodeMapFlags = new List<Inheritance.NodeMapFlag>
+                    {
+                        new Inheritance.NodeMapFlag{ LocalNodeFlags = 2071986171 },
+                        new Inheritance.NodeMapFlag{ LocalNodeFlags = 1275 }
+                    };
+                }
 
                 // create approximate node map from shared names
                 if (block.NodeMap?.Count != newJmad.SkeletonNodes.Count)
@@ -114,9 +137,8 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 }
 
                 // add all vehicle modes if requested
-                if(specifics.Contains("vehicles"))
+                if(vehicles)
                 {
-                    specifics.RemoveAt(specifics.IndexOf("vehicles"));
                     List<string> currentModeNames = Animation.Modes.Select(m => CacheContext.StringTable.GetString(m.Name)).ToList();
                     foreach (var m in newJmad.Modes)
                     {

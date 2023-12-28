@@ -344,7 +344,7 @@ namespace TagTool.Commands.Editing
 
                 try
                 {
-                    found = Enum.Parse(type, query);
+                    found = Enum.Parse(type, query, true);
                 }
                 catch
                 {
