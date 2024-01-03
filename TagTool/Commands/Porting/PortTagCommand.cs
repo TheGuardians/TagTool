@@ -835,6 +835,9 @@ namespace TagTool.Commands.Porting
 
                         if (CacheContext.StringTable.GetString(screenEffect.InputVariable) == "saved_film_vision_mode_intensity")
                             screenEffect.Flags_ODST |= AreaScreenEffect.ScreenEffectBlock.SefcFlagBits_ODST.DebugDisable; // prevents spawning and rendering
+
+                        if (screenEffect.ObjectFalloff.Data.Length == 0)
+                            screenEffect.ObjectFalloff = TagFunction.DefaultConstant;
                     }
                     
                     break;
