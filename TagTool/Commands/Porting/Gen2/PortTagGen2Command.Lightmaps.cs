@@ -21,6 +21,7 @@ using static TagTool.Tags.Definitions.Gen2.ScenarioStructureLightmap.StructureLi
 using static TagTool.Lighting.ReachLightmapConverter;
 using static TagTool.Tags.Definitions.ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.DeathAndDamageBlock;
 using static TagTool.Cache.HaloOnline.ResourceCacheHaloOnline;
+using TagTool.Bitmaps.DDS;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -29,7 +30,6 @@ namespace TagTool.Commands.Porting.Gen2
         public CachedTag ConvertLightmap(TagTool.Tags.Definitions.Gen2.Scenario gen2Scenario, Scenario newScenario, string scenarioPath, Stream cacheStream, Stream gen2CacheStream)
         {
             bool use_per_pixel = true;
-            bool skip_lightmap_bake = true;
             var sldtTag = Cache.TagCache.AllocateTag<ScenarioLightmapBspData>($"{scenarioPath}_faux_lightmap");
             var sldt = new ScenarioLightmap();
             sldt.PerPixelLightmapDataReferences = new List<ScenarioLightmap.DataReferenceBlock>();
@@ -43,6 +43,8 @@ namespace TagTool.Commands.Porting.Gen2
                     ScenarioStructureBsp sbsp = Cache.Deserialize<ScenarioStructureBsp>(cacheStream, newScenario.StructureBsps[i].StructureBsp);
                     var gen2Lightmap = Gen2Cache.Deserialize<TagTool.Tags.Definitions.Gen2.ScenarioStructureLightmap>(gen2CacheStream, gen2Scenario.StructureBsps[i].StructureLightmap);
                     lbsp = ConvertLightmapData(sbsp, gen2Lightmap, cacheStream, gen2CacheStream, i, lightmapDataName, use_per_pixel);
+                    sbsp.Geometry = lbsp.Geometry;
+                    Cache.Serialize(cacheStream, newScenario.StructureBsps[i].StructureBsp, sbsp);
                 }
                 
                 lbsp.BspIndex = (short)i;
@@ -98,7 +100,7 @@ namespace TagTool.Commands.Porting.Gen2
             if (use_per_pixel)
             {
                 linearSHBitmap = ConvertBitmap(gen2bitmap);
-                intensityBitmap = linearSHBitmap;
+                intensityBitmap = ConvertBitmap(gen2bitmap);
             }
 
             //clusters
@@ -109,7 +111,7 @@ namespace TagTool.Commands.Porting.Gen2
                 Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
                 if(clusterrenderdata.BitmapIndex != -1)
                 {
-                    var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];
+                    var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];                   
 
                     byte[] rawBitmapData = Gen2Cache.GetCacheRawData((uint)image.Lod0Pointer, (int)image.Lod0Size);
                     //h2v raw bitmap data is gz compressed
@@ -124,7 +126,13 @@ namespace TagTool.Commands.Porting.Gen2
                         }
                     }
 
+                    if (image.Flags.HasFlag(TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FlagsValue.Swizzled))
+                    {
+                        rawBitmapData = Swizzle(rawBitmapData, image.Width, image.Height, 1, 1, true);
+                    }
+
                     var palette = lgroup.SectionPalette[clusterrenderdata.PaletteIndex];
+
                     List<LightmapRawVertex> lightmapRawVertices = new List<LightmapRawVertex>();
                     foreach(var vert in clustermesh.RawVertices)
                     {
@@ -155,7 +163,7 @@ namespace TagTool.Commands.Porting.Gen2
                             float[] R = new float[4];
                             float[] G = new float[4];
                             float[] B = new float[4];
-                            SphericalHarmonics.EvaluateDirectionalLight(2, ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]), new RealVector3d(), R, G, B);
+                            SphericalHarmonics.EvaluateDirectionalLight(2, ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]), new RealVector3d(1.0f, 1.0f, 1.0f), R, G, B);
                             var sh = new SphericalHarmonics.SH2Probe(R, G, B);
                             for (int i = 0; i < 4; i++)
                             {
