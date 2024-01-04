@@ -219,30 +219,6 @@ namespace TagTool.Commands.Porting.Gen2
                 new TagToolWarning($"Failed to find bitmap format matching {format}");
                 return BitmapFormat.A8R8G8B8;
             }
-            /*
-            switch (format)
-            {
-                case BitmapGen2.BitmapDataBlock.FormatValue.A8y8:
-                    return BitmapFormat.A8Y8;
-                case BitmapGen2.BitmapDataBlock.FormatValue.A8:
-                    return BitmapFormat.A8;
-                case BitmapGen2.BitmapDataBlock.FormatValue.A1r5g5b5:
-                    return BitmapFormat.A1R5G5B5;
-                case BitmapGen2.BitmapDataBlock.FormatValue.A4r4g4b4:
-                    return BitmapFormat.A4R4G4B4;
-                case BitmapGen2.BitmapDataBlock.FormatValue.A8r8g8b8:
-                    return BitmapFormat.A8R8G8B8;
-                case BitmapGen2.BitmapDataBlock.FormatValue.Argbfp32:
-                    return BitmapFormat.ARGBFP32;
-                case BitmapGen2.BitmapDataBlock.FormatValue.Ay8:
-                    return BitmapFormat.AY8;
-                case BitmapGen2.BitmapDataBlock.FormatValue.Dxt1:
-                    return BitmapFormat.Dxt1;
-                case BitmapGen2.BitmapDataBlock.FormatValue.Dxt3:
-                    return BitmapFormat.Dxt3;
-                case BitmapGen2.BitmapDataBlock.FormatValue.
-            }
-            */
         }
         #region Original Xbox
 

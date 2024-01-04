@@ -152,27 +152,43 @@ namespace TagTool.Commands.Porting.Gen2
                         lbsp.Geometry.Meshes[clusterMeshIndices[clusterindex]].VertexBufferIndices[1] = (short)bufferIndex;
 
                         var coefficients = new List<RealRgbColor[]>();
-                        var dominantIntensities = new RealRgbColor[rawBitmapData.Length];
+                        var dominantIntensities = new RealRgbColor[image.Width * image.Height];
                         for (int i = 0; i < 4; i++)
                         {
-                            coefficients.Add(new RealRgbColor[rawBitmapData.Length]);
+                            coefficients.Add(new RealRgbColor[image.Width * image.Height]);
                         }
-                            
-                        for (var c = 0; c < rawBitmapData.Length; c++)
-                        {
+
+                        var dataStream = new MemoryStream(rawBitmapData);
+                        var dataReader = new EndianReader(dataStream);
+                        for (var c = 0; c < image.Width * image.Height; c++)
+                        {         
                             float[] R = new float[4];
                             float[] G = new float[4];
                             float[] B = new float[4];
-                            SphericalHarmonics.EvaluateDirectionalLight(2, ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]), new RealVector3d(1.0f, 1.0f, 1.0f), R, G, B);
+                            switch (image.Format)
+                            {
+                                case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.A8r8g8b8:
+                                    dataStream.Position = c * 4;
+                                    RealRgbColor colorVista = ARGB_to_Real_RGB(dataReader.ReadArgbColor());
+                                    SphericalHarmonics.EvaluateDirectionalLight(2, colorVista, lightmapRawVertices[0].IncidentDirection, R, G, B);
+                                    dominantIntensities[c] = colorVista;
+                                    break;
+                                case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
+                                    RealRgbColor color = ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]);
+                                    SphericalHarmonics.EvaluateDirectionalLight(2, color, lightmapRawVertices[0].IncidentDirection, R, G, B);
+                                    dominantIntensities[c] = color;
+                                    break;
+                                default:
+                                    new TagToolError(CommandError.OperationFailed, "Unknown lightmap bitmap format!");
+                                    return null;
+                            }                            
                             var sh = new SphericalHarmonics.SH2Probe(R, G, B);
                             for (int i = 0; i < 4; i++)
                             {
                                 coefficients[i][c].Red = sh.R[i];
                                 coefficients[i][c].Green = sh.G[i];
                                 coefficients[i][c].Blue = sh.B[i];
-                            }
-
-                            dominantIntensities[c] = new RealRgbColor(1.0f,1.0f,1.0f);
+                            }                          
                         }
 
                         Console.WriteLine($"Converting Cluster Lightmap {clusterindex}...");
@@ -194,10 +210,10 @@ namespace TagTool.Commands.Porting.Gen2
                             convertedLightmap = null;
                         }
 
-                        ImportIntoLbsp(convertedLightmap, linearSHBitmap, intensityBitmap, Cache, lbsp, clusterindex);
+                        ImportIntoLbsp(convertedLightmap, linearSHBitmap, intensityBitmap, Cache, lbsp, clusterrenderdata.BitmapIndex);
                         lbsp.ClusterStaticPerVertexLightingBuffers.Add(new ScenarioLightmapBspData.ClusterStaticPerVertexLighting
                         {
-                            LightmapBitmapsImageIndex = (short)clusterindex,
+                            LightmapBitmapsImageIndex = (short)clusterrenderdata.BitmapIndex,
                             StaticPerVertexLightingIndex = -1
                         });
                     }
@@ -440,6 +456,9 @@ namespace TagTool.Commands.Porting.Gen2
             linearSH.Height = result.Height;
             linearSH.Depth = 8;
             linearSH.UpdateFormat(BitmapFormat.Dxt5);
+            
+            //var outPath = "lightmaptest_image_" + imageindex;
+            //StoreDDS(outPath, linearSH.Width, linearSH.Height, linearSH.Depth, linearSH.Type, linearSH.Format, result.LinearSH);
 
             var intensity = new BaseBitmap();
             intensity.Type = BitmapType.Texture3D;
@@ -478,9 +497,11 @@ namespace TagTool.Commands.Porting.Gen2
         }
         public byte SampleLightmapBitmap(byte[] bitmap, RealVector2d texcoord, int width, int height)
         {
-            int xcoord = (int)Math.Floor((double)(texcoord.I * width));
-            int ycoord = (int)Math.Floor((double)(texcoord.J * height));
+            int xcoord = (int)Math.Round((double)(texcoord.I * width));
+            int ycoord = (int)Math.Round((double)(texcoord.J * height));
             int index = ycoord * width + xcoord;
+            if (index >= bitmap.Length)
+                index = bitmap.Length - 1;
             return bitmap[index];
         }
 
@@ -566,6 +587,24 @@ namespace TagTool.Commands.Porting.Gen2
                 },
             });
             return result;
+        }
+
+        private static void StoreDDS(string filePath, int width, int height, int depth, BitmapType type, BitmapFormat format, byte[] data)
+        {
+            var fi = new FileInfo(filePath);
+            fi.Directory.Create();
+
+            var bitmap = new BaseBitmap();
+            bitmap.Width = width;
+            bitmap.Height = height;
+            bitmap.Depth = depth;
+            bitmap.Type = type;
+            bitmap.Format = format;
+            bitmap.UpdateFormat(format);
+            bitmap.Data = data;
+            var dds = new DDSFile(bitmap);
+            using (var writer = new EndianWriter(File.Create(fi.FullName)))
+                dds.Write(writer);
         }
     }
 }
