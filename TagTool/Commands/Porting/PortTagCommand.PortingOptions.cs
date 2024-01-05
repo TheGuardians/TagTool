@@ -88,7 +88,7 @@ namespace TagTool.Commands.Porting
 			/// Only use templates that have the exact same render method options
 			/// </summary>
 			[PortingFlagDescription("Only use templates that have the exact same render method options")]
-			PefectShaderMatchOnly = 1 << 11,
+			PerfectShaderMatchOnly = 1 << 11,
 
 			/// <summary>
 			/// Keep cache in memory during porting.
