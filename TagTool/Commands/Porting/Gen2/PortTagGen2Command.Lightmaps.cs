@@ -125,6 +125,19 @@ namespace TagTool.Commands.Porting.Gen2
                     foreach (var vert in clustermesh.RawVertices)
                         incident_direction = (vert.PrimaryLightmapIncidentDirection + incident_direction) / 2.0f;
 
+                    /*
+                    //DEBUG DUMP BITMAP
+                    var dumpStream = new MemoryStream();
+                    var dumpWriter = new EndianWriter(dumpStream);
+                    for (var c = 0; c < image.Width * image.Height; c++)
+                    {
+                        ArgbColor color = palette.PaletteColors[rawBitmapData[c]];
+                        dumpWriter.Write(color.GetValue());
+                    }
+                    StoreDDS($"cluster_{clusterindex}.dds", 
+                        image.Width, image.Height, 1, BitmapType.Texture2D, BitmapFormat.A8R8G8B8, dumpStream.ToArray());
+                    */
+
                     var dataStream = new MemoryStream(rawBitmapData);
                     var dataReader = new EndianReader(dataStream);
                     for (var c = 0; c < image.Width * image.Height; c++)

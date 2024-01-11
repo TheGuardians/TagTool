@@ -113,14 +113,14 @@ namespace TagTool.Commands.Porting.Gen2
             else
             {
                 //seek to offset then write out line by line
-                writer.BaseStream.Position = (offset[1] * targetLightmapSize + offset[0]) * 4;
                 OffsetWrites.Add(offset);
                 float MaxL = 0.0f;
                 ArgbColor convertedColor = new ArgbColor();
                 //layer 0
                 for (var y = 0; y < bitmap.Height(); y++)
                 {
-                    for(var x = 0; x < bitmap.Width(); x++)
+                    writer.BaseStream.Position = ((offset[1] + y) * targetLightmapSize + offset[0]) * 4;
+                    for (var x = 0; x < bitmap.Width(); x++)
                     {
                         var val = bitmap.coefficients[lightmapLayer][bitmap.Width() * y + x];
                         //even layers get filled with dummy data
@@ -135,8 +135,7 @@ namespace TagTool.Commands.Porting.Gen2
                         else
                             convertedColor = CreateDummySHData(val);
                         writer.Write(convertedColor.GetValue());
-                    }
-                    writer.BaseStream.Position = ((offset[1] + y) * targetLightmapSize + offset[0]) * 4;
+                    }                   
                 }
                 
                 if (!useDummyData)
