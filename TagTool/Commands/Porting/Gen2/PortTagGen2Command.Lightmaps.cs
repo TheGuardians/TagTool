@@ -33,12 +33,14 @@ namespace TagTool.Commands.Porting.Gen2
             for (var i = 0; i < gen2Scenario.StructureBsps.Count; i++)
             {
                 var lbsp = new ScenarioLightmapBspData();
-                var lightmapDataName = $"{scenarioPath}_faux_lightmap_bsp_data_{i}";
+                var lightmapDataName = newScenario.StructureBsps[i].StructureBsp.Name;
                 if (gen2Scenario.StructureBsps[i].StructureLightmap != null)
                 {
                     ScenarioStructureBsp sbsp = Cache.Deserialize<ScenarioStructureBsp>(cacheStream, newScenario.StructureBsps[i].StructureBsp);
                     var gen2Lightmap = Gen2Cache.Deserialize<TagTool.Tags.Definitions.Gen2.ScenarioStructureLightmap>(gen2CacheStream, gen2Scenario.StructureBsps[i].StructureLightmap);
                     lbsp = ConvertLightmapData(sbsp, gen2Lightmap, cacheStream, gen2CacheStream, i, lightmapDataName);
+                    if (lbsp == null)
+                        return null;
                     sbsp.Geometry = lbsp.Geometry;
                     Cache.Serialize(cacheStream, newScenario.StructureBsps[i].StructureBsp, sbsp);
                 }
@@ -135,12 +137,12 @@ namespace TagTool.Commands.Porting.Gen2
                             case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.A8r8g8b8:
                                 dataStream.Position = c * 4;
                                 RealRgbColor colorVista = ARGB_to_Real_RGB(dataReader.ReadArgbColor());
-                                SphericalHarmonics.EvaluateDirectionalLight(2, colorVista, incident_direction, R, G, B);
+                                EvaluateDirectionalLightCustom(2, colorVista, incident_direction, R, G, B);
                                 dominantIntensities[c] = colorVista;
                                 break;
                             case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
                                 RealRgbColor color = ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]);
-                                SphericalHarmonics.EvaluateDirectionalLight(2, color, incident_direction, R, G, B);
+                                EvaluateDirectionalLightCustom(2, color, incident_direction, R, G, B);
                                 dominantIntensities[c] = color;
                                 break;
                             default:
@@ -177,6 +179,8 @@ namespace TagTool.Commands.Porting.Gen2
 
             CachedLightmap convertedLightmap = new CachedLightmap();
             convertedLightmap = packer.Pack();
+            if (convertedLightmap == null)
+                return null;
             convertedLightmap.MaxLs[4] = 1.0f;
 
             //fixup lightmap texcoords and write to resources
@@ -205,7 +209,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                     //H2 lightmap texcoords are compressed to 0.5-1 space
                     tex.Texcoord = new RealVector2d(tex.Texcoord.I * 2 - 1, tex.Texcoord.J * 2 - 1);
-                    int[] originalOffset = new int[] { (int)(tex.Texcoord.I * image.Width), (int)(tex.Texcoord.J * image.Height) };
+                    int[] originalOffset = new int[] { (int)Math.Round(tex.Texcoord.I * image.Width), (int)Math.Round(tex.Texcoord.J * image.Height) };
                     int[] newOffset = new int[] { clusterOffset[0] + originalOffset[0], clusterOffset[1] + originalOffset[1] };
                     tex.Texcoord = new RealVector2d(newOffset[0] / (float)convertedLightmap.Width, newOffset[1] / (float)convertedLightmap.Height);
 
@@ -592,6 +596,16 @@ namespace TagTool.Commands.Porting.Gen2
             double Green = (((color.Green + 1) / 2) + 0.5) - color.Green;
             double Blue = (((color.Blue + 1) / 2) + 0.5) - color.Blue;
             return new ArgbColor(byte.MaxValue, (byte)(Red * 255), (byte)(Green * 255), (byte)(Blue * 255));
+        }
+        private static void EvaluateDirectionalLightCustom(int order, RealRgbColor intensity, RealVector3d direction, float[] shRed, float[] shGreen, float[] shBlue)
+        {
+            float s = (float)Math.PI;
+
+            var shBasis = new float[order * order];
+            SphericalHarmonics.EvaluateDirection(direction, order, shBasis);
+            SphericalHarmonics.Scale(shRed, order, shBasis, intensity.Red * s);
+            SphericalHarmonics.Scale(shGreen, order, shBasis, intensity.Green * s);
+            SphericalHarmonics.Scale(shBlue, order, shBasis, intensity.Blue * s);
         }
 
         private static void StoreDDS(string filePath, int width, int height, int depth, BitmapType type, BitmapFormat format, byte[] data)

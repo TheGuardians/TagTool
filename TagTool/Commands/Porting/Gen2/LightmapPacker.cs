@@ -15,7 +15,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
     public class LightmapPacker
     {
-        private int[] SizeClasses = new int[] { 32,64,128,256,512,1024,2048,4096};
+        private int[] SizeClasses = new int[] { 4,8,16,32,64,128,256,512,1024,2048,4096};
         private List<BitmapContainer> bitmapContainers = new List<BitmapContainer>();
         private int lightmapLayer = 0;
         private int targetLightmapSize = 0;
@@ -35,7 +35,8 @@ namespace TagTool.Commands.Porting.Gen2
 
         public CachedLightmap Pack()
         {
-            NestBitmaps();
+            if (!NestBitmaps())
+                return null;
             MemoryStream layeredLightmapData = new MemoryStream();
             for(var i = 0; i < 4; i++)
             {

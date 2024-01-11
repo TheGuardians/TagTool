@@ -32,7 +32,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 "GenerateStructureSurfaces",
                 "Attempts to regnerate the structure surface blocks needed by the geometry sampler",
 
-                "GenerateStructureSurfaces",
+                "GenerateStructureSurfaces [lightmap tag name]",
 
                 "Attempts to regnerate the structure surface blocks needed by the geometry sampler")
         {
@@ -43,10 +43,14 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
         public override object Execute(List<string> args)
         {
+            string lightmapTagName = Tag.Name;
+            if (args.Count > 0)
+                lightmapTagName = args[0];
+
             // Find and deserialize the lightmap bsp
             ScenarioLightmapBspData lbsp;
             using (var stream = Cache.OpenCacheRead())
-                lbsp = Cache.Deserialize<ScenarioLightmapBspData>(stream, Cache.TagCache.GetTag<ScenarioLightmapBspData>(Tag.Name));
+                lbsp = Cache.Deserialize<ScenarioLightmapBspData>(stream, Cache.TagCache.GetTag<ScenarioLightmapBspData>(lightmapTagName));
 
             var renderGeometry = lbsp.Geometry;
             var renderGeometryResource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(renderGeometry.Resource);
