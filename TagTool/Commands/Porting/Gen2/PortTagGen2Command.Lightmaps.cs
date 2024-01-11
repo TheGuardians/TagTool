@@ -127,15 +127,32 @@ namespace TagTool.Commands.Porting.Gen2
 
                     /*
                     //DEBUG DUMP BITMAP
-                    var dumpStream = new MemoryStream();
-                    var dumpWriter = new EndianWriter(dumpStream);
-                    for (var c = 0; c < image.Width * image.Height; c++)
+                    using (var rawdataStream = new MemoryStream(rawBitmapData))
+                    using (var dumpReader = new EndianReader(rawdataStream))
+                    using (var dumpStream = new MemoryStream())
+                    using (var dumpWriter = new EndianWriter(dumpStream))
                     {
-                        ArgbColor color = palette.PaletteColors[rawBitmapData[c]];
-                        dumpWriter.Write(color.GetValue());
-                    }
-                    StoreDDS($"cluster_{clusterindex}.dds", 
-                        image.Width, image.Height, 1, BitmapType.Texture2D, BitmapFormat.A8R8G8B8, dumpStream.ToArray());
+                        for (var c = 0; c < image.Width * image.Height; c++)
+                        {
+                            ArgbColor color = new ArgbColor();
+                            switch (image.Format)
+                            {
+                                case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.A8r8g8b8:
+                                    var B = dumpReader.ReadByte();
+                                    var G = dumpReader.ReadByte();
+                                    var R = dumpReader.ReadByte();
+                                    var A = dumpReader.ReadByte();
+                                    color = new ArgbColor(A,R,G,B);
+                                    break;
+                                case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
+                                    color = palette.PaletteColors[rawBitmapData[c]];
+                                    break;
+                            }
+                            dumpWriter.Write(color.GetValue());
+                        }
+                        StoreDDS($"cluster_{clusterindex}.dds",
+                            image.Width, image.Height, 1, BitmapType.Texture2D, BitmapFormat.A8R8G8B8, dumpStream.ToArray());
+                    }                       
                     */
 
                     var dataStream = new MemoryStream(rawBitmapData);
@@ -148,8 +165,11 @@ namespace TagTool.Commands.Porting.Gen2
                         switch (image.Format)
                         {
                             case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.A8r8g8b8:
-                                dataStream.Position = c * 4;
-                                RealRgbColor colorVista = ARGB_to_Real_RGB(dataReader.ReadArgbColor());
+                                var temp_B = dataReader.ReadByte();
+                                var temp_G = dataReader.ReadByte();
+                                var temp_R = dataReader.ReadByte();
+                                var temp_A = dataReader.ReadByte();
+                                RealRgbColor colorVista = ARGB_to_Real_RGB(new ArgbColor(temp_A, temp_R, temp_G, temp_B));
                                 EvaluateDirectionalLightCustom(2, colorVista, incident_direction, R, G, B);
                                 dominantIntensities[c] = colorVista;
                                 break;
@@ -159,7 +179,7 @@ namespace TagTool.Commands.Porting.Gen2
                                 dominantIntensities[c] = color;
                                 break;
                             default:
-                                new TagToolError(CommandError.OperationFailed, "Unknown lightmap bitmap format!");
+                                new TagToolError(CommandError.OperationFailed, "Unknown lightmap bitmap format! Aborting!");
                                 return null;
                         }
                         var sh = new SphericalHarmonics.SH2Probe(R, G, B);
@@ -220,8 +240,9 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     var tex = lightmapRawVertices[t];
 
-                    //H2 lightmap texcoords are compressed to 0.5-1 space
-                    tex.Texcoord = new RealVector2d(tex.Texcoord.I * 2 - 1, tex.Texcoord.J * 2 - 1);
+                    //H2X lightmap texcoords are compressed to 0.5-1 space
+                    if(Gen2Cache.Version == CacheVersion.Halo2Xbox)
+                        tex.Texcoord = new RealVector2d(tex.Texcoord.I * 2 - 1, tex.Texcoord.J * 2 - 1);
                     int[] originalOffset = new int[] { (int)Math.Round(tex.Texcoord.I * image.Width), (int)Math.Round(tex.Texcoord.J * image.Height) };
                     int[] newOffset = new int[] { clusterOffset[0] + originalOffset[0], clusterOffset[1] + originalOffset[1] };
                     tex.Texcoord = new RealVector2d(newOffset[0] / (float)convertedLightmap.Width, newOffset[1] / (float)convertedLightmap.Height);
