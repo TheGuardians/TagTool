@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TagTool.Tags.Definitions;
 using BitmapGen2 = TagTool.Tags.Definitions.Gen2.Bitmap;
 using TagTool.Bitmaps;
+using TagTool.Bitmaps.Utils;
 using System.IO;
 using TagTool.IO;
 using TagTool.Commands.Common;
@@ -105,7 +106,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Type = ConvertBitmapType(gen2Img.Type),
                     Format = ConvertBitmapFormat(gen2Img.Format),
                     RegistrationPoint = gen2Img.RegistrationPoint,
-                    MipmapCount = 0, //no mipmaps for now
+                    MipmapCount = (sbyte)gen2Img.MipmapCount,
                     Flags = new BitmapFlags(),
                     Curve = BitmapImageCurve.xRGB, //default to this for now
                 };
@@ -118,6 +119,7 @@ namespace TagTool.Commands.Porting.Gen2
                 //set pixel data size after decompression and modification
                 newImg.PixelDataSize = rawBitmapData.Length;
 
+                //generate mipmaps
                 BaseBitmap bitmapbase = new BaseBitmap(newImg);
                 bitmapbase.Data = rawBitmapData;
                 var bitmapResourceDefinition = BitmapUtils.CreateBitmapTextureInteropResource(bitmapbase);
@@ -216,7 +218,7 @@ namespace TagTool.Commands.Porting.Gen2
                 return result;
             else
             {
-                new TagToolWarning($"Failed to find bitmap format matching {format}");
+                new TagToolError(CommandError.None, $"Failed to find bitmap format matching {format}");
                 return BitmapFormat.A8R8G8B8;
             }
         }
