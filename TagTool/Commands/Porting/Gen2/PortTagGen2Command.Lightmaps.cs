@@ -19,6 +19,7 @@ using TagTool.Serialization;
 using System.Numerics;
 using static TagTool.Tags.Definitions.Gen2.ScenarioStructureLightmap.StructureLightmapGroupBlock;
 using TagTool.Bitmaps.DDS;
+using TagTool.Bitmaps.Utils;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -119,11 +120,14 @@ namespace TagTool.Commands.Porting.Gen2
                         coefficients.Add(new RealRgbColor[image.Width * image.Height]);
                     }
 
+                    //DON'T USE INCIDENT DIRECTION FOR NOW AS IT CAUSES ARTIFACTS
+                    /*
                     //get average incident direction across cluster mesh
                     Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
                     RealVector3d incident_direction = clustermesh.RawVertices[0].PrimaryLightmapIncidentDirection;
                     foreach (var vert in clustermesh.RawVertices)
                         incident_direction = (vert.PrimaryLightmapIncidentDirection + incident_direction) / 2.0f;
+                    */
 
                     /*
                     //DEBUG DUMP BITMAP
@@ -170,12 +174,12 @@ namespace TagTool.Commands.Porting.Gen2
                                 var temp_R = dataReader.ReadByte();
                                 var temp_A = dataReader.ReadByte();
                                 RealRgbColor colorVista = ARGB_to_Real_RGB(new ArgbColor(temp_A, temp_R, temp_G, temp_B));
-                                EvaluateDirectionalLightCustom(2, colorVista, incident_direction, R, G, B);
+                                EvaluateDirectionalLightCustom(2, colorVista, new RealVector3d(), R, G, B);
                                 dominantIntensities[c] = colorVista;
                                 break;
                             case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
                                 RealRgbColor color = ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]);
-                                EvaluateDirectionalLightCustom(2, color, incident_direction, R, G, B);
+                                EvaluateDirectionalLightCustom(2, color, new RealVector3d(), R, G, B);
                                 dominantIntensities[c] = color;
                                 break;
                             default:
@@ -422,86 +426,42 @@ namespace TagTool.Commands.Porting.Gen2
             return lbsp;
         }
 
-        public class ConversionResult
-        {
-            public byte[] LinearSH;
-            public byte[] Intensity;
-            public float[] MaxLs;
-            public int Width;
-            public int Height;
-        }
-
-        public class H2LightmapConverter
-        {
-            public Action<float> ProgressUpdated;
-            public int ProgressUpdateIntervalMS = 1000;
-            public int MaxDegreeOfParallelism = -1;
-
-            public ConversionResult Convert(List<RealRgbColor[]> coefficients, RealRgbColor[] dominantIntensities, int width, int height)
-            {
-                var compressor = new LightmapCompressor();
-                compressor.MaxDegreeOfParallelism = MaxDegreeOfParallelism;
-                compressor.ProgressUpdateInterval = ProgressUpdateIntervalMS;
-                compressor.ProgressUpdated += ProgressUpdated;
-
-                var tasks = compressor.Tasks;
-                for (int i = 0; i < 4; i++)
-                    compressor.AddTask(new LightmapCompressionTask(i, coefficients[i], width, height));
-                compressor.AddTask(new LightmapCompressionTask(4, dominantIntensities, width, height));
-                compressor.Run();
-                compressor.ProgressUpdated -= ProgressUpdated;
-
-                var result = new ConversionResult();
-                result.MaxLs = tasks.Select(x => x.MaxL).ToArray();
-                result.Width = width;
-                result.Height = height;
-
-                using (var ms = new MemoryStream())
-                {
-                    for (int i = 0; i < 4; i++)
-                    {
-                        ms.Write(tasks[i].Dxt0, 0, tasks[i].Dxt0.Length);
-                        ms.Write(tasks[i].Dxt1, 0, tasks[i].Dxt1.Length);
-                    }
-                    result.LinearSH = ms.ToArray();
-                }
-
-                using (var ms = new MemoryStream())
-                {
-                    var task = tasks[4];
-                    ms.Write(task.Dxt0, 0, task.Dxt0.Length);
-                    ms.Write(task.Dxt1, 0, task.Dxt1.Length);
-                    result.Intensity = ms.ToArray();
-                }
-
-                return result;
-            }
-        }
-
         public void ImportIntoLbsp(CachedLightmap result, Bitmap linearSHBitmap, Bitmap intensityBitmap, GameCacheHaloOnlineBase cache, ScenarioLightmapBspData Lbsp, int imageindex)
         {
+            //NOTICE: USING THE DXT5 COMPRESSOR IN THIS WAY RESULTS IN ALL OF THE LAYERS BEING REMOVED BESIDES THE FIRST ONE
+            //THIS REALLY SHOULDNT WORK BUT IT DOES, AND SAVES A LOT OF SPACE, SO LEAVING IT IN PLACE FOR NOW
+
+            var dxt5Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 | 
+                SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra, 
+                result.LinearSH, result.Width, result.Height);
             var linearSH = new BaseBitmap();
             linearSH.Type = BitmapType.Texture3D;
-            linearSH.Data = result.LinearSH;
+            linearSH.Data = dxt5Compressor.CompressTexture();
             linearSH.Width = result.Width;
             linearSH.Height = result.Height;
             linearSH.Depth = 8;
-            linearSH.UpdateFormat(BitmapFormat.A8R8G8B8);
-            
+            linearSH.UpdateFormat(BitmapFormat.Dxt5);
+
             //var outPath = "lightmaptest_image_" + imageindex;
             //StoreDDS(outPath, linearSH.Width, linearSH.Height, linearSH.Depth, linearSH.Type, linearSH.Format, result.LinearSH);
 
+            var dxt5Compressor2 = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 |
+                SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra,
+                result.Intensity, result.Width, result.Height);
             var intensity = new BaseBitmap();
             intensity.Type = BitmapType.Texture3D;
-            intensity.Data = result.Intensity;
+            intensity.Data = dxt5Compressor2.CompressTexture();
             intensity.Width = result.Width;
             intensity.Height = result.Height;
             intensity.Depth = 2;
-            intensity.UpdateFormat(BitmapFormat.A8R8G8B8);
+            intensity.UpdateFormat(BitmapFormat.Dxt5);
 
             Lbsp.CoefficientsMapScale = new TagTool.Common.LuminanceScale[9];
             for (int i = 0; i < 5; i++)
                 Lbsp.CoefficientsMapScale[i] = new TagTool.Common.LuminanceScale() { Scale = result.MaxLs[i] };
+
+            //conversion comes out a bit dark, make it brighter
+            Lbsp.CoefficientsMapScale[0].Scale = Lbsp.CoefficientsMapScale[0].Scale * 4.0f;
 
             ImportBitmap(cache, linearSHBitmap, imageindex, linearSH);
             ImportBitmap(cache, intensityBitmap, imageindex, intensity);
@@ -641,7 +601,6 @@ namespace TagTool.Commands.Porting.Gen2
             SphericalHarmonics.Scale(shGreen, order, shBasis, intensity.Green * s);
             SphericalHarmonics.Scale(shBlue, order, shBasis, intensity.Blue * s);
         }
-
         private static void StoreDDS(string filePath, int width, int height, int depth, BitmapType type, BitmapFormat format, byte[] data)
         {
             var fi = new FileInfo(filePath);
