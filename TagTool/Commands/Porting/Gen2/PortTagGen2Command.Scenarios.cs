@@ -570,6 +570,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 if (cluster.MeshIndex == -1)
                 {
+                    Gen2Meshes.Add(new Gen2BSPResourceMesh());
                     newSbsp.Geometry.Meshes.Add(new Mesh()
                     {
                         Type = VertexType.World,
@@ -584,6 +585,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 if (instance.MeshIndex == -1)
                 {
+                    Gen2Meshes.Add(new Gen2BSPResourceMesh());
                     newSbsp.Geometry.Meshes.Add(new Mesh()
                     {
                         Type = VertexType.World,
@@ -604,6 +606,8 @@ namespace TagTool.Commands.Porting.Gen2
             for (var i = 0; i < Gen2Meshes.Count; i++)
             {
                 Gen2BSPResourceMesh gen2mesh = Gen2Meshes[i];
+                if (gen2mesh.VisibilityMoppCodeData == null || gen2mesh.VisibilityBounds == null)
+                    continue;
                 //mesh visibility mopp and mopp reorder table
                 if (gen2mesh.VisibilityMoppCodeData.Length > 0 && gen2mesh.MoppReorderTable != null)
                 {

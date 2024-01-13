@@ -63,7 +63,7 @@ namespace TagTool.Commands.Porting.Gen2
                 clusterMeshIndices.Add(cluster.MeshIndex);
             var sbspResource = Cache.ResourceCache.GetStructureBspTagResources(sbsp.CollisionBspResource);
             foreach(var instance in sbsp.InstancedGeometryInstances)
-            instanceMeshIndices.Add(sbspResource.InstancedGeometry[instance.DefinitionIndex].MeshIndex);
+                instanceMeshIndices.Add(sbspResource.InstancedGeometry[instance.DefinitionIndex].MeshIndex);
 
             RenderGeometryApiResourceDefinition resourceDef = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(sbsp.Geometry.Resource);
 
@@ -229,6 +229,8 @@ namespace TagTool.Commands.Porting.Gen2
                 var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];
 
                 Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
+                if (clustermesh.RawVertices.Count == 0)
+                    continue;
                 List<LightmapRawVertex> lightmapRawVertices = new List<LightmapRawVertex>();
                 foreach (var vert in clustermesh.RawVertices)
                 {
@@ -266,17 +268,16 @@ namespace TagTool.Commands.Porting.Gen2
                 lbsp.Geometry.Meshes[clusterMeshIndices[clusterindex]].VertexBufferIndices[1] = (short)bufferIndex;
             }
 
-            //write blank intensity bitmaps for now
             var bitmapStreamDI = new MemoryStream();
             var vertWriterDI = new EndianWriter(bitmapStreamDI);
+            var bitmapStreamDI2 = new MemoryStream();
+            var vertWriterDI2 = new EndianWriter(bitmapStreamDI2);
             for (var c = 0; c < convertedLightmap.Width * convertedLightmap.Height; c++)
             {
                 vertWriterDI.Write(new ArgbColor(255, 255, 255, 255).GetValue());
+                vertWriterDI2.Write(CreateDummySHData(new RealRgbColor(1.0f,1.0f,1.0f)).GetValue());
             }
-            for (var c = 0; c < convertedLightmap.Width * convertedLightmap.Height; c++)
-            {
-                vertWriterDI.Write(CreateDummySHData(new RealRgbColor(1.0f, 1.0f, 1.0f)).GetValue());
-            }
+            bitmapStreamDI2.WriteTo(bitmapStreamDI);
             convertedLightmap.Intensity = bitmapStreamDI.ToArray();
 
             ImportIntoLbsp(convertedLightmap, linearSHBitmap, intensityBitmap, Cache, lbsp, 0);
@@ -343,7 +344,8 @@ namespace TagTool.Commands.Porting.Gen2
             }
             for (var instanceindex = 0; instanceindex < lgroup.InstanceRenderInfo.Count; instanceindex++)
             {
-                if(instanceMeshIndices[instanceindex] == -1)
+                Gen2BSPResourceMesh instancemesh = bspMeshes[bsp_index][instanceMeshIndices[instanceindex]];
+                if(instancemesh.RawVertices == null || instancemesh.RawVertices.Count == 0)
                 {
                     lbsp.InstancedGeometry.Add(new ScenarioLightmapBspData.InstancedGeometryLighting
                     {
@@ -352,9 +354,7 @@ namespace TagTool.Commands.Porting.Gen2
                         InstancedGeometryLightProbesIndex = -1
                     });
                     continue;
-                }                  
-
-                Gen2BSPResourceMesh instancemesh = bspMeshes[bsp_index][instanceMeshIndices[instanceindex]];
+                }
 
                 var bucket = lgroup.GeometryBuckets[lgroup.InstanceBucketRefs[instanceindex].BucketIndex];
                 List<LightmapRawVertex> lightmapRawVertices = new List<LightmapRawVertex>();
@@ -428,15 +428,22 @@ namespace TagTool.Commands.Porting.Gen2
 
         public void ImportIntoLbsp(CachedLightmap result, Bitmap linearSHBitmap, Bitmap intensityBitmap, GameCacheHaloOnlineBase cache, ScenarioLightmapBspData Lbsp, int imageindex)
         {
-            //NOTICE: USING THE DXT5 COMPRESSOR IN THIS WAY RESULTS IN ALL OF THE LAYERS BEING REMOVED BESIDES THE FIRST ONE
-            //THIS REALLY SHOULDNT WORK BUT IT DOES, AND SAVES A LOT OF SPACE, SO LEAVING IT IN PLACE FOR NOW
-
-            var dxt5Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 | 
-                SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra, 
-                result.LinearSH, result.Width, result.Height);
+            //compress each of the 8 layers and compile them together
+            MemoryStream outStream = new MemoryStream();
+            MemoryStream inStream = new MemoryStream(result.LinearSH);
+            for(var i = 0; i < 8; i++)
+            {
+                byte[] buffer = new byte[result.Width * result.Height * 4];
+                inStream.Read(buffer, 0, result.Width * result.Height * 4);
+                var dxt5Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 |
+                SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra,
+                buffer, result.Width, result.Height);
+                outStream.Write(dxt5Compressor.CompressTexture(), 0, result.Width * result.Height);
+            }
+            
             var linearSH = new BaseBitmap();
             linearSH.Type = BitmapType.Texture3D;
-            linearSH.Data = dxt5Compressor.CompressTexture();
+            linearSH.Data = outStream.ToArray();
             linearSH.Width = result.Width;
             linearSH.Height = result.Height;
             linearSH.Depth = 8;
@@ -445,12 +452,22 @@ namespace TagTool.Commands.Porting.Gen2
             //var outPath = "lightmaptest_image_" + imageindex;
             //StoreDDS(outPath, linearSH.Width, linearSH.Height, linearSH.Depth, linearSH.Type, linearSH.Format, result.LinearSH);
 
-            var dxt5Compressor2 = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 |
+            //compress each of the 2 layers and compile them together
+            MemoryStream outStreamIntensity = new MemoryStream();
+            MemoryStream inStreamIntensity = new MemoryStream(result.Intensity);
+            for (var i = 0; i < 2; i++)
+            {
+                byte[] buffer = new byte[result.Width * result.Height * 4];
+                inStreamIntensity.Read(buffer, 0, result.Width * result.Height * 4);
+                var dxt5Compressor = new SquishLib.Compressor(SquishLib.SquishFlags.kDxt5 |
                 SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra,
-                result.Intensity, result.Width, result.Height);
+                buffer, result.Width, result.Height);
+                outStreamIntensity.Write(dxt5Compressor.CompressTexture(), 0, result.Width * result.Height);
+            }
+
             var intensity = new BaseBitmap();
             intensity.Type = BitmapType.Texture3D;
-            intensity.Data = dxt5Compressor2.CompressTexture();
+            intensity.Data = outStreamIntensity.ToArray();
             intensity.Width = result.Width;
             intensity.Height = result.Height;
             intensity.Depth = 2;
