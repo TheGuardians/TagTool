@@ -30,11 +30,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             base(true,
 
                 "GenerateStructureSurfaces",
-                "Attempts to regnerate the structure surface blocks needed by the geometry sampler",
+                "Attempts to regenerate the structure surface blocks needed by the geometry sampler",
 
-                "GenerateStructureSurfaces [lightmap tag name]",
+                "GenerateStructureSurfaces",
 
-                "Attempts to regnerate the structure surface blocks needed by the geometry sampler")
+                "Attempts to regenerate the structure surface blocks needed by the geometry sampler")
         {
             Cache = cache;
             Definition = definition;
@@ -44,8 +44,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public override object Execute(List<string> args)
         {
             string lightmapTagName = Tag.Name;
-            if (args.Count > 0)
-                lightmapTagName = args[0];
 
             // Find and deserialize the lightmap bsp
             ScenarioLightmapBspData lbsp;
@@ -57,13 +55,45 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             renderGeometry.SetResourceBuffers(renderGeometryResource, false);
 
             var tagResources = Cache.ResourceCache.GetStructureBspTagResources(Definition.CollisionBspResource);
-
-            GenerateStructureSurfaces(tagResources, renderGeometry);
-
+            GenerateStructureSurfaces(tagResources, renderGeometry);           
             ((GameCacheHaloOnlineBase)Cache).ResourceCaches.ReplaceResource(Definition.CollisionBspResource.HaloOnlinePageableResource, tagResources);
 
+            //optionally generate structure surfaces for sbsp if none are present
+            var cacheFileTagResources = Cache.ResourceCache.GetStructureBspCacheFileTagResources(Definition.PathfindingResource);
+            if (cacheFileTagResources.SurfacePlanes == null || cacheFileTagResources.SurfacePlanes.Count == 0)
+            {
+                GenerateStructureBspStructureSurfaces(tagResources, cacheFileTagResources, renderGeometry);
+                ((GameCacheHaloOnlineBase)Cache).ResourceCaches.ReplaceResource(Definition.PathfindingResource.HaloOnlinePageableResource, cacheFileTagResources);
+            }
             Console.WriteLine("Finished.");
             return true;
+        }
+
+        public void GenerateStructureBspStructureSurfaces(StructureBspTagResources tagResources, StructureBspCacheFileTagResources cacheFileTagResources, RenderGeometry renderGeometry)
+        {           
+            // Do nothing if the sbsp has no collision
+            if (tagResources.CollisionBsps == null || tagResources.CollisionBsps.Count == 0)
+                return;
+
+            var collisionBsp = tagResources.CollisionBsps[0];
+            cacheFileTagResources.SurfacePlanes = new TagTool.Tags.TagBlock<StructureSurface>(CacheAddressType.Definition);
+            foreach (var surface in collisionBsp.Surfaces)
+                cacheFileTagResources.SurfacePlanes.Add(new StructureSurface());
+            cacheFileTagResources.Planes = new TagTool.Tags.TagBlock<StructureSurfaceToTriangleMapping>(CacheAddressType.Definition);
+
+            for (var i = 0; i < Definition.Clusters.Count; i++)
+            {
+                Console.WriteLine($"Generating surface triangles for sbsp cluster ({i + 1}/{Definition.Clusters.Count})...");
+                if (Definition.Clusters[i].MeshIndex == -1)
+                    continue;
+                // Do nothing if the sbsp has no vertex data
+                var mesh = renderGeometry.Meshes[Definition.Clusters[i].MeshIndex];
+                if (mesh.ResourceIndexBuffers[0] == null || mesh.ResourceVertexBuffers[0] == null)
+                    continue;
+
+                List<SurfaceTriangle>[] surfaceTriangleLists = GenerateStructureSurfaceTriangleLists(collisionBsp, new MeshData(Cache, Definition.Clusters[i].MeshIndex, -1, renderGeometry));
+                PopulateStructureBspStructureSurfaceBlocks(cacheFileTagResources.SurfacePlanes, cacheFileTagResources.Planes, surfaceTriangleLists, i);
+            }            
         }
 
         public void GenerateStructureSurfaces(StructureBspTagResources tagResources, RenderGeometry renderGeometry)
@@ -88,17 +118,46 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             if (mesh.ResourceIndexBuffers[0] == null || mesh.ResourceVertexBuffers[0] == null)
                 return;
 
-            List<SurfaceTriangle>[] surfaceTriangleLists = GenerateStructureSurfaceTriangleLists(collisionBsp, new MeshData(Cache, instanceDef, renderGeometry));
+            List<SurfaceTriangle>[] surfaceTriangleLists = GenerateStructureSurfaceTriangleLists(collisionBsp, new MeshData(Cache, instanceDef.MeshIndex, instanceDef.CompressionIndex, renderGeometry));
 
             instanceDef.SurfacePlanes = new TagTool.Tags.TagBlock<StructureSurface>(CacheAddressType.Definition);
             instanceDef.Planes = new TagTool.Tags.TagBlock<StructureSurfaceToTriangleMapping>(CacheAddressType.Definition);
             PopulateStructureSurfaceBlocks(instanceDef.SurfacePlanes, instanceDef.Planes, surfaceTriangleLists);
         }
 
+        public static void PopulateStructureBspStructureSurfaceBlocks(
+            IList<StructureSurface> structureSurfaceBlock,
+            IList<StructureSurfaceToTriangleMapping> triangleMappingBlock,
+            List<SurfaceTriangle>[] surfaceTriangleLists,
+            int clusterIndex = 0)
+        {
+            for (int surfaceIndex = 0; surfaceIndex < surfaceTriangleLists.Length; surfaceIndex++)
+            {
+                // Empty lists should still have a structure surface block.
+                var structureSurface = new StructureSurface();
+                var triangleList = surfaceTriangleLists[surfaceIndex];
+                if (triangleList.Count > 0)
+                {
+                    if (structureSurfaceBlock[surfaceIndex].SurfaceToTriangleMappingCount > triangleList.Count)
+                        continue;
+
+                    // Construct the triangle mapping block
+                    structureSurface.FirstSurfaceToTriangleMappingIndex = triangleMappingBlock.Count;
+                    foreach (var triangle in triangleList)
+                    {
+                        triangleMappingBlock.Add(new StructureSurfaceToTriangleMapping() { ClusterIndex = clusterIndex, TriangleIndex = triangle.Index + 2 });
+                        structureSurface.SurfaceToTriangleMappingCount++;
+                    }
+                    structureSurfaceBlock[surfaceIndex] = structureSurface;
+                }
+            }
+        }
+
         public static void PopulateStructureSurfaceBlocks(
             IList<StructureSurface> structureSurfaceBlock,
             IList<StructureSurfaceToTriangleMapping> triangleMappingBlock,
-            List<SurfaceTriangle>[] surfaceTriangleLists)
+            List<SurfaceTriangle>[] surfaceTriangleLists,
+            int clusterIndex = 0)
         {
             structureSurfaceBlock.Clear();
             triangleMappingBlock.Clear();
@@ -115,7 +174,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                     structureSurface.FirstSurfaceToTriangleMappingIndex = triangleMappingBlock.Count;
                     foreach (var triangle in triangleList)
                     {
-                        triangleMappingBlock.Add(new StructureSurfaceToTriangleMapping() { ClusterIndex = 0, TriangleIndex = triangle.Index + 2 });
+                        triangleMappingBlock.Add(new StructureSurfaceToTriangleMapping() { ClusterIndex = clusterIndex, TriangleIndex = triangle.Index + 2 });
                         structureSurface.SurfaceToTriangleMappingCount++;
                     }
                 }
@@ -572,11 +631,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             public ushort[] Indices;
             public Mesh Mesh;
 
-            public MeshData(GameCache cache, InstancedGeometryBlock instanceDef, RenderGeometry renderGeometry)
+            public MeshData(GameCache cache, int meshIndex, int compressionIndex, RenderGeometry renderGeometry)
             {
-                Mesh = renderGeometry.Meshes[instanceDef.MeshIndex];
+                Mesh = renderGeometry.Meshes[meshIndex];
                 Indices = ReadMeshIndices(cache, Mesh);
-                Vertices = ReadMeshVertices(cache, Mesh, new VertexCompressor(renderGeometry.Compression[instanceDef.CompressionIndex]));
+                Vertices = ReadMeshVertices(cache, Mesh, compressionIndex == -1 ? null : new VertexCompressor(renderGeometry.Compression[compressionIndex]));
             }
 
             private static ushort[] ReadMeshIndices(GameCache cache, Mesh mesh)
@@ -595,8 +654,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                 for (var i = 0; i < vertexBuffer.Count; i++)
                 {
                     var rigid = vertexStream.ReadRigidVertex();
-                    rigid.Position = compressor.DecompressPosition(rigid.Position);
-                    rigid.Texcoord = compressor.DecompressUv(rigid.Texcoord);
+                    if(compressor != null)
+                    {
+                        rigid.Position = compressor.DecompressPosition(rigid.Position);
+                        rigid.Texcoord = compressor.DecompressUv(rigid.Texcoord);
+                    }                  
 
                     result.Add(new GenericVertex
                     {
