@@ -20,14 +20,16 @@ namespace TagTool.Commands.Porting.Gen2
         private int lightmapLayer = 0;
         private int targetLightmapSize = 0;
         public Dictionary<int, int[]> clusterBitmapOffsets = new Dictionary<int, int[]>();
+        public Dictionary<int, int[]> instanceBitmapOffsets = new Dictionary<int, int[]>();
         private float[] MaxLs = new float[9];
         private List<int[]> OffsetWrites = new List<int[]>();
 
-        public bool AddBitmap(int width, int height, int cluster_index, List<RealRgbColor[]> coefficients)
+        public bool AddBitmap(int width, int height, int index, bool isInstance, List<RealRgbColor[]> coefficients)
         {
             var newBitmap = new BitmapContainer();
             newBitmap.Size = new int[] { width, height };
-            newBitmap.ClusterIndex = cluster_index;
+            newBitmap.Index = index;
+            newBitmap.isInstance = isInstance;
             newBitmap.coefficients = coefficients;
             bitmapContainers.Add(newBitmap);
             return true;
@@ -141,9 +143,15 @@ namespace TagTool.Commands.Porting.Gen2
                 if (!useDummyData)
                 {
                     MaxLs[lightmapLayer] = MaxL;
-                    //store offset of final cluster bitmap write location
+                    //store offset of final cluster or instance bitmap write location
                     if(lightmapLayer == 0)
-                        clusterBitmapOffsets.Add(bitmap.ClusterIndex, offset);
+                    {
+                        if (bitmap.isInstance)
+                            instanceBitmapOffsets.Add(bitmap.Index, offset);
+                        else
+                            clusterBitmapOffsets.Add(bitmap.Index, offset);
+                    }
+                        
                 }                    
             }                            
         }
@@ -255,7 +263,8 @@ namespace TagTool.Commands.Porting.Gen2
             }
             public int MaxSize() { return Size.Max(); }
             public int MinSize() { return Size.Min(); }
-            public int ClusterIndex;
+            public int Index;
+            public bool isInstance = false;
             public List<RealRgbColor[]> coefficients = new List<RealRgbColor[]>();
             public List<BitmapContainer> ChildBitmaps = new List<BitmapContainer>();
 

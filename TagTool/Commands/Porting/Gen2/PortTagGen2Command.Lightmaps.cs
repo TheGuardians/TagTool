@@ -20,6 +20,7 @@ using System.Numerics;
 using static TagTool.Tags.Definitions.Gen2.ScenarioStructureLightmap.StructureLightmapGroupBlock;
 using TagTool.Bitmaps.DDS;
 using TagTool.Bitmaps.Utils;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -91,111 +92,11 @@ namespace TagTool.Commands.Porting.Gen2
                 var clusterrenderdata = lgroup.ClusterRenderInfo[clusterindex];              
                 if(clusterrenderdata.BitmapIndex != -1)
                 {
-                    var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];                   
-
-                    byte[] rawBitmapData = Gen2Cache.GetCacheRawData((uint)image.Lod0Pointer, (int)image.Lod0Size);
-                    //h2v raw bitmap data is gz compressed
-                    if (Gen2Cache.Version == CacheVersion.Halo2Vista)
-                    {
-                        using (var stream = new MemoryStream(rawBitmapData))
-                        using (var resultStream = new MemoryStream())
-                        using (var zstream = new GZipStream(stream, CompressionMode.Decompress))
-                        {
-                            zstream.CopyTo(resultStream);
-                            rawBitmapData = resultStream.ToArray();
-                        }
-                    }
-
-                    if (image.Flags.HasFlag(TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FlagsValue.Swizzled))
-                    {
-                        rawBitmapData = Swizzle(rawBitmapData, image.Width, image.Height, 1, 1, true);
-                    }
-
+                    var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];
                     var palette = lgroup.SectionPalette[clusterrenderdata.PaletteIndex];
+                    List<RealRgbColor[]> coefficients = BuildCoefficients(image, palette);
 
-                    var coefficients = new List<RealRgbColor[]>();
-                    var dominantIntensities = new RealRgbColor[image.Width * image.Height];
-                    for (int i = 0; i < 4; i++)
-                    {
-                        coefficients.Add(new RealRgbColor[image.Width * image.Height]);
-                    }
-
-                    //DON'T USE INCIDENT DIRECTION FOR NOW AS IT CAUSES ARTIFACTS
-                    /*
-                    //get average incident direction across cluster mesh
-                    Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
-                    RealVector3d incident_direction = clustermesh.RawVertices[0].PrimaryLightmapIncidentDirection;
-                    foreach (var vert in clustermesh.RawVertices)
-                        incident_direction = (vert.PrimaryLightmapIncidentDirection + incident_direction) / 2.0f;
-                    */
-
-                    /*
-                    //DEBUG DUMP BITMAP
-                    using (var rawdataStream = new MemoryStream(rawBitmapData))
-                    using (var dumpReader = new EndianReader(rawdataStream))
-                    using (var dumpStream = new MemoryStream())
-                    using (var dumpWriter = new EndianWriter(dumpStream))
-                    {
-                        for (var c = 0; c < image.Width * image.Height; c++)
-                        {
-                            ArgbColor color = new ArgbColor();
-                            switch (image.Format)
-                            {
-                                case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.A8r8g8b8:
-                                    var B = dumpReader.ReadByte();
-                                    var G = dumpReader.ReadByte();
-                                    var R = dumpReader.ReadByte();
-                                    var A = dumpReader.ReadByte();
-                                    color = new ArgbColor(A,R,G,B);
-                                    break;
-                                case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
-                                    color = palette.PaletteColors[rawBitmapData[c]];
-                                    break;
-                            }
-                            dumpWriter.Write(color.GetValue());
-                        }
-                        StoreDDS($"cluster_{clusterindex}.dds",
-                            image.Width, image.Height, 1, BitmapType.Texture2D, BitmapFormat.A8R8G8B8, dumpStream.ToArray());
-                    }                       
-                    */
-
-                    var dataStream = new MemoryStream(rawBitmapData);
-                    var dataReader = new EndianReader(dataStream);
-                    for (var c = 0; c < image.Width * image.Height; c++)
-                    {
-                        float[] R = new float[4];
-                        float[] G = new float[4];
-                        float[] B = new float[4];
-                        switch (image.Format)
-                        {
-                            case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.A8r8g8b8:
-                                var temp_B = dataReader.ReadByte();
-                                var temp_G = dataReader.ReadByte();
-                                var temp_R = dataReader.ReadByte();
-                                var temp_A = dataReader.ReadByte();
-                                RealRgbColor colorVista = ARGB_to_Real_RGB(new ArgbColor(temp_A, temp_R, temp_G, temp_B));
-                                EvaluateDirectionalLightCustom(2, colorVista, new RealVector3d(), R, G, B);
-                                dominantIntensities[c] = colorVista;
-                                break;
-                            case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
-                                RealRgbColor color = ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]);
-                                EvaluateDirectionalLightCustom(2, color, new RealVector3d(), R, G, B);
-                                dominantIntensities[c] = color;
-                                break;
-                            default:
-                                new TagToolError(CommandError.OperationFailed, "Unknown lightmap bitmap format! Aborting!");
-                                return null;
-                        }
-                        var sh = new SphericalHarmonics.SH2Probe(R, G, B);
-                        for (int i = 0; i < 4; i++)
-                        {
-                            coefficients[i][c].Red = sh.R[i];
-                            coefficients[i][c].Green = sh.G[i];
-                            coefficients[i][c].Blue = sh.B[i];
-                        }
-                    }
-
-                    packer.AddBitmap(image.Width, image.Height, clusterindex, coefficients);
+                    packer.AddBitmap(image.Width, image.Height, clusterindex, false, coefficients);
 
                     lbsp.ClusterStaticPerVertexLightingBuffers.Add(new ScenarioLightmapBspData.ClusterStaticPerVertexLighting
                     {
@@ -211,78 +112,8 @@ namespace TagTool.Commands.Porting.Gen2
                         StaticPerVertexLightingIndex = -1
                     });
                 }
-            }
+            }           
 
-
-            CachedLightmap convertedLightmap = new CachedLightmap();
-            convertedLightmap = packer.Pack();
-            if (convertedLightmap == null)
-                return null;
-            convertedLightmap.MaxLs[4] = 1.0f;
-
-            //fixup lightmap texcoords and write to resources
-            for (var clusterindex = 0; clusterindex < lgroup.Clusters.Count; clusterindex++)
-            {
-                var clusterrenderdata = lgroup.ClusterRenderInfo[clusterindex];
-                if (clusterrenderdata.BitmapIndex == -1)
-                    continue;
-                var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];
-
-                Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
-                if (clustermesh.RawVertices.Count == 0)
-                    continue;
-                List<LightmapRawVertex> lightmapRawVertices = new List<LightmapRawVertex>();
-                foreach (var vert in clustermesh.RawVertices)
-                {
-                    lightmapRawVertices.Add(new LightmapRawVertex
-                    {
-                        Texcoord = vert.PrimaryLightmapTexcoord,
-                    });
-                }                
-                
-                int[] clusterOffset = packer.clusterBitmapOffsets[clusterindex];
-
-                for(var t = 0; t < lightmapRawVertices.Count; t++)
-                {
-                    var tex = lightmapRawVertices[t];
-
-                    //H2X lightmap texcoords are compressed to 0.5-1 space
-                    if(Gen2Cache.Version == CacheVersion.Halo2Xbox)
-                        tex.Texcoord = new RealVector2d(tex.Texcoord.I * 2 - 1, tex.Texcoord.J * 2 - 1);
-                    int[] originalOffset = new int[] { (int)Math.Round(tex.Texcoord.I * image.Width), (int)Math.Round(tex.Texcoord.J * image.Height) };
-                    int[] newOffset = new int[] { clusterOffset[0] + originalOffset[0], clusterOffset[1] + originalOffset[1] };
-                    tex.Texcoord = new RealVector2d(newOffset[0] / (float)convertedLightmap.Width, newOffset[1] / (float)convertedLightmap.Height);
-
-                    //WRITE OUT TEXCOORDS ONTO BITMAP TO DEBUG
-                    /*
-                    int rawDataOffset = (newOffset[1] * convertedLightmap.Width + newOffset[0]) * 4;
-                    var rawStream = new MemoryStream(convertedLightmap.LinearSH);
-                    var writer = new EndianWriter(rawStream);
-                    writer.BaseStream.Position = rawDataOffset;
-                    writer.Write(new ArgbColor(255, 255, 0, 0).GetValue());
-                    */
-                }
-
-                //fixup geometry and resource
-                int bufferIndex = BuildPerPixelResourceData(resourceDef, lightmapRawVertices);
-                lbsp.Geometry.Meshes[clusterMeshIndices[clusterindex]].VertexBufferIndices[1] = (short)bufferIndex;
-            }
-
-            var bitmapStreamDI = new MemoryStream();
-            var vertWriterDI = new EndianWriter(bitmapStreamDI);
-            var bitmapStreamDI2 = new MemoryStream();
-            var vertWriterDI2 = new EndianWriter(bitmapStreamDI2);
-            for (var c = 0; c < convertedLightmap.Width * convertedLightmap.Height; c++)
-            {
-                vertWriterDI.Write(new ArgbColor(255, 255, 255, 255).GetValue());
-                vertWriterDI2.Write(CreateDummySHData(new RealRgbColor(1.0f,1.0f,1.0f)).GetValue());
-            }
-            bitmapStreamDI2.WriteTo(bitmapStreamDI);
-            convertedLightmap.Intensity = bitmapStreamDI.ToArray();
-
-            ImportIntoLbsp(convertedLightmap, linearSHBitmap, intensityBitmap, Cache, lbsp, 0);
-
-            //instances
             //instance bucket data
             int[] bucketVertexOffsets = new int[lgroup.GeometryBuckets.Count];
             foreach (var bucket in lgroup.GeometryBuckets)
@@ -342,6 +173,8 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 }
             }
+
+            //instances
             for (var instanceindex = 0; instanceindex < lgroup.InstanceRenderInfo.Count; instanceindex++)
             {
                 Gen2BSPResourceMesh instancemesh = bspMeshes[bsp_index][instanceMeshIndices[instanceindex]];
@@ -356,64 +189,184 @@ namespace TagTool.Commands.Porting.Gen2
                     continue;
                 }
 
-                var bucket = lgroup.GeometryBuckets[lgroup.InstanceBucketRefs[instanceindex].BucketIndex];
-                List<LightmapRawVertex> lightmapRawVertices = new List<LightmapRawVertex>();
-                for (var v = 0; v < instancemesh.RawVertices.Count; v++)
-                    lightmapRawVertices.Add(new LightmapRawVertex());
+                //static per pixel lighting
                 if (lgroup.InstanceRenderInfo[instanceindex].BitmapIndex != -1)
                 {
                     var palette = lgroup.SectionPalette[lgroup.InstanceRenderInfo[instanceindex].PaletteIndex];
                     var image = gen2bitmap.Bitmaps[lgroup.InstanceRenderInfo[instanceindex].BitmapIndex];
 
-                    byte[] rawBitmapData = Gen2Cache.GetCacheRawData((uint)image.Lod0Pointer, (int)image.Lod0Size);
-                    //h2v raw bitmap data is gz compressed
-                    if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+                    List<RealRgbColor[]> coefficients = BuildCoefficients(image, palette);
+                    packer.AddBitmap(image.Width, image.Height, instanceindex, true, coefficients);
+
+                    lbsp.InstancedGeometry.Add(new ScenarioLightmapBspData.InstancedGeometryLighting
                     {
-                        using (var stream = new MemoryStream(rawBitmapData))
-                        using (var resultStream = new MemoryStream())
-                        using (var zstream = new GZipStream(stream, CompressionMode.Decompress))
+                        LightmapBitmapsImageIndex = 0,
+                        StaticPerVertexLightingIndex = -1,
+                        InstancedGeometryLightProbesIndex = -1
+                    });
+
+                }
+                //static per vertex lighting for some instances
+                else
+                {
+                    var bucket = lgroup.GeometryBuckets[lgroup.InstanceBucketRefs[instanceindex].BucketIndex];
+                    List<LightmapRawVertex> lightmapRawVertices = new List<LightmapRawVertex>();
+                    for (var v = 0; v < instancemesh.RawVertices.Count; v++)
+                        lightmapRawVertices.Add(new LightmapRawVertex());
+                    for (var vertIndex = 0; vertIndex < lightmapRawVertices.Count; vertIndex++)
+                    {
+                        if (bucket.Flags.HasFlag(LightmapVertexBufferBucketBlock.FlagsValue.IncidentDirection))
                         {
-                            zstream.CopyTo(resultStream);
-                            rawBitmapData = resultStream.ToArray();
+                            lightmapRawVertices[vertIndex].IncidentDirection = bucket.RawVertices[vertIndex +
+                                bucketVertexOffsets[lgroup.InstanceBucketRefs[instanceindex].BucketIndex]].PrimaryLightmapIncidentDirection;
+                        }
+                        if (bucket.Flags.HasFlag(LightmapVertexBufferBucketBlock.FlagsValue.Color))
+                        {
+                            lightmapRawVertices[vertIndex].Color = bucket.RawVertices[vertIndex +
+                                bucketVertexOffsets[lgroup.InstanceBucketRefs[instanceindex].BucketIndex]].PrimaryLightmapColor;
                         }
                     }
-                    for (int v = 0; v < instancemesh.RawVertices.Count; v++)
+                    //keep track of used bucket vertices
+                    bucketVertexOffsets[lgroup.InstanceBucketRefs[instanceindex].BucketIndex] += lightmapRawVertices.Count;
+
+                    //fixup geometry and resource
+                    int bufferIndex = BuildPerVertexResourceData(resourceDef, lightmapRawVertices);
+                    lbsp.InstancedGeometry.Add(new ScenarioLightmapBspData.InstancedGeometryLighting
                     {
-                        lightmapRawVertices[v].Color = ARGB_to_Real_RGB(palette.PaletteColors[SampleLightmapBitmap(rawBitmapData, instancemesh.RawVertices[v].PrimaryLightmapTexcoord, image.Width, image.Height)]);
-                        lightmapRawVertices[v].IncidentDirection = instancemesh.RawVertices[v].PrimaryLightmapIncidentDirection;
-                    }
+                        LightmapBitmapsImageIndex = -1,
+                        StaticPerVertexLightingIndex = (short)lbsp.StaticPerVertexLightingBuffers.Count(),
+                        InstancedGeometryLightProbesIndex = -1
+                    });
+                    lbsp.StaticPerVertexLightingBuffers.Add(new ScenarioLightmapBspData.StaticPerVertexLighting
+                    {
+                        VertexBufferIndex = bufferIndex
+                    });
                 }
-                for(var vertIndex = 0; vertIndex < lightmapRawVertices.Count; vertIndex++)
+            }
+
+            //pack lightmap bitmaps together
+            CachedLightmap convertedLightmap = new CachedLightmap();
+            convertedLightmap = packer.Pack();
+            if (convertedLightmap == null)
+                return null;
+            convertedLightmap.MaxLs[4] = 1.0f;
+
+            //fixup lightmap texcoords and write to resources
+            for (var clusterindex = 0; clusterindex < lgroup.Clusters.Count; clusterindex++)
+            {
+                var clusterrenderdata = lgroup.ClusterRenderInfo[clusterindex];
+                if (clusterrenderdata.BitmapIndex == -1)
+                    continue;
+                var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];
+
+                Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
+                if (clustermesh.RawVertices.Count == 0)
+                    continue;
+                List<LightmapRawVertex> lightmapRawVertices = new List<LightmapRawVertex>();
+                foreach (var vert in clustermesh.RawVertices)
                 {
-                    if (bucket.Flags.HasFlag(LightmapVertexBufferBucketBlock.FlagsValue.IncidentDirection))
+                    lightmapRawVertices.Add(new LightmapRawVertex
                     {
-                        lightmapRawVertices[vertIndex].IncidentDirection = bucket.RawVertices[vertIndex +
-                            bucketVertexOffsets[lgroup.InstanceBucketRefs[instanceindex].BucketIndex]].PrimaryLightmapIncidentDirection;
-                    }
-                    if (bucket.Flags.HasFlag(LightmapVertexBufferBucketBlock.FlagsValue.Color))
-                    {
-                        lightmapRawVertices[vertIndex].Color = bucket.RawVertices[vertIndex +
-                            bucketVertexOffsets[lgroup.InstanceBucketRefs[instanceindex].BucketIndex]].PrimaryLightmapColor;
-                    }
+                        Texcoord = vert.PrimaryLightmapTexcoord,
+                    });
                 }
 
-                //keep track of used bucket vertices
-                bucketVertexOffsets[lgroup.InstanceBucketRefs[instanceindex].BucketIndex] += lightmapRawVertices.Count;
+                int[] clusterOffset = packer.clusterBitmapOffsets[clusterindex];
+
+                for (var t = 0; t < lightmapRawVertices.Count; t++)
+                {
+                    var tex = lightmapRawVertices[t];
+
+                    //H2X lightmap texcoords are compressed to 0.5-1 space
+                    if (Gen2Cache.Version == CacheVersion.Halo2Xbox)
+                        tex.Texcoord = new RealVector2d(tex.Texcoord.I * 2 - 1, tex.Texcoord.J * 2 - 1);
+                    int[] originalOffset = new int[] { (int)Math.Round(tex.Texcoord.I * image.Width), (int)Math.Round(tex.Texcoord.J * image.Height) };
+                    int[] newOffset = new int[] { clusterOffset[0] + originalOffset[0], clusterOffset[1] + originalOffset[1] };
+                    tex.Texcoord = new RealVector2d(newOffset[0] / (float)convertedLightmap.Width, newOffset[1] / (float)convertedLightmap.Height);
+
+                    //WRITE OUT TEXCOORDS ONTO BITMAP TO DEBUG
+                    /*
+                    int rawDataOffset = (newOffset[1] * convertedLightmap.Width + newOffset[0]) * 4;
+                    var rawStream = new MemoryStream(convertedLightmap.LinearSH);
+                    var writer = new EndianWriter(rawStream);
+                    writer.BaseStream.Position = rawDataOffset;
+                    writer.Write(new ArgbColor(255, 255, 0, 0).GetValue());
+                    */
+                }
 
                 //fixup geometry and resource
-                int bufferIndex = BuildPerVertexResourceData(resourceDef, lightmapRawVertices);
-                lbsp.InstancedGeometry.Add(new ScenarioLightmapBspData.InstancedGeometryLighting
-                {
-                    LightmapBitmapsImageIndex = -1,
-                    StaticPerVertexLightingIndex = (short)lbsp.StaticPerVertexLightingBuffers.Count(),
-                    InstancedGeometryLightProbesIndex = -1
-                });
-                lbsp.StaticPerVertexLightingBuffers.Add(new ScenarioLightmapBspData.StaticPerVertexLighting
-                {
-                    VertexBufferIndex = bufferIndex
-                });
-
+                int bufferIndex = BuildPerPixelResourceData(resourceDef, lightmapRawVertices);
+                lbsp.Geometry.Meshes[clusterMeshIndices[clusterindex]].VertexBufferIndices[1] = (short)bufferIndex;
             }
+
+            lbsp.Geometry.InstancedGeometryPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
+            //fixup instance texcoords and write to resources
+            for (var instanceindex = 0; instanceindex < lgroup.InstanceRenderInfo.Count; instanceindex++)
+            {
+                var clusterrenderdata = lgroup.InstanceRenderInfo[instanceindex];
+                if (clusterrenderdata.BitmapIndex == -1)
+                    continue;
+                var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];
+
+                Gen2BSPResourceMesh instancemesh = bspMeshes[bsp_index][instanceMeshIndices[instanceindex]];
+                if (instancemesh.RawVertices.Count == 0)
+                    continue;
+                List<LightmapRawVertex> lightmapRawVertices = new List<LightmapRawVertex>();
+                foreach (var vert in instancemesh.RawVertices)
+                {
+                    lightmapRawVertices.Add(new LightmapRawVertex
+                    {
+                        Texcoord = vert.PrimaryLightmapTexcoord,
+                    });
+                }
+
+                int[] instanceOffset = packer.instanceBitmapOffsets[instanceindex];
+
+                for (var t = 0; t < lightmapRawVertices.Count; t++)
+                {
+                    var tex = lightmapRawVertices[t];
+
+                    //H2X lightmap texcoords are compressed to 0.5-1 space
+                    if (Gen2Cache.Version == CacheVersion.Halo2Xbox)
+                        tex.Texcoord = new RealVector2d(tex.Texcoord.I * 2 - 1, tex.Texcoord.J * 2 - 1);
+                    int[] originalOffset = new int[] { (int)Math.Round(tex.Texcoord.I * image.Width), (int)Math.Round(tex.Texcoord.J * image.Height) };
+                    int[] newOffset = new int[] { instanceOffset[0] + originalOffset[0], instanceOffset[1] + originalOffset[1] };
+                    tex.Texcoord = new RealVector2d(newOffset[0] / (float)convertedLightmap.Width, newOffset[1] / (float)convertedLightmap.Height);
+
+                    //WRITE OUT TEXCOORDS ONTO BITMAP TO DEBUG
+                    /*
+                    int rawDataOffset = (newOffset[1] * convertedLightmap.Width + newOffset[0]) * 4;
+                    var rawStream = new MemoryStream(convertedLightmap.LinearSH);
+                    var writer = new EndianWriter(rawStream);
+                    writer.BaseStream.Position = rawDataOffset;
+                    writer.Write(new ArgbColor(255, 255, 0, 0).GetValue());
+                    */
+                }
+
+                //fixup geometry and resource
+                int bufferIndex = BuildPerPixelResourceData(resourceDef, lightmapRawVertices);
+                lbsp.Geometry.InstancedGeometryPerPixelLighting.Add(new RenderGeometry.StaticPerPixelLighting
+                {
+                    VertexBufferIndex = (short)bufferIndex
+                });
+                sbsp.InstancedGeometryInstances[instanceindex].LightmapTexcoordBlockIndex = 
+                    (short)(lbsp.Geometry.InstancedGeometryPerPixelLighting.Count - 1);
+            }
+
+            var bitmapStreamDI = new MemoryStream();
+            var vertWriterDI = new EndianWriter(bitmapStreamDI);
+            var bitmapStreamDI2 = new MemoryStream();
+            var vertWriterDI2 = new EndianWriter(bitmapStreamDI2);
+            for (var c = 0; c < convertedLightmap.Width * convertedLightmap.Height; c++)
+            {
+                vertWriterDI.Write(new ArgbColor(255, 255, 255, 255).GetValue());
+                vertWriterDI2.Write(CreateDummySHData(new RealRgbColor(1.0f, 1.0f, 1.0f)).GetValue());
+            }
+            bitmapStreamDI2.WriteTo(bitmapStreamDI);
+            convertedLightmap.Intensity = bitmapStreamDI.ToArray();
+
+            ImportIntoLbsp(convertedLightmap, linearSHBitmap, intensityBitmap, Cache, lbsp, 0);
+
             CachedTag SHBitmapTag = Cache.TagCache.AllocateTag<Bitmap>(lgroup.BitmapGroup.Name + "_SH");
             CachedTag intensityBitmapTag = Cache.TagCache.AllocateTag<Bitmap>(lgroup.BitmapGroup.Name + "_intensity");
             Cache.Serialize(cacheStream, SHBitmapTag, linearSHBitmap);
@@ -426,8 +379,110 @@ namespace TagTool.Commands.Porting.Gen2
             return lbsp;
         }
 
+        public List<RealRgbColor[]> BuildCoefficients(TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock image, StructureLightmapPaletteColorBlock palette)
+        {            
+            byte[] rawBitmapData = Gen2Cache.GetCacheRawData((uint)image.Lod0Pointer, (int)image.Lod0Size);
+            //h2v raw bitmap data is gz compressed
+            if (Gen2Cache.Version == CacheVersion.Halo2Vista)
+            {
+                using (var stream = new MemoryStream(rawBitmapData))
+                using (var resultStream = new MemoryStream())
+                using (var zstream = new GZipStream(stream, CompressionMode.Decompress))
+                {
+                    zstream.CopyTo(resultStream);
+                    rawBitmapData = resultStream.ToArray();
+                }
+            }
+
+            if (image.Flags.HasFlag(TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FlagsValue.Swizzled))
+            {
+                rawBitmapData = Swizzle(rawBitmapData, image.Width, image.Height, 1, 1, true);
+            }
+            
+            var coefficients = new List<RealRgbColor[]>();
+            for (int i = 0; i < 4; i++)
+            {
+                coefficients.Add(new RealRgbColor[image.Width * image.Height]);
+            }
+
+            //DON'T USE INCIDENT DIRECTION FOR NOW AS IT CAUSES ARTIFACTS
+            /*
+            //get average incident direction across cluster mesh
+            Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
+            RealVector3d incident_direction = clustermesh.RawVertices[0].PrimaryLightmapIncidentDirection;
+            foreach (var vert in clustermesh.RawVertices)
+                incident_direction = (vert.PrimaryLightmapIncidentDirection + incident_direction) / 2.0f;
+            */
+
+            /*
+            //DEBUG DUMP BITMAP
+            using (var rawdataStream = new MemoryStream(rawBitmapData))
+            using (var dumpReader = new EndianReader(rawdataStream))
+            using (var dumpStream = new MemoryStream())
+            using (var dumpWriter = new EndianWriter(dumpStream))
+            {
+                for (var c = 0; c < image.Width * image.Height; c++)
+                {
+                    ArgbColor color = new ArgbColor();
+                    switch (image.Format)
+                    {
+                        case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.A8r8g8b8:
+                            var B = dumpReader.ReadByte();
+                            var G = dumpReader.ReadByte();
+                            var R = dumpReader.ReadByte();
+                            var A = dumpReader.ReadByte();
+                            color = new ArgbColor(A,R,G,B);
+                            break;
+                        case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
+                            color = palette.PaletteColors[rawBitmapData[c]];
+                            break;
+                    }
+                    dumpWriter.Write(color.GetValue());
+                }
+                StoreDDS($"cluster_{clusterindex}.dds",
+                    image.Width, image.Height, 1, BitmapType.Texture2D, BitmapFormat.A8R8G8B8, dumpStream.ToArray());
+            }                       
+            */
+
+            var dataStream = new MemoryStream(rawBitmapData);
+            var dataReader = new EndianReader(dataStream);
+            for (var c = 0; c < image.Width * image.Height; c++)
+            {
+                float[] R = new float[4];
+                float[] G = new float[4];
+                float[] B = new float[4];
+                switch (image.Format)
+                {
+                    case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.A8r8g8b8:
+                        var temp_B = dataReader.ReadByte();
+                        var temp_G = dataReader.ReadByte();
+                        var temp_R = dataReader.ReadByte();
+                        var temp_A = dataReader.ReadByte();
+                        RealRgbColor colorVista = ARGB_to_Real_RGB(new ArgbColor(temp_A, temp_R, temp_G, temp_B));
+                        EvaluateDirectionalLightCustom(2, colorVista, new RealVector3d(), R, G, B);
+                        break;
+                    case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
+                        RealRgbColor color = ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]);
+                        EvaluateDirectionalLightCustom(2, color, new RealVector3d(), R, G, B);
+                        break;
+                    default:
+                        new TagToolError(CommandError.OperationFailed, "Unknown lightmap bitmap format! Aborting!");
+                        return null;
+                }
+                var sh = new SphericalHarmonics.SH2Probe(R, G, B);
+                for (int i = 0; i < 4; i++)
+                {
+                    coefficients[i][c].Red = sh.R[i];
+                    coefficients[i][c].Green = sh.G[i];
+                    coefficients[i][c].Blue = sh.B[i];
+                }
+            }
+            return coefficients;
+        }
+
         public void ImportIntoLbsp(CachedLightmap result, Bitmap linearSHBitmap, Bitmap intensityBitmap, GameCacheHaloOnlineBase cache, ScenarioLightmapBspData Lbsp, int imageindex)
         {
+            /*
             //compress each of the 8 layers and compile them together
             MemoryStream outStream = new MemoryStream();
             MemoryStream inStream = new MemoryStream(result.LinearSH);
@@ -440,18 +495,20 @@ namespace TagTool.Commands.Porting.Gen2
                 buffer, result.Width, result.Height);
                 outStream.Write(dxt5Compressor.CompressTexture(), 0, result.Width * result.Height);
             }
-            
+            */
+
             var linearSH = new BaseBitmap();
             linearSH.Type = BitmapType.Texture3D;
-            linearSH.Data = outStream.ToArray();
+            linearSH.Data = result.LinearSH;
             linearSH.Width = result.Width;
             linearSH.Height = result.Height;
             linearSH.Depth = 8;
-            linearSH.UpdateFormat(BitmapFormat.Dxt5);
+            linearSH.UpdateFormat(BitmapFormat.A8R8G8B8);
 
             //var outPath = "lightmaptest_image_" + imageindex;
             //StoreDDS(outPath, linearSH.Width, linearSH.Height, linearSH.Depth, linearSH.Type, linearSH.Format, result.LinearSH);
 
+            /*
             //compress each of the 2 layers and compile them together
             MemoryStream outStreamIntensity = new MemoryStream();
             MemoryStream inStreamIntensity = new MemoryStream(result.Intensity);
@@ -464,14 +521,15 @@ namespace TagTool.Commands.Porting.Gen2
                 buffer, result.Width, result.Height);
                 outStreamIntensity.Write(dxt5Compressor.CompressTexture(), 0, result.Width * result.Height);
             }
+            */
 
             var intensity = new BaseBitmap();
             intensity.Type = BitmapType.Texture3D;
-            intensity.Data = outStreamIntensity.ToArray();
+            intensity.Data = result.Intensity;
             intensity.Width = result.Width;
             intensity.Height = result.Height;
             intensity.Depth = 2;
-            intensity.UpdateFormat(BitmapFormat.Dxt5);
+            intensity.UpdateFormat(BitmapFormat.A8R8G8B8);
 
             Lbsp.CoefficientsMapScale = new TagTool.Common.LuminanceScale[9];
             for (int i = 0; i < 5; i++)

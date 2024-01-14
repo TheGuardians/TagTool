@@ -119,8 +119,9 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public InstancedGeometryFlagsReach FlagsReach;
 
-        public short LodDataIndex;
-        public short CompressionIndex;
+        public short LightmapTexcoordBlockIndex;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 2)]
+        public byte[] Padding = new byte[2];
         [TagField(Length = 1, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagField(Length = 4, MinVersion = CacheVersion.HaloReach)]
         public uint[] SeamBitVector;

@@ -508,13 +508,15 @@ namespace TagTool.Commands.Porting.Gen2
                     instanced.Up.I, instanced.Up.J, instanced.Up.K,
                     instanced.Position.X, instanced.Position.Y, instanced.Position.Z),
                     DefinitionIndex = instanced.InstanceDefinition,
-                    LodDataIndex = -1,
-                    CompressionIndex = -1,
+                    LightmapTexcoordBlockIndex = -1,
                     Name = instanced.Name,
                     WorldBoundingSphereCenter = instanced.WorldBoundingSphereCenter,
                     BoundingSphereRadiusBounds = new Bounds<float>(instanced.BoundingSphereRadius, instanced.BoundingSphereRadius),
                     PathfindingPolicy = (Scenery.PathfindingPolicyValue)instanced.PathfindingPolicy,
-                    LightmappingPolicy = (InstancedGeometryInstance.InstancedGeometryLightmappingPolicy)instanced.LightmappingPolicy,
+                    LightmappingPolicy = ((int)instanced.LightmappingPolicy) == 0 ? 
+                    InstancedGeometryInstance.InstancedGeometryLightmappingPolicy.PerPixelShared :
+                    InstancedGeometryInstance.InstancedGeometryLightmappingPolicy.PerVertex,
+                    LightmapResolutionScale = 1.0f
                 };
 
                 //make sure there is a bsp physics block in the instance def
