@@ -190,7 +190,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case Shader shader:
                     //preserve a copy of unconverted data
                     Shader oldshader = Gen2Cache.Deserialize<Shader>(gen2CacheStream, gen2Tag);
-                    definition = ConvertShader(shader, oldshader, cacheStream);
+                    definition = ConvertShader(shader, oldshader, cacheStream, gen2CacheStream);
                     break;
                     //return Cache.TagCache.GetTag(@"shaders\invalid.shader");
                 case ScenarioStructureBsp sbsp:
