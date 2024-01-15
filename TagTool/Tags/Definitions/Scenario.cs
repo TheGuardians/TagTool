@@ -4397,36 +4397,9 @@ namespace TagTool.Tags.Definitions
 
             public float GameObjectResetHeight;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown2;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown4;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown5;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown6;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown7;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown8;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown9;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown10;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown11;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown12;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown13;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown14;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown15;
+            [TagField(Length = 0x3C, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Padding;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<DynamicSpawnOverload> DynamicSpawnOverloads;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -4436,12 +4409,29 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x10)]
             public class DynamicSpawnOverload : TagStructure
-			{
-                public short OverloadType;
-                public short Unknown;
+            {
+                public OverloadTypeValue OverloadType;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float InnerRadius;
                 public float OuterRadius;
                 public float Weight;
+
+                public enum OverloadTypeValue : short
+                {
+                    Enemy,
+                    Friend,
+                    EnemyVehicle,
+                    FriendlyVehicle,
+                    EmptyVehicle,
+                    OddballInclusion,
+                    OddballExclusion,
+                    HillInclusion,
+                    HillExclusion,
+                    LastRaceFlag,
+                    DeadAlly,
+                    ControlledTerritory
+                }
             }
 
             [Flags]
@@ -4461,16 +4451,63 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x30)]
             public class SpawnZone : TagStructure
-			{
-                [TagField(Flags = Label)]
-                public StringId Name;
-                public RelevantTeamFlags RelevantTeams;
-                public uint RelevantGames;
-                public uint Flags;
+            {
+                /// <summary>
+                /// Lower and upper heights can be left at 0, in which case they use defaults.  Leaving relevant teams empty means all teams;
+                /// leaving all games empty means all games.
+                /// </summary>
+                public StaticSpawnZoneDataStructBlock Data;
                 public RealPoint3d Position;
-                public Bounds<float> HeightBounds;
-                public Bounds<float> RadiusBounds;
+                public float LowerHeight;
+                public float UpperHeight;
+                public float InnerRadius;
+                public float OuterRadius;
                 public float Weight;
+
+                [TagStructure(Size = 0x10)]
+                public class StaticSpawnZoneDataStructBlock : TagStructure
+                {
+                    public StringId Name;
+                    public RelevantTeamValue RelevantTeam;
+                    public RelevantGamesValue RelevantGames;
+                    public FlagsValue Flags;
+
+                    [Flags]
+                    public enum RelevantTeamValue : uint
+                    {
+                        RedAlpha = 1 << 0,
+                        BlueBravo = 1 << 1,
+                        YellowCharlie = 1 << 2,
+                        GreenDelta = 1 << 3,
+                        PurpleEcho = 1 << 4,
+                        OrangeFoxtrot = 1 << 5,
+                        BrownGolf = 1 << 6,
+                        PinkHotel = 1 << 7,
+                        Neutral = 1 << 8
+                    }
+
+                    [Flags]
+                    public enum RelevantGamesValue : uint
+                    {
+                        Slayer = 1 << 0,
+                        Oddball = 1 << 1,
+                        KingOfTheHill = 1 << 2,
+                        CaptureTheFlag = 1 << 3,
+                        Race = 1 << 4,
+                        Headhunter = 1 << 5,
+                        Juggernaut = 1 << 6,
+                        Territories = 1 << 7
+                    }
+
+                    [Flags]
+                    public enum FlagsValue : uint
+                    {
+                        DisabledIfFlagHome = 1 << 0,
+                        DisabledIfFlagAway = 1 << 1,
+                        DisabledIfBombHome = 1 << 2,
+                        DisabledIfBombAway = 1 << 3
+                    }
+                }
             }
         }
 

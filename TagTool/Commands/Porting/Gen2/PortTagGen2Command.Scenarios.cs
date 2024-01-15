@@ -942,6 +942,9 @@ namespace TagTool.Commands.Porting.Gen2
                 }
             }
 
+            //Spawn Zones
+            AutoConverter.TranslateList(gen2Tag.SpawnData, newScenario.SpawnData);
+
             // Item Collection -> Weapon/Vehicle Placement
             byte uniqueid = 0;
             CachedTag paletteTag;
