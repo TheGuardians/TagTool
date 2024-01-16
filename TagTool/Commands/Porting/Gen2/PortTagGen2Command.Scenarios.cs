@@ -20,7 +20,83 @@ namespace TagTool.Commands.Porting.Gen2
 {
     partial class PortTagGen2Command : Command
     {
+        enum NetgameFlagObjectAdditionList
+        {
+            OddballSpawnPoint = 0,
+            CtfFlagSpawnPoint = 1,
+            CtfFlagReturnArea = 2,
+            AssaultBombGoalArea = 3,
+            AssaultBombSpawnPoint = 4,
+            TeleporterSender = 5,
+            TeleporterReciever = 6
+        }
+
         List<List<Gen2BSPResourceMesh>> bspMeshes = new List<List<Gen2BSPResourceMesh>>();
+
+        private void ConvertNetgameFlags(TagTool.Tags.Definitions.Gen2.Scenario rawgen2tag, Scenario newScenario)
+        {
+            if (newScenario.MapType == ScenarioMapType.Multiplayer)
+            {
+                // TODO make new tags that are equivalent to these but don't have a render model
+                // TODO fix teleporters
+                // add in reverse order of NetgameFlagObjectAdditionList enum
+                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\teleporter_reciever\teleporter_reciever") });
+                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\teleporter_sender\teleporter_sender") });
+                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\assault\assault_bomb_spawn_point") });
+                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\assault\assault_bomb_goal_area") });
+                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\ctf\ctf_flag_return_area") });
+                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\ctf\ctf_flag_spawn_point") });
+                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\oddball\oddball_ball_spawn_point") });
+
+                foreach (var NetgameFlags in rawgen2tag.NetgameFlags)
+                {
+                    Scenario.CrateInstance crate = new Scenario.CrateInstance();
+
+                    switch (NetgameFlags.Type)
+                    {
+                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.OddballSpawn:
+                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.OddballSpawnPoint);
+                            break;
+                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.CtfFlagSpawn:
+                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.CtfFlagSpawnPoint);
+                            break;
+                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.CtfFlagReturn:
+                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.CtfFlagReturnArea);
+                            break;
+                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.AssaultBombSpawn:
+                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.AssaultBombSpawnPoint);
+                            break;
+                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.AssaultBombReturn:
+                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.AssaultBombGoalArea);
+                            break;
+                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.TeleporterSrc:
+                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.TeleporterSender);
+                            break;
+                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.TeleporterDest:
+                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.TeleporterReciever);
+                            break;
+                    }
+                    crate.PaletteIndex -= 1;
+                    crate.Position = NetgameFlags.Position;
+                    crate.Rotation.YawValue = NetgameFlags.Facing.Radians;
+
+                    crate.Multiplayer = new TagTool.Tags.Definitions.Scenario.MultiplayerObjectProperties();
+                    crate.Multiplayer.Team = (TagTool.Tags.Definitions.Common.MultiplayerTeamDesignator)NetgameFlags.TeamDesignator;
+                    crate.ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Crate };
+                    crate.Source = Scenario.ScenarioInstance.SourceValue.Editor;
+                    crate.EditorFolder = -1;
+                    crate.ParentId = new ScenarioObjectParentStruct() { NameIndex = -1 };
+                    crate.UniqueHandle = new DatumHandle(0xffffffff);
+                    crate.OriginBspIndex = -1;
+                    crate.CanAttachToBspFlags = (ushort)(1u << 0);
+
+                    // TODO: figure out how to handle symemtric and asymmetric placements (Flags in Netgame flags)
+
+                    newScenario.Crates.Add(crate);
+                }
+            }
+        }
+
         public TagStructure ConvertScenario(TagTool.Tags.Definitions.Gen2.Scenario gen2Tag, TagTool.Tags.Definitions.Gen2.Scenario rawgen2Tag, string scenarioPath
             , Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
@@ -1303,6 +1379,10 @@ namespace TagTool.Commands.Porting.Gen2
                 }
                 uniqueid += 101;
             }
+
+
+
+            ConvertNetgameFlags(rawgen2tag, newScenario);
 
             // Trigger Volumes
             foreach (var vol in gen2Tag.KillTriggerVolumes)
