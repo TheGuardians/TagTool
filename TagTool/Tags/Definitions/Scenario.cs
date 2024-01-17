@@ -528,17 +528,9 @@ namespace TagTool.Tags.Definitions
             public CachedTag LocalLighting;
             public ScenarioStructureSizeEnum SizeClass;
 
-            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float HackyAmbientMinLuminance;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float DirectDraftAmbientMinLuminance;
-
             public float StructureVertexSink;
-
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown4;
 
             public ushort Flags;
             public short DefaultSkyIndex;
@@ -546,7 +538,7 @@ namespace TagTool.Tags.Definitions
             public ushort InstanceFadeEndPixels;
             public CachedTag Cubemap;
             public CachedTag Wind;
-            public uint ClosnedBspFlags;
+            public uint ClonedBspFlags;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public ScenarioLightmapSettingStruct LightmapSettings;
@@ -573,6 +565,28 @@ namespace TagTool.Tags.Definitions
                 _10Meg,
                 _20Meg,
                 _60Meg
+            }
+
+            [Flags]
+            public enum StructureBspFlags : ushort
+            {
+                None = 0,
+                DefaultSkyEnabled = 1 << 0,
+                DoNotCompressLightmaps = 1 << 1,
+                GenerateFakeSmallLightmaps = 1 << 2,
+                RayTraceAdjacentBspsOnSkyHits = 1 << 3,
+                LightmapsUseConservativeSubcharts = 1 << 4,
+                LightmapsReduceStretchHack = 1 << 5,
+                LightmapsuseExtendedGathering = 1 << 6,
+                LightmapsFinalGatherIgnoresBackfacingHits = 1 << 7,
+                LightmapsUseMoreSamplesForLargeSkyLights = 1 << 8,
+                LightmapsUseMorePreciseExtendedGathering = 1 << 9,
+                NoAiAttachment = 1 << 10,
+                NotMultiplayerPlayableSpace = 1 << 11,
+                LightmapsEnableImportanceScaling = 1 << 12,
+                Bit13 = 1 << 13,
+                Bit14 = 1 << 14,
+                Bit15 = 1 << 15,
             }
 
             [TagStructure(Size = 0x2C)]

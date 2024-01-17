@@ -12,6 +12,7 @@ using TagTool.Tags;
 using TagTool.Tags.Definitions.Gen2;
 using TagTool.BlamFile;
 using TagTool.Commands.Porting;
+using TagTool.Commands.ScenarioStructureBSPs;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -233,6 +234,18 @@ namespace TagTool.Commands.Porting.Gen2
                         cluster.InstancedGeometryPhysics.StructureBsp = destinationTag;
                     break;
                 case TagTool.Tags.Definitions.Scenario scnr:
+                    {
+                        foreach (var block in scnr.StructureBsps)
+                        {
+                            if (block.StructureBsp == null)
+                                continue;
+
+                            CachedTag sbspTag = block.StructureBsp;
+                            var sbsp = Cache.Deserialize<TagTool.Tags.Definitions.ScenarioStructureBsp>(cacheStream, sbspTag);
+                            new GenerateStructureSurfacesCommand(Cache, sbspTag, sbsp).Execute(new List<string> { });
+                            Cache.Serialize(cacheStream, sbspTag, sbsp);
+                        }
+                    }
                     GenerateMapFile(cacheStream, Cache, destinationTag, destinationTag.Name.Split('\\').ToList().Last(), "", "Bungie");
                     break;
                 default:
