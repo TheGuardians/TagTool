@@ -6,7 +6,6 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Commands.Common;
-using TagTool.Commands.Porting;
 using TagTool.IO;
 using TagTool.Tags;
 using TagTool.Tags.Definitions.Gen2;
@@ -118,7 +117,7 @@ namespace TagTool.Commands.Porting.Gen2
                 "ligh",
                 "eqip",
                 "ctrl",
-                "bipd"
+                "bipd",
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -193,7 +192,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Shader oldshader = Gen2Cache.Deserialize<Shader>(gen2CacheStream, gen2Tag);
                     definition = ConvertShader(shader, oldshader, cacheStream, gen2CacheStream);
                     break;
-                    //return Cache.TagCache.GetTag(@"shaders\invalid.shader");
+                //return Cache.TagCache.GetTag(@"shaders\invalid.shader");
                 case ScenarioStructureBsp sbsp:
                     definition = ConvertStructureBSP(sbsp);
                     break;
@@ -203,6 +202,15 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
                 case Light light:
                     definition = ConvertLight(light);
+                    break;
+                case Sound sound:
+                    definition = ConvertSound((Cache.Gen2.CachedTagGen2)gen2Tag, sound, gen2CacheStream, gen2Tag.Name);
+                    break;
+                case SoundLooping loop:
+                    definition = ConvertLoopingSound((Cache.Gen2.CachedTagGen2)gen2Tag, loop, cacheStream);
+                    break;
+                case SoundEnvironment snde:
+                    definition = ConvertSoundEnvironment(snde);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");

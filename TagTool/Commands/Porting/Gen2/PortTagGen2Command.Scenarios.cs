@@ -957,7 +957,6 @@ namespace TagTool.Commands.Porting.Gen2
 
                 if (NetgameEquipment.ItemVehicleCollection != null)
                 {
-                    bool found = false;
                     object itemdef = Gen2Cache.Deserialize(gen2CacheStream, NetgameEquipment.ItemVehicleCollection);
 
                     // Port tags referenced in item/vehicle collection
@@ -969,106 +968,39 @@ namespace TagTool.Commands.Porting.Gen2
                             vehilayout = (TagTool.Tags.Definitions.Gen2.VehicleCollection)itemdef;
                             if (vehilayout.VehiclePermutations[0].Vehicle != null)
                             {
-                                // Add vehicle to the vehicle palette and place if the vehicle palette is empty
-                                if (newScenario.VehiclePalette.Count == 0)
-                                {
-                                    if (Cache.TagCache.TryGetTag(vehilayout.VehiclePermutations[0].Vehicle.Name + '.'
-                                        + vehilayout.VehiclePermutations[0].Vehicle.Group.ToString(), out paletteTag))
-                                    {
-
-                                        newScenario.VehiclePalette.Add(new Scenario.ScenarioPaletteEntry
-                                        {
-                                            Object = paletteTag
-                                        });
-                                        var vehicle = new Scenario.VehicleInstance
-                                        {
-                                            PaletteIndex = 0,
-                                            NameIndex = -1,
-                                            PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                            Position = NetgameEquipment.Position,
-                                            Rotation = NetgameEquipment.Orientation.Orientation,
-                                            Scale = 1,
-                                            BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                            OriginBspIndex = 1,
-                                            CanAttachToBspFlags = 1,
-                                            Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                            UniqueHandle = new DatumHandle(uniqueid),
-                                            EditorFolder = -1,
-                                            ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle },
-                                            Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                        };
-                                        newScenario.Vehicles.Add(vehicle);
-                                        vehicle.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                        vehicle.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                        vehicle.Multiplayer.EngineFlags = EngineFlags;
-                                    }
+                                if (!Cache.TagCache.TryGetTag<Vehicle>(vehilayout.VehiclePermutations[0].Vehicle.Name, out paletteTag))
                                     break;
-                                }
-
-                                // Check to see if the weapon already exists in the palette before adding a new entry
-                                for (byte i = 0; i < newScenario.VehiclePalette.Count; i++)
+                                var palette_index = newScenario.VehiclePalette.FindIndex(v => v.Object.Name == vehilayout.VehiclePermutations[0].Vehicle.Name);
+                                if (palette_index == -1)
                                 {
-                                    if (vehilayout.VehiclePermutations[0].Vehicle.Name == newScenario.VehiclePalette[i].Object.Name)
+                                    newScenario.VehiclePalette.Add(new Scenario.ScenarioPaletteEntry
                                     {
-                                        found = true;
-                                        var vehicle = new Scenario.VehicleInstance
-                                        {
-                                            PaletteIndex = i,
-                                            NameIndex = -1,
-                                            PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                            Position = NetgameEquipment.Position,
-                                            Rotation = NetgameEquipment.Orientation.Orientation,
-                                            Scale = 1,
-                                            BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                            OriginBspIndex = 1,
-                                            CanAttachToBspFlags = 1,
-                                            Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                            UniqueHandle = new DatumHandle(uniqueid),
-                                            EditorFolder = -1,
-                                            ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle },
-                                            Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                        };
-                                        newScenario.Vehicles.Add(vehicle);
-                                        vehicle.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                        vehicle.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                        vehicle.Multiplayer.EngineFlags = EngineFlags;
-                                        break;
-                                    }
+                                        Object = paletteTag
+                                    });
+                                    palette_index = newScenario.VehiclePalette.Count - 1;
                                 }
-
-                                // Add if vehicle was not already in the palette
-                                if (found == false)
+                                newScenario.Vehicles.Add(new Scenario.VehicleInstance
                                 {
-                                    if (Cache.TagCache.TryGetTag(vehilayout.VehiclePermutations[0].Vehicle.Name + '.'
-                                        + vehilayout.VehiclePermutations[0].Vehicle.Group.ToString(), out paletteTag))
+                                    PaletteIndex = (short)palette_index,
+                                    NameIndex = -1,
+                                    PlacementFlags = Scenario.ObjectPlacementFlags.None,
+                                    Position = NetgameEquipment.Position,
+                                    Rotation = NetgameEquipment.Orientation.Orientation,
+                                    Scale = 1,
+                                    BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
+                                    OriginBspIndex = 1,
+                                    CanAttachToBspFlags = 1,
+                                    Source = Scenario.ScenarioInstance.SourceValue.Editor,
+                                    UniqueHandle = new DatumHandle(uniqueid),
+                                    EditorFolder = -1,
+                                    ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle },
+                                    Multiplayer = new Scenario.MultiplayerObjectProperties
                                     {
-                                        newScenario.VehiclePalette.Add(new Scenario.ScenarioPaletteEntry
-                                        {
-                                            Object = paletteTag
-                                        });
-                                        var vehicle = new Scenario.VehicleInstance
-                                        {
-                                            PaletteIndex = (short)(newScenario.VehiclePalette.Count - 1),
-                                            NameIndex = -1,
-                                            PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                            Position = NetgameEquipment.Position,
-                                            Rotation = NetgameEquipment.Orientation.Orientation,
-                                            Scale = 1,
-                                            BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                            OriginBspIndex = 1,
-                                            CanAttachToBspFlags = 1,
-                                            Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                            UniqueHandle = new DatumHandle(uniqueid),
-                                            EditorFolder = -1,
-                                            ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Vehicle },
-                                            Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                        };
-                                        newScenario.Vehicles.Add(vehicle);
-                                        vehicle.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                        vehicle.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                        vehicle.Multiplayer.EngineFlags = EngineFlags;
+                                        SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default,
+                                        AbandonTime = NetgameEquipment.RespawnOnEmptyTime,
+                                        EngineFlags = EngineFlags
                                     }
-                                }
+                                });
                             }
                             break;
                         default:
@@ -1083,219 +1015,78 @@ namespace TagTool.Commands.Porting.Gen2
                                     {
                                         WeaponFlags |= Scenario.WeaponInstance.ScenarioWeaponDatumFlags.InitiallyAtRestdoesntFall;
                                     }
-
-                                    // Add weapon to the weapon palette and place if the weapon palette is empty
-                                    if (newScenario.WeaponPalette.Count == 0)
+                                    if (!Cache.TagCache.TryGetTag<Weapon>(itemlayout.ItemPermutations[0].Item.Name, out paletteTag))
+                                        break;
+                                    var palette_index = newScenario.WeaponPalette.FindIndex(v => v.Object.Name ==
+                                    itemlayout.ItemPermutations[0].Item.Name);
+                                    if (palette_index == -1)
                                     {
-                                        if (Cache.TagCache.TryGetTag(itemlayout.ItemPermutations[0].Item.Name + '.'
-                                            + itemlayout.ItemPermutations[0].Item.Group.ToString(), out paletteTag))
+                                        newScenario.WeaponPalette.Add(new Scenario.ScenarioPaletteEntry
                                         {
-
-                                            newScenario.WeaponPalette.Add(new Scenario.ScenarioPaletteEntry
-                                            {
-                                                Object = paletteTag
-                                            });
-                                            var weapon = new Scenario.WeaponInstance
-                                            {
-                                                PaletteIndex = 0,
-                                                NameIndex = -1,
-                                                PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                                Position = NetgameEquipment.Position,
-                                                Rotation = NetgameEquipment.Orientation.Orientation,
-                                                Scale = 1,
-                                                BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                                OriginBspIndex = 1,
-                                                CanAttachToBspFlags = 1,
-                                                Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                                UniqueHandle = new DatumHandle(uniqueid),
-                                                EditorFolder = -1,
-                                                ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Weapon },
-                                                WeaponFlags = WeaponFlags,
-                                                Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                            };
-                                            newScenario.Weapons.Add(weapon);
-                                            weapon.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                            weapon.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                            weapon.Multiplayer.EngineFlags = EngineFlags;
-                                            break;
-                                        }
+                                            Object = paletteTag
+                                        });
+                                        palette_index = newScenario.WeaponPalette.Count - 1;
                                     }
-                                    // Check to see if the weapon already exists in the palette before adding a new entry
-                                    found = false;
-                                    for (byte i = 0; i < newScenario.WeaponPalette.Count; i++)
+                                    newScenario.Weapons.Add(new Scenario.WeaponInstance
                                     {
-                                        if (newScenario.WeaponPalette[i].Object != null)
+                                        PaletteIndex = (short)palette_index,
+                                        NameIndex = -1,
+                                        PlacementFlags = Scenario.ObjectPlacementFlags.None,
+                                        Position = NetgameEquipment.Position,
+                                        Rotation = NetgameEquipment.Orientation.Orientation,
+                                        Scale = 1,
+                                        BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
+                                        OriginBspIndex = 1,
+                                        CanAttachToBspFlags = 1,
+                                        Source = Scenario.ScenarioInstance.SourceValue.Editor,
+                                        UniqueHandle = new DatumHandle(uniqueid),
+                                        EditorFolder = -1,
+                                        ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Weapon },
+                                        WeaponFlags = WeaponFlags,
+                                        Multiplayer = new Scenario.MultiplayerObjectProperties
                                         {
-                                            if (itemlayout.ItemPermutations[0].Item.Name == newScenario.WeaponPalette[i].Object.Name)
-                                            {
-                                                found = true;
-                                                var weapon = new Scenario.WeaponInstance
-                                                {
-                                                    PaletteIndex = i,
-                                                    NameIndex = -1,
-                                                    PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                                    Position = NetgameEquipment.Position,
-                                                    Rotation = NetgameEquipment.Orientation.Orientation,
-                                                    Scale = 1,
-                                                    BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                                    OriginBspIndex = 1,
-                                                    CanAttachToBspFlags = 1,
-                                                    Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                                    UniqueHandle = new DatumHandle(uniqueid),
-                                                    EditorFolder = -1,
-                                                    ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Weapon },
-                                                    WeaponFlags = WeaponFlags,
-                                                    Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                                };
-                                                newScenario.Weapons.Add(weapon);
-                                                weapon.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                                weapon.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                                weapon.Multiplayer.EngineFlags = EngineFlags;
-                                                break;
-                                            }
+                                            SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default,
+                                            AbandonTime = NetgameEquipment.RespawnOnEmptyTime,
+                                            EngineFlags = EngineFlags
                                         }
-                                    }
-
-                                    // Add if weapon was not already in the palette
-                                    if (found == false)
-                                    {
-                                        if (Cache.TagCache.TryGetTag(itemlayout.ItemPermutations[0].Item.Name + '.'
-                                            + itemlayout.ItemPermutations[0].Item.Group.ToString(), out paletteTag))
-                                        {
-                                            newScenario.WeaponPalette.Add(new Scenario.ScenarioPaletteEntry
-                                            {
-                                                Object = paletteTag
-                                            });
-                                            var weapon = new Scenario.WeaponInstance
-                                            {
-                                                PaletteIndex = (short)(newScenario.WeaponPalette.Count - 1),
-                                                NameIndex = -1,
-                                                PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                                Position = NetgameEquipment.Position,
-                                                Rotation = NetgameEquipment.Orientation.Orientation,
-                                                Scale = 1,
-                                                BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                                OriginBspIndex = 1,
-                                                CanAttachToBspFlags = 1,
-                                                Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                                UniqueHandle = new DatumHandle(uniqueid),
-                                                EditorFolder = -1,
-                                                ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Weapon },
-                                                WeaponFlags = WeaponFlags,
-                                                Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                            };
-                                            newScenario.Weapons.Add(weapon);
-                                            weapon.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                            weapon.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                            weapon.Multiplayer.EngineFlags = EngineFlags;
-                                        }
-                                    }
+                                    });
                                 }
                                 else
                                 {
-                                    // Add equipment to the equipment palette and place if the weapon palette is empty
-                                    if (newScenario.EquipmentPalette.Count == 0)
-                                    {
-                                        if (Cache.TagCache.TryGetTag(itemlayout.ItemPermutations[0].Item.Name + '.'
-                                            + itemlayout.ItemPermutations[0].Item.Group.ToString(), out paletteTag))
-                                        {
-                                            newScenario.EquipmentPalette.Add(new Scenario.ScenarioPaletteEntry
-                                            {
-                                                Object = Cache.TagCacheGenHO.GetTag(itemlayout.ItemPermutations[0].Item.Name + '.'
-                                                + itemlayout.ItemPermutations[0].Item.Group.ToString())
-                                            });
-                                            var equipment = new Scenario.EquipmentInstance
-                                            {
-                                                PaletteIndex = 0,
-                                                NameIndex = -1,
-                                                PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                                Position = NetgameEquipment.Position,
-                                                Rotation = NetgameEquipment.Orientation.Orientation,
-                                                Scale = 1,
-                                                BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                                OriginBspIndex = 1,
-                                                CanAttachToBspFlags = 1,
-                                                Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                                UniqueHandle = new DatumHandle(uniqueid),
-                                                EditorFolder = -1,
-                                                ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Equipment },
-                                                Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                            };
-                                            newScenario.Equipment.Add(equipment);
-                                            equipment.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                            equipment.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                            equipment.Multiplayer.EngineFlags = EngineFlags;
-                                        }
+                                    if (!Cache.TagCache.TryGetTag<Equipment>(itemlayout.ItemPermutations[0].Item.Name, out paletteTag))
                                         break;
-                                    }
-
-                                    // Check to see if the equipment already exists in the palette before adding a new entry
-                                    found = false;
-                                    for (byte i = 0; i < newScenario.EquipmentPalette.Count; i++)
+                                    var palette_index = newScenario.EquipmentPalette.FindIndex(v => v.Object.Name ==
+                                    itemlayout.ItemPermutations[0].Item.Name);
+                                    if (palette_index == -1)
                                     {
-                                        if (itemlayout.ItemPermutations[0].Item.Name == newScenario.EquipmentPalette[i].Object.Name)
+                                        newScenario.EquipmentPalette.Add(new Scenario.ScenarioPaletteEntry
                                         {
-                                            found = true;
-                                            var equipment = new Scenario.EquipmentInstance
-                                            {
-                                                PaletteIndex = i,
-                                                NameIndex = -1,
-                                                PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                                Position = NetgameEquipment.Position,
-                                                Rotation = NetgameEquipment.Orientation.Orientation,
-                                                Scale = 1,
-                                                BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                                OriginBspIndex = 1,
-                                                CanAttachToBspFlags = 1,
-                                                Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                                UniqueHandle = new DatumHandle(uniqueid),
-                                                EditorFolder = -1,
-                                                ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Equipment },
-                                                Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                            };
-                                            newScenario.Equipment.Add(equipment);
-                                            equipment.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                            equipment.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                            equipment.Multiplayer.EngineFlags = EngineFlags;
-                                            break;
-                                        }
+                                            Object = paletteTag
+                                        });
+                                        palette_index = newScenario.EquipmentPalette.Count - 1;
                                     }
-
-                                    // Add if equipment was not already in the palette
-                                    if (found == false)
+                                    newScenario.Equipment.Add(new Scenario.EquipmentInstance
                                     {
-                                        if (Cache.TagCache.TryGetTag(itemlayout.ItemPermutations[0].Item.Name + '.'
-                                            + itemlayout.ItemPermutations[0].Item.Group.ToString(), out paletteTag))
+                                        PaletteIndex = (short)palette_index,
+                                        NameIndex = -1,
+                                        PlacementFlags = Scenario.ObjectPlacementFlags.None,
+                                        Position = NetgameEquipment.Position,
+                                        Rotation = NetgameEquipment.Orientation.Orientation,
+                                        Scale = 1,
+                                        BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
+                                        OriginBspIndex = 1,
+                                        CanAttachToBspFlags = 1,
+                                        Source = Scenario.ScenarioInstance.SourceValue.Editor,
+                                        UniqueHandle = new DatumHandle(uniqueid),
+                                        EditorFolder = -1,
+                                        ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Equipment },
+                                        Multiplayer = new Scenario.MultiplayerObjectProperties
                                         {
-
-                                            newScenario.EquipmentPalette.Add(new Scenario.ScenarioPaletteEntry
-                                            {
-                                                Object = Cache.TagCacheGenHO.GetTag(itemlayout.ItemPermutations[0].Item.Name + '.'
-                                            + itemlayout.ItemPermutations[0].Item.Group.ToString())
-                                            });
-                                            var equipment = new Scenario.EquipmentInstance
-                                            {
-                                                PaletteIndex = (short)(newScenario.EquipmentPalette.Count - 1),
-                                                NameIndex = -1,
-                                                PlacementFlags = Scenario.ObjectPlacementFlags.None,
-                                                Position = NetgameEquipment.Position,
-                                                Rotation = NetgameEquipment.Orientation.Orientation,
-                                                Scale = 1,
-                                                BspPolicy = Scenario.ScenarioInstance.BspPolicyValue.Default,
-                                                OriginBspIndex = 1,
-                                                CanAttachToBspFlags = 1,
-                                                Source = Scenario.ScenarioInstance.SourceValue.Editor,
-                                                UniqueHandle = new DatumHandle(uniqueid),
-                                                EditorFolder = -1,
-                                                ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Equipment },
-                                                Multiplayer = new Scenario.MultiplayerObjectProperties(),
-                                            };
-                                            newScenario.Equipment.Add(equipment);
-                                            equipment.Multiplayer.SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default;
-                                            equipment.Multiplayer.AbandonTime = NetgameEquipment.RespawnOnEmptyTime;
-                                            equipment.Multiplayer.EngineFlags = EngineFlags;
+                                            SpawnTime = NetgameEquipment.SpawnTimeInSeconds0Default,
+                                            AbandonTime = NetgameEquipment.RespawnOnEmptyTime,
+                                            EngineFlags = EngineFlags
                                         }
-                                    }
+                                    });
                                 }
                             }
                             break;
