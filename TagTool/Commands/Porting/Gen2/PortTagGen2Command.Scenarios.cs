@@ -39,48 +39,45 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 // TODO make new tags that are equivalent to these but don't have a render model
                 // TODO fix teleporters
-                // add in reverse order of NetgameFlagObjectAdditionList enum
-                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\teleporter_reciever\teleporter_reciever") });
-                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\teleporter_sender\teleporter_sender") });
-                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\assault\assault_bomb_spawn_point") });
-                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\assault\assault_bomb_goal_area") });
-                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\ctf\ctf_flag_return_area") });
-                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\ctf\ctf_flag_spawn_point") });
-                newScenario.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = Cache.TagCache.GetTag<Crate>(@"objects\multi\oddball\oddball_ball_spawn_point") });
 
                 foreach (var NetgameFlags in rawgen2tag.NetgameFlags)
                 {
                     Scenario.CrateInstance crate = new Scenario.CrateInstance();
 
+                    CachedTag objectiveItem = null;
                     switch (NetgameFlags.Type)
                     {
                         case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.OddballSpawn:
-                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.OddballSpawnPoint);
+                            Cache.TagCache.TryGetTag<Crate>(@"objects\multi\oddball\oddball_ball_spawn_point", out objectiveItem);
                             break;
                         case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.CtfFlagSpawn:
-                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.CtfFlagSpawnPoint);
+                            Cache.TagCache.TryGetTag<Crate>(@"objects\multi\ctf\ctf_flag_spawn_point", out objectiveItem);
                             break;
                         case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.CtfFlagReturn:
-                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.CtfFlagReturnArea);
+                            Cache.TagCache.TryGetTag<Crate>(@"objects\multi\ctf\ctf_flag_return_area", out objectiveItem);
                             break;
                         case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.AssaultBombSpawn:
-                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.AssaultBombSpawnPoint);
+                            Cache.TagCache.TryGetTag<Crate>(@"objects\multi\assault\assault_bomb_spawn_point", out objectiveItem);
                             break;
                         case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.AssaultBombReturn:
-                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.AssaultBombGoalArea);
+                            Cache.TagCache.TryGetTag<Crate>(@"objects\multi\assault\assault_bomb_goal_area", out objectiveItem);
                             break;
                         case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.TeleporterSrc:
-                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.TeleporterSender);
+                            Cache.TagCache.TryGetTag<Crate>(@"objects\multi\teleporter_sender\teleporter_sender", out objectiveItem);
                             break;
                         case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.TeleporterDest:
-                            crate.PaletteIndex = (short)(newScenario.CratePalette.Count - NetgameFlagObjectAdditionList.TeleporterReciever);
+                            Cache.TagCache.TryGetTag<Crate>(@"objects\multi\teleporter_reciever\teleporter_reciever", out objectiveItem);
                             break;
                     }
-                    crate.PaletteIndex -= 1;
+
+                    if (objectiveItem == null)
+                        continue;
+
+                    crate.PaletteIndex = (short)GetOrAddCrateItem(newScenario, objectiveItem);
                     crate.Position = NetgameFlags.Position;
                     crate.Rotation.YawValue = NetgameFlags.Facing.Radians;
 
-                    crate.Multiplayer = new TagTool.Tags.Definitions.Scenario.MultiplayerObjectProperties();
+                    crate.Multiplayer = new Scenario.MultiplayerObjectProperties();
                     crate.Multiplayer.Team = (TagTool.Tags.Definitions.Common.MultiplayerTeamDesignator)NetgameFlags.TeamDesignator;
                     crate.ObjectType = new GameObjectType8 { Halo3ODST = GameObjectTypeHalo3ODST.Crate };
                     crate.Source = Scenario.ScenarioInstance.SourceValue.Editor;
@@ -94,6 +91,18 @@ namespace TagTool.Commands.Porting.Gen2
 
                     newScenario.Crates.Add(crate);
                 }
+            }
+        }
+
+        private int GetOrAddCrateItem(Scenario scnr, CachedTag crate)
+        {
+            int findIndex = scnr.CratePalette.FindIndex(c => c.Object == crate);
+            if (findIndex != -1)
+                return findIndex;
+            else
+            {
+                scnr.CratePalette.Add(new Scenario.ScenarioPaletteEntry { Object = crate });
+                return scnr.CratePalette.Count - 1;
             }
         }
 
