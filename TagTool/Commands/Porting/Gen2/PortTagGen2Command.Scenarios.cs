@@ -20,17 +20,6 @@ namespace TagTool.Commands.Porting.Gen2
 {
     partial class PortTagGen2Command : Command
     {
-        enum NetgameFlagObjectAdditionList
-        {
-            OddballSpawnPoint = 0,
-            CtfFlagSpawnPoint = 1,
-            CtfFlagReturnArea = 2,
-            AssaultBombGoalArea = 3,
-            AssaultBombSpawnPoint = 4,
-            TeleporterSender = 5,
-            TeleporterReciever = 6
-        }
-
         List<List<Gen2BSPResourceMesh>> bspMeshes = new List<List<Gen2BSPResourceMesh>>();
 
         private void ConvertNetgameFlags(TagTool.Tags.Definitions.Gen2.Scenario rawgen2tag, Scenario newScenario)
