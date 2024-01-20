@@ -70,7 +70,7 @@ namespace TagTool.Commands.Gen2.Bitmaps
             }
 
             //convert palettized formats to A8R8B8G8
-            if (gen2Img.Format == BitmapGen2.BitmapDataBlock.FormatValue.P8)
+            if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Palettized))
                 rawBitmapData = ConvertP8BitmapData(rawBitmapData);
 
             //normalize X8R8G8B8 bumpmaps
@@ -101,6 +101,8 @@ namespace TagTool.Commands.Gen2.Bitmaps
                 newImg.Flags |= BitmapFlags.PowerOfTwoDimensions;
             if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Compressed))
                 newImg.Flags |= BitmapFlags.Compressed;
+            if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Palettized))
+                newImg.Format = BitmapFormat.A8R8G8B8;
 
             //set pixel data size after decompression and modification
             newImg.PixelDataSize = rawBitmapData.Length;
@@ -187,9 +189,10 @@ namespace TagTool.Commands.Gen2.Bitmaps
         private static BitmapFormat ConvertBitmapFormat(BitmapGen2.BitmapDataBlock.FormatValue format)
         {
             BitmapFormat result;
-            if (format == BitmapGen2.BitmapDataBlock.FormatValue.P8Bump ||
-                format == BitmapGen2.BitmapDataBlock.FormatValue.P8)
+            if (format == BitmapGen2.BitmapDataBlock.FormatValue.P8Bump)
                 return BitmapFormat.A8R8G8B8;
+            else if (format == BitmapGen2.BitmapDataBlock.FormatValue.P8)
+                return BitmapFormat.A8;
             else if (Enum.TryParse(format.ToString(), true, out result))
                 return result;
             else
