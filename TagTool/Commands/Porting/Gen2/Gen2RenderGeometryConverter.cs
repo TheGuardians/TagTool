@@ -221,14 +221,25 @@ namespace TagTool.Commands.Porting.Gen2
 
                     var elementStream = new VertexElementStream(stream);
 
-                    (string, VertexDeclarationUsage, VertexDeclarationType, int)[] declaration = Gen2Cache.Version == CacheVersion.Halo2Vista ?
-                        VertexDeclarationsVista[vertexBuffer.TypeIndex] : VertexDeclarations[vertexBuffer.TypeIndex];
-
-                    //Console.WriteLine($"Vertex type index {vertexBuffer.TypeIndex} of stride {vertexBuffer.StrideIndex} of class {section.GeometryClassification.ToString()}");
+                    (string, VertexDeclarationUsage, VertexDeclarationType, int)[] declaration = null;
+                    if(Gen2Cache.Version == CacheVersion.Halo2Vista)
+                    {
+                        if (VistaVertexDictionary.ContainsKey(vertexBuffer.TypeIndex))
+                            declaration = VistaVertexDictionary[vertexBuffer.TypeIndex];
+                        else
+                        {
+                            declaration = VertexDeclarationsVista[vertexBuffer.TypeIndex];
+                            new TagToolError(CommandError.CustomMessage, $"UNKNOWN VERTEX - Locator:{resource.SecondaryLocator},Stride:{vertexBuffer.StrideIndex},Type:{vertexBuffer.TypeIndex}");
+                        }
+                    }
+                    else
+                        declaration = VertexDeclarations[vertexBuffer.TypeIndex];
+                    
+                    //Console.WriteLine($"Locator:{resource.SecondaryLocator},Stride:{vertexBuffer.StrideIndex},Type:{vertexBuffer.TypeIndex}");
 
                     int calculated_size = CalculateVertexSize(declaration);
                     if (calculated_size != vertexBuffer.StrideIndex)
-                        Console.WriteLine($"WARNING: vertex type {vertexBuffer.TypeIndex} of declared size {vertexBuffer.StrideIndex} didn't match defined size of {calculated_size}");
+                        new TagToolError(CommandError.CustomError, $"vertex type {vertexBuffer.TypeIndex} of declared size {vertexBuffer.StrideIndex} didn't match defined size of {calculated_size}");                  
 
                     for (var i = 0; i < vertexcount; i++)
                     {
@@ -245,6 +256,14 @@ namespace TagTool.Commands.Porting.Gen2
                             }
 
                             var element = ReadVertexElement(elementStream, entry.Item3);
+
+                            //STREAMS:
+                            //Stream 0 -- Position, BlendIndices, BlendWeight
+                            //Stream 1 -- TexCoord
+                            //Stream 2 -- Normal, Binormal, Tangent
+                            //Stream 3 -- Lightmap Texcoord
+                            //Stream 4 -- Lightmap Incident Direction
+                            //Stream 5 -- Lightmap Color
 
                             switch (resource.SecondaryLocator) // stream source
                             {

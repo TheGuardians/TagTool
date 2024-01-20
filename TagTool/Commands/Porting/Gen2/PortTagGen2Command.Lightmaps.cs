@@ -92,9 +92,10 @@ namespace TagTool.Commands.Porting.Gen2
                 var clusterrenderdata = lgroup.ClusterRenderInfo[clusterindex];              
                 if(clusterrenderdata.BitmapIndex != -1)
                 {
+                    Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
                     var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];
                     var palette = lgroup.SectionPalette[clusterrenderdata.PaletteIndex];
-                    List<RealRgbColor[]> coefficients = BuildCoefficients(image, palette);
+                    List<RealRgbColor[]> coefficients = BuildCoefficients(clustermesh, image, palette);
 
                     packer.AddBitmap(image.Width, image.Height, clusterindex, false, coefficients);
 
@@ -195,7 +196,7 @@ namespace TagTool.Commands.Porting.Gen2
                     var palette = lgroup.SectionPalette[lgroup.InstanceRenderInfo[instanceindex].PaletteIndex];
                     var image = gen2bitmap.Bitmaps[lgroup.InstanceRenderInfo[instanceindex].BitmapIndex];
 
-                    List<RealRgbColor[]> coefficients = BuildCoefficients(image, palette);
+                    List<RealRgbColor[]> coefficients = BuildCoefficients(instancemesh, image, palette);
                     packer.AddBitmap(image.Width, image.Height, instanceindex, true, coefficients);
 
                     lbsp.InstancedGeometry.Add(new ScenarioLightmapBspData.InstancedGeometryLighting
@@ -379,7 +380,7 @@ namespace TagTool.Commands.Porting.Gen2
             return lbsp;
         }
 
-        public List<RealRgbColor[]> BuildCoefficients(TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock image, StructureLightmapPaletteColorBlock palette)
+        public List<RealRgbColor[]> BuildCoefficients(Gen2BSPResourceMesh mesh, TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock image, StructureLightmapPaletteColorBlock palette)
         {            
             byte[] rawBitmapData = Gen2Cache.GetCacheRawData((uint)image.Lod0Pointer, (int)image.Lod0Size);
             //h2v raw bitmap data is gz compressed
@@ -405,15 +406,15 @@ namespace TagTool.Commands.Porting.Gen2
                 coefficients.Add(new RealRgbColor[image.Width * image.Height]);
             }
 
-            //DON'T USE INCIDENT DIRECTION FOR NOW AS IT CAUSES ARTIFACTS
+
+            RealVector3d incident_direction = new RealVector3d();
             /*
+            //NO INCIDENT DIRECTION FOR NOW DUE TO ARTIFACTS
             //get average incident direction across cluster mesh
-            Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
-            RealVector3d incident_direction = clustermesh.RawVertices[0].PrimaryLightmapIncidentDirection;
-            foreach (var vert in clustermesh.RawVertices)
+            RealVector3d incident_direction = mesh.RawVertices[0].PrimaryLightmapIncidentDirection;
+            foreach (var vert in mesh.RawVertices)
                 incident_direction = (vert.PrimaryLightmapIncidentDirection + incident_direction) / 2.0f;
             */
-
             /*
             //DEBUG DUMP BITMAP
             using (var rawdataStream = new MemoryStream(rawBitmapData))
@@ -459,11 +460,11 @@ namespace TagTool.Commands.Porting.Gen2
                         var temp_R = dataReader.ReadByte();
                         var temp_A = dataReader.ReadByte();
                         RealRgbColor colorVista = ARGB_to_Real_RGB(new ArgbColor(temp_A, temp_R, temp_G, temp_B));
-                        EvaluateDirectionalLightCustom(2, colorVista, new RealVector3d(), R, G, B);
+                        EvaluateDirectionalLightCustom(2, colorVista, incident_direction, R, G, B);
                         break;
                     case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
                         RealRgbColor color = ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]);
-                        EvaluateDirectionalLightCustom(2, color, new RealVector3d(), R, G, B);
+                        EvaluateDirectionalLightCustom(2, color, incident_direction, R, G, B);
                         break;
                     default:
                         new TagToolError(CommandError.OperationFailed, "Unknown lightmap bitmap format! Aborting!");
