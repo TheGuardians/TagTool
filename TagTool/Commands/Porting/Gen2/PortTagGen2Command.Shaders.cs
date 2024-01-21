@@ -37,8 +37,6 @@ namespace TagTool.Commands.Porting.Gen2
         private RenderMethod Definition { get; set; }
         public Shader ConvertShader(ShaderGen2 gen2Shader, ShaderGen2 gen2ShaderH2, String gen2TagName, Stream cacheStream, Stream gen2CacheStream)
         {
-            var ShaderBlendMode = RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.Opaque;
-            var PostProcessFlag = RenderMethod.RenderMethodPostprocessBlock.RenderMethodPostprocessFlags.None;
 
             string shader_template = gen2ShaderH2.Template.Name;
             string shader_template_name = shader_template;
@@ -1002,7 +1000,6 @@ namespace TagTool.Commands.Porting.Gen2
                 if (shader_template.Contains("alpha_test"))
                 {
                     shaderCategories[(int)ShaderMethods.Alpha_Test] = (byte)Alpha_Test.Simple;
-                    PostProcessFlag = RenderMethod.RenderMethodPostprocessBlock.RenderMethodPostprocessFlags.EnableAlphaTest;
                 }
 
                 // Specular Mask
@@ -1066,12 +1063,10 @@ namespace TagTool.Commands.Porting.Gen2
                 if (shader_template.Contains("add"))
                 {
                     shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Additive;
-                    ShaderBlendMode = RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.Additive;
                 }
                 else if (shader_template.Contains("alpha") && !gen2TagName.Contains("stars"))
                 {
                     shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Alpha_Blend;
-                    ShaderBlendMode = RenderMethod.RenderMethodPostprocessBlock.BlendModeValue.AlphaBlend;
                 }
             }
             else if (new_shader_type == "rmhg")
@@ -1121,8 +1116,6 @@ namespace TagTool.Commands.Porting.Gen2
 
             // check if tag already exists, or allocate new one
             string rmGroup = ShaderTypeGroups[rmt2Desc.Type];
-            if (!Cache.TagCache.TryGetTag($"{gen2TagName}.{rmGroup}", out var rmTag))
-                rmTag = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(rmGroup), gen2TagName);
 
             var rmt2 = Cache.Deserialize<RenderMethodTemplate>(cacheStream, rmt2Tag);
             rmdf = Cache.Deserialize<RenderMethodDefinition>(cacheStream, rmdfTag);
