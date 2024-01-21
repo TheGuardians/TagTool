@@ -1084,6 +1084,7 @@ namespace TagTool.Commands.Porting.Gen2
             ShaderMatcherNew.Rmt2Descriptor rmt2Desc = new ShaderMatcherNew.Rmt2Descriptor("shader", shaderCategories);
 
             CachedTag rmdfTag = Cache.TagCache.GetTag<RenderMethodDefinition>($"shaders\\{rmt2Desc.Type}");
+            RenderMethodDefinition rmdf;
 
             RenderMethodTemplate rmt2Definition;
             if (!Cache.TagCacheGenHO.TryGetTag(rmt2TagName + ".rmt2", out CachedTag rmt2Tag))
@@ -1093,7 +1094,6 @@ namespace TagTool.Commands.Porting.Gen2
 
                 GlobalPixelShader glps;
                 GlobalVertexShader glvs;
-                RenderMethodDefinition rmdf;
                 if (!Cache.TagCache.TryGetTag($"shaders\\{rmt2Desc.Type}.rmdf", out rmdfTag))
                 {
                     Console.WriteLine($"Generating rmdf for \"{rmt2Desc.Type}\"");
@@ -1124,57 +1124,54 @@ namespace TagTool.Commands.Porting.Gen2
             if (!Cache.TagCache.TryGetTag($"{gen2TagName}.{rmGroup}", out var rmTag))
                 rmTag = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(rmGroup), gen2TagName);
 
-            using (var stream = Cache.OpenCacheReadWrite())
+            var rmt2 = Cache.Deserialize<RenderMethodTemplate>(cacheStream, rmt2Tag);
+            rmdf = Cache.Deserialize<RenderMethodDefinition>(cacheStream, rmdfTag);
+
+            // store rmop definitions for quick lookup
+            List<RenderMethodOption> renderMethodOptions = new List<RenderMethodOption>();
+            for (int i = 0; i < rmt2Desc.Options.Length; i++)
             {
-                var rmt2 = Cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
-                var rmdf = Cache.Deserialize<RenderMethodDefinition>(stream, rmdfTag);
-
-                // store rmop definitions for quick lookup
-                List<RenderMethodOption> renderMethodOptions = new List<RenderMethodOption>();
-                for (int i = 0; i < rmt2Desc.Options.Length; i++)
-                {
-                    var rmopTag = rmdf.Categories[i].ShaderOptions[rmt2Desc.Options[i]].Option;
-                    if (rmopTag != null)
-                        renderMethodOptions.Add(Cache.Deserialize<RenderMethodOption>(stream, rmopTag));
-                }
-
-                // create definition
-                object definition = Activator.CreateInstance(Cache.TagCache.TagDefinitions.GetTagDefinitionType(rmGroup));
-                // make changes as RenderMethod so the code can be reused for each rm type
-                var rmDefinition = definition as RenderMethod;
-
-                rmDefinition.BaseRenderMethod = rmdfTag;
-
-                // initialize lists
-                rmDefinition.Options = new List<RenderMethod.RenderMethodOptionIndex>();
-                rmDefinition.ShaderProperties = new List<RenderMethod.RenderMethodPostprocessBlock>();
-
-                foreach (var option in rmt2Desc.Options)
-                    rmDefinition.Options.Add(new RenderMethod.RenderMethodOptionIndex { OptionIndex = option });
-                rmDefinition.SortLayer = TagTool.Shaders.SortingLayerValue.Normal;
-                rmDefinition.PredictionAtomIndex = -1;
-
-                PopulateRenderMethodConstants populateConstants = new PopulateRenderMethodConstants();
-
-                // setup shader property
-                RenderMethod.RenderMethodPostprocessBlock shaderProperty = new RenderMethod.RenderMethodPostprocessBlock
-                {
-                    Template = rmt2Tag,
-                    // setup constants
-                    TextureConstants = populateConstants.SetupTextureConstants(rmt2, renderMethodOptions, Cache),
-                    RealConstants = populateConstants.SetupRealConstants(rmt2, renderMethodOptions, Cache),
-                    IntegerConstants = populateConstants.SetupIntegerConstants(rmt2, renderMethodOptions, Cache),
-                    BooleanConstants = populateConstants.SetupBooleanConstants(rmt2, renderMethodOptions, Cache),
-                    // get alpha blend mode
-                    BlendMode = populateConstants.GetAlphaBlendMode(rmt2Desc, rmdf, Cache),
-                    // TODO
-                    QueryableProperties = new short[] { -1, -1, -1, -1, -1, -1, -1, -1 }
-                };
-
-                rmDefinition.ShaderProperties.Add(shaderProperty);
-                rmDefinition.BaseRenderMethod = Cache.TagCacheGenHO.GetTag<RenderMethodDefinition>(rmt2Desc.GetRmdfName());
-                Definition = rmDefinition;
+                var rmopTag = rmdf.Categories[i].ShaderOptions[rmt2Desc.Options[i]].Option;
+                if (rmopTag != null)
+                    renderMethodOptions.Add(Cache.Deserialize<RenderMethodOption>(cacheStream, rmopTag));
             }
+
+            // create definition
+            object definition = Activator.CreateInstance(Cache.TagCache.TagDefinitions.GetTagDefinitionType(rmGroup));
+            // make changes as RenderMethod so the code can be reused for each rm type
+            var rmDefinition = definition as RenderMethod;
+
+            rmDefinition.BaseRenderMethod = rmdfTag;
+
+            // initialize lists
+            rmDefinition.Options = new List<RenderMethod.RenderMethodOptionIndex>();
+            rmDefinition.ShaderProperties = new List<RenderMethod.RenderMethodPostprocessBlock>();
+
+            foreach (var option in rmt2Desc.Options)
+                rmDefinition.Options.Add(new RenderMethod.RenderMethodOptionIndex { OptionIndex = option });
+            rmDefinition.SortLayer = TagTool.Shaders.SortingLayerValue.Normal;
+            rmDefinition.PredictionAtomIndex = -1;
+
+            PopulateRenderMethodConstants populateConstants = new PopulateRenderMethodConstants();
+
+            // setup shader property
+            RenderMethod.RenderMethodPostprocessBlock shaderProperty = new RenderMethod.RenderMethodPostprocessBlock
+            {
+                Template = rmt2Tag,
+                // setup constants
+                TextureConstants = populateConstants.SetupTextureConstants(rmt2, renderMethodOptions, Cache),
+                RealConstants = populateConstants.SetupRealConstants(rmt2, renderMethodOptions, Cache),
+                IntegerConstants = populateConstants.SetupIntegerConstants(rmt2, renderMethodOptions, Cache),
+                BooleanConstants = populateConstants.SetupBooleanConstants(rmt2, renderMethodOptions, Cache),
+                // get alpha blend mode
+                BlendMode = populateConstants.GetAlphaBlendMode(rmt2Desc, rmdf, Cache),
+                // TODO
+                QueryableProperties = new short[] { -1, -1, -1, -1, -1, -1, -1, -1 }
+            };
+
+            rmDefinition.ShaderProperties.Add(shaderProperty);
+            rmDefinition.BaseRenderMethod = Cache.TagCacheGenHO.GetTag<RenderMethodDefinition>(rmt2Desc.GetRmdfName());
+            Definition = rmDefinition;
 
             // Add all the texture maps
             foreach (var shadermap in rmt2Definition.TextureParameterNames)
