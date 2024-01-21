@@ -10,20 +10,6 @@ namespace TagTool.Shaders.ShaderGenerator
 {
     public class PopulateRenderMethodConstants
     {
-        static readonly Dictionary<string, string> ShaderTypeGroups = new Dictionary<string, string>
-        {
-            ["shader"] = "rmsh",
-            ["decal"] = "rmd ",
-            ["halogram"] = "rmhg",
-            ["water"] = "rmw ",
-            ["black"] = "rmbk",
-            ["terrain"] = "rmtr",
-            ["custom"] = "rmcs",
-            ["foliage"] = "rmfl",
-            ["screen"] = "rmss",
-            ["cortana"] = "rmct",
-            ["zonly"] = "rmzo",
-        };
         public List<TextureConstant> SetupTextureConstants(RenderMethodTemplate rmt2, List<RenderMethodOption> renderMethodOptions, GameCacheHaloOnlineBase Cache)
         {
             List<TextureConstant> textureConstants = new List<TextureConstant>();
