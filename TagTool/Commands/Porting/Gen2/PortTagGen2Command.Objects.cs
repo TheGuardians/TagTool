@@ -244,8 +244,8 @@ namespace TagTool.Commands.Porting.Gen2
                                 {
                                     Steering = new Vehicle.VehicleSteeringControl
                                     {
-                                        OverdampenCuspAngle = gen2Tag.OverdampenCuspAngle,
-                                        OverdampenExponent = gen2Tag.OverdampenExponent
+                                        OverdampenCuspAngle = Angle.FromRadians(1.0f),
+                                        OverdampenExponent = 1.0f
                                     },
                                     VelocityControl = new Vehicle.VehicleVelocityControl
                                     {
