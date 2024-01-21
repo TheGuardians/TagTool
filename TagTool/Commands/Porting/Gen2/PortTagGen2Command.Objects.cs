@@ -258,7 +258,8 @@ namespace TagTool.Commands.Porting.Gen2
                                         SlideAcceleration = gen2Tag.SlideAcceleration,
                                         SlideDeceleration = gen2Tag.SlideDeceleration,
                                     },
-                                    Flags = Vehicle.AlienScoutPhysics.AlienScoutFlags.None, // TODO
+                                    Flags = Vehicle.AlienScoutPhysics.AlienScoutFlags.None,
+                                    SpecificType = (Vehicle.AlienScoutPhysics.AlienScoutSpecificType)gen2Tag.SpecificType,
                                     DragCoefficient = 0.0f,
                                     ConstantDeceleration = 0.0f,
                                     TorqueScale = 1.0f,
