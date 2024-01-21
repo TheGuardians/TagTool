@@ -355,12 +355,6 @@ namespace TagTool.Commands.Porting.Gen2
 
         public Biped FixupBiped(TagTool.Tags.Definitions.Gen2.Biped gen2Tag, Biped newbiped)
         {
-
-            for (byte i = 0; i < newbiped.Functions.Count; i++)
-            {
-                newbiped.Functions[i].DefaultFunction.Data = gen2Tag.Functions[i].DefaultFunction.Data;
-            }
-
             newbiped.PreferredGunNode = gen2Tag.MoreDamnNodes.PreferredGunNode;
 
             newbiped.HudInterfaces = new List<Unit.HudInterface>();
