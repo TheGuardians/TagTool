@@ -67,10 +67,9 @@ namespace TagTool.Commands.Gen2.Bitmaps
                 foreach (var pix in rawBitmapData)
                     outWriter.Write(bumpPalette[pix]);
                 rawBitmapData = outStream.ToArray();
-            }
-
-            //convert palettized formats to A8R8B8G8
-            if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Palettized))
+            }           
+            else if (gen2Img.Flags.HasFlag(BitmapGen2.BitmapDataBlock.FlagsValue.Palettized))
+                //convert palettized formats to A8R8B8G8
                 rawBitmapData = ConvertP8BitmapData(rawBitmapData);
 
             //normalize X8R8G8B8 bumpmaps
