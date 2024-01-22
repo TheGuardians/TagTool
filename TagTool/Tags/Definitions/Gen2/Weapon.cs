@@ -809,7 +809,8 @@ namespace TagTool.Tags.Definitions.Gen2
             public short RoundsTotalInitial;
             public short RoundsTotalMaximum;
             public short RoundsLoadedMaximum;
-            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public short RoundsInventoryMaximum;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
             /// <summary>
             /// the length of time it takes to load a single magazine into the weapon
