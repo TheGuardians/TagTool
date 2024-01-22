@@ -244,6 +244,8 @@ namespace TagTool.Commands.Porting.Gen2
             new[] // 0x06
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte3N, 0),
             },
             new[] // 0x07 model_rigid_boned3::uncompressed
             {

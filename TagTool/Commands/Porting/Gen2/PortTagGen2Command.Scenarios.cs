@@ -1044,7 +1044,7 @@ namespace TagTool.Commands.Porting.Gen2
                             {
                                 if (!Cache.TagCache.TryGetTag<Vehicle>(vehilayout.VehiclePermutations[0].Vehicle.Name, out paletteTag))
                                     break;
-                                var palette_index = newScenario.VehiclePalette.FindIndex(v => v.Object.Name == vehilayout.VehiclePermutations[0].Vehicle.Name);
+                                var palette_index = newScenario.VehiclePalette.FindIndex(v => (v.Object == null ? "" : v.Object.Name) == vehilayout.VehiclePermutations[0].Vehicle.Name);
                                 if (palette_index == -1)
                                 {
                                     newScenario.VehiclePalette.Add(new Scenario.ScenarioPaletteEntry
@@ -1091,7 +1091,7 @@ namespace TagTool.Commands.Porting.Gen2
                                     }
                                     if (!Cache.TagCache.TryGetTag<Weapon>(itemlayout.ItemPermutations[0].Item.Name, out paletteTag))
                                         break;
-                                    var palette_index = newScenario.WeaponPalette.FindIndex(v => v.Object.Name ==
+                                    var palette_index = newScenario.WeaponPalette.FindIndex(v => (v.Object == null ? "" : v.Object.Name) ==
                                     itemlayout.ItemPermutations[0].Item.Name);
                                     if (palette_index == -1)
                                     {
@@ -1129,7 +1129,7 @@ namespace TagTool.Commands.Porting.Gen2
                                 {
                                     if (!Cache.TagCache.TryGetTag<Equipment>(itemlayout.ItemPermutations[0].Item.Name, out paletteTag))
                                         break;
-                                    var palette_index = newScenario.EquipmentPalette.FindIndex(v => v.Object.Name ==
+                                    var palette_index = newScenario.EquipmentPalette.FindIndex(v => (v.Object == null ? "" : v.Object.Name) ==
                                     itemlayout.ItemPermutations[0].Item.Name);
                                     if (palette_index == -1)
                                     {

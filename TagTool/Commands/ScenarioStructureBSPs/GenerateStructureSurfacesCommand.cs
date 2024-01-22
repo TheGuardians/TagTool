@@ -54,14 +54,20 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             lbsp = Cache.Deserialize<ScenarioLightmapBspData>(stream, Cache.TagCache.GetTag<ScenarioLightmapBspData>(lightmapTagName));
             var renderGeometry = lbsp.Geometry;
             var renderGeometryResource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(renderGeometry.Resource);
+            if (renderGeometryResource == null)
+                return false;
             renderGeometry.SetResourceBuffers(renderGeometryResource, false);
 
             var tagResources = Cache.ResourceCache.GetStructureBspTagResources(Definition.CollisionBspResource);
+            if (tagResources == null)
+                return false;
             GenerateStructureSurfaces(tagResources, renderGeometry);           
             ((GameCacheHaloOnlineBase)Cache).ResourceCaches.ReplaceResource(Definition.CollisionBspResource.HaloOnlinePageableResource, tagResources);
 
             //optionally generate structure surfaces for sbsp if none are present
             var cacheFileTagResources = Cache.ResourceCache.GetStructureBspCacheFileTagResources(Definition.PathfindingResource);
+            if (cacheFileTagResources == null)
+                return false;
             if (cacheFileTagResources.SurfacePlanes == null || cacheFileTagResources.SurfacePlanes.Count == 0)
             {
                 GenerateStructureBspStructureSurfaces(tagResources, cacheFileTagResources, renderGeometry);
