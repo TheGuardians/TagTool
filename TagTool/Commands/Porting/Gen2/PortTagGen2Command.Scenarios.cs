@@ -238,18 +238,8 @@ namespace TagTool.Commands.Porting.Gen2
                         //fixup skymodetag with gen2 sky render model scale
                         RenderModel skymode = Cache.Deserialize<RenderModel>(cacheStream, skymodetag);
 
-                        foreach (var comp in skymode.Geometry.Compression)
-                        {
-                            float size_x = comp.X.Upper - comp.X.Lower;
-                            float size_y = comp.Y.Upper - comp.Y.Lower;
-                            float size_z = comp.Z.Upper - comp.Z.Lower;
-                            comp.X.Upper = (comp.X.Upper - (size_x / 2)) + (size_x / 2) * gen2skytag.RenderModelScale;
-                            comp.X.Lower = (comp.X.Lower + (size_x / 2)) - (size_x / 2) * gen2skytag.RenderModelScale;
-                            comp.Y.Upper = (comp.Y.Upper - (size_y / 2)) + (size_y / 2) * gen2skytag.RenderModelScale;
-                            comp.Y.Lower = (comp.Y.Lower + (size_y / 2)) - (size_y / 2) * gen2skytag.RenderModelScale;
-                            comp.Z.Upper = (comp.Z.Upper - (size_z / 2)) + (size_z / 2) * gen2skytag.RenderModelScale;
-                            comp.Z.Lower = (comp.Z.Lower + (size_z / 2)) - (size_z / 2) * gen2skytag.RenderModelScale;
-                        };
+                        skymode.Nodes[0].DefaultScale *= (gen2skytag.RenderModelScale / 2);
+
                         Cache.Serialize(cacheStream, skymodetag, skymode);
                     }
 

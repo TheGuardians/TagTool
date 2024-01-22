@@ -607,6 +607,41 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order.Add("environment_map");
                         break;
                     }
+                case "tex_bump_env_four_change_color":
+                    {
+                        new_shader_type = "rmsh";
+
+                        h2_vertex_constants.Add("detail_map"); // og: detail_map_scale, i is x, j is y
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("environment_map_specular_contribution"); // og: env_brightness in W
+                        h2_vertex_constants.Add(""); // og: env_glancing_brightness in W
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+
+                        h2_pixel_constants.Add("normal_specular_tint"); // og: specular_color
+                        h2_pixel_constants.Add("glancing_specular_tint"); // og: specular_glancing_color
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add(""); // og: env_midrange_tint_color
+                        h2_pixel_constants.Add("env_tint_color"); // og: env_tint_color
+                        h2_pixel_constants.Add(""); // og: env_glancing_tint_color
+                        h2_pixel_constants.Add(""); // og: env_brightness
+                        h2_pixel_constants.Add(""); // og: env_glancing_brightness
+
+                        h2_bitmap_order.Add("bump_map");
+                        h2_bitmap_order.Add(""); // og: active_camo_bump_map
+                        h2_bitmap_order.Add("base_map");
+                        h2_bitmap_order.Add("detail_map");
+                        h2_bitmap_order.Add("change_color_map");
+                        h2_bitmap_order.Add("environment_map");
+                        h2_bitmap_order.Add("");
+                        break;
+                    }
                 case "tex_bump_env_no_detail":
                     {
                         new_shader_type = "rmsh";
@@ -625,6 +660,8 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order.Add("");
                         h2_bitmap_order.Add("base_map");
                         h2_bitmap_order.Add("environment_map");
+                        h2_bitmap_order.Add("detail_map");
+                        h2_bitmap_order.Add("");
                         break;
                     }
                 case "tex_bump_env_two_change_color_indexed":
@@ -888,26 +925,19 @@ namespace TagTool.Commands.Porting.Gen2
                     {
                         new_shader_type = "rmsh";
 
-                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.From_Diffuse;
+                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Texture;
                         h2_bitmap_order.Add("environment_map");
                         h2_bitmap_order.Add("specular_mask_texture");
-                        h2_bitmap_order.Add("base_map");
+                        h2_bitmap_order.Add("base_map"); // og: alpha_blend_map
+                        h2_bitmap_order.Add("");
+
+                        h2_vertex_constants.Add("+specular_mask_texture");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("+base_map");
                         
-                        if (Gen2Cache.Version == CacheVersion.Halo2Vista)
-                        {
-                            h2_vertex_constants.Add("+specular_mask_texture");
-                            h2_vertex_constants.Add("");
-                            h2_vertex_constants.Add("+base_map");
-                        }
-                        else
-                        {
-                            h2_vertex_constants.Add("+specular_mask_texture");
-                            h2_vertex_constants.Add("");
-                            h2_vertex_constants.Add("+base_map");
-                        }
-                        
-                        h2_pixel_constants.Add("env_tint_color");
+                        h2_pixel_constants.Add("env_tint_color"); // og: environment_color
                         h2_pixel_constants.Add("albedo_color");
+                        h2_pixel_constants.Add(""); // og: alpha_blend_color
                         break;
                     }
                 case "sky_one_alpha_env_illum":
@@ -1038,7 +1068,7 @@ namespace TagTool.Commands.Porting.Gen2
                 }
 
                 // Self Illumination
-                if (shader_template.Contains("illum"))
+                if (shader_template.Contains("illum") || shader_template.Contains("sky"))
                 {
                     if (shader_template.Contains("3_channel") || shader_template.Contains("plasma"))
                     {
@@ -1052,6 +1082,10 @@ namespace TagTool.Commands.Porting.Gen2
                     {
                         shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.Meter;
                     }
+                    else if (shader_template.Contains("sky"))
+                    {
+                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.From_Diffuse;
+                    }
                     else
                     {
                         shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.Simple;
@@ -1064,7 +1098,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Additive;
                 }
-                else if (shader_template.Contains("alpha") && !gen2TagName.Contains("stars"))
+                else if (shader_template.Contains("alpha") && !gen2TagName.Contains("stars") && !gen2TagName.Contains("dome"))
                 {
                     shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Alpha_Blend;
                 }
@@ -1173,7 +1207,7 @@ namespace TagTool.Commands.Porting.Gen2
                 var h2_postprocess = gen2Shader.PostprocessDefinition[0];
                 var h2_texture_reference = h2_postprocess.Bitmaps;
                 string current_type = Cache.StringTable[((int)shadermap.Name.Value)];   // Gets the current type of bitmap in the template
-                string current_bitmap = h2_texture_reference[0].Bitmap.ToString(); ; // Sets up the variable for bitmap assignment and reference
+                string current_bitmap = null; // Sets up the variable for bitmap assignment and reference
 
                 // If the string in the bitmap order list matches the current_type in the rmt2,
                 // Then set current_type to the bitmap path
@@ -1202,6 +1236,20 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 }
 
+                //if ((found == false) && (shader_template.Contains("sky")))
+                //{
+                //    for (var i = 0; i < h2_bitmap_order.Count; i++)
+                //    {
+                //        if (h2_bitmap_order[i] == "self_illum_map")
+                //        {
+                //            found = true;
+                //            if (h2_texture_reference[i].Bitmap != null) { current_bitmap = h2_texture_reference[i].Bitmap.ToString(); }
+                //            else current_bitmap = null;
+                //            break;
+                //        }
+                //    }
+                //}
+
                 // If bitmap type is not found in list just give it a default bitmap
                 //if (found == false) current_type = "shaders\\default_bitmaps\\bitmaps\\alpha_grey50.bitmap";
 
@@ -1213,14 +1261,9 @@ namespace TagTool.Commands.Porting.Gen2
                         string sampler_name = Cache.StringTable[(int)rmt2Definition.TextureParameterNames[samplerIndex].Name.Value];
                         if (sampler_name == current_type)
                         {
-                            try
+                            if (current_bitmap != null)
                             {
                                 Definition.ShaderProperties[0].TextureConstants[samplerIndex].Bitmap = Cache.TagCacheGenHO.GetTag(current_bitmap);
-                                break;
-                            }
-                            catch
-                            {
-                                new TagToolWarning($"tried to set '{current_type}' as bitmap reference, bitmap must not exist");
                                 break;
                             }
                         }
