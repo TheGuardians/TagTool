@@ -22,7 +22,7 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             public StringId Name;
             public HudWidgetInputsStructBlock Unknown;
-            public HudWidgetStateDefinitionStructBlock Unknown1;
+            public HudWidgetStateDefinitionStructBlock WidgetState;
             public AnchorValue Anchor;
             public FlagsValue Flags;
             [TagField(ValidTags = new [] { "bitm" })]

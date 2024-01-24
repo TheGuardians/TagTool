@@ -371,7 +371,7 @@ namespace TagTool.Commands.Porting.Gen2
             newbiped.HudInterfaces = new List<Unit.HudInterface>();
             newbiped.HudInterfaces.Add(new Unit.HudInterface
             {
-                UnitHudInterface = Cache.TagCache.GetTag(@"ui\chud\spartan.chdt")
+                UnitHudInterface = Cache.TagCache.GetTag(gen2Tag.NewHudInterfaces[0].NewUnitHudInterface.ToString())
             });
 
             newbiped.LockonDistance = gen2Tag.LockOnData.LockOnDistance;
