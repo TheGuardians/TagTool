@@ -94,6 +94,17 @@ namespace TagTool.Commands.Porting.Gen2
             });
             newweapon.WeaponFlags = new WeaponFlags();
 
+            newweapon.CenteredFirstPersonWeaponOffset.X = (float)gen2Tag.FirstPersonWeaponOffset.I;
+            newweapon.CenteredFirstPersonWeaponOffset.Y = (float)gen2Tag.FirstPersonWeaponOffset.J;
+            newweapon.CenteredFirstPersonWeaponOffset.Z = (float)gen2Tag.FirstPersonWeaponOffset.K;
+
+            newweapon.FirstPersonWeaponOffset.I = (float)gen2Tag.FirstPersonWeaponOffset.I;
+            newweapon.FirstPersonWeaponOffset.J = (float)gen2Tag.FirstPersonWeaponOffset.J;
+            if (gen2Tag.FirstPersonWeaponOffset.K == 0) { newweapon.FirstPersonWeaponOffset.K = (float)0.02; }
+            if (gen2Tag.FirstPersonWeaponOffset.K != 0) { newweapon.FirstPersonWeaponOffset.K = ((float)gen2Tag.FirstPersonWeaponOffset.K * -2); }
+
+            newweapon.HudInterface = Cache.TagCacheGenHO.GetTag(gen2Tag.PlayerInterface.NewHudInterface.ToString());
+
             AutoConverter.TranslateEnum(gen2Tag.WeaponFlags, out newweapon.WeaponFlags.NewFlags, newweapon.WeaponFlags.NewFlags.GetType());
             return newweapon;
         }
@@ -360,7 +371,7 @@ namespace TagTool.Commands.Porting.Gen2
             newbiped.HudInterfaces = new List<Unit.HudInterface>();
             newbiped.HudInterfaces.Add(new Unit.HudInterface
             {
-                UnitHudInterface = Cache.TagCache.GetTag(@"ui\chud\spartan.chdt")
+                UnitHudInterface = Cache.TagCache.GetTag(gen2Tag.NewHudInterfaces[0].NewUnitHudInterface.ToString())
             });
 
             newbiped.LockonDistance = gen2Tag.LockOnData.LockOnDistance;

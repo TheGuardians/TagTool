@@ -118,6 +118,7 @@ namespace TagTool.Commands.Porting.Gen2
                 "eqip",
                 "ctrl",
                 "bipd",
+                "nhdt",
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -211,6 +212,9 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
                 case SoundEnvironment snde:
                     definition = ConvertSoundEnvironment(snde);
+                    break;
+                case NewHudDefinition nhdt:
+                    definition = ConvertNewHudDefinition(nhdt);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
