@@ -103,7 +103,9 @@ namespace TagTool.Commands.Porting.Gen2
             if (gen2Tag.FirstPersonWeaponOffset.K == 0) { newweapon.FirstPersonWeaponOffset.K = (float)0.02; }
             if (gen2Tag.FirstPersonWeaponOffset.K != 0) { newweapon.FirstPersonWeaponOffset.K = ((float)gen2Tag.FirstPersonWeaponOffset.K * -2); }
 
-            newweapon.HudInterface = Cache.TagCacheGenHO.GetTag(gen2Tag.PlayerInterface.NewHudInterface.ToString());
+            if (gen2Tag.PlayerInterface.NewHudInterface != null) {
+                newweapon.HudInterface = Cache.TagCacheGenHO.GetTag(gen2Tag.PlayerInterface.NewHudInterface.ToString());
+            }
 
             AutoConverter.TranslateEnum(gen2Tag.WeaponFlags, out newweapon.WeaponFlags.NewFlags, newweapon.WeaponFlags.NewFlags.GetType());
             return newweapon;
@@ -368,11 +370,14 @@ namespace TagTool.Commands.Porting.Gen2
         {
             newbiped.PreferredGunNode = gen2Tag.MoreDamnNodes.PreferredGunNode;
 
-            newbiped.HudInterfaces = new List<Unit.HudInterface>();
-            newbiped.HudInterfaces.Add(new Unit.HudInterface
-            {
-                UnitHudInterface = Cache.TagCache.GetTag(gen2Tag.NewHudInterfaces[0].NewUnitHudInterface.ToString())
-            });
+            if (gen2Tag.NewHudInterfaces.Count > 0 && gen2Tag.NewHudInterfaces[0].NewUnitHudInterface != null) {
+                newbiped.HudInterfaces = new List<Unit.HudInterface> {
+                    new Unit.HudInterface {
+                        UnitHudInterface = Cache.TagCache.GetTag(gen2Tag.NewHudInterfaces[0].NewUnitHudInterface.ToString())
+                    }
+                };
+            }
+            
 
             newbiped.LockonDistance = gen2Tag.LockOnData.LockOnDistance;
             AutoConverter.TranslateEnum(gen2Tag.LockOnData.Flags, out newbiped.LockonFlags, newbiped.LockonFlags.GetType());
