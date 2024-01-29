@@ -15,7 +15,7 @@ namespace TagTool.Commands.Porting.Gen2
 {
     public class LightmapPacker
     {
-        private int[] SizeClasses = new int[] { 4,8,16,32,64,128,256,512,1024,2048,4096};
+        private int[] SizeClasses = new int[] { 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096 };
         private List<BitmapContainer> bitmapContainers = new List<BitmapContainer>();
         private int lightmapLayer = 0;
         private int targetLightmapSize = 0;
@@ -24,13 +24,14 @@ namespace TagTool.Commands.Porting.Gen2
         private float[] MaxLs = new float[9];
         private List<int[]> OffsetWrites = new List<int[]>();
 
-        public bool AddBitmap(int width, int height, int index, bool isInstance, List<RealRgbColor[]> coefficients)
+        public bool AddBitmap(int width, int height, int index, bool isInstance, List<RealRgbColor[]> coefficients, List<float[]> luminances)
         {
             var newBitmap = new BitmapContainer();
             newBitmap.Size = new int[] { width, height };
             newBitmap.Index = index;
             newBitmap.isInstance = isInstance;
-            newBitmap.coefficients = coefficients;
+            newBitmap.coefficientsUVW = coefficients;
+            newBitmap.coefficientsL = luminances;
             bitmapContainers.Add(newBitmap);
             return true;
         }
@@ -40,7 +41,7 @@ namespace TagTool.Commands.Porting.Gen2
             if (!NestBitmaps())
                 return null;
             MemoryStream layeredLightmapData = new MemoryStream();
-            for(var i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 lightmapLayer = i;
                 BitmapContainer lightmapBitmap = new BitmapContainer
@@ -71,8 +72,8 @@ namespace TagTool.Commands.Porting.Gen2
         }
         private void WriteNestedBitmap(EndianWriter writer, BitmapContainer bitmap, int[] offset, bool useDummyData)
         {
-            List<int> bitmapSlots = new List<int> { 0, 0, 0, 0 };           
-            if(bitmap.ChildBitmaps.Count > 0)
+            List<int> bitmapSlots = new List<int> { 0, 0, 0, 0 };
+            if (bitmap.ChildBitmaps.Count > 0)
             {
                 bitmap.ChildBitmaps = bitmap.ChildBitmaps.OrderByDescending(c => c.GetBitmapShape()).ToList();
                 foreach (var nested in bitmap.ChildBitmaps)
@@ -116,7 +117,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 //seek to offset then write out line by line
                 OffsetWrites.Add(offset);
-                float MaxL = 0.0f;
+                float MaxL = bitmap.coefficientsL[lightmapLayer].Max();
                 ArgbColor convertedColor = new ArgbColor();
                 //layer 0
                 for (var y = 0; y < bitmap.Height(); y++)
@@ -124,36 +125,42 @@ namespace TagTool.Commands.Porting.Gen2
                     writer.BaseStream.Position = ((offset[1] + y) * targetLightmapSize + offset[0]) * 4;
                     for (var x = 0; x < bitmap.Width(); x++)
                     {
-                        var val = bitmap.coefficients[lightmapLayer][bitmap.Width() * y + x];
+                        var bitmapOffset = bitmap.Width() * y + x;
+                        var uvw = bitmap.coefficientsUVW[lightmapLayer][bitmapOffset];
+                        var luminance = bitmap.coefficientsL[lightmapLayer][bitmapOffset];
                         //even layers get filled with dummy data
                         if (!useDummyData)
                         {
-                            float L = (float)Math.Sqrt(val.Red * val.Red + val.Green * val.Green + val.Blue * val.Blue);
-                            if (L > MaxL)
-                                MaxL = L;
-                            convertedColor = new ArgbColor(byte.MaxValue, (byte)(val.Red * 255),
-                            (byte)(val.Green * 255), (byte)(val.Blue * 255));
-                        }                          
+                            float L = luminance / MaxL;
+                            if (L > 1.0f)
+                                throw new Exception("Luminance > 1 in luwv encoding");
+
+                            if (uvw.Red > 1.0f || uvw.Green > 1.0f || uvw.Blue > 1.0f)
+                            {
+                                Console.WriteLine("LUVW SH too big for single layer, need multi layer encoding");
+                            }
+                            convertedColor = new ArgbColor((byte)(L * 255), (byte)(uvw.Red * 255), (byte)(uvw.Green * 255), (byte)(uvw.Blue * 255));
+                        }
                         else
-                            convertedColor = CreateDummySHData(val);
+                            convertedColor = CreateDummyLUVWSH(uvw);
                         writer.Write(convertedColor.GetValue());
-                    }                   
+                    }
                 }
-                
+
                 if (!useDummyData)
                 {
                     MaxLs[lightmapLayer] = MaxL;
                     //store offset of final cluster or instance bitmap write location
-                    if(lightmapLayer == 0)
+                    if (lightmapLayer == 0)
                     {
                         if (bitmap.isInstance)
                             instanceBitmapOffsets.Add(bitmap.Index, offset);
                         else
                             clusterBitmapOffsets.Add(bitmap.Index, offset);
                     }
-                        
-                }                    
-            }                            
+
+                }
+            }
         }
 
         private bool NestBitmaps()
@@ -162,7 +169,7 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 int minSize = container.Size.Min();
                 int maxSize = container.Size.Max();
-                if(minSize < SizeClasses[0] || maxSize > SizeClasses.Last() ||
+                if (minSize < SizeClasses[0] || maxSize > SizeClasses.Last() ||
                     maxSize > 2 * minSize)
                 {
                     new TagToolError(CommandError.CustomMessage, $"Bitmap of dimensions {container.Size[0]},{container.Size[1]} not supported yet by packer! Aborting!");
@@ -173,8 +180,8 @@ namespace TagTool.Commands.Porting.Gen2
             //overall goal size for the lightmap is 2x the dimension of the largest child bitmap, but may end up larger
             int maxChildSize = bitmapContainers.Select(b => b.MaxSize()).Max();
 
-            for(var i = 0; i < SizeClasses.Length; i++)
-            {              
+            for (var i = 0; i < SizeClasses.Length; i++)
+            {
                 List<BitmapContainer> currentMinSize = bitmapContainers.Where(b => b.MinSize() == SizeClasses[i]).ToList();
                 //if there are more than four of the current size, we need to upgrade a size further for the total lightmap
                 if (SizeClasses[i] >= maxChildSize && currentMinSize.Count <= 4)
@@ -191,13 +198,13 @@ namespace TagTool.Commands.Porting.Gen2
 
                 NestRectangleBitmaps(squares, longBois, SizeClasses[i + 1]);
                 NestRectangleBitmaps(squares, wideBois, SizeClasses[i + 1]);
-                while(squares.Count > 3)
+                while (squares.Count > 3)
                     bitmapContainers.Add(new BitmapContainer
                     {
                         Size = new int[] { SizeClasses[i + 1], SizeClasses[i + 1] },
                         ChildBitmaps = new List<BitmapContainer> { squares.Pop(), squares.Pop(), squares.Pop(), squares.Pop() }
                     });
-                if(squares.Count > 0)
+                if (squares.Count > 0)
                     bitmapContainers.Add(new BitmapContainer
                     {
                         Size = new int[] { SizeClasses[i + 1], SizeClasses[i + 1] },
@@ -225,7 +232,7 @@ namespace TagTool.Commands.Porting.Gen2
                         Size = new int[] { sizeClass, sizeClass },
                         ChildBitmaps = new List<BitmapContainer> { rectangles.Pop(), squares.Pop(), squares.Pop() }
                     });
-                else if(squares.Count > 0)
+                else if (squares.Count > 0)
                     bitmapContainers.Add(new BitmapContainer
                     {
                         Size = new int[] { sizeClass, sizeClass },
@@ -240,13 +247,11 @@ namespace TagTool.Commands.Porting.Gen2
             }
         }
 
-        private ArgbColor CreateDummySHData(RealRgbColor color)
+        private ArgbColor CreateDummyLUVWSH(RealRgbColor uvw)
         {
-            double Red = (((color.Red + 1) / 2) + 0.5) - color.Red;
-            double Green = (((color.Green + 1) / 2) + 0.5) - color.Green;
-            double Blue = (((color.Blue + 1) / 2) + 0.5) - color.Blue;
-            return new ArgbColor(byte.MaxValue, (byte)(Red * 255), (byte)(Green * 255), (byte)(Blue * 255));
+            return new ArgbColor(byte.MaxValue, (byte)(uvw.Red * 255), (byte)(uvw.Green * 255), (byte)(uvw.Blue * 255));
         }
+
         public class BitmapContainer
         {
             public int[] Size = new int[2];
@@ -265,7 +270,8 @@ namespace TagTool.Commands.Porting.Gen2
             public int MinSize() { return Size.Min(); }
             public int Index;
             public bool isInstance = false;
-            public List<RealRgbColor[]> coefficients = new List<RealRgbColor[]>();
+            public List<RealRgbColor[]> coefficientsUVW = new List<RealRgbColor[]>();
+            public List<float[]> coefficientsL = new List<float[]>();
             public List<BitmapContainer> ChildBitmaps = new List<BitmapContainer>();
 
             public enum BitmapShape

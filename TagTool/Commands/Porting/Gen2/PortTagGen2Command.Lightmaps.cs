@@ -46,7 +46,7 @@ namespace TagTool.Commands.Porting.Gen2
                     sbsp.Geometry = lbsp.Geometry;
                     Cache.Serialize(cacheStream, newScenario.StructureBsps[i].StructureBsp, sbsp);
                 }
-                
+
                 lbsp.BspIndex = (short)i;
                 var lbspTag = Cache.TagCache.AllocateTag<ScenarioLightmapBspData>(lightmapDataName);
                 Cache.Serialize(cacheStream, lbspTag, lbsp);
@@ -63,7 +63,7 @@ namespace TagTool.Commands.Porting.Gen2
             foreach (var cluster in sbsp.Clusters)
                 clusterMeshIndices.Add(cluster.MeshIndex);
             var sbspResource = Cache.ResourceCache.GetStructureBspTagResources(sbsp.CollisionBspResource);
-            foreach(var instance in sbsp.InstancedGeometryInstances)
+            foreach (var instance in sbsp.InstancedGeometryInstances)
                 instanceMeshIndices.Add(sbspResource.InstancedGeometry[instance.DefinitionIndex].MeshIndex);
 
             RenderGeometryApiResourceDefinition resourceDef = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(sbsp.Geometry.Resource);
@@ -78,26 +78,26 @@ namespace TagTool.Commands.Porting.Gen2
             var lgroup = gen2Lightmap.LightmapGroups[0];
 
             //set up geometry carried over from sbsp
-            lbsp.Geometry = sbsp.Geometry;          
+            lbsp.Geometry = sbsp.Geometry;
 
             var gen2bitmap = Gen2Cache.Deserialize<TagTool.Tags.Definitions.Gen2.Bitmap>(gen2CacheStream, lgroup.BitmapGroup);
 
-            Bitmap linearSHBitmap = new Bitmap() { Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource, Images = new List<Bitmap.Image>(), HardwareTextures = new List<TagResourceReference>()};
+            Bitmap linearSHBitmap = new Bitmap() { Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource, Images = new List<Bitmap.Image>(), HardwareTextures = new List<TagResourceReference>() };
             Bitmap intensityBitmap = new Bitmap() { Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource, Images = new List<Bitmap.Image>(), HardwareTextures = new List<TagResourceReference>() };
             LightmapPacker packer = new LightmapPacker();
 
             //clusters
             for (var clusterindex = 0; clusterindex < lgroup.Clusters.Count; clusterindex++)
             {
-                var clusterrenderdata = lgroup.ClusterRenderInfo[clusterindex];              
-                if(clusterrenderdata.BitmapIndex != -1)
+                var clusterrenderdata = lgroup.ClusterRenderInfo[clusterindex];
+                if (clusterrenderdata.BitmapIndex != -1)
                 {
                     Gen2BSPResourceMesh clustermesh = bspMeshes[bsp_index][clusterMeshIndices[clusterindex]];
                     var image = gen2bitmap.Bitmaps[clusterrenderdata.BitmapIndex];
                     var palette = lgroup.SectionPalette[clusterrenderdata.PaletteIndex];
-                    List<RealRgbColor[]> coefficients = BuildCoefficients(clustermesh, image, palette);
+                    var coefficientsTuple = BuildCoefficients(clustermesh, image, palette);
 
-                    packer.AddBitmap(image.Width, image.Height, clusterindex, false, coefficients);
+                    packer.AddBitmap(image.Width, image.Height, clusterindex, false, coefficientsTuple.Item1, coefficientsTuple.Item2);
 
                     lbsp.ClusterStaticPerVertexLightingBuffers.Add(new ScenarioLightmapBspData.ClusterStaticPerVertexLighting
                     {
@@ -113,7 +113,7 @@ namespace TagTool.Commands.Porting.Gen2
                         StaticPerVertexLightingIndex = -1
                     });
                 }
-            }           
+            }
 
             //instance bucket data
             int[] bucketVertexOffsets = new int[lgroup.GeometryBuckets.Count];
@@ -154,9 +154,9 @@ namespace TagTool.Commands.Porting.Gen2
                                 var vertStream = new VertexElementStream(stream);
                                 for (var i = 0; i < vertexCount; i++)
                                 {
-                                    stream.Position = 8 + bucket.GeometryBlockInfo.SectionDataSize + 
+                                    stream.Position = 8 + bucket.GeometryBlockInfo.SectionDataSize +
                                         resourceinstance.ResourceDataOffset + ((resourceinstance.ResourceDataSize / vertexCount) * i);
-                                    
+
                                     switch (resourceinstance.SecondaryLocator)
                                     {
                                         case 0: //incident direction
@@ -179,7 +179,7 @@ namespace TagTool.Commands.Porting.Gen2
             for (var instanceindex = 0; instanceindex < lgroup.InstanceRenderInfo.Count; instanceindex++)
             {
                 Gen2BSPResourceMesh instancemesh = bspMeshes[bsp_index][instanceMeshIndices[instanceindex]];
-                if(instancemesh.RawVertices == null || instancemesh.RawVertices.Count == 0)
+                if (instancemesh.RawVertices == null || instancemesh.RawVertices.Count == 0)
                 {
                     lbsp.InstancedGeometry.Add(new ScenarioLightmapBspData.InstancedGeometryLighting
                     {
@@ -196,8 +196,8 @@ namespace TagTool.Commands.Porting.Gen2
                     var palette = lgroup.SectionPalette[lgroup.InstanceRenderInfo[instanceindex].PaletteIndex];
                     var image = gen2bitmap.Bitmaps[lgroup.InstanceRenderInfo[instanceindex].BitmapIndex];
 
-                    List<RealRgbColor[]> coefficients = BuildCoefficients(instancemesh, image, palette);
-                    packer.AddBitmap(image.Width, image.Height, instanceindex, true, coefficients);
+                    var coefficients = BuildCoefficients(instancemesh, image, palette);
+                    packer.AddBitmap(image.Width, image.Height, instanceindex, true, coefficients.Item1, coefficients.Item2);
 
                     lbsp.InstancedGeometry.Add(new ScenarioLightmapBspData.InstancedGeometryLighting
                     {
@@ -350,7 +350,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     VertexBufferIndex = (short)bufferIndex
                 });
-                sbsp.InstancedGeometryInstances[instanceindex].LightmapTexcoordBlockIndex = 
+                sbsp.InstancedGeometryInstances[instanceindex].LightmapTexcoordBlockIndex =
                     (short)(lbsp.Geometry.InstancedGeometryPerPixelLighting.Count - 1);
             }
 
@@ -380,8 +380,8 @@ namespace TagTool.Commands.Porting.Gen2
             return lbsp;
         }
 
-        public List<RealRgbColor[]> BuildCoefficients(Gen2BSPResourceMesh mesh, TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock image, StructureLightmapPaletteColorBlock palette)
-        {            
+        public Tuple<List<RealRgbColor[]>, List<float[]>> BuildCoefficients(Gen2BSPResourceMesh mesh, TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock image, StructureLightmapPaletteColorBlock palette)
+        {
             byte[] rawBitmapData = Gen2Cache.GetCacheRawData((uint)image.Lod0Pointer, (int)image.Lod0Size);
             //h2v raw bitmap data is gz compressed
             if (Gen2Cache.Version == CacheVersion.Halo2Vista)
@@ -399,11 +399,13 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 rawBitmapData = TagTool.Commands.Gen2.Bitmaps.BitmapConverterGen2.Swizzle(rawBitmapData, image.Width, image.Height, 1, 1, true);
             }
-            
+
             var coefficients = new List<RealRgbColor[]>();
+            var luminances = new List<float[]>();
             for (int i = 0; i < 4; i++)
             {
                 coefficients.Add(new RealRgbColor[image.Width * image.Height]);
+                luminances.Add(new float[image.Width * image.Height]);
             }
 
 
@@ -460,30 +462,34 @@ namespace TagTool.Commands.Porting.Gen2
                         var temp_R = dataReader.ReadByte();
                         var temp_A = dataReader.ReadByte();
                         RealRgbColor colorVista = ARGB_to_Real_RGB(new ArgbColor(temp_A, temp_R, temp_G, temp_B));
-                        EvaluateDirectionalLightCustom(2, colorVista, incident_direction, R, G, B);
+                        SphericalHarmonics.AmbientSHCoefficientsFromAmbientColor(colorVista, R, G, B);
                         break;
                     case TagTool.Tags.Definitions.Gen2.Bitmap.BitmapDataBlock.FormatValue.P8:
                         RealRgbColor color = ARGB_to_Real_RGB(palette.PaletteColors[rawBitmapData[c]]);
-                        EvaluateDirectionalLightCustom(2, color, incident_direction, R, G, B);
+                        SphericalHarmonics.AmbientSHCoefficientsFromAmbientColor(color, R, G, B);
                         break;
                     default:
                         new TagToolError(CommandError.OperationFailed, "Unknown lightmap bitmap format! Aborting!");
                         return null;
                 }
-                var sh = new SphericalHarmonics.SH2Probe(R, G, B);
+
                 for (int i = 0; i < 4; i++)
                 {
-                    coefficients[i][c].Red = sh.R[i];
-                    coefficients[i][c].Green = sh.G[i];
-                    coefficients[i][c].Blue = sh.B[i];
+                    RealRgbColor uvw = new RealRgbColor();
+                    float luminance = 0.0f;
+                    SphericalHarmonics.ConvertToLuvwSpace(new RealRgbColor(R[i], G[i], B[i]), ref uvw, ref luminance);
+
+                    coefficients[i][c].Red = uvw.Red;
+                    coefficients[i][c].Green = uvw.Green;
+                    coefficients[i][c].Blue = uvw.Blue;
+                    luminances[i][c] = luminance;
                 }
             }
-            return coefficients;
+            return new Tuple<List<RealRgbColor[]>, List<float[]>>(coefficients, luminances);
         }
 
         public void ImportIntoLbsp(CachedLightmap result, Bitmap linearSHBitmap, Bitmap intensityBitmap, GameCacheHaloOnlineBase cache, ScenarioLightmapBspData Lbsp, int imageindex)
         {
-            /*
             //compress each of the 8 layers and compile them together
             MemoryStream outStream = new MemoryStream();
             MemoryStream inStream = new MemoryStream(result.LinearSH);
@@ -496,20 +502,18 @@ namespace TagTool.Commands.Porting.Gen2
                 buffer, result.Width, result.Height);
                 outStream.Write(dxt5Compressor.CompressTexture(), 0, result.Width * result.Height);
             }
-            */
 
             var linearSH = new BaseBitmap();
             linearSH.Type = BitmapType.Texture3D;
-            linearSH.Data = result.LinearSH;
+            linearSH.Data = outStream.ToArray();
             linearSH.Width = result.Width;
             linearSH.Height = result.Height;
             linearSH.Depth = 8;
-            linearSH.UpdateFormat(BitmapFormat.A8R8G8B8);
+            linearSH.UpdateFormat(BitmapFormat.Dxt5);
 
             //var outPath = "lightmaptest_image_" + imageindex;
             //StoreDDS(outPath, linearSH.Width, linearSH.Height, linearSH.Depth, linearSH.Type, linearSH.Format, result.LinearSH);
-
-            /*
+            
             //compress each of the 2 layers and compile them together
             MemoryStream outStreamIntensity = new MemoryStream();
             MemoryStream inStreamIntensity = new MemoryStream(result.Intensity);
@@ -521,23 +525,19 @@ namespace TagTool.Commands.Porting.Gen2
                 SquishLib.SquishFlags.kColourIterativeClusterFit | SquishLib.SquishFlags.kSourceBgra,
                 buffer, result.Width, result.Height);
                 outStreamIntensity.Write(dxt5Compressor.CompressTexture(), 0, result.Width * result.Height);
-            }
-            */
+            }          
 
             var intensity = new BaseBitmap();
             intensity.Type = BitmapType.Texture3D;
-            intensity.Data = result.Intensity;
+            intensity.Data = outStreamIntensity.ToArray();
             intensity.Width = result.Width;
             intensity.Height = result.Height;
             intensity.Depth = 2;
-            intensity.UpdateFormat(BitmapFormat.A8R8G8B8);
+            intensity.UpdateFormat(BitmapFormat.Dxt5);
 
             Lbsp.CoefficientsMapScale = new TagTool.Common.LuminanceScale[9];
             for (int i = 0; i < 5; i++)
                 Lbsp.CoefficientsMapScale[i] = new TagTool.Common.LuminanceScale() { Scale = result.MaxLs[i] };
-
-            //conversion comes out a bit dark, make it brighter
-            Lbsp.CoefficientsMapScale[0].Scale = Lbsp.CoefficientsMapScale[0].Scale * 4.0f;
 
             ImportBitmap(cache, linearSHBitmap, imageindex, linearSH);
             ImportBitmap(cache, intensityBitmap, imageindex, intensity);
@@ -599,7 +599,7 @@ namespace TagTool.Commands.Porting.Gen2
                 var probe = new SphericalHarmonics.SH2Probe(R, G, B);
                 vertexStream.WriteStaticPerVertexData(VmfConversion.CompressStaticPerVertex(vert.Color, probe,
                     Cache.Version, Cache.Platform));
-            }              
+            }
 
             StreamUtil.Align(vertexBufferStream, 4);
 
@@ -633,7 +633,7 @@ namespace TagTool.Commands.Porting.Gen2
             var vertexStream = VertexStreamFactory.Create(Cache.Version, Cache.Platform, vertexBufferStream);
             foreach (var vert in vertices)
                 vertexStream.WriteStaticPerPixelData(new StaticPerPixelData
-                {                  
+                {
                     Texcoord = new RealVector2d
                     {
                         I = vert.Texcoord.I,
@@ -672,7 +672,7 @@ namespace TagTool.Commands.Porting.Gen2
             float s = (float)Math.PI;
 
             var shBasis = new float[order * order];
-            SphericalHarmonics.EvaluateDirection(direction, order, shBasis);
+            SphericalHarmonics.EvaluateSHBasis(direction, order, shBasis);
             SphericalHarmonics.Scale(shRed, order, shBasis, intensity.Red * s);
             SphericalHarmonics.Scale(shGreen, order, shBasis, intensity.Green * s);
             SphericalHarmonics.Scale(shBlue, order, shBasis, intensity.Blue * s);

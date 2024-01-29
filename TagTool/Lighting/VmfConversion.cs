@@ -123,7 +123,7 @@ namespace TagTool.Lighting
             halfsh.DominantLightIntensity[0] = Half.GetBits((Half)intensity.Red);
             halfsh.DominantLightIntensity[1] = Half.GetBits((Half)intensity.Green);
             halfsh.DominantLightIntensity[2] = Half.GetBits((Half)intensity.Blue);
-            
+
             for (int i = 0; i < 9; i++)
             {
                 halfsh.SHRed[i] = Half.GetBits((Half)sh.R[i]);
@@ -149,7 +149,7 @@ namespace TagTool.Lighting
             VmfLight.EvalulateVmf(DecompressedNormalizedBandwidth(vmf.Indirect.Bandwidth), iczh);
 
             float[] sh_basis = new float[9];
-            SphericalHarmonics.EvaluateDirection(vmf.Direct.Direction, 3, sh_basis);
+            SphericalHarmonics.EvaluateSHBasis(vmf.Direct.Direction, 3, sh_basis);
 
             var result = new SphericalHarmonics.SH3Probe();
             result.R[0] = (sh_basis[0] * dczh[0] * vmf.Direct.Color.Red) + (sh_basis[0] * iczh[0] * vmf.Indirect.Color.Red);
