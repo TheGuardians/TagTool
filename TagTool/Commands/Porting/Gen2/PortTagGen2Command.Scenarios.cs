@@ -123,8 +123,11 @@ namespace TagTool.Commands.Porting.Gen2
                     newScenario.CampaignId = -1;
                     break;
                 case ScenarioMapType.SinglePlayer:
-                    newScenario.MapId = gen2Tag.LevelData[0].CampaignLevelData[0].MapId;
-                    newScenario.CampaignId = gen2Tag.LevelData[0].CampaignLevelData[0].CampaignId;
+                    if (gen2Tag.LevelData[0].CampaignLevelData.Count > 0)
+                    {
+                        newScenario.MapId = gen2Tag.LevelData[0].CampaignLevelData[0].MapId;
+                        newScenario.CampaignId = gen2Tag.LevelData[0].CampaignLevelData[0].CampaignId;
+                    }
                     break;
             }
 
