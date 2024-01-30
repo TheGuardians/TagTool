@@ -1,4 +1,4 @@
-﻿using HaloShaderGenerator.Shader;
+using HaloShaderGenerator.Shader;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -189,6 +189,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case "tex_bump":
                 case "tex_bump_active_camo":
                 case "tex_bump_shiny":
+                case "tex_bump_no_specular":
                     {
                         new_shader_type = "rmsh";
 
@@ -454,6 +455,38 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order.Add("base_map");
                         h2_bitmap_order.Add("detail_map");
                         h2_bitmap_order.Add("environment_map");
+                        break;
+                    }
+                case "tex_bump_env_illum":
+                case "tex_bump_env_illum_combined":
+                    {
+                        new_shader_type = "rmsh";
+
+                        h2_vertex_constants.Add("bump_map");
+                        h2_vertex_constants.Add("base_map");
+                        h2_vertex_constants.Add("detail_map");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("self_illum_map");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+
+                        h2_pixel_constants.Add("env_tint_color"); // env_tint_color
+                        h2_pixel_constants.Add(""); // env_glancing_tint_color
+                        h2_pixel_constants.Add("environment_map_specular_contribution");    // env_brightness
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add("normal_specular_tint"); // specular_color
+                        h2_pixel_constants.Add("glancing_specular_tint"); // glancing_specular_color
+                        h2_pixel_constants.Add("self_illum_color");
+
+                        h2_value_properties.Add("self_illum_intensity"); // emissive_power
+
+                        h2_bitmap_order.Add("bump_map");
+                        h2_bitmap_order.Add(""); // og: active_camo_bump_map
+                        h2_bitmap_order.Add("base_map");
+                        h2_bitmap_order.Add("detail_map");
+                        h2_bitmap_order.Add("environment_map");
+                        h2_bitmap_order.Add("self_illum_map");
                         break;
                     }
                 case "tex_bump_env_illum_3_channel":
