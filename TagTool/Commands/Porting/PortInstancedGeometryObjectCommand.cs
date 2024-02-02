@@ -207,7 +207,15 @@ namespace TagTool.Commands.Porting
                             index = FindBlockIndex(blamSbsp.InstancedGeometryInstances, identifier);
 
                         if (index == -1)
-                            return new TagToolError(CommandError.OperationFailed, $"Instance not found by identifier {identifier}!");
+                        {
+                            new TagToolError(CommandError.OperationFailed, $"Instance not found by identifier {identifier}!");
+                            continue;
+                        }
+                        if (desiredInstances.ContainsKey(index))
+                        {
+                            new TagToolError(CommandError.OperationFailed, $"Instance {identifier} already selected!");
+                            continue;
+                        }
 
                         desiredInstances.Add(index, tagname);
                         forgeItems.Add(new ForgeGlobalsDefinition.PaletteItem()

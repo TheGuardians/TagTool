@@ -20,6 +20,7 @@ using System.Text.RegularExpressions;
 using TagTool.IO;
 using System.Collections.Concurrent;
 using TagTool.Geometry.BspCollisionGeometry;
+using TagTool.Commands.ScenarioStructureBSPs;
 
 namespace TagTool.Commands.Porting
 {
@@ -1149,15 +1150,30 @@ namespace TagTool.Commands.Porting
 
                 case RenderModel mode:
                     blamDefinition = ConvertGen3RenderModel(edTag, blamTag, mode);
-					break;
+                    break;
 
-				case Scenario scnr:
-					blamDefinition = ConvertScenario(cacheStream, blamCacheStream, resourceStreams, scnr, blamTag.Name);
-					break;
+                case Scenario scnr:
+                    {
+                        blamDefinition = ConvertScenario(cacheStream, blamCacheStream, resourceStreams, scnr, blamTag.Name);
+                        if (BlamCache.Platform == CachePlatform.MCC)
+                        {
+                            foreach (var block in scnr.StructureBsps)
+                            {
+                                if (block.StructureBsp == null)
+                                    continue;
 
-				case ScenarioLightmap sLdT:
+                                CachedTag sbspTag = block.StructureBsp;
+                                var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, sbspTag);
+                                new GenerateStructureSurfacesCommand(CacheContext, sbspTag, sbsp, cacheStream).Execute(new List<string> { });
+                                CacheContext.Serialize(cacheStream, sbspTag, sbsp);
+                            }
+                        }
+                    }
+                    break;
+
+                case ScenarioLightmap sLdT:
                     if(BlamCache.Version < CacheVersion.HaloReach)
-					    blamDefinition = ConvertScenarioLightmap(cacheStream, blamCacheStream, resourceStreams, blamTag.Name, sLdT);
+                        blamDefinition = ConvertScenarioLightmap(cacheStream, blamCacheStream, resourceStreams, blamTag.Name, sLdT);
                     //fixup lightmap bsp references
                     if (BlamCache.Version >= CacheVersion.HaloReach)
                     {
@@ -1178,9 +1194,9 @@ namespace TagTool.Commands.Porting
                         blamDefinition = ConvertScenarioLightmapBspData(Lbsp);
 					break;
 
-				case ScenarioStructureBsp sbsp:
+                case ScenarioStructureBsp sbsp:
                     blamDefinition = ConvertScenarioStructureBsp(sbsp, edTag, resourceStreams);
-					break;
+                    break;
 
                 case Sound sound:
                     //support sound conversion for HO generation caches

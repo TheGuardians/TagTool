@@ -7,9 +7,12 @@ using TagTool.Tags;
 using TagTool.Audio;
 using TagTool.Tags.Definitions;
 using Gen2Sound = TagTool.Tags.Definitions.Gen2.Sound;
+using Gen2LoopingSound = TagTool.Tags.Definitions.Gen2.SoundLooping;
+using Gen2SoundEnvironment = TagTool.Tags.Definitions.Gen2.SoundEnvironment;
 using Gen2SoundCacheFileGestalt = TagTool.Tags.Definitions.Gen2.SoundCacheFileGestalt;
 using System;
 using System.Linq;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -34,6 +37,40 @@ namespace TagTool.Commands.Porting.Gen2
                     SharedSoundGestalt = cache.Deserialize<Gen2SoundCacheFileGestalt>(stream, blamTag);
             }
 
+        }
+        public SoundEnvironment ConvertSoundEnvironment(Gen2SoundEnvironment gen2envi)
+        {
+            SoundEnvironment newEnvi = new SoundEnvironment();
+            AutoConverter.TranslateTagStructure(gen2envi, newEnvi);
+            return newEnvi;
+        }
+
+        public SoundLooping ConvertLoopingSound(CachedTagGen2 gen2Tag, Gen2LoopingSound gen2loop, Stream cacheStream)
+        {
+            SoundLooping newLoop = new SoundLooping();
+            AutoConverter.TranslateTagStructure(gen2loop, newLoop);
+            CachedTag sound = null;
+            if (newLoop.Tracks.Count > 0)
+            {
+                 sound = newLoop.Tracks[0].Loop;
+            }
+            else if(newLoop.DetailSounds.Count > 0)
+            {
+                sound = newLoop.DetailSounds[0].Sound;
+            }
+
+            if(sound != null)
+            {
+                Sound soundDef = Cache.Deserialize<Sound>(cacheStream, sound);
+                newLoop.SoundClass = (SoundLooping.SoundClassValue)soundDef.SoundClass.HaloOnline;
+            }
+            else
+            {
+                new TagToolError(CommandError.None, $"Looping sound {gen2Tag.Name} unable to determine sound class from child sound! Returning null!");
+                return null;
+            }
+            
+            return newLoop;
         }
 
         public Sound ConvertSound(CachedTagGen2 gen2Tag, Gen2Sound gen2Sound, Stream gen2Stream, string gen2Name)
@@ -205,7 +242,7 @@ namespace TagTool.Commands.Porting.Gen2
                         var permutationChunkIndex = gen2Permutation.FirstChunk + k;
                         var chunk = ugh.Chunks[permutationChunkIndex];
                         var chunkSize = chunk.GetSize();
-                        byte[] chunkData = (Cache.ResourceCache as ResourceCacheGen2).GetResourceDataFromHandle(chunk.ResourceReference, chunkSize);
+                        byte[] chunkData = Gen2Cache.GetCacheRawData((uint)chunk.ResourceReference.Gen2ResourceAddress, (int)chunkSize); 
                         Array.Copy(chunkData, 0, permutationData, currentOffset, chunkSize);
                         currentOffset += chunkSize;
                     }

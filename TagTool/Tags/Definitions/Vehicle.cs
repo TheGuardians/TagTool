@@ -776,9 +776,9 @@ namespace TagTool.Tags.Definitions
             public AntiGravityPointDamping Damping;
 
             public float AntigravStrength;
+            public float AntigravOffset;
             public float AntigravHeight;
             public float AntigravDampFactor;
-            public float AntigravExtensionDamping;
             public float AntigravNormalK1;
             public float AntigravNormalK0;
             public float Radius;

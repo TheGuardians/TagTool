@@ -553,12 +553,12 @@ namespace TagTool.Commands.Porting
                             var lightingElement = Lbsp.Geometry.InstancedGeometryPerPixelLighting[instanceIndex];
                             if (lightingElement.VertexBufferIndex != -1)
                             {
-                                sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = (short)newPerPixelLighting.Count;
+                                sbsp.InstancedGeometryInstances[instanceIndex].LightmapTexcoordBlockIndex = (short)newPerPixelLighting.Count;
                                 newPerPixelLighting.Add(lightingElement);
                             }
                             else
                             {
-                                sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = -1;
+                                sbsp.InstancedGeometryInstances[instanceIndex].LightmapTexcoordBlockIndex = -1;
                             }
                         }
                         Lbsp.Geometry.InstancedGeometryPerPixelLighting = newPerPixelLighting;

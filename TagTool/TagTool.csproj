@@ -398,6 +398,9 @@
     <Compile Include="Commands\Bitmaps\ReencodeBitmapCommand.cs" />
     <Compile Include="Commands\Forge\AddForgeItemCommand.cs" />
     <Compile Include="Commands\Forge\AddForgeCategoryCommand.cs" />
+    <Compile Include="Commands\Gen2\Bitmaps\BitmapContextFactory.cs" />
+    <Compile Include="Commands\Gen2\Bitmaps\BitmapConverterGen2.cs" />
+    <Compile Include="Commands\Gen2\Bitmaps\ExtractBitmapCommand.cs" />
     <Compile Include="Commands\Gen4\Models\ModelContextFactory.cs" />
     <Compile Include="Commands\Gen4\Models\ExportJMSCommand.cs" />
     <Compile Include="Commands\Gen4\ScenarioStructureBSPs\BSPContextFactory.cs" />
@@ -407,6 +410,8 @@
     <Compile Include="Commands\ModelAnimationGraphs\SetInheritanceCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\SetAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExportJMSCommand.cs" />
+    <Compile Include="Commands\Porting\Gen2\LightmapPacker.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.NewHudDefinition.cs" />
     <Compile Include="Commands\Porting\IgnoreBlamTagCommand.cs" />
     <Compile Include="Commands\Porting\Gen4\PortTagGen4Command.Models.cs" />
     <Compile Include="Commands\Porting\StructureAutoConverter.cs" />
@@ -460,6 +465,7 @@
     <Compile Include="Havok\PerMeshMoppGenerator.cs" />
     <Compile Include="IO\FixedMemoryStream.cs" />
     <Compile Include="Scripting\ScriptDecompiler.cs" />
+    <Compile Include="Shaders\ShaderGenerator\PopulateRenderMethodConstants.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RealVector4d.cs" />

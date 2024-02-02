@@ -169,6 +169,9 @@ namespace TagTool.Commands.Editing
                     case "jmad":
                         CommandsGen2.ModelAnimationGraphs.AnimationContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen2.ModelAnimationGraph)definition);
                         break;
+                    case "bitm":
+                        CommandsGen2.Bitmaps.BitmapContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen2.Bitmap)definition);
+                        break;
                 }
             }
             if (CacheVersionDetection.IsInGen(CacheGeneration.Fourth, cache.Version))

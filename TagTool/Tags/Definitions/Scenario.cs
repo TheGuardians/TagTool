@@ -532,17 +532,9 @@ namespace TagTool.Tags.Definitions
             public CachedTag LocalLighting;
             public ScenarioStructureSizeEnum SizeClass;
 
-            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float HackyAmbientMinLuminance;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
             public float DirectDraftAmbientMinLuminance;
-
             public float StructureVertexSink;
-
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown4;
 
             public ushort Flags;
             public short DefaultSkyIndex;
@@ -550,7 +542,7 @@ namespace TagTool.Tags.Definitions
             public ushort InstanceFadeEndPixels;
             public CachedTag Cubemap;
             public CachedTag Wind;
-            public uint ClosnedBspFlags;
+            public uint ClonedBspFlags;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public ScenarioLightmapSettingStruct LightmapSettings;
@@ -577,6 +569,28 @@ namespace TagTool.Tags.Definitions
                 _10Meg,
                 _20Meg,
                 _60Meg
+            }
+
+            [Flags]
+            public enum StructureBspFlags : ushort
+            {
+                None = 0,
+                DefaultSkyEnabled = 1 << 0,
+                DoNotCompressLightmaps = 1 << 1,
+                GenerateFakeSmallLightmaps = 1 << 2,
+                RayTraceAdjacentBspsOnSkyHits = 1 << 3,
+                LightmapsUseConservativeSubcharts = 1 << 4,
+                LightmapsReduceStretchHack = 1 << 5,
+                LightmapsuseExtendedGathering = 1 << 6,
+                LightmapsFinalGatherIgnoresBackfacingHits = 1 << 7,
+                LightmapsUseMoreSamplesForLargeSkyLights = 1 << 8,
+                LightmapsUseMorePreciseExtendedGathering = 1 << 9,
+                NoAiAttachment = 1 << 10,
+                NotMultiplayerPlayableSpace = 1 << 11,
+                LightmapsEnableImportanceScaling = 1 << 12,
+                Bit13 = 1 << 13,
+                Bit14 = 1 << 14,
+                Bit15 = 1 << 15,
             }
 
             [TagStructure(Size = 0x2C)]
@@ -4417,36 +4431,9 @@ namespace TagTool.Tags.Definitions
 
             public float GameObjectResetHeight;
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown2;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown4;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown5;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown6;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown7;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown8;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown9;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown10;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown11;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown12;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown13;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown14;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-            public uint Unknown15;
+            [TagField(Length = 0x3C, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Padding;
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<DynamicSpawnOverload> DynamicSpawnOverloads;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
@@ -4456,12 +4443,29 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x10)]
             public class DynamicSpawnOverload : TagStructure
-			{
-                public short OverloadType;
-                public short Unknown;
+            {
+                public OverloadTypeValue OverloadType;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] Padding;
                 public float InnerRadius;
                 public float OuterRadius;
                 public float Weight;
+
+                public enum OverloadTypeValue : short
+                {
+                    Enemy,
+                    Friend,
+                    EnemyVehicle,
+                    FriendlyVehicle,
+                    EmptyVehicle,
+                    OddballInclusion,
+                    OddballExclusion,
+                    HillInclusion,
+                    HillExclusion,
+                    LastRaceFlag,
+                    DeadAlly,
+                    ControlledTerritory
+                }
             }
 
             [Flags]
@@ -4481,16 +4485,63 @@ namespace TagTool.Tags.Definitions
 
             [TagStructure(Size = 0x30)]
             public class SpawnZone : TagStructure
-			{
-                [TagField(Flags = Label)]
-                public StringId Name;
-                public RelevantTeamFlags RelevantTeams;
-                public uint RelevantGames;
-                public uint Flags;
+            {
+                /// <summary>
+                /// Lower and upper heights can be left at 0, in which case they use defaults.  Leaving relevant teams empty means all teams;
+                /// leaving all games empty means all games.
+                /// </summary>
+                public StaticSpawnZoneDataStructBlock Data;
                 public RealPoint3d Position;
-                public Bounds<float> HeightBounds;
-                public Bounds<float> RadiusBounds;
+                public float LowerHeight;
+                public float UpperHeight;
+                public float InnerRadius;
+                public float OuterRadius;
                 public float Weight;
+
+                [TagStructure(Size = 0x10)]
+                public class StaticSpawnZoneDataStructBlock : TagStructure
+                {
+                    public StringId Name;
+                    public RelevantTeamValue RelevantTeam;
+                    public RelevantGamesValue RelevantGames;
+                    public FlagsValue Flags;
+
+                    [Flags]
+                    public enum RelevantTeamValue : uint
+                    {
+                        RedAlpha = 1 << 0,
+                        BlueBravo = 1 << 1,
+                        YellowCharlie = 1 << 2,
+                        GreenDelta = 1 << 3,
+                        PurpleEcho = 1 << 4,
+                        OrangeFoxtrot = 1 << 5,
+                        BrownGolf = 1 << 6,
+                        PinkHotel = 1 << 7,
+                        Neutral = 1 << 8
+                    }
+
+                    [Flags]
+                    public enum RelevantGamesValue : uint
+                    {
+                        Slayer = 1 << 0,
+                        Oddball = 1 << 1,
+                        KingOfTheHill = 1 << 2,
+                        CaptureTheFlag = 1 << 3,
+                        Race = 1 << 4,
+                        Headhunter = 1 << 5,
+                        Juggernaut = 1 << 6,
+                        Territories = 1 << 7
+                    }
+
+                    [Flags]
+                    public enum FlagsValue : uint
+                    {
+                        DisabledIfFlagHome = 1 << 0,
+                        DisabledIfFlagAway = 1 << 1,
+                        DisabledIfBombHome = 1 << 2,
+                        DisabledIfBombAway = 1 << 3
+                    }
+                }
             }
         }
 

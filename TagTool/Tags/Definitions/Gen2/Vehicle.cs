@@ -363,7 +363,7 @@ namespace TagTool.Tags.Definitions.Gen2
             /// function must exceed this value (after mapping) to be active 0. means do nothing
             /// </summary>
             public float MinValue;
-            public MappingFunctionBlock DefaultFunction;
+            public TagFunction DefaultFunction;
             public StringId ScaleBy;
             
             [Flags]
@@ -1122,9 +1122,9 @@ namespace TagTool.Tags.Definitions.Gen2
                 public float Z0;
                 public float Z1;
                 [TagField(Length = 8)]
-                public Unknown3Datum[] Unknown3;
+                public MultiSphereShape[] Multispheres;
                 [TagField(Length = 4)]
-                public NumSpheresDatum[] NumSpheres;
+                public NumSpheresDatum[] ChildShapes;
                 
                 public enum ShapeTypeValue : short
                 {
@@ -1162,11 +1162,9 @@ namespace TagTool.Tags.Definitions.Gen2
                 }
                 
                 [TagStructure(Size = 0x10)]
-                public class Unknown3Datum : TagStructure
+                public class MultiSphereShape : TagStructure
                 {
-                    public RealVector3d Sphere;
-                    [TagField(Length = 0x4)]
-                    public byte[] Unknown3;
+                    public RealQuaternion Sphere;
                 }
                 
                 [TagStructure(Size = 0x10)]

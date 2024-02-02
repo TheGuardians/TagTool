@@ -8,6 +8,7 @@ using TagTool.Common;
 using TagTool.Commands.Common;
 using TagTool.Tags;
 using TagTool.Cache.HaloOnline;
+using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock.TextureConstant;
 
 namespace TagTool.Commands.Editing
 {
@@ -208,6 +209,11 @@ namespace TagTool.Commands.Editing
                     var pageable = (PageableResource)fieldValue;
                     pageable.GetLocation(out var location);
                     valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
+                }
+                else if (fieldType == typeof(PackedSamplerAddressMode))
+                {
+                    var packedAddressMode = (PackedSamplerAddressMode)fieldValue;
+                    valueString = $"{{ AddressU: {packedAddressMode.AddressU}, AddressV: {packedAddressMode.AddressV} }}";
                 }
                 else if (fieldInfo.FieldType.IsArray && fieldInfo.Attribute.Length != 0)
                 {
@@ -448,6 +454,17 @@ namespace TagTool.Commands.Editing
                 if (args.Count != 1 || !cache.TagCache.TryGetCachedTag(args[0], out var tagInstance))
                     return false;
                 output = tagInstance;
+            }
+            else if (type == typeof(PackedSamplerAddressMode))
+            {
+                if (args.Count != 2)
+                    return false;
+
+                if (!Enum.TryParse<SamplerAddressModeEnum>(args[0], out var parsedU)
+                    || !Enum.TryParse<SamplerAddressModeEnum>(args[1], out var parsedV))
+                    return false;
+
+                output = new PackedSamplerAddressMode() { AddressU = parsedU, AddressV = parsedV };
             }
             else if (cache is GameCacheHaloOnlineBase && type == typeof(PageableResource))
             {

@@ -6,12 +6,12 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Commands.Common;
-using TagTool.Commands.Porting;
 using TagTool.IO;
 using TagTool.Tags;
 using TagTool.Tags.Definitions.Gen2;
 using TagTool.BlamFile;
 using TagTool.Commands.Porting;
+using TagTool.Commands.ScenarioStructureBSPs;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -117,7 +117,8 @@ namespace TagTool.Commands.Porting.Gen2
                 "ligh",
                 "eqip",
                 "ctrl",
-                "bipd"
+                "bipd",
+                "nhdt",
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -190,9 +191,9 @@ namespace TagTool.Commands.Porting.Gen2
                 case Shader shader:
                     //preserve a copy of unconverted data
                     Shader oldshader = Gen2Cache.Deserialize<Shader>(gen2CacheStream, gen2Tag);
-                    definition = ConvertShader(shader, oldshader, cacheStream);
+                    definition = ConvertShader(shader, oldshader, gen2Tag.Name, cacheStream, gen2CacheStream);
                     break;
-                    //return Cache.TagCache.GetTag(@"shaders\invalid.shader");
+                //return Cache.TagCache.GetTag(@"shaders\invalid.shader");
                 case ScenarioStructureBsp sbsp:
                     definition = ConvertStructureBSP(sbsp);
                     break;
@@ -202,6 +203,18 @@ namespace TagTool.Commands.Porting.Gen2
                     break;
                 case Light light:
                     definition = ConvertLight(light);
+                    break;
+                case Sound sound:
+                    definition = ConvertSound((Cache.Gen2.CachedTagGen2)gen2Tag, sound, gen2CacheStream, gen2Tag.Name);
+                    break;
+                case SoundLooping loop:
+                    definition = ConvertLoopingSound((Cache.Gen2.CachedTagGen2)gen2Tag, loop, cacheStream);
+                    break;
+                case SoundEnvironment snde:
+                    definition = ConvertSoundEnvironment(snde);
+                    break;
+                case NewHudDefinition nhdt:
+                    definition = ConvertNewHudDefinition(nhdt);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
@@ -233,6 +246,18 @@ namespace TagTool.Commands.Porting.Gen2
                         cluster.InstancedGeometryPhysics.StructureBsp = destinationTag;
                     break;
                 case TagTool.Tags.Definitions.Scenario scnr:
+                    {
+                        foreach (var block in scnr.StructureBsps)
+                        {
+                            if (block.StructureBsp == null)
+                                continue;
+
+                            CachedTag sbspTag = block.StructureBsp;
+                            var sbsp = Cache.Deserialize<TagTool.Tags.Definitions.ScenarioStructureBsp>(cacheStream, sbspTag);
+                            new GenerateStructureSurfacesCommand(Cache, sbspTag, sbsp, cacheStream).Execute(new List<string> { });
+                            Cache.Serialize(cacheStream, sbspTag, sbsp);
+                        }
+                    }
                     GenerateMapFile(cacheStream, Cache, destinationTag, destinationTag.Name.Split('\\').ToList().Last(), "", "Bungie");
                     break;
                 default:

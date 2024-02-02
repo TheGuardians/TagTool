@@ -244,6 +244,8 @@ namespace TagTool.Commands.Porting.Gen2
             new[] // 0x06
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Short3N, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte3, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte3N, 0),
             },
             new[] // 0x07 model_rigid_boned3::uncompressed
             {
@@ -559,6 +561,71 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float4, 0),
                 ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0),
+            }
+        };
+
+        public static Dictionary<int, (string, VertexDeclarationUsage, VertexDeclarationType, int)[]> VistaVertexDictionary =
+            new Dictionary<int, (string, VertexDeclarationUsage, VertexDeclarationType, int)[]>
+        {
+            { 0x1, new[] // 0x01 model_rigid::uncompressed
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+            }
+            },
+            { 0x2, new[] // 0x02 model_skinned2::uncompressed
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte2, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte2N, 0),
+            }
+            },
+            { 0x4, new[] // 0x04 model_skinned4::uncompressed
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
+            }
+            },
+            { 0x6, new[] // 0x06 model_skinned4::uncompressed
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
+            }
+            },
+            {0x8, new[] // 0x08 model_skinned4::uncompressed
+            {
+                ("Position", VertexDeclarationUsage.Position, VertexDeclarationType.Float3, 0),
+                ("NodeIndices", VertexDeclarationUsage.BlendIndices, VertexDeclarationType.UByte4, 0),
+                ("NodeWeights", VertexDeclarationUsage.BlendWeight, VertexDeclarationType.UByte4N, 0),
+            }
+            },
+            {0x17, new[] // 0x17
+            {
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0)
+            }
+            },
+            {0x19, new[] // 0x19
+            {
+                ("Normal", VertexDeclarationUsage.Normal, VertexDeclarationType.Float3, 0),
+                ("Binormal", VertexDeclarationUsage.Binormal, VertexDeclarationType.Float3, 0),
+                ("Tangent", VertexDeclarationUsage.Tangent, VertexDeclarationType.Float3, 0),
+            }
+            },
+            {0x1D, new[] // 0x1D
+            {
+                ("TexCoord", VertexDeclarationUsage.TextureCoordinate, VertexDeclarationType.Float2, 0)
+            }
+            },
+            {0x2E, new[] // 0x2E
+            {
+                ("IncidentRadiosity", VertexDeclarationUsage.Color, VertexDeclarationType.HenD3N, 1),
+            }
+            },
+            {0x2F, new[] // 0x2F
+            {
+                ("IncidentRadiosity", VertexDeclarationUsage.Color, VertexDeclarationType.Float3, 1),
+            }
             }
         };
 
