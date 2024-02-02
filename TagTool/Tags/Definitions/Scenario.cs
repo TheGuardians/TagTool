@@ -4431,7 +4431,7 @@ namespace TagTool.Tags.Definitions
 
             public float GameObjectResetHeight;
 
-            [TagField(Length = 0x3C, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Length = 0x3C, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public byte[] Padding;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
