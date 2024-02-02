@@ -470,10 +470,9 @@ namespace TagTool.Tags.Definitions
                 public enum ConstraintFlags : int
                 {
                     None = 0,
-                    IsPhysicalChild = 1 << 0,
-                    IsRigid = 1 << 1,
-                    DisableEffects = 1 << 2,
-                    NotCreatedAutomatically = 1 << 3
+                    IsRigid = 1 << 0,
+                    DisableEffects = 1 << 1,
+                    NotCreatedAutomatically = 1 << 2
                 }
 
                 [TagStructure(Size = 0xC)]
@@ -1025,8 +1024,8 @@ namespace TagTool.Tags.Definitions
             public RealVector3d BUp;
             public RealPoint3d BPosition;
             public short EdgeIndex;
-            public short Unknown;
-            public uint Unknown2;
+            [TagField(Length = 6, Flags = TagFieldFlags.Padding)]
+            public byte[] Pad;
             public float LimitFriction;
             public Bounds<float> LimitAngleBounds;
         }
