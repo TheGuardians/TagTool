@@ -1163,8 +1163,8 @@ namespace TagTool.Commands.Porting
                                     continue;
 
                                 CachedTag sbspTag = block.StructureBsp;
-                                var sbsp = CacheContext.Deserialize<TagTool.Tags.Definitions.ScenarioStructureBsp>(cacheStream, sbspTag);
-                                new GenerateStructureSurfacesCommand(CacheContext, sbspTag, sbsp).Execute(new List<string> { });
+                                var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, sbspTag);
+                                new GenerateStructureSurfacesCommand(CacheContext, sbspTag, sbsp, cacheStream).Execute(new List<string> { });
                                 CacheContext.Serialize(cacheStream, sbspTag, sbsp);
                             }
                         }
