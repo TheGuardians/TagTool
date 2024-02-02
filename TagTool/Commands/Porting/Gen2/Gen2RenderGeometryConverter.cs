@@ -145,8 +145,10 @@ namespace TagTool.Commands.Porting.Gen2
                     default:
                         throw new NotSupportedException(geometrytype.ToString());
                 }
-
-                builder.BindIndexBuffer(mesh.StripIndices.Select(i => (ushort)i.Index), IndexBufferFormat.TriangleStrip);
+                var bufferFormat = IndexBufferFormat.TriangleStrip;
+                if (mesh.Parts.Any(p => p.FlagsOld.HasFlag(Part.PartFlagsOld.OverrideTriangleList)))
+                    bufferFormat = IndexBufferFormat.TriangleList;
+                builder.BindIndexBuffer(mesh.StripIndices.Select(i => (ushort)i.Index), bufferFormat);
 
                 builder.EndMesh();
             }
