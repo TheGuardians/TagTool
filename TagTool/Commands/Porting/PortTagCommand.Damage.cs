@@ -156,7 +156,7 @@ namespace TagTool.Commands.Porting
                     {
                         ResponseType = GlobalDamageInfoBlock.DamageSection.InstantResponse.ResponseTypeValue.RecievesAllDamage,
                         ConstraintDamageType = GlobalDamageInfoBlock.DamageSection.InstantResponse.ConstraintDamageTypeValue.None,
-                        Trigger = StringId.Invalid,
+                        ConstraintGroupName = StringId.Invalid,
                         Flags = instantResponse.Flags.ConvertLexical<GlobalDamageInfoBlock.DamageSection.InstantResponse.FlagsValue>(),
                         DamageThreshold = instantResponse.DamageThreshold,
                         BodyThresholdFlags = 0,

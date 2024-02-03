@@ -904,7 +904,7 @@ namespace TagTool.Tags.Definitions
                     public ResponseTypeValue ResponseType;
                     public ConstraintDamageTypeValue ConstraintDamageType;
                     
-                    public StringId Trigger;
+                    public StringId ConstraintGroupName;
 
                     public FlagsValue Flags;
                     public float DamageThreshold;
