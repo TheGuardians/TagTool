@@ -131,6 +131,7 @@ namespace TagTool.Commands.Gen2.Bitmaps
                 baseBitmap.Data = BitmapDecoder.SwapXYDxn(baseBitmap.Data, image.Width, image.Height);
                 // Prevent memory allocation crash
                 TagTool.Bitmaps.Utils.BitmapConverter.TrimLowestMipmaps(baseBitmap);
+                image.MipmapCount = (sbyte)(baseBitmap.MipMapCount - 1);
 
                 baseBitmap.UpdateFormat(BitmapFormat.Dxn);
                 baseBitmap.Flags |= BitmapFlags.Compressed;
