@@ -59,26 +59,34 @@ namespace TagTool.Commands.Bitmaps
                 #endif
                         var bitmap = Cache.Deserialize<Bitmap>(tagsStream, tag);
                         var ddsOutDir = outDir;
-
-                        if (bitmap.Images.Count > 1)
+                        
+                        if (bitmap != null)
                         {
-                            ddsOutDir = Path.Combine(outDir, tag.Index.ToString("X8"));
-                            Directory.CreateDirectory(ddsOutDir);
-                        }
-
-                        for (var i = 0; i < bitmap.Images.Count; i++)
-                        {
-                            var outPath = Path.Combine(ddsOutDir, ((bitmap.Images.Count > 1) ? i.ToString() : tag.Index.ToString("X8")) + ".dds");
-                            var ddsFile = BitmapExtractor.ExtractBitmap(Cache, bitmap, i, tag.Name);
-                            if (ddsFile == null)
-                                continue;
-                            using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
-                            using (var writer = new EndianWriter(outStream, EndianFormat.LittleEndian))
+                            if (bitmap.Images.Count > 1)
                             {
-                                ddsFile.Write(writer);
+                                ddsOutDir = Path.Combine(outDir, tag.Name.ToString());
+                                Directory.CreateDirectory(ddsOutDir);
                             }
+
+                            for (var i = 0; i < bitmap.Images.Count; i++)
+                            {
+                                var outPath = Path.Combine(ddsOutDir, ((bitmap.Images.Count > 1) ? i.ToString() : tag.Name.ToString()) + ".dds");
+                                string directoryToCreate = Path.GetDirectoryName(outPath);
+                                Directory.CreateDirectory(directoryToCreate);
+                                var ddsFile = BitmapExtractor.ExtractBitmap(Cache, bitmap, i, tag.Name);
+                                if (ddsFile == null)
+                                    continue;
+                                using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
+                                using (var writer = new EndianWriter(outStream, EndianFormat.LittleEndian))
+                                {
+                                    if (ddsFile.BitmapData != null)
+                                    {
+                                        ddsFile.Write(writer);
+                                    }
+                                }
+                            }
+                            count++;
                         }
-                        count++;
 #if !DEBUG
                     }
                     catch (Exception ex)
