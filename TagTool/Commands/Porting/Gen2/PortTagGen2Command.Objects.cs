@@ -376,6 +376,7 @@ namespace TagTool.Commands.Porting.Gen2
                         UnitHudInterface = Cache.TagCache.GetTag(gen2Tag.NewHudInterfaces[0].NewUnitHudInterface.ToString())
                     }
                 };
+                newbiped.PhysicsFlags.Halo3ODST = Havok.BipedPhysicsFlags.Halo3OdstBits.UsePlayerPhysics;
             }
             
 
