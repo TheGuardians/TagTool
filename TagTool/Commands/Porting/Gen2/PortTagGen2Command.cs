@@ -191,8 +191,9 @@ namespace TagTool.Commands.Porting.Gen2
                 case Biped biped:
                     definition = ConvertObject(gen2definition, cacheStream);
                     break;
+                case Effect effect:
                 case DamageEffect damage:
-                    definition = ConvertEffect(damage);
+                    definition = ConvertEffect(gen2definition);
                     break;
                 case Shader shader:
                     //preserve a copy of unconverted data
