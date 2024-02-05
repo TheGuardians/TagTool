@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using TagTool.Bitmaps;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Commands.Shaders;
@@ -15,6 +16,8 @@ using static TagTool.Shaders.ShaderMatching.ShaderMatcherNew;
 using static TagTool.Tags.Definitions.MultiplayerVariantSettingsInterfaceDefinition.GameEngineSetting;
 using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
 using ShaderGen2 = TagTool.Tags.Definitions.Gen2.Shader;
+using TagGroupGen3 = TagTool.Cache.Gen3.TagGroupGen3;
+using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -693,7 +696,6 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order.Add("");
                         h2_bitmap_order.Add("base_map");
                         h2_bitmap_order.Add("environment_map");
-                        h2_bitmap_order.Add("detail_map");
                         h2_bitmap_order.Add("");
                         break;
                     }
@@ -954,6 +956,27 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_pixel_constants.Add("albedo_color");
                         break;
                     }
+                case "two_alpha_env_multichannel":
+                    {
+                        new_shader_type = "rmsh";
+
+                        h2_pixel_constants.Add("env_tint_color"); // og: environment_color
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add(""); // og: transparent_color
+
+                        h2_vertex_constants.Add("+base_map"); // og: multichannel_map_scale
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("+detail_map"); // og: detail_map_scale
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("normal_specular_tint"); // og: tint_color
+                        h2_vertex_constants.Add("glancing_specular_tint"); // og: glancing_tint_color
+
+                        h2_bitmap_order.Add("environment_map"); // og: environment_map
+                        h2_bitmap_order.Add("multichannel_map"); // og: multichannel_map
+                        h2_bitmap_order.Add("detail_map"); // og: detail_map
+                        h2_bitmap_order.Add("");
+                        break;
+                    }
                 case "sky_one_alpha_env":
                     {
                         new_shader_type = "rmsh";
@@ -1077,6 +1100,11 @@ namespace TagTool.Commands.Porting.Gen2
                         shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Color_Texture;
                     }
                 }
+                if (shader_template.Contains("multichannel"))
+                {
+                    shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
+                    shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
+                }
 
                 // Material Model
                 if (shader_template.Contains("tex"))
@@ -1084,7 +1112,6 @@ namespace TagTool.Commands.Porting.Gen2
                     if (shader_template.Contains("specular"))
                     {
                         shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
-                        // Additional logic for tex + specular
                     }
                     else
                     {
@@ -1097,7 +1124,6 @@ namespace TagTool.Commands.Porting.Gen2
                 if (shader_template.Contains("env"))
                 {
                     shaderCategories[(int)ShaderMethods.Environment_Mapping] = (byte)Environment_Mapping.Custom_Map;
-                    // Additional logic for env
                 }
 
                 // Self Illumination
@@ -1127,11 +1153,11 @@ namespace TagTool.Commands.Porting.Gen2
                 }
 
                 // Blend Mode
-                if (shader_template.Contains("add"))
+                if (shader_template.Contains("add") || shader_template.Contains("multichannel"))
                 {
                     shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Additive;
                 }
-                else if (shader_template.Contains("alpha") && !gen2TagName.Contains("stars") && !gen2TagName.Contains("dome"))
+                else if (shader_template.Contains("alpha") && !gen2TagName.Contains("stars") && !gen2TagName.Contains("dome") && !shader_template.Contains("multichannel"))
                 {
                     shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Alpha_Blend;
                 }
@@ -1269,14 +1295,52 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 }
 
-                //if ((found == false) && (shader_template.Contains("sky")))
+                //if ((found == false) && (shader_template.Contains("multichannel")) && current_type == "base_map")
                 //{
                 //    for (var i = 0; i < h2_bitmap_order.Count; i++)
                 //    {
-                //        if (h2_bitmap_order[i] == "self_illum_map")
+                //        if (h2_bitmap_order[i] == "multichannel_map")
                 //        {
                 //            found = true;
-                //            if (h2_texture_reference[i].Bitmap != null) { current_bitmap = h2_texture_reference[i].Bitmap.ToString(); }
+                //            if (h2_texture_reference[i].Bitmap != null) 
+                //            {
+                //                CachedTag multiChannelBitmapTag = Cache.TagCacheGenHO.GetTag(h2_texture_reference[i].Bitmap.ToString());
+                //                Bitmap multiChannelBitmap = Cache.Deserialize<Bitmap>(cacheStream, multiChannelBitmapTag);
+                //                Bitmap.Image multiChannelBitmapImage = multiChannelBitmap.Images[0];
+                //                BaseBitmap bitmapBase = new BaseBitmap(multiChannelBitmapImage)
+                //                {
+                //                    Data = multiChannelBitmap.ProcessedPixelData
+                //                };
+                //
+                //                Bitmap newSpecBitmap = new Bitmap
+                //                {
+                //                    Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource,
+                //                    SpriteSpacing = multiChannelBitmap.SpriteSpacing,
+                //                    Sequences = new List<Bitmap.Sequence>(),
+                //                    Images = new List<Bitmap.Image>(),
+                //                    HardwareTextures = new List<TagTool.Tags.TagResourceReference>()
+                //                };
+                //                var tagIndex = Cache.TagCache.Count+1;
+                //                var newSpec = Cache.TagCache.AllocateTag(new TagGroupGen3());
+                //                newSpec = Cache.TagCache.CreateCachedTag(tagIndex, new TagGroupGen3());
+                //
+                //                string originalName = h2_texture_reference[i].Bitmap.ToString();
+                //                newSpec.Name = originalName.Insert(originalName.LastIndexOf(".bitmap"), "_spec");
+                //
+                //                //Cache.TagCacheGenHO.Tags[tagIndex] = (CachedTagHaloOnline)newSpec;
+                //
+                //                bitmapBase.Data = BitmapDecoder.FillR(bitmapBase.Data, multiChannelBitmapImage.Width, multiChannelBitmapImage.Height);
+                //
+                //                var bitmapResourceDefinition = BitmapUtils.CreateBitmapTextureInteropResource(bitmapBase);
+                //                var resourceReference = Cache.ResourceCache.CreateBitmapResource(bitmapResourceDefinition);
+                //                newSpecBitmap.HardwareTextures.Add(resourceReference);
+                //                newSpecBitmap.Images.Add(multiChannelBitmapImage);
+                //                bitmapBase.UpdateFormat(BitmapFormat.Dxt5aMono);
+                //                multiChannelBitmapImage.Format = BitmapFormat.Dxt5aMono;
+                //                Cache.Serialize(cacheStream, newSpec, newSpecBitmap);
+                //
+                //                current_bitmap = newSpec.ToString();
+                //            }
                 //            else current_bitmap = null;
                 //            break;
                 //        }
@@ -1296,6 +1360,13 @@ namespace TagTool.Commands.Porting.Gen2
                         {
                             if (current_bitmap != null)
                             {
+                                switch (sampler_name)
+                                {
+                                    case "bump_map":
+                                    case "environment_map":
+                                        Definition.ShaderProperties[0].TextureConstants[samplerIndex].FilterMode = TextureConstant.SamplerFilterMode.Anisotropic3Expensive;
+                                        break;
+                                }
                                 Definition.ShaderProperties[0].TextureConstants[samplerIndex].Bitmap = Cache.TagCacheGenHO.GetTag(current_bitmap);
                                 break;
                             }
@@ -1326,6 +1397,7 @@ namespace TagTool.Commands.Porting.Gen2
                         Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = (float)gen2Shader.LightmapSpecularBrightness;
                         Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = (float)gen2Shader.LightmapSpecularBrightness;
                         Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = (float)gen2Shader.LightmapSpecularBrightness;
+                        Definition.ShaderProperties[0].BooleanConstants = (uint)1;
                         break;
 
                     case "environment_map_specular_contribution":
@@ -1333,10 +1405,10 @@ namespace TagTool.Commands.Porting.Gen2
                         {
                             if (h2_pixel_constants[i] == current_type)
                             {
-                                Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 10;
-                                Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 10;
-                                Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 10;
-                                Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 10;
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 20;
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 20;
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 20;
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 20;
                                 found = true;
                                 break;
                             }
@@ -1347,10 +1419,10 @@ namespace TagTool.Commands.Porting.Gen2
                             {
                                 if (h2_vertex_constants[i2] == current_type)
                                 {
-                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = ((float)h2vertex_constant[i2].W) / 10;
-                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = ((float)h2vertex_constant[i2].W) / 10;
-                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = ((float)h2vertex_constant[i2].W) / 10;
-                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = ((float)h2vertex_constant[i2].W) / 10;
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = ((float)h2vertex_constant[i2].W) / 20;
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = ((float)h2vertex_constant[i2].W) / 20;
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = ((float)h2vertex_constant[i2].W) / 20;
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = ((float)h2vertex_constant[i2].W) / 20;
                                     found = true;
                                     break;
                                 }
@@ -1464,7 +1536,43 @@ namespace TagTool.Commands.Porting.Gen2
                             Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = (float)1;
                             Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = (float)1;
                         }
-                            break;
+                        break;
+
+                    case "env_tint_color":
+                        for (int i = 0; i < h2_pixel_constants.Count; i++)
+                        {
+                            if (h2_pixel_constants[i] == current_type)
+                            {
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = (((float)h2pixel_constant[i].Color.Red) / 255) * 0.83f;
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = (((float)h2pixel_constant[i].Color.Green) / 255) * 0.54f;
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = Math.Min((((float)h2pixel_constant[i].Color.Blue) / 255) * 1.19f, 1f);
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = 1f;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found == false)
+                        {
+                            for (int i = 0; i < h2_vertex_constants.Count; i++)
+                            {
+                                if (h2_vertex_constants[i] == current_type)
+                                {
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = ((float)h2vertex_constant[i].Vector3.I) * 0.83f;
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = ((float)h2vertex_constant[i].Vector3.J) * 0.54f;
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = Math.Min(((float)h2vertex_constant[i].Vector3.K) * 1.19f, 1f);
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = 1f;
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+
+                    case "env_roughness_scale":
+                        Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = (float)0;
+                        Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = (float)0;
+                        Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = (float)0;
+                        Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = (float)0;
+                        break;
 
                     // If no float constant specific edits are needed 
                     default:
