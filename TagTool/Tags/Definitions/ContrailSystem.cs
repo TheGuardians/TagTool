@@ -66,12 +66,12 @@ namespace TagTool.Tags.Definitions
             public enum ContrailAppearanceFlags : ushort
             {
                 TintFromLightmap = 1 << 0,
-                Doublesided = 1 << 1,
+                DoubleSided = 1 << 1,
                 ProfileOpacityFromScaleA = 1 << 2,
                 RandomUOffset = 1 << 3,
                 RandomVOffset = 1 << 4,
-                OriginFade = 1 << 5,
-                Bit6 = 1 << 6,
+                OriginFaded = 1 << 5,
+                EdgeFaded = 1 << 6,
                 Fogged = 1 << 7,
             }
 
