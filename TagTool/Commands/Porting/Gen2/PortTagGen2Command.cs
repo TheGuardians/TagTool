@@ -214,7 +214,8 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertSoundEnvironment(snde);
                     break;
                 case NewHudDefinition nhdt:
-                    definition = ConvertNewHudDefinition(nhdt);
+                    NewHudDefinition gen2Hud = Gen2Cache.Deserialize<NewHudDefinition>(gen2CacheStream, gen2Tag);
+                    definition = ConvertNewHudDefinition(nhdt, gen2Hud, cacheStream, gen2CacheStream, gen2Tag);
                     break;
                 default:
                     new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
