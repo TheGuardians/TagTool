@@ -740,7 +740,7 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             public StringId Name;
             public HudWidgetInputsStructBlock Unknown;
-            public HudWidgetStateDefinitionStructBlock Unknown1;
+            public HudWidgetStateDefinitionStructBlock WidgetState;
             public AnchorValue Anchor;
             /// <summary>
             /// string is a number: treats the inputted string id as a function name, not a string name
