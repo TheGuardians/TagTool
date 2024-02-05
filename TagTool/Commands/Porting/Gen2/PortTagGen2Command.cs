@@ -120,6 +120,7 @@ namespace TagTool.Commands.Porting.Gen2
                 "ctrl",
                 "bipd",
                 "nhdt",
+                "pphy"
             };
             if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
             {
@@ -157,6 +158,7 @@ namespace TagTool.Commands.Porting.Gen2
             switch (gen2definition)
             {
                 case Antenna antenna:
+                case PointPhysics pointPhysics: // not a widget, but we can group it with widgets
                     definition = ConvertWidget(gen2definition);
                     break;
                 case CollisionModel collisionModel:

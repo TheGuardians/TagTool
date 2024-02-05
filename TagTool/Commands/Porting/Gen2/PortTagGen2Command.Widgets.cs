@@ -23,6 +23,8 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 case TagTool.Tags.Definitions.Gen2.Antenna antenna:
                     return ConvertAntenna(antenna);
+                case TagTool.Tags.Definitions.Gen2.PointPhysics pointPhysics:
+                    return ConvertPointPhysics(pointPhysics);
                 default:
                     return null;
             }
@@ -77,6 +79,22 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             return newAntenna;
+        }
+
+        private TagStructure ConvertPointPhysics(TagTool.Tags.Definitions.Gen2.PointPhysics pointPhysics)
+        {
+            PointPhysics newPointPhysics = new PointPhysics();
+
+            // TODO: calculation for RuntimeMassOverRadiusCubed
+
+            newPointPhysics.Flags = (PointPhysics.PointPhysicsFlags)pointPhysics.Flags;
+            newPointPhysics.Density = pointPhysics.Density;
+            newPointPhysics.AirFriction = pointPhysics.AirFriction;
+            newPointPhysics.WaterFriction = pointPhysics.WaterFriction;
+            newPointPhysics.SurfaceFriction = pointPhysics.SurfaceFriction;
+            newPointPhysics.Elasticity = pointPhysics.Elasticity;
+
+            return newPointPhysics;
         }
     }
 }
