@@ -97,6 +97,7 @@ namespace TagTool.Commands.Porting.Gen2
             //use hardcoded list of supported tags to prevent unnecessary deserialization
             List<string> supportedTagGroups = new List<string>
             {
+                "ant!",
                 "coll",
                 "jmad",
                 "phmo",
@@ -155,6 +156,9 @@ namespace TagTool.Commands.Porting.Gen2
 
             switch (gen2definition)
             {
+                case Antenna antenna:
+                    definition = ConvertWidget(gen2definition);
+                    break;
                 case CollisionModel collisionModel:
                     definition = ConvertCollisionModel(collisionModel);
                     break;
