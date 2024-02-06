@@ -412,6 +412,7 @@
     <Compile Include="Commands\Models\ExportJMSCommand.cs" />
     <Compile Include="Commands\Porting\Gen2\LightmapPacker.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.NewHudDefinition.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Widgets.cs" />
     <Compile Include="Commands\Porting\IgnoreBlamTagCommand.cs" />
     <Compile Include="Commands\Porting\Gen4\PortTagGen4Command.Models.cs" />
     <Compile Include="Commands\Porting\StructureAutoConverter.cs" />
