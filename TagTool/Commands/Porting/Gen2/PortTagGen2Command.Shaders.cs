@@ -1,4 +1,6 @@
-using HaloShaderGenerator.Shader;
+using NewShader = HaloShaderGenerator.Shader;
+using NewHalogram = HaloShaderGenerator.Halogram;
+using NewDecal = HaloShaderGenerator.Decal;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,16 +40,23 @@ namespace TagTool.Commands.Porting.Gen2
             ["zonly"] = "rmzo",
         };
         private RenderMethod Definition { get; set; }
-        public Shader ConvertShader(ShaderGen2 gen2Shader, ShaderGen2 gen2ShaderH2, String gen2TagName, Stream cacheStream, Stream gen2CacheStream)
+        public RenderMethod ConvertShader(ShaderGen2 gen2Shader, ShaderGen2 gen2ShaderH2, String gen2TagName, Stream cacheStream, Stream gen2CacheStream, CachedTag gen2Tag)
         {
 
             string shader_template = gen2ShaderH2.Template.Name;
-            string shader_template_name = shader_template;
             shader_template = shader_template.Split('\\').Last();
 
-            byte[] shaderCategories = new byte[Enum.GetValues(typeof(HaloShaderGenerator.Shader.ShaderMethods)).Length];
-            for (var i = 0; i < shaderCategories.Length; i++)
-                shaderCategories[i] = 0;
+            byte[] shaderCategoriesRMSH = new byte[Enum.GetValues(typeof(HaloShaderGenerator.Shader.ShaderMethods)).Length];
+            for (var i = 0; i < shaderCategoriesRMSH.Length; i++)
+                shaderCategoriesRMSH[i] = 0;
+
+            byte[] shaderCategoriesRMHG = new byte[Enum.GetValues(typeof(HaloShaderGenerator.Halogram.HalogramMethods)).Length];
+            for (var i = 0; i < shaderCategoriesRMHG.Length; i++)
+                shaderCategoriesRMHG[i] = 0;
+
+            byte[] shaderCategoriesRMD = new byte[Enum.GetValues(typeof(HaloShaderGenerator.Decal.DecalMethods)).Length];
+            for (var i = 0; i < shaderCategoriesRMD.Length; i++)
+                shaderCategoriesRMD[i] = 0;
 
             // Declare string lists that contain the order and contents for each of these tagblocks
             /*            // Create a list to store the usage types
@@ -142,25 +151,98 @@ namespace TagTool.Commands.Porting.Gen2
                 '+'
             };
 
+            ShaderGen2 h2Shader = Gen2Cache.Deserialize<ShaderGen2>(gen2CacheStream, gen2Tag);
+
             switch (shader_template)
             {
-                case "plasma_alpha":
+                case "overlay":
                     {
-                        new_shader_type = "rmhg";
+                        new_shader_type = "shader";
+
+                        h2_bitmap_order.Add("base_map");
+                        break;
+                    }
+                case "plasma_alpha":
+                case "plasma_alpha_active_camo":
+                    {
+                        new_shader_type = "halogram";
 
                         h2_pixel_constants.Add("color_sharp"); // og: color_medium
                         h2_pixel_constants.Add("color_wide"); // og: color_wide
                         h2_pixel_constants.Add("");
                         h2_pixel_constants.Add("color_medium"); // og: color_sharp
 
-                        h2_vertex_constants.Add("noise_map_a_scale_x"); // noise_map_a_scale_x
-                        h2_vertex_constants.Add("noise_map_a_scale_y"); // noise_map_a_scale_y
-                        h2_vertex_constants.Add("noise_map_b_scale_x"); // noise_map_b_scale_x
-                        h2_vertex_constants.Add("noise_map_b_scale_y"); // noise_map_b_scale_y
+                        h2_vertex_constants.Add("+noise_map_a"); // noise_map_a_scale_x
+                        h2_vertex_constants.Add(""); // noise_map_a_scale_y
+                        h2_vertex_constants.Add("+noise_map_b"); // noise_map_b_scale_x
+                        h2_vertex_constants.Add(""); // noise_map_b_scale_y
                         h2_vertex_constants.Add(""); // 
                         h2_vertex_constants.Add(""); // 
                         h2_vertex_constants.Add(""); // 
                         h2_vertex_constants.Add(""); // 
+
+                        switch (h2Shader.PostprocessDefinition[0].Overlays.Count)
+                        {
+                            case 10:
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("noise_map_a_translation_x");
+                                h2_overlay_references.Add("noise_map_a_translation_y");
+                                h2_overlay_references.Add("noise_map_b_translation_x");
+                                h2_overlay_references.Add("noise_map_b_translation_y");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                break;
+                            case 20:
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("noise_map_a_translation_y");
+                                h2_overlay_references.Add("noise_map_a_translation_x");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("noise_map_b_translation_y");
+                                h2_overlay_references.Add("noise_map_b_translation_x");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                break;
+                            case 23:
+                                h2_overlay_references.Add("noise_map_a_translation_x");
+                                h2_overlay_references.Add("noise_map_a_translation_y");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("noise_map_b_translation_x");
+                                h2_overlay_references.Add("noise_map_b_translation_y");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("");
+                                h2_overlay_references.Add("color_wide"); // og: color_wide
+                                h2_overlay_references.Add("color_sharp"); // og: color_medium
+                                h2_overlay_references.Add("color_medium"); // og_color_sharp
+                                break;
+                        }
 
                         h2_bitmap_order.Add("noise_map_a");
                         h2_bitmap_order.Add("noise_map_b");
@@ -169,7 +251,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_alpha_test":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("base_map");
                         h2_vertex_constants.Add("detail_map");
@@ -193,8 +275,9 @@ namespace TagTool.Commands.Porting.Gen2
                 case "tex_bump_active_camo":
                 case "tex_bump_shiny":
                 case "tex_bump_no_specular":
+                case "tex_bump_no_alpha":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("base_map");
@@ -213,7 +296,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case "tex_bump_alpha_test":
                 case "tex_bump_alpha_test_clamped":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -252,7 +335,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_alpha_test_single_pass":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("base_map");
@@ -279,7 +362,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_detail_blend":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Gen2Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -307,9 +390,29 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order.Add("detail_map2");
                         break;
                     }
+                case "tex_bump_detail_keep_blend":
+                    {
+                        new_shader_type = "shader";
+
+                        h2_vertex_constants.Add("bump_map");
+                        h2_vertex_constants.Add("base_map");
+                        h2_vertex_constants.Add("detail_map");
+                        h2_vertex_constants.Add("detail_map2");
+
+                        h2_pixel_constants.Add("albedo_color");
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add("normal_specular_tint");
+                        h2_pixel_constants.Add("glancing_specular_tint");
+
+                        h2_bitmap_order.Add("bump_map");
+                        h2_bitmap_order.Add("base_map");
+                        h2_bitmap_order.Add("detail_map");
+                        h2_bitmap_order.Add("detail_map2");
+                        break;
+                    }
                 case "tex_bump_detail_blend_detail":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Gen2Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -343,7 +446,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_detail_keep":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("base_map");
@@ -359,7 +462,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_detail_overlay":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Gen2Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -389,7 +492,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_dprs_env":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("base_map");
@@ -418,7 +521,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case "tex_bump_env_combined":
                 case "tex_bump_env_dbl_spec":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Gen2Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -463,7 +566,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case "tex_bump_env_illum":
                 case "tex_bump_env_illum_combined":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("base_map");
@@ -494,7 +597,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_env_illum_3_channel":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("base_map");
@@ -534,7 +637,7 @@ namespace TagTool.Commands.Porting.Gen2
                 // H2 implementation of self illum occlusion dosent exist in HO, this wont be "exact"
                 case "tex_bump_env_illum_3_channel_occlusion_combined":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Gen2Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -611,7 +714,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case "tex_bump_env_alpha_clamped":
                 case "tex_bump_env_alpha_test_indexed":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("alpha_test_map");
@@ -645,7 +748,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_env_four_change_color":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("detail_map"); // og: detail_map_scale, i is x, j is y
                         h2_vertex_constants.Add("");
@@ -680,7 +783,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_env_no_detail":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("base_map");
@@ -699,9 +802,34 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order.Add("");
                         break;
                     }
+                case "tex_bump_env_two_change_color":
+                    {
+                        new_shader_type = "shader";
+                        h2_vertex_constants.Add("base_map");
+                        h2_vertex_constants.Add("bump_map");
+                        h2_vertex_constants.Add("detail_map");
+                        h2_vertex_constants.Add("change_color_map");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("environment_map_specular_contribution"); // og: env_brightness
+
+                        h2_pixel_constants.Add("normal_specular_tint"); // og: specular_color
+                        h2_pixel_constants.Add("glancing_specular_tint"); // og: specular_glancing_color
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add("env_tint_color"); // og: env_tint_color
+
+                        h2_bitmap_order.Add("bump_map");
+                        h2_bitmap_order.Add("");
+                        h2_bitmap_order.Add("base_map");
+                        h2_bitmap_order.Add("detail_map");
+                        h2_bitmap_order.Add("change_color_map");
+                        h2_bitmap_order.Add("environment_map");
+                        break;
+                    }
                 case "tex_bump_env_two_change_color_indexed":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Gen2Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -735,7 +863,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_illum":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("base_map");
@@ -761,7 +889,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_illum_3_channel":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Gen2Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -803,7 +931,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_one_change_color":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("bump_map");
                         h2_vertex_constants.Add("base_map");
@@ -817,9 +945,33 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order.Add("change_color_map");
                         break;
                     }
+                case "tex_bump_plasma_one_channel_illum":
+                    {
+                        new_shader_type = "shader";
+
+                        h2_vertex_constants.Add("bump_map");
+                        h2_vertex_constants.Add("base_map");
+                        h2_vertex_constants.Add("detail_map");
+                        h2_vertex_constants.Add("self_illum_map"); // og: multichannel_map
+
+                        h2_pixel_constants.Add("normal_specular_tint"); // og: specular_color
+                        h2_pixel_constants.Add("glancing_specular_tint"); // og: specular_glancing_color
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add("channel_b"); // og: channel_b_color
+                        h2_pixel_constants.Add("channel_c"); // og: channel_c_color
+                        h2_pixel_constants.Add("channel_a"); // og: channel_a_color
+
+                        h2_value_properties.Add("self_illum_intensity"); // og: emissive_power
+
+                        h2_bitmap_order.Add("bump_map");
+                        h2_bitmap_order.Add("base_map");
+                        h2_bitmap_order.Add("detail_map");
+                        h2_bitmap_order.Add("self_illum_map"); // og: multichannel_map
+                        break;
+                    }
                 case "tex_bump_three_detail_blend":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Gen2Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -851,7 +1003,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "tex_bump_two_detail":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         if (Gen2Cache.Version == CacheVersion.Halo2Vista)
                         {
@@ -880,9 +1032,51 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order.Add("detail_map2");
                         break;
                     }
+                case "tex_env":
+                    {
+                        new_shader_type = "shader";
+
+                        h2_vertex_constants.Add("base_map");
+                        h2_vertex_constants.Add("bump_map");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+
+                        h2_pixel_constants.Add("env_tint_color"); // og: env_tint_color
+                        h2_pixel_constants.Add(""); // og: env_glancing_tint_color
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add("normal_specular_tint"); // og: specular_tint
+                        h2_pixel_constants.Add("glancing_specular_tint"); // og: specular_glancing_color
+
+                        h2_bitmap_order.Add("base_map");
+                        h2_bitmap_order.Add("detail_map");
+                        h2_bitmap_order.Add("environment_map");
+                        break;
+                    }
+                case "prt_simple":
+                    {
+                        new_shader_type = "shader";
+
+                        h2_vertex_constants.Add("bump_map");
+                        h2_vertex_constants.Add("base_map");
+                        h2_vertex_constants.Add(""); // og: prt_diffuse_scale
+                        h2_vertex_constants.Add("detail_map");
+                        h2_vertex_constants.Add("");
+                        h2_vertex_constants.Add("");
+
+                        h2_pixel_constants.Add("glancing_specular_tint"); // og: specular_color
+
+                        h2_bitmap_order.Add("bump_map");
+                        h2_bitmap_order.Add("base_map");
+                        h2_bitmap_order.Add("detail_map");
+                        h2_bitmap_order.Add("environment_map");
+                        break;
+                    }
                 case "illum":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("self_illum_map");
                         
@@ -895,7 +1089,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "illum_3_channel":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("self_illum_map");
 
@@ -913,7 +1107,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "one_add_illum":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_vertex_constants.Add("");
                         h2_vertex_constants.Add("");
@@ -929,7 +1123,7 @@ namespace TagTool.Commands.Porting.Gen2
                 case "one_alpha_env":
                 case "one_alpha_env_active_camo":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_bitmap_order.Add("environment_map");
                         h2_bitmap_order.Add("specular_mask_texture");
@@ -958,7 +1152,7 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "two_alpha_env_multichannel":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
                         h2_pixel_constants.Add("env_tint_color"); // og: environment_color
                         h2_pixel_constants.Add("");
@@ -977,11 +1171,28 @@ namespace TagTool.Commands.Porting.Gen2
                         h2_bitmap_order.Add("");
                         break;
                     }
+                case "two_add_env_illum":
+                    {
+                        new_shader_type = "shader";
+
+                        h2_pixel_constants.Add("");
+                        h2_pixel_constants.Add(""); // og: brightness?
+                        h2_pixel_constants.Add("albedo_color");
+                        h2_pixel_constants.Add("self_illum_color");
+
+                        h2_vertex_constants.Add("");
+
+                        h2_bitmap_order.Add("environment_map");
+                        h2_bitmap_order.Add("");
+                        h2_bitmap_order.Add("");
+                        h2_bitmap_order.Add("self_illum_map");
+                        break;
+                    }
                 case "sky_one_alpha_env":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
-                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Texture;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Specular_Mask] = (byte)NewShader.Specular_Mask.Specular_Mask_From_Texture;
                         h2_bitmap_order.Add("environment_map");
                         h2_bitmap_order.Add("specular_mask_texture");
                         h2_bitmap_order.Add("base_map"); // og: alpha_blend_map
@@ -998,9 +1209,9 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                 case "sky_one_alpha_env_illum":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
-                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.From_Diffuse;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Self_Illumination] = (byte)NewShader.Self_Illumination.From_Diffuse;
                         h2_bitmap_order.Add("environment_map");
                         h2_bitmap_order.Add("specular_mask_texture");
                         h2_bitmap_order.Add("base_map");
@@ -1023,9 +1234,9 @@ namespace TagTool.Commands.Porting.Gen2
                 case "two_alpha_clouds":
                 case "sky_two_alpha_clouds":
                     {
-                        new_shader_type = "rmsh";
+                        new_shader_type = "shader";
 
-                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.From_Diffuse;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Self_Illumination] = (byte)NewShader.Self_Illumination.From_Diffuse;
                         h2_vertex_constants.Add("+detail_map2");
                         h2_vertex_constants.Add("+detail_map_overlay");
                     
@@ -1039,7 +1250,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             // Change the contents of lists depending on the h2 template used
-            if (new_shader_type == "rmsh")
+            if (new_shader_type == "shader")
             {
                 // Albedo
                 if (shader_template.Contains("change_color") || shader_template.Contains("detail") || shader_template.Contains("cloud"))
@@ -1047,45 +1258,49 @@ namespace TagTool.Commands.Porting.Gen2
                     // Change Color
                     if (shader_template.Contains("one_change_color") || shader_template.Contains("two_change_color"))
                     {
-                        shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Two_Change_Color;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Albedo] = (byte)NewShader.Albedo.Two_Change_Color;
                     }
                     else if (shader_template.Contains("four_change_color"))
                     {
-                        shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Four_Change_Color;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Albedo] = (byte)NewShader.Albedo.Four_Change_Color;
                     }
 
                     // Detail
                     if (shader_template.Contains("two_detail"))
                     {
-                        shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Two_Detail;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Albedo] = (byte)NewShader.Albedo.Two_Detail;
                     }
                     else if (shader_template.Contains("blend_detail"))
                     {
-                        shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Two_Detail_Overlay;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Albedo] = (byte)NewShader.Albedo.Two_Detail_Overlay;
                     }
                     else if (shader_template.Contains("blend"))
                     {
-                        shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Detail_Blend;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Albedo] = (byte)NewShader.Albedo.Detail_Blend;
                     }
 
                     // Clouds
                     if (shader_template.Contains("cloud"))
                     {
-                        shaderCategories[(int)ShaderMethods.Albedo] = (byte)Albedo.Two_Detail_Overlay;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Albedo] = (byte)NewShader.Albedo.Two_Detail_Overlay;
                     }
+                }
+                if (shader_template.Contains("overlay"))
+                {
+                    shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Blend_Mode] = (byte)NewShader.Blend_Mode.Double_Multiply;
                 }
 
                 // Bump Mapping
                 if (shader_template.Contains("bump"))
                 {
-                    shaderCategories[(int)ShaderMethods.Bump_Mapping] = (byte)Bump_Mapping.Standard;
+                    shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Bump_Mapping] = (byte)NewShader.Bump_Mapping.Standard;
                     // Additional logic for bump mapping
                 }
 
                 // Alpha Test
                 if (shader_template.Contains("alpha_test"))
                 {
-                    shaderCategories[(int)ShaderMethods.Alpha_Test] = (byte)Alpha_Test.Simple;
+                    shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Alpha_Test] = (byte)NewShader.Alpha_Test.Simple;
                 }
 
                 // Specular Mask
@@ -1093,17 +1308,17 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     if (shader_template.Contains("tiling"))
                     {
-                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Texture;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Specular_Mask] = (byte)NewShader.Specular_Mask.Specular_Mask_From_Texture;
                     }
                     else
                     {
-                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Color_Texture;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Specular_Mask] = (byte)NewShader.Specular_Mask.Specular_Mask_From_Color_Texture;
                     }
                 }
                 if (shader_template.Contains("multichannel"))
                 {
-                    shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
-                    shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
+                    shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Specular_Mask] = (byte)NewShader.Specular_Mask.Specular_Mask_From_Diffuse;
+                    shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Material_Model] = (byte)NewShader.Material_Model.Two_Lobe_Phong;
                 }
 
                 // Material Model
@@ -1111,19 +1326,19 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     if (shader_template.Contains("specular"))
                     {
-                        shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Material_Model] = (byte)NewShader.Material_Model.Two_Lobe_Phong;
                     }
                     else
                     {
-                        shaderCategories[(int)ShaderMethods.Material_Model] = (byte)Material_Model.Two_Lobe_Phong;
-                        shaderCategories[(int)ShaderMethods.Specular_Mask] = (byte)Specular_Mask.Specular_Mask_From_Diffuse;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Material_Model] = (byte)NewShader.Material_Model.Two_Lobe_Phong;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Specular_Mask] = (byte)NewShader.Specular_Mask.Specular_Mask_From_Diffuse;
                     }
                 }
 
                 // Environment Mapping
                 if (shader_template.Contains("env"))
                 {
-                    shaderCategories[(int)ShaderMethods.Environment_Mapping] = (byte)Environment_Mapping.Custom_Map;
+                    shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Environment_Mapping] = (byte)NewShader.Environment_Mapping.Per_Pixel;
                 }
 
                 // Self Illumination
@@ -1131,23 +1346,23 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     if (shader_template.Contains("3_channel") || shader_template.Contains("plasma"))
                     {
-                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination._3_Channel_Self_Illum;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Self_Illumination] = (byte)NewShader.Self_Illumination._3_Channel_Self_Illum;
                     }
                     else if (shader_template.Contains("detail"))
                     {
-                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.Illum_Detail;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Self_Illumination] = (byte)NewShader.Self_Illumination.Illum_Detail;
                     }
                     else if (shader_template.Contains("meter"))
                     {
-                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.Meter;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Self_Illumination] = (byte)NewShader.Self_Illumination.Meter;
                     }
                     else if (shader_template.Contains("sky"))
                     {
-                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.From_Diffuse;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Self_Illumination] = (byte)NewShader.Self_Illumination.From_Diffuse;
                     }
                     else
                     {
-                        shaderCategories[(int)ShaderMethods.Self_Illumination] = (byte)Self_Illumination.Simple;
+                        shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Self_Illumination] = (byte)NewShader.Self_Illumination.Simple;
                         new TagToolWarning($"Shader template '{shader_template}' has unknown or default illum type");
                     }
                 }
@@ -1155,21 +1370,59 @@ namespace TagTool.Commands.Porting.Gen2
                 // Blend Mode
                 if (shader_template.Contains("add") || shader_template.Contains("multichannel"))
                 {
-                    shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Additive;
+                    shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Blend_Mode] = (byte)NewShader.Blend_Mode.Additive;
                 }
-                else if (shader_template.Contains("alpha") && !gen2TagName.Contains("stars") && !gen2TagName.Contains("dome") && !shader_template.Contains("multichannel"))
+                else if (shader_template.Contains("alpha") && !gen2TagName.Contains("stars") && !gen2TagName.Contains("dome") && !shader_template.Contains("multichannel") && !shader_template.Contains("no_alpha"))
                 {
-                    shaderCategories[(int)ShaderMethods.Blend_Mode] = (byte)Blend_Mode.Alpha_Blend;
+                    shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Blend_Mode] = (byte)NewShader.Blend_Mode.Alpha_Blend;
+                }
+
+                // First Person
+                //shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Misc] = (byte)NewShader.Misc.First_Person_Sometimes;
+            }
+            else if (new_shader_type == "halogram")
+            {
+                if (shader_template.Contains("plasma"))
+                {
+                    shaderCategoriesRMHG[(int)NewHalogram.HalogramMethods.Albedo] = (byte)NewHalogram.Albedo.Constant_Color;
+                    shaderCategoriesRMHG[(int)NewHalogram.HalogramMethods.Self_Illumination] = (byte)NewHalogram.Self_Illumination.Plasma;
+                    shaderCategoriesRMHG[(int)NewHalogram.HalogramMethods.Blend_Mode] = (byte)NewHalogram.Blend_Mode.Additive;
+                }
+
+                // First Person
+                //shaderCategoriesRMSH[(int)NewShader.ShaderMethods.Misc] = (byte)NewShader.Misc.First_Person_Sometimes;
+            }
+            else if (new_shader_type == "decal")
+            {
+                if (shader_template.Contains("overlay"))
+                {
+                    shaderCategoriesRMD[(int)NewDecal.DecalMethods.Albedo] = (byte)NewDecal.Albedo.Diffuse_Only;
+                    shaderCategoriesRMD[(int)NewDecal.DecalMethods.Blend_Mode] = (byte)NewDecal.Blend_Mode.Add_Src_Times_Dstalpha;
+                }
+                if (shader_template.Contains("one_alpha_env"))
+                {
+                    shaderCategoriesRMD[(int)NewDecal.DecalMethods.Albedo] = (byte)NewDecal.Albedo.Diffuse_Only;
+                    shaderCategoriesRMD[(int)NewDecal.DecalMethods.Blend_Mode] = (byte)NewDecal.Blend_Mode.Alpha_Blend;
                 }
             }
-            else if (new_shader_type == "rmhg")
+
+            byte[] shaderCategories = null;
+            switch (new_shader_type)
             {
-                // do stuff for halograms
+                case "shader":
+                    shaderCategories = shaderCategoriesRMSH;
+                    break;
+                case "halogram":
+                    shaderCategories = shaderCategoriesRMHG;
+                    break;
+                case "decal":
+                    shaderCategories = shaderCategoriesRMD;
+                    break;
             }
 
-            string rmt2TagName = @"shaders\shader_templates\_" + string.Join("_", shaderCategories);
+            string rmt2TagName = $"shaders\\{new_shader_type}_templates\\_" + string.Join("_", shaderCategories);
 
-            ShaderMatcherNew.Rmt2Descriptor rmt2Desc = new ShaderMatcherNew.Rmt2Descriptor("shader", shaderCategories);
+            ShaderMatcherNew.Rmt2Descriptor rmt2Desc = new ShaderMatcherNew.Rmt2Descriptor(new_shader_type, shaderCategories);
 
             CachedTag rmdfTag = Cache.TagCache.GetTag<RenderMethodDefinition>($"shaders\\{rmt2Desc.Type}");
             RenderMethodDefinition rmdf;
@@ -1364,7 +1617,16 @@ namespace TagTool.Commands.Porting.Gen2
                                 {
                                     case "bump_map":
                                     case "environment_map":
+                                    case "change_color_map":
                                         Definition.ShaderProperties[0].TextureConstants[samplerIndex].FilterMode = TextureConstant.SamplerFilterMode.Anisotropic3Expensive;
+                                        if (new_shader_type == "decal")
+                                        {
+                                            Definition.ShaderProperties[0].TextureConstants[samplerIndex].SamplerAddressMode = new TextureConstant.PackedSamplerAddressMode
+                                            {
+                                                AddressU = TextureConstant.SamplerAddressModeEnum.Clamp,
+                                                AddressV = TextureConstant.SamplerAddressModeEnum.Clamp
+                                            };
+                                        }
                                         break;
                                 }
                                 Definition.ShaderProperties[0].TextureConstants[samplerIndex].Bitmap = Cache.TagCacheGenHO.GetTag(current_bitmap);
@@ -1405,10 +1667,10 @@ namespace TagTool.Commands.Porting.Gen2
                         {
                             if (h2_pixel_constants[i] == current_type)
                             {
-                                Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 20;
-                                Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 20;
-                                Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 20;
-                                Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = ((float)h2pixel_constant[i].Color.Alpha / 255) / 20;
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = ((float)h2pixel_constant[i].Color.Alpha / 255);
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = ((float)h2pixel_constant[i].Color.Alpha / 255);
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = ((float)h2pixel_constant[i].Color.Alpha / 255);
+                                Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = ((float)h2pixel_constant[i].Color.Alpha / 255);
                                 found = true;
                                 break;
                             }
@@ -1419,10 +1681,10 @@ namespace TagTool.Commands.Porting.Gen2
                             {
                                 if (h2_vertex_constants[i2] == current_type)
                                 {
-                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = ((float)h2vertex_constant[i2].W) / 20;
-                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = ((float)h2vertex_constant[i2].W) / 20;
-                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = ((float)h2vertex_constant[i2].W) / 20;
-                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = ((float)h2vertex_constant[i2].W) / 20;
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = ((float)h2vertex_constant[i2].W);
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = ((float)h2vertex_constant[i2].W);
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = ((float)h2vertex_constant[i2].W);
+                                    Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = ((float)h2vertex_constant[i2].W);
                                     found = true;
                                     break;
                                 }
@@ -1447,18 +1709,18 @@ namespace TagTool.Commands.Porting.Gen2
                     case "analytical_specular_contribution":
                         if (shader_template.Contains("no_detail"))
                         {
-                            Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = (float)0.25;
-                            Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = (float)0.25;
-                            Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = (float)0.25;
-                            Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = (float)0.25;
+                            Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = (float)0.125;
+                            Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = (float)0.125;
+                            Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = (float)0.125;
+                            Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = (float)0.125;
                             break;
                         }
                         else
                         {
-                            Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = (float)0.5;
-                            Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = (float)0.5;
-                            Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = (float)0.5;
-                            Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = (float)0.5;
+                            Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = (float)0.25;
+                            Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = (float)0.25;
+                            Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = (float)0.25;
+                            Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = (float)0.25;
                             break;
                         }
 
@@ -1568,10 +1830,10 @@ namespace TagTool.Commands.Porting.Gen2
                         break;
 
                     case "env_roughness_scale":
-                        Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = (float)0;
-                        Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = (float)0;
-                        Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = (float)0;
-                        Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = (float)0;
+                        Definition.ShaderProperties[0].RealConstants[current_index].Arg0 = (float)0.5;
+                        Definition.ShaderProperties[0].RealConstants[current_index].Arg1 = (float)0.5;
+                        Definition.ShaderProperties[0].RealConstants[current_index].Arg2 = (float)0.5;
+                        Definition.ShaderProperties[0].RealConstants[current_index].Arg3 = (float)0.5;
                         break;
 
                     // If no float constant specific edits are needed 
@@ -1654,7 +1916,24 @@ namespace TagTool.Commands.Porting.Gen2
                         break;
                 }
             }
-            return Definition as Shader;
+
+            // update alpha blended shaders to use add source times destination alpha, shader generator doesn't have an rmop for this
+            if (shader_template == "one_alpha")
+            {
+                Definition.ShaderProperties[0].BlendMode = BlendModeValue.AddSrcTimesDstalpha;
+            }
+
+            switch (new_shader_type)
+            {
+                case "shader":
+                    return Definition as Shader;
+                case "halogram":
+                    return Definition as ShaderHalogram;
+                case "decal":
+                    return Definition as ShaderDecal;
+                default:
+                    return Definition as Shader;
+            }
         }
 
         private RenderMethod.RenderMethodPostprocessBlock.RealConstant MatchVertexConstant(List<string> h2_vertex_constants, List<char> modifiers,
