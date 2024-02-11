@@ -161,7 +161,7 @@ namespace TagTool.Commands.Porting
 
                 case "rmbk" when CacheContext.TagCache.TryGetTag(@"levels\dlc\bunkerworld\shaders\z_black.rmsh", out shaderTag):
                     return shaderTag;
-                case "rmgl" when CacheContext.TagCache.TryGetTag(@"levels\dlc\sidewinder\shaders\side_hall_glass03", out shaderTag):
+                case "rmgl" when CacheContext.TagCache.TryGetTag(@"levels\dlc\sidewinder\shaders\side_hall_glass03.rmsh", out shaderTag):
                     return shaderTag;
                 case "rmrd":
                 case "rmsh":

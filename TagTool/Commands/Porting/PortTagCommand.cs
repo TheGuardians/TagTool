@@ -1710,8 +1710,8 @@ namespace TagTool.Commands.Porting
                             case "none":
                                 break;
                             default:
-                                if (!string.IsNullOrEmpty(scnrObj.MegaloLabel))
-                                    new TagToolWarning($"unknown megalo label: {scnrObj.MegaloLabel}");
+                                //if (!string.IsNullOrEmpty(scnrObj.MegaloLabel))
+                                //    new TagToolWarning($"unknown megalo label: {scnrObj.MegaloLabel}");
                                 break;
                         }
 
