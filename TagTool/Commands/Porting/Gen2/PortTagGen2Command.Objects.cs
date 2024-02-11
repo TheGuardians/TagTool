@@ -94,11 +94,11 @@ namespace TagTool.Commands.Porting.Gen2
             });
             newweapon.WeaponFlags = new WeaponFlags();
 
-            newweapon.CenteredFirstPersonWeaponOffset.X = (float)gen2Tag.FirstPersonWeaponOffset.I;
+            newweapon.CenteredFirstPersonWeaponOffset.X = (float)gen2Tag.FirstPersonWeaponOffset.I * 2;
             newweapon.CenteredFirstPersonWeaponOffset.Y = (float)gen2Tag.FirstPersonWeaponOffset.J;
             newweapon.CenteredFirstPersonWeaponOffset.Z = (float)gen2Tag.FirstPersonWeaponOffset.K;
 
-            newweapon.FirstPersonWeaponOffset.I = (float)gen2Tag.FirstPersonWeaponOffset.I;
+            newweapon.FirstPersonWeaponOffset.I = (float)gen2Tag.FirstPersonWeaponOffset.I * 2;
             newweapon.FirstPersonWeaponOffset.J = (float)gen2Tag.FirstPersonWeaponOffset.J;
             if (gen2Tag.FirstPersonWeaponOffset.K == 0) { newweapon.FirstPersonWeaponOffset.K = (float)0.02; }
             if (gen2Tag.FirstPersonWeaponOffset.K != 0) { newweapon.FirstPersonWeaponOffset.K = ((float)gen2Tag.FirstPersonWeaponOffset.K * -2); }
@@ -135,6 +135,12 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                     Cache.Serialize(cacheStream, model.CollisionModel, coll);
                 }
+                newscenery.MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>();
+                newscenery.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock
+                {
+                    Type = TagTool.Tags.Definitions.Common.MultiplayerObjectType.Weapon,
+                    SpawnTimerType = TagTool.Tags.Definitions.Common.MultiplayerObjectSpawnTimerType.StartsOnDisturbance
+                });
             }
             return newscenery;
         }
@@ -363,6 +369,13 @@ namespace TagTool.Commands.Porting.Gen2
                             };
                     break;
             }
+
+            vehi.MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>();
+            vehi.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock
+            {
+                Type = TagTool.Tags.Definitions.Common.MultiplayerObjectType.Weapon,
+                SpawnTimerType = TagTool.Tags.Definitions.Common.MultiplayerObjectSpawnTimerType.StartsOnDisturbance
+            });
             return vehi;
         }
 
@@ -376,14 +389,13 @@ namespace TagTool.Commands.Porting.Gen2
                         UnitHudInterface = Cache.TagCache.GetTag(gen2Tag.NewHudInterfaces[0].NewUnitHudInterface.ToString())
                     }
                 };
-                newbiped.PhysicsFlags.Halo3ODST = Havok.BipedPhysicsFlags.Halo3OdstBits.UsePlayerPhysics;
             }
-            
 
             newbiped.LockonDistance = gen2Tag.LockOnData.LockOnDistance;
             AutoConverter.TranslateEnum(gen2Tag.LockOnData.Flags, out newbiped.LockonFlags, newbiped.LockonFlags.GetType());
-
             newbiped.PhysicsFlags = gen2Tag.Physics.Flags;
+            AutoConverter.TranslateEnum(gen2Tag.Physics.Flags, out newbiped.PhysicsFlags.Halo3ODST, newbiped.PhysicsFlags.Halo3ODST.GetType());
+
             newbiped.HeightStanding = gen2Tag.Physics.HeightStanding;
             newbiped.HeightCrouching = gen2Tag.Physics.HeightCrouching;
             newbiped.Radius = gen2Tag.Physics.Radius;
