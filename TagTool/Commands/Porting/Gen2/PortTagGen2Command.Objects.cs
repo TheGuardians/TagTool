@@ -394,7 +394,7 @@ namespace TagTool.Commands.Porting.Gen2
             newbiped.LockonDistance = gen2Tag.LockOnData.LockOnDistance;
             AutoConverter.TranslateEnum(gen2Tag.LockOnData.Flags, out newbiped.LockonFlags, newbiped.LockonFlags.GetType());
             newbiped.PhysicsFlags = gen2Tag.Physics.Flags;
-            AutoConverter.TranslateEnum(gen2Tag.Physics.Flags, out newbiped.PhysicsFlags.Halo3ODST, newbiped.PhysicsFlags.Halo3ODST.GetType());
+            AutoConverter.TranslateEnum(gen2Tag.Physics.Flags.Halo2, out newbiped.PhysicsFlags.Halo3ODST, newbiped.PhysicsFlags.Halo3ODST.GetType());
 
             newbiped.HeightStanding = gen2Tag.Physics.HeightStanding;
             newbiped.HeightCrouching = gen2Tag.Physics.HeightCrouching;
