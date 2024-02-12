@@ -34,7 +34,7 @@ namespace TagTool.Commands.Porting.Gen2
             var gen2Text = nhdt.TextWidgets;
             var widgetDictionary = new Dictionary<string, string>();
 
-            // setup hud widgets blocks
+            // setup bitmap widget pairs
             foreach (var bitmap in gen2Bitmaps)
             {
                 string bitmapWidgetName = Cache.StringTable.GetString(bitmap.Name);
@@ -61,6 +61,7 @@ namespace TagTool.Commands.Porting.Gen2
                     case "heat_meter_single":
                     case "ammo_meter_single":
                     case "weapon_background_single":
+                    case "weapon_background_out":
                         AddWidgetDictionaryPair(bitmapWidgetName, "ammo_area", widgetDictionary);
                         break;
                     case "heat_background_left":
@@ -68,6 +69,14 @@ namespace TagTool.Commands.Porting.Gen2
                         AddWidgetDictionaryPair(bitmapWidgetName, "warning_flashes", widgetDictionary);
                         break;
                     case "scope_mask":
+                    case "left_crosshair":
+                    case "right_crosshair":
+                    case "bottom_crosshair":
+                    case "top_crosshair":
+                    case "2x":
+                    case "covenant_2xa":
+                    case "covenant_2xb":
+                    case "distance_meter":
                         AddWidgetDictionaryPair(bitmapWidgetName, "scope", widgetDictionary);
                         break;
                     case "backpack":
@@ -98,15 +107,54 @@ namespace TagTool.Commands.Porting.Gen2
                         break;
                 }
             }
+            // setup text widget pairs
+            foreach (var text in gen2Text)
+            {
+                string textWidgetName = Cache.StringTable.GetString(text.Name);
+                switch (textWidgetName)
+                {
+                    case "frag_count":
+                    case "frag_hidden":
+                        AddWidgetDictionaryPair(textWidgetName, "frag_grenade", widgetDictionary);
+                        break;
+                    case "plasma_count":
+                    case "plasma_hidden":
+                        AddWidgetDictionaryPair(textWidgetName, "plasma_grenade", widgetDictionary);
+                        break;
+                    case "battery_test_right":
+                    case "battery_test_right_out":
+                    case "bullets_right":
+                    case "bullets_right_out":
+                        AddWidgetDictionaryPair(textWidgetName, "ammo_area_right", widgetDictionary);
+                        break;
+                    case "battery_test_left":
+                    case "battery_test_left_out":
+                    case "bullets_left":
+                    case "bullets_left_out":
+                        AddWidgetDictionaryPair(textWidgetName, "ammo_area_left", widgetDictionary);
+                        break;
+                    case "bullets_single":
+                    case "bullets_out":
+                    case "heat":
+                    case "heat_out":
+                        AddWidgetDictionaryPair(textWidgetName, "ammo_area", widgetDictionary);
+                        break;
+                    default:
+                        AddWidgetDictionaryPair(textWidgetName, "unmapped", widgetDictionary);
+                        break;
+                }
+            }
 
             // populate hud widgets blocks
             chud.HudWidgets = new List<HudWidget>();
             AddHudWidgets(chud, widgetDictionary);
 
+            int widgetIndex = 0;
             // populate bitmaps into their correct hud widgets
             foreach (var hudWidget in chud.HudWidgets)
             {
                 hudWidget.BitmapWidgets = new List<HudWidget.BitmapWidget>();
+                hudWidget.TextWidgets = new List<HudWidget.TextWidget>();
 
                 for (int bitmapIndex = 0; bitmapIndex < gen2Bitmaps.Count; bitmapIndex++)
                 {
@@ -114,11 +162,13 @@ namespace TagTool.Commands.Porting.Gen2
                     string hudWidgetString = Cache.StringTable.GetString(hudWidget.Name);
 
                     // populate bitmaps and subblocks
-                    for (int i = 0; i < widgetDictionary.Count; i++)
+                    foreach (var widgetDictionaryEntry in widgetDictionary)
                     {
-                        if (widgetDictionary.TryGetValue(hudWidgetString, out string actualBitmapWidgetString) && actualBitmapWidgetString == bitmapWidgetString)
+                        if (widgetDictionaryEntry.Key == bitmapWidgetString && widgetDictionaryEntry.Value == hudWidgetString)
                         {
                             RealPoint2d realOffset = new RealPoint2d();
+                            RealPoint2d realOrigin = new RealPoint2d { X = -1f, Y = -1f };
+                            RealPoint2d realScale = new RealPoint2d { X = 1.25f, Y = 1.25f };
                             RenderDatum newRenderData = new RenderDatum();
 
                             switch (ConvertAnchor(nhdt.BitmapWidgets[bitmapIndex].Anchor.ToString()))
@@ -155,8 +205,13 @@ namespace TagTool.Commands.Porting.Gen2
                                 case "Crosshair":
                                     realOffset = new RealPoint2d
                                     {
-                                        X = nhdt.BitmapWidgets[bitmapIndex].FullscreenOffset.X - 44f,
-                                        Y = (nhdt.BitmapWidgets[bitmapIndex].FullscreenOffset.Y * 1.25f) - 44f,
+                                        X = nhdt.BitmapWidgets[bitmapIndex].FullscreenOffset.X * 1.25f,
+                                        Y = nhdt.BitmapWidgets[bitmapIndex].FullscreenOffset.Y * 1.25f,
+                                    };
+                                    realOrigin = new RealPoint2d
+                                    {
+                                        X = realOrigin.X * -1,
+                                        Y = realOrigin.Y * -1,
                                     };
                                     break;
                                 default:
@@ -167,26 +222,60 @@ namespace TagTool.Commands.Porting.Gen2
                                     };
                                     break;
                             }
+                            switch (bitmapWidgetString)
+                            {
+                                case "crosshair":
+                                    realOffset = new RealPoint2d
+                                    {
+                                        X = 0,
+                                        Y = 0,
+                                    };
+                                    realOrigin = new RealPoint2d
+                                    {
+                                        X = 0,
+                                        Y = 0,
+                                    };
+                                    break;
+                            }
+
+                            HudBitmapWidgets.FlagsValue flags = nhdt.BitmapWidgets[bitmapIndex].Flags;
+
+                            // Check and apply Flip to widget scale
+                            realScale.X *= (flags & HudBitmapWidgets.FlagsValue.FlipHorizontally) == HudBitmapWidgets.FlagsValue.FlipHorizontally ? -1 : 1;
+                            realOrigin.X *= (flags & HudBitmapWidgets.FlagsValue.FlipHorizontally) == HudBitmapWidgets.FlagsValue.FlipHorizontally ? -1 : 1;
+                            realScale.Y *= (flags & HudBitmapWidgets.FlagsValue.FlipVertically) == HudBitmapWidgets.FlagsValue.FlipVertically ? -1 : 1;
+                            realOrigin.Y *= (flags & HudBitmapWidgets.FlagsValue.FlipVertically) == HudBitmapWidgets.FlagsValue.FlipVertically ? -1 : 1;
+
+                            if (hudWidgetString == "scope" && bitmapWidgetString != "scope_mask")
+                            {
+                                realOrigin.X *= -1;
+                                realOrigin.Y *= -1;
+                            }
 
                             HudWidget.BitmapWidget newBitmapWidget = new HudWidget.BitmapWidget
                             {
-                                Name = Cache.StringTable.GetStringId(actualBitmapWidgetString),
+                                Name = Cache.StringTable.GetStringId(bitmapWidgetString),
                                 Bitmap = Cache.TagCacheGenHO.GetTag(nhdt.BitmapWidgets[bitmapIndex].Bitmap.ToString()),
                                 BitmapSequenceIndex = (byte)nhdt.BitmapWidgets[bitmapIndex].FullscreenSequenceIndex,
-                                PlacementData = new List<PlacementDatum>(),
                                 StateData = new List<StateDatum>(),
+                                PlacementData = new List<PlacementDatum>(),
+                                AnimationData = new List<AnimationDatum>(),
                                 RenderData = new List<RenderDatum>(),
+                                RuntimeWidgetIndex = widgetIndex
                             };
+                            widgetIndex++;
+                            StateDatum newStateData = new StateDatum { };
+                            ProcessStateData(nhdt, bitmapIndex, newStateData, "bitmap");
                             PlacementDatum newPlacementData = new PlacementDatum
                             {
                                 Anchor = (PlacementDatum.ChudAnchorType)Enum.Parse(typeof(PlacementDatum.ChudAnchorType), ConvertAnchor(nhdt.BitmapWidgets[bitmapIndex].Anchor.ToString())),
-                                Origin = new RealPoint2d { X = -1f, Y = -1f },
+                                Origin = realOrigin,
                                 Offset = realOffset,
-                                Scale = new RealPoint2d { X = 1.25f, Y = 1.25f },
+                                Scale = realScale,
                             };
-                            StateDatum newStateData = new StateDatum { };
-                            ProcessStateData(nhdt, bitmapIndex, newStateData, "bitmap");
-                            ConvertFlags(nhdt.BitmapWidgets[bitmapIndex].Flags, newBitmapWidget);
+                            AnimationDatum newAnimationData = new AnimationDatum();
+                            PopulateAnimationData(newAnimationData, bitmapWidgetString);
+                            ConvertFlags(nhdt.BitmapWidgets[bitmapIndex].Flags, newBitmapWidget, null);
 
                             CachedTag gen2Shader = gen2Hud.BitmapWidgets[bitmapIndex].Shader;
                             ShaderGen2 gen2ShaderInstance = Gen2Cache.Deserialize<ShaderGen2>(gen2CacheStream, gen2Shader);
@@ -333,6 +422,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                             newBitmapWidget.StateData.Add(newStateData);
                             newBitmapWidget.PlacementData.Add(newPlacementData);
+                            newBitmapWidget.AnimationData.Add(newAnimationData);
                             newBitmapWidget.RenderData.Add(newRenderData);
                             hudWidget.BitmapWidgets.Add(newBitmapWidget);
                         }
@@ -345,9 +435,9 @@ namespace TagTool.Commands.Porting.Gen2
                     string textWidgetString = Cache.StringTable.GetString(gen2Text[textIndex].Name);
                     string hudWidgetString = Cache.StringTable.GetString(hudWidget.Name);
 
-                    for (int i = 0; i < widgetDictionary.Count; i++)
+                    foreach (var widgetDictionaryEntry in widgetDictionary)
                     {
-                        if (widgetDictionary.TryGetValue(hudWidgetString, out string actualTextWidgetString) && actualTextWidgetString == textWidgetString)
+                        if (widgetDictionaryEntry.Key == textWidgetString && widgetDictionaryEntry.Value == hudWidgetString)
                         {
                             RealPoint2d realOffset = new RealPoint2d();
                             RenderDatum newRenderData = new RenderDatum();
@@ -399,24 +489,48 @@ namespace TagTool.Commands.Porting.Gen2
                                     break;
                             }
 
+                            string originalInput = Cache.StringTable.GetString(nhdt.TextWidgets[textIndex].String);
+                            string convertedInput = null;
+                            switch (originalInput)
+                            {
+                                case "hud_input1":
+                                    convertedInput = "chud_out_a";
+                                    break;
+                                default:
+                                    new TagToolWarning($"could not convert hud input string '{Gen2Cache.StringTable.GetString(nhdt.TextWidgets[textIndex].String)}'");
+                                    break;
+                            }
+
                             HudWidget.TextWidget newTextWidget = new HudWidget.TextWidget
                             {
-                                Name = Cache.StringTable.GetStringId(actualTextWidgetString),
-                                InputString = Cache.StringTable.GetStringId(Gen2Cache.StringTable.GetString(nhdt.TextWidgets[i].String)),
-                                PlacementData = new List<PlacementDatum>(),
+                                Name = Cache.StringTable.GetStringId(textWidgetString),
+                                InputString = Cache.StringTable.GetStringId(convertedInput),
                                 StateData = new List<StateDatum>(),
+                                PlacementData = new List<PlacementDatum>(),
+                                AnimationData = new List<AnimationDatum>(),
                                 RenderData = new List<RenderDatum>(),
+                                Font = WidgetFontValue.FullscreenHudMessage,
+                                WidgetIndex = widgetIndex
                             };
+                            widgetIndex++;
+                            StateDatum newStateData = new StateDatum { };
+                            ProcessStateData(nhdt, textIndex, newStateData, "text");
                             PlacementDatum newPlacementData = new PlacementDatum
                             {
                                 Anchor = (PlacementDatum.ChudAnchorType)Enum.Parse(typeof(PlacementDatum.ChudAnchorType), ConvertAnchor(nhdt.TextWidgets[textIndex].Anchor.ToString())),
                                 Origin = new RealPoint2d { X = -1f, Y = -1f },
                                 Offset = realOffset,
-                                Scale = new RealPoint2d { X = 1.25f, Y = 1.25f },
+                                Scale = new RealPoint2d { X = 1.75f, Y = 1.75f },
                             };
-                            StateDatum newStateData = new StateDatum { };
-                            ProcessStateData(nhdt, textIndex, newStateData, "text");
-                            //ConvertFlags(nhdt.TextWidgets[textIndex].Flags, newTextWidget);
+                            AnimationDatum newAnimationData = new AnimationDatum();
+                            PopulateAnimationData(newAnimationData, textWidgetString);
+
+                            string extraData = null;
+                            if (nhdt.TextWidgets[textIndex].Justification == HudTextWidgets.JustificationValue.Center)
+                            {
+                                extraData = "CenterHorizontally";
+                            }
+                            ConvertFlags(nhdt.TextWidgets[textIndex].Flags, newTextWidget, extraData);
 
                             CachedTag gen2Shader = gen2Hud.TextWidgets[textIndex].Shader;
                             ShaderGen2 gen2ShaderInstance = Gen2Cache.Deserialize<ShaderGen2>(gen2CacheStream, gen2Shader);
@@ -425,18 +539,13 @@ namespace TagTool.Commands.Porting.Gen2
                             switch (textWidgetString)
                             {
                                 case "frag_count":
+                                case "plasma_count":
                                     newRenderData = new RenderDatum
                                     {
-                                        ShaderType = RenderDatum.ChudShaderType.Crosshair,
+                                        ShaderType = RenderDatum.ChudShaderType.TextSimple,
                                         BlendModeHO = RenderDatum.ChudBlendMode.AlphaBlend,
-                                        ExternalInput = RenderDatum.ChudRenderExternalInputHO.Autoaim,
-                                        LocalColorA = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorA, "LocalColorA"),
-                                        LocalColorB = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorB, "LocalColorB"),
-                                        LocalColorC = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorC, "LocalColorC"),
-                                        LocalColorD = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorD, "LocalColorD"),
-                                        OutputColorA = RenderDatum.OutputColorValue_HO.CrosshairNormal,
-                                        OutputColorB = RenderDatum.OutputColorValue_HO.CrosshairEnemy,
-                                        OutputColorC = RenderDatum.OutputColorValue_HO.CrosshairFriendly,
+                                        ExternalInput = RenderDatum.ChudRenderExternalInputHO.GrenadeCount,
+                                        OutputColorB = RenderDatum.OutputColorValue_HO.HighlightForeground,
                                     };
                                     break;
                                 default:
@@ -523,13 +632,14 @@ namespace TagTool.Commands.Porting.Gen2
             };
             chud.HudAmmunitionInfo = newHudAmmunitionInfo;
 
-            if (gen2Tag.Name.ToString() == "ui\\hud\\masterchief")
+            switch (gen2Tag.Name.ToString())
             {
-                UpdateCHGD(cacheStream, "masterchief");
-            }
-            if (gen2Tag.Name.ToString() == "ui\\hud\\dervish")
-            {
-                UpdateCHGD(cacheStream, "dervish");
+                case "ui\\hud\\masterchief":
+                    UpdateCHGD(cacheStream, "masterchief");
+                    break;
+                case "ui\\hud\\dervish":
+                    UpdateCHGD(cacheStream, "dervish");
+                    break;
             }
 
             return chud;
@@ -546,7 +656,7 @@ namespace TagTool.Commands.Porting.Gen2
         public void AddHudWidgets(ChudDefinition chud, Dictionary<string, string> widgetDictionary)
         {
             List<string> hudWidgets = new List<string>();
-            foreach (var key in widgetDictionary.Keys)
+            foreach (var key in widgetDictionary.Values)
             {
                 if (!hudWidgets.Contains(key))
                 {
@@ -561,77 +671,117 @@ namespace TagTool.Commands.Porting.Gen2
             }
         }
 
-        public void ConvertFlags(HudBitmapWidgets.FlagsValue gen2BitmapFlags, HudWidget.BitmapWidget newBitmapData)
+        public AnimationDatum PopulateAnimationData(AnimationDatum animationData, string widgetString)
         {
-            var fields = gen2BitmapFlags.GetType().GetFields();
-            List<string> results = new List<string>();
-
-            foreach (var field in fields) // for every bitfield in the widget state
+            animationData.Active = new AnimationDatum.ChudWidgetAnimationStruct();
+            animationData.Initializing = new AnimationDatum.ChudWidgetAnimationStruct();
+            switch (widgetString)
             {
-                var fieldType = field.FieldType;
+                case "binocular_mask":
+                    animationData.Active.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Active.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\zoom_scope.chud_animation_definition");
+                    break;
+                case "frag_grenade_default":
+                case "frag_count":
+                case "frag_count_out":
+                case "plasma_grenade_default":
+                case "plasma_count":
+                case "plasma_count_out":
+                case "no_grenades":
+                case "shield_meter":
+                case "shield_mask":
+                case "motion_tracker_background":
+                    animationData.Initializing.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Initializing.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\boot_sequence\\default_boot_flash.chud_animation_definition");
+                    break;
+            }
+            return animationData;
+        }
 
-                // Check if the field is an enum and the underlying type is ushort
-                if (fieldType.IsEnum && Enum.GetUnderlyingType(fieldType) == typeof(ushort))
+        public uint PopulateRuntimeIndex(string bitmapWidgetName, uint hudWidgetIndex)
+        {
+            uint newWidgetIndex = 0;
+            switch (bitmapWidgetName)
+            {
+                case "binocular_mask":
+                    newWidgetIndex = 56;
+                    break;
+            }
+            return newWidgetIndex;
+        }
+
+
+        public void ConvertFlags(dynamic gen2Flags, dynamic newData, string extraData)
+        {
+            var enumType = gen2Flags.GetType();
+            List<string> results = new List<string>();
+            if (extraData != null) { results.Add(extraData); }
+
+            // Assuming ProcessFlagField processes individual flags and returns their string representations
+            foreach (var field in Enum.GetValues(enumType))
+            {
+                // Convert the current field to a numeric value for bitwise comparison
+                int flagValue = (ushort)field;
+                int gen2FlagValue = Convert.ToInt32(gen2Flags);
+
+                // Check if the flag is set in gen2BitmapFlags using bitwise AND
+                if ((gen2FlagValue & flagValue) == flagValue)
                 {
-                    ushort enumValue = (ushort)field.GetValue(gen2BitmapFlags);
-                    List<string> newBits = ProcessFlagField(enumValue, fieldType);
-                    results.AddRange(newBits);
+                    // This flag is set, process it
+                    string flagName = Enum.GetName(enumType, field);
+                    if (!string.IsNullOrEmpty(flagName))
+                    {
+                        switch (flagName)
+                        {
+                            case "ScopeMirrorHorizontally":
+                                results.Add("MirrorHorizontally");
+                                break;
+                            case "ScopeMirrorVertically":
+                                results.Add("MirrorVertically");
+                                break;
+                            case "ScopeStretch":
+                                results.Add("Stretch");
+                                break;
+                            case "StringIsANumber":
+                                results.Add("StringIsANumber");
+                                break;
+                            case "Force2DigitNumber":
+                                results.Add("Force2DigitNumber");
+                                break;
+                            case "Force3DigitNumber":
+                                results.Add("Force3DigitNumber");
+                                break;
+                            case "FlipVertically":
+                            case "FlipHorizontally":
+                            case "TalkingPlayerHack":
+                            default:
+                                new TagToolWarning($"match not found for bitmap flag type {flagName}");
+                                break;
+                        }
+                    }
                 }
             }
 
             foreach (var result in results)
             {
-                // Use reflection to find the enum in StateDatum
-                var field = newBitmapData.GetType().GetField("Flags");
+                // Use reflection to find the enum
+                var field = newData.GetType().GetField("Flags") ?? newData.GetType().GetField("TextFlags");
                 if (field != null && field.FieldType.IsEnum)
                 {
                     // Get current enum value
-                    object enumValue = field.GetValue(newBitmapData);
+                    object enumValue = field.GetValue(newData);
 
                     // Parse the bit to set
                     object bitValue = Enum.Parse(field.FieldType, result);
 
                     // Set the bit using bitwise OR
-                    ushort updatedValue = (ushort)(Convert.ToUInt16(enumValue) | Convert.ToUInt16(bitValue));
+                    uint updatedValue = (uint)(Convert.ToUInt32(enumValue) | Convert.ToUInt32(bitValue));
 
                     // Set the updated value back
-                    field.SetValue(newBitmapData, Enum.ToObject(field.FieldType, updatedValue));
+                    field.SetValue(newData, Enum.ToObject(field.FieldType, updatedValue));
                 }
             }
             results.Clear();
-        }
-
-        private List<string> ProcessFlagField(ushort enumValue, Type enumType)
-        {
-            List<string> results = new List<string>();
-
-            foreach (var enumName in Enum.GetNames(enumType)) // for every bit in the bitfield
-            {
-                var value = (ushort)Enum.Parse(enumType, enumName);
-                if ((enumValue & value) == value) // if bit is true
-                {
-                    switch (enumName)
-                    {
-                        case "FlipHorizontally":
-                            break;
-                        case "FlipVertically":
-                            break;
-                        case "ScopeMirrorHorizontally":
-                            results.Add("MirrorHorizontally");
-                            break;
-                        case "ScopeMirrorVertically":
-                            results.Add("MirrorVertically");
-                            break;
-                        case "ScopeStretch":
-                            results.Add("ExtendBorder");
-                            break;
-                        default:
-                            new TagToolWarning($"match not found for flag type {enumName}");
-                            break;
-                    }
-                }
-            }
-            return results;
         }
 
         private string ConvertAnchor(string input)
@@ -928,7 +1078,7 @@ namespace TagTool.Commands.Porting.Gen2
                             case "UnitIsZoomedLevel1":
                             case "UnitIsZoomedLevel2":
                             case "BinocularsEnabled":
-                                results.Add("UnitGeneralFlags.BinocularsNotActive");
+                                results.Add("InverseFlags.NotZoomedIn");
                                 break;
                             case "MotionSensorEnabled":
                                 results.Add("UnitGeneralFlags.MotionTrackerDisabled");
