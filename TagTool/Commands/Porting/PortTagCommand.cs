@@ -245,6 +245,17 @@ namespace TagTool.Commands.Porting
             {
                 RenderMethod renderMethod = BlamCache.Deserialize<RenderMethod>(blamCacheStream, blamTag);
 
+                if (BlamCache.Version >= CacheVersion.HaloReach)
+                {
+                    switch (blamTag.Group.Tag.ToString())
+                    {
+                        case "rmcs":
+                        case "rmgl":
+                            resultTag = GetDefaultShader(blamTag.Group.Tag, resultTag);
+                            return false;
+                    }
+                }
+
                 string templateName = renderMethod.ShaderProperties[0].Template.Name;
                 if(TagTool.Shaders.ShaderMatching.ShaderMatcherNew.Rmt2Descriptor.TryParse(templateName, out var rmt2Descriptor))
                 {
@@ -498,6 +509,9 @@ namespace TagTool.Commands.Porting
                                     item.ChildObject = null;
                                     break;
                             }
+
+                if (hlmt.NewDamageInfo == null || hlmt.NewDamageInfo.Count == 0)
+                    hlmt.NewDamageInfo = new List<Model.GlobalDamageInfoBlock>() { ConvertDamageInfoReach(hlmt.OmahaDamageInfo) };
             }
 
             if (definition is GameObject obj) {
@@ -1091,11 +1105,6 @@ namespace TagTool.Commands.Porting
                             else if (target.LockOnData.FlagsOld.HasFlag(Model.TargetLockOnData.FlagsValueOld.LockedByPlasmaTracking))
                                 target.LockOnData.TrackingType = CacheContext.StringTable.GetStringId("bipeds");
                         }
-                    }
-                    if(BlamCache.Version >= CacheVersion.HaloReach)
-                    {
-                        if(hlmt.NewDamageInfo == null || hlmt.NewDamageInfo.Count == 0)
-                            hlmt.NewDamageInfo = new List<Model.GlobalDamageInfoBlock>() { ConvertDamageInfoReach(hlmt.OmahaDamageInfo) };
                     }
                     break;
               
@@ -1699,8 +1708,8 @@ namespace TagTool.Commands.Porting
                             case "none":
                                 break;
                             default:
-                                if (!string.IsNullOrEmpty(scnrObj.MegaloLabel))
-                                    new TagToolWarning($"unknown megalo label: {scnrObj.MegaloLabel}");
+                                //if (!string.IsNullOrEmpty(scnrObj.MegaloLabel))
+                                //    new TagToolWarning($"unknown megalo label: {scnrObj.MegaloLabel}");
                                 break;
                         }
 
@@ -1934,7 +1943,7 @@ namespace TagTool.Commands.Porting
                 if (matchIndex != -1)
                 {
                     if(name != originalName)
-                        new TagToolWarning($"Failed to find global material type '{originalName}', using '{name}' instead");
+                        Console.WriteLine($"Failed to find global material type '{originalName}', using '{name}'");
 
                     return matchIndex;
                 }
@@ -1944,7 +1953,7 @@ namespace TagTool.Commands.Porting
                 if (blamIndex == -1)
                 {
                     if (!originalName.StartsWith("default"))
-                        new TagToolWarning($"Failed to find global material type '{originalName}', using 'default_material'");
+                        Console.WriteLine($"Failed to find global material type '{originalName}', using 'default_material'");
                     return 0;
                 }
 
@@ -1961,7 +1970,7 @@ namespace TagTool.Commands.Porting
                     matchIndex = 0;
 
                 name = CacheContext.StringTable.GetString(materials[matchIndex].Name);
-                new TagToolWarning($"Failed to find global material type '{originalName}', using '{name}' instead");
+                Console.WriteLine($"Failed to find global material type '{originalName}', using '{name}'");
                 return matchIndex;
             }
         }

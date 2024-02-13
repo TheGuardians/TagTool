@@ -43,7 +43,8 @@ namespace TagTool.Commands.Porting.Gen2
                     Name = gen2var.Name,
                     ModelRegionIndices = gen2var.ModelRegionIndices,
                     Regions = new List<Model.Variant.Region>(),
-                    Objects = new List<Model.Variant.Object>()
+                    Objects = new List<Model.Variant.Object>(),
+                    InstanceGroupIndex = -1
                 };
                 foreach (var gen2reg in gen2var.Regions)
                 {
@@ -112,9 +113,19 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             AutoConverter.TranslateList(gen2Model.NewDamageInfo, model.NewDamageInfo);
-
             // Fixup NewDamageInfo
-            if (gen2Model.NewDamageInfo.Count > 0)
+            foreach (var newDmg in model.NewDamageInfo)
+            {
+                foreach(var dmgSec in newDmg.DamageSections)
+                {
+                    foreach(var insRep in dmgSec.InstantResponses)
+                    {
+                        insRep.SecondaryRuntimeRegionIndex = -1;
+                        insRep.DestroyInstanceGroup = -1;
+                    }
+                }
+            }
+            if(model.NewDamageInfo.Count > 0)
             {
                 model.NewDamageInfo[0].CollisionDamageReportingType = ConvertDamageReportingType(gen2Model.NewDamageInfo[0].CollisionDamageReportingType);
                 model.NewDamageInfo[0].ResponseDamageReportingType = ConvertDamageReportingType(gen2Model.NewDamageInfo[0].ResponseDamageReportingType);

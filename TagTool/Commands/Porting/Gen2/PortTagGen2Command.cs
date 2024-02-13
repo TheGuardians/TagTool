@@ -97,6 +97,7 @@ namespace TagTool.Commands.Porting.Gen2
             //use hardcoded list of supported tags to prevent unnecessary deserialization
             List<string> supportedTagGroups = new List<string>
             {
+                "ant!",
                 "coll",
                 "jmad",
                 "phmo",
@@ -119,8 +120,16 @@ namespace TagTool.Commands.Porting.Gen2
                 "ctrl",
                 "bipd",
                 "nhdt",
+                "pphy"
             };
-            if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
+            // don't print a warning for these
+            List<string> hiddenTagGroups = new List<string>
+            {
+                "stem",
+                "spas",
+                "vrtx"
+            };
+            if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()) && !hiddenTagGroups.Contains(gen2Tag.Group.ToString()))
             {
                 new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null!");
                 return null;
@@ -155,6 +164,10 @@ namespace TagTool.Commands.Porting.Gen2
 
             switch (gen2definition)
             {
+                case Antenna antenna:
+                case PointPhysics pointPhysics: // not a widget, but we can group it with widgets
+                    definition = ConvertWidget(gen2definition);
+                    break;
                 case CollisionModel collisionModel:
                     definition = ConvertCollisionModel(collisionModel);
                     break;
@@ -185,13 +198,14 @@ namespace TagTool.Commands.Porting.Gen2
                 case Biped biped:
                     definition = ConvertObject(gen2definition, cacheStream);
                     break;
+                case Effect effect:
                 case DamageEffect damage:
-                    definition = ConvertEffect(damage);
+                    definition = ConvertEffect(gen2definition);
                     break;
                 case Shader shader:
                     //preserve a copy of unconverted data
                     Shader oldshader = Gen2Cache.Deserialize<Shader>(gen2CacheStream, gen2Tag);
-                    definition = ConvertShader(shader, oldshader, gen2Tag.Name, cacheStream, gen2CacheStream);
+                    definition = ConvertShader(shader, oldshader, gen2Tag.Name, cacheStream, gen2CacheStream, gen2Tag);
                     break;
                 //return Cache.TagCache.GetTag(@"shaders\invalid.shader");
                 case ScenarioStructureBsp sbsp:
@@ -214,10 +228,14 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertSoundEnvironment(snde);
                     break;
                 case NewHudDefinition nhdt:
-                    definition = ConvertNewHudDefinition(nhdt);
+                    NewHudDefinition gen2Hud = Gen2Cache.Deserialize<NewHudDefinition>(gen2CacheStream, gen2Tag);
+                    definition = ConvertNewHudDefinition(nhdt, gen2Hud, cacheStream, gen2CacheStream, gen2Tag);
                     break;
                 default:
-                    new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
+                    if (!hiddenTagGroups.Contains(gen2Tag.Group.ToString()))
+                    {
+                        new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null!");
+                    }
                     return null;
             }
 

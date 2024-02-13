@@ -73,9 +73,9 @@ namespace TagTool.Commands.Gen2.Bitmaps
                 rawBitmapData = ConvertP8BitmapData(rawBitmapData);
 
             //normalize X8R8G8B8 bumpmaps
-            if (gen2Img.Format == BitmapGen2.BitmapDataBlock.FormatValue.X8r8g8b8 &&
-                gen2Bitmap.Usage == BitmapGen2.UsageValue.HeightMap)
-                rawBitmapData = NormalizeX8R8G8B8HeightMap(rawBitmapData);
+            //if (gen2Img.Format == BitmapGen2.BitmapDataBlock.FormatValue.X8r8g8b8 &&
+            //    gen2Bitmap.Usage == BitmapGen2.UsageValue.HeightMap)
+            //    rawBitmapData = NormalizeX8R8G8B8HeightMap(rawBitmapData);
 
             return rawBitmapData;
         }
@@ -107,6 +107,36 @@ namespace TagTool.Commands.Gen2.Bitmaps
             newImg.PixelDataSize = rawBitmapData.Length;
 
             return newImg;
+        }
+
+        public static void PostprocessBitmap(BaseBitmap baseBitmap, BitmapGen2 bitm, Bitmap.Image image)
+        {
+            // convert XRGB8 bumpmaps to DXN
+            if (image.Format == BitmapFormat.X8R8G8B8 && bitm.Usage == BitmapGen2.UsageValue.HeightMap)
+            {
+                // convert to raw RGBA
+                byte[] rawData = BitmapDecoder.DecodeBitmap(baseBitmap.Data, image.Format, image.Width, image.Height);
+
+                for (int i = 0; i < rawData.Length; i += 4)
+                {
+                    rawData[i + 0] = rawData[i + 0];//(byte)((((rawData[i + 0] / 255.0f) + 1.007874015748031f) / 2.007874015748031f) * 255.0f);
+                    rawData[i + 1] = rawData[i + 1];//(byte)((((rawData[i + 1] / 255.0f) + 1.007874015748031f) / 2.007874015748031f) * 255.0f);
+                    rawData[i + 2] = rawData[i + 2];//(byte)((((rawData[i + 2] / 255.0f) + 1.007874015748031f) / 2.007874015748031f) * 255.0f);
+                    rawData[i + 3] = 0xFF;
+                }
+
+                baseBitmap.Data = TagTool.Bitmaps.Utils.BitmapConverter.EncodeDXN(rawData, image.Width, image.Height, out baseBitmap.MipMapCount, true);
+
+                // Swap R and G channel (DX9 ATI2N)
+                baseBitmap.Data = BitmapDecoder.SwapXYDxn(baseBitmap.Data, image.Width, image.Height);
+                // Prevent memory allocation crash
+                TagTool.Bitmaps.Utils.BitmapConverter.TrimLowestMipmaps(baseBitmap);
+                image.MipmapCount = (sbyte)(baseBitmap.MipMapCount - 1);
+
+                baseBitmap.UpdateFormat(BitmapFormat.Dxn);
+                baseBitmap.Flags |= BitmapFlags.Compressed;
+                image.Format = BitmapFormat.Dxn;
+            }
         }
 
         private static byte[] ConvertP8BitmapData(byte[] data)

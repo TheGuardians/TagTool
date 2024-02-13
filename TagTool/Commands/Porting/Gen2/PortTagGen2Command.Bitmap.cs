@@ -61,6 +61,9 @@ namespace TagTool.Commands.Porting.Gen2
                 Bitmap.Image newImg = BitmapConverterGen2.ConvertBitmapImage(Gen2Cache, gen2Img, rawBitmapData);
                 BaseBitmap bitmapbase = new BaseBitmap(newImg);
                 bitmapbase.Data = rawBitmapData;
+
+                BitmapConverterGen2.PostprocessBitmap(bitmapbase, gen2Bitmap, newImg);
+
                 var bitmapResourceDefinition = BitmapUtils.CreateBitmapTextureInteropResource(bitmapbase);
                 var resourceReference = Cache.ResourceCache.CreateBitmapResource(bitmapResourceDefinition);
                 newBitmap.HardwareTextures.Add(resourceReference);
