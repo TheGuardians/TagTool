@@ -40,6 +40,20 @@ namespace TagTool.Geometry
 
             return json;
         }
-
+        public JSONNode ReadString()
+        {
+            try
+            {
+                // Parse the JSON string
+                var jsonNode = JSON.Parse(filename);
+                return jsonNode;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during parsing
+                Console.WriteLine("Error parsing JSON string: " + ex.Message);
+                return null;
+            }
+        }
     }
 }
