@@ -137,6 +137,9 @@ namespace TagTool.Commands.Porting.Gen2
             // Starting Profiles
             AutoConverter.TranslateList(gen2Tag.PlayerStartingProfile, newScenario.PlayerStartingProfile);
 
+            if (newScenario.MapType == ScenarioMapType.Multiplayer)
+                ConfigurePlayerStartingProfile(newScenario, gen2Tag);
+
             //soft surfaces
             newScenario.SoftSurfaces = new List<Scenario.SoftSurfaceBlock> { new Scenario.SoftSurfaceBlock() };
 
@@ -276,6 +279,43 @@ namespace TagTool.Commands.Porting.Gen2
             newScenario.Lightmap = ConvertLightmap(rawgen2Tag, newScenario, scenarioPath, cacheStream, gen2CacheStream);
 
             return newScenario;
+        }
+
+        private void ConfigurePlayerStartingProfile(Scenario scnr, Gen2Scenario gen2scnr)
+        {
+            bool noGrenades = false;
+            bool plasmaGrenades = false;
+
+            if (gen2scnr.StartingEquipment?.Count() > 0)
+            {
+                noGrenades = gen2scnr.StartingEquipment[0].Flags.HasFlag(Gen2Scenario.ScenarioStartingEquipmentBlock.FlagsValue.NoGrenades);
+                plasmaGrenades = gen2scnr.StartingEquipment[0].Flags.HasFlag(Gen2Scenario.ScenarioStartingEquipmentBlock.FlagsValue.PlasmaGrenades);
+            }
+
+            //get from globals later maybe
+            byte grenadeCount = 2;
+
+            if (scnr.PlayerStartingProfile == null || scnr.PlayerStartingProfile.Count == 0)
+            {
+                scnr.PlayerStartingProfile = new List<Scenario.PlayerStartingProfileBlock>() {
+                    new Scenario.PlayerStartingProfileBlock() {
+                        Name = "start_assault",
+                        PrimaryWeapon = Cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap"),
+                        PrimaryRoundsLoaded = 32,
+                        PrimaryRoundsTotal = 108,
+                        StartingFragGrenadeCount = (noGrenades || plasmaGrenades) ? (byte)0 : grenadeCount,
+                        StartingPlasmaGrenadeCount = (plasmaGrenades && !noGrenades) ? grenadeCount : (byte)0
+                    }
+                };
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(scnr.PlayerStartingProfile[0].Name))
+                    scnr.PlayerStartingProfile[0].Name = "start_assault";
+        
+                if (scnr.PlayerStartingProfile[0].PrimaryWeapon == null)
+                    scnr.PlayerStartingProfile[0].PrimaryWeapon = Cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap");
+            }
         }
 
         public TagStructure ConvertStructureBSP(Gen2ScenarioStructureBsp gen2Tag)
