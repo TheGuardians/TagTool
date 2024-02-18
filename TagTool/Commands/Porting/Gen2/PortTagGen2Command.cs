@@ -184,7 +184,7 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertModel(model, cacheStream);
                     break;
                 case Bitmap bitmap:
-                    definition = ConvertBitmap(bitmap);
+                    definition = ConvertBitmap(bitmap, gen2Tag.Name);
                     break;
                 case Crate crate:
                 case Scenery scenery:
