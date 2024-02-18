@@ -5,6 +5,9 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using TagTool.Cache;
+using TagTool.Cache.HaloOnline;
+using TagTool.Commands.Common;
+using TagTool.Commands.Scenarios;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Geometry.BspCollisionGeometry;
@@ -26,8 +29,10 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         private ScenarioStructureBsp Definition { get; }
         private CachedTag Tag { get; }
         private Stream InternalStream { get; }
+        private Scenario ScenarioDef { get; }
 
-        public GenerateStructureSurfacesCommand(GameCache cache, CachedTag tag, ScenarioStructureBsp definition, Stream stream = null) :
+        public GenerateStructureSurfacesCommand(GameCache cache, CachedTag tag, ScenarioStructureBsp definition, 
+            Stream stream = null, Scenario scnrDefinition = null) :
             base(true,
 
                 "GenerateStructureSurfaces",
@@ -41,17 +46,24 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             Definition = definition;
             Tag = tag;
             InternalStream = stream;
+            ScenarioDef = scnrDefinition;
         }
 
         public override object Execute(List<string> args)
         {
-            string lightmapTagName = Tag.Name;
-
             // Find and deserialize the lightmap bsp
             Stream stream = (InternalStream != null ? InternalStream : Cache.OpenCacheRead());
             ScenarioLightmapBspData lbsp;
+            CachedTag lbspTag;
 
-            lbsp = Cache.Deserialize<ScenarioLightmapBspData>(stream, Cache.TagCache.GetTag<ScenarioLightmapBspData>(lightmapTagName));
+            string lightmapTagName = Tag.Name + ".Lbsp";
+            if (!Cache.TagCache.TryGetCachedTag(lightmapTagName, out lbspTag))
+            {
+                if (!TryGetLbspTag(stream, out lbspTag))
+                    return new TagToolWarning("Structure surface generation aborted: Lbsp not found");
+            }
+
+            lbsp = Cache.Deserialize<ScenarioLightmapBspData>(stream, lbspTag);
             var renderGeometry = lbsp.Geometry;
             var renderGeometryResource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(renderGeometry.Resource);
             if (renderGeometryResource == null)
@@ -75,6 +87,26 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             }
             Console.WriteLine("Finished.");
             return true;
+        }
+
+        private bool TryGetLbspTag(Stream stream, out CachedTag lbspTag)
+        {
+            if (ScenarioDef != null)
+            {
+                int sbspIndex = ScenarioDef.StructureBsps.FindIndex(x => x.StructureBsp == Tag);
+                if (ScenarioDef.Lightmap != null && sbspIndex != -1)
+                {
+                    ScenarioLightmap sLdT = Cache.Deserialize<ScenarioLightmap>(stream, ScenarioDef.Lightmap);
+                    if (sLdT.PerPixelLightmapDataReferences?.Count() > sbspIndex)
+                    {
+                        lbspTag = sLdT.PerPixelLightmapDataReferences?[sbspIndex].LightmapBspData;
+                        return true;
+                    }
+                }
+            }
+
+            lbspTag = null;
+            return false;
         }
 
         public void GenerateStructureBspStructureSurfaces(StructureBspTagResources tagResources, StructureBspCacheFileTagResources cacheFileTagResources, RenderGeometry renderGeometry)
