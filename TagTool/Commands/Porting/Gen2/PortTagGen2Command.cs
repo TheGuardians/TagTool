@@ -184,7 +184,7 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertModel(model, cacheStream);
                     break;
                 case Bitmap bitmap:
-                    definition = ConvertBitmap(bitmap);
+                    definition = ConvertBitmap(bitmap, gen2Tag.Name);
                     break;
                 case Crate crate:
                 case Scenery scenery:
@@ -272,7 +272,7 @@ namespace TagTool.Commands.Porting.Gen2
 
                             CachedTag sbspTag = block.StructureBsp;
                             var sbsp = Cache.Deserialize<TagTool.Tags.Definitions.ScenarioStructureBsp>(cacheStream, sbspTag);
-                            new GenerateStructureSurfacesCommand(Cache, sbspTag, sbsp, cacheStream).Execute(new List<string> { });
+                            new GenerateStructureSurfacesCommand(Cache, sbspTag, sbsp, cacheStream, scnr).Execute(new List<string> { });
                             Cache.Serialize(cacheStream, sbspTag, sbsp);
                         }
                     }

@@ -109,7 +109,7 @@ namespace TagTool.Commands.Gen2.Bitmaps
             return newImg;
         }
 
-        public static void PostprocessBitmap(BaseBitmap baseBitmap, BitmapGen2 bitm, Bitmap.Image image)
+        public static void PostprocessBitmap(BaseBitmap baseBitmap, BitmapGen2 bitm, Bitmap.Image image, string gen2TagName)
         {
             // convert XRGB8 bumpmaps to DXN
             if (image.Format == BitmapFormat.X8R8G8B8 && bitm.Usage == BitmapGen2.UsageValue.HeightMap)

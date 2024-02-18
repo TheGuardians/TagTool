@@ -1173,7 +1173,7 @@ namespace TagTool.Commands.Porting
 
                                 CachedTag sbspTag = block.StructureBsp;
                                 var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, sbspTag);
-                                new GenerateStructureSurfacesCommand(CacheContext, sbspTag, sbsp, cacheStream).Execute(new List<string> { });
+                                new GenerateStructureSurfacesCommand(CacheContext, sbspTag, sbsp, cacheStream, scnr).Execute(new List<string> { });
                                 CacheContext.Serialize(cacheStream, sbspTag, sbsp);
                             }
                         }
@@ -1759,6 +1759,10 @@ namespace TagTool.Commands.Porting
 
                 case CollisionGeometry collisionGeometry:
                     return ConvertCollisionBsp(collisionGeometry);
+
+                case CollisionBspPhysicsDefinition collisionBspPhysics when BlamCache.Version >= CacheVersion.HaloReach:
+                    collisionBspPhysics = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, collisionBspPhysics, definition, blamTagName);
+                    return ConvertCollisionBspPhysicsReach(collisionBspPhysics);
 
 				case RenderGeometry renderGeometry when BlamCache.Version >= CacheVersion.Halo3Retail:
 					renderGeometry = ConvertStructure(cacheStream, blamCacheStream, resourceStreams, renderGeometry, definition, blamTagName);

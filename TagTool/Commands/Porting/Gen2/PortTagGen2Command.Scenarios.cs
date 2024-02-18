@@ -15,6 +15,8 @@ using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using static TagTool.Commands.Porting.Gen2.Gen2BspGeometryConverter;
+using Gen2Scenario = TagTool.Tags.Definitions.Gen2.Scenario;
+using Gen2ScenarioStructureBsp = TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -22,7 +24,7 @@ namespace TagTool.Commands.Porting.Gen2
     {
         List<List<Gen2BSPResourceMesh>> bspMeshes = new List<List<Gen2BSPResourceMesh>>();
 
-        private void ConvertNetgameFlags(TagTool.Tags.Definitions.Gen2.Scenario rawgen2tag, Scenario newScenario)
+        private void ConvertNetgameFlags(Gen2Scenario rawgen2tag, Scenario newScenario)
         {
             if (newScenario.MapType == ScenarioMapType.Multiplayer)
             {
@@ -36,25 +38,25 @@ namespace TagTool.Commands.Porting.Gen2
                     CachedTag objectiveItem = null;
                     switch (NetgameFlags.Type)
                     {
-                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.OddballSpawn:
+                        case Gen2Scenario.ScenarioNetpointsBlock.TypeValue.OddballSpawn:
                             Cache.TagCache.TryGetTag<Crate>(@"objects\multi\oddball\oddball_ball_spawn_point", out objectiveItem);
                             break;
-                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.CtfFlagSpawn:
+                        case Gen2Scenario.ScenarioNetpointsBlock.TypeValue.CtfFlagSpawn:
                             Cache.TagCache.TryGetTag<Crate>(@"objects\multi\ctf\ctf_flag_spawn_point", out objectiveItem);
                             break;
-                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.CtfFlagReturn:
+                        case Gen2Scenario.ScenarioNetpointsBlock.TypeValue.CtfFlagReturn:
                             Cache.TagCache.TryGetTag<Crate>(@"objects\multi\ctf\ctf_flag_return_area", out objectiveItem);
                             break;
-                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.AssaultBombSpawn:
+                        case Gen2Scenario.ScenarioNetpointsBlock.TypeValue.AssaultBombSpawn:
                             Cache.TagCache.TryGetTag<Crate>(@"objects\multi\assault\assault_bomb_spawn_point", out objectiveItem);
                             break;
-                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.AssaultBombReturn:
+                        case Gen2Scenario.ScenarioNetpointsBlock.TypeValue.AssaultBombReturn:
                             Cache.TagCache.TryGetTag<Crate>(@"objects\multi\assault\assault_bomb_goal_area", out objectiveItem);
                             break;
-                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.TeleporterSrc:
+                        case Gen2Scenario.ScenarioNetpointsBlock.TypeValue.TeleporterSrc:
                             Cache.TagCache.TryGetTag<Crate>(@"objects\multi\teleporter_sender\teleporter_sender", out objectiveItem);
                             break;
-                        case TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetpointsBlock.TypeValue.TeleporterDest:
+                        case Gen2Scenario.ScenarioNetpointsBlock.TypeValue.TeleporterDest:
                             Cache.TagCache.TryGetTag<Crate>(@"objects\multi\teleporter_reciever\teleporter_reciever", out objectiveItem);
                             break;
                     }
@@ -95,7 +97,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
         }
 
-        public TagStructure ConvertScenario(TagTool.Tags.Definitions.Gen2.Scenario gen2Tag, TagTool.Tags.Definitions.Gen2.Scenario rawgen2Tag, string scenarioPath
+        public TagStructure ConvertScenario(Gen2Scenario gen2Tag, Gen2Scenario rawgen2Tag, string scenarioPath
             , Stream cacheStream, Stream gen2CacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             Scenario newScenario = new Scenario();
@@ -134,6 +136,9 @@ namespace TagTool.Commands.Porting.Gen2
 
             // Starting Profiles
             AutoConverter.TranslateList(gen2Tag.PlayerStartingProfile, newScenario.PlayerStartingProfile);
+
+            if (newScenario.MapType == ScenarioMapType.Multiplayer)
+                ConfigurePlayerStartingProfile(newScenario, gen2Tag);
 
             //soft surfaces
             newScenario.SoftSurfaces = new List<Scenario.SoftSurfaceBlock> { new Scenario.SoftSurfaceBlock() };
@@ -276,7 +281,44 @@ namespace TagTool.Commands.Porting.Gen2
             return newScenario;
         }
 
-        public TagStructure ConvertStructureBSP(TagTool.Tags.Definitions.Gen2.ScenarioStructureBsp gen2Tag)
+        private void ConfigurePlayerStartingProfile(Scenario scnr, Gen2Scenario gen2scnr)
+        {
+            bool noGrenades = false;
+            bool plasmaGrenades = false;
+
+            if (gen2scnr.StartingEquipment?.Count() > 0)
+            {
+                noGrenades = gen2scnr.StartingEquipment[0].Flags.HasFlag(Gen2Scenario.ScenarioStartingEquipmentBlock.FlagsValue.NoGrenades);
+                plasmaGrenades = gen2scnr.StartingEquipment[0].Flags.HasFlag(Gen2Scenario.ScenarioStartingEquipmentBlock.FlagsValue.PlasmaGrenades);
+            }
+
+            //get from globals later maybe
+            byte grenadeCount = 2;
+
+            if (scnr.PlayerStartingProfile == null || scnr.PlayerStartingProfile.Count == 0)
+            {
+                scnr.PlayerStartingProfile = new List<Scenario.PlayerStartingProfileBlock>() {
+                    new Scenario.PlayerStartingProfileBlock() {
+                        Name = "start_assault",
+                        PrimaryWeapon = Cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap"),
+                        PrimaryRoundsLoaded = 32,
+                        PrimaryRoundsTotal = 108,
+                        StartingFragGrenadeCount = (noGrenades || plasmaGrenades) ? (byte)0 : grenadeCount,
+                        StartingPlasmaGrenadeCount = (plasmaGrenades && !noGrenades) ? grenadeCount : (byte)0
+                    }
+                };
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(scnr.PlayerStartingProfile[0].Name))
+                    scnr.PlayerStartingProfile[0].Name = "start_assault";
+        
+                if (scnr.PlayerStartingProfile[0].PrimaryWeapon == null)
+                    scnr.PlayerStartingProfile[0].PrimaryWeapon = Cache.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap");
+            }
+        }
+
+        public TagStructure ConvertStructureBSP(Gen2ScenarioStructureBsp gen2Tag)
         {
             ScenarioStructureBsp newSbsp = new ScenarioStructureBsp();
             newSbsp.UseResourceItems = 1; // use CollisionBspResource
@@ -709,7 +751,7 @@ namespace TagTool.Commands.Porting.Gen2
             return newSbsp;
         }
 
-        public void ConvertScenarioPlacements(TagTool.Tags.Definitions.Gen2.Scenario gen2Tag, TagTool.Tags.Definitions.Gen2.Scenario rawgen2tag,
+        public void ConvertScenarioPlacements(Gen2Scenario gen2Tag, Gen2Scenario rawgen2tag,
             Scenario newScenario, Stream gen2CacheStream, Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams)
         {
             // Object names
@@ -1078,7 +1120,7 @@ namespace TagTool.Commands.Porting.Gen2
                                 {
                                     // Convert weapon flags
                                     var WeaponFlags = Scenario.WeaponInstance.ScenarioWeaponDatumFlags.DoesAcceleratemovesDueToExplosions;
-                                    if (NetgameEquipment.Flags.HasFlag(TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.FlagsValue.Levitate))
+                                    if (NetgameEquipment.Flags.HasFlag(Gen2Scenario.ScenarioNetgameEquipmentBlock.FlagsValue.Levitate))
                                     {
                                         WeaponFlags |= Scenario.WeaponInstance.ScenarioWeaponDatumFlags.InitiallyAtRestdoesntFall;
                                     }
@@ -1398,63 +1440,63 @@ namespace TagTool.Commands.Porting.Gen2
         }
 
         void ConvertH2GametypeFlags(ref TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags EngineFlags,
-            TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock NetgameEquipment)
+            Gen2Scenario.ScenarioNetgameEquipmentBlock NetgameEquipment)
         {
-            if (NetgameEquipment.GameType1 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.CaptureTheFlag
-                || NetgameEquipment.GameType2 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.CaptureTheFlag
-                || NetgameEquipment.GameType3 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.CaptureTheFlag
-                || NetgameEquipment.GameType4 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.CaptureTheFlag)
+            if (NetgameEquipment.GameType1 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.CaptureTheFlag
+                || NetgameEquipment.GameType2 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.CaptureTheFlag
+                || NetgameEquipment.GameType3 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.CaptureTheFlag
+                || NetgameEquipment.GameType4 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.CaptureTheFlag)
             {
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.CaptureTheFlag;
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Assault;
             }
 
-            if (NetgameEquipment.GameType1 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.Slayer
-                || NetgameEquipment.GameType2 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.Slayer
-                || NetgameEquipment.GameType3 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.Slayer
-                || NetgameEquipment.GameType4 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.Slayer)
+            if (NetgameEquipment.GameType1 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.Slayer
+                || NetgameEquipment.GameType2 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.Slayer
+                || NetgameEquipment.GameType3 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.Slayer
+                || NetgameEquipment.GameType4 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.Slayer)
             {
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Infection;
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Slayer;
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Vip;
             }
 
-            if (NetgameEquipment.GameType1 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.Oddball
-                || NetgameEquipment.GameType2 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.Oddball
-                || NetgameEquipment.GameType3 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.Oddball
-                || NetgameEquipment.GameType4 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.Oddball)
+            if (NetgameEquipment.GameType1 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.Oddball
+                || NetgameEquipment.GameType2 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.Oddball
+                || NetgameEquipment.GameType3 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.Oddball
+                || NetgameEquipment.GameType4 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.Oddball)
             {
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Oddball;
             }
 
-            if (NetgameEquipment.GameType1 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.KingOfTheHill
-                || NetgameEquipment.GameType2 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.KingOfTheHill
-                || NetgameEquipment.GameType3 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.KingOfTheHill
-                || NetgameEquipment.GameType4 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.KingOfTheHill)
+            if (NetgameEquipment.GameType1 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.KingOfTheHill
+                || NetgameEquipment.GameType2 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.KingOfTheHill
+                || NetgameEquipment.GameType3 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.KingOfTheHill
+                || NetgameEquipment.GameType4 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.KingOfTheHill)
             {
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.KingOfTheHill;
             }
 
-            if (NetgameEquipment.GameType1 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.Juggernaut
-                || NetgameEquipment.GameType2 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.Juggernaut
-                || NetgameEquipment.GameType3 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.Juggernaut
-                || NetgameEquipment.GameType4 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.Juggernaut)
+            if (NetgameEquipment.GameType1 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.Juggernaut
+                || NetgameEquipment.GameType2 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.Juggernaut
+                || NetgameEquipment.GameType3 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.Juggernaut
+                || NetgameEquipment.GameType4 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.Juggernaut)
             {
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Juggernaut;
             }
 
-            if (NetgameEquipment.GameType1 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.Territories
-                || NetgameEquipment.GameType2 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.Territories
-                || NetgameEquipment.GameType3 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.Territories
-                || NetgameEquipment.GameType4 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.Territories)
+            if (NetgameEquipment.GameType1 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.Territories
+                || NetgameEquipment.GameType2 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.Territories
+                || NetgameEquipment.GameType3 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.Territories
+                || NetgameEquipment.GameType4 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.Territories)
             {
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Territories;
             }
 
-            if (NetgameEquipment.GameType1 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.AllExceptCtf
-                || NetgameEquipment.GameType2 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.AllExceptCtf
-                || NetgameEquipment.GameType3 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.AllExceptCtf
-                || NetgameEquipment.GameType4 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.AllExceptCtf)
+            if (NetgameEquipment.GameType1 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.AllExceptCtf
+                || NetgameEquipment.GameType2 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.AllExceptCtf
+                || NetgameEquipment.GameType3 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.AllExceptCtf
+                || NetgameEquipment.GameType4 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.AllExceptCtf)
             {
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Infection;
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Slayer;
@@ -1465,10 +1507,10 @@ namespace TagTool.Commands.Porting.Gen2
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.Territories;
             }
 
-            if (NetgameEquipment.GameType1 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.AllGameTypes
-                || NetgameEquipment.GameType2 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.AllGameTypes
-                || NetgameEquipment.GameType3 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.AllGameTypes
-                || NetgameEquipment.GameType4 == TagTool.Tags.Definitions.Gen2.Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.AllGameTypes)
+            if (NetgameEquipment.GameType1 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType1Value.AllGameTypes
+                || NetgameEquipment.GameType2 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType2Value.AllGameTypes
+                || NetgameEquipment.GameType3 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType3Value.AllGameTypes
+                || NetgameEquipment.GameType4 == Gen2Scenario.ScenarioNetgameEquipmentBlock.GameType4Value.AllGameTypes)
             {
                 EngineFlags |= TagTool.Tags.Definitions.Common.GameEngineSubTypeFlags.All;
             }

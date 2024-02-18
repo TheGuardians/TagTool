@@ -11,8 +11,52 @@ namespace TagTool.Geometry.BspCollisionGeometry
     public class CollisionBspPhysicsDefinition : TagStructure
     {
         public CollisionGeometryShape GeometryShape;
-        [TagField(Align = 16)]
+        [TagField(Align = 16, MaxVersion = CacheVersion.HaloOnline700123)]
         public CMoppBvTreeShape MoppBvTreeShape;
+
+        // TODO: merge with MoppBvTreeShape
+        [TagField(Align = 16, MinVersion = CacheVersion.HaloReach)]
+        public MoppBvTreeShapeStruct MoppBvTreeShapeReach;
+
+        [TagStructure(Size = 0x50)]
+        public class MoppBvTreeShapeStruct : TagStructure
+        {
+            public HavokShapeStruct20102 MoppBvTreeShape;
+            public BvTreeTypeValue Type;
+            [TagField(Length = 0x3, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding1;
+            public int MoppCodePointer;
+            public int MoppDataSkip;
+            public int MoppDataSize;
+            public RealVector3d CodeInfoCopy;
+            public float HavokWCodeInfoCopy;
+            public int ChildShapeVtable;
+            public int ChildShapePointer;
+            public int ChildSize;
+            [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding2;
+            //c_mopp_bv_tree
+            public float MoppScale;
+            [TagField(Length = 0xC, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding3;
+
+            [TagStructure(Size = 0x10)]
+            public class HavokShapeStruct20102 : TagStructure
+            {
+                public int FieldPointerSkip;
+                public short Size;
+                public short Count;
+                public int UserData;
+                public int Type;
+            }
+
+            public enum BvTreeTypeValue : sbyte
+            {
+                Mopp,
+                TrisampledHeightfield,
+                User,
+            };
+        }
     }
 
     [TagStructure(Size = 0xB0, Align = 16, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]

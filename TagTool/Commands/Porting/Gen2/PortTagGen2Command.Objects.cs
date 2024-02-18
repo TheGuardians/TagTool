@@ -35,7 +35,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Weapon newweapon = new Weapon();
                     AutoConverter.TranslateTagStructure(weapon, newweapon);
                     newweapon.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Weapon };
-                    return FixupWeapon(weapon, newweapon);
+                    return FixupWeapon(weapon, newweapon, cacheStream);
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                     Vehicle newvehicle = new Vehicle();
                     AutoConverter.TranslateTagStructure(vehicle, newvehicle);
@@ -75,7 +75,7 @@ namespace TagTool.Commands.Porting.Gen2
             }
         }
 
-        public Weapon FixupWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag, Weapon newweapon)
+        public Weapon FixupWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag, Weapon newweapon, Stream cacheStream)
         {
             newweapon.FirstPerson = new List<Weapon.FirstPersonBlock>();
             foreach (var firstperson in gen2Tag.PlayerInterface.FirstPerson)
@@ -108,6 +108,11 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             AutoConverter.TranslateEnum(gen2Tag.WeaponFlags, out newweapon.WeaponFlags.NewFlags, newweapon.WeaponFlags.NewFlags.GetType());
+            AutoConverter.TranslateEnum(gen2Tag.Tracking, out newweapon.Tracking, newweapon.Tracking.GetType());
+            newweapon.SpecialHudVersion = Weapon.SpecialHudVersionValue.DefaultNoOutline2;
+
+            GeneratePhysicsFromCollision(newweapon, cacheStream);
+
             return newweapon;
         }
 
@@ -428,6 +433,25 @@ namespace TagTool.Commands.Porting.Gen2
             AutoConverter.TranslateTagStructure(gen2Tag.Physics.FlyingPhysics, newbiped.BipedFlyingPhysics);
 
             return newbiped;
+        }
+
+        public void GeneratePhysicsFromCollision(Weapon weapon, Stream cacheStream)
+        {
+            if (weapon.Model != null)
+            {
+                Cache.TagCacheGenHO.TryGetTag(weapon.Model.ToString(), out CachedTag weaponModel);
+                Model weaponModelInstance = Cache.Deserialize<Model>(cacheStream, weaponModel);
+                if (weaponModelInstance.CollisionModel != null && weaponModelInstance.PhysicsModel == null)
+                {
+                    Cache.TagCacheGenHO.TryGetTag(weaponModelInstance.CollisionModel.ToString(), out CachedTag weaponCollisionModel);
+                    CollisionModel weaponCollisionModelInstance = Cache.Deserialize<CollisionModel>(cacheStream, weaponCollisionModel);
+
+                    ObjConvexHullProcessor generator = new ObjConvexHullProcessor();
+                    weaponModelInstance.PhysicsModel = generator.ConvertCollisionModelToPhysics(weaponCollisionModelInstance, cacheStream, weaponCollisionModel, Cache);
+
+                    Cache.Serialize(cacheStream, weaponModel, weaponModelInstance);
+                }
+            }
         }
     }
 }

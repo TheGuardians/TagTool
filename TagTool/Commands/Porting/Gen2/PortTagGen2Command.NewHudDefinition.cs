@@ -22,6 +22,11 @@ using static TagTool.Tags.Definitions.ChudDefinition;
 using static TagTool.Tags.Definitions.ChudDefinition.HudWidgetBase;
 using static TagTool.Tags.Definitions.Gen2.NewHudDefinition;
 using ShaderGen2 = TagTool.Tags.Definitions.Gen2.Shader;
+using BitmapGen2 = TagTool.Tags.Definitions.Gen2.Bitmap;
+using BitmapGen3 = TagTool.Tags.Definitions.Bitmap;
+using TagTool.Bitmaps;
+using TagTool.Bitmaps.Utils;
+using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -50,12 +55,14 @@ namespace TagTool.Commands.Porting.Gen2
                     case "weapon_background_left_out":
                     case "heat_meter_left":
                     case "ammo_meter_left":
+                    case "heat_background_left":
                         AddWidgetDictionaryPair(bitmapWidgetName, "ammo_area_left", widgetDictionary);
                         break;
                     case "weapon_background_right":
                     case "weapon_background_right_out":
                     case "heat_meter_right":
                     case "ammo_meter_right":
+                    case "heat_background_right":
                         AddWidgetDictionaryPair(bitmapWidgetName, "ammo_area_right", widgetDictionary);
                         break;
                     case "heat_meter_single":
@@ -63,10 +70,6 @@ namespace TagTool.Commands.Porting.Gen2
                     case "weapon_background_single":
                     case "weapon_background_out":
                         AddWidgetDictionaryPair(bitmapWidgetName, "ammo_area", widgetDictionary);
-                        break;
-                    case "heat_background_left":
-                    case "heat_background_right":
-                        AddWidgetDictionaryPair(bitmapWidgetName, "warning_flashes", widgetDictionary);
                         break;
                     case "scope_mask":
                     case "left_crosshair":
@@ -103,7 +106,7 @@ namespace TagTool.Commands.Porting.Gen2
                         AddWidgetDictionaryPair(bitmapWidgetName, "binoculars_wide_fullscreen", widgetDictionary);
                         break;
                     default:
-                        AddWidgetDictionaryPair(bitmapWidgetName, "unmapped", widgetDictionary);
+                        AddWidgetDictionaryPair(bitmapWidgetName, "Mustard", widgetDictionary);
                         break;
                 }
             }
@@ -125,12 +128,16 @@ namespace TagTool.Commands.Porting.Gen2
                     case "battery_test_right_out":
                     case "bullets_right":
                     case "bullets_right_out":
+                    case "needles_right":
+                    case "needles_right_out":
                         AddWidgetDictionaryPair(textWidgetName, "ammo_area_right", widgetDictionary);
                         break;
                     case "battery_test_left":
                     case "battery_test_left_out":
                     case "bullets_left":
                     case "bullets_left_out":
+                    case "needles_left":
+                    case "needles_left_out":
                         AddWidgetDictionaryPair(textWidgetName, "ammo_area_left", widgetDictionary);
                         break;
                     case "bullets_single":
@@ -150,16 +157,79 @@ namespace TagTool.Commands.Porting.Gen2
             AddHudWidgets(chud, widgetDictionary);
 
             int widgetIndex = 0;
+
+            // port ping bitmap, only referenced by globals which we don't port
+            // CachedTag newPingBitmapTag = null;
+            // if (!Cache.TagCacheGenHO.TryGetTag("ui\\hud\\bitmaps\\hud_sweeper.bitm", out newPingBitmapTag))
+            // {
+            //     CachedTag pingBitmap = Gen2Cache.TagCacheGen2.GetTag("ui\\hud\\bitmaps\\hud_sweeper.bitm");
+            //     BitmapGen2 pingBitmapInstance = Gen2Cache.Deserialize<BitmapGen2>(gen2CacheStream, pingBitmap);
+            //     TagStructure newPingBitmap = ConvertBitmap(pingBitmapInstance);
+            //     newPingBitmapTag = Cache.TagCache.AllocateTag(newPingBitmap.GetType(), "ui\\hud\\bitmaps\\hud_sweeper");
+            //     Cache.Serialize(cacheStream, newPingBitmapTag, newPingBitmap);
+            // }
+
             // populate bitmaps into their correct hud widgets
             foreach (var hudWidget in chud.HudWidgets)
             {
                 hudWidget.BitmapWidgets = new List<HudWidget.BitmapWidget>();
                 hudWidget.TextWidgets = new List<HudWidget.TextWidget>();
+                string hudWidgetString = Cache.StringTable.GetString(hudWidget.Name);
 
+                // populate ping bitmap widget
+                if (hudWidgetString == "motion_tracker")
+                {
+                    HudWidget.BitmapWidget newBitmapWidget = new HudWidget.BitmapWidget
+                    {
+                        Name = Cache.StringTable.GetStringId("ping"),
+                        Bitmap = Cache.TagCacheGenHO.GetTag("ui\\chud\\bitmaps\\motion_tracker.bitmap"),
+                        BitmapSequenceIndex = 1,
+                        StateData = new List<StateDatum>(),
+                        PlacementData = new List<PlacementDatum>(),
+                        AnimationData = new List<AnimationDatum>(),
+                        RenderData = new List<RenderDatum>(),
+                        RuntimeWidgetIndex = widgetIndex
+                    };
+                    StateDatum newStateData = new StateDatum
+                    {
+                        UnitGeneralFlags = StateDatum.UnitGeneral.MotionTrackerEnabled,
+                        InverseFlags = StateDatum.Inverse.NotZoomedIn
+                    };
+                    PlacementDatum newPlacementData = new PlacementDatum
+                    {
+                        Anchor = PlacementDatum.ChudAnchorType.MotionSensor,
+                        Origin = new RealPoint2d { X = 0f, Y = 0f },
+                        Offset = new RealPoint2d { X = -1f, Y = -2f },
+                        Scale = new RealPoint2d { X = 1.25f, Y = 1.25f },
+                    };
+                    AnimationDatum newAnimationData = new AnimationDatum
+                    {
+                        Active = new AnimationDatum.ChudWidgetAnimationStruct
+                        {
+                            InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time,
+                            Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\motion_tracker_ping.chud_animation_definition")
+                        }
+                    };
+                    RenderDatum newRenderData = new RenderDatum
+                    {
+                        ShaderType = RenderDatum.ChudShaderType.Simple,
+                        BlendModeHO = RenderDatum.ChudBlendMode.AlphaBlend,
+                        ExternalInput = RenderDatum.ChudRenderExternalInputHO.Zero,
+                        LocalColorA = new ArgbColor(0, 0, 0, 0),
+                        OutputColorA = RenderDatum.OutputColorValue_HO.HighlightForeground
+                    };
+                    widgetIndex++;
+                    newBitmapWidget.StateData.Add(newStateData);
+                    newBitmapWidget.PlacementData.Add(newPlacementData);
+                    newBitmapWidget.AnimationData.Add(newAnimationData);
+                    newBitmapWidget.RenderData.Add(newRenderData);
+                    hudWidget.BitmapWidgets.Add(newBitmapWidget);
+                }
+
+                // populate remaining bitmap widgets
                 for (int bitmapIndex = 0; bitmapIndex < gen2Bitmaps.Count; bitmapIndex++)
                 {
                     string bitmapWidgetString = Cache.StringTable.GetString(gen2Bitmaps[bitmapIndex].Name);
-                    string hudWidgetString = Cache.StringTable.GetString(hudWidget.Name);
 
                     // populate bitmaps and subblocks
                     foreach (var widgetDictionaryEntry in widgetDictionary)
@@ -246,7 +316,7 @@ namespace TagTool.Commands.Porting.Gen2
                             realScale.Y *= (flags & HudBitmapWidgets.FlagsValue.FlipVertically) == HudBitmapWidgets.FlagsValue.FlipVertically ? -1 : 1;
                             realOrigin.Y *= (flags & HudBitmapWidgets.FlagsValue.FlipVertically) == HudBitmapWidgets.FlagsValue.FlipVertically ? -1 : 1;
 
-                            if (hudWidgetString == "scope" && bitmapWidgetString != "scope_mask")
+                            if (hudWidgetString == "scope" || hudWidgetString.Contains("binocular"))
                             {
                                 realOrigin.X *= -1;
                                 realOrigin.Y *= -1;
@@ -311,6 +381,10 @@ namespace TagTool.Commands.Porting.Gen2
                                         LocalColorD = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorD, "LocalColorD"),
                                         OutputColorA = RenderDatum.OutputColorValue_HO.PrimaryBackground,
                                         OutputColorB = RenderDatum.OutputColorValue_HO.PrimaryBackground,
+                                        OutputColorC = RenderDatum.OutputColorValue_HO.WarningFlash,
+                                        OutputScalarA = RenderDatum.OutputScalarValue.RangeInput,
+                                        OutputScalarB = RenderDatum.OutputScalarValue.RangeInput,
+                                        OutputScalarC = RenderDatum.OutputScalarValue.FlashAnimation,
                                     };
                                     break;
                                 case "shield_mask":
@@ -327,6 +401,9 @@ namespace TagTool.Commands.Porting.Gen2
                                         LocalColorD = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorD, "LocalColorD"),
                                         OutputColorA = RenderDatum.OutputColorValue_HO.SecondaryBackground,
                                         OutputColorB = RenderDatum.OutputColorValue_HO.HighlightForeground,
+                                        OutputColorC = RenderDatum.OutputColorValue_HO.PrimaryBackground,
+                                        OutputColorD = RenderDatum.OutputColorValue_HO.WarningFlash,
+                                        OutputScalarD = RenderDatum.OutputScalarValue.FlashAnimation,
                                     };
                                     break;
                                 case "heat_meter":
@@ -352,55 +429,35 @@ namespace TagTool.Commands.Porting.Gen2
                                         ShaderType = RenderDatum.ChudShaderType.Meter,
                                         BlendModeHO = RenderDatum.ChudBlendMode.AlphaBlend,
                                         ExternalInput = ConvertInput(nhdt.BitmapWidgets[bitmapIndex].Unknown.Input1, newRenderData.ExternalInput),
-                                        LocalColorA = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorA, "LocalColorA"),
+                                        LocalColorA = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorD, "LocalColorD"),
                                         LocalColorB = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorB, "LocalColorB"),
                                         LocalColorC = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorC, "LocalColorC"),
                                         LocalColorD = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorD, "LocalColorD"),
+                                        LocalScalarA = 1f,
+                                        LocalScalarB = 0.1f,
+                                        OutputColorA = RenderDatum.OutputColorValue_HO.SecondaryBackground,
+                                        OutputColorB = RenderDatum.OutputColorValue_HO.PrimaryBackground,
+                                        OutputColorC = RenderDatum.OutputColorValue_HO.SecondaryBackground,
+                                        OutputColorD = RenderDatum.OutputColorValue_HO.WarningFlash,
+                                        OutputColorE = RenderDatum.OutputColorValue_HO.LocalA,
+                                        OutputColorF = RenderDatum.OutputColorValue_HO.LocalA,
+                                        OutputScalarA = RenderDatum.OutputScalarValue.Input,
+                                        OutputScalarB = RenderDatum.OutputScalarValue.FlashAnimation,
+                                        OutputScalarC = RenderDatum.OutputScalarValue.LocalA,
+                                        OutputScalarD = RenderDatum.OutputScalarValue.LocalB,
+                                        OutputScalarE = RenderDatum.OutputScalarValue.Input,
+                                        OutputScalarF = RenderDatum.OutputScalarValue.Input
                                     };
                                     break;
                                 case "motion_tracker_background":
-                                    newRenderData = new RenderDatum
-                                    {
-                                        ShaderType = RenderDatum.ChudShaderType.Simple,
-                                        BlendModeHO = RenderDatum.ChudBlendMode.AlphaBlend,
-                                        LocalColorA = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorA, "LocalColorA"),
-                                        LocalColorB = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorB, "LocalColorB"),
-                                        LocalColorC = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorC, "LocalColorC"),
-                                        LocalColorD = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorD, "LocalColorD"),
-                                        OutputColorA = RenderDatum.OutputColorValue_HO.PrimaryBackground,
-                                        OutputColorB = RenderDatum.OutputColorValue_HO.PrimaryBackground,
-                                        OutputColorC = RenderDatum.OutputColorValue_HO.HighlightForeground,
-                                    };
-                                    break;
                                 case "frag_grenade_default":
-                                    newRenderData = new RenderDatum
-                                    {
-                                        ShaderType = RenderDatum.ChudShaderType.Simple,
-                                        BlendModeHO = RenderDatum.ChudBlendMode.AlphaBlend,
-                                        LocalColorA = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorA, "LocalColorA"),
-                                        LocalColorB = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorB, "LocalColorB"),
-                                        LocalColorC = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorC, "LocalColorC"),
-                                        LocalColorD = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorD, "LocalColorD"),
-                                        OutputColorA = RenderDatum.OutputColorValue_HO.PrimaryBackground,
-                                        OutputColorB = RenderDatum.OutputColorValue_HO.PrimaryBackground,
-                                        OutputColorC = RenderDatum.OutputColorValue_HO.HighlightForeground,
-                                    };
-                                    break;
                                 case "plasma_grenade_default":
-                                    newRenderData = new RenderDatum
-                                    {
-                                        ShaderType = RenderDatum.ChudShaderType.Simple,
-                                        BlendModeHO = RenderDatum.ChudBlendMode.AlphaBlend,
-                                        LocalColorA = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorA, "LocalColorA"),
-                                        LocalColorB = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorB, "LocalColorB"),
-                                        LocalColorC = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorC, "LocalColorC"),
-                                        LocalColorD = ConvertColorData(gen2ShaderInstance, newRenderData.LocalColorD, "LocalColorD"),
-                                        OutputColorA = RenderDatum.OutputColorValue_HO.PrimaryBackground,
-                                        OutputColorB = RenderDatum.OutputColorValue_HO.PrimaryBackground,
-                                        OutputColorC = RenderDatum.OutputColorValue_HO.HighlightForeground,
-                                    };
-                                    break;
                                 case "no_grenades":
+                                case "weapon_background_right":
+                                case "weapon_background_right_out":
+                                case "weapon_background_left":
+                                case "weapon_background_left_out":
+                                case "weapon_background_out":
                                     newRenderData = new RenderDatum
                                     {
                                         ShaderType = RenderDatum.ChudShaderType.Simple,
@@ -416,7 +473,7 @@ namespace TagTool.Commands.Porting.Gen2
                                     break;
                                 case "binocular_mask":
                                 default:
-                                    new TagToolWarning($"bitmap string '{bitmapWidgetString}' not yet supported");
+                                    new TagToolWarning($"render data for bitmap string '{bitmapWidgetString}' not yet supported");
                                     break;
                             }
 
@@ -425,7 +482,15 @@ namespace TagTool.Commands.Porting.Gen2
                             newBitmapWidget.AnimationData.Add(newAnimationData);
                             newBitmapWidget.RenderData.Add(newRenderData);
                             hudWidget.BitmapWidgets.Add(newBitmapWidget);
+
+                            // fixup ballistic meter bitmap data
+
                         }
+                    }
+                    if (gen2Bitmaps[bitmapIndex].Unknown.Input1 == HudBitmapWidgets.HudWidgetInputsStructBlock.Input1Value.WeaponClipAmmoFraction)
+                    {
+                        int iconCount = nhdt.DashlightData.LowAmmoCutoff;
+                        ConvertBitmapData(gen2Bitmaps[bitmapIndex].Bitmap, iconCount, cacheStream);
                     }
                 }
 
@@ -433,7 +498,6 @@ namespace TagTool.Commands.Porting.Gen2
                 for (int textIndex = 0; textIndex < gen2Text.Count; textIndex++)
                 {
                     string textWidgetString = Cache.StringTable.GetString(gen2Text[textIndex].Name);
-                    string hudWidgetString = Cache.StringTable.GetString(hudWidget.Name);
 
                     foreach (var widgetDictionaryEntry in widgetDictionary)
                     {
@@ -488,12 +552,21 @@ namespace TagTool.Commands.Porting.Gen2
                                     };
                                     break;
                             }
-
+                            if (textWidgetString == "frag_count")
+                            {
+                                realOffset = new RealPoint2d
+                                {
+                                    X = nhdt.TextWidgets[textIndex].FullscreenOffset.X - 25f,
+                                    Y = (nhdt.TextWidgets[textIndex].FullscreenOffset.Y * 1.25f),
+                                };
+                                break;
+                            }
                             string originalInput = Cache.StringTable.GetString(nhdt.TextWidgets[textIndex].String);
                             string convertedInput = null;
                             switch (originalInput)
                             {
                                 case "hud_input1":
+                                case "hud_input2":
                                     convertedInput = "chud_out_a";
                                     break;
                                 default:
@@ -518,9 +591,9 @@ namespace TagTool.Commands.Porting.Gen2
                             PlacementDatum newPlacementData = new PlacementDatum
                             {
                                 Anchor = (PlacementDatum.ChudAnchorType)Enum.Parse(typeof(PlacementDatum.ChudAnchorType), ConvertAnchor(nhdt.TextWidgets[textIndex].Anchor.ToString())),
-                                Origin = new RealPoint2d { X = -1f, Y = -1f },
+                                Origin = new RealPoint2d { X = -1f, Y = -1.35f },
                                 Offset = realOffset,
-                                Scale = new RealPoint2d { X = 1.75f, Y = 1.75f },
+                                Scale = new RealPoint2d { X = 1.25f, Y = 1.25f },
                             };
                             AnimationDatum newAnimationData = new AnimationDatum();
                             PopulateAnimationData(newAnimationData, textWidgetString);
@@ -548,8 +621,28 @@ namespace TagTool.Commands.Porting.Gen2
                                         OutputColorB = RenderDatum.OutputColorValue_HO.HighlightForeground,
                                     };
                                     break;
+                                case "needles_right":
+                                case "needles_left":
+                                case "bullets_single":
+                                    newRenderData = new RenderDatum
+                                    {
+                                        ShaderType = RenderDatum.ChudShaderType.TextSimple,
+                                        BlendModeHO = RenderDatum.ChudBlendMode.AlphaBlend,
+                                        ExternalInput = RenderDatum.ChudRenderExternalInputHO.WeaponAmmoReserve,
+                                        OutputColorB = RenderDatum.OutputColorValue_HO.HighlightForeground,
+                                    };
+                                    break;
+                                case "heat":
+                                    newRenderData = new RenderDatum
+                                    {
+                                        ShaderType = RenderDatum.ChudShaderType.TextSimple,
+                                        BlendModeHO = RenderDatum.ChudBlendMode.AlphaBlend,
+                                        ExternalInput = RenderDatum.ChudRenderExternalInputHO.WeaponBatteryFraction,
+                                        OutputColorB = RenderDatum.OutputColorValue_HO.HighlightForeground,
+                                    };
+                                    break;
                                 default:
-                                    new TagToolWarning($"text string '{textWidgetString}' not yet supported");
+                                    new TagToolWarning($"render data for text string '{textWidgetString}' not yet supported");
                                     break;
                             }
 
@@ -619,7 +712,7 @@ namespace TagTool.Commands.Porting.Gen2
                         hudWidget.SortLayer = WidgetLayerEnum.Background;
                         break;
                     default:
-                        new TagToolWarning($"Hud Widget '{Cache.StringTable[(int)hudWidget.Name.Value]}' found but not handled");
+                        new TagToolWarning($"Hud Widget '{Cache.StringTable.GetString(hudWidget.Name)}' found but not handled");
                         break;
                 }
             }
@@ -675,6 +768,8 @@ namespace TagTool.Commands.Porting.Gen2
         {
             animationData.Active = new AnimationDatum.ChudWidgetAnimationStruct();
             animationData.Initializing = new AnimationDatum.ChudWidgetAnimationStruct();
+            animationData.Readying = new AnimationDatum.ChudWidgetAnimationStruct();
+            animationData.Flashing = new AnimationDatum.ChudWidgetAnimationStruct();
             switch (widgetString)
             {
                 case "binocular_mask":
@@ -688,11 +783,42 @@ namespace TagTool.Commands.Porting.Gen2
                 case "plasma_count":
                 case "plasma_count_out":
                 case "no_grenades":
-                case "shield_meter":
-                case "shield_mask":
                 case "motion_tracker_background":
                     animationData.Initializing.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
-                    animationData.Initializing.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\boot_sequence\\default_boot_flash.chud_animation_definition");
+                    animationData.Initializing.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\dimming.chud_animation_definition");
+                    break;
+                case "weapon_background_right":
+                case "weapon_background_right_out":
+                case "heat_meter_right":
+                case "weapon_background_left":
+                case "weapon_background_left_out":
+                case "heat_meter_left":
+                case "weapon_background_single":
+                case "weapon_background_out":
+                    animationData.Readying.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Readying.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\fade_in.chud_animation_definition");
+                    break;
+                case "ammo_meter_right":
+                case "ammo_meter_left":
+                case "ammo_meter_single":
+                    animationData.Readying.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Readying.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\fade_in.chud_animation_definition");
+                    animationData.Flashing.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Flashing.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\flash_test.chud_animation_definition");
+                    break;
+                case "shield_mask":
+                    animationData.Initializing.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Initializing.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\dimming.chud_animation_definition");
+                    animationData.Flashing.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Flashing.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\shields_out.chud_animation_definition");
+                    break;
+                case "shield_meter":
+                    animationData.Initializing.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Initializing.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\shield_dimming.chud_animation_definition");
+                    animationData.Active.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Active.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\shield_dimming.chud_animation_definition");
+                    animationData.Flashing.InputType = AnimationDatum.ChudWidgetAnimationStruct.ChudWidgetAnimationInputTypeEnum.Time;
+                    animationData.Flashing.Animation = Cache.TagCacheGenHO.GetTag("ui\\chud\\animations\\shields_out.chud_animation_definition");
                     break;
             }
             return animationData;
@@ -740,7 +866,7 @@ namespace TagTool.Commands.Porting.Gen2
                                 results.Add("MirrorVertically");
                                 break;
                             case "ScopeStretch":
-                                results.Add("Stretch");
+                                results.Add("ExtendBorder");
                                 break;
                             case "StringIsANumber":
                                 results.Add("StringIsANumber");
@@ -806,6 +932,33 @@ namespace TagTool.Commands.Porting.Gen2
             }
         }
 
+        public void ConvertBitmapData(CachedTag gen2BitmapRef, int iconCount, Stream cacheStream)
+        {
+            CachedTag bitmap = Cache.TagCacheGenHO.GetTag(gen2BitmapRef.ToString());
+
+            BitmapGen3 bitmapInstance = Cache.Deserialize<BitmapGen3>(cacheStream, bitmap);
+
+            BitmapTextureInteropResource bitmapResource = Cache.ResourceCache.GetBitmapTextureInteropResource(bitmapInstance.HardwareTextures[0]);
+
+            byte[] bitmapPrimaryResourceData = bitmapResource.Texture.Definition.PrimaryResourceData.Data;
+            Image newImg = bitmapInstance.Images[0];
+
+            BaseBitmap bitmapBase = new BaseBitmap(newImg);
+
+            byte[] rawBitmapData = BitmapDecoder.DecodeBitmap(bitmapPrimaryResourceData, newImg.Format, newImg.Width, newImg.Height);
+            bitmapBase.Data = BitmapDecoder.FixupBallisticMeter(rawBitmapData, iconCount);
+
+            var bitmapResourceDefinition = BitmapUtils.CreateBitmapTextureInteropResource(bitmapBase);
+            var resourceReference = Cache.ResourceCache.CreateBitmapResource(bitmapResourceDefinition);
+            bitmapInstance.HardwareTextures.Clear();
+            bitmapInstance.HardwareTextures.Add(resourceReference);
+
+            bitmapInstance.Images.Clear();
+            bitmapInstance.Images.Add(newImg);
+
+            Cache.Serialize(cacheStream, bitmap, bitmapInstance);
+        }
+
         public ArgbColor ConvertColorData(ShaderGen2 shader, ArgbColor newColor, string slot)
         {
             var h2_pixel_constants = new List<string>();
@@ -857,7 +1010,7 @@ namespace TagTool.Commands.Porting.Gen2
                     newColor.Red = shader.PostprocessDefinition[0].PixelConstants[i].Color.Red;
                     newColor.Green = shader.PostprocessDefinition[0].PixelConstants[i].Color.Green;
                     newColor.Blue = shader.PostprocessDefinition[0].PixelConstants[i].Color.Blue;
-                    newColor.Alpha = shader.PostprocessDefinition[0].PixelConstants[i].Color.Alpha;
+                    newColor.Alpha = 255;
                     return newColor;
                 }
             }
@@ -1140,9 +1293,9 @@ namespace TagTool.Commands.Porting.Gen2
                     hudGlobals.HudGlobals[0].HudAttributes[0].WarpSourceFovY = Angle.FromDegrees(1f);
                     hudGlobals.HudGlobals[0].HudAttributes[0].WarpAmount = 1;
                     hudGlobals.HudGlobals[0].HudAttributes[0].MotionSensorOrigin = new RealPoint2d(58f, 976f);
-                    hudGlobals.HudGlobals[0].PrimaryBackground = new ArgbColor(0, 3, 28, 56);
-                    hudGlobals.HudGlobals[0].SecondaryBackground = new ArgbColor(0, 36, 139, 255);
-                    hudGlobals.HudGlobals[0].HighlightForeground = new ArgbColor(0, 58, 108, 255);
+                    hudGlobals.HudGlobals[0].PrimaryBackground = new ArgbColor(0, 2, 35, 120);
+                    hudGlobals.HudGlobals[0].SecondaryBackground = new ArgbColor(0, 4, 60, 200);
+                    hudGlobals.HudGlobals[0].HighlightForeground = new ArgbColor(0, 60, 96, 255);
                     Cache.Serialize(cacheStream, hudGlobalsTag, hudGlobals);
                     break;
                 case "dervish":

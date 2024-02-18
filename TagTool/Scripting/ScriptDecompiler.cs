@@ -308,6 +308,8 @@ namespace TagTool.Scripting
                 case "ZoneSet":
                 case "Damage":
                 case "StartingProfile":
+                case "ObjectList":
+                case "MpTeam":
                 case "DeviceGroup":
                     result.Name = expr.StringAddress == 0 ? "none" : $"\"{ReadScriptString(scriptStringReader, expr.StringAddress)}\"";
                     break;
