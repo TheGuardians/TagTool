@@ -410,9 +410,13 @@
     <Compile Include="Commands\ModelAnimationGraphs\SetInheritanceCommand.cs" />
     <Compile Include="Commands\ModelAnimationGraphs\SetAnimationCommand.cs" />
     <Compile Include="Commands\Models\ExportJMSCommand.cs" />
+    <Compile Include="Commands\PhysicsModels\PhysicsModelGenerator.cs" />
+    <Compile Include="Commands\Porting\Gen2\Gen2CollisionModelConverter.cs" />
+    <Compile Include="Commands\Porting\Gen2\Gen2ShaderTemplateMappings.cs" />
     <Compile Include="Commands\Porting\Gen2\LightmapPacker.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.NewHudDefinition.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Widgets.cs" />
+    <Compile Include="Commands\Porting\Gen2\Gen2ShaderTemplateMapBase.cs" />
     <Compile Include="Commands\Porting\IgnoreBlamTagCommand.cs" />
     <Compile Include="Commands\Porting\Gen4\PortTagGen4Command.Models.cs" />
     <Compile Include="Commands\Porting\StructureAutoConverter.cs" />
@@ -1726,6 +1730,9 @@
       <HintPath>..\Tools\JsonMoppNet.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="MIConvexHull">
+      <HintPath>..\Tools\MIConvexHull.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data.Entity.Design" />
@@ -1766,6 +1773,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting">
       <Version>4.6.0</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
     </PackageReference>
     <PackageReference Include="Poly2Tri.NetStandard">
       <Version>1.0.2</Version>
