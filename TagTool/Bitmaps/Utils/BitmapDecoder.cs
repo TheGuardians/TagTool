@@ -7,6 +7,8 @@ using System.IO;
 using TagTool.Bitmaps.DDS;
 using TagTool.Commands;
 using TagTool.IO;
+using System.Collections.Generic;
+using System.Linq;
 
 /***************************************************************
 * The following code is derived from the HaloDeveloper project
@@ -236,7 +238,7 @@ namespace TagTool.Bitmaps
                             color.B = computeZ ? CalculateNormalZ(vector.R, vector.G) : (byte)0;
                             color.A = 0xFF;
 
-                            if(swapXY)
+                            if (swapXY)
                                 (color.R, color.G) = (color.G, color.R);
 
                             buffer[destIndex + 0] = color.B;
@@ -545,6 +547,122 @@ namespace TagTool.Bitmaps
                 data[i + 13] = x4;
                 data[i + 14] = x5;
                 data[i + 15] = x6;
+            }
+            return data;
+        }
+        public static byte[] FixupBallisticMeter(byte[] data, int iconCount)
+        {
+            // Holds the unique blue values.
+            HashSet<int> blueValues = new HashSet<int>();
+
+            // Variables to hold min and max alpha and green values.
+            int minAlpha = int.MaxValue;
+            int maxAlpha = int.MinValue;
+            int minGreen = int.MaxValue;
+            int maxGreen = int.MinValue;
+
+            // Extract blue values, green values, and alpha values.
+            for (int i = 0; i < data.Length; i += 4) // Increment by 4 for each pixel (ARGB)
+            {
+                int blueValue = data[i]; // Blue value is at index 0 for each pixel (BGRA)
+                int greenValue = data[i + 1]; // Green value is at index 1 for each pixel (BGRA)
+                int alphaValue = data[i + 3]; // Alpha value is at index 3 for each pixel (BGRA)
+                if (blueValue > 0)
+                {
+                    blueValues.Add(blueValue);
+                }
+
+                // Update min and max alpha if the current alpha is not zero.
+                if (alphaValue > 0)
+                {
+                    minAlpha = Math.Min(minAlpha, alphaValue);
+                    maxAlpha = Math.Max(maxAlpha, alphaValue);
+                }
+
+                // Update min and max green if the current green is not zero.
+                if (greenValue > 0)
+                {
+                    minGreen = Math.Min(minGreen, greenValue);
+                    maxGreen = Math.Max(maxGreen, greenValue);
+                }
+            }
+
+            // Normalize alpha values if there is a range to normalize.
+            if (minAlpha < maxAlpha)
+            {
+                for (int i = 3; i < data.Length; i += 4) // Start at index 3 and increment by 4 for each pixel (BGRA)
+                {
+                    int alphaValue = data[i];
+                    if (alphaValue != 0) // Only modify non-zero alpha values.
+                    {
+                        // Normalize the alpha value to the 0-255 range.
+                        data[i] = (byte)(((alphaValue - minAlpha) * 255) / (maxAlpha - minAlpha));
+                    }
+                }
+            }
+
+            // Normalize green values if there is a range to normalize.
+            if (minGreen < maxGreen)
+            {
+                for (int i = 1; i < data.Length; i += 4) // Start at index 1 and increment by 4 for each pixel (BGRA)
+                {
+                    int greenValue = data[i];
+                    if (greenValue != 0) // Only modify non-zero green values.
+                    {
+                        // Normalize the green value to the 0-5 range.
+                        data[i] = (byte)((5 * (greenValue - minGreen) / (maxGreen - minGreen)));
+                    }
+                }
+            }
+
+            // Convert the HashSet to a List and sort it.
+            var sortedBlueValues = blueValues.ToList();
+            sortedBlueValues.Sort();
+
+            // If the count matches iconCount, we assign values in order.
+            if (sortedBlueValues.Count == iconCount)
+            {
+                // Create a dictionary to map original blue values to their new values.
+                Dictionary<int, byte> blueValueMapping = new Dictionary<int, byte>();
+                for (int i = 0; i < sortedBlueValues.Count; i++)
+                {
+                    // Map the sorted blue values to a range from 1 to iconCount.
+                    blueValueMapping[sortedBlueValues[i]] = (byte)(i + 1);
+                }
+
+                // Loop through each pixel in the data
+                for (int i = 0; i < data.Length; i += 4) // Increment by 4 for each pixel (ARGB)
+                {
+                    if (data[i] != 0) // Only modify non-zero blue values
+                    {
+                        // Apply the new blue value if it's in the dictionary
+                        if (blueValueMapping.TryGetValue(data[i], out byte newBlueValue))
+                        {
+                            data[i] = newBlueValue;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Otherwise, we do the averaging and division as before
+                List<int> differences = new List<int>();
+                for (int i = 0; i < sortedBlueValues.Count - 1; i++)
+                {
+                    differences.Add(sortedBlueValues[i + 1] - sortedBlueValues[i]);
+                }
+
+                double averageDifference = differences.Any() ? differences.Average() : 0;
+
+                for (int i = 0; i < data.Length; i += 4) // Increment by 4 for each pixel (ARGB)
+                {
+                    // Apply the value to the Blue component
+                    if (data[i] != 0) // Only modify non-zero blue values
+                    {
+                        byte newData = (byte)((data[i] / averageDifference) + 1);
+                        data[i] = newData;
+                    }
+                }
             }
             return data;
         }
@@ -1319,7 +1437,7 @@ namespace TagTool.Bitmaps
             {
                 ushort X = (ushort)(((((ushort)data[i + 2]) << 8) | (ushort)data[i + 3]) + 0x7FFF);
                 ushort Y = (ushort)(((((ushort)data[i + 0]) << 8) | (ushort)data[i + 1]) + 0x7FFF);
-        
+
                 if (swapXY)
                 {
                     buffer[i] = (byte)((X >> 8) & 0xFF);
@@ -1431,9 +1549,9 @@ namespace TagTool.Bitmaps
                     bitmRaw = DecodeDxt3A(bitmRaw, virtualWidth, virtualHeight);
                     break;
 
-               /* case BitmapFormat.Dxt3a1111:
-                    bitmRaw = DecodeDxt3A1111(bitmRaw, virtualWidth, virtualHeight);
-                    break;*/
+                /* case BitmapFormat.Dxt3a1111:
+                     bitmRaw = DecodeDxt3A1111(bitmRaw, virtualWidth, virtualHeight);
+                     break;*/
 
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.ReachDxnMonoAlpha:
@@ -1614,6 +1732,69 @@ namespace TagTool.Bitmaps
             }
             catch { }
             return destinationArray;
+        }
+
+        public static byte[] FillR(byte[] data, int width, int height)
+        {
+            uint blockWidth, blockHeight;
+            XboxGraphics.XGGetBlockDimensions(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXT5A, out blockWidth, out blockHeight);
+            uint alignedWidth = Direct3D.D3D9x.D3D.NextMultipleOf((uint)width, blockWidth);
+            uint alignedHeight = Direct3D.D3D9x.D3D.NextMultipleOf((uint)height, blockHeight);
+            int texelPitch = (int)(blockWidth * blockHeight * XboxGraphics.XGBitsPerPixelFromGpuFormat(Direct3D.D3D9x.D3D9xGPU.GPUTEXTUREFORMAT.GPUTEXTUREFORMAT_DXT5A)) >> 3;
+            for (int i = 0; i < (alignedWidth * alignedHeight); i += texelPitch)
+            {
+                // store x values and swap
+                byte xMin = data[i];
+                byte xMax = data[i + 1];
+            
+                byte x1 = data[i + 2]; // R data
+                byte x2 = data[i + 3];
+                byte x3 = data[i + 4];
+                byte x4 = data[i + 5];
+                byte x5 = data[i + 6];
+                byte x6 = data[i + 7];
+            
+                data[i] = xMin;
+                data[i + 1] = xMax;
+            
+                data[i + 2] = x1; // R data
+                data[i + 3] = x2;
+                data[i + 4] = x3;
+                data[i + 5] = x4;
+                data[i + 6] = x5;
+                data[i + 7] = x6;
+            
+                data[i + 8] = xMin;
+                data[i + 9] = xMax;
+            
+                data[i + 10] = x1; // G data
+                data[i + 11] = x2;
+                data[i + 12] = x3;
+                data[i + 13] = x4;
+                data[i + 14] = x5;
+                data[i + 15] = x6;
+
+                data[i + 16] = xMin;
+                data[i + 17] = xMax;
+
+                data[i + 18] = x1; // B data
+                data[i + 19] = x2;
+                data[i + 20] = x3;
+                data[i + 21] = x4;
+                data[i + 22] = x5;
+                data[i + 23] = x6;
+
+                data[i + 24] = xMin;
+                data[i + 25] = xMax;
+
+                data[i + 26] = x1; // A data
+                data[i + 27] = x2;
+                data[i + 28] = x3;
+                data[i + 29] = x4;
+                data[i + 30] = x5;
+                data[i + 31] = x6;
+            }
+            return data;
         }
 
         private static int XGAddress2DTiledX(int Offset, int Width, int TexelPitch)
