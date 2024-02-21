@@ -1068,17 +1068,16 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     object itemdef = Gen2Cache.Deserialize(gen2CacheStream, NetgameEquipment.ItemVehicleCollection);
 
-                    // Port tags referenced in item/vehicle collection
-                    ConvertData(cacheStream, gen2CacheStream, resourceStreams, null, null, NetgameEquipment.ItemVehicleCollection);
-
                     switch (NetgameEquipment.ItemVehicleCollection.Group.ToString())
                     {
                         case "vehc":
                             vehilayout = (TagTool.Tags.Definitions.Gen2.VehicleCollection)itemdef;
                             if (vehilayout.VehiclePermutations[0].Vehicle != null)
                             {
-                                if (!Cache.TagCache.TryGetTag<Vehicle>(vehilayout.VehiclePermutations[0].Vehicle.Name, out paletteTag))
+                                ConvertTag(cacheStream, gen2CacheStream, resourceStreams, vehilayout.VehiclePermutations[0].Vehicle);
+                                if (!Cache.TagCache.TryGetCachedTag(vehilayout.VehiclePermutations[0].Vehicle.ToString(), out paletteTag))
                                     break;
+
                                 var palette_index = newScenario.VehiclePalette.FindIndex(v => (v.Object == null ? "" : v.Object.Name) == vehilayout.VehiclePermutations[0].Vehicle.Name);
                                 if (palette_index == -1)
                                 {
@@ -1116,6 +1115,10 @@ namespace TagTool.Commands.Porting.Gen2
                             itemlayout = (TagTool.Tags.Definitions.Gen2.ItemCollection)itemdef;
                             if (itemlayout.ItemPermutations[0].Item != null)
                             {
+                                ConvertTag(cacheStream, gen2CacheStream, resourceStreams, itemlayout.ItemPermutations[0].Item);
+                                if (!Cache.TagCache.TryGetCachedTag(itemlayout.ItemPermutations[0].Item.ToString(), out paletteTag))
+                                    break;
+
                                 if (itemlayout.ItemPermutations[0].Item.Group.ToString().Equals("weap"))
                                 {
                                     // Convert weapon flags
@@ -1124,8 +1127,6 @@ namespace TagTool.Commands.Porting.Gen2
                                     {
                                         WeaponFlags |= Scenario.WeaponInstance.ScenarioWeaponDatumFlags.InitiallyAtRestdoesntFall;
                                     }
-                                    if (!Cache.TagCache.TryGetTag<Weapon>(itemlayout.ItemPermutations[0].Item.Name, out paletteTag))
-                                        break;
                                     var palette_index = newScenario.WeaponPalette.FindIndex(v => (v.Object == null ? "" : v.Object.Name) ==
                                     itemlayout.ItemPermutations[0].Item.Name);
                                     if (palette_index == -1)
@@ -1162,8 +1163,6 @@ namespace TagTool.Commands.Porting.Gen2
                                 }
                                 else
                                 {
-                                    if (!Cache.TagCache.TryGetTag<Equipment>(itemlayout.ItemPermutations[0].Item.Name, out paletteTag))
-                                        break;
                                     var palette_index = newScenario.EquipmentPalette.FindIndex(v => (v.Object == null ? "" : v.Object.Name) ==
                                     itemlayout.ItemPermutations[0].Item.Name);
                                     if (palette_index == -1)
