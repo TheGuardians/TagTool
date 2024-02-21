@@ -1017,9 +1017,10 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
                 {
-                    Object = Cache.TagCache.GetTag<Scenery>(@"objects\multi\spawning\respawn_point_invisible")
+                    Object = Cache.TagCache.GetTag<Scenery>(@"objects\multi\spawning\respawn_point")
                 });
                 bool prematchcameraset = false;
+                int firstSpawnIndex = newScenario.Scenery.Count();
                 foreach (var startlocation in newScenario.PlayerStartingLocations)
                 {
                     newScenario.Scenery.Add(new Scenario.SceneryInstance
@@ -1049,6 +1050,14 @@ namespace TagTool.Commands.Porting.Gen2
                         prematchcameraset = true;
                     }
                 }
+
+                newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = Cache.TagCache.GetTag<Scenery>(@"objects\multi\spawning\respawn_point_invisible")
+                });
+                var invisibleSpawn = newScenario.Scenery[firstSpawnIndex].DeepCloneV2();
+                invisibleSpawn.PaletteIndex = (short)(newScenario.SceneryPalette.Count() - 1);
+                newScenario.Scenery.Add(invisibleSpawn);
             }
 
             //Spawn Zones
