@@ -61,11 +61,16 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "jpt!" })]
         public CachedTag DetonationSound;
 
-        public DamageReportingType DamageReportingType;
-
-        [TagField(Length = 3, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        public DamageReportingType DamageReportingType; // technically a short in HO
+        [TagField(Length = 3, Flags = Padding, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Length = 1, Flags = Padding, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagField(Length = 1, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
         public byte[] Padding1;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public sbyte DamageReportingVariant;
+        [TagField(Length = 1, Flags = Padding, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Padding2;
+
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public GameObjectType16 SuperDetonationObjectTypes;

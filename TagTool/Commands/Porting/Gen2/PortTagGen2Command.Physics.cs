@@ -238,7 +238,7 @@ namespace TagTool.Commands.Porting.Gen2
                         {
                             Shape = new Havok.HavokShapeReference((Havok.BlamShapeType)gen2listshape.ShapeType, gen2listshape.Shape),
                             CollisionFilter = (uint)gen2listshape.CollisionFilter,
-                            NumChildShapes = (uint)gen2list.ChildShapesSize
+                            NumChildShapes = gen2list.ChildShapesSize
                         });
                         //TODO: Shape Size?
                     }
@@ -254,7 +254,7 @@ namespace TagTool.Commands.Porting.Gen2
                         {
                             Shape = new Havok.HavokShapeReference((Havok.BlamShapeType)gen2listshape.ShapeType, gen2listshape.Shape),
                             CollisionFilter = (uint)gen2listshape.CollisionFilter,
-                            NumChildShapes = (uint)gen2list.ChildShapesSize
+                            NumChildShapes = gen2list.ChildShapesSize
                         });
                         //TODO: Shape Size?
                     }

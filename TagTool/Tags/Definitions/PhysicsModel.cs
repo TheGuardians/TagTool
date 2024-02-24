@@ -721,8 +721,8 @@ namespace TagTool.Tags.Definitions
             public uint ChildShapeSize;
         }
         
-        [TagStructure(Size = 0x40, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x50, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x34, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x44, Platform = CachePlatform.MCC)]
         public class Shape : TagStructure
 		{
             public StringId Name;
@@ -748,29 +748,15 @@ namespace TagTool.Tags.Definitions
             public sbyte ProxyCollisionGroup;
 
             public HavokShapeBase ShapeBase;
-
-            [TagField(Flags = Padding, Length = 0xC, MaxVersion = CacheVersion.HaloOnline700123)]
-            [TagField(Flags = Padding, Length = 0xC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
-            public byte[] Pad = new byte[0xC];
-
-            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknownMCC0;
-            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknownMCC1;
-            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
-            public float ReachUnknownMCC2;
         }
 
-        [TagStructure(Size = 0x30, Align = 0x10, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x50, Align = 0x10, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x60, Align = 0x10, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        [TagStructure(Size = 0x3C, Align = 0x10, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x5C, Align = 0x10, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x6C, Align = 0x10, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
         public class Sphere : Shape
         {
-            [TagField(Length = 16, Flags = Padding,
-                Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
-            public byte[] ReachPaddingMCC;
-
             // translate shape
+            [TagField(Align = 16)]
             public HavokShapeBase ConvexBase;
             public PlatformUnsignedValue FieldPointerSkip;
             public HavokShapeReference ShapeReference;
@@ -779,19 +765,21 @@ namespace TagTool.Tags.Definitions
             public float TranslationRadius;
         }
 
-        [TagStructure(Size = 0x20, Align = 0x10)]
+        [TagStructure(Size = 0x2C, Align = 0x10)]
         public class Pill : Shape
         {
+            [TagField(Align = 16)]
             public RealVector3d Bottom;
             public float BottomRadius;
             public RealVector3d Top;
             public float TopRadius;
         }
 
-        [TagStructure(Size = 0x70, Align = 0x10, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x90, Align = 0x10, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x7C, Align = 0x10, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x9C, Align = 0x10, Platform = CachePlatform.MCC)]
         public class Box : Shape
         {
+            [TagField(Align = 16)]
             public RealVector3d HalfExtents;
             public float HalfExtentsRadius;
 
@@ -810,9 +798,14 @@ namespace TagTool.Tags.Definitions
             public float TranslationRadius;
         }
 
-        [TagStructure(Size = 0x40, Align = 0x10)]
+        [TagStructure(Size = 0x4C, Align = 0x10)]
         public class Triangle : Shape
         {
+            public short WeldingInfo;
+            public sbyte WeldingType;
+            public sbyte IsExtruded;
+
+            [TagField(Align = 16)]
             public RealVector3d PointA;
             public float HavokwPointA;
             public RealVector3d PointB;
@@ -823,12 +816,13 @@ namespace TagTool.Tags.Definitions
             public float HavokwExtrusion;
         }
 
-        [TagStructure(Size = 0x40, Align = 0x10, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x50, Align = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
-        [TagStructure(Size = 0x50, Align = 0x10, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
-        [TagStructure(Size = 0x60, Align = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x4C, Align = 0x10, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x5C, Align = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x5C, Align = 0x10, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x6C, Align = 0x10, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public class Polyhedron : Shape
         {
+            [TagField(Align = 16)]
             public RealVector3d AabbHalfExtents;
             public float AabbHalfExtentsRadius;
             public RealVector3d AabbCenter;
@@ -921,8 +915,8 @@ namespace TagTool.Tags.Definitions
 		{
             public Havok.HavokShapeReference Shape;
             public uint CollisionFilter;
-            public float ShapeSize;
-            public uint NumChildShapes;
+            public int ShapeSize;
+            public int NumChildShapes;
             [TagField(Platform = CachePlatform.MCC)]
             public uint MCCUnknown0;
             [TagField(Platform = CachePlatform.MCC)]
