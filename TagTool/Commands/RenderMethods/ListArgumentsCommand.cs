@@ -150,7 +150,10 @@ namespace TagTool.Commands.RenderMethods
                     for (int i = 0; i < template.TextureParameterNames.Count; i++)
                     {
                         var paramName = Cache.StringTable.GetString(template.TextureParameterNames[i].Name);
-                        var paramValue = property.TextureConstants[i].Bitmap.ToString();
+                        var paramValue = property.TextureConstants[i].Bitmap?.ToString();
+                        if (paramValue == null)
+                            paramValue = "NULL";
+
                         var index = -1;
                         if (filter.Terms.Count > 0)
                         {
