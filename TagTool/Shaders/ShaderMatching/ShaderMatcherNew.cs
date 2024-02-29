@@ -445,6 +445,9 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"albedo\patchy_emblem":
                                 optionName = "emblem_change_color";
                                 break;
+                            case @"albedo\color_mask":
+                                optionName = "constant_color";
+                                break;
                             case @"bump_mapping\detail_blend":
                             case @"bump_mapping\three_detail_blend":
                                 optionName = "detail";
