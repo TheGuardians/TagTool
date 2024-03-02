@@ -126,13 +126,23 @@ namespace TagTool.Commands.Porting.Gen2
             // don't print a warning for these
             List<string> hiddenTagGroups = new List<string>
             {
+                "DECR",
+                "fog ",
+                "itmc",
+                "ltmp",
+                "sky ",
                 "stem",
                 "spas",
+                "vehc",
                 "vrtx"
             };
-            if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()) && !hiddenTagGroups.Contains(gen2Tag.Group.ToString()))
+
+            var group = gen2Tag.Group.ToString();
+            if (!supportedTagGroups.Contains(group))
             {
-                new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null!");
+                if (!hiddenTagGroups.Contains(group))
+                    new TagToolWarning($"Porting tag group '{group}' not yet supported, returning null!");
+
                 return null;
             }
 
