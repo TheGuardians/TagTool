@@ -12,6 +12,7 @@ using TagTool.Tags.Definitions.Gen2;
 using TagTool.BlamFile;
 using TagTool.Commands.Porting;
 using TagTool.Commands.ScenarioStructureBSPs;
+using Gen3Globals = TagTool.Tags.Definitions.Globals;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -435,6 +436,23 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             return damageReportingType;
+        }
+
+        // wrote this for Gen2 but probably not necessary. create and move into scenario porting utils maybe
+        private short GetEquivalentGlobalMaterial(short globalMaterialIndexGen2, Globals globalsGen2, Gen3Globals globals)
+        {
+            var materialBlockGen2 = globalsGen2.Materials[globalMaterialIndexGen2];
+
+            StringId gen3Name = Cache.StringTable.GetStringId(Gen2Cache.StringTable.GetString(materialBlockGen2.Name));
+            if (gen3Name == StringId.Invalid)
+                gen3Name = Cache.StringTable.GetStringId(Gen2Cache.StringTable.GetString(materialBlockGen2.ParentName));
+
+            short newIndex = (short)globals.Materials.FindIndex(m => m.Name == gen3Name);
+
+            if (newIndex == -1)
+                return 0;   // default_material
+            else
+                return newIndex;
         }
 
         private List<CachedTag> ParseLegacyTag(string tagSpecifier)

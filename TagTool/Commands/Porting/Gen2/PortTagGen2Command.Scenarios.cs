@@ -331,7 +331,19 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 newSbsp.Materials.Add(new RenderMaterial
                 {
-                    RenderMethod = material.Shader == null ? Cache.TagCache.GetTag(@"shaders\invalid.shader") : material.Shader
+                    RenderMethod = material.Shader == null ? Cache.TagCache.GetTag(@"shaders\invalid.shader") : material.Shader,
+                    Properties = material.Properties?.Count() == 0 ? null : new List<RenderMaterial.Property>
+                    {
+                        new RenderMaterial.Property()
+                        {
+                            Type = (RenderMaterial.Property.PropertyType)material.Properties[0].Type,
+                            ShortValue = material.Properties[0].IntValue,
+                            IntValue = material.Properties[0].IntValue,
+                            RealValue = material.Properties[0].RealValue
+                        }
+                    },
+                    ImportedMaterialIndex = -1,
+                    BreakableSurfaceIndex = material.BreakableSurfaceIndex
                 });
             }
 
@@ -340,7 +352,11 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 newSbsp.CollisionMaterials.Add(new ScenarioStructureBsp.CollisionMaterial
                 {
-                    RenderMethod = material.NewShader == null ? Cache.TagCache.GetTag(@"shaders\invalid.shader") : material.NewShader
+                    RenderMethod = material.NewShader == null ? Cache.TagCache.GetTag(@"shaders\invalid.shader") : material.NewShader,
+                    RuntimeGlobalMaterialIndex = material.RuntimeGlobalMaterialIndex,
+                    //RuntimeGlobalMaterialIndex = GetEquivalentGlobalMaterial(material.RuntimeGlobalMaterialIndex, Globals, Gen3Globals),
+                    ConveyorSurfaceIndex = material.ConveyorSurfaceIndex,
+                    SeamMappingIndex = -1
                 });
             }
 
