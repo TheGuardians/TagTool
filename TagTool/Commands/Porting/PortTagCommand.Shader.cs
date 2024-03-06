@@ -11,6 +11,7 @@ using System.Linq;
 using TagTool.Shaders.ShaderFunctions;
 using static TagTool.Tags.Definitions.RenderMethod;
 using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
+using TagTool.Shaders.ShaderGenerator;
 
 namespace TagTool.Commands.Porting
 {
@@ -185,6 +186,91 @@ namespace TagTool.Commands.Porting
             return Matcher.FindClosestTemplate(blamRmt2, BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, blamRmt2), FlagIsSet(PortingFlags.GenerateShaders));
         }
 
+        //private RenderMethod ConvertRenderMethodNew(
+        //    Stream stream,
+        //    Stream blamStream,
+        //    RenderMethod renderMethod,
+        //    RenderMethod blamRenderMethod,
+        //    CachedTag blamRmt2Tag,
+        //    CachedTag blamTag)
+        //{
+        //    RenderMethod newRm = new RenderMethod();
+        //
+        //    // should never be reached if null
+        //    //if (renderMethod.ShaderProperties[0].Template == null) 
+        //    //    throw new Exception($"Failed to find HO rmt2 for this RenderMethod instance");
+        //
+        //    // create blam rmt2 descriptor
+        //    ShaderMatcherNew.Rmt2Descriptor.TryParse(blamRenderMethod.ShaderProperties[0].Template.Name, out ShaderMatcherNew.Rmt2Descriptor blamRmt2Descriptor);
+        //    // create ed rmt2 descriptor
+        //    ShaderMatcherNew.Rmt2Descriptor.TryParse(renderMethod.ShaderProperties[0].Template.Name, out ShaderMatcherNew.Rmt2Descriptor edRmt2Descriptor);
+        //
+        //    // get relevant rmdf
+        //    CachedTag rmdfInstance = Matcher.FindRmdf(renderMethod.ShaderProperties[0].Template);
+        //    if (rmdfInstance == null) // shader matching will fail without an rmdf -- throw an exception
+        //        throw new Exception($"Unable to find valid \"{edRmt2Descriptor.Type}\" rmdf for rmt2");
+        //
+        //    var rmdf = CacheContext.Deserialize<RenderMethodDefinition>(stream, rmdfInstance);
+        //    var rmt2 = CacheContext.Deserialize<RenderMethodTemplate>(stream, renderMethod.ShaderProperties[0].Template);
+        //    var blamRmt2 = BlamCache.Deserialize<RenderMethodTemplate>(stream, blamRenderMethod.ShaderProperties[0].Template);
+        //
+        //    newRm.BaseRenderMethod = rmdfInstance;
+        //    newRm.Options = BuildRenderMethodOptionIndices(edRmt2Descriptor);
+        //    newRm.RenderFlags = renderMethod.RenderFlags;
+        //    newRm.SortLayer = renderMethod.SortLayer;
+        //    newRm.Version = renderMethod.Version;
+        //    newRm.CustomFogSettingIndex = renderMethod.CustomFogSettingIndex;
+        //    newRm.PredictionAtomIndex = renderMethod.PredictionAtomIndex;
+        //    newRm.ShaderProperties = new List<RenderMethodPostprocessBlock>();
+        //
+        //    // --- Shader property ---
+        //
+        //    var parameters = ShaderGeneratorNew.GatherParameters(CacheContext, stream, rmdf, edRmt2Descriptor.Options.ToList(), false);
+        //
+        //    var shaderProperty = new RenderMethodPostprocessBlock
+        //    {
+        //        TextureConstants = new List<TextureConstant>(),
+        //        RealConstants = new List<RealConstant>(),
+        //        IntegerConstants = new List<uint>(),
+        //        BooleanConstants = 0
+        //    };
+        //
+        //    for (int i = 0; i < rmt2.TextureParameterNames.Count; i++)
+        //    {
+        //        string name = CacheContext.StringTable.GetString(rmt2.TextureParameterNames[i].Name);
+        //        var parameterBlock = parameters.Find(x => CacheContext.StringTable.GetString(x.Name) == name);
+        //
+        //        if (parameterBlock.Type != RenderMethodOption.ParameterBlock.OptionDataType.Bitmap)
+        //            new TagToolWarning("");
+        //
+        //        shaderProperty.TextureConstants.Add(new TextureConstant
+        //        {
+        //            Bitmap = parameterBlock.DefaultSamplerBitmap,
+        //            BitmapIndex = 0,
+        //            SamplerAddressMode = new TextureConstant.PackedSamplerAddressMode
+        //            {
+        //                AddressU = (TextureConstant.SamplerAddressModeEnum)parameterBlock.DefaultAddressMode,
+        //                AddressV = (TextureConstant.SamplerAddressModeEnum)parameterBlock.DefaultAddressMode
+        //            },
+        //            FilterMode = (TextureConstant.SamplerFilterMode)parameterBlock.DefaultFilterMode,
+        //            ExternTextureMode = TextureConstant.RenderMethodExternTextureMode.UseBitmapAsNormal,
+        //            TextureTransformConstantIndex = -1,
+        //            TextureTransformOverlayIndices = new TagBlockIndex()
+        //        });
+        //    }
+        //
+        //    // convert filter mode
+        //    if (BlamCache.Version == CacheVersion.Halo3ODST || BlamCache.Version >= CacheVersion.HaloReach)
+        //    {
+        //        foreach (var textureConstant in renderMethod.ShaderProperties[0].TextureConstants)
+        //            textureConstant.FilterMode = textureConstant.FilterModePacked.FilterMode;
+        //    }
+        //
+        //
+        //    renderMethod = newRm;
+        //    return renderMethod;
+        //}
+
         private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, RenderMethod blamRm, CachedTag blamRmt2, CachedTag blamTag)
         {
             var bmMaps = new List<string>();
@@ -208,20 +294,10 @@ namespace TagTool.Commands.Porting
             RenderMethod originalRm = finalRm;
 
             // convert filter mode
-            if (BlamCache.Version >= CacheVersion.HaloReach)
+            if (BlamCache.Version == CacheVersion.Halo3ODST || BlamCache.Version >= CacheVersion.HaloReach)
             {
-                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
-                    textureConstant.FilterMode = textureConstant.FilterModeReach.FilterMode;
-            }
-            else if (BlamCache.Version == CacheVersion.Halo3ODST)
-            {
-                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
-                    textureConstant.FilterMode = textureConstant.FilterModeODST.FilterMode;
-            }
-            else if (BlamCache.Version <= CacheVersion.Halo3Retail)
-            {
-                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
-                    textureConstant.FilterMode = textureConstant.FilterModeH3;
+                foreach (var textureConstant in originalRm.ShaderProperties[0].TextureConstants)
+                    textureConstant.FilterMode = textureConstant.FilterModePacked.FilterMode;
             }
 
             // Get a simple list of bitmaps and arguments names
@@ -314,9 +390,46 @@ namespace TagTool.Commands.Porting
                         newShaderProperty.TextureConstants[edMaps.IndexOf(eM)] = finalRm.ShaderProperties[0].TextureConstants[bmMaps.IndexOf(bM)];
 
             foreach (var eA in edRealConstants)
+            {
+                bool found = false;
                 foreach (var bA in bmRealConstants)
+                {
                     if (eA == bA)
+                    {
                         newShaderProperty.RealConstants[edRealConstants.IndexOf(eA)] = finalRm.ShaderProperties[0].RealConstants[bmRealConstants.IndexOf(bA)];
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) // search for bool
+                {
+                    foreach (var bA in bmBoolConstants)
+                    {
+                        if (eA == bA)
+                        {
+                            float boolconst = (finalRm.ShaderProperties[0].BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) == 0 ? 0.0f : 1.0f;
+                            newShaderProperty.RealConstants[edRealConstants.IndexOf(eA)] = new RealConstant { Arg0 = boolconst };
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found) // search for int
+                {
+                    foreach (var bA in bmIntConstants)
+                    {
+                        if (eA == bA)
+                        {
+                            float intConst = (float)finalRm.ShaderProperties[0].IntegerConstants[bmIntConstants.IndexOf(bA)];
+                            newShaderProperty.RealConstants[edRealConstants.IndexOf(eA)] = new RealConstant { Arg0 = intConst };
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
 
             foreach (var eA in edIntConstants)
                 foreach (var bA in bmIntConstants)
