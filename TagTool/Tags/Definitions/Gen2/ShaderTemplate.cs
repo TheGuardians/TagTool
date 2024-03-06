@@ -246,7 +246,7 @@ namespace TagTool.Tags.Definitions.Gen2
         public class ShaderTemplatePostprocessDefinitionNewBlock : TagStructure
         {
             public List<ShaderTemplatePostprocessLevelOfDetailNewBlock> LevelsOfDetail;
-            public List<TagBlockIndexBlock> Layers;
+            public List<TagBlockIndexGen2> Layers;
             public List<ShaderTemplatePostprocessPassNewBlock> Passes;
             public List<ShaderTemplatePostprocessImplementationNewBlock> Implementations;
             public List<ShaderTemplatePostprocessRemappingNewBlock> Remappings;
@@ -254,27 +254,9 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagStructure(Size = 0xA)]
             public class ShaderTemplatePostprocessLevelOfDetailNewBlock : TagStructure
             {
-                public TagBlockIndexStructBlock Layers;
+                public TagBlockIndexGen2 Layers;
                 public int AvailableLayers;
                 public float ProjectedHeightPercentage;
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-            }
-            
-            [TagStructure(Size = 0x2)]
-            public class TagBlockIndexBlock : TagStructure
-            {
-                public TagBlockIndexStructBlock Indices;
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock : TagStructure
-                {
-                    public short BlockIndexData;
-                }
             }
             
             [TagStructure(Size = 0xA)]
@@ -282,39 +264,15 @@ namespace TagTool.Tags.Definitions.Gen2
             {
                 [TagField(ValidTags = new [] { "spas" })]
                 public CachedTag Pass;
-                public TagBlockIndexStructBlock Implementations;
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock : TagStructure
-                {
-                    public short BlockIndexData;
-                }
+                public TagBlockIndexGen2 Implementations;
             }
             
             [TagStructure(Size = 0x6)]
             public class ShaderTemplatePostprocessImplementationNewBlock : TagStructure
             {
-                public TagBlockIndexStructBlock Bitmaps;
-                public TagBlockIndexStructBlock1 PixelConstants;
-                public TagBlockIndexStructBlock2 VertexConstants;
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock1 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock2 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
+                public TagBlockIndexGen2 Bitmaps;
+                public TagBlockIndexGen2 PixelConstants;
+                public TagBlockIndexGen2 VertexConstants;
             }
             
             [TagStructure(Size = 0x4)]

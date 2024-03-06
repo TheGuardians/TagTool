@@ -121,7 +121,10 @@ namespace TagTool.Commands.Porting.Gen2
                 "ctrl",
                 "bipd",
                 "nhdt",
-                "pphy"
+                "pphy",
+                "prt3",
+                "effe",
+                "pmov",
             };
             // don't print a warning for these
             List<string> hiddenTagGroups = new List<string>
@@ -169,6 +172,7 @@ namespace TagTool.Commands.Porting.Gen2
                     destinationTag = instance;
             }
 
+            object origGen2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
             object gen2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
             gen2definition = ConvertData(cacheStream, gen2CacheStream, resourceStreams, gen2definition, gen2definition, gen2Tag);
             TagStructure definition;
@@ -210,13 +214,13 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertObject(gen2definition, cacheStream);
                     break;
                 case Effect effect:
+                case Particle particle:
+                case ParticlePhysics pmov:
                 case DamageEffect damage:
-                    definition = ConvertEffect(gen2definition);
+                    definition = ConvertEffect(gen2definition, origGen2definition, cacheStream, gen2CacheStream);
                     break;
                 case Shader shader:
-                    //preserve a copy of unconverted data
-                    Shader oldshader = Gen2Cache.Deserialize<Shader>(gen2CacheStream, gen2Tag);
-                    definition = ConvertShader(shader, oldshader, gen2Tag.Name, cacheStream, gen2CacheStream, gen2Tag);
+                    definition = ConvertShader(shader, (Shader)origGen2definition, gen2Tag.Name, cacheStream, gen2CacheStream, gen2Tag);
                     break;
                 //return Cache.TagCache.GetTag(@"shaders\invalid.shader");
                 case ScenarioStructureBsp sbsp:

@@ -378,7 +378,7 @@ namespace TagTool.Shaders.ShaderGenerator
         {
             if(mappings.Count > 0)
             {
-                table[usage] = new RenderMethodTemplate.TagBlockIndex
+                table[usage] = new TagBlockIndex
                 {
                     Offset = (ushort)rmt2.RoutingInfo.Count,
                     Count = (ushort)mappings.Count
@@ -476,16 +476,16 @@ namespace TagTool.Shaders.ShaderGenerator
 
             rmt2.RoutingInfo = new List<RenderMethodTemplate.RoutingInfoBlock>();
             rmt2.Passes = new List<RenderMethodTemplate.PassBlock>();
-            rmt2.EntryPoints = new List<RenderMethodTemplate.TagBlockIndex>();
+            rmt2.EntryPoints = new List<TagBlockIndex>();
 
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
             {
-                var entryPoint = new RenderMethodTemplate.TagBlockIndex();
+                var entryPoint = new TagBlockIndex();
 
                 if (generator.IsEntryPointSupported(mode))
                 {
                     while (rmt2.EntryPoints.Count < (int)mode)
-                        rmt2.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
+                        rmt2.EntryPoints.Add(new TagBlockIndex());
 
                     entryPoint.Offset = (ushort)rmt2.Passes.Count();
                     entryPoint.Count = 1;
@@ -494,7 +494,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     var parameterTable = new RenderMethodTemplate.PassBlock();
 
                     for (int i = 0; i < parameterTable.Values.Length; i++)
-                        parameterTable.Values[i] = new RenderMethodTemplate.TagBlockIndex();
+                        parameterTable.Values[i] = new TagBlockIndex();
 
                     rmt2.Passes.Add(parameterTable);
 
@@ -1095,7 +1095,7 @@ namespace TagTool.Shaders.ShaderGenerator
             {
                 RoutingInfo = new List<RenderMethodTemplate.RoutingInfoBlock>(),
                 Passes = new List<RenderMethodTemplate.PassBlock>(),
-                EntryPoints = new List<RenderMethodTemplate.TagBlockIndex>(),
+                EntryPoints = new List<TagBlockIndex>(),
                 RealParameterNames = new List<RenderMethodTemplate.ShaderArgument>(),
                 IntegerParameterNames = new List<RenderMethodTemplate.ShaderArgument>(),
                 BooleanParameterNames = new List<RenderMethodTemplate.ShaderArgument>(),
@@ -1175,7 +1175,7 @@ namespace TagTool.Shaders.ShaderGenerator
             }
 
             for (int i = 0; i < Enum.GetValues(typeof(EntryPoint)).Length; i++)
-                rmt2.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
+                rmt2.EntryPoints.Add(new TagBlockIndex());
 
             foreach (var entryBlock in rmdf.EntryPoints)
             {
@@ -1190,7 +1190,7 @@ namespace TagTool.Shaders.ShaderGenerator
                 RenderMethodTemplate.PassBlock pass = new RenderMethodTemplate.PassBlock();
 
                 for (int j = 0; j < (int)ParameterUsage.Count; j++) // init
-                    pass.Values[j] = new RenderMethodTemplate.TagBlockIndex();
+                    pass.Values[j] = new TagBlockIndex();
 
                 // texture extern ps/vs //////////////////////////
 

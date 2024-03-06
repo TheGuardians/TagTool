@@ -635,7 +635,7 @@ namespace TagTool.Commands.Porting
             return vertexRegisters;
         }
 
-        private bool TableParameterAlreadyExists(RenderMethodTemplate.TagBlockIndex tableInteger, List<RenderMethodRoutingInfoBlock> tableParameters, RenderMethodRoutingInfoBlock parameter)
+        private bool TableParameterAlreadyExists(TagBlockIndex tableInteger, List<RenderMethodRoutingInfoBlock> tableParameters, RenderMethodRoutingInfoBlock parameter)
         {
             for (int i = tableInteger.Offset; i < tableInteger.Offset + tableInteger.Count; i++)
                 if (tableParameters[i].RegisterIndex == parameter.RegisterIndex &&
@@ -754,7 +754,7 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].RoutingInfo.Clear();
 
             while (finalRm.ShaderProperties[0].EntryPoints.Count != edRmt2.EntryPoints.Count)
-                finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
+                finalRm.ShaderProperties[0].EntryPoints.Add(new TagBlockIndex());
             while (finalRm.ShaderProperties[0].Passes.Count != edRmt2.Passes.Count)
                 finalRm.ShaderProperties[0].Passes.Add(new RenderMethodPostprocessPassBlock());
 

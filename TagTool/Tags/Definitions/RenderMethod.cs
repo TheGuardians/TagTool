@@ -382,6 +382,14 @@ namespace TagTool.Tags.Definitions
                 public byte FunctionIndex;
                 public byte SourceIndex;
             }
+
+            public TextureConstant TryGetTextureConstantFromQueryableProperty(int queryIndex)
+            {
+                if (queryIndex >= 0 && queryIndex < 8 &&
+                    QueryableProperties[queryIndex] != -1)
+                    return TextureConstants[QueryableProperties[queryIndex]];
+                return null;
+            }
         }
 
         [TagStructure(Size = 0xC)]
