@@ -1,4 +1,4 @@
-﻿using TagTool.Cache;
+using TagTool.Cache;
 using TagTool.Commands.Common;
 using System.Collections.Generic;
 using System;
@@ -42,11 +42,11 @@ namespace TagTool.Commands.Modding
 
                 if (response.ToLower().StartsWith("y"))
                 {
+                    string cacheName = Cache.BaseModPackage.CacheNames[tagCacheIndex];
                     Cache.BaseModPackage.TagCachesStreams.RemoveAt(tagCacheIndex);
                     Cache.BaseModPackage.CacheNames.RemoveAt(tagCacheIndex);
                     Cache.BaseModPackage.TagCacheNames.RemoveAt(tagCacheIndex);
-
-                    Console.WriteLine($"Deleted tag cache {tagCacheIndex} ({Cache.BaseModPackage.CacheNames[tagCacheIndex]}) from package...");
+                    Console.WriteLine($"Deleted tag cache {tagCacheIndex} ({cacheName}) from package...");
                     return true;
                 }
                 else
