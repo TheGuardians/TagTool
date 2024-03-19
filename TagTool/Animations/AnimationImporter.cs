@@ -613,7 +613,8 @@ namespace TagTool.Animations
                             };
 
                         //set 'nextframe' translation to be equivalent to that of the first frame
-                        AnimationNodes[0].Frames[frame_index].Translation = FirstFrame.Translation;
+                        AnimationNodes[0].Frames[frame_index].Translation.X = FirstFrame.Translation.X;
+                        AnimationNodes[0].Frames[frame_index].Translation.Y = FirstFrame.Translation.Y;
 
                         //since we are moving backwards, insert the movementframe at the beginning of the list
                         MovementData.Insert(0, MovementFrame);
