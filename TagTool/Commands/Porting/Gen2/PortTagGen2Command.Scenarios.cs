@@ -158,7 +158,7 @@ namespace TagTool.Commands.Porting.Gen2
                 newScenario.StructureBsps.Add(new Scenario.StructureBspBlock
                 {
                     StructureBsp = gen2Tag.StructureBsps[i].StructureBsp,
-                    Flags = 32,
+                    Flags = (Scenario.StructureBspBlock.StructureBspFlags)32,
                     DefaultSkyIndex = -1,
                     Cubemap = cubemapsTag,
                     Wind = windTag

@@ -1177,6 +1177,14 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serialize(cacheStream, sbspTag, sbsp);
                             }
                         }
+
+                        if(BlamCache.Version >= CacheVersion.HaloReach)
+                        {
+                            foreach(var block in scnr.StructureBsps)
+                            {
+                                block.Flags = block.FlagsReach.ConvertLexical<Scenario.StructureBspBlock.StructureBspFlags>();
+                            }
+                        }
                     }
                     break;
 
