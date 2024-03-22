@@ -75,7 +75,8 @@ namespace TagTool.Commands.Tags
 
         private static string ShortTagName(CachedTag tag)
         {
-            return $"{tag.Name}.{tag.Group.Tag}";
+            var prefix = string.IsNullOrEmpty(tag.Name) ? $"0x{tag.Index:X4}" : tag.Name;
+            return $"{prefix}.{tag.Group.Tag}";
         }
 
         private void DeepSearch(CachedTag tag, object definition, string phrase)
@@ -122,6 +123,16 @@ namespace TagTool.Commands.Tags
                         {
                             foreach (var fieldInfo in tagStruct.GetTagFieldEnumerable(Cache.Version, Cache.Platform))
                                 DeepSearch(fieldInfo.GetValue(tagStruct), path.Length > 0 ? $"{path}.{fieldInfo.Name}" : fieldInfo.Name);
+                        }
+                        break;
+                    case IBounds bounds:
+                        {
+                            var boundString = data.ToString().Trim(new char[] { '{', '}', ' ' });
+                            boundString = boundString.Replace("Lower: ", "");
+                            boundString = boundString.Replace(" Upper: ", "");
+
+                            if (boundString.ToLower().Contains(phrase))
+                                Console.WriteLine($"{outputPrefix}{path} = {data}");
                         }
                         break;
                     default:
