@@ -13,7 +13,6 @@ using TagTool.Tags.Resources;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using System.Numerics;
-using Assimp;
 using System.Text.RegularExpressions;
 
 namespace TagTool.Animations
@@ -35,36 +34,6 @@ namespace TagTool.Animations
         private List<MovementDataDxDyDzDyaw> MovementData = new List<MovementDataDxDyDzDyaw>();
         public ModelAnimationTagResource.GroupMemberMovementDataType MovementDataType;
         public bool ScaleFix = false;
-
-        public bool AssimpImport(string fileName)
-        {
-            //import the mesh and get the vertices and indices
-            Scene model;
-            using (var importer = new AssimpContext())
-            {
-                using (var logStream = new LogStream((msg, userData) => Console.Write(msg)))
-                {
-                    logStream.Attach();
-                    model = importer.ImportFile(fileName);
-                    logStream.Detach();
-                }
-            }
-
-            if (model.HasAnimations && model.Animations[0].HasNodeAnimations)
-            {
-                foreach (var modelnode in model.Animations[0].NodeAnimationChannels)
-                {
-                    List<AnimationFrame> NodeFrames = new List<AnimationFrame>();
-                }
-            }
-            else
-            {
-                new TagToolError(CommandError.CustomError, "Model has no animations!");
-                return false;
-            }
-            return true;
-        }
-
         public bool Import(string fileName)
         {
             using (FileStream textStream = (FileStream)File.OpenRead(fileName))
@@ -632,12 +601,25 @@ namespace TagTool.Animations
             return;
         }
 
-        public static float GetYawRotationBetweenQuaternions(RealQuaternion fromQuaternion, RealQuaternion toQuaternion)
+        private float GetQuaternionYaw(RealQuaternion q)
         {
-            float fromYaw = (float)Math.Atan2(2f * (fromQuaternion.W * fromQuaternion.J + fromQuaternion.K * fromQuaternion.I), 1 - 2f * (fromQuaternion.J * fromQuaternion.J + fromQuaternion.I * fromQuaternion.I)) * (180f / (float)Math.PI);
-            float toYaw = (float)Math.Atan2(2f * (toQuaternion.W * toQuaternion.J + toQuaternion.K * toQuaternion.I), 1 - 2f * (toQuaternion.J * toQuaternion.J + toQuaternion.I * toQuaternion.I)) * (180f / (float)Math.PI);
+            return (float)Math.Atan2(2.0 * (q.J * q.K + q.W * q.I), q.W * q.W - q.I * q.I - q.J * q.J + q.K * q.K);
+        }
 
-            return toYaw - fromYaw;
+        private float GetYawRotationBetweenQuaternions(RealQuaternion from, RealQuaternion to)
+        {
+            float fromYaw = GetQuaternionYaw(from);
+            float toYaw = GetQuaternionYaw(to);
+            float diff = toYaw - fromYaw;
+            if(diff > 180.0f)
+            {
+                diff = (360.0f - diff) * -1;
+            }
+            else if(diff < -180.0f)
+            {
+                diff = (360.0f + diff);
+            }
+            return diff;
         }
 
         public int SerializeMovementData(GameCacheHaloOnlineBase CacheContext, DataSerializationContext dataContext, MemoryStream stream)
