@@ -578,13 +578,16 @@ namespace TagTool.Animations
                     };
 
                 //set 'nextframe' data to be equivalent to that of the first frame
-                AnimationNodes[0].Frames[frame_index].Translation.X = FirstFrame.Translation.X;
-                AnimationNodes[0].Frames[frame_index].Translation.Y = FirstFrame.Translation.Y;
-                if (MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw)
-                    AnimationNodes[0].Frames[frame_index].Translation.Z = FirstFrame.Translation.Z;
-                if (MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw ||
-                    MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw)
-                    AnimationNodes[0].Frames[frame_index].Rotation = FirstFrame.Rotation;
+                if(MovementDataType != ModelAnimationTagResource.GroupMemberMovementDataType.None)
+                {
+                    AnimationNodes[0].Frames[frame_index].Translation.X = FirstFrame.Translation.X;
+                    AnimationNodes[0].Frames[frame_index].Translation.Y = FirstFrame.Translation.Y;
+                    if (MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw)
+                        AnimationNodes[0].Frames[frame_index].Translation.Z = FirstFrame.Translation.Z;
+                    if (MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw ||
+                        MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw)
+                        AnimationNodes[0].Frames[frame_index].Rotation = FirstFrame.Rotation;
+                }
 
                 //since we are moving backwards, insert the movementframe at the beginning of the list
                 MovementData.Insert(0, MovementFrame);
@@ -611,14 +614,6 @@ namespace TagTool.Animations
             float fromYaw = GetQuaternionYaw(from);
             float toYaw = GetQuaternionYaw(to);
             float diff = toYaw - fromYaw;
-            if(diff > 180.0f)
-            {
-                diff = (360.0f - diff) * -1;
-            }
-            else if(diff < -180.0f)
-            {
-                diff = (360.0f + diff);
-            }
             return diff;
         }
 
