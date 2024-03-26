@@ -391,13 +391,13 @@ namespace TagTool.Tags.Definitions
             public CachedTag MegaloStringIdTable;
 
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public CachedTag MenuMusic1;
+            public CachedTag MusicFirstPlace;
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public CachedTag MenuMusic2;
+            public CachedTag MusicSecondPlace;
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public CachedTag MenuMusic3;
+            public CachedTag MusicThirdPlace;
             [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public CachedTag MenuMusic4;
+            public CachedTag MusicPostMatch;
 
             [TagStructure(Size = 0x10)]
             public class Sound : TagStructure

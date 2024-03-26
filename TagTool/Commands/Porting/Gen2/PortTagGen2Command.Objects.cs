@@ -6,11 +6,13 @@ using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Cache.Gen2;
 using System.IO;
 using TagTool.Commands.Common;
+using Gen2Eqip = TagTool.Tags.Definitions.Gen2.Equipment;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -59,7 +61,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Equipment newequipment = new Equipment();
                     AutoConverter.TranslateTagStructure(equipment, newequipment);
                     newequipment.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Equipment };
-                    return newequipment;
+                    return FixupEquipment(equipment, newequipment);
                 case TagTool.Tags.Definitions.Gen2.DeviceControl devicecontrol:
                     DeviceControl newdevicecontrol = new DeviceControl();
                     AutoConverter.TranslateTagStructure(devicecontrol, newdevicecontrol);
@@ -73,6 +75,53 @@ namespace TagTool.Commands.Porting.Gen2
                 default:
                     return null;
             }
+        }
+
+        private Equipment FixupEquipment(Gen2Eqip equipment, Equipment newequipment)
+        {
+            MultiplayerObjectType itemType = MultiplayerObjectType.Grenade;
+            short defaultSpawnTime = 15;
+            short defaultAbandonTime = 15;
+
+            switch (equipment.PowerupType)
+            {
+                case Gen2Eqip.PowerupTypeValue.ActiveCamouflage:
+                    {
+                        newequipment.MultiplayerPowerup = new List<Equipment.MultiplayerPowerupBlock>();
+                        newequipment.MultiplayerPowerup.Add(new Equipment.MultiplayerPowerupBlock
+                        {
+                            Flavor = Equipment.MultiplayerPowerupBlock.FlavorValue.BluePowerup
+                        });
+                        defaultSpawnTime = 30;
+                        defaultAbandonTime = 60;
+                        itemType = MultiplayerObjectType.Powerup;
+                    }
+                    newequipment.PickupSound = Cache.TagCache.GetTag<Sound>(@"sound\game_sfx\multiplayer\pickup_invis");
+                    break;
+                case Gen2Eqip.PowerupTypeValue.OverShield:
+                    {
+                        newequipment.MultiplayerPowerup = new List<Equipment.MultiplayerPowerupBlock>();
+                        newequipment.MultiplayerPowerup.Add(new Equipment.MultiplayerPowerupBlock
+                        {
+                            Flavor = Equipment.MultiplayerPowerupBlock.FlavorValue.RedPowerup
+                        });
+                        defaultSpawnTime = 30;
+                        defaultAbandonTime = 60;
+                        itemType = MultiplayerObjectType.Powerup;
+                    }
+                    newequipment.PickupSound = Cache.TagCache.GetTag<Sound>(@"sound\game_sfx\multiplayer\pickup_invis");
+                    break;
+            }
+
+            newequipment.MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>();
+            newequipment.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock
+            {
+                Type = itemType,
+                DefaultSpawnTime = defaultSpawnTime,
+                DefaultAbandonTime = defaultAbandonTime
+            });
+
+            return newequipment;
         }
 
         public Weapon FixupWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag, Weapon newweapon, Stream cacheStream)

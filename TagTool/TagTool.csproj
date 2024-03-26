@@ -396,6 +396,8 @@
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
     <Compile Include="Commands\Bitmaps\ReencodeBitmapCommand.cs" />
+    <Compile Include="Commands\Camera\CameraTrackContextFactory.cs" />
+    <Compile Include="Commands\Camera\AdjustPositionCommand.cs" />
     <Compile Include="Commands\Forge\AddForgeItemCommand.cs" />
     <Compile Include="Commands\Forge\AddForgeCategoryCommand.cs" />
     <Compile Include="Commands\Gen2\Bitmaps\BitmapContextFactory.cs" />
@@ -438,6 +440,7 @@
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.RenderModel.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Scenarios.cs" />
     <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Shaders.cs" />
+    <Compile Include="Commands\Porting\Gen2\PortTagGen2Command.Widgets.cs" />
     <Compile Include="Commands\Porting\Gen4\PortTagGen4Command.Physics.cs" />
     <Compile Include="Commands\Porting\ListBlamTagsCommand.cs" />
     <Compile Include="Commands\Porting\NameBlamTagCommand.cs" />
@@ -454,6 +457,9 @@
     <Compile Include="Common\MathHelper.cs" />
     <Compile Include="Common\NativeInterop.cs" />
     <Compile Include="Common\RealRgbaColor.cs" />
+    <Compile Include="Common\TagBlockIndex.cs" />
+    <Compile Include="Effects\EditableProperty.cs" />
+    <Compile Include="Effects\ParticleGpu.cs" />
     <Compile Include="Fonts\FontBitmapPacker.cs" />
     <Compile Include="Fonts\FontPackage.cs" />
     <Compile Include="Geometry\Ass\AssFormat.cs" />
@@ -470,6 +476,7 @@
     <Compile Include="Havok\PerMeshMoppGenerator.cs" />
     <Compile Include="IO\FixedMemoryStream.cs" />
     <Compile Include="Scripting\ScriptDecompiler.cs" />
+    <Compile Include="Shaders\ShaderConverter\ShaderConverter.cs" />
     <Compile Include="Shaders\ShaderGenerator\PopulateRenderMethodConstants.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />

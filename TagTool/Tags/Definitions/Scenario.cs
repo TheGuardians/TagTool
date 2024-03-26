@@ -536,7 +536,11 @@ namespace TagTool.Tags.Definitions
             public float DirectDraftAmbientMinLuminance;
             public float StructureVertexSink;
 
-            public ushort Flags;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public StructureBspFlags Flags;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public StructureBspFlagsReach FlagsReach;
+
             public short DefaultSkyIndex;
             public ushort InstanceFadeStartPixels;
             public ushort InstanceFadeEndPixels;
@@ -587,10 +591,30 @@ namespace TagTool.Tags.Definitions
                 LightmapsUseMorePreciseExtendedGathering = 1 << 9,
                 NoAiAttachment = 1 << 10,
                 NotMultiplayerPlayableSpace = 1 << 11,
-                LightmapsEnableImportanceScaling = 1 << 12,
+                LightmapsEnableImportanceScaling = 1 << 12, // H3 MCC
                 Bit13 = 1 << 13,
                 Bit14 = 1 << 14,
                 Bit15 = 1 << 15,
+            }
+
+            [Flags]
+            public enum StructureBspFlagsReach : ushort
+            {
+                None = 0,
+                DefaultSkyEnabled = 1 << 0,
+                PerVertexOnlyLightmap = 1 << 1,
+                NeverLightmap = 1 << 2,
+                GenerateFakeSmallLightmaps = 1 << 3,
+                RayTraceAdjacentBspsOnSkyHits = 1 << 4,
+                LightmapsUseConservativeSubcharts = 1 << 5,
+                LightmapsReduceStretchHack = 1 << 6,
+                LightmapsuseExtendedGathering = 1 << 7,
+                LightmapsFinalGatherIgnoresBackfacingHits = 1 << 8,
+                NoAiAttachment = 1 << 9, // NoPathfinding
+                NotMultiplayerPlayableSpace = 1 << 10,
+                SharedBsp = 1 << 11,
+                DontUseExtraLightingBspsForCubemaps = 1 << 12,
+                CustomGravityScale = 1 << 13
             }
 
             [TagStructure(Size = 0x2C)]

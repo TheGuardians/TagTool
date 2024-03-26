@@ -420,6 +420,7 @@ namespace TagTool.Commands.Porting
             {
                 cfxs.AutoExposureAntiBloom = new CameraFxSettings.CameraFxValue();
                 cfxs.AutoExposureAntiBloom.Flags |= CameraFxSettings.FlagsValue.UseDefault;
+                cfxs.BloomIntensity.Flags |= CameraFxSettings.FlagsValue.UseDefault;
             }
 
             switch (blamTagName)

@@ -1177,6 +1177,14 @@ namespace TagTool.Commands.Porting
                                 CacheContext.Serialize(cacheStream, sbspTag, sbsp);
                             }
                         }
+
+                        if(BlamCache.Version >= CacheVersion.HaloReach)
+                        {
+                            foreach(var block in scnr.StructureBsps)
+                            {
+                                block.Flags = block.FlagsReach.ConvertLexical<Scenario.StructureBspBlock.StructureBspFlags>();
+                            }
+                        }
                     }
                     break;
 
@@ -1630,6 +1638,11 @@ namespace TagTool.Commands.Porting
                         if (multiplayer.DefaultAbandonTime == 0) multiplayer.DefaultAbandonTime = 30;
                         multiplayer.BoundaryShape = multiplayer.ReachBoundaryShape;
                         multiplayer.SpawnTimerType = multiplayer.SpawnTimerTypeReach.ConvertLexical<MultiplayerObjectSpawnTimerType>();
+                        foreach (var boundary in multiplayer.BoundaryShaders)
+                        {
+                            boundary.StandardShader = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, boundary.StandardShader, definition, blamTagName);
+                            boundary.OpaqueShader = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, boundary.OpaqueShader, definition, blamTagName);
+                        }
                         return multiplayer;
                     }
 

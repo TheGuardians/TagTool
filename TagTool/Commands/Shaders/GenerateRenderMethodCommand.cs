@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Common;
 using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using TagTool.Shaders.ShaderMatching;
 using TagTool.Shaders.ShaderGenerator;
 using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
+using System.IO;
+using static TagTool.Shaders.ShaderMatching.ShaderMatcherNew;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Commands.Shaders
 {
@@ -118,6 +122,59 @@ namespace TagTool.Commands.Shaders
 
             Console.WriteLine($"Generated {rmGroup} tag: {rmTag.Name}.{rmTag.Group}");
             return true;
+        }
+
+        static public RenderMethod GenerateRenderMethod(CachedTag rmt2Tag, CachedTag rmdfTag, GameCacheHaloOnlineBase cache, Stream stream, byte[] options)
+        {
+            var rmt2 = cache.Deserialize<RenderMethodTemplate>(stream, rmt2Tag);
+            var rmdf = cache.Deserialize<RenderMethodDefinition>(stream, rmdfTag);
+
+            // store rmop definitions for quick lookup
+            List<RenderMethodOption> renderMethodOptions = new List<RenderMethodOption>();
+            for (int i = 0; i < options.Length; i++)
+            {
+                var rmopTag = rmdf.Categories[i].ShaderOptions[options[i]].Option;
+                if (rmopTag != null)
+                    renderMethodOptions.Add(cache.Deserialize<RenderMethodOption>(stream, rmopTag));
+            }
+
+            var rmDefinition = new RenderMethod();
+
+            rmDefinition.BaseRenderMethod = rmdfTag;
+
+            // initialize lists
+            rmDefinition.Options = new List<RenderMethod.RenderMethodOptionIndex>();
+            rmDefinition.Parameters = new List<RenderMethod.RenderMethodParameterBlock>();
+            rmDefinition.ShaderProperties = new List<RenderMethod.RenderMethodPostprocessBlock>();
+
+            foreach (var option in options)
+                rmDefinition.Options.Add(new RenderMethod.RenderMethodOptionIndex { OptionIndex = option });
+            rmDefinition.SortLayer = TagTool.Shaders.SortingLayerValue.Normal;
+            rmDefinition.PredictionAtomIndex = -1;
+
+            PopulateRenderMethodConstants populateConstants = new PopulateRenderMethodConstants();
+
+            // setup shader property
+            RenderMethod.RenderMethodPostprocessBlock shaderProperty = new RenderMethod.RenderMethodPostprocessBlock
+            {
+                Template = rmt2Tag,
+                // setup constants
+                TextureConstants = populateConstants.SetupTextureConstants(rmt2, renderMethodOptions, cache),
+                RealConstants = populateConstants.SetupRealConstants(rmt2, renderMethodOptions, cache),
+                IntegerConstants = populateConstants.SetupIntegerConstants(rmt2, renderMethodOptions, cache),
+                BooleanConstants = populateConstants.SetupBooleanConstants(rmt2, renderMethodOptions, cache),
+                // get alpha blend mode
+                BlendMode = populateConstants.GetAlphaBlendMode(options, rmdf, cache),
+                EntryPoints = new List<TagBlockIndex>(),
+                Passes = new List<RenderMethodPostprocessPassBlock>(),
+                RoutingInfo = new List<RenderMethodRoutingInfoBlock>(),
+                Functions = new List<RenderMethod.RenderMethodAnimatedParameterBlock>(),
+                // TODO
+                QueryableProperties = new short[] { -1, -1, -1, -1, -1, -1, -1, -1 },
+            };
+
+            rmDefinition.ShaderProperties.Add(shaderProperty);
+            return rmDefinition;
         }
     }
 }

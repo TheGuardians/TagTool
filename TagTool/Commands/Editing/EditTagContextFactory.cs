@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml;
 using TagTool.Commands.Bitmaps;
 using TagTool.Commands.Bipeds;
+using TagTool.Commands.Camera;
 using TagTool.Commands.Decorators;
 using TagTool.Commands.Video;
 using TagTool.Commands.Unicode;
@@ -113,6 +114,8 @@ namespace TagTool.Commands.Editing
                     case "rmw ": // shader_water
                     case "rmzo": // shader_zonly
                     case "rmcs": // shader_custom
+                    case "rmct": // shader_cortana
+                    case "rmgl": // shader_glass
                         RenderMethodContextFactory.Populate(commandContext, cache, tag, (RenderMethod)definition);
                         break;
 
@@ -136,7 +139,6 @@ namespace TagTool.Commands.Editing
                         LightmapContextFactory.Populate(commandContext, cache, tag, (ScenarioLightmapBspData)definition);
                         break;
 
-
                     case "vfsl":
                         VFilesContextFactory.Populate(commandContext, cache, tag, (VFilesList)definition);
                         break;
@@ -155,6 +157,10 @@ namespace TagTool.Commands.Editing
 
                     case "sddt":
                         StructureDesignContextFactory.Populate(commandContext, cache, tag, (StructureDesign)definition);
+                        break;
+
+                    case "trak":
+                        CameraTrackContextFactory.Populate(commandContext, cache, tag, (CameraTrack)definition);
                         break;
                 }
             }

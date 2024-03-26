@@ -158,7 +158,7 @@ namespace TagTool.Commands.Porting.Gen2
                 newScenario.StructureBsps.Add(new Scenario.StructureBspBlock
                 {
                     StructureBsp = gen2Tag.StructureBsps[i].StructureBsp,
-                    Flags = 32,
+                    Flags = (Scenario.StructureBspBlock.StructureBspFlags)32,
                     DefaultSkyIndex = -1,
                     Cubemap = cubemapsTag,
                     Wind = windTag
@@ -331,7 +331,19 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 newSbsp.Materials.Add(new RenderMaterial
                 {
-                    RenderMethod = material.Shader == null ? Cache.TagCache.GetTag(@"shaders\invalid.shader") : material.Shader
+                    RenderMethod = material.Shader == null ? Cache.TagCache.GetTag(@"shaders\invalid.shader") : material.Shader,
+                    Properties = material.Properties?.Count() == 0 ? null : new List<RenderMaterial.Property>
+                    {
+                        new RenderMaterial.Property()
+                        {
+                            Type = (RenderMaterial.Property.PropertyType)material.Properties[0].Type,
+                            ShortValue = material.Properties[0].IntValue,
+                            IntValue = material.Properties[0].IntValue,
+                            RealValue = material.Properties[0].RealValue
+                        }
+                    },
+                    ImportedMaterialIndex = -1,
+                    BreakableSurfaceIndex = material.BreakableSurfaceIndex
                 });
             }
 
@@ -340,7 +352,11 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 newSbsp.CollisionMaterials.Add(new ScenarioStructureBsp.CollisionMaterial
                 {
-                    RenderMethod = material.NewShader == null ? Cache.TagCache.GetTag(@"shaders\invalid.shader") : material.NewShader
+                    RenderMethod = material.NewShader == null ? Cache.TagCache.GetTag(@"shaders\invalid.shader") : material.NewShader,
+                    RuntimeGlobalMaterialIndex = material.RuntimeGlobalMaterialIndex,
+                    //RuntimeGlobalMaterialIndex = GetEquivalentGlobalMaterial(material.RuntimeGlobalMaterialIndex, Globals, Gen3Globals),
+                    ConveyorSurfaceIndex = material.ConveyorSurfaceIndex,
+                    SeamMappingIndex = -1
                 });
             }
 
@@ -1017,9 +1033,10 @@ namespace TagTool.Commands.Porting.Gen2
             {
                 newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
                 {
-                    Object = Cache.TagCache.GetTag<Scenery>(@"objects\multi\spawning\respawn_point_invisible")
+                    Object = Cache.TagCache.GetTag<Scenery>(@"objects\multi\spawning\respawn_point")
                 });
                 bool prematchcameraset = false;
+                int firstSpawnIndex = newScenario.Scenery.Count();
                 foreach (var startlocation in newScenario.PlayerStartingLocations)
                 {
                     newScenario.Scenery.Add(new Scenario.SceneryInstance
@@ -1049,6 +1066,14 @@ namespace TagTool.Commands.Porting.Gen2
                         prematchcameraset = true;
                     }
                 }
+
+                newScenario.SceneryPalette.Add(new Scenario.ScenarioPaletteEntry
+                {
+                    Object = Cache.TagCache.GetTag<Scenery>(@"objects\multi\spawning\respawn_point_invisible")
+                });
+                var invisibleSpawn = newScenario.Scenery[firstSpawnIndex].DeepCloneV2();
+                invisibleSpawn.PaletteIndex = (short)(newScenario.SceneryPalette.Count() - 1);
+                newScenario.Scenery.Add(invisibleSpawn);
             }
 
             //Spawn Zones
@@ -1068,17 +1093,16 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     object itemdef = Gen2Cache.Deserialize(gen2CacheStream, NetgameEquipment.ItemVehicleCollection);
 
-                    // Port tags referenced in item/vehicle collection
-                    ConvertData(cacheStream, gen2CacheStream, resourceStreams, null, null, NetgameEquipment.ItemVehicleCollection);
-
                     switch (NetgameEquipment.ItemVehicleCollection.Group.ToString())
                     {
                         case "vehc":
                             vehilayout = (TagTool.Tags.Definitions.Gen2.VehicleCollection)itemdef;
                             if (vehilayout.VehiclePermutations[0].Vehicle != null)
                             {
-                                if (!Cache.TagCache.TryGetTag<Vehicle>(vehilayout.VehiclePermutations[0].Vehicle.Name, out paletteTag))
+                                ConvertTag(cacheStream, gen2CacheStream, resourceStreams, vehilayout.VehiclePermutations[0].Vehicle);
+                                if (!Cache.TagCache.TryGetCachedTag(vehilayout.VehiclePermutations[0].Vehicle.ToString(), out paletteTag))
                                     break;
+
                                 var palette_index = newScenario.VehiclePalette.FindIndex(v => (v.Object == null ? "" : v.Object.Name) == vehilayout.VehiclePermutations[0].Vehicle.Name);
                                 if (palette_index == -1)
                                 {
@@ -1116,6 +1140,10 @@ namespace TagTool.Commands.Porting.Gen2
                             itemlayout = (TagTool.Tags.Definitions.Gen2.ItemCollection)itemdef;
                             if (itemlayout.ItemPermutations[0].Item != null)
                             {
+                                ConvertTag(cacheStream, gen2CacheStream, resourceStreams, itemlayout.ItemPermutations[0].Item);
+                                if (!Cache.TagCache.TryGetCachedTag(itemlayout.ItemPermutations[0].Item.ToString(), out paletteTag))
+                                    break;
+
                                 if (itemlayout.ItemPermutations[0].Item.Group.ToString().Equals("weap"))
                                 {
                                     // Convert weapon flags
@@ -1124,8 +1152,6 @@ namespace TagTool.Commands.Porting.Gen2
                                     {
                                         WeaponFlags |= Scenario.WeaponInstance.ScenarioWeaponDatumFlags.InitiallyAtRestdoesntFall;
                                     }
-                                    if (!Cache.TagCache.TryGetTag<Weapon>(itemlayout.ItemPermutations[0].Item.Name, out paletteTag))
-                                        break;
                                     var palette_index = newScenario.WeaponPalette.FindIndex(v => (v.Object == null ? "" : v.Object.Name) ==
                                     itemlayout.ItemPermutations[0].Item.Name);
                                     if (palette_index == -1)
@@ -1162,8 +1188,6 @@ namespace TagTool.Commands.Porting.Gen2
                                 }
                                 else
                                 {
-                                    if (!Cache.TagCache.TryGetTag<Equipment>(itemlayout.ItemPermutations[0].Item.Name, out paletteTag))
-                                        break;
                                     var palette_index = newScenario.EquipmentPalette.FindIndex(v => (v.Object == null ? "" : v.Object.Name) ==
                                     itemlayout.ItemPermutations[0].Item.Name);
                                     if (palette_index == -1)

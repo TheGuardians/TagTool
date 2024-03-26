@@ -128,8 +128,8 @@ namespace TagTool.Tags.Definitions.Gen2
         {
             [TagField(ValidTags = new [] { "shad" })]
             public CachedTag OldShader;
-            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
-            public byte[] Padding;
+            [TagField(Flags = TagFieldFlags.GlobalMaterial)]
+            public short RuntimeGlobalMaterialIndex;
             public short ConveyorSurfaceIndex;
             [TagField(ValidTags = new [] { "shad" })]
             public CachedTag NewShader;

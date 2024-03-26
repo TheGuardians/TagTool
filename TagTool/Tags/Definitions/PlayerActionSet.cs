@@ -58,7 +58,9 @@ namespace TagTool.Tags
             {
                 HideWeapon = 1 << 0,
                 ForceThirdPersonCamera = 1 << 1,
-                InhibitMovement = 1 << 2
+                InhibitMovement = 1 << 2,
+                InhibitCameraMovement = 1 << 3,
+                InhibitCancel = 1 << 4,
             }
         }
     }

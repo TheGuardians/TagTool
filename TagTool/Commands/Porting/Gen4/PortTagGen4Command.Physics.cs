@@ -348,7 +348,7 @@ namespace TagTool.Commands.Porting.Gen4
                 {
                     CollisionFilter = (uint)gen4listshape.CollisionFilter,
                     ShapeSize = gen4listshape.ShapeSize,
-                    NumChildShapes = (uint)gen4listshape.NumChildShapes,
+                    NumChildShapes = gen4listshape.NumChildShapes,
                     Shape = new Havok.HavokShapeReference
                     {
                         Index = gen4listshape.ShapeReference.Shape,

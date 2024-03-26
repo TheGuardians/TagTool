@@ -120,5 +120,12 @@ namespace TagTool.Tags
             None = 0,
             ForceConstant = 1 << 0
         }
+
+        public bool IsRealPoint2d() => RuntimeMFlags.HasFlag(EditablePropertiesFlags.RealPoint2dType);
+        public bool IsRealPoint3d() => RuntimeMFlags.HasFlag(EditablePropertiesFlags.RealPoint3dType);
+        public bool IsRealVector3d() => RuntimeMFlags.HasFlag(EditablePropertiesFlags.RealVector3dType);
+        public bool IsConstant() => RuntimeMFlags.HasFlag(EditablePropertiesFlags.IsConstant);
+        public bool IsConstantPerParticle() => RuntimeMFlags.HasFlag(EditablePropertiesFlags.ConstantPerEntity);
+        public bool IsConstantOverTime() => RuntimeMFlags.HasFlag(EditablePropertiesFlags.ConstantOverTime);
     }
 }

@@ -10,7 +10,10 @@ using System;
 using System.Linq;
 using TagTool.Shaders.ShaderFunctions;
 using static TagTool.Tags.Definitions.RenderMethod;
+using static TagTool.Tags.Definitions.RenderMethodOption;
 using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock;
+using TagTool.Shaders.ShaderGenerator;
+using TagTool.Shaders.ShaderConverter;
 
 namespace TagTool.Commands.Porting
 {
@@ -187,6 +190,30 @@ namespace TagTool.Commands.Porting
 
         private RenderMethod ConvertRenderMethod(Stream cacheStream, Stream blamCacheStream, RenderMethod finalRm, RenderMethod blamRm, CachedTag blamRmt2, CachedTag blamTag)
         {
+            ShaderConverter shaderConverter = new ShaderConverter(CacheContext, 
+                BlamCache, 
+                cacheStream, 
+                blamCacheStream,
+                finalRm, 
+                blamRm, 
+                Matcher);
+            RenderMethod newRm = shaderConverter.ConvertRenderMethod();
+
+            // copy each field as at this point in conversion,
+            // we don't know the original tag type and what extra fields exist
+
+            finalRm.BaseRenderMethod = newRm.BaseRenderMethod;
+            finalRm.Options = newRm.Options;
+            finalRm.Parameters = newRm.Parameters;
+            finalRm.ShaderProperties = newRm.ShaderProperties;
+            finalRm.RenderFlags = newRm.RenderFlags;
+            finalRm.SortLayer = newRm.SortLayer;
+            finalRm.Version = newRm.Version;
+            finalRm.CustomFogSettingIndex = newRm.CustomFogSettingIndex;
+            finalRm.PredictionAtomIndex = newRm.PredictionAtomIndex;
+
+            return finalRm;
+
             var bmMaps = new List<string>();
             var bmRealConstants = new List<string>();
             var bmIntConstants = new List<string>();
@@ -208,20 +235,10 @@ namespace TagTool.Commands.Porting
             RenderMethod originalRm = finalRm;
 
             // convert filter mode
-            if (BlamCache.Version >= CacheVersion.HaloReach)
+            if (BlamCache.Version == CacheVersion.Halo3ODST || BlamCache.Version >= CacheVersion.HaloReach)
             {
-                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
-                    textureConstant.FilterMode = textureConstant.FilterModeReach.FilterMode;
-            }
-            else if (BlamCache.Version == CacheVersion.Halo3ODST)
-            {
-                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
-                    textureConstant.FilterMode = textureConstant.FilterModeODST.FilterMode;
-            }
-            else if (BlamCache.Version <= CacheVersion.Halo3Retail)
-            {
-                foreach (var textureConstant in finalRm.ShaderProperties[0].TextureConstants)
-                    textureConstant.FilterMode = textureConstant.FilterModeH3;
+                foreach (var textureConstant in originalRm.ShaderProperties[0].TextureConstants)
+                    textureConstant.FilterMode = textureConstant.FilterModePacked.FilterMode;
             }
 
             // Get a simple list of bitmaps and arguments names
@@ -314,9 +331,46 @@ namespace TagTool.Commands.Porting
                         newShaderProperty.TextureConstants[edMaps.IndexOf(eM)] = finalRm.ShaderProperties[0].TextureConstants[bmMaps.IndexOf(bM)];
 
             foreach (var eA in edRealConstants)
+            {
+                bool found = false;
                 foreach (var bA in bmRealConstants)
+                {
                     if (eA == bA)
+                    {
                         newShaderProperty.RealConstants[edRealConstants.IndexOf(eA)] = finalRm.ShaderProperties[0].RealConstants[bmRealConstants.IndexOf(bA)];
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) // search for bool
+                {
+                    foreach (var bA in bmBoolConstants)
+                    {
+                        if (eA == bA)
+                        {
+                            float boolconst = (finalRm.ShaderProperties[0].BooleanConstants & (1u << bmBoolConstants.IndexOf(bA))) == 0 ? 0.0f : 1.0f;
+                            newShaderProperty.RealConstants[edRealConstants.IndexOf(eA)] = new RealConstant { Arg0 = boolconst };
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found) // search for int
+                {
+                    foreach (var bA in bmIntConstants)
+                    {
+                        if (eA == bA)
+                        {
+                            float intConst = (float)finalRm.ShaderProperties[0].IntegerConstants[bmIntConstants.IndexOf(bA)];
+                            newShaderProperty.RealConstants[edRealConstants.IndexOf(eA)] = new RealConstant { Arg0 = intConst };
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
 
             foreach (var eA in edIntConstants)
                 foreach (var bA in bmIntConstants)
@@ -635,7 +689,7 @@ namespace TagTool.Commands.Porting
             return vertexRegisters;
         }
 
-        private bool TableParameterAlreadyExists(RenderMethodTemplate.TagBlockIndex tableInteger, List<RenderMethodRoutingInfoBlock> tableParameters, RenderMethodRoutingInfoBlock parameter)
+        private bool TableParameterAlreadyExists(TagBlockIndex tableInteger, List<RenderMethodRoutingInfoBlock> tableParameters, RenderMethodRoutingInfoBlock parameter)
         {
             for (int i = tableInteger.Offset; i < tableInteger.Offset + tableInteger.Count; i++)
                 if (tableParameters[i].RegisterIndex == parameter.RegisterIndex &&
@@ -754,7 +808,7 @@ namespace TagTool.Commands.Porting
             finalRm.ShaderProperties[0].RoutingInfo.Clear();
 
             while (finalRm.ShaderProperties[0].EntryPoints.Count != edRmt2.EntryPoints.Count)
-                finalRm.ShaderProperties[0].EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
+                finalRm.ShaderProperties[0].EntryPoints.Add(new TagBlockIndex());
             while (finalRm.ShaderProperties[0].Passes.Count != edRmt2.Passes.Count)
                 finalRm.ShaderProperties[0].Passes.Add(new RenderMethodPostprocessPassBlock());
 

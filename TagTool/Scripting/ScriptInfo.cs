@@ -11904,6 +11904,18 @@ namespace TagTool.Scripting
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.StringId),
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real),
                 },
+                [0x0B2] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_set_position")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real)
+                },
+                [0x0B3] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_set_target")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real)
+                },
                 [0x0B4] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_attach_to_object")
                 {
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Object),
@@ -11913,6 +11925,12 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Object),
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.StringId),
+                },
+                [0x0B6] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_position_world_offset")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real),
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real)
                 },
                 [0x0B7] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_on"),
                 [0x0B8] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_off"),
@@ -11924,6 +11942,18 @@ namespace TagTool.Scripting
                 {
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
                     new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long),
+                },
+                [0x0BB] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_render_mode")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Long)
+                },
+                [0x0BD] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_set_fov")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real)
+                },
+                [0x0BE] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_set_fov_frame_target")
+                {
+                    new ScriptInfo.ParameterInfo(HsType.HaloOnlineValue.Real)
                 },
                 [0x0BF] = new ScriptInfo(HsType.HaloOnlineValue.Void, "texture_camera_enable_dynamic_lights")
                 {

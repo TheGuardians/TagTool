@@ -42,8 +42,11 @@ namespace TagTool.Commands.RenderMethods
                 for (var i = 0; i < template.TextureParameterNames.Count; i++)
                 {
                     var mapTemplate = template.TextureParameterNames[i];
+                    string bitmName = property.TextureConstants[i].Bitmap?.ToString();
+                    if (bitmName == null)
+                        bitmName = "NULL";
 
-                    Console.WriteLine($"[{i}] {Cache.StringTable.GetString(mapTemplate.Name)} {property.TextureConstants[i].Bitmap.Name}.bitmap");
+                    Console.WriteLine($"[{i}] {Cache.StringTable.GetString(mapTemplate.Name)} {bitmName}");
                 }
             }
 

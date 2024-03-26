@@ -12,6 +12,7 @@ using TagTool.Tags.Definitions.Gen2;
 using TagTool.BlamFile;
 using TagTool.Commands.Porting;
 using TagTool.Commands.ScenarioStructureBSPs;
+using Gen3Globals = TagTool.Tags.Definitions.Globals;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -120,18 +121,31 @@ namespace TagTool.Commands.Porting.Gen2
                 "ctrl",
                 "bipd",
                 "nhdt",
-                "pphy"
+                "pphy",
+                "prt3",
+                "effe",
+                "pmov",
             };
             // don't print a warning for these
             List<string> hiddenTagGroups = new List<string>
             {
+                "DECR",
+                "fog ",
+                "itmc",
+                "ltmp",
+                "sky ",
                 "stem",
                 "spas",
+                "vehc",
                 "vrtx"
             };
-            if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()) && !hiddenTagGroups.Contains(gen2Tag.Group.ToString()))
+
+            var group = gen2Tag.Group.ToString();
+            if (!supportedTagGroups.Contains(group))
             {
-                new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null!");
+                if (!hiddenTagGroups.Contains(group))
+                    new TagToolWarning($"Porting tag group '{group}' not yet supported, returning null!");
+
                 return null;
             }
 
@@ -158,6 +172,7 @@ namespace TagTool.Commands.Porting.Gen2
                     destinationTag = instance;
             }
 
+            object origGen2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
             object gen2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
             gen2definition = ConvertData(cacheStream, gen2CacheStream, resourceStreams, gen2definition, gen2definition, gen2Tag);
             TagStructure definition;
@@ -199,13 +214,13 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertObject(gen2definition, cacheStream);
                     break;
                 case Effect effect:
+                case Particle particle:
+                case ParticlePhysics pmov:
                 case DamageEffect damage:
-                    definition = ConvertEffect(gen2definition);
+                    definition = ConvertEffect(gen2definition, origGen2definition, cacheStream, gen2CacheStream);
                     break;
                 case Shader shader:
-                    //preserve a copy of unconverted data
-                    Shader oldshader = Gen2Cache.Deserialize<Shader>(gen2CacheStream, gen2Tag);
-                    definition = ConvertShader(shader, oldshader, gen2Tag.Name, cacheStream, gen2CacheStream, gen2Tag);
+                    definition = ConvertShader(shader, (Shader)origGen2definition, gen2Tag.Name, cacheStream, gen2CacheStream, gen2Tag);
                     break;
                 //return Cache.TagCache.GetTag(@"shaders\invalid.shader");
                 case ScenarioStructureBsp sbsp:
@@ -435,6 +450,23 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             return damageReportingType;
+        }
+
+        // wrote this for Gen2 but probably not necessary. create and move into scenario porting utils maybe
+        private short GetEquivalentGlobalMaterial(short globalMaterialIndexGen2, Globals globalsGen2, Gen3Globals globals)
+        {
+            var materialBlockGen2 = globalsGen2.Materials[globalMaterialIndexGen2];
+
+            StringId gen3Name = Cache.StringTable.GetStringId(Gen2Cache.StringTable.GetString(materialBlockGen2.Name));
+            if (gen3Name == StringId.Invalid)
+                gen3Name = Cache.StringTable.GetStringId(Gen2Cache.StringTable.GetString(materialBlockGen2.ParentName));
+
+            short newIndex = (short)globals.Materials.FindIndex(m => m.Name == gen3Name);
+
+            if (newIndex == -1)
+                return 0;   // default_material
+            else
+                return newIndex;
         }
 
         private List<CachedTag> ParseLegacyTag(string tagSpecifier)

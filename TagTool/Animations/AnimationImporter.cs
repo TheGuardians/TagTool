@@ -13,7 +13,7 @@ using TagTool.Tags.Resources;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using System.Numerics;
-using Assimp;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Animations
 {
@@ -34,36 +34,6 @@ namespace TagTool.Animations
         private List<MovementDataDxDyDzDyaw> MovementData = new List<MovementDataDxDyDzDyaw>();
         public ModelAnimationTagResource.GroupMemberMovementDataType MovementDataType;
         public bool ScaleFix = false;
-
-        public bool AssimpImport(string fileName)
-        {
-            //import the mesh and get the vertices and indices
-            Scene model;
-            using (var importer = new AssimpContext())
-            {
-                using (var logStream = new LogStream((msg, userData) => Console.Write(msg)))
-                {
-                    logStream.Attach();
-                    model = importer.ImportFile(fileName);
-                    logStream.Detach();
-                }
-            }
-
-            if (model.HasAnimations && model.Animations[0].HasNodeAnimations)
-            {
-                foreach (var modelnode in model.Animations[0].NodeAnimationChannels)
-                {
-                    List<AnimationFrame> NodeFrames = new List<AnimationFrame>();
-                }
-            }
-            else
-            {
-                new TagToolError(CommandError.CustomError, "Model has no animations!");
-                return false;
-            }
-            return true;
-        }
-
         public bool Import(string fileName)
         {
             using (FileStream textStream = (FileStream)File.OpenRead(fileName))
@@ -590,45 +560,61 @@ namespace TagTool.Animations
 
         public void HandleMovementData()
         {
-            switch (MovementDataType)
+            //extract data only from the first (root) node
+            //data collection starts at the end of the frames, moving backwards to the beginning
+            for (int frame_index = AnimationNodes[0].Frames.Count - 1; frame_index > 0; frame_index--)
             {
-                //TODO: add better handling for more complex movement data types
-                case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy:
-                case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
-                case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
-                    //extract data only from the first (root) node
-                    //data collection starts at the end of the frames, moving backwards to the beginning
-                    for (int frame_index = AnimationNodes[0].Frames.Count - 1; frame_index > 0; frame_index--)
+                AnimationFrame CurrentFrame = AnimationNodes[0].Frames[frame_index - 1];
+                AnimationFrame NextFrame = AnimationNodes[0].Frames[frame_index];
+                AnimationFrame FirstFrame = AnimationNodes[0].Frames[0];
+
+                MovementDataDxDyDzDyaw MovementFrame =
+                    new MovementDataDxDyDzDyaw
                     {
-                        AnimationFrame CurrentFrame = AnimationNodes[0].Frames[frame_index - 1];
-                        AnimationFrame NextFrame = AnimationNodes[0].Frames[frame_index];
-                        AnimationFrame FirstFrame = AnimationNodes[0].Frames[0];
+                        X = NextFrame.Translation.X - CurrentFrame.Translation.X,
+                        Y = NextFrame.Translation.Y - CurrentFrame.Translation.Y,
+                        Z = NextFrame.Translation.Z - CurrentFrame.Translation.Z,
+                        W = GetYawRotationBetweenQuaternions(CurrentFrame.Rotation, NextFrame.Rotation)
+                    };
 
-                        //don't include z axis for basic movement data
-                        MovementDataDxDyDzDyaw MovementFrame =
-                            new MovementDataDxDyDzDyaw
-                            {
-                                X = NextFrame.Translation.X - CurrentFrame.Translation.X,
-                                Y = NextFrame.Translation.Y - CurrentFrame.Translation.Y
-                            };
+                //set 'nextframe' data to be equivalent to that of the first frame
+                if(MovementDataType != ModelAnimationTagResource.GroupMemberMovementDataType.None)
+                {
+                    AnimationNodes[0].Frames[frame_index].Translation.X = FirstFrame.Translation.X;
+                    AnimationNodes[0].Frames[frame_index].Translation.Y = FirstFrame.Translation.Y;
+                    if (MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw)
+                        AnimationNodes[0].Frames[frame_index].Translation.Z = FirstFrame.Translation.Z;
+                    if (MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw ||
+                        MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw)
+                        AnimationNodes[0].Frames[frame_index].Rotation = FirstFrame.Rotation;
+                }
 
-                        //set 'nextframe' translation to be equivalent to that of the first frame
-                        AnimationNodes[0].Frames[frame_index].Translation = FirstFrame.Translation;
-
-                        //since we are moving backwards, insert the movementframe at the beginning of the list
-                        MovementData.Insert(0, MovementFrame);
-                    }
-
-                    //add an extra frame for the transition from the resting position
-                    MovementData.Insert(0, new MovementDataDxDyDzDyaw
-                    {
-                        X = AnimationNodes[0].Frames[0].Translation.X - AnimationNodes[0].DefaultTranslation.X,
-                        Y = AnimationNodes[0].Frames[0].Translation.Y - AnimationNodes[0].DefaultTranslation.Y
-                    });
-                    return;
-                default:
-                    return;
+                //since we are moving backwards, insert the movementframe at the beginning of the list
+                MovementData.Insert(0, MovementFrame);
             }
+
+            //add an extra frame for the transition from the resting position
+            MovementData.Insert(0, new MovementDataDxDyDzDyaw
+            {
+                X = AnimationNodes[0].Frames[0].Translation.X - AnimationNodes[0].DefaultTranslation.X,
+                Y = AnimationNodes[0].Frames[0].Translation.Y - AnimationNodes[0].DefaultTranslation.Y,
+                Z = AnimationNodes[0].Frames[0].Translation.Z - AnimationNodes[0].DefaultTranslation.Z,
+                W = GetYawRotationBetweenQuaternions(AnimationNodes[0].DefaultRotation, AnimationNodes[0].Frames[0].Rotation)
+            });
+            return;
+        }
+
+        private float GetQuaternionYaw(RealQuaternion q)
+        {
+            return (float)Math.Atan2(2.0 * (q.J * q.K + q.W * q.I), q.W * q.W - q.I * q.I - q.J * q.J + q.K * q.K);
+        }
+
+        private float GetYawRotationBetweenQuaternions(RealQuaternion from, RealQuaternion to)
+        {
+            float fromYaw = GetQuaternionYaw(from);
+            float toYaw = GetQuaternionYaw(to);
+            float diff = toYaw - fromYaw;
+            return diff;
         }
 
         public int SerializeMovementData(GameCacheHaloOnlineBase CacheContext, DataSerializationContext dataContext, MemoryStream stream)
@@ -647,7 +633,7 @@ namespace TagTool.Animations
                     case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
                         dataContext.Writer.Write(movementframe.X);
                         dataContext.Writer.Write(movementframe.Y);
-                        dataContext.Writer.Write(movementframe.Z);
+                        dataContext.Writer.Write(movementframe.W);
                         break;
                     case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
                         dataContext.Writer.Write(movementframe.X);

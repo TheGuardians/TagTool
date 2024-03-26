@@ -199,7 +199,7 @@ namespace TagTool.Commands.Scenarios
                         StructureBsp = sbspTag,
                         Cubemap = cubemapsTag,
                         Wind = windTag,
-                        Flags = 32,
+                        Flags = (Scenario.StructureBspBlock.StructureBspFlags)32,
                         DefaultSkyIndex = -1
                     }
                 };

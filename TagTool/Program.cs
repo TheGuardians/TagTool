@@ -95,8 +95,14 @@ namespace TagTool.Commands
                 if (string.IsNullOrWhiteSpace(tagCacheFile))
                     continue;
 
-                if (!tagCacheFile.Contains(".map") && !tagCacheFile.EndsWith(".dat"))
-                    tagCacheFile += "\\tags.dat";
+                if (!tagCacheFile.EndsWith(".map") && !tagCacheFile.EndsWith(".dat"))
+                {
+                    if (tagCacheFile.Last() == '\\' || tagCacheFile.Last() == '/')
+                        tagCacheFile = tagCacheFile.Substring(0, tagCacheFile.Length - 1);
+
+                    var append = tagCacheFile.EndsWith("maps") ? "tags.dat" : "maps\\tags.dat";
+                    tagCacheFile = Path.Combine(tagCacheFile, append);
+                }
 
                 if (File.Exists(tagCacheFile))
                     fileInfo = new FileInfo(tagCacheFile);

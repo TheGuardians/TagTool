@@ -127,6 +127,21 @@ namespace TagTool.Commands.Porting
 
                 ConvertInstanceBucketsReach(sbsp, sbspTagResources);
                 ConvertReachEnvironmentMopp(sbsp);
+
+                // Reach invalid shader is an inconspicuous gray material and was left on many maps
+                if (CacheContext.TagCache.TryGetCachedTag("levels\\shared\\shaders\\simple\\grey.shader", out CachedTag defaultGray))
+                {
+                    foreach (var material in sbsp.CollisionMaterials)
+                    {
+                        if (material.RenderMethod?.ToString() == "shaders\\invalid.shader")
+                            material.RenderMethod = defaultGray;
+                    }
+                    foreach (var material in sbsp.Materials)
+                    {
+                        if (material.RenderMethod?.ToString() == "shaders\\invalid.shader")
+                            material.RenderMethod = defaultGray;
+                    }
+                }
             }
 
             return sbsp;

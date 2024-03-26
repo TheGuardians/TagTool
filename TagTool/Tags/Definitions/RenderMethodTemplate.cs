@@ -51,34 +51,6 @@ namespace TagTool.Tags.Definitions
             public List<ShaderArgument> TextureParameterNames;
         }
 
-        [TagStructure(Size = 0x2)]
-        public class TagBlockIndex : TagStructure
-		{
-            public ushort Offset { get => GetOffset(); set => SetOffset(value); }
-            public ushort Count { get => GetCount(); set => SetCount(value); }
-
-            private ushort GetCount() => (ushort)(Integer >> 10);
-            private ushort GetOffset() => (ushort)(Integer & 0x3FFu);
-            private void SetCount(ushort count)
-            {
-                if (count > 0x3Fu) throw new System.Exception("Out of range");
-                var a = GetOffset();
-                var b = (count & 0x3F) << 10;
-                var value = (ushort)(a | b);
-                Integer = value;
-            }
-            private void SetOffset(ushort _offset)
-            {
-                if (_offset > 0x3FFu) throw new System.Exception("Out of range");
-                var a = (_offset & 0x3FF);
-                var b = (GetCount() & 0x3F) << 10;
-                var value = (ushort)(a | b);
-                Integer = value;
-            }
-
-            public ushort Integer;
-        }
-
         [TagStructure(Size = 0x1C, Platform = CachePlatform.Original)]
         [TagStructure(Size = 0x20, Align = 0x8, Platform = CachePlatform.MCC)]
         public class PassBlock : TagStructure
