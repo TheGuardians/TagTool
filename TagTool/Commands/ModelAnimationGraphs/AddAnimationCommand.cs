@@ -255,7 +255,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
         {
             List<string> tokens = filename.Split(':').ToList();
             List<string> unsupportedTokens = 
-                new List<string> { "s_kill", "s_ping", "h_kill", "h_ping", "sync_actions", "suspension", "tread", "object", "2" };
+                new List<string> { "s_kill", "s_ping", "h_kill", "h_ping", "sync_actions", "suspension", "tread", "object", "2", "device"};
             if(tokens.Any(t => unsupportedTokens.Contains(t)))
             {
                 new TagToolWarning($"Unsupported string token found in filename {filename}. Manual mode addition is required.");
@@ -267,7 +267,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 tokens.RemoveAt(tokens.Count - 1);
 
             //fixups for specific mode tokens
-            List<string> edgeCases = new List<string> { "vehicle", "first_person"};
+            List<string> edgeCases = new List<string> { "vehicle", "first_person", "weapon"};
             if (edgeCases.Contains(tokens[0]))
                 tokens[0] = "any";
 
@@ -307,7 +307,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             int modeIndex = AddMode(modeString);
             int classIndex = AddClass(modeIndex, classString);
             int typeIndex = AddType(modeIndex, classIndex, typeString);
-            int actionIndex = AddAction(modeIndex, classIndex, typeIndex, actionString, animationIndex);
+            AddAction(modeIndex, classIndex, typeIndex, actionString, animationIndex);
 
             Console.WriteLine($"Successfully added mode entries for '{modeString}:{classString}:{typeString}:{actionString}'!");
         }
@@ -368,41 +368,31 @@ namespace TagTool.Commands.ModelAnimationGraphs
             }
         }
 
-        public int AddAction(int modeIndex, int classIndex, int typeIndex, string actionString, int animationIndex)
+        public void AddAction(int modeIndex, int classIndex, int typeIndex, string actionString, int animationIndex)
         {
             StringId actionStringID = CacheContext.StringTable.GetStringId(actionString);
             var set = Animation.Modes[modeIndex].WeaponClass[classIndex].WeaponType[typeIndex].Set;
+            var newAction = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
+            {
+                Label = actionStringID,
+                GraphIndex = -1,
+                Animation = (short)animationIndex
+            };
             if (AnimationType == ModelAnimationGraph.FrameType.Base) //for base actions
             {
                 int actionIndex = set.Actions.FindIndex(m => m.Label == actionStringID);
                 if (actionIndex != -1)
-                    return actionIndex;
+                    set.Actions[actionIndex] = newAction;
                 else
-                {
-                    set.Actions.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
-                    {
-                        Label = actionStringID,
-                        GraphIndex = -1,
-                        Animation = (short)animationIndex
-                    });
-                    return set.Actions.Count - 1;
-                }
+                    set.Actions.Add(newAction);
             }
             else //handles overlays and replacements
             {
                 int actionIndex = set.Overlays.FindIndex(m => m.Label == actionStringID);
                 if (actionIndex != -1)
-                    return actionIndex;
+                    set.Overlays[actionIndex] = newAction;
                 else
-                {
-                    set.Overlays.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
-                    {
-                        Label = actionStringID,
-                        GraphIndex = -1,
-                        Animation = (short)animationIndex
-                    });
-                    return set.Overlays.Count - 1;
-                }
+                    set.Overlays.Add(newAction);
             }           
         }
         public void AdjustImportedNodes(AnimationImporter importer)
