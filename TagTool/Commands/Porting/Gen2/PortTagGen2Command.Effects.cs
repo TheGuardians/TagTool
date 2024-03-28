@@ -166,8 +166,6 @@ namespace TagTool.Commands.Porting.Gen2
                         CreateInDisposition = (EffectViolenceMode)part.CreateIn1,
                         PrimaryLocation = part.Location,
                         Flags = (EffectEventPartFlags)part.Flags,
-                        RuntimeBaseGroupTag = part.Type.Group.Tag,
-                        Type = part.Type,
                         VelocityBounds = part.VelocityBounds,
                         VelocityConeAngle = part.VelocityConeAngle,
                         AngularVelocityBounds = part.AngularVelocityBounds,
@@ -175,6 +173,13 @@ namespace TagTool.Commands.Porting.Gen2
                         AScalesValues = (EffectEventPartScales)part.AScalesValues,
                         BScalesValues = (EffectEventPartScales)part.BScalesValues
                     };
+
+                    if (part.Type != null)
+                    {
+                        var gen2group = part.Type.Group.Tag.ToString();
+                        if(Tag.TryParseGroupTag(Cache, gen2group, out newPart.RuntimeBaseGroupTag))
+                            newPart.Type = part.Type;
+                    }
 
                     newEvent.Parts.Add(newPart);
                 }
@@ -191,7 +196,7 @@ namespace TagTool.Commands.Porting.Gen2
                     newEvent.Accelerations.Add(newAcceleration);
                 }
 
-                for (int j = 0; j <  eventBlock.ParticleSystems.Count; j++)
+                for (int j = 0; j < eventBlock.ParticleSystems.Count; j++)
                 {
                     var oldPs = eventBlock.ParticleSystems[j];
 
@@ -225,7 +230,7 @@ namespace TagTool.Commands.Porting.Gen2
                     ps.RuntimeMaximumLifespan = 8.0f; // TODO: (emitters --> max(ps.RuntimeMaximumLifespan, ps.ParticleLifespan) )
                     for (int k = 0; k < oldPs.Emitters.Count; k++)
                     {
-                        var oldEm = oldPs.Emitters[i];
+                        var oldEm = oldPs.Emitters[k];
                         Effect.Event.ParticleSystem.Emitter emitter = new Effect.Event.ParticleSystem.Emitter();
 
                         emitter.Name = Cache.StringTable.GetOrAddString($"emitter_{k}");
@@ -645,7 +650,7 @@ namespace TagTool.Commands.Porting.Gen2
                     gpuFunction.Innards[4] = BitConverter.ToSingle(function.Data, 12 * multiPartIndex + 0x24);
                     gpuFunction.Innards[5] = BitConverter.ToSingle(function.Data, 12 * multiPartIndex + 0x28);
                     gpuFunction.Innards[6] = BitConverter.ToSingle(function.Data, 12 * multiPartIndex + 0x28);
-                    gpuFunction.Innards[5] = BitConverter.ToSingle(function.Data, 12 * multiPartIndex + 0x30);
+                    gpuFunction.Innards[7] = BitConverter.ToSingle(function.Data, 12 * multiPartIndex + 0x30);
                     break;
                 case 4:
                     gpuFunction.Innards[0] = BitConverter.ToSingle(function.Data, 12 * multiPartIndex + 0x20);
