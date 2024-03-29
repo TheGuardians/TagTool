@@ -196,39 +196,32 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 if (isWorldRelative)
                     AnimationBlock.AnimationData.InternalFlags |= ModelAnimationGraph.Animation.InternalFlagsValue.WorldRelative;
 
+                //build a new resource 
+                ModelAnimationTagResource newResource = new ModelAnimationTagResource
+                {
+                    GroupMembers = new TagTool.Tags.TagBlock<ModelAnimationTagResource.GroupMember>()
+                };
+                newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext));
+                newResource.GroupMembers.AddressType = CacheAddressType.Definition;
+                //serialize the new resource into the cache
+                TagResourceReference resourceref = CacheContext.ResourceCache.CreateModelAnimationGraphResource(newResource);
+
+                //add resource reference to the animation tag
+                Animation.ResourceGroups.Add(new ModelAnimationGraph.ResourceGroup
+                {
+                    ResourceReference = resourceref,
+                    MemberCount = 1
+                });
+
+                AnimationBlock.AnimationData.ResourceGroupIndex = (short)(Animation.ResourceGroups.Count - 1);
+                AnimationBlock.AnimationData.ResourceGroupMemberIndex = 0;
+
                 if (replacing)
                 {
-                    int groupIndex = Animation.Animations[existingIndex].AnimationData.ResourceGroupIndex;
-                    int memberIndex = Animation.Animations[existingIndex].AnimationData.ResourceGroupMemberIndex;
-                    ModelAnimationTagResource existingResource = CacheContext.ResourceCache.GetModelAnimationTagResource(
-                        Animation.ResourceGroups[groupIndex].ResourceReference);
-                    existingResource.GroupMembers[memberIndex] = importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext);
-                    ResourceCachesHaloOnlineBase resourceCache = (ResourceCachesHaloOnlineBase)CacheContext.ResourceCache;
-                    resourceCache.ReplaceResource(Animation.ResourceGroups[groupIndex].ResourceReference, existingResource);
-
-                    AnimationBlock.AnimationData.ResourceGroupIndex = (short)groupIndex;
-                    AnimationBlock.AnimationData.ResourceGroupMemberIndex = (short)memberIndex;
                     Animation.Animations[existingIndex] = AnimationBlock;
                 }
                 else
                 {
-                    //build a new resource 
-                    ModelAnimationTagResource newResource = new ModelAnimationTagResource
-                    {
-                        GroupMembers = new TagTool.Tags.TagBlock<ModelAnimationTagResource.GroupMember>()
-                    };
-                    newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext));
-                    newResource.GroupMembers.AddressType = CacheAddressType.Definition;
-                    //serialize the new resource into the cache
-                    TagResourceReference resourceref = CacheContext.ResourceCache.CreateModelAnimationGraphResource(newResource);
-
-                    //add resource reference to the animation tag
-                    Animation.ResourceGroups.Add(new ModelAnimationGraph.ResourceGroup
-                    {
-                        ResourceReference = resourceref,
-                        MemberCount = 1
-                    });
-
                     Animation.Animations.Add(AnimationBlock);
                     existingIndex = Animation.Animations.Count - 1;
                 }
