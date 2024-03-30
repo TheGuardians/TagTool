@@ -71,11 +71,11 @@ namespace TagTool.Animations
         public static List<RenderModel.Node> GetRenderModelNodes(GameCache CacheContext, List<ModelAnimationGraph.SkeletonNode> jmadnodes, int nodelistchecksum)
         {
             List<RenderModel.Node> Nodes = new List<RenderModel.Node>();
+            string matchedTagName = "";
             using (var stream = CacheContext.OpenCacheRead())
             {
                 List<StringId> jmadnodenames = jmadnodes.Select(n => n.Name).ToList();
-                int bestmatchcount = 0;
-
+                int bestmatchcount = 0;             
                 foreach (CachedTag tag in CacheContext.TagCache.NonNull())
                 {
                     if (!tag.IsInGroup(new Tag("mode")))
@@ -88,16 +88,21 @@ namespace TagTool.Animations
                     currentmatchcount = currentNodes.Count;
                     if (currentmatchcount >= bestmatchcount)
                     {
+                        matchedTagName = tag.Name;
                         bestmatchcount = currentmatchcount;
                         Nodes = currentNodes.DeepClone();
                         if (currentmatchcount == jmadnodes.Count &&
-                            CalculateNodeListChecksum(CacheContext, modetag.Nodes, 0) == nodelistchecksum)
+                            CalculateNodeListChecksum(CacheContext, modetag.Nodes, 0) == nodelistchecksum &&
+                            modetag.Nodes.Count == jmadnodes.Count)
                         {
+                            Console.WriteLine($"Animation nodes matched render model {matchedTagName}");
                             return Nodes;
                         }
                     }
                 }
             }
+            if(matchedTagName != "")
+                Console.WriteLine($"Animation Nodes matched render model {matchedTagName}");
             return Nodes;
         }
 
