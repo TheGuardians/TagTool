@@ -331,13 +331,11 @@ namespace TagTool.Tags.Definitions
                 public StringId VariantName; // if empty, may be used by any model variant
             }
 
-            [TagStructure(Size = 0x28, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
-            [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
+            [TagStructure(Size = 0x28)]
             public class ChangeColorFunction : TagStructure
 			{
-                [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(Flags = TagFieldFlags.Padding, Length = 4)]
                 public byte[] Unused = new byte[4];
-
                 public GlobalRgbInterpolationFlags ScaleFlags;
                 public RealRgbColor ColorLowerBound;
                 public RealRgbColor ColorUpperBound;
