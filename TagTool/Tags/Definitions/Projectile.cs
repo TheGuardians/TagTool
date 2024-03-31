@@ -270,23 +270,6 @@ namespace TagTool.Tags.Definitions
                 CannotBeOverpenetrated = 1 << 0
             }
 
-            [Flags]
-            public enum MaterialPossibleResponseFlags : ushort
-			{
-				None,
-				OnlyAgainstUnits = 1 << 0,
-				NeverAgainstUnits = 1 << 1,
-				OnlyAgainstBipeds = 1 << 2,
-				OnlyAgainstVehicles = 1 << 3,
-				NeverAgainstWussPlayers = 1 << 4,
-				OnlyWhenTethered = 1 << 5,
-				OnlyWhenNotTethered = 1 << 6,
-				OnlyAgainstDeadBipeds = 1 << 7,
-				NeverAgainstDeadBipeds = 1 << 8,
-				OnlyAiProjectiles = 1 << 9,
-				NeverAiProjectiles = 1 << 10
-			}
-
             public enum MaterialResponseValue : short
             {
                 ImpactDetonate,
@@ -310,12 +293,13 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Flags = GlobalMaterial)]
             public StringId MaterialName;
+            [TagField(Flags = GlobalMaterial)]
             public short RuntimeMaterialIndex;
             public MaterialPossibleResponseFlags ResponseFlags;
             public float ChanceFraction; // [0,1]
-            public Bounds<Angle> Between; // degrees
-            public Bounds<float> And; // world units per second
-            public MaterialResponse Response;
+            public Bounds<Angle> BetweenAngle; // degrees
+            public Bounds<float> AndVelocity; // world units per second
+            public MaterialResponse PotentialResponse;
             public EffectScaleEnum ScaleEffectsBy;
             // the angle of incidence is randomly perturbed by at most this amount to simulate irregularity.
             public Angle AngularNoise; // degrees
@@ -328,32 +312,17 @@ namespace TagTool.Tags.Definitions
             // the fraction of the projectile's velocity perpendicular to the surface lost on impact
             public float PerpendicularFriction;
 
-            [Flags]
-            public enum MaterialPossibleResponseFlags : ushort
-            {
-                OnlyAgainstUnits = 1 << 0,
-                NeverAgainstUnits = 1 << 1,
-                OnlyAgainstBipeds = 1 << 2,
-                OnlyAgainstVehicles = 1 << 3,
-                NeverAgainstWussPlayers = 1 << 4,
-                OnlyWhenTethered = 1 << 5,
-                OnlyWhenNotTethered = 1 << 6,
-                OnlyAgainstDeadBipeds = 1 << 7,
-                NeverAgainstDeadBipeds = 1 << 8,
-                OnlyAiProjectiles = 1 << 9,
-                NeverAiProjectiles = 1 << 10
-            }
-
             public enum MaterialResponse : short
             {
-                Impact,
+                ImpactDetonate,
                 Fizzle,
                 Overpenetrate,
                 Attach,
                 Bounce,
-                Bounce1,
-                Fizzle1,
-                TurnPhysical
+                BounceDud,
+                FizzleRicochet,
+                TurnPhysical,
+                Airstrike
             }
 
             public enum EffectScaleEnum : short
@@ -361,6 +330,23 @@ namespace TagTool.Tags.Definitions
                 Damage,
                 Angle
             }
+        }
+
+        [Flags]
+        public enum MaterialPossibleResponseFlags : ushort
+        {
+            None,
+            OnlyAgainstUnits = 1 << 0,
+            NeverAgainstUnits = 1 << 1,
+            OnlyAgainstBipeds = 1 << 2,
+            OnlyAgainstVehicles = 1 << 3,
+            NeverAgainstWussPlayers = 1 << 4,
+            OnlyWhenTethered = 1 << 5,
+            OnlyWhenNotTethered = 1 << 6,
+            OnlyAgainstDeadBipeds = 1 << 7,
+            NeverAgainstDeadBipeds = 1 << 8,
+            OnlyAiProjectiles = 1 << 9,
+            NeverAiProjectiles = 1 << 10
         }
 
         [TagStructure(Size = 0x30)]

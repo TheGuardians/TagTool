@@ -548,6 +548,13 @@ namespace TagTool.Commands.Porting
                 if (eqip.EquipmentFlagsReach.HasFlag(Equipment.EquipmentFlagBitsReach.ThirdPersonCameraWhileActive))
                     eqip.EquipmentFlags |= Equipment.EquipmentFlagBits.ThirdPersonCameraAlways;
             }
+
+            if (definition is Projectile proj)
+            {
+                proj.MaterialResponses = new List<Projectile.ProjectileMaterialResponseBlock>();
+                var converter = new StructureAutoConverter(BlamCache, CacheContext);
+                converter.TranslateList(proj.MaterialResponsesNew, proj.MaterialResponses);
+            }
         }
 
         public void CullNewObjects<T>(List<Scenario.ScenarioPaletteEntry> palette, List<T> instanceList, Dictionary<string,string> replacements)
