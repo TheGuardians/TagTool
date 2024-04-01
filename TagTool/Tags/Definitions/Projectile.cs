@@ -14,8 +14,10 @@ namespace TagTool.Tags.Definitions
     {
         [TagField(MaxVersion = CacheVersion.HaloOnline235640)]
         public ProjectileFlags Flags;
-        [TagField(MinVersion = CacheVersion.HaloOnline301003)]
+        [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline700123)]
         public ProjectileFlagsHO FlagsHO;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public ProjectileFlagsReach FlagsReach;
         public DetonationTimerModes DetonationTimerStarts;
         public AiSoundVolume ImpactVolumeForAi;
         public float CollisionRadius; // world units
@@ -201,6 +203,44 @@ namespace TagTool.Tags.Definitions
             Bit23 = 1 << 23,
             Bit24 = 1 << 24,
             Bit25 = 1 << 25,
+            Bit26 = 1 << 26,
+            Bit27 = 1 << 27,
+            Bit28 = 1 << 28,
+            Bit29 = 1 << 29,
+            Bit30 = 1 << 30,
+            Bit31 = 1 << 31
+        }
+
+        [Flags]
+        public enum ProjectileFlagsReach : int
+        {
+            None,
+            OrientedAlongVelocity = 1 << 0,
+            AiMustUseBallisticAiming = 1 << 1,
+            DetonationMaxTimeIfAttached = 1 << 2,
+            DamageScalesBasedOnDistance = 1 << 3,
+            SteeringAdjustsOrientation = 1 << 4,
+            DoNotNoiseUpSteering = 1 << 5,
+            CanTrackBehindItself = 1 << 6,
+            RobotronSteering = 1 << 7,
+            AffectedByPhantomVolumes = 1 << 8,
+            Bit9 = 1 << 9,
+            NotifiesTargetUnits = 1 << 10,
+            UseGroundDetonationWhenAttached = 1 << 11,
+            AIMinorTrackingThreat = 1 << 12,
+            DangerousWhenInactive = 1 << 13,
+            AIStimulusWhenAttached = 1 << 14,
+            OverPeneDetonation = 1 << 15,
+            NoImpactEffectsOnBounce = 1 << 16,
+            RC1OverpenetrationFixes = 1 << 17,
+            DisableInstantaneousFirstTick = 1 << 18,
+            ConstrainGravityToVelocityBounds = 1 << 19,
+            AllowDecelerationToBelowFinalVelocity = 1 << 20,
+            SupportsTethering = 1 << 21,
+            DamageNotPredictableByClients = 1 << 22,
+            CollidesWithPhysicsOnlySurfaces = 1 << 23,
+            DetonatesWhenAttachedToObjects = 1 << 24,
+            CannotBeDetachedByEquipment = 1 << 25,
             Bit26 = 1 << 26,
             Bit27 = 1 << 27,
             Bit28 = 1 << 28,

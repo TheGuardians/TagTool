@@ -551,9 +551,24 @@ namespace TagTool.Commands.Porting
 
             if (definition is Projectile proj)
             {
-                proj.MaterialResponses = new List<Projectile.ProjectileMaterialResponseBlock>();
+                // merge old and new material response lists
+                var newMaterials = new List<Projectile.ProjectileMaterialResponseBlock>();
                 var converter = new StructureAutoConverter(BlamCache, CacheContext);
-                converter.TranslateList(proj.MaterialResponsesNew, proj.MaterialResponses);
+                converter.TranslateList(proj.MaterialResponsesNew, newMaterials);
+                if (proj.MaterialResponses != null && proj.MaterialResponses.Count > 0)
+                    proj.MaterialResponses.AddRange(newMaterials);
+                else
+                    proj.MaterialResponses = newMaterials;
+
+                // preconvert projectile flags
+                converter.TranslateEnum(proj.FlagsReach, out proj.Flags, proj.Flags.GetType());
+
+                // handle required flags Reach doesn't have
+                if (proj.SuperDetonationProjectileCount > 0)
+                    proj.Flags |= Projectile.ProjectileFlags.HasSuperCombiningExplosion;
+
+                if (proj.ConicalSpread.Any())
+                    proj.Flags |= Projectile.ProjectileFlags.TravelsInstantaneously;
             }
         }
 
