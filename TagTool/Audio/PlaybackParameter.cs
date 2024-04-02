@@ -5,7 +5,7 @@ using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x38, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x38, MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x44,  MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x54, MinVersion = CacheVersion.HaloReach)]
     public class PlaybackParameter : TagStructure

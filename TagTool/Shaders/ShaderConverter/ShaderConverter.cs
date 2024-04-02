@@ -381,15 +381,47 @@ namespace TagTool.Shaders.ShaderConverter
                     int parameterIndex = Parameters.FindIndex(x => Cache.StringTable.GetString(x.Name) == name);
 
                     if (parameterIndex == -1) // this will crash for the meantime
-                        new TagToolWarning($"Shader converter: real parameter \"{name}\" does not exist in rmop");
-
-                    realConstants.Add(new RealConstant
                     {
-                        Arg0 = Parameters[parameterIndex].DefaultFloatArgument,
-                        Arg1 = Parameters[parameterIndex].DefaultFloatArgument,
-                        Arg2 = Parameters[parameterIndex].DefaultFloatArgument,
-                        Arg3 = Parameters[parameterIndex].DefaultFloatArgument
-                    });
+                        bool added = false;
+                        // Hardcoded fixups for option constants (they are not in rmop)
+                        if (ShaderTypeHasOptionConstants(BaseRmt2Descriptor.Type))
+                        {
+                            int optionValue = GetCategoryOption(name);
+                            if (optionValue != -1)
+                            {
+                                realConstants.Add(new RealConstant
+                                {
+                                    Arg0 = optionValue,
+                                    Arg1 = optionValue,
+                                    Arg2 = optionValue,
+                                    Arg3 = optionValue
+                                });
+                                added = true;
+                            }
+                        }
+
+                        if (!added)
+                        {
+                            new TagToolWarning($"Shader converter: real parameter \"{name}\" does not exist in rmop");
+                            realConstants.Add(new RealConstant
+                            {
+                                Arg0 = 0.0f,
+                                Arg1 = 0.0f,
+                                Arg2 = 0.0f,
+                                Arg3 = 0.0f
+                            });
+                        }
+                    }
+                    else
+                    {
+                        realConstants.Add(new RealConstant
+                        {
+                            Arg0 = Parameters[parameterIndex].DefaultFloatArgument,
+                            Arg1 = Parameters[parameterIndex].DefaultFloatArgument,
+                            Arg2 = Parameters[parameterIndex].DefaultFloatArgument,
+                            Arg3 = Parameters[parameterIndex].DefaultFloatArgument
+                        });
+                    }
                 }
             }
 
@@ -514,6 +546,38 @@ namespace TagTool.Shaders.ShaderConverter
             }
 
             return queryableProperties;
+        }
+
+        private void ValidateRenderMethod()
+        {
+
+        }
+
+        private bool ShaderTypeHasOptionConstants(string type)
+        {
+            switch (type)
+            {
+                case "particle":
+                case "beam":
+                case "contrail":
+                case "decal":
+                case "light_volume":
+                case "water":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private int GetCategoryOption(string categoryName)
+        {
+            for (int i = 0; i < Rmdf.Categories.Count; i++)
+            {
+                if (Cache.StringTable.GetString(Rmdf.Categories[i].Name) == categoryName)
+                    return BaseRmt2Descriptor.Options[i];
+            }
+
+            return -1;
         }
     }
 }

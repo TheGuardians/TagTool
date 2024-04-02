@@ -189,12 +189,6 @@ namespace TagTool.Commands.Porting.Gen2
                     }
                     Cache.Serialize(cacheStream, model.CollisionModel, coll);
                 }
-                newscenery.MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>();
-                newscenery.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock
-                {
-                    Type = TagTool.Tags.Definitions.Common.MultiplayerObjectType.Weapon,
-                    SpawnTimerType = TagTool.Tags.Definitions.Common.MultiplayerObjectSpawnTimerType.StartsOnDisturbance
-                });
             }
             return newscenery;
         }

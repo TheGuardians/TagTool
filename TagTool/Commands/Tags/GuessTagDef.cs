@@ -13,6 +13,8 @@ using System.Runtime.Remoting.Contexts;
 using TagTool.Layouts;
 using static TagTool.IO.ConsoleHistory;
 using TagTool.Tags;
+using System.Runtime.Remoting.Messaging;
+using TagTool.Cache.Gen2;
 
 namespace TagTool.Commands.Tags
 {
@@ -58,6 +60,13 @@ namespace TagTool.Commands.Tags
                 TagSectionMin = headerGen4.SectionTable.Sections[(int)CacheFileSectionType.TagSection].Offset;
                 TagSectionMax = TagSectionMin + headerGen4.SectionTable.Sections[(int)CacheFileSectionType.TagSection].Size;
             }
+            else if(CacheVersionDetection.IsInGen(TagTool.Cache.CacheGeneration.Second, Cache.Version))
+            {
+                CacheGeneration = 2;
+                var cacheGen2 = (GameCacheGen2)Cache;
+                TagSectionMin = (int)Cache.TagCache.TagTable.First().DefinitionOffset;
+                TagSectionMax = (int)Cache.TagCache.TagTable.Last().DefinitionOffset;
+            }
             else
                 return new TagToolError(CommandError.OperationFailed, "Current cache generation not supported yet!");
 
@@ -74,21 +83,28 @@ namespace TagTool.Commands.Tags
                 CachedTag testTag = Cache.TagCache.GetTag(i);
                 CachedTag nextTag = Cache.TagCache.GetTag(i + 1);
 
-                if (testTag == null || nextTag == null)
+                if (testTag == null || nextTag == null || testTag.Group == null)
                     continue;
 
                 var tagOffset = testTag.DefinitionOffset;
+                var nextOffset = nextTag.DefinitionOffset;
+
+                if(CacheGeneration == 2)
+                {
+                    tagOffset &= 0x3FFFFFFF;
+                    nextOffset &= 0x3FFFFFFF;
+                }
 
                 TagFormat currentTag = new TagFormat
                 {
                     tagType = testTag.Group.Tag,
                     tagName = testTag.Name,
                     rawPointer = tagOffset,
-                    StructureBounds = new Bounds<uint>(previousTagOffset, testTag.DefinitionOffset)
+                    StructureBounds = new Bounds<uint>(previousTagOffset, tagOffset)
                 };
 
                 var reader = new EndianReader(CacheStream, Cache.Endianness);
-                uint tagMaxSize = nextTag.DefinitionOffset - testTag.DefinitionOffset;
+                uint tagMaxSize = nextOffset - tagOffset;
 
                 uint tagTypeCap = 0xFFFF;
                 Type currenttagType = Cache.TagCache.TagDefinitions.GetTagDefinitionType(testTag.Group.Tag);
@@ -100,7 +116,7 @@ namespace TagTool.Commands.Tags
                     tagMaxSize = tagTypeCap;
 
                 //populate the main structure first
-                ScanStructure(reader, currentTag, testTag.DefinitionOffset, testTag.DefinitionOffset + tagMaxSize, false);
+                ScanStructure(reader, currentTag, tagOffset, tagOffset + tagMaxSize, false);
 
                 //calculate size of main struct of previous tag based on earlier pointer of current tag
                 uint mainStructCalculated = 0;
@@ -110,7 +126,7 @@ namespace TagTool.Commands.Tags
                     mainStructCalculated = firstPointer - previousTagOffset;
                 }
                 else
-                    mainStructCalculated = testTag.DefinitionOffset - previousTagOffset;
+                    mainStructCalculated = tagOffset - previousTagOffset;
                 if (tagList.Count > 0)
                 {
                     tagList[tagList.Count - 1].MainStructSize = mainStructCalculated;
@@ -243,6 +259,8 @@ namespace TagTool.Commands.Tags
         {
             switch (CacheGeneration)
             {
+                case 2:
+                    return address & 0x3FFFFFFF;
                 case 3:
                     GameCacheGen3 gen3cache = (GameCacheGen3)Cache;
                     return gen3cache.TagAddressToOffset(address);

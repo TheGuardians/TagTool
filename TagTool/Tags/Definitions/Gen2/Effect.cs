@@ -109,8 +109,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public CreateInValue1 CreateIn1;
                 public short Location;
                 public FlagsValue Flags;
-                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
-                public byte[] Padding;
+                public Tag RuntimeBaseGroupTag;
                 [TagField(ValidTags = new [] { "jpt!","obje","snd!","deca","coln","ligh","MGS2","tdtl","lens" })]
                 public CachedTag Type;
                 /// <summary>

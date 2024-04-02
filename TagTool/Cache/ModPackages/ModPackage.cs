@@ -851,7 +851,7 @@ namespace TagTool.Cache
                 Header.ModifierFlags |= ModifierFlags.campaign;
                 Header.ModifierFlags |= ModifierFlags.multiplayer;
                 Header.ModifierFlags |= ModifierFlags.firefight;
-                Header.ModifierFlags |= ModifierFlags.character;
+                //Header.ModifierFlags |= ModifierFlags.character;
             }
 
             Console.WriteLine();

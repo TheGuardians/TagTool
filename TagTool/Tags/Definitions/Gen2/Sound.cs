@@ -4,7 +4,7 @@ using TagTool.Audio;
 
 namespace TagTool.Tags.Definitions.Gen2
 {
-    [TagStructure(Name = "sound", Tag = "snd!", MinVersion = CacheVersion.Halo2Beta, MaxVersion= CacheVersion.Halo2Vista, Size = 0x14)]
+    [TagStructure(Name = "sound", Tag = "snd!", MinVersion = CacheVersion.Halo2Alpha, MaxVersion= CacheVersion.Halo2Vista, Size = 0x14)]
     public class Sound : TagStructure
     {
         public Gen2SoundFlags Flags;

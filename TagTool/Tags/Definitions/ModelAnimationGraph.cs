@@ -351,9 +351,9 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public RealVector3d HeadingReach;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public float HeadingAngleReach;
+                public float AverageTranslationMagnitudeReach;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public float TranslationMagnitudeReach; //???
+                public float AveragePivotYawReach;
 
                 public List<FrameEvent> FrameEvents;
                 public List<SoundEvent> SoundEvents;
@@ -381,9 +381,10 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public RealVector3d Heading;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float HeadingAngle;
+                public float AverageTranslationMagnitude;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float TranslationMagnitude; //???
+                public float AveragePivotYaw;
+
             }
 
             [Flags]

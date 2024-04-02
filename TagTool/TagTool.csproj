@@ -235,6 +235,7 @@
     <Compile Include="Analysis\TagBlockGuess.cs" />
     <Compile Include="Analysis\TagLayoutGuess.cs" />
     <Compile Include="Analysis\TagReferenceGuess.cs" />
+    <Compile Include="Animations\AnimationDefaultNodeHelper.cs" />
     <Compile Include="Animations\Codecs\RevisedCurveCodec.cs" />
     <Compile Include="Animations\Codecs\SharedStaticDataCodec.cs" />
     <Compile Include="Animations\Common\AnimatedCodecHeader.cs" />

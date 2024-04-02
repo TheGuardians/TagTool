@@ -129,6 +129,23 @@ namespace TagTool.Commands.Porting.Gen2
             // don't print a warning for these
             List<string> hiddenTagGroups = new List<string>
             {
+                "*cen",
+                "*ipd",
+                "*ehi",
+                "*qip",
+                "*eap",
+                "*sce",
+                "*igh",
+                "dgr*",
+                "dec*",
+                "cin*",
+                "trg*",
+                "clu*",
+                "/**/",
+                "*rea",
+                "sslt",
+                "dc*s",
+                "hsc*",
                 "DECR",
                 "fog ",
                 "itmc",

@@ -266,7 +266,9 @@ namespace TagTool.Audio
                 }
                 else if (targetFormat == Compression.PCM)
                 {
-                    blamSound.UpdateFormat(Compression.PCM, PrepareWAVForFMOD(WAVFileName));
+                    // don't use UpdateFormat as it'll calculcate the wrong sample count
+                    blamSound.Compression = Compression.PCM;
+                    blamSound.Data = PrepareWAVForFMOD(WAVFileName);
                 }
                 else if (targetFormat == Compression.Tagtool_WAV)
                 {

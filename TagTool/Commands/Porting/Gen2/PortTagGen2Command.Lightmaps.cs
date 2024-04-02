@@ -366,6 +366,7 @@ namespace TagTool.Commands.Porting.Gen2
             bitmapStreamDI2.WriteTo(bitmapStreamDI);
             convertedLightmap.Intensity = bitmapStreamDI.ToArray();
 
+            Console.WriteLine("Importing lightmap...");
             ImportIntoLbsp(convertedLightmap, linearSHBitmap, intensityBitmap, Cache, lbsp, 0);
 
             CachedTag SHBitmapTag = Cache.TagCache.AllocateTag<Bitmap>(lgroup.BitmapGroup.Name + "_SH");

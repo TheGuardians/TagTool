@@ -5,9 +5,14 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0xF0)]
+    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0x104)]
     public class ForgeGlobalsDefinition : TagStructure
     {
+        public int version;
+
+        [TagField(ValidTags = new[] { "rm  " })]
+        public CachedTag DefaultBoundaryRenderMethod;
+
         [TagField(ValidTags = new[] { "rm  " })]
         public CachedTag InvisibleRenderMethod;
 
