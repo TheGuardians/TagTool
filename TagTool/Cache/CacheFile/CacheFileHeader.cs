@@ -54,6 +54,7 @@ namespace TagTool.Cache
                 case CacheVersion.HaloXbox:
                 case CacheVersion.HaloCustomEdition:
                     return deserializer.Deserialize<CacheFileHeaderGen1>(dataContext);
+                case CacheVersion.Halo2Alpha:
                 case CacheVersion.Halo2Beta:
                 case CacheVersion.Halo2Xbox:
                 case CacheVersion.Halo2Vista:
@@ -102,11 +103,11 @@ namespace TagTool.Cache
 
     }
 
-    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo3Beta)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo3Beta)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
     public class StringIDHeader : TagStructure
     {
-        [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo3Beta)]
+        [TagField(MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo3Beta)]
         public uint BufferAlignedOffset;
 
         public int Count;
@@ -125,7 +126,7 @@ namespace TagTool.Cache
     }
 
     [TagStructure(Size = 0xC, MaxVersion = CacheVersion.HaloCustomEdition)]
-    [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Xbox)]
+    [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo2Xbox)]
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3Beta)]
     public class TagMemoryHeader
@@ -136,7 +137,7 @@ namespace TagTool.Cache
         public uint MemoryBufferOffset;
         public int MemoryBufferSize;
 
-        [TagField(MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagField(MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo2Vista)]
         public int MemoryBufferCapacity;
 
         [TagField(MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]

@@ -136,7 +136,7 @@ namespace TagTool.Commands.Tags
                     Index: tag?.Index ?? index++,
                     Offset: tag?.DefinitionOffset.ToString("X8"),
                     Name: tag?.Name,
-                    Group: tag?.Group.ToString(),
+                    Group: tag?.Group?.ToString(),
                     Group4: tag?.Group?.Tag.ToString(),
                     IsMatch: true
                     );

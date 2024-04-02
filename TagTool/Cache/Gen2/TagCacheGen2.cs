@@ -131,7 +131,7 @@ namespace TagTool.Cache.Gen2
 
 
                     var streamPosition = reader.BaseStream.Position;
-                    reader.SeekTo(tagDataSectionOffset +  entry.TagNameAddress - tagCacheVirtualAddress);
+                    reader.SeekTo(tagDataSectionOffset + entry.TagNameAddress - tagCacheVirtualAddress);
                     name = reader.ReadNullTerminatedString();
                     reader.SeekTo(streamPosition);
                 }

@@ -6,6 +6,8 @@ using TagTool.Tags;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using TagTool.Serialization;
 
 namespace TagTool.Animations.Codecs
 {
@@ -73,6 +75,87 @@ namespace TagTool.Animations.Codecs
             }
         }
 
-        public override byte[] Write(GameCacheHaloOnlineBase CacheContext) => throw new NotImplementedException();
+        public override byte[] Write(GameCacheHaloOnlineBase CacheContext)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            using (EndianWriter writer = new EndianWriter(stream, EndianFormat.LittleEndian))
+            {
+                var dataContext = new DataSerializationContext(writer, CacheAddressType.Memory, false);
+
+                var datastartoffset = stream.Position.DeepClone();
+
+                var codecheader = new AnimationCodecHeader
+                {
+                    Type = AnimationCodecType.BlendScreen,
+                    RotationCount = (sbyte)this.RotatedNodeCount,
+                    TranslationCount = (sbyte)this.TranslatedNodeCount,
+                    ScaleCount = (sbyte)this.ScaledNodeCount,
+                    PlaybackRate = this.CompressionRate,
+                    ErrorPercentage = this.ErrorValue
+                };
+                CacheContext.Serializer.Serialize(dataContext, codecheader);
+
+                var staticcodecheaderoffset = stream.Position.DeepClone();
+                //write an empty static codec header for now, will return to this later 
+                CacheContext.Serializer.Serialize(dataContext, new StaticCodecHeader());
+
+                //write rotation frame data
+                for (int index1 = 0; index1 < (int)this.RotatedNodeCount; ++index1)
+                {
+                    for (int index2 = 0; index2 < this.RotationKeyFrames[index1].Count; ++index2)
+                    {
+                        Quaternion rotation = this.Rotations[index1][index2];
+                        writer.Write(rotation.X);
+                        writer.Write(rotation.Y);
+                        writer.Write(rotation.Z);
+                        writer.Write(rotation.W);
+                    };
+                };
+
+                //record translation data offset to write to header later on
+                var translationdataoffset = stream.Position.DeepClone();
+                //write translation frame data
+                for (int index1 = 0; index1 < (int)this.TranslatedNodeCount; ++index1)
+                {
+                    for (int index2 = 0; index2 < this.TranslationKeyFrames[index1].Count; ++index2)
+                    {
+                        RealPoint3d translation = this.Translations[index1][index2];
+                        writer.Write(translation.X);
+                        writer.Write(translation.Y);
+                        writer.Write(translation.Z);
+                    };
+                };
+
+                //record scale data offset to write to header later on
+                var scaledataoffset = stream.Position.DeepClone();
+                //write scale frame data
+                for (int index1 = 0; index1 < (int)this.ScaledNodeCount; ++index1)
+                {
+                    for (int index2 = 0; index2 < this.ScaleKeyFrames[index1].Count; ++index2)
+                    {
+                        float scale = this.Scales[index1][index2];
+                        writer.Write(scale);
+                    };
+                };
+
+                //record end of data offset
+                var dataendoffset = stream.Position.DeepClone();
+                //move back to header to write data sizes
+                stream.Position = staticcodecheaderoffset;
+                var staticcodecsizes = new StaticCodecHeader
+                {
+                    TranslationDataOffset = (int)translationdataoffset - (int)datastartoffset,
+                    ScaleDataOffset = (int)scaledataoffset - (int)datastartoffset,
+                    RotationFrameSize = 0x10 * this.FrameCount, //four shorts times number of frames in animation
+                    TranslationFrameSize = 0xC * this.FrameCount, //three floats times number of frames in animation
+                    ScaleFrameSize = 0x4 * this.FrameCount //one float times number of frames in animation
+                };
+                CacheContext.Serializer.Serialize(dataContext, staticcodecsizes);
+
+                //return to the end of the stream
+                stream.Position = stream.Length;
+                return stream.ToArray();
+            }
+        }
     }
 }
