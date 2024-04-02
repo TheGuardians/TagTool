@@ -1977,6 +1977,14 @@ namespace TagTool.Commands.Porting
                 if (name.StartsWith("wet_"))
                     name = name.Substring(4);
 
+                //Temp fix to use equivalent materials to prevent ported projectiles bouncing on players shields
+                if (name.Equals("energy_shield_invulnerable"))
+                    name = "energy_shield_invincible";
+
+                //Temp fix to use equivalent materials
+                if (name.Equals("energy_hologram"))
+                    name = "energy_holo";
+
                 // search for the name in the destination materials
                 var matchIndex = (short)materials.FindIndex(x => CacheContext.StringTable.GetString(x.Name) == name);
                 if (matchIndex != -1)
