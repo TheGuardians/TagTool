@@ -66,6 +66,7 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("form", "formation"), typeof(Formation) },
             { new TagGroupGen3("gfxt", "gfx_textures_list"), typeof(GfxTexturesList) },
             { new TagGroupGen3("gint", "unit", "obje", "giant"), typeof(Giant) },
+            { new TagGroupGen3("gldf", "cheap_light"), typeof(CheapLight) },
             { new TagGroupGen3("glps", "global_pixel_shader"), typeof(GlobalPixelShader) },
             { new TagGroupGen3("glvs", "global_vertex_shader"), typeof(GlobalVertexShader) },
             { new TagGroupGen3("goof", "multiplayer_variant_settings_interface_definition"), typeof(MultiplayerVariantSettingsInterfaceDefinition) },
