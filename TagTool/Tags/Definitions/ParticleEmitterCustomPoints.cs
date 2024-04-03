@@ -18,9 +18,9 @@ namespace TagTool.Tags.Definitions
             public short PositionX;
             public short PositionY;
             public short PositionZ;
-            public byte NormalX;
-            public byte NormalY;
-            public byte NormalZ;
+            public sbyte NormalX;
+            public sbyte NormalY;
+            public sbyte NormalZ;
             public byte Correlation;
         }
     }
