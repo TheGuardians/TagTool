@@ -424,6 +424,7 @@ namespace TagTool.Tags.Definitions
                         UnweightedLine,
                         Plane,
                         Jetwash,
+                        // H4
                         PlanarOrbit,
                         SphereOrbit
                     }

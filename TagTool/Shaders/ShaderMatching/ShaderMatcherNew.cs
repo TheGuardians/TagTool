@@ -474,7 +474,6 @@ namespace TagTool.Shaders.ShaderMatching
                                 optionName = "per_vertex_ravi_order_0";
                                 break;
                             case @"depth_fade\low_res":
-                            case @"depth_fade\palette_shift":
                                 optionName = "on";
                                 break;
                             // MCC rmsh //

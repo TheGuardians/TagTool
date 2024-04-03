@@ -479,6 +479,7 @@
     <Compile Include="Scripting\ScriptDecompiler.cs" />
     <Compile Include="Shaders\ShaderConverter\ShaderConverter.cs" />
     <Compile Include="Shaders\ShaderGenerator\PopulateRenderMethodConstants.cs" />
+    <Compile Include="Tags\Definitions\CheapLight.cs" />
     <Compile Include="Tags\Definitions\Common\ObjectIdentifier.cs" />
     <Compile Include="Common\RealMath.cs" />
     <Compile Include="Common\RealVector4d.cs" />
