@@ -477,9 +477,9 @@ namespace TagTool.Shaders.ShaderConverter
         {
             uint boolConstants = 0;
 
-            for (int i = 0; i < Rmt2.IntegerParameterNames.Count; i++)
+            for (int i = 0; i < Rmt2.BooleanParameterNames.Count; i++)
             {
-                string name = Cache.StringTable.GetString(Rmt2.IntegerParameterNames[i].Name);
+                string name = Cache.StringTable.GetString(Rmt2.BooleanParameterNames[i].Name);
                 int parameterMappingIndex = ParameterMappings.FindIndex(x => x.Name == name);
 
                 if (parameterMappingIndex != -1)
