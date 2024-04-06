@@ -783,9 +783,6 @@ namespace TagTool.Tags.Definitions
             public DamageReportingType CollisionDamageReportingType;
             public DamageReportingType ResponseDamageReportingType;
 
-            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public short UnknownHO;
-
             [TagField(Length = 0x2, Flags = Padding, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] MQ;

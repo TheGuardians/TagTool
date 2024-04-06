@@ -3,7 +3,9 @@ using TagTool.Tags;
 
 namespace TagTool.Damage
 {
-    [TagStructure(Size = 0x1)]
+    [TagStructure(Size = 0x1, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x1, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x2, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     public class DamageReportingType : TagStructure
 	{
         [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
@@ -198,7 +200,7 @@ namespace TagTool.Damage
             ElephantTurret
         }
 
-        public enum HaloOnlineValue : sbyte
+        public enum HaloOnlineValue : short
         {
             GuardiansUnknown,
             Guardians,

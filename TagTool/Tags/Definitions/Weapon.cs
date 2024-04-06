@@ -92,7 +92,8 @@ namespace TagTool.Tags.Definitions
         public CachedTag ClangEffect;
 
         public DamageReportingType MeleeDamageReportingType;
-        [TagField(Length = 1, Flags = TagFieldFlags.Padding)]
+        [TagField(Length = 1, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Length = 1, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloReach)]
         public byte[] Padding4;
 
         // -------- zoom
@@ -607,7 +608,9 @@ namespace TagTool.Tags.Definitions
             public List<FirstPersonOffsetBlock> FirstPersonOffsets;
             public DamageReportingType DamageReportingType;
 
-            [TagField(Length = 3, Flags = Padding)]
+            [TagField(Length = 3, Flags = Padding, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagField(Length = 3, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
+            [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public byte[] Padding1;
 
             [TagField(ValidTags = new[] { "obje" })]

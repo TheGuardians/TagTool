@@ -556,7 +556,9 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public DamageReportingType DamageEffectReportingType;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST, Flags = Padding, Length = 3)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Flags = Padding, Length = 3)]
+                [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 3)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Flags = Padding, Length = 2)]
                 public byte[] Padding3;
             }
 
