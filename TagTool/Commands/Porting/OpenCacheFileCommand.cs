@@ -54,13 +54,30 @@ namespace TagTool.Commands.Porting
                 
             Console.Write("Loading cache...");
 
-            GameCache blamCache = GameCache.Open(fileName);
+            var blamCache = GetCache(fileName);
+            if (blamCache == null)
+                return false;
 
-            ContextStack.Push(PortingContextFactory.Create(ContextStack, Cache, blamCache));
+            ContextStack.Push(PortingContextFactory.Create(ContextStack, Cache, (GameCache)blamCache));
 
             Console.WriteLine("done.");
 
             return true;
+        }
+
+        private object GetCache(FileInfo fileName)
+        {
+            if (fileName.Extension == ".pak")
+            {
+                if (Cache is GameCacheModPackage)
+                    return new GameCacheModPackage(((GameCacheModPackage)Cache).BaseCacheReference, fileName, false);
+                else if (Cache is GameCacheHaloOnlineBase)
+                    return new GameCacheModPackage((GameCacheHaloOnlineBase)Cache, fileName, false);
+                else
+                    return new TagToolError(CommandError.OperationFailed, "Mod package porting only allowed on ED base cache or mod package caches!");
+            }
+            else
+                return GameCache.Open(fileName);
         }
     }
 }
