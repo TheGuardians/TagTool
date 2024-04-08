@@ -2137,7 +2137,7 @@ namespace TagTool.Scripting.Compiler
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(startingProfileString.Value);
-                Array.Copy(BitConverter.GetBytes((short)startingProfileIndex), expr.Data, 2);
+                expr.Data = new byte[] { (byte)((startingProfileIndex & 0xFF)), (byte)(startingProfileIndex >> 8), 0xFF, 0xFF };
             }
 
             return handle;
@@ -3156,7 +3156,7 @@ namespace TagTool.Scripting.Compiler
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cinematicLightprobeSymbol.Value);
-                Array.Copy(BitConverter.GetBytes((short)cinematicLightprobeIndex), expr.Data, 2);
+                Array.Copy(BitConverter.GetBytes(cinematicLightprobeIndex), expr.Data, 4);
             }
 
             return handle;
