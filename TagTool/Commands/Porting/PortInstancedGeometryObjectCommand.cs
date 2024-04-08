@@ -9,6 +9,7 @@ using TagTool.Geometry.Utils;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using static TagTool.Commands.Porting.PortTagCommand;
+using static TagTool.Porting.PortingContext;
 
 namespace TagTool.Commands.Porting
 {
@@ -244,7 +245,7 @@ namespace TagTool.Commands.Porting
                 }
 
                 var converter = new GeometryToObjectConverter(HoCache, hoCacheStream, BlamCache, blamCacheStream, blamScnr, sbspIndex);
-                converter.PortTag.SetFlags(portingFlags);
+                converter.PortContext.SetFlags(portingFlags);
 
                 foreach (var kv in desiredInstances)
                 {

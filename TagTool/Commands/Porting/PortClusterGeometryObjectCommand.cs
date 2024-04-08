@@ -8,7 +8,7 @@ using TagTool.Common;
 using TagTool.Geometry.Utils;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
-using static TagTool.Commands.Porting.PortTagCommand;
+using static TagTool.Porting.PortingContext;
 
 namespace TagTool.Commands.Porting
 {
@@ -88,7 +88,7 @@ namespace TagTool.Commands.Porting
                     return true;
 
                 var converter = new GeometryToObjectConverter(HoCache, hoCacheStream, BlamCache, blamCacheStream, blamScnr, sbspIndex);
-                converter.PortTag.SetFlags(portingFlags);
+                converter.PortContext.SetFlags(portingFlags);
 
 
                 var forgTag = HoCache.TagCache.FindFirstInGroup("forg");

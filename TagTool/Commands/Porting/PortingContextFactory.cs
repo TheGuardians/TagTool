@@ -4,7 +4,9 @@ using TagTool.Cache.Monolithic;
 using TagTool.Commands.Common;
 using TagTool.Commands.Porting.Gen2;
 using TagTool.Commands.Porting.Gen4;
+using TagTool.Commands.Sounds;
 using TagTool.Commands.Tags;
+using TagTool.Porting;
 using TagTool.Serialization;
 using TagTool.Tags.Definitions;
 
@@ -51,10 +53,11 @@ namespace TagTool.Commands.Porting
                 if (portingCache is GameCacheGen3 || portingCache is GameCacheMonolithic || portingCache is GameCacheHaloOnlineBase)
                 {
                     var portTagCommand = new PortTagCommand(hoCache, portingCache);
+                    var portingContext = new PortingContext(hoCache, portingCache);
                     context.AddCommand(portTagCommand);
-                    context.AddCommand(new MergeAnimationGraphsCommand(hoCache, portingCache, portTagCommand));
+                    context.AddCommand(new MergeAnimationGraphsCommand(hoCache, portingCache, portingContext));
                     context.AddCommand(new PortMultiplayerEventsCommand(hoCache, portingCache));
-                    context.AddCommand(new PortMultiplayerScenarioCommand(hoCache, portingCache, portTagCommand));
+                    context.AddCommand(new PortMultiplayerScenarioCommand(hoCache, portingCache));
                     context.AddCommand(new PortInstancedGeometryObjectCommand(hoCache, portingCache));
                     context.AddCommand(new PortClusterGeometryObjectCommand(hoCache, portingCache));
                     context.AddCommand(new DoNotReplaceGroupsCommand());

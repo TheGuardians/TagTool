@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using TagTool.Commands.Common;
+using TagTool.Porting;
 
 namespace TagTool.Commands.Porting
 {

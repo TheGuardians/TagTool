@@ -13,6 +13,7 @@ using TagTool.BlamFile;
 using TagTool.Commands.Porting;
 using TagTool.Commands.ScenarioStructureBSPs;
 using Gen3Globals = TagTool.Tags.Definitions.Globals;
+using TagTool.Porting;
 
 namespace TagTool.Commands.Porting.Gen2
 {
