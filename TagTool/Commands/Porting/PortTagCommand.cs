@@ -103,7 +103,7 @@ namespace TagTool.Commands.Porting
             try
             {
                 using (var cacheStream = FlagIsSet(PortingFlags.Memory) ? new MemoryStream() : (Stream)CacheContext.OpenCacheReadWrite())
-                using (var blamCacheStream = BlamCache.OpenCacheRead())
+                using (var blamCacheStream = BlamCache is GameCacheModPackage ? ((GameCacheModPackage)BlamCache).OpenCacheRead(cacheStream) : BlamCache.OpenCacheRead())
                 {
                     if (FlagIsSet(PortingFlags.Memory))
                         using (var cacheFileStream = CacheContext.OpenCacheRead())
