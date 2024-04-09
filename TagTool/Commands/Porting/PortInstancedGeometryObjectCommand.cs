@@ -46,6 +46,7 @@ namespace TagTool.Commands.Porting
         {
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
             var portingFlags = ParsePortingFlags(argStack);
+            var filter = "";
 
             using (var blamCacheStream = BlamCache.OpenCacheRead())
             using (var hoCacheStream = HoCache.OpenCacheReadWrite())
@@ -68,7 +69,9 @@ namespace TagTool.Commands.Porting
                 else if (argStack.Count > 0 && int.TryParse(argStack.Peek(), out var discard))
                     argStack.Pop();
 
-                var blamSbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamCacheStream, blamScnr.StructureBsps[sbspIndex].StructureBsp);
+                CachedTag sbspTag = blamScnr.StructureBsps[sbspIndex].StructureBsp;
+                var sbspName = sbspTag.Name.Split('\\').Last();
+                var blamSbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamCacheStream, sbspTag);
 
                 if (argStack.Count > 0 && argStack.Peek().ToLower() == "nocenter")
                 {
@@ -99,6 +102,12 @@ namespace TagTool.Commands.Porting
                 {
                     argStack.Pop();
                     allunique = true;
+
+                    if (argStack.Count > 0)
+                    {
+                        filter = argStack.Peek().ToLower();
+                        argStack.Pop();
+                    }
                 }
                 if (argStack.Count > 0)
                 {
@@ -141,11 +150,17 @@ namespace TagTool.Commands.Porting
                             var instance = blamSbsp.InstancedGeometryInstances[i];
                             var name = BlamCache.StringTable.GetString(instance.Name);
                             if (visitedNames.Add(name) && visitedDefinitions.Add(instance.DefinitionIndex))
-                                uniqueInstances.Add((i, name));
+                            {
+                                if(string.IsNullOrEmpty(filter) || name.ToLower().Contains(filter))
+                                    uniqueInstances.Add((i, name));
+                            }
                         }
                     }
 
-                    foreach(var (index, name) in uniqueInstances)
+                    globalcategory = true;
+                    newCategoryName = sbspName;
+
+                    foreach (var (index, name) in uniqueInstances)
                     {
                         if (BlamCache.Platform == CachePlatform.MCC && name.Contains("merged"))
                             break;
@@ -231,7 +246,10 @@ namespace TagTool.Commands.Porting
                 }
 
                 if (desiredInstances.Count < 1)
+                {
+                    new TagToolWarning("No qualifying instances found!");
                     return true;
+                }
 
                 if (globalcategory && newCategoryName != null)
                 {
