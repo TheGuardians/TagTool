@@ -287,7 +287,7 @@ namespace TagTool.Bitmaps
             switch (format)
             {
                 case BitmapFormat.Ctx1:
-                    return Commands.Porting.PortingOptions.Current.HqNormalMapConversion ? 
+                    return Porting.PortingOptions.Current.HqNormalMapConversion ? 
                         BitmapFormat.Dxn : BitmapFormat.Dxt1;
 
                 case BitmapFormat.DxnMonoAlpha:

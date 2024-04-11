@@ -5,7 +5,7 @@ using TagTool.Tags;
 using TagTool.Commands.Common;
 using TagTool.Cache;
 
-namespace TagTool.Commands.Porting
+namespace TagTool.Porting
 {
     public class StructureAutoConverter
     {

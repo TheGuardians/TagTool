@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using TagTool.Audio;
 
-namespace TagTool.Commands.Porting
+namespace TagTool.Porting
 {
     public class PortingOptions
     {

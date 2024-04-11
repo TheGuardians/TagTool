@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using TagTool.Common;
 
-namespace TagTool.Commands.Porting
+namespace TagTool.Porting
 {
     public static class PortingConstants
 	{

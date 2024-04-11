@@ -17,6 +17,9 @@ using System.ComponentModel;
 using System.Text;
 using System.Reflection;
 using TagTool.Tags.Definitions.Common;
+using static TagTool.Porting.PortingContext;
+using TagTool.Porting;
+using TagTool.Commands.Sounds;
 
 namespace TagTool.Commands.Porting
 {
@@ -42,7 +45,7 @@ namespace TagTool.Commands.Porting
 			Default = Objects | DeviceObjects | SpawnPoint
         }
 
-        public PortMultiplayerScenarioCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache, PortTagCommand portTag) :
+        public PortMultiplayerScenarioCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache) :
             base(true,
 
                 "PortMultiplayerScenario",
@@ -428,9 +431,8 @@ namespace TagTool.Commands.Porting
             
             using (var tagRenamer = new TagRenamerScope())
             {
-                var porttag = new PortTagCommand(destCache, srcCache);
+                var porttag = new PortingContext(destCache, srcCache);
                 porttag.SetFlags(portingFlags);
-                porttag.InitializeSoundConverter();
 
                 var sldtTag = scnr.Lightmap;
                 tagRenamer.Rename(sldtTag, $"{scenarioPath}_faux_lightmap");

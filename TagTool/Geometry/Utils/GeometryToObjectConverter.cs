@@ -16,6 +16,9 @@ using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
 using TagTool.Commands.CollisionModels.OffsetCollisonBsp;
 using TagTool.Commands.CollisionModels;
+using TagTool.Porting;
+using static TagTool.Porting.PortingContext;
+using TagTool.Commands.Sounds;
 
 namespace TagTool.Geometry.Utils
 {
@@ -36,7 +39,7 @@ namespace TagTool.Geometry.Utils
         private RealPoint3d GeometryOffset;
         private RenderGeometryCompression OriginalCompression;
         private bool HasValidCollisions = true;
-        public PortTagCommand PortTag { get; private set; }
+        public PortingContext PortContext { get; private set; }
 
         public GeometryToObjectConverter(
             GameCacheHaloOnlineBase destCache, Stream destStream, GameCache sourceCache,
@@ -47,8 +50,7 @@ namespace TagTool.Geometry.Utils
             SourceCache = sourceCache;
             SourceStream = sourceStream;
             StructureBspIndex = structureBspIndex;
-            PortTag = new PortTagCommand(destCache, sourceCache);
-            PortTag.SetFlags(PortTagCommand.PortingFlags.Default);
+            PortContext = new PortingContext(destCache, sourceCache);
 
             Scenario = scenario;
             StructureBspIndex = structureBspIndex;
@@ -678,7 +680,7 @@ namespace TagTool.Geometry.Utils
             data = data.DeepClone();
 
             var resourceStreams = new Dictionary<ResourceLocation, Stream>();
-            data = (T)PortTag.ConvertData(DestStream, SourceStream, resourceStreams, data, null, "");
+            data = (T)PortContext.ConvertData(DestStream, SourceStream, resourceStreams, data, null, "");
             foreach (var stream in resourceStreams)
                 stream.Value.Close();
 
