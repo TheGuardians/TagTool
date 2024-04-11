@@ -27,8 +27,13 @@ namespace TagTool.Tags
 
             public ushort Flags;
 
-            [TagField(Flags = TagFieldFlags.Padding, Length = 0x100)]
-            public byte[] Unused = new byte[0x100];
+            public ArgbColor BackgroundColor;
+            public ArgbColor BorderColor;
+            public ArgbColor HighlightColor;
+            public ArgbColor TextColor;
+
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0xF0)]
+            public byte[] Unused = new byte[0xF0];
 
             public enum WidgetType : short
             {

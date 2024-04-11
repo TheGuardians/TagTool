@@ -1431,192 +1431,6 @@ namespace TagTool.Commands.Porting
                 }
         }
 
-        private bool ConvertEmitterToCustomPoints(Stream cacheStream, Effect.Event.ParticleSystem.Emitter emitter, string blamTagName)
-        {
-            bool converted = false;
-
-            float maxEmissionRadius = 0.0f;
-            if (emitter.EmissionRadius.RuntimeMFlags.HasFlag(ParticlePropertyScalar.EditablePropertiesFlags.IsConstant))
-                maxEmissionRadius = emitter.EmissionRadius.RuntimeMConstantValue;
-            else if (emitter.EmissionRadius.Function.Data[2] == 0)
-                maxEmissionRadius = BitConverter.ToSingle(emitter.EmissionRadius.Function.Data, 8);
-            float maxEmissionAngle = 0.0f;
-            if (emitter.EmissionAngle.RuntimeMFlags.HasFlag(ParticlePropertyScalar.EditablePropertiesFlags.IsConstant))
-                maxEmissionAngle = emitter.EmissionAngle.RuntimeMConstantValue;
-            else if (emitter.EmissionAngle.Function.Data[2] == 0)
-                maxEmissionAngle = BitConverter.ToSingle(emitter.EmissionAngle.Function.Data, 8);
-
-            const int MaxPoints = 120; // adjust as needed
-            int pointsToGenerate = (int)(MaxPoints * maxEmissionRadius);
-            float stepSize = 2.0f / pointsToGenerate;
-
-            var random = new Random(0xFFFF); // conversion should always produce same results
-            var axisScale = emitter.AxisScale;
-
-            ParticleEmitterCustomPoints pecp = new ParticleEmitterCustomPoints();
-            pecp.Points = new List<ParticleEmitterCustomPoints.Point>();
-            pecp.ParticleModel = null; // not needed
-            // todo: optimize
-            int compressionValue = (int)(32767.0f / Math.Max(maxEmissionRadius, 1.0f));
-            pecp.CompressionScale = new RealVector3d(1.0f / compressionValue, 1.0f / compressionValue, 1.0f / compressionValue);
-            pecp.CompressionOffset = new RealVector3d(0, 0, 0);
-
-            if (emitter.EmissionShape == Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Plane)
-            {
-                Console.WriteLine($"Converting emitter {CacheContext.StringTable.GetString(emitter.Name)} from {emitter.EmissionShape} to CustomPoints");
-                for (int i = 0; i < pointsToGenerate; i++)
-                {
-                    ParticleEmitterCustomPoints.Point point = new ParticleEmitterCustomPoints.Point
-                    {
-                        PositionX = (short)((2.0f * (float)random.NextDouble() - 1.0f) * maxEmissionRadius * axisScale.X * compressionValue),
-                        PositionY = (short)((2.0f * (float)random.NextDouble() - 1.0f) * maxEmissionRadius * axisScale.Y * compressionValue),
-                        PositionZ = (short)((2.0f * (float)random.NextDouble() - 1.0f) * maxEmissionRadius * axisScale.Z * compressionValue),
-                        // Planes have a constant velocity of {1,0,0}
-                        // Emission angle may cause random directions... not much can be done
-                        NormalX = 127,
-                        NormalY = 0,
-                        NormalZ = 0,
-                        Correlation = 0
-                    };
-                    pecp.Points.Add(point);
-                }
-                converted = true;
-            }
-            else if (emitter.EmissionShape == Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Cube)
-            {
-                Console.WriteLine($"Converting emitter {CacheContext.StringTable.GetString(emitter.Name)} from {emitter.EmissionShape} to CustomPoints");
-                for (int i = 0; i < pointsToGenerate; i++)
-                {
-                    RealVector3d cubePoint = new RealVector3d
-                    {
-                        I = (2.0f * maxEmissionRadius * (float)random.NextDouble() - maxEmissionRadius),
-                        J = (2.0f * maxEmissionRadius * (float)random.NextDouble() - maxEmissionRadius),
-                        K = (2.0f * maxEmissionRadius * (float)random.NextDouble() - maxEmissionRadius)
-                    };
-                    ParticleEmitterCustomPoints.Point point = new ParticleEmitterCustomPoints.Point
-                    {
-                        PositionX = (short)(cubePoint.I * axisScale.X * compressionValue),
-                        PositionY = (short)(cubePoint.J * axisScale.Y * compressionValue),
-                        PositionZ = (short)(cubePoint.K * axisScale.Z * compressionValue),
-                        Correlation = 0
-                    };
-                    cubePoint = RealVector3d.Normalize(cubePoint);
-                    point.NormalX = (sbyte)(cubePoint.I * 127.0f);
-                    point.NormalY = (sbyte)(cubePoint.J * 127.0f);
-                    point.NormalZ = (sbyte)(cubePoint.K * 127.0f);
-                    pecp.Points.Add(point);
-                }
-                converted = true;
-            }
-            else if (emitter.EmissionShape == Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Cylinder)
-            {
-                Console.WriteLine($"Converting emitter {CacheContext.StringTable.GetString(emitter.Name)} from {emitter.EmissionShape} to CustomPoints");
-                for (int i = 0; i < pointsToGenerate; i++)
-                {
-                    float randomCircular = (float)(random.NextDouble() * 2 * Math.PI);
-                    float randomizedRadius = (float)random.NextDouble() * maxEmissionRadius;
-                    RealVector3d cylinderPoint = new RealVector3d
-                    {
-                        I = (2.0f * (float)random.NextDouble() - 1.0f),
-                        J = randomizedRadius * (float)Math.Sin(randomCircular),
-                        K = randomizedRadius * (float)Math.Cos(randomCircular)
-                    };
-                    ParticleEmitterCustomPoints.Point point = new ParticleEmitterCustomPoints.Point
-                    {
-                        PositionX = (short)(cylinderPoint.I * axisScale.X * compressionValue),
-                        PositionY = (short)(cylinderPoint.J * axisScale.Y * compressionValue),
-                        PositionZ = (short)(cylinderPoint.K * axisScale.Z * compressionValue),
-                        Correlation = 0
-                    };
-                    cylinderPoint = RealVector3d.Normalize(cylinderPoint);
-                    point.NormalX = (sbyte)(cylinderPoint.I * 127.0f);
-                    point.NormalY = (sbyte)(cylinderPoint.J * 127.0f);
-                    point.NormalZ = (sbyte)(cylinderPoint.K * 127.0f);
-                    pecp.Points.Add(point);
-                }
-                converted = true;
-            }
-            else if (emitter.EmissionShape == Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.UnweightedLine)
-            {
-                Console.WriteLine($"Converting emitter {CacheContext.StringTable.GetString(emitter.Name)} from {emitter.EmissionShape} to CustomPoints");
-                for (int i = 0; i < pointsToGenerate; i++)
-                {
-                    float randomCircular = (float)(random.NextDouble() * 2 * Math.PI);
-                    float randomAngle = (float)random.NextDouble() * maxEmissionAngle * 0.017453292f;
-                    RealVector3d linePoint = new RealVector3d
-                    {
-                        I = 0.0f,
-                        J = (2.0f * maxEmissionRadius * (float)random.NextDouble() - maxEmissionRadius),
-                        K = 0.0f
-                    };
-                    ParticleEmitterCustomPoints.Point point = new ParticleEmitterCustomPoints.Point
-                    {
-                        PositionX = (short)(linePoint.I * axisScale.X * compressionValue),
-                        PositionY = (short)(linePoint.J * axisScale.Y * compressionValue),
-                        PositionZ = (short)(linePoint.K * axisScale.Z * compressionValue),
-                        Correlation = 0
-                    };
-                    RealVector3d lineNormal = new RealVector3d
-                    {
-                        I = (float)Math.Cos(randomAngle),
-                        J = (float)(Math.Sin(randomCircular) * Math.Sin(randomAngle)),
-                        K = (float)(Math.Cos(randomCircular) * Math.Sin(randomAngle)),
-                    };
-                    lineNormal = RealVector3d.Normalize(lineNormal);
-                    point.NormalX = (sbyte)(lineNormal.I * 127.0f);
-                    point.NormalY = (sbyte)(lineNormal.J * 127.0f);
-                    point.NormalZ = (sbyte)(lineNormal.K * 127.0f);
-                    pecp.Points.Add(point);
-                }
-                converted = true;
-            }
-            else if (emitter.EmissionShape == Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Tube)
-            {
-                Console.WriteLine($"Converting emitter {CacheContext.StringTable.GetString(emitter.Name)} from {emitter.EmissionShape} to CustomPoints");
-                for (int i = 0; i < pointsToGenerate; i++)
-                {
-                    float randomCircular = (float)(random.NextDouble() * 2 * Math.PI);
-                    float emissionAngle = maxEmissionAngle * 0.017453292f;
-                    RealVector3d tubePoint = new RealVector3d
-                    {
-                        I = 0.0f,
-                        J = maxEmissionRadius * (float)Math.Sin(randomCircular),
-                        K = maxEmissionRadius * (float)Math.Cos(randomCircular)
-                    };
-                    ParticleEmitterCustomPoints.Point point = new ParticleEmitterCustomPoints.Point
-                    {
-                        PositionX = (short)(tubePoint.I * axisScale.X * compressionValue),
-                        PositionY = (short)(tubePoint.J * axisScale.Y * compressionValue),
-                        PositionZ = (short)(tubePoint.K * axisScale.Z * compressionValue),
-                        Correlation = 0
-                    };
-                    RealVector3d tubeNormal = new RealVector3d
-                    {
-                        I = (float)Math.Cos(emissionAngle),
-                        J = (float)(Math.Sin(randomCircular) * Math.Sin(emissionAngle)),
-                        K = (float)(Math.Cos(randomCircular) * Math.Sin(emissionAngle)),
-                    };
-                    tubeNormal = RealVector3d.Normalize(tubeNormal);
-                    point.NormalX = (sbyte)(tubeNormal.I * 127.0f);
-                    point.NormalY = (sbyte)(tubeNormal.J * 127.0f);
-                    point.NormalZ = (sbyte)(tubeNormal.K * 127.0f);
-                    pecp.Points.Add(point);
-                }
-                converted = true;
-            }
-
-            if (converted)
-            {
-                var pecpTag = CacheContext.TagCache.AllocateTag<ParticleEmitterCustomPoints>(blamTagName);
-                CacheContext.Serialize(cacheStream, pecpTag, pecp);
-
-                emitter.CustomShape = pecpTag;
-                emitter.EmissionShape = Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.CustomPoints;
-                return true;
-            }
-            return false;
-        }
-
         private Effect ConvertEffect(Stream cacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Effect effe, string blamTagName)
         {
             if (BlamCache.Platform == CachePlatform.MCC)
@@ -1652,8 +1466,9 @@ namespace TagTool.Commands.Porting
                     {
                         Enum.TryParse(particleSystem.ReachFlags.ToString(), out particleSystem.Flags);
 
-                        foreach (var emitter in particleSystem.Emitters)
+                        for (int i = 0; i < particleSystem.Emitters.Count; i++)
                         {
+                            var emitter = particleSystem.Emitters[i];
                             // Needs to be implemented in the engine
                             if (emitter.EmissionShape == Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.BoatHullSurface ||
                                 emitter.EmissionShape == Effect.Event.ParticleSystem.Emitter.EmissionShapeValue.Jetwash)
@@ -1664,8 +1479,9 @@ namespace TagTool.Commands.Porting
 
                             if (emitter.AxisScale.X != 1.0f || emitter.AxisScale.Y != 1.0f || emitter.AxisScale.Z != 1.0f)
                             {
-                                if (!ConvertEmitterToCustomPoints(cacheStream, emitter, blamTagName))
-                                    new TagToolWarning($"Particle emitter \"{CacheContext.StringTable.GetString(emitter.Name)}\" will have incorrect dimensions: AxisScale {emitter.AxisScale}");
+                                Effects.EmitterCustomPointPlotter pecpPlotter = new Effects.EmitterCustomPointPlotter(CacheContext, cacheStream, emitter, blamTagName, i);
+                                if (!pecpPlotter.ConvertEmitterToCustomPoints())
+                                    new TagToolWarning($"Particle emitter \"{CacheContext.StringTable.GetString(emitter.Name)}_{i}\" will have incorrect dimensions: AxisScale {emitter.AxisScale}");
                             }
 
                             if (!Enum.TryParse(emitter.ParticleMovement.FlagsReach.ToString(), out emitter.ParticleMovement.Flags))

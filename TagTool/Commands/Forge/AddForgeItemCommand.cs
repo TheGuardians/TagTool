@@ -37,7 +37,7 @@ namespace TagTool.Commands.Forge
 
         public override object Execute(List<string> args)
         {
-            using (var cacheStream = Cache.OpenCacheRead())
+            using (var cacheStream = Cache.OpenCacheReadWrite())
             {
                 if (args.Count > 4 || args.Count < 2)
                     return new TagToolError(CommandError.ArgCount);
