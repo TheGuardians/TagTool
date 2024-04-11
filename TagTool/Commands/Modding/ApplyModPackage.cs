@@ -367,7 +367,7 @@ namespace TagTool.Commands.Modding
             var currentForg = (ForgeGlobalsDefinition)BaseCache.Deserialize(CacheStream, currentForgTag);
 
             // hardcoded base indices:
-            int[] baseBlockCounts = new int[] { 0, 15, 173, 6, 81, 478, 9, 12 };
+            int[] baseBlockCounts = new int[] { 0, 20, 173, 6, 83, 498, 9, 12 };
 
             for (int i = baseBlockCounts[0]; i < forg.ReForgeMaterialTypes.Count; i++)
                 currentForg.ReForgeMaterialTypes.Add(forg.ReForgeMaterialTypes[i]);

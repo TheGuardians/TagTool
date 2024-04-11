@@ -105,7 +105,7 @@ namespace TagTool.Geometry.Utils
             else
                 geoID = StructureBsp.InstancedGeometryInstances[geometryIndex].Name;
 
-            string geoname = SourceCache.StringTable.GetString(geoID);
+            string geoname = SourceCache.StringTable.GetString(geoID).Replace('|','-');
 
             var tagName = $"objects\\{scenarioFolder}\\instanced\\{bspindex}{geometryIndex}_{geoname}";
 
