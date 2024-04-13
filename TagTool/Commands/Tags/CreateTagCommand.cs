@@ -36,33 +36,32 @@ namespace TagTool.Commands.Tags
             var tagNameString = "";
             var tagIndexString = "";
 
-            if(args.Count >= 2)
+            switch(args.Count)
             {
-                if (args[1].StartsWith("0x") && args.Count == 3)
-                {
-                    tagNameString = args[2];
-                    tagIndexString = args[1];
-                }
-                else
-                if (!args[1].StartsWith("0x") && args.Count == 3)
-                {
-                    tagNameString = args[1];
-                    tagIndexString = args[2];
-                }
-                else
-                if (args[1].StartsWith("0x") && args.Count == 2)
-                {
-                    tagIndexString = args[1];
-                }
-                else
-                if (!args[1].StartsWith("0x") && args.Count == 2)
-                {
-                    tagNameString = args[1];
-                }
+                case 1:
+                    break;
+                case 2:
+                    if (args[1].StartsWith("0x"))
+                        tagIndexString = args[1];
+                    else
+                        tagNameString = args[1];
+                    break;
+                case 3:
+                    if (args[1].StartsWith("0x"))
+                    {
+                        tagIndexString = args[1];
+                        tagNameString = args[2];
+                    }
+                    else
+                    {
+                        tagNameString = args[1];
+                        tagIndexString = args[2];
+                    }
+                    break;
             }
 
             if (groupTagString.Length > 4)
-                return new TagToolError(CommandError.ArgInvalid, $"Invalid group tag: {groupTagString}");
+                return new TagToolError(CommandError.CustomError, $"Invalid group tag: {groupTagString}");
 
             while (groupTagString.Length < 4)
                 groupTagString += " ";
@@ -75,10 +74,15 @@ namespace TagTool.Commands.Tags
                     chars[i] = groupTagString[i];
 
                 groupTag = new Tag(new string(chars));
+
+                if (!Cache.TagCache.TryParseGroupTag(groupTagString, out groupTag))
+                    return new TagToolError(CommandError.CustomError, $"Invalid group tag: {groupTagString}");
             }
 
             if (args.Count >= 2 && tagNameString != "")
             {
+                tagNameString = tagNameString.Split('.')[0];
+
                 var fullName = $"{tagNameString}.{groupTag}";
                 if (!Cache.TagCache.IsTagPathValid(fullName))
                     return new TagToolError(CommandError.CustomError, $"Malformed target tag path '{tagNameString}'");
@@ -116,13 +120,13 @@ namespace TagTool.Commands.Tags
                             Cache.TagCacheGenHO.SetTagDataRaw(stream, oldInstance, new byte[] { });
                         }
 
-                        instance = Cache.TagCache.CreateCachedTag(tagIndex, Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag));
+                        instance = Cache.TagCache.CreateCachedTag(tagIndex, tagGroup);
                         Cache.TagCacheGenHO.Tags[tagIndex] = (CachedTagHaloOnline)instance;
                     }
                 }
 
                 if (instance == null)
-                    instance = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag));
+                    instance = Cache.TagCache.AllocateTag(tagGroup);
 
 
                 if (!string.IsNullOrWhiteSpace(tagNameString))
