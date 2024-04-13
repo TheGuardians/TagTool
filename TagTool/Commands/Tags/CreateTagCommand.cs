@@ -77,10 +77,13 @@ namespace TagTool.Commands.Tags
                 groupTag = new Tag(new string(chars));
             }
 
-            if (args.Count >= 2 && tagNameString != "" && Cache.TagCache.TryGetCachedTag(tagNameString + "." + args[0], out var previoustag))
+            if (args.Count >= 2 && tagNameString != "")
             {
-                Console.WriteLine($"TagName already Exists at [Index: 0x{previoustag.Index:X4}] {previoustag.Name}.{previoustag.Group}");
-                return true;
+                var fullName = $"{tagNameString}.{groupTag}";
+                if (!Cache.TagCache.IsTagPathValid(fullName))
+                    return new TagToolError(CommandError.CustomError, $"Malformed target tag path '{tagNameString}'");
+                else if (Cache.TagCache.TryGetCachedTag(fullName, out var previoustag))
+                    return new TagToolError(CommandError.CustomError, $"Tag name already in use: [Index: 0x{previoustag.Index:X4}] {previoustag}");
             }
 
             CachedTag instance = null;
@@ -122,18 +125,16 @@ namespace TagTool.Commands.Tags
                     instance = Cache.TagCache.AllocateTag(Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag));
 
 
-                if (tagNameString != "") //if Tagname is supplied
-                {
+                if (!string.IsNullOrWhiteSpace(tagNameString))
                     instance.Name = tagNameString;
-                    Cache.SaveTagNames(null);
-                }
+                else
+                    instance.Name = $"0x{instance.Index:X4}";
 
+                Cache.SaveTagNames();
                 Cache.Serialize(stream, instance, Activator.CreateInstance(Cache.TagCache.TagDefinitions.GetTagDefinitionType(groupTag)));
             }
 
-            var tagName = instance.Name ?? $"0x{instance.Index:X4}";
-
-            Console.WriteLine($"[Index: 0x{instance.Index:X4}] {tagName}.{instance.Group}");
+            Console.WriteLine($"[Index: 0x{instance.Index:X4}] {instance}");
             return true;
         }
     }
