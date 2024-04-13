@@ -19,8 +19,11 @@ namespace TagTool.Audio
 
         private void LoadBanks()
         {
-            LoadBank("sfx.fsb");
-            LoadBank("english.fsb");
+            foreach(var file in Directory.EnumerateFiles())
+            {
+                if (file.Extension == ".fsb")
+                    LoadBank(file.Name);
+            }
         }
 
         private void LoadBank(string name)
