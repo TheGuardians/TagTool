@@ -70,9 +70,9 @@ namespace TagTool.Commands.Porting
             if (fileName.Extension == ".pak")
             {
                 if (Cache is GameCacheModPackage)
-                    return new GameCacheModPackage(((GameCacheModPackage)Cache).BaseCacheReference, fileName, false);
+                    return new GameCacheModPackage(((GameCacheModPackage)Cache).BaseCacheReference, fileName, true);
                 else if (Cache is GameCacheHaloOnlineBase)
-                    return new GameCacheModPackage((GameCacheHaloOnlineBase)Cache, fileName, false);
+                    return new GameCacheModPackage((GameCacheHaloOnlineBase)Cache, fileName, true);
                 else
                     return new TagToolError(CommandError.OperationFailed, "Mod package porting only allowed on ED base cache or mod package caches!");
             }
