@@ -8,7 +8,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0x104)]
     public class ForgeGlobalsDefinition : TagStructure
     {
-        public int version;
+        [TagField(Flags = TagFieldFlags.Hidden)]
+        public int Version;
 
         [TagField(ValidTags = new[] { "rm  " })]
         public CachedTag DefaultBoundaryRenderMethod;
