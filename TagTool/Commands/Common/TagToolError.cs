@@ -40,7 +40,7 @@ namespace TagTool.Commands.Common
 
                     if (cmdError != CommandError.CustomMessage && cmdError != CommandError.CustomError)
                     {
-                        string outputLine = "\nERROR: ";
+                        string outputLine = "ERROR: ";
 
                         switch (cmdError)
                         {
@@ -90,7 +90,7 @@ namespace TagTool.Commands.Common
 
                     if (cmdError == CommandError.CustomError && hasCustomMessage)
                     {
-                        Console.WriteLine("\nERROR: " + customMessage);
+                        Console.WriteLine("ERROR: " + customMessage);
                         showHelpMessage = false;
                     }
 
@@ -98,7 +98,7 @@ namespace TagTool.Commands.Common
                         Console.WriteLine("> " + customMessage);
 
                     if (showHelpMessage)
-                        Console.WriteLine($"\nEnter \"Help {CommandRunner.CurrentCommandName}\" for command syntax.");
+                        Console.WriteLine($"Enter \"Help {CommandRunner.CurrentCommandName}\" for command syntax.");
                 }
 
                 Console.ResetColor();
