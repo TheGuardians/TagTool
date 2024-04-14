@@ -19,9 +19,10 @@ namespace TagTool.Audio
 
         private void LoadBanks()
         {
+            List<string> otherLanguages = new List<string> { "french.fsb", "german.fsb", "italian.fsb", "mexican.fsb", "spanish.fsb" };
             foreach(var file in Directory.EnumerateFiles())
             {
-                if (file.Extension == ".fsb")
+                if (file.Extension == ".fsb" && !otherLanguages.Contains(file.Name))
                     LoadBank(file.Name);
             }
         }
