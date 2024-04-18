@@ -9,10 +9,10 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "mod_globals", Tag = "modg", Size = 0x11C)]
     public class ModGlobalsDefinition : TagStructure
     {
-        public int version;
+        [TagField(Flags = Hidden)]
+        public int Version;
 
         public List<PlayerCharacterSet> PlayerCharacterSets;
-
         public List<PlayerCharacterCustomization> PlayerCharacterCustomizations;
 
         [TagField(Flags = TagFieldFlags.Padding, Length = 0x100)]
@@ -79,7 +79,9 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0xBC)]
             public class PlayerCharacterRegionScript : TagStructure
             {
-                public int unused;
+                [TagField(Flags = Padding, Length = 0x4)]
+                public byte[] Padding0;
+
                 [TagField(Length = 32)]
                 public string RegionName;
                 [TagField(Length = 32)]
@@ -98,7 +100,10 @@ namespace TagTool.Tags.Definitions
             {
                 public ChangeColorFlagsValue ValidColorFlags;
                 public ChangeColorFlagsValue TeamOverrideFlags;
-                public short Unused;
+
+                [TagField(Flags = Padding, Length = 0x2)]
+                public byte[] Padding0;
+
                 [TagField(Length = 5)]
                 public ChangeColorBlock[] Colors;
 

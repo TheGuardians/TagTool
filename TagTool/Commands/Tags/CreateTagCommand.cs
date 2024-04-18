@@ -79,11 +79,13 @@ namespace TagTool.Commands.Tags
                     return new TagToolError(CommandError.CustomError, $"Invalid group tag: {groupTagString}");
             }
 
+            var tagGroup = Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag);
+
             if (args.Count >= 2 && tagNameString != "")
             {
                 tagNameString = tagNameString.Split('.')[0];
 
-                var fullName = $"{tagNameString}.{groupTag}";
+                var fullName = $"{tagNameString}.{tagGroup}";
                 if (!Cache.TagCache.IsTagPathValid(fullName))
                     return new TagToolError(CommandError.CustomError, $"Malformed target tag path '{tagNameString}'");
                 else if (Cache.TagCache.TryGetCachedTag(fullName, out var previoustag))
@@ -91,7 +93,6 @@ namespace TagTool.Commands.Tags
             }
 
             CachedTag instance = null;
-            var tagGroup = Cache.TagCache.TagDefinitions.GetTagGroupFromTag(groupTag);
 
             using (var stream = Cache.OpenCacheReadWrite())
             {

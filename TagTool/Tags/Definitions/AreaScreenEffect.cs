@@ -13,8 +13,8 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "area_screen_effect", Tag = "sefc", Size = 0x10, MinVersion = CacheVersion.HaloReach)]
     public class AreaScreenEffect : TagStructure
 	{
-        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
-        public int version;
+        [TagField(Flags = Hidden, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
+        public int Version;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         [TagField(MinVersion = CacheVersion.HaloReach)]

@@ -8,7 +8,8 @@ namespace TagTool.Tags
     [TagStructure(Name = "player_action_set", Tag = "pact", Size = 0x11C)]
     public class PlayerActionSet : TagStructure
     {
-        public int version;
+        [TagField(Flags = TagFieldFlags.Hidden)]
+        public int Version;
 
         public List<WidgetData> Widget;
 
