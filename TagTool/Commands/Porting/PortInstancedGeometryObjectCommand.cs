@@ -193,10 +193,12 @@ namespace TagTool.Commands.Porting
                         var categoryIndex = -1;
                         string paletteName = string.Empty;
                         string categoryName = string.Empty;
+                        var forge = false;
 
-                        if (parts.Count() > 1 && parts[1].StartsWith("forgepalette"))
+                        if (parts.Count() > 1 && parts[1].StartsWith("forge"))
                         {
                             forgeArgs = parts[1].Split(':');
+                            forge = true;
 
                             if (forgeArgs.Count() == 1)
                             {
@@ -233,15 +235,18 @@ namespace TagTool.Commands.Porting
                         }
 
                         desiredInstances.Add(index, tagname);
-                        forgeItems.Add(new ForgeGlobalsDefinition.PaletteItem()
+                        if (forge)
                         {
-                            Name = paletteName,
-                            Type = ForgeGlobalsDefinition.PaletteItemType.Prop,
-                            CategoryIndex = (short)categoryIndex,
-                            DescriptionIndex = -1,
-                            MaxAllowed = (ushort)index,
-                            Object = null
-                        });
+                            forgeItems.Add(new ForgeGlobalsDefinition.PaletteItem()
+                            {
+                                Name = paletteName,
+                                Type = ForgeGlobalsDefinition.PaletteItemType.Prop,
+                                CategoryIndex = (short)categoryIndex,
+                                DescriptionIndex = -1,
+                                MaxAllowed = (ushort)index,
+                                Object = null
+                            });
+                        }
                     }
                 }
 
