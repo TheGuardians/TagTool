@@ -65,8 +65,18 @@ namespace TagTool.Commands.Common
                 case "exit":
                     if (ContextStack.IsBase())
                         Console.WriteLine("Cannot exit, already at base context! Use 'quit' to quit tagtool.");
+                    else if (ContextStack.IsModPackage())
+                        new TagToolWarning("Use 'exitmodpackage' to leave a mod package context.");
                     else
                         ContextStack.Pop();
+                    return;
+                case "exitmodpackage":
+                    {
+                        if (ContextStack.IsModPackage())
+                            ContextStack.Pop();
+                        else
+                            new TagToolWarning("Use 'exit' to leave standard contexts.");
+                    }
                     return;
                 case "cs" when !ExecuteCSharpCommand.OutputIsRedirectable(commandArgs.Skip(1).ToList()):
                     redirectFile = null;
