@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TagTool.Cache;
 
 namespace TagTool.Commands
 {
@@ -73,5 +74,6 @@ namespace TagTool.Commands
         }
 
         public bool IsBase() => ContextStack.Count == 1;
+        public bool IsModPackage() => Context.Name.ToLower().EndsWith(".pak");
     }
 }
