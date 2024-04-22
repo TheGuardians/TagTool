@@ -49,6 +49,6 @@ jobs:
         files: release_x64.7z
         tag_name: ${{ steps.determine_version.outputs.version }}
         draft: false
-        prerelease: true
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
