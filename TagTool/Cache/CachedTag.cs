@@ -1,4 +1,5 @@
-﻿using TagTool.Common;
+﻿using System;
+using TagTool.Common;
 using TagTool.Tags;
 
 namespace TagTool.Cache
@@ -10,6 +11,12 @@ namespace TagTool.Cache
         public int Index;
         public uint ID;
         public TagGroup Group;
+     
+        /// <summary>
+        /// A function to map cache addresses to file offsets
+        /// </summary>
+        public AddressToOffsetOverrideDelegate AddressToOffsetOverride;
+        public delegate uint AddressToOffsetOverrideDelegate(uint currentOffset, uint address);
 
         public abstract uint DefinitionOffset { get; }
 
@@ -17,10 +24,10 @@ namespace TagTool.Cache
         {
             Index = -1;
             Name = null;
-            Group = TagGroup.None;
+            Group = new TagGroup();
         }
 
-        public CachedTag(int index, string name = null) : this(index, TagGroup.None, name) { }
+        public CachedTag(int index, string name = null) : this(index, new TagGroup(), name) { }
 
         public CachedTag(int index, TagGroup group, string name = null)
         {

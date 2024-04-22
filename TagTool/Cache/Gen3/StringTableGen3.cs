@@ -13,42 +13,79 @@ namespace TagTool.Cache.Gen3
         public StringTableGen3(EndianReader reader, MapFile baseMapFile) : base()
         {
             Version = baseMapFile.Version;
+            
+            var gen3Header = (CacheFileHeaderGen3)baseMapFile.Header;
+            var stringIDHeader = gen3Header.GetStringIDHeader();
+            var cachePlatform = baseMapFile.CachePlatform;
 
-            switch (Version)
+            if (cachePlatform == CachePlatform.Original)
             {
-                case CacheVersion.Halo3Retail:
-                case CacheVersion.Halo3Beta:    // double check
-                    Resolver = new StringIdResolverHalo3();
-                    break;
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Beta:
+                        Resolver = new StringIdResolverHalo3Beta();
+                        break;
 
-                case CacheVersion.Halo3ODST:
-                    Resolver = new StringIdResolverHalo3ODST();
-                    break;
+                    case CacheVersion.Halo3Retail:
+                        Resolver = new StringIdResolverHalo3();
+                        break;
 
-                case CacheVersion.HaloReach:
-                    Resolver = new StringIdResolverHaloReach();
-                    StringKey = "ILikeSafeStrings";
-                    break;
+                    case CacheVersion.Halo3ODST:
+                        Resolver = new StringIdResolverHalo3ODST();
+                        break;
 
-                case CacheVersion.HaloReachMCC0824:
-                case CacheVersion.HaloReachMCC0887:
-                case CacheVersion.HaloReachMCC1035:
-                case CacheVersion.HaloReachMCC1211:
-                    Resolver = new StringIdResolverHaloReachMCC();
-                    break;
+                    case CacheVersion.HaloReach:
+                        Resolver = new StringIdResolverHaloReach();
+                        StringKey = "ILikeSafeStrings";
+                        break;
+                    case CacheVersion.Halo4:
+                        Resolver = new StringIdResolverHalo4();
+                        break;
 
-                default:
-                    throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version));
+                    default:
+                        throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version, cachePlatform));
+                }
+            }
+            else if(cachePlatform == CachePlatform.MCC)
+            {
+                switch (Version)
+                {
+                    case CacheVersion.Halo3Retail:
+                        Resolver = new StringIdResolverHalo3MCC();
+                        break;
+
+                    case CacheVersion.Halo3ODST:
+                        Resolver = new StringIdResolverHalo3ODSTMCC();
+                        break;
+
+                    case CacheVersion.HaloReach:
+                        Resolver = new StringIdResolverHaloReachMCC();
+                        break;
+
+                    default:
+                        throw new NotSupportedException(CacheVersionDetection.GetBuildName(Version, cachePlatform));
+                }
             }
 
-            var sectionTable = baseMapFile.Header.SectionTable;
+            var sectionTable = gen3Header.SectionTable;
 
             // means no strings
-            if (sectionTable.Sections[(int)CacheFileSectionType.StringSection].Size == 0)
+            if (sectionTable != null && sectionTable.Sections[(int)CacheFileSectionType.StringSection].Size == 0)
                 return;
 
-            var stringIdIndexTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.StringIDsIndicesOffset);
-            var stringIdBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, baseMapFile.Header.StringIDsBufferOffset);
+            uint stringIdIndexTableOffset;
+            uint stringIdBufferOffset;
+            if (Version > CacheVersion.Halo3Beta)
+            {
+                stringIdIndexTableOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, stringIDHeader.IndicesOffset);
+                stringIdBufferOffset = sectionTable.GetOffset(CacheFileSectionType.StringSection, stringIDHeader.BufferOffset);
+            }
+            else
+            {
+                stringIdIndexTableOffset = stringIDHeader.IndicesOffset;
+                stringIdBufferOffset = stringIDHeader.BufferOffset;
+            }
+            
 
             //
             // Read offsets
@@ -56,8 +93,8 @@ namespace TagTool.Cache.Gen3
 
             reader.SeekTo(stringIdIndexTableOffset);
 
-            int[] stringOffset = new int[baseMapFile.Header.StringIDsCount];
-            for (var i = 0; i < baseMapFile.Header.StringIDsCount; i++)
+            int[] stringOffset = new int[stringIDHeader.Count];
+            for (var i = 0; i < stringIDHeader.Count; i++)
             {
                 stringOffset[i] = reader.ReadInt32();
                 Add("");
@@ -68,9 +105,9 @@ namespace TagTool.Cache.Gen3
             EndianReader newReader;
 
             if (StringKey == "")
-                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(baseMapFile.Header.StringIDsBufferSize)), reader.Format);
+                newReader = new EndianReader(new MemoryStream(reader.ReadBytes(stringIDHeader.BufferSize)), reader.Format);
             else
-                newReader = new EndianReader(reader.DecryptAesSegment(baseMapFile.Header.StringIDsBufferSize, StringKey), reader.Format);
+                newReader = new EndianReader(reader.DecryptAesSegment(stringIDHeader.BufferSize, StringKey), reader.Format);
 
             //
             // Read strings

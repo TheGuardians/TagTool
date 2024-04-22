@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Monolithic;
+using System.Linq;
 
 namespace TagTool.Commands.Tags
 {
     class ExtractTagCommand : Command
     {
-        private GameCacheHaloOnlineBase Cache { get; }
+        private GameCache Cache { get; }
 
-        public ExtractTagCommand(GameCacheHaloOnlineBase cache)
+        public ExtractTagCommand(GameCache cache)
             : base(true,
 
                   "ExtractTag",
@@ -26,27 +29,44 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
+            if (!Cache.TagCache.TryGetTag(args[0], out var instance))
+                return new TagToolError(CommandError.TagInvalid);
 
-            if (!Cache.TryGetTag(args[0], out var instance))
-                return false;
+            var path = args[1];
 
-            var file = new FileInfo(args[1]);
+            if (Path.GetExtension(path) == "")
+                path = Path.Combine(path, instance.Name.Split('\\').Last() + "." + instance.Group);
 
+            var file = new FileInfo(path);
             if (!file.Directory.Exists)
                 file.Directory.Create();
 
-
-            byte[] data;
-
-            using (var stream = Cache.OpenCacheRead())
-                data = Cache.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)instance);
-
-            using (var outStream = file.Create())
+            
+            if(Cache is GameCacheHaloOnlineBase hoCache)
             {
-                outStream.Write(data, 0, data.Length);
-                Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, file);
-                Console.WriteLine("The tag's definition will be at offset 0x{0:X}.", instance.DefinitionOffset);
+                byte[] data;
+                using (var stream = Cache.OpenCacheRead())
+                    data = hoCache.TagCacheGenHO.ExtractTagRaw(stream, (CachedTagHaloOnline)instance);
+
+                using (var outStream = file.Create())
+                {
+                    outStream.Write(data, 0, data.Length);
+                    Console.WriteLine("Wrote 0x{0:X} bytes to \"{1}\".", outStream.Position, file);
+                    Console.WriteLine("The tag's definition will be at offset 0x{0:X}.", instance.DefinitionOffset);
+                }
+            }
+            else if (Cache is GameCacheMonolithic monolithicCache)
+            {
+                byte[] data;
+                using (var stream = Cache.OpenCacheRead())
+                    data = monolithicCache.Backend.ExtractTagRaw(instance.Index);
+
+                using (var outStream = file.Create())
+                {
+                    outStream.Write(data, 0, data.Length);
+                    Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, file);
+                }
             }
 
             return true;

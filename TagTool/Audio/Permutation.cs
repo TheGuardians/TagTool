@@ -1,56 +1,119 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+    [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x14, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original, BuildType = CacheBuildType.ReleaseBuild)]
+    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original, BuildType = CacheBuildType.TagsBuild)]
+   
     public class Permutation : TagStructure
-	{
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+    {
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
         public short ImportNameIndex;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        [TagField(BuildType = CacheBuildType.TagsBuild)]
         public StringId ImportName;
 
         //Convert
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
         public short EncodedSkipFraction;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public Bounds<float> SkipFraction;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public sbyte GainH2;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public sbyte PermutationInfoIndex;
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public short LanguageNeutralTime;
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        [TagField(BuildType = CacheBuildType.TagsBuild)]
+        public float SkipFraction;
 
-        public uint SampleSize;
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        [TagField(BuildType = CacheBuildType.TagsBuild)]
+        public float Gain;
 
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(Version = CacheVersion.HaloReach)]
+        public uint SampleCount;
+
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
         public int FirstPermutationChunkIndex;
-        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
         public short PermutationChunkCount;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-        public sbyte Gain;
-        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
+        public sbyte EncodedGain;
+
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.ReleaseBuild)]
         public sbyte OverallPermutationIndex;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.ReleaseBuild)]
+        public short FirstLayerMarkerIndex;
+
+        [TagField(MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.ReleaseBuild)]
+        public short LayerMarkerCount;
+
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
+        public short RawInfoIndex;
+
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
+        public short PlayFractionType;
+
+        [TagField(MinVersion = CacheVersion.HaloReach, BuildType = CacheBuildType.TagsBuild)]
+        public Bounds<short> MissionRange;
+
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
+        public ushort PermutationFlags;
+
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
+        public ushort Flags;
+
+        [TagField(Gen = CacheGeneration.Third, BuildType = CacheBuildType.TagsBuild)]
+        public List<PermutationLanguage> Languages;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint PermutationNumber;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint IsNotFirstPermutation;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public List<PermutationChunk> PermutationChunks;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown1;
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public PermutationFlagsHaloOnline PermutationFlagsHO;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public uint Unknown2;
+        [TagField(Gen = CacheGeneration.HaloOnline, Flags = TagFieldFlags.Padding, Length = 2)]
+        public byte[] Padding;
+
+        [TagField(Gen = CacheGeneration.HaloOnline)]
+        public uint FirstSample;
+
+        [TagField(Platform = CachePlatform.MCC)]
+        public uint FsbSoundHash;
+
+        [Flags]
+        public enum PermutationFlagsHaloOnline : short
+        {
+            /// <summary>
+            /// Wait for the currently playing permutation to finish
+            /// </summary>
+            SequencedBit = (1 << 0)
+        }
+    }
+
+    [TagStructure(Size = 0x10)]
+    public class Gen2Permutation : TagStructure
+    {
+        public short Name;
+        public short EncodedSkipFraction;
+        public sbyte EncodedGain; // dB
+        public sbyte PermutationInfoIndex;
+        public short LanguageNeutralTime; // ms
+        public int SampleSize;
+        public short FirstChunk;
+        public short ChunkCount;
     }
 }

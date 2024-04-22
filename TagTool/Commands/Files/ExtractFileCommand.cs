@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags.Definitions;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Files
 {
@@ -28,17 +29,14 @@ namespace TagTool.Commands.Files
         public override object Execute(List<string> args)
         {
             if (args.Count != 1 && args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var virtualPath = args[0];
             var outputPath = (args.Count == 2) ? args[1] : virtualPath;
             var file = Definition.Find(virtualPath);
 
             if (file == null)
-            {
-                Console.WriteLine("Unable to find file {0}.", virtualPath);
-                return true;
-            }
+                return new TagToolError(CommandError.FileNotFound);
 
             var outDir = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(outDir))

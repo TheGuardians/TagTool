@@ -12,11 +12,14 @@ namespace TagTool.Cache.Gen2
         public override uint DefinitionOffset => Offset;
         public int Size;
         public uint Offset;
+        public bool IsShared;
 
-        public CachedTagGen2(int index, uint ID, TagGroup tagGroup, uint address, int size, string name) : base(index, tagGroup, name)
+        public CachedTagGen2(int index, uint ID, TagGroupGen2 tagGroup, uint address, int size, string name, bool isShared) : base(index, tagGroup, name)
         {
+            this.ID = ID;
             Offset = address;
             Size = size;
+            IsShared = isShared;
         }
     }
 }

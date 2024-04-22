@@ -5,7 +5,7 @@ namespace TagTool.Tags.Definitions
 	{
         public float Unknown;
         public float Unknown2;
-        public uint Unknown3;
-        public uint Unknown4;
+        public uint Unused;
+        public uint Unused1;
     }
 }

@@ -3,7 +3,7 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "armor", Tag = "armr", Size = 0x28, MinVersion = CacheVersion.HaloOnline430475)]
+    [TagStructure(Name = "armor", Tag = "armr", Size = 0x28, MinVersion = CacheVersion.HaloOnline430475, MaxVersion = CacheVersion.HaloOnline700123)]
     public class Armor : GameObject
     {
         public CachedTag ParentModel;

@@ -7,7 +7,7 @@ namespace TagTool.Commands.Models
     {
         public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, Model model)
         {
-            var groupName = cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
 
             var context = new CommandContext(parent,
                 string.Format("{0:X8}.{1}", tag.Index, groupName));
@@ -20,8 +20,9 @@ namespace TagTool.Commands.Models
         public static void Populate(CommandContext context, GameCache cache, CachedTag tag, Model model)
         {
             context.AddCommand(new ListVariantsCommand(cache, model));
-            context.AddCommand(new ExtractModelCommand(cache, model));
+            context.AddCommand(new ExtractModelCommand(cache, tag, model));
             context.AddCommand(new ExtractBitmapsCommand(cache, tag, model));
+            context.AddCommand(new ExportJMSCommand(cache, model));
         }
     }
 }

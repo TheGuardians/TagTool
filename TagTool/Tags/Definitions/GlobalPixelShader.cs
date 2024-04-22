@@ -6,26 +6,30 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "global_pixel_shader", Tag = "glps", Size = 0x1C)]
     public class GlobalPixelShader : TagStructure
 	{
-        public List<DrawMode> DrawModes;
-        public uint Unknown2;
+        public List<EntryPointBlock> EntryPoints;
+        public uint Version;
         public List<PixelShaderBlock> Shaders;
 
-        [TagStructure(Size = 0x10)]
-        public class DrawMode : TagStructure
+        [TagStructure(Size = 0x10, Platform = Cache.CachePlatform.Original)]
+        [TagStructure(Size = 0x14, MaxVersion = Cache.CacheVersion.Halo3ODST, Platform = Cache.CachePlatform.MCC)]
+        [TagStructure(Size = 0x10, MinVersion = Cache.CacheVersion.HaloReach, Platform = Cache.CachePlatform.MCC)]
+        public class EntryPointBlock : TagStructure
 		{
-            public List<UnknownBlock2> Unknown;
-            public uint Unknown2;
+            public List<CategoryDependencyBlock> CategoryDependency;
+            public int DefaultCompiledShaderIndex;
+            [TagField(Platform = Cache.CachePlatform.MCC, MaxVersion = Cache.CacheVersion.Halo3ODST)]
+            public int CustomCompiledShaderIndex;
 
             [TagStructure(Size = 0x10)]
-            public class UnknownBlock2 : TagStructure
+            public class CategoryDependencyBlock : TagStructure
 			{
-                public uint Unknown;
-                public List<UnknownBlock> Unknown2;
+                public int DefinitionCategoryIndex;
+                public List<GlobalShaderOptionDependency> OptionDependency;
 
                 [TagStructure(Size = 0x4)]
-                public class UnknownBlock : TagStructure
-				{
-                    public uint Unknown;
+                public class GlobalShaderOptionDependency : TagStructure
+                {
+                    public int CompiledShaderIndex;
                 }
             }
         }

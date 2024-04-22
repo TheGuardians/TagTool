@@ -10,6 +10,8 @@ namespace TagTool.Common
         public float J { get; set; }
         public float K { get; set; }
 
+        public RealVector3d(RealVector3d xyz) : this(xyz.I, xyz.J, xyz.K) { }
+
         public RealVector3d(float x, float y, float z)
         {
             I = x;
@@ -42,10 +44,44 @@ namespace TagTool.Common
         public static bool operator !=(RealVector3d a, RealVector3d b) =>
             !a.Equals(b);
 
-        public static RealVector3d operator *(float k, RealVector3d a)
-        {
-            return new RealVector3d(k * a.I, k * a.J, k * a.K);
-        }
+        public static RealVector3d operator +(RealVector3d a, RealVector3d b) =>
+                    new RealVector3d(a.I + b.I, a.J + b.J, a.K + b.K);
+
+        public static RealVector3d operator +(RealVector3d a, float b) =>
+            new RealVector3d(a.I + b, a.J + b, a.K + b);
+
+        public static RealVector3d operator +(float a, RealVector3d b) =>
+            new RealVector3d(a + b.I, a + b.J, a + b.K);
+
+        public static RealVector3d operator -(RealVector3d a, RealVector3d b) =>
+            new RealVector3d(a.I - b.I, a.J - b.J, a.K - b.K);
+
+        public static RealVector3d operator -(RealVector3d a, float b) =>
+            new RealVector3d(a.I - b, a.J - b, a.K - b);
+
+        public static RealVector3d operator -(float a, RealVector3d b) =>
+            new RealVector3d(a - b.I, a - b.J, a - b.K);
+
+        public static RealVector3d operator *(RealVector3d a, RealVector3d b) =>
+            new RealVector3d(a.I * b.I, a.J * b.J, a.K * b.K);
+
+        public static RealVector3d operator *(RealVector3d a, float b) =>
+            new RealVector3d(a.I * b, a.J * b, a.K * b);
+
+        public static RealVector3d operator *(float a, RealVector3d b) =>
+            new RealVector3d(a * b.I, a * b.J, a * b.K);
+
+        public static RealVector3d operator /(RealVector3d a, RealVector3d b) =>
+            new RealVector3d(a.I / b.I, a.J / b.J, a.K / b.K);
+
+        public static RealVector3d operator /(RealVector3d a, float b) =>
+            new RealVector3d(a.I / b, a.J / b, a.K / b);
+
+        public static RealVector3d operator /(float a, RealVector3d b) =>
+            new RealVector3d(a / b.I, a / b.J, a / b.K);
+
+        public static RealVector3d operator %(RealVector3d a, float b) =>
+            new RealVector3d(a.I % b, a.J % b, a.K % b);
 
         public override int GetHashCode() =>
             13 * 17 + I.GetHashCode()
@@ -97,6 +133,26 @@ namespace TagTool.Common
             return Normalize(result);
         }
 
+        public static RealVector3d CrossProductNoNorm(RealVector3d a, RealVector3d b)
+        {
+            return new RealVector3d()
+            {
+                I = a.J * b.K - a.K * b.J,
+                J = a.K * b.I - a.I * b.K,
+                K = a.I * b.J - a.J * b.I
+            };
+        }
+
+        public static float DotProduct(RealVector3d a, RealVector3d b)
+        {
+            return a.I * b.I + a.J * b.J + a.K * b.K;
+        }
+
+        public static float Magnitude(RealVector3d a)
+        {
+            return a.I * a.I + a.J * a.J + a.K * a.K;
+        }
+
         public static float Norm(RealVector3d a)
         {
             return (float)Math.Sqrt(a.I*a.I + a.J*a.J + a.K*a.K);
@@ -104,7 +160,24 @@ namespace TagTool.Common
 
         public static RealVector3d Normalize(RealVector3d a)
         {
-            return 1 / Norm(a) * a;
+            float n = Norm(a);
+            if (n < float.Epsilon)
+                return new RealVector3d(0, 0, 0);
+            return 1 / n * a;
         }
+
+        public static RealVector3d Frac(RealVector3d a)
+        {
+            RealVector3d result = new RealVector3d
+            {
+                I = a.I - (float)Math.Floor(a.I),
+                J = a.J - (float)Math.Floor(a.J),
+                K = a.K - (float)Math.Floor(a.K)
+            };
+
+            return result;
+        }
+
+        public RealVector3d ConvertRange() => new RealVector3d(this * 2.0f - 1.0f);
     }
 }

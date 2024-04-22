@@ -12,22 +12,45 @@ namespace TagTool.Geometry
             _stream = new VertexElementStream(stream);
         }
 
-        private RealQuaternion TransformTangent(RealQuaternion tangent)
+        private RealQuaternion TransformTangent(RealQuaternion tangent) => 
+            new RealQuaternion(tangent * 2.0f - 1.0f);
+
+        private float Sign(float x) => (x > 0 ? 1.0f : 0.0f) - (x < 0 ? 1.0f : 0.0f);
+
+        private static readonly RealVector3d WorldNormalConst = new RealVector3d(0.00390625f, 1.52587891e-005f, 5.96046448e-008f);
+        private static readonly RealVector2d NormalConst = new RealVector2d(0.00552486209f, 3.05240974e-005f);
+        private static readonly RealVector2d NormalRangeConst = new RealVector2d(1.01117313f, 1.00555551f);
+
+        private RealVector3d ComputeMs30NormalWorld(float pos_w) => 
+            RealVector3d.Frac(pos_w * WorldNormalConst).ConvertRange();
+
+        private RealVector3d ComputeMs30Normal(float pos_w)
         {
-            return new RealQuaternion(
-                (tangent.I * 2.0f) - 1.0f,
-                (tangent.J * 2.0f) - 1.0f,
-                (tangent.K * 2.0f) - 1.0f,
-                (tangent.W * 2.0f) - 1.0f);
+            RealVector2d n_xz = NormalConst * System.Math.Abs(pos_w * 32767.0f);
+            n_xz = (RealVector2d.Frac(n_xz) * 2.0f - 1.0f) * NormalRangeConst;
+            
+            float n_y = System.Math.Max(1.0f - n_xz.Dot(), 0.0f);
+            n_y = 1.0f / (float)System.Math.Pow(n_y, -0.5f); // n_y = rcp(rsqrt(n_y))
+
+            return new RealVector3d(n_xz.I, n_y * Sign(pos_w), n_xz.J);
         }
 
         public WorldVertex ReadWorldVertex()
         {
+            var position = _stream.ReadFloat4();
+            var texcoord = _stream.ReadFloat2();
+            var tangent = TransformTangent(_stream.ReadUByte4N());
+
+            var normal = ComputeMs30NormalWorld(position.W);
+            var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
+
             return new WorldVertex
             {
-                Position = _stream.ReadFloat4(),
-                Texcoord = _stream.ReadFloat2(),
-                Tangent = TransformTangent(_stream.ReadUByte4N()),
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
+                Normal = normal,
+                Binormal = binormal
             };
         }
 
@@ -40,11 +63,20 @@ namespace TagTool.Geometry
 
         public RigidVertex ReadRigidVertex()
         {
+            var position = _stream.ReadShort4N();
+            var texcoord = _stream.ReadShort2N();
+            var tangent = TransformTangent(_stream.ReadUByte4N());
+
+            var normal = ComputeMs30Normal(position.W);
+            var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
+
             return new RigidVertex
             {
-                Position = _stream.ReadShort4N(),
-                Texcoord = _stream.ReadShort2N(),
-                Tangent = TransformTangent(_stream.ReadUByte4N()),
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
+                Normal = normal,
+                Binormal = binormal
             };
         }
 
@@ -57,13 +89,24 @@ namespace TagTool.Geometry
 
         public SkinnedVertex ReadSkinnedVertex()
         {
+            var position = _stream.ReadShort4N();
+            var texcoord = _stream.ReadShort2N();
+            var tangent = TransformTangent(_stream.ReadUByte4N());
+            var blendIndices = _stream.ReadUByte4();
+            var blendWeights = _stream.ReadUByte4N().ToArray();
+
+            var normal = ComputeMs30Normal(position.W);
+            var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
+
             return new SkinnedVertex
             {
-                Position = _stream.ReadShort4N(),
-                Texcoord = _stream.ReadShort2N(),
-                Tangent = TransformTangent(_stream.ReadUByte4N()),
-                BlendIndices = _stream.ReadUByte4(),
-                BlendWeights = _stream.ReadUByte4N().ToArray(),
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
+                BlendIndices = blendIndices,
+                BlendWeights = blendWeights,
+                Normal = normal,
+                Binormal = binormal
             };
         }
 
@@ -95,11 +138,20 @@ namespace TagTool.Geometry
 
         public FlatWorldVertex ReadFlatWorldVertex()
         {
+            var position = _stream.ReadFloat4();
+            var texcoord = _stream.ReadFloat2();
+            var tangent = TransformTangent(_stream.ReadUByte4N());
+
+            var normal = ComputeMs30NormalWorld(position.W);
+            var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
+
             return new FlatWorldVertex
             {
-                Position = _stream.ReadFloat4(),
-                Texcoord = _stream.ReadFloat2(),
-                Tangent = TransformTangent(_stream.ReadUByte4N()),
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
+                Normal = normal,
+                Binormal = binormal
             };
         }
 
@@ -112,11 +164,20 @@ namespace TagTool.Geometry
 
         public FlatRigidVertex ReadFlatRigidVertex()
         {
+            var position = _stream.ReadShort4N();
+            var texcoord = _stream.ReadShort2N();
+            var tangent = TransformTangent(_stream.ReadUByte4N());
+
+            var normal = ComputeMs30Normal(position.W);
+            var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
+
             return new FlatRigidVertex
             {
-                Position = _stream.ReadShort4N(),
-                Texcoord = _stream.ReadShort2N(),
-                Tangent = TransformTangent(_stream.ReadUByte4N()),
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
+                Normal = normal,
+                Binormal= binormal
             };
         }
 
@@ -129,13 +190,22 @@ namespace TagTool.Geometry
 
         public FlatSkinnedVertex ReadFlatSkinnedVertex()
         {
+            var position = _stream.ReadShort4N();
+            var texcoord = _stream.ReadShort2N();
+            var tangent = TransformTangent(_stream.ReadUByte4N());
+
+            var normal = ComputeMs30Normal(position.W);
+            var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
+
             return new FlatSkinnedVertex
             {
-                Position = _stream.ReadShort4N(),
-                Texcoord = _stream.ReadShort2N(),
-                Tangent = TransformTangent(_stream.ReadUByte4N()),
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
                 BlendIndices = _stream.ReadUByte4(),
                 BlendWeights = _stream.ReadUByte4N().ToArray(),
+                Normal = normal,
+                Binormal = binormal,
             };
         }
 
@@ -451,13 +521,22 @@ namespace TagTool.Geometry
 
         public DualQuatVertex ReadDualQuatVertex()
         {
+            var position = _stream.ReadShort4N();
+            var texcoord = _stream.ReadShort2N();
+            var tangent = TransformTangent(_stream.ReadUByte4N());
+
+            var normal = ComputeMs30Normal(position.W);
+            var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
+
             return new DualQuatVertex
             {
-                Position = _stream.ReadShort4N(),
-                Texcoord = _stream.ReadShort2N(),
-                Tangent = TransformTangent(_stream.ReadUByte4N()),
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
                 BlendIndices = _stream.ReadUByte4(),
                 BlendWeights = _stream.ReadUByte4N().ToArray(),
+                Normal = normal,
+                Binormal = binormal
             };
         }
 
@@ -583,7 +662,7 @@ namespace TagTool.Geometry
             _stream.WriteFloat3(v.SHCoefficients3);
         }
 
-        public Unknown1A ReadUnknown1A()
+        public WaterTriangleIndices ReadWaterTriangleIndices()
         {
             var buffer = _stream.ReadUShort6();
             ushort[] vertices = new ushort[3];
@@ -594,63 +673,62 @@ namespace TagTool.Geometry
                 vertices[i] = buffer[2 * i];
                 indices[i] = buffer[2 * i + 1];
             }
-            return new Unknown1A
+            return new WaterTriangleIndices
             {
-                Vertices = vertices,
-                Indices = indices
+                MeshIndices = vertices,
+                WaterIndices = indices
 
             };
         }
 
-        public void WriteUnknown1A(Unknown1A v)
+        public void WriteWaterTriangleIndices(WaterTriangleIndices v)
         {
             for (int i = 0; i < 3; i += 2)
             {
-                _stream.WriteUShort(v.Vertices[i]);
-                _stream.WriteUShort(v.Indices[i]);
+                _stream.WriteUShort(v.MeshIndices[i]);
+                _stream.WriteUShort(v.WaterIndices[i]);
             }
         }
 
-        public Unknown1B ReadUnknown1B()
+        public WaterTesselatedParameters ReadWaterTesselatedParameters()
         {
-            return new Unknown1B
+            return new WaterTesselatedParameters
             {
-                Unknown1 = _stream.ReadFloat1(),
-                Unknown2 = _stream.ReadFloat1(),
-                Unknown3 = _stream.ReadFloat1(),
-                Unknown4 = _stream.ReadFloat1(),
-                Unknown5 = _stream.ReadFloat1(),
-                Unknown6 = _stream.ReadFloat1(),
-                Unknown7 = _stream.ReadFloat1(),
-                Unknown8 = _stream.ReadFloat1(),
-                Unknown9 = _stream.ReadFloat1(),
+                LocalInfo = _stream.ReadFloat2(),
+                LocalInfoPadd = _stream.ReadFloat1(),
+                BaseTex = _stream.ReadFloat2(),
+                BaseTexPadd = _stream.ReadFloat1(),
             };
         }
 
-        public void WriteUnknown1B(Unknown1B v)
+        public void WriteWaterTesselatedParameters(WaterTesselatedParameters v)
         {
-            _stream.WriteFloat1(v.Unknown1);
-            _stream.WriteFloat1(v.Unknown2);
-            _stream.WriteFloat1(v.Unknown3);
-            _stream.WriteFloat1(v.Unknown4);
-            _stream.WriteFloat1(v.Unknown5);
-            _stream.WriteFloat1(v.Unknown6);
-            _stream.WriteFloat1(v.Unknown7);
-            _stream.WriteFloat1(v.Unknown8);
-            _stream.WriteFloat1(v.Unknown9);
+            _stream.WriteFloat2(v.LocalInfo);
+            _stream.WriteFloat1(v.LocalInfoPadd);
+            _stream.WriteFloat2(v.BaseTex);
+            _stream.WriteFloat1(v.BaseTexPadd);
         }
 
-        public WorldVertex ReadWorldWaterVertex()
+        public WorldWaterVertex ReadWorldWaterVertex()
         {
-            return new WorldVertex
+            var position = _stream.ReadFloat4();
+            var texcoord = _stream.ReadFloat2();
+            var tangent = TransformTangent(_stream.ReadUByte4N());
+
+            var normal = ComputeMs30NormalWorld(position.W);
+            var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
+
+            return new WorldWaterVertex
             {
-                Position = _stream.ReadFloat4(),
-                Texcoord = _stream.ReadFloat2(),
-                Tangent = TransformTangent(_stream.ReadUByte4N()),
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
+                Normal = normal,
+                Binormal = binormal
             };
         }
 
-        public void WriteWorldWaterVertex(WorldVertex v)
+        public void WriteWorldWaterVertex(WorldWaterVertex v)
         {
             _stream.WriteFloat4(v.Position);
             _stream.WriteFloat2(v.Texcoord);
@@ -686,9 +764,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.World:
                 case VertexBufferFormat.World2:
                     return 0x38;
-                case VertexBufferFormat.Unknown1A:
+                case VertexBufferFormat.WaterTriangleIndices:
                     return 0xC;
-                case VertexBufferFormat.Unknown1B:
+                case VertexBufferFormat.TesselatedWaterParameters:
                     return 0x24;
                 default:
                     return -1;

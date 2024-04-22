@@ -4,11 +4,13 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Cache.HaloOnline;
 using TagTool.BlamFile;
 using TagTool.Cache.Resources;
 using TagTool.Extensions;
+using TagTool.Cache.Gen3;
 
 namespace TagTool.Commands.Modding
 {
@@ -24,11 +26,11 @@ namespace TagTool.Commands.Modding
             base(false,
 
                 "ExportModPackage",
-                "",
+                "NO LONGER SUPPORTED - use CreateModPackage instead",
 
                 "ExportModPackage [TagFile] [TagList] [TagBounds] [MapFiles] [CampaignFile] [FontPackageFile] <Package File>",
 
-                "")
+                "NO LONGER SUPPORTED - use CreateModPackage instead")
         {
             CacheContext = cacheContext;
         }
@@ -36,7 +38,7 @@ namespace TagTool.Commands.Modding
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 7)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             string packageName;
             string line = null;
@@ -96,11 +98,14 @@ namespace TagTool.Commands.Modding
 
             // assign everything to the first cache for now
 
+            AddStringIds();
+
             var tagStream = ModPackage.TagCachesStreams[0];
             ModPackage.CacheNames.Add("default");
 
-            ModPackage.TagCaches[0] = new TagCacheHaloOnline(tagStream, new Dictionary<int, string>());
-            ModPackage.Resources = new ResourceCacheHaloOnline(CacheVersion.HaloOnline106708, ModPackage.ResourcesStream);
+            // temporary cache for holding tags and resources
+            TagCacheHaloOnline modPackTagCache = new TagCacheHaloOnline(CacheContext.Version, tagStream, ModPackage.StringTable, new Dictionary<int, string>());
+            ResourceCacheHaloOnline modPackResourceCache = new ResourceCacheHaloOnline(CacheContext.Version, CacheContext.Platform, ModPackage.ResourcesStream);
 
             CreateDescription();
 
@@ -113,7 +118,7 @@ namespace TagTool.Commands.Modding
 
                 Console.WriteLine("Please specify the start index to be used:");
                 string input = line = Console.ReadLine().TrimStart().TrimEnd();
-                if (CacheContext.TryGetTag(input, out var fromInstance) && fromInstance != null)
+                if (CacheContext.TagCache.TryGetTag(input, out var fromInstance) && fromInstance != null)
                     fromIndex = fromInstance.Index;
 
                 if (fromIndex != -1)
@@ -122,12 +127,11 @@ namespace TagTool.Commands.Modding
                     input = Console.ReadLine().TrimStart().TrimEnd();
                     if(input != "")
                     {
-                        if (CacheContext.TryGetTag(input, out var toInstance) && fromInstance != null)
+                        if (CacheContext.TagCache.TryGetTag(input, out var toInstance) && fromInstance != null)
                             toIndex = toInstance.Index;
                         else
                         {
-                            Console.WriteLine($"Invalid end index");
-                            return false;
+                            return new TagToolError(CommandError.ArgInvalid, "Invalid end index");
                         }
                     }
                 }
@@ -156,11 +160,11 @@ namespace TagTool.Commands.Modding
                     while (!reader.EndOfStream)
                     {
                         var tagName = reader.ReadLine();
-                        if (CacheContext.TryGetTag(tagName, out var instance) && instance != null)
+                        if (CacheContext.TagCache.TryGetTag(tagName, out var instance) && instance != null)
                             if(!tagIndices.Contains(instance.Index))
                                 tagIndices.Add(instance.Index);
                         else
-                            Console.WriteLine($"Falied to find  tag {tagName}");
+                            Console.WriteLine($"Falied to find tag {tagName}");
                     }
 
                     reader.Close();
@@ -171,7 +175,7 @@ namespace TagTool.Commands.Modding
                 Console.WriteLine("Please specify the tags to be used (enter an empty line to finish):");
 
                 while ((line = Console.ReadLine().TrimStart().TrimEnd()) != "")
-                    if (CacheContext.TryGetTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
+                    if (CacheContext.TagCache.TryGetTag(line, out var instance) && instance != null && !tagIndices.Contains(instance.Index))
                         tagIndices.Add(instance.Index);
             }
 
@@ -241,8 +245,7 @@ namespace TagTool.Commands.Modding
                 var directory = new DirectoryInfo(Console.ReadLine());
                 if(!directory.Exists)
                 {
-                    Console.WriteLine($"ERROR: Directory does not exist.");
-                    return true;
+                    return new TagToolError(CommandError.DirectoryNotFound);
                 }
 
                 AddFiles(directory);
@@ -254,8 +257,8 @@ namespace TagTool.Commands.Modding
 
             Console.WriteLine("Building...");
 
-            AddStringIds();
-            AddTags(tagIndices);
+            
+            AddTags(tagIndices, modPackTagCache, modPackResourceCache);
             
             ModPackage.Save(new FileInfo(packageName));
 
@@ -294,10 +297,9 @@ namespace TagTool.Commands.Modding
             ModPackage.Metadata.BuildDateHigh = (int)((DateTime.Now.ToFileTime() & 0x7FFFFFFF00000000) >> 32);
         }
 
-        private void AddTags(HashSet<int> tagIndices)
+        private void AddTags(HashSet<int> tagIndices, TagCacheHaloOnline modTagCache, ResourceCacheHaloOnline modPackResourceCache)
         {
             // define current cache tags, names
-            var modTagCache = ModPackage.TagCaches[0];
             var modTagNames = ModPackage.TagCacheNames[0];
             var modTagStream = ModPackage.TagCachesStreams[0];
 
@@ -323,7 +325,7 @@ namespace TagTool.Commands.Modding
                     ResourceCacheHaloOnline resourceCache = null;
                     var location = (ResourceLocation)value;
 
-                    if (location == ResourceLocation.None)
+                    if (location == ResourceLocation.None || location == ResourceLocation.RenderModels || location == ResourceLocation.Lightmaps || location == ResourceLocation.Mods)
                         continue;
 
                     try
@@ -345,7 +347,7 @@ namespace TagTool.Commands.Modding
 
                     if (srcTag == null)
                     {
-                        modTagCache.AllocateTag(new TagTool.Tags.TagGroup());
+                        modTagCache.AllocateTag(new TagGroupGen3());
                         continue;
                     }
                         
@@ -354,7 +356,7 @@ namespace TagTool.Commands.Modding
                         var emptyTag = modTagCache.AllocateTag(srcTag.Group, srcTag.Name);
                         var cachedTagData = new CachedTagData();
                         cachedTagData.Data = new byte[0];
-                        cachedTagData.Group = emptyTag.Group;
+                        cachedTagData.Group = (TagGroupGen3)emptyTag.Group;
                         modTagCache.SetTagData(modTagStream, (CachedTagHaloOnline)emptyTag, cachedTagData);
                         continue;
                     }
@@ -413,7 +415,7 @@ namespace TagTool.Commands.Modding
                             }
                             else
                             {
-                                var newResourceIndex = ModPackage.Resources.AddRaw(
+                                var newResourceIndex = modPackResourceCache.AddRaw(
                                     ModPackage.ResourcesStream,
                                     srcResourceCaches[resourceLocation].ExtractRaw(
                                         srcResourceStreams[resourceLocation],
@@ -472,7 +474,7 @@ namespace TagTool.Commands.Modding
                     MapFile map = new MapFile();
                     map.Read(reader);
                     // TODO: specify cache per map
-                    ModPackage.AddMap(cacheStream, ((CacheFileHeader)map.Header).MapId , 0);
+                    ModPackage.AddMap(cacheStream, ((CacheFileHeaderGenHaloOnline)map.Header).MapId , 0);
 
                 }
             }

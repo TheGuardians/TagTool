@@ -2,15 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
+using TagTool.Cache.Monolithic;
+using TagTool.Tags;
+using TagTool.Common;
 
 namespace TagTool.Commands.Tags
 {
     class ExtractAllTagsCommand : Command
     {
-        public GameCacheHaloOnlineBase Cache { get; }
+        public GameCache Cache { get; }
 
-        public ExtractAllTagsCommand(GameCacheHaloOnlineBase cache)
+        public ExtractAllTagsCommand(GameCache cache)
             : base(false,
 
                   "ExtractAllTags",
@@ -26,7 +30,7 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var directory = args[0];
 
@@ -36,12 +40,12 @@ namespace TagTool.Commands.Tags
                 var answer = Console.ReadLine().ToLower();
 
                 if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return false;
+                    return new TagToolError(CommandError.YesNoSyntax);
 
                 if (answer.StartsWith("y"))
                     Directory.CreateDirectory(directory);
                 else
-                    return false;
+                    return true;
             }
 
             using (var cacheStream = Cache.OpenCacheRead())
@@ -51,27 +55,45 @@ namespace TagTool.Commands.Tags
                     if (instance == null)
                         continue;
 
-                    var tagName = instance.Name + "." + Cache.StringTable.GetString(instance.Group.Name);
+                    if (instance.Group.Tag == Tag.Null)
+                        continue;
+
+                    var tagName = instance.Name + "." + instance.Group;
                     var tagPath = Path.Combine(directory, tagName);
                     var tagDirectory = Path.GetDirectoryName(tagPath);
 
                     if (!Directory.Exists(tagDirectory))
                         Directory.CreateDirectory(tagDirectory);
 
+                    var tagData = ExtractTag(cacheStream, instance);
+                    if (tagData == null)
+                        continue;
+
                     using (var tagStream = File.Create(tagPath))
                     using (var writer = new BinaryWriter(tagStream))
                     {
-                        writer.Write(Cache.TagCacheGenHO.ExtractTagRaw(cacheStream, (CachedTagHaloOnline)instance));
+                        writer.Write(tagData);
                     }
 
                     Console.WriteLine($"Exported {tagName}");
                 }
             }
 
-            Console.WriteLine();
             Console.WriteLine("Done!");
-
             return true;
+        }
+
+        private byte[] ExtractTag(Stream cacheStream, CachedTag instance)
+        {
+            switch(Cache)
+            {
+                case GameCacheHaloOnlineBase hoCache:
+                    return hoCache.TagCacheGenHO.ExtractTagRaw(cacheStream, (CachedTagHaloOnline)instance);
+                case GameCacheMonolithic monolithicCache:
+                    return monolithicCache.Backend.ExtractTagRaw(instance.Index);
+                default:
+                    throw new NotSupportedException();
+            }
         }
     }
 }

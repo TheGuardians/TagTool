@@ -7,19 +7,19 @@ namespace TagTool.Serialization
 {
     class ModPackageTagSerializationContext : HaloOnlineSerializationContext
     {
-        private ModPackage Package;
+        private TagCacheHaloOnline ModPackageTagCache;
 
-        public ModPackageTagSerializationContext(Stream stream, GameCacheHaloOnlineBase context, ModPackage package, CachedTagHaloOnline tag) : base(stream, context, tag)
+        public ModPackageTagSerializationContext(Stream stream, GameCacheHaloOnlineBase context, CachedTagHaloOnline tag) : base(stream, context, tag)
         {
-            Package = package;
+            ModPackageTagCache = context.TagCacheGenHO;
         }
 
         public override CachedTag GetTagByIndex(int index)
         {
-            if (index < 0)
+            if (index < 0 || index >= ModPackageTagCache.Tags.Count)
                 return null;
 
-            return Package.TagCaches[0].Tags[index];
+            return ModPackageTagCache.Tags[index];
         }
 
         public override CachedTag GetTagByName(TagGroup group, string name)

@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Scripting;
-using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using TagTool.Cache.HaloOnline;
@@ -18,7 +18,9 @@ namespace TagTool.Commands.Modding
 {
     class ApplyModPackageCommand : Command
     {
-        private GameCacheHaloOnlineBase CacheContext { get; }
+        private GameCacheHaloOnlineBase BaseCache { get; }
+
+        private GameCacheModPackage ModCache { get; }
 
         private Dictionary<int, int> TagMapping;
 
@@ -28,174 +30,223 @@ namespace TagTool.Commands.Modding
 
         private Dictionary<StringId, StringId> StringIdMapping;
 
-        public ApplyModPackageCommand(GameCacheHaloOnlineBase cacheContext) :
+
+        public ApplyModPackageCommand(GameCacheModPackage modCache) :
             base(false,
 
                 "ApplyModPackage",
-                "Apply a mod package to the current cache. \n",
+                "Apply current mod package to the base cache. \n",
 
-                "ApplyModPackage <File>",
+                "ApplyModPackage [Tag cache index (default=0)]",
 
-                "Apply a mod package to the current cache. \n")
+                "Apply current mod package to the base cache. \n")
         {
-            CacheContext = cacheContext;
+            BaseCache = modCache.BaseCacheReference;
+            ModCache = modCache;
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1)
-                return false;
+            int tagCacheIndex = -1;
 
-            var filePath = args[0];
+            if (args.Count > 1)
+                return new TagToolError(CommandError.ArgCount);
 
-            if (!File.Exists(filePath))
+            if (args.Count == 0)
+                tagCacheIndex = 0;
+            else
+                if (!int.TryParse(args[0], System.Globalization.NumberStyles.Integer, null, out tagCacheIndex))
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
+
+            if (tagCacheIndex != ModCache.GetCurrentTagCacheIndex())
             {
-                Console.WriteLine($"File {filePath} does not exist!");
-                return false;
+                if (!ModCache.SetActiveTagCache(tagCacheIndex))
+                {
+                    return new TagToolError(CommandError.CustomMessage, "Failed to apply mod package to base cache, no changes applied");
+                }
             }
 
             TagMapping = new Dictionary<int, int>();
             StringIdMapping = new Dictionary<StringId, StringId>();
 
             // build dictionary of names to tag instance for faster lookups
-            CacheTagsByName = CacheContext.TagCache.TagTable
+            CacheTagsByName = BaseCache.TagCache.TagTable
                 .Where(tag => tag != null)
                 .GroupBy(tag => $"{tag.Name}.{tag.Group}")
                 .Select(tags => tags.Last())
                 .ToDictionary(tag => $"{tag.Name}.{tag.Group}", tag => tag);
 
-            CacheStream = CacheContext.OpenCacheReadWrite();
 
-            var modPackage = new ModPackage(new FileInfo(filePath));
-
-            var cacheIndex = 0; // Only apply cache at index 0 for now
-
-            if(modPackage.Header.Version != ModPackageVersion.MultiCache)
+            // shut down base cache stream from mod cache and reopen once applying is complete
+            using (CacheStream = BaseCache.OpenCacheReadWrite())
             {
-                Console.WriteLine($"Wrong mod package version {modPackage.Header.Version.ToString()}");
-                return true;
-            }
 
-            for (int i = 0; i < modPackage.TagCaches[cacheIndex].Count; i++)
-            {
-                var modTag = modPackage.TagCaches[cacheIndex].GetTag(i);
-
-                if (modTag != null)
+                for (int i = 0; i < ModCache.TagCache.Count; i++)
                 {
-                    if (!TagMapping.ContainsKey(modTag.Index))
-                        ConvertCachedTagInstance(modPackage, modTag);
-                }
-            }
+                    var modTag = ModCache.TagCache.GetTag(i);
 
-            // fixup map files
-
-            foreach (var mapFile in modPackage.MapFileStreams)
-            {
-                using (var reader = new EndianReader(mapFile))
-                {
-                    MapFile map = new MapFile();
-                    map.Read(reader);
-
-                    var modIndex = map.Header.ScenarioTagIndex;
-                    TagMapping.TryGetValue(modIndex, out int newScnrIndex);
-                    map.Header.ScenarioTagIndex = newScnrIndex;
-                    var mapName = map.Header.Name;
-
-                    var mapPath = $"{CacheContext.Directory.FullName}\\{mapName}.map";
-                    var file = new FileInfo(mapPath);
-                    var fileStream = file.OpenWrite();
-                    using (var writer = new EndianWriter(fileStream, map.EndianFormat))
+                    if (modTag != null)
                     {
-                        map.Write(writer);
+                        if (!TagMapping.ContainsKey(modTag.Index))
+                            ConvertCachedTagInstance(ModCache.BaseModPackage, modTag, false);
                     }
                 }
-            }
 
-            // apply .campaign file
-            if(modPackage.CampaignFileStream != null && modPackage.CampaignFileStream.Length > 0)
-            {
-                var campaignFilepath = $"{CacheContext.Directory.FullName}\\halo3.campaign";
-                var campaignFile = new FileInfo(campaignFilepath);
-                using (var campaignFileStream = campaignFile.OpenWrite())
+                // fixup map files
+                foreach (var mapFile in ModCache.BaseModPackage.MapFileStreams)
                 {
-                    modPackage.CampaignFileStream.CopyTo(campaignFileStream);
+                    if (BaseCache is GameCacheModPackage)
+                    {
+                        var reader = new EndianReader(mapFile);
+
+                        MapFile map = new MapFile();
+                        map.Read(reader);
+                        var header = (CacheFileHeaderGenHaloOnline)map.Header;
+                        var modIndex = header.ScenarioTagIndex;
+                        TagMapping.TryGetValue(modIndex, out int newScnrIndex);
+                        header.ScenarioTagIndex = newScnrIndex;
+
+                        var modPackCache = BaseCache as GameCacheModPackage;
+                        modPackCache.AddMapFile(mapFile, header.MapId);
+                    }
+                    else
+                    {
+                        using (var reader = new EndianReader(mapFile))
+                        {
+                            MapFile map = new MapFile();
+                            map.Read(reader);
+                            var header = (CacheFileHeaderGenHaloOnline)map.Header;
+                            var modIndex = header.ScenarioTagIndex;
+                            TagMapping.TryGetValue(modIndex, out int newScnrIndex);
+                            header.ScenarioTagIndex = newScnrIndex;
+                            var mapName = header.Name;
+
+                            var mapPath = $"{BaseCache.Directory.FullName}\\{mapName}.map";
+                            var file = new FileInfo(mapPath);
+                            var fileStream = file.OpenWrite();
+                            using (var writer = new EndianWriter(fileStream, map.EndianFormat))
+                            {
+                                map.Write(writer);
+                            }
+                        }
+                    }
                 }
-            }
-            
-            // apply fonts
-            if(modPackage.FontPackage != null && modPackage.FontPackage.Length > 0)
-            {
-                var fontFilePath = $"{CacheContext.Directory.FullName}\\fonts\\font_package.bin";
-                var fontFile = new FileInfo(fontFilePath);
-                using (var fontFileStream = fontFile.OpenWrite())
+
+                // apply .campaign file
+                if (ModCache.BaseModPackage.CampaignFileStream != null && ModCache.BaseModPackage.CampaignFileStream.Length > 0)
                 {
-                    modPackage.FontPackage.CopyTo(fontFileStream);
+                    if (BaseCache is GameCacheModPackage)
+                    {
+                        var BaseCacheContext = BaseCache as GameCacheModPackage;
+                        BaseCacheContext.SetCampaignFile(ModCache.BaseModPackage.CampaignFileStream);
+                    }
+                    else
+                    {
+                        var campaignFilepath = $"{BaseCache.Directory.FullName}\\halo3.campaign";
+                        var campaignFile = new FileInfo(campaignFilepath);
+                        using (var campaignFileStream = campaignFile.OpenWrite())
+                        {
+                            ModCache.BaseModPackage.CampaignFileStream.CopyTo(campaignFileStream);
+                        }
+                    }
                 }
+
+                // apply fonts
+                if (ModCache.BaseModPackage.FontPackage != null && ModCache.BaseModPackage.FontPackage.Length > 0)
+                {
+                    using (var stream = ModCache.BaseModPackage.FontPackage)
+                    {
+                        BaseCache.SaveFonts(stream);
+                    }
+                }
+
+                // apply mod files
+                if (ModCache.BaseModPackage.Files != null && ModCache.BaseModPackage.Files.Count > 0)
+                {
+
+                    if (BaseCache is GameCacheHaloOnline)
+                    {
+                        Console.WriteLine("Mod Files exist in package. Overwrite in BaseCache? (y/n)");
+                        string response = Console.ReadLine();
+                        if (response.ToLower().StartsWith("y"))
+                        {
+                            Console.WriteLine("Please enter the directory for the Mod Files:");
+                            string directoryPath = Console.ReadLine();
+
+                            var directory = new DirectoryInfo(directoryPath);
+                            if (!directory.Exists)
+                            {
+                                return new TagToolError(CommandError.DirectoryNotFound);
+                            }
+
+                            Console.WriteLine("Writing Mod Files to Directory");
+                            foreach (var file in ModCache.BaseModPackage.Files)
+                            {
+                                Console.WriteLine("Writing: {0}", file.Key);
+                                directory.CreateSubdirectory(Path.GetDirectoryName(file.Key.ToString()));
+                                BaseCache.AddModFile(Path.Combine(directory.FullName, file.Key), file.Value);
+                            }
+
+                        }
+                        else
+                            Console.WriteLine("Skipping Mod Files");
+                    }
+                    else
+                        foreach (var file in ModCache.BaseModPackage.Files)
+                        {
+                            Console.WriteLine("Copying: {0}", file.Key);
+                            BaseCache.AddModFile(file.Key, file.Value);
+                        }
+                }
+
+
+                BaseCache.SaveTagNames();
+                BaseCache.SaveStrings();
             }
-            
-
-
-            CacheStream.Close();
-            CacheStream.Dispose();
-            CacheContext.SaveTagNames();
-            CacheContext.SaveStrings();
 
             return true;
         }
 
-
-        private CachedTag ConvertCachedTagInstance(ModPackage modPack, CachedTag modTag)
+        private CachedTag ConvertCachedTagInstance(ModPackage modPack, CachedTag modTag, bool isTagReference = true)
         {
-            Console.WriteLine($"Converting {modTag.Name}.{modTag.Group}...");
-
             // tag has already been converted
             if (TagMapping.ContainsKey(modTag.Index))
-                return CacheContext.TagCache.GetTag(TagMapping[modTag.Index]);   // get the matching tag in the destination package
+                return BaseCache.TagCache.GetTag(TagMapping[modTag.Index]);   // get the matching tag in the destination package
 
             // Determine if tag requires conversion
-            if (modTag.DefinitionOffset == ((CachedTagHaloOnline)modTag).TotalSize)
+            if (((CachedTagHaloOnline)modTag).IsEmpty())
             {
                 //modtag references a base tag, figure out which one is it and add it to the mapping
-                CachedTag baseTag = null;
-                if (modTag.Index < CacheContext.TagCache.Count)
-                    baseTag = CacheContext.TagCache.GetTag(modTag.Index);
-
-                // mod tag has a name, first check if baseTag name is null, else if the names don't match or group don't match
-                if (baseTag != null && baseTag.Group == modTag.Group && baseTag.Name != null && baseTag.Name == modTag.Name)
+                CachedTag cacheTag;
+                if (CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out cacheTag))
                 {
-                    TagMapping[modTag.Index] = baseTag.Index;
-                    return baseTag;
+                    TagMapping[modTag.Index] = cacheTag.Index;
+                    return cacheTag;
                 }
-                else
-                {
-                    // tag name/group doesn't match base tag, try to look for it
 
-                    CachedTag cacheTag;
-                    if(CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out cacheTag))
-                    {
-                        TagMapping[modTag.Index] = cacheTag.Index;
-                        return cacheTag;
-                    }
+                // Failed to find tag in base cache
+                Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group} in the base cache, returning null tag reference.");
 
-                    // Failed to find tag in base cache
-                    Console.Error.WriteLine($"Failed to find {modTag.Name}.{modTag.Group.ToString()} in the base cache, returning null tag reference.");
-                    //return null;
-                    throw new Exception("Failed to find tag when applying.");
-                }
-            }     
+                // check if anything actually depends on this tag
+                if (!isTagReference)
+                    return null;
+
+                throw new Exception("Failed to find tag when applying.");
+            }
             else
             {
+                Console.WriteLine($"Converting {modTag.Name}.{modTag.Group}...");
                 CachedTag newTag;
                 if (!CacheTagsByName.TryGetValue($"{modTag.Name}.{modTag.Group}", out newTag))
                 {
-                    newTag = CacheContext.TagCache.AllocateTag(modTag.Group);
+                    newTag = BaseCache.TagCache.AllocateTag(modTag.Group);
                     newTag.Name = modTag.Name;
                 }
 
                 TagMapping.Add(modTag.Index, newTag.Index);
-                var definitionType = TagDefinition.Find(modTag.Group.Tag);
-                var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
-                var tagDefinition = deserializer.Deserialize(new ModPackageTagSerializationContext(modPack.TagCachesStreams[0], CacheContext, modPack, (CachedTagHaloOnline)modTag), definitionType);
+                var definitionType = BaseCache.TagCache.TagDefinitions.GetTagDefinitionType(modTag.Group);
+
+                var tagDefinition = ModCache.Deserialize(ModCache.OpenCacheRead(CacheStream), modTag);
                 tagDefinition = ConvertData(modPack, tagDefinition);
 
                 if (definitionType == typeof(ForgeGlobalsDefinition))
@@ -206,7 +257,7 @@ namespace TagTool.Commands.Modding
                 {
                     tagDefinition = ConvertScenario(modPack, (Scenario)tagDefinition);
                 }
-                CacheContext.Serialize(CacheStream, newTag, tagDefinition);
+                BaseCache.Serialize(CacheStream, newTag, tagDefinition);
 
                 foreach (var resourcePointer in ((CachedTagHaloOnline)modTag).ResourcePointerOffsets)
                 {
@@ -219,9 +270,6 @@ namespace TagTool.Commands.Modding
 
         private object ConvertData(ModPackage modPack, object data)
         {
-
-            var type = data.GetType();
-
             switch (data)
             {
                 case StringId _:
@@ -241,7 +289,6 @@ namespace TagTool.Commands.Modding
                     return ConvertCachedTagInstance(modPack, tag);
                 
             }
-
             return data;
         }
 
@@ -253,14 +300,14 @@ namespace TagTool.Commands.Modding
             {
                 StringId cacheStringId;
                 var modString = modPack.StringTable.GetString(stringId);
-                var cacheStringTest = CacheContext.StringTable.GetString(stringId);
+                var cacheStringTest = BaseCache.StringTable.GetString(stringId);
 
                 if (cacheStringTest != null && modString == cacheStringTest)            // check if base cache contains the exact same id with matching strings
                     cacheStringId = stringId;
-                else if (CacheContext.StringTable.Contains(modString))                // try to find the string among all stringids
-                    cacheStringId = CacheContext.StringTable.GetStringId(modString);
+                else if (BaseCache.StringTable.Contains(modString))                // try to find the string among all stringids
+                    cacheStringId = BaseCache.StringTable.GetStringId(modString);
                 else                                                                    // add new stringid
-                    cacheStringId = CacheContext.StringTable.AddString(modString);
+                    cacheStringId = BaseCache.StringTable.AddString(modString);
 
                 StringIdMapping[stringId] = cacheStringId;
                 return cacheStringId;
@@ -273,18 +320,18 @@ namespace TagTool.Commands.Modding
                 return resource;
 
             var resourceStream = new MemoryStream();
-            modPack.Resources.Decompress(modPack.ResourcesStream, resource.Page.Index, resource.Page.CompressedBlockSize, resourceStream);
+            var resourceCache = ModCache.ResourceCaches.GetResourceCache(ResourceLocation.Mods);
+            resourceCache.Decompress(modPack.ResourcesStream, resource.Page.Index, resource.Page.CompressedBlockSize, resourceStream);
             resourceStream.Position = 0;
             resource.ChangeLocation(ResourceLocation.ResourcesB);
             resource.Page.OldFlags &= ~OldRawPageFlags.InMods;
-            CacheContext.ResourceCaches.AddResource(resource, resourceStream);
+            BaseCache.ResourceCaches.AddResource(resource, resourceStream);
 
             return resource;
         }
 
         private IList ConvertCollection(ModPackage modPack, IList collection)
         {
-            // return early where possible
             if (collection is null || collection.Count == 0)
                 return collection;
 
@@ -300,7 +347,7 @@ namespace TagTool.Commands.Modding
 
         private T ConvertStructure<T>(ModPackage modPack, T data) where T : TagStructure
         {
-            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), CacheContext.Version))
+            foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(data.GetType(), BaseCache.Version, BaseCache.Platform))
             {
                 var oldValue = tagFieldInfo.GetValue(data);
 
@@ -316,11 +363,11 @@ namespace TagTool.Commands.Modding
 
         private ForgeGlobalsDefinition ConvertForgeGlobals(ForgeGlobalsDefinition forg)
         {
-            var currentForgTag = CacheContext.GetTag<ForgeGlobalsDefinition>("multiplayer\\forge_globals");
-            var currentForg = (ForgeGlobalsDefinition)CacheContext.Deserialize(CacheStream, currentForgTag);
+            var currentForgTag = BaseCache.TagCache.GetTag<ForgeGlobalsDefinition>("multiplayer\\forge_globals");
+            var currentForg = (ForgeGlobalsDefinition)BaseCache.Deserialize(CacheStream, currentForgTag);
 
             // hardcoded base indices:
-            int[] baseBlockCounts = new int[] { 0, 15, 173, 6, 81, 468, 9, 12 };
+            int[] baseBlockCounts = new int[] { 0, 20, 173, 6, 83, 498, 9, 12 };
 
             for (int i = baseBlockCounts[0]; i < forg.ReForgeMaterialTypes.Count; i++)
                 currentForg.ReForgeMaterialTypes.Add(forg.ReForgeMaterialTypes[i]);
@@ -350,20 +397,20 @@ namespace TagTool.Commands.Modding
             currentForg.InvisibleRenderMethod = forg.InvisibleRenderMethod;
             currentForg.DefaultRenderMethod = forg.DefaultRenderMethod;
             currentForg.PrematchCameraObject = forg.PrematchCameraObject;
+            currentForg.PostmatchObject = forg.PostmatchObject;
             currentForg.ModifierObject = forg.ModifierObject;
             currentForg.KillVolumeObject = forg.KillVolumeObject;
             currentForg.GarbageVolumeObject = forg.GarbageVolumeObject;
+            currentForg.FxObject = forg.FxObject;
+            currentForg.FxLight = forg.FxLight;
 
             return currentForg;
         }
 
         private Scenario ConvertScenario(ModPackage modPack, Scenario scnr)
         {
-
             foreach (var expr in scnr.ScriptExpressions)
-            {
                 ConvertScriptExpression(modPack, expr);
-            }
 
             return scnr;
         }
@@ -376,6 +423,7 @@ namespace TagTool.Commands.Modding
         public void ConvertScriptExpressionData(ModPackage modPack, HsSyntaxNode expr)
         {
             if (expr.Flags == HsSyntaxNodeFlags.Expression)
+            {
                 switch (expr.ValueType.HaloOnline)
                 {
                     case HsType.HaloOnlineValue.Sound:
@@ -397,10 +445,15 @@ namespace TagTool.Commands.Modding
                     case HsType.HaloOnlineValue.AnyTagNotResolving:
                         ConvertScriptTagReferenceExpressionData(modPack, expr);
                         return;
+
+                    case HsType.HaloOnlineValue.AiLine when BitConverter.ToInt32(expr.Data, 0) != -1:
+                    case HsType.HaloOnlineValue.StringId:
+                        ConvertScriptStringIdExpressionData(modPack, expr);
+                        return;
                     default:
                         break;
                 }
-
+            }
         }
 
         public void ConvertScriptTagReferenceExpressionData(ModPackage modPack, HsSyntaxNode expr)
@@ -410,8 +463,20 @@ namespace TagTool.Commands.Modding
             if (tagIndex == -1)
                 return;
 
-            var tag = ConvertCachedTagInstance(modPack, modPack.TagCaches[0].Tags[tagIndex]);
+            var tag = ConvertCachedTagInstance(modPack, ModCache.TagCacheGenHO.Tags[tagIndex]);
             expr.Data = BitConverter.GetBytes(tag.Index).ToArray();
+        }
+
+        public void ConvertScriptStringIdExpressionData(ModPackage modPack, HsSyntaxNode expr)
+        {
+            StringId modStringId = new StringId(BitConverter.ToUInt32(expr.Data.ToArray(), 0));
+
+            // if string is invalid, don't convert
+            if (modPack.StringTable.GetString(modStringId) == null)
+                return;
+
+            var edStringId = ConvertStringId(modPack, modStringId);
+            expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();
         }
     }
 }

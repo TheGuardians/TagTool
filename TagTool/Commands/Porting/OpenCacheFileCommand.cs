@@ -1,5 +1,5 @@
 using TagTool.Cache;
-using TagTool.IO;
+using TagTool.Commands.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +28,7 @@ namespace TagTool.Commands.Porting
         public override object Execute(List<string> args)
         {
             if (args.Count < 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             while (args.Count > 1)
             {
@@ -38,7 +38,7 @@ namespace TagTool.Commands.Porting
                         break;
 
                     default:
-                        throw new FormatException(args[0]);
+                        return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
                 }
 
                 args.RemoveAt(0);
@@ -48,19 +48,36 @@ namespace TagTool.Commands.Porting
 
             if (!fileName.Exists)
             {
-                Console.WriteLine($"Cache {fileName.FullName} does not exist");
+                new TagToolError(CommandError.CustomError, $"Cache \"{fileName.FullName}\" does not exist.");
                 return true;
             }
                 
             Console.Write("Loading cache...");
 
-            GameCache blamCache = GameCache.Open(fileName);
+            var blamCache = GetCache(fileName);
+            if (blamCache == null)
+                return false;
 
-            ContextStack.Push(PortingContextFactory.Create(ContextStack, Cache, blamCache));
+            ContextStack.Push(PortingContextFactory.Create(ContextStack, Cache, (GameCache)blamCache));
 
             Console.WriteLine("done.");
 
             return true;
+        }
+
+        private object GetCache(FileInfo fileName)
+        {
+            if (fileName.Extension == ".pak")
+            {
+                if (Cache is GameCacheModPackage)
+                    return new GameCacheModPackage(((GameCacheModPackage)Cache).BaseCacheReference, fileName, true);
+                else if (Cache is GameCacheHaloOnlineBase)
+                    return new GameCacheModPackage((GameCacheHaloOnlineBase)Cache, fileName, true);
+                else
+                    return new TagToolError(CommandError.OperationFailed, "Mod package porting only allowed on ED base cache or mod package caches!");
+            }
+            else
+                return GameCache.Open(fileName);
         }
     }
 }

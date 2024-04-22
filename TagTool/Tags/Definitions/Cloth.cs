@@ -11,8 +11,11 @@ namespace TagTool.Tags.Definitions
 	{
         public ClothFlags Flags;
         public StringId MarkerAttachmentName;
-        public StringId SecondMarkerAttachmentName;
+        public StringId SecondaryAxisAttachmentName;
+
+        [TagField(ValidTags = new[] { "rmsh" })]
         public CachedTag Shader;
+
         public short GridXDimension;
         public short GridYDimension;
         public float GridSpacingX;
@@ -20,8 +23,8 @@ namespace TagTool.Tags.Definitions
         public List<CollisionSphere> CollisionSpheres;
         public ClothProperties Properties;
         public List<Vertex> Vertices;
-        public List<short> Indices;
-        public List<short> StripIndices;
+        public List<ClothIndex> Indices;
+        public List<ClothIndex> StripIndices;
         public List<Link> Links;
 
         [TagStructure(Size = 0x8)]
@@ -35,7 +38,7 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14)]
         public class Vertex : TagStructure
 		{
-            public RealPoint3d Position;
+            public RealPoint3d InitialPosition;
             public RealVector2d Uv;
         }
         
@@ -45,6 +48,12 @@ namespace TagTool.Tags.Definitions
             public short Index1;
             public short Index2;
             public float DefaultDistance;
+        }
+
+        [TagStructure(Size = 0x2)]
+        public class ClothIndex : TagStructure
+        {
+            public short Index;
         }
     }
 
@@ -65,14 +74,14 @@ namespace TagTool.Tags.Definitions
     public class ClothProperties : TagStructure
 	{
         public ClothIntegrationType IntegrationType;
-        public short NumberIterations;
-        public float Weight;
-        public float Drag;
-        public float WindScale;
-        public float WindFlappinessScale;
-        public float LongestRod;
+        public short NumberIterations; // [1-8] sug 1
+        public float Weight; // [-10.0 - 10.0] sug 1.0
+        public float Drag; // [0.0 - 0.5] sug 0.07
+        public float WindScale; // [0.0 - 3.0] sug 1.0
+        public float WindFlappinessScale; // [0.0 - 1.0] sug 0.75
+        public float LongestRod; // [1.0 - 10.0] sug 3.5
 
-        [TagField(Flags = Padding, Length = 24)]
-        public byte[] Unused;
+        [TagField(Flags = TagFieldFlags.Padding, Length = 24)]
+        public byte[] Padding;
     }
 }

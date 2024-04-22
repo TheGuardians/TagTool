@@ -8,7 +8,7 @@ namespace TagTool.Bitmaps
 {
     public class BitmapInjector
     {
-        public static BitmapTextureInteropResource CreateBitmapResourceFromDDS(GameCache cache, DDSFile file)
+        public static BitmapTextureInteropResource CreateBitmapResourceFromDDS(GameCache cache, DDSFile file, BitmapImageCurve curve)
         {
             BitmapTextureInteropResource result = BitmapUtils.CreateEmptyBitmapTextureInteropResource();
 
@@ -16,7 +16,7 @@ namespace TagTool.Bitmaps
             {
                 // TODO: for cubemaps, fix mipmap order to d3d9 expected order
                 result.Texture.Definition.PrimaryResourceData = new TagData(file.BitmapData);
-                result.Texture.Definition.Bitmap = BitmapUtils.CreateBitmapTextureInteropDefinition(file.Header);
+                result.Texture.Definition.Bitmap = BitmapUtils.CreateBitmapTextureInteropDefinition(file.Header, curve);
             }
             else if(cache.GetType() == typeof(GameCacheGen3))
             {

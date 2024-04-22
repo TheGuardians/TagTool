@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
-using TagTool.Tags.Definitions;
 using TagTool.Commands.Common;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Strings
 {
@@ -17,9 +17,9 @@ namespace TagTool.Commands.Strings
             "ListAllStrings",
             "Scan unic tags to find a localized string",
 
-            "ListAllStrings <language> [filter]",
+            "ListAllStrings [language] [filter]",
 
-            "Scans all unic tags to find the strings belonging to a language.\n" +
+            "Scans all unic tags to find the strings belonging to a language (default = english).\n" +
             "If a filter is specified, only strings containing the filter will be listed.\n" +
             "\n" +
             "Available languages:\n" +
@@ -32,13 +32,28 @@ namespace TagTool.Commands.Strings
         
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1 && args.Count != 2)
-                return false;
+            GameLanguage language = GameLanguage.English;
+            string filter = null;
 
-            if (!ArgumentParser.TryParseEnum(args[0], out GameLanguage language))
-                return false;
+            switch (args.Count)
+            {
+                case 1:
+                    if (!ArgumentParser.TryParseEnum(args[0], out language))
+                        filter = args[0];
+                    break;
+                case 2:
+                    {
+                        if (!ArgumentParser.TryParseEnum(args[0], out language))
+                            return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
+                        filter = args[1];
+                    }
+                    break;
+                case 0:
+                    break;
+                default:
+                    return new TagToolError(CommandError.ArgCount);
+            }
 
-            var filter = (args.Count == 2) ? args[1] : null;
             var found = false;
 
             using (var stream = Cache.OpenCacheRead())
@@ -51,10 +66,7 @@ namespace TagTool.Commands.Strings
                     if (strings.Count == 0)
                         continue;
 
-                    if (found)
-                        Console.WriteLine();
-
-                    Console.WriteLine("Strings found in {0:X8}.unic:", unicTag.Index);
+                    Console.WriteLine($"\nStrings found in {unicTag.Name}.unic:");
                     LocalizedStringPrinter.PrintStrings(strings);
 
                     found = true;
@@ -62,7 +74,7 @@ namespace TagTool.Commands.Strings
             }
 
             if (!found)
-                Console.Error.WriteLine("No strings found.");
+                Console.WriteLine("No strings found.");
 
             return true;
         }

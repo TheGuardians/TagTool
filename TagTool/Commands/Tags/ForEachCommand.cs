@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Commands.Editing;
 using TagTool.Common;
 using System.IO;
@@ -20,9 +21,10 @@ namespace TagTool.Commands.Tags
                 "ForEach",
                 "Executes a command on every instance of the specified tag group.",
                 
-                "ForEach [Const] <Tag Group> [Named: <Regex>] <Command...>",
+                "ForEach [Const] <Tag Group> [<Filter> <Term>] <Command...>",
                 
-                "Executes a command on every instance of the specified tag group.")
+                "Executes a command on every instance of the specified tag group." +
+                "\nCommon Filters: \"named\", \"startingwith\", \"endingwith\", \"in_file:\", \"regex:\"")
         {
             ContextStack = contextStack;
             Cache = cache;
@@ -31,9 +33,13 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count < 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var isConst = false;
+
+            //set const by default for other caches
+            if (!CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, Cache.Version))
+                isConst = true;
 
             if (args[0].ToLower() == "const")
             {
@@ -42,13 +48,9 @@ namespace TagTool.Commands.Tags
             }
 
             if (args.Count < 1)
-                return false;
-
-            if (!Cache.TryParseGroupTag(args[0], out var groupTag))
-            {
-                Console.WriteLine($"Invalid tag group: {args[0]}");
-                return true;
-            }
+                return new TagToolError(CommandError.ArgCount);
+            if (!Cache.TagCache.TryParseGroupTag(args[0], out var groupTag))
+                return new TagToolError(CommandError.CustomError, $"Invalid group tag \"{args[0]}\"");
 
             args.RemoveAt(0);
 
@@ -58,8 +60,9 @@ namespace TagTool.Commands.Tags
             var filename = "";
 
             string pattern = null;
+            string[] otherFilters = new string[] { "startingwith", "endingwith", "named", "containing"};
 
-            while (args.Count > 0 && args[0].EndsWith(":"))
+            while (args.Count > 0 && (args[0].EndsWith(":") || otherFilters.Contains(args[0])) )
             {
                 switch (args[0].ToLower())
                 {
@@ -78,6 +81,7 @@ namespace TagTool.Commands.Tags
                     case "startswith:":
                     case "starts_with:":
                     case "starting:":
+                    case "startingwith":
                     case "startingwith:":
                     case "starting_with:":
                     case "start_filter:":
@@ -88,6 +92,7 @@ namespace TagTool.Commands.Tags
 
                     case "ends:":
                     case "ending:":
+                    case "endingwith":
                     case "endingwith:":
                     case "ending_with:":
                     case "endswith:":
@@ -98,9 +103,11 @@ namespace TagTool.Commands.Tags
                         args.RemoveRange(0, 2);
                         break;
 
+                    case "named":
                     case "named:":
                     case "filter:":
                     case "contains:":
+                    case "containing":
                     case "containing:":
                         filter = args[1];
                         args.RemoveRange(0, 2);
@@ -132,7 +139,7 @@ namespace TagTool.Commands.Tags
             {
                 var tagsList = new List<CachedTag>();
                 foreach (var line in File.ReadAllLines(filename))
-                    tags.Add(Cache.GetTag(line));
+                    tags.Add(Cache.TagCache.GetTag(line));
 
                 tags = tagsList;
             }
@@ -142,7 +149,6 @@ namespace TagTool.Commands.Tags
             }
 
             var rootContext = ContextStack.Context;
-
 
             foreach (var instance in tags)
             {
@@ -168,25 +174,39 @@ namespace TagTool.Commands.Tags
                 using (var stream = Cache.OpenCacheRead())
                     definition = Cache.Deserialize(stream, instance);
 
-
                 ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, instance, definition));
 
                 Console.WriteLine();
-                Console.WriteLine($"{tagName}.{Cache.StringTable.GetString(instance.Group.Name)}:");
-                ContextStack.Context.GetCommand(args[0]).Execute(args.Skip(1).ToList());
+                Console.WriteLine($"{tagName}.{instance.Group}:");
+                foreach (var commandToExecute in commandsToExecute)
+                {
+                    var currentCommand = ContextStack.Context.GetCommand(commandToExecute[0]);
 
-                while (ContextStack.Context != rootContext) ContextStack.Pop();
+                    if (currentCommand != null)
+                        currentCommand.Execute(commandToExecute.Skip(1).ToList());
+                    else
+                    {
+                        ContextReturn(rootContext);
+                        return new TagToolError(CommandError.CustomError, "The command to execute could not be found... You may have made a typo.");
+                    }
+                }
+
+                ContextReturn(rootContext);
 
                 if (!isConst)
                 {
                     using (var stream = Cache.OpenCacheReadWrite())
                         Cache.Serialize(stream, instance, definition);
                 }
-
             }
 
             Console.WriteLine();
             return true;
+        }
+
+        public void ContextReturn(CommandContext previousContext)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
         }
     }
 }

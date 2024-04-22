@@ -1,4 +1,5 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Shaders;
 using TagTool.Tags.Definitions;
 using System;
@@ -35,9 +36,7 @@ namespace TagTool.Commands.Shaders
 		public override object Execute(List<string> args)
 		{
 			if (args.Count < 2)
-				return false;
-
-
+                return new TagToolError(CommandError.ArgCount);
 
             bool use_assembly_compiler = args.Count >= 2 && args[0].ToLower() == "asm";
             string file = args[args.Count - 1];
@@ -98,7 +97,7 @@ namespace TagTool.Commands.Shaders
                 {
                     var _definition = Definition as PixelShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCConstantTable.Constants = existing_block.PCConstantTable.Constants;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
@@ -107,7 +106,7 @@ namespace TagTool.Commands.Shaders
                 {
                     var _definition = Definition as GlobalPixelShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCConstantTable.Constants = existing_block.PCConstantTable.Constants;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
@@ -125,7 +124,7 @@ namespace TagTool.Commands.Shaders
                 {
                     var _definition = Definition as VertexShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCConstantTable.Constants = existing_block.PCConstantTable.Constants;
 
                     _definition.Shaders[index] = shader_data_block;
                 }
@@ -134,7 +133,7 @@ namespace TagTool.Commands.Shaders
                 {
                     var _definition = Definition as GlobalVertexShader;
                     var existing_block = _definition.Shaders[index];
-                    shader_data_block.PCParameters = existing_block.PCParameters;
+                    shader_data_block.PCConstantTable = existing_block.PCConstantTable;
 
 
                     _definition.Shaders[index] = shader_data_block;

@@ -35,10 +35,9 @@ namespace TagTool.Commands.Unicode
         public override object Execute(List<string> args)
         {
             if (args.Count != 1 && args.Count != 2)
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
             if (!ArgumentParser.TryParseEnum(args[0], out GameLanguage language))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             var filter = (args.Count == 2) ? args[1] : null;
             var strings = LocalizedStringPrinter.PrepareForDisplay(Definition, Cache.StringTable, Definition.Strings, language, filter);
@@ -46,7 +45,7 @@ namespace TagTool.Commands.Unicode
             if (strings.Count > 0)
                 LocalizedStringPrinter.PrintStrings(strings);
             else
-                Console.WriteLine("No strings found.");
+                Console.WriteLine("No strings found");
             
             return true;
         }

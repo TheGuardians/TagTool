@@ -63,7 +63,7 @@ namespace TagTool.Tools.Geometry
         public void SerializeToFile(EndianWriter writer)
         {
             var context = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            var serializer = new TagSerializer(CacheVersion.HaloOnlineED, CachePlatform.Original);
 
             writer.BaseStream.Position = Constants.HeaderSize;
             context.PointerOffset = Constants.HeaderSize;
@@ -138,13 +138,13 @@ namespace TagTool.Tools.Geometry
 
             // set lighting
 
-            mode.UnknownSHProbes = new List<RenderModel.UnknownSHProbe>();
+            mode.VolumeSamples = new List<RenderModel.VolumeSamplesBlock>();
             mode.SHBlue = DefaultLighting.SHBlue;
             mode.SHRed = DefaultLighting.SHRed;
             mode.SHGreen = DefaultLighting.SHGreen;
             foreach (var lightProbe in LightProbes)
             {
-                mode.UnknownSHProbes.Add(new RenderModel.UnknownSHProbe
+                mode.VolumeSamples.Add(new RenderModel.VolumeSamplesBlock
                 {
                     Position = lightProbe.Position,
                     Coefficients = lightProbe.Coefficients
@@ -296,7 +296,7 @@ namespace TagTool.Tools.Geometry
 
             LightProbes = new List<BMFLightProbe>();
 
-            foreach (var lightProbe in mode.UnknownSHProbes)
+            foreach (var lightProbe in mode.VolumeSamples)
             {
                 LightProbes.Add(new BMFLightProbe
                 {
@@ -337,17 +337,17 @@ namespace TagTool.Tools.Geometry
 
                         foreach (var part in mesh.Parts)
                         {
-                            indexStream.Position = part.FirstIndexOld;
+                            indexStream.Position = part.FirstIndex;
                             ushort[] indices = new ushort[0];
                             vertexCount += part.VertexCount;
 
                             switch (indexBuffer.Format)
                             {
                                 case IndexBufferFormat.TriangleList:
-                                    indices = indexStream.ReadIndices(part.IndexCountOld);
+                                    indices = indexStream.ReadIndices(part.IndexCount);
                                     break;
                                 case IndexBufferFormat.TriangleStrip:
-                                    indices = indexStream.ReadTriangleStrip(part.IndexCountOld);
+                                    indices = indexStream.ReadTriangleStrip(part.IndexCount);
                                     break;
                                 default:
                                     throw new InvalidOperationException("Unsupported index buffer type: " + indexBuffer.Format);
@@ -375,13 +375,13 @@ namespace TagTool.Tools.Geometry
                 {
                     var vertexBuffer = mesh.ResourceVertexBuffers[0];
                     var vertexCompressor = new VertexCompressor(mode.Geometry.Compression[0]);
-                    geometryMesh.Vertices = ConvertGeometryVertices(vertexCompressor, vertexBuffer, cache.Version, vertexCount, mesh.RigidNodeIndex);
+                    geometryMesh.Vertices = ConvertGeometryVertices(vertexCompressor, vertexBuffer, cache.Version, cache.Platform, vertexCount, mesh.RigidNodeIndex);
                 }
 
                 if (mesh.ResourceVertexBuffers[3] != null)
                 {
                     var vertexBuffer = mesh.ResourceVertexBuffers[3];
-                    geometryMesh.PerVertexLighting = ConvertLightingVertices(vertexBuffer, cache.Version, vertexCount);
+                    geometryMesh.PerVertexLighting = ConvertLightingVertices(vertexBuffer, cache.Version, cache.Platform, vertexCount);
                 }
 
                 Meshes.Add(geometryMesh);
@@ -401,13 +401,17 @@ namespace TagTool.Tools.Geometry
             return stringId;
         }
 
-        private static List<BMFVertex> ConvertGeometryVertices(VertexCompressor vertexCompressor, VertexBufferDefinition vertexBuffer, CacheVersion version, int vertexCount, int rigidNodeIndex)
+        private static List<BMFVertex> ConvertGeometryVertices(VertexCompressor vertexCompressor, VertexBufferDefinition vertexBuffer, CacheVersion version, CachePlatform platform, int vertexCount, int rigidNodeIndex)
         {
             var vertices = new List<BMFVertex>();
 
             using (var vertexDataStream = new MemoryStream(vertexBuffer.Data.Data))
             {
-                var vertexStream = VertexStreamFactory.Create(version, vertexDataStream);
+                var vertexStream = VertexStreamFactory.Create(version, platform, vertexDataStream);
+
+                VertexStreamReach reachVertexStream = null;
+                if (version >= CacheVersion.HaloReach)
+                    reachVertexStream = (VertexStreamReach)vertexStream;
 
                 for (int j = 0; j < vertexCount; j++)
                 {
@@ -450,6 +454,42 @@ namespace TagTool.Tools.Geometry
                                 vertex.Weights[i] = new BMFVertexWeight { NodeIndex = skinned.BlendIndices[i], Weight = skinned.BlendWeights[i] };
                             }
                             break;
+                       
+                        case VertexBufferFormat.RigidCompressed:
+                            var compressedRigid = reachVertexStream.ReadReachRigidVertex();
+
+                            vertex.Position = vertexCompressor.DecompressPosition(compressedRigid.Position).IJK;
+                            texcoordTemp = vertexCompressor.DecompressUv(compressedRigid.Texcoord);
+                            vertex.Texcoord = new RealVector3d(texcoordTemp.I, texcoordTemp.J, 0.0f);
+                            vertex.Normal = compressedRigid.Normal;
+                            vertex.Tangent = compressedRigid.Tangent.IJK;
+                            vertex.Binormal = compressedRigid.Binormal;
+
+                            vertex.Weights[0] = new BMFVertexWeight { NodeIndex = rigidNodeIndex, Weight = 1.0f };
+
+                            for (int i = 1; i < 4; i++)
+                            {
+                                vertex.Weights[i] = new BMFVertexWeight();
+                            }
+
+                            break;
+
+                        case VertexBufferFormat.SkinnedCompressed:
+                            var compressedSkinned = reachVertexStream.ReadReachSkinnedVertex();
+
+                            vertex.Position = vertexCompressor.DecompressPosition(compressedSkinned.Position).IJK;
+                            texcoordTemp = vertexCompressor.DecompressUv(compressedSkinned.Texcoord);
+                            vertex.Texcoord = new RealVector3d(texcoordTemp.I, texcoordTemp.J, 0.0f);
+                            vertex.Normal = compressedSkinned.Normal;
+                            vertex.Tangent = compressedSkinned.Tangent.IJK;
+                            vertex.Binormal = compressedSkinned.Binormal;
+
+                            for (int i = 0; i < 4; i++)
+                            {
+                                vertex.Weights[i] = new BMFVertexWeight { NodeIndex = compressedSkinned.BlendIndices[i], Weight = compressedSkinned.BlendWeights[i] };
+                            }
+                            break;
+
                         default:
                             throw new InvalidOperationException("Unsupported vertex buffer type: " + vertexBuffer.Format);
                     }
@@ -461,13 +501,13 @@ namespace TagTool.Tools.Geometry
             return vertices;
         }
 
-        private static List<BMFVertexLighting> ConvertLightingVertices(VertexBufferDefinition vertexBuffer, CacheVersion version, int vertexCount)
+        private static List<BMFVertexLighting> ConvertLightingVertices(VertexBufferDefinition vertexBuffer, CacheVersion version, CachePlatform platform, int vertexCount)
         {
             var vertices = new List<BMFVertexLighting>();
 
             using (var vertexDataStream = new MemoryStream(vertexBuffer.Data.Data))
             {
-                var vertexStream = VertexStreamFactory.Create(version, vertexDataStream);
+                var vertexStream = VertexStreamFactory.Create(version, platform, vertexDataStream);
 
                 for (int j = 0; j < vertexCount; j++)
                 {
@@ -606,7 +646,7 @@ namespace TagTool.Tools.Geometry
         [TagField(Length = Constants.StringLength, ForceNullTerminated = true)]
         public string Name;
 
-        public Mesh.Part.PartTypeNew DrawType = Mesh.Part.PartTypeNew.OpaqueShadowCasting;
+        public Part.PartTypeNew DrawType = Part.PartTypeNew.OpaqueShadowCasting;
 
         [TagField(Flags = TagFieldFlags.Padding, Length = 3)]
         public byte[] Padding;

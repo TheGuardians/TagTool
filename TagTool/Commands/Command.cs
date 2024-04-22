@@ -15,13 +15,17 @@ namespace TagTool.Commands
         /// <param name="description">The command's description.</param>
         /// <param name="usage">The command's usage string.</param>
         /// <param name="helpMessage">The command's help message.</param>
-        protected Command(bool inherit, string name, string description, string usage, string helpMessage)
+        /// <param name="ignoreVars">The command's argument variable policy.</param>
+		/// <param name="examples">Examples of the command's usage.</param>
+        protected Command(bool inherit, string name, string description, string usage, string helpMessage = "", bool ignoreVars = false, string examples = "")
         {
             Name = name;
             Description = description;
             Usage = usage;
             HelpMessage = helpMessage;
+			Examples = examples;	
             Inherit = inherit;
+            IgnoreArgumentVariables = ignoreVars;
         }
 
         /// <summary>
@@ -45,9 +49,19 @@ namespace TagTool.Commands
         public string HelpMessage { get; private set; }
 
         /// <summary>
+        /// Gets the command's examples.
+        /// </summary>
+        public string Examples { get; private set; }
+
+        /// <summary>
         /// Gets the command's flags.
         /// </summary>
         public bool Inherit { get; private set; }
+
+        /// <summary>
+        /// Gets the command's argument variable policy.
+        /// </summary>
+        public bool IgnoreArgumentVariables { get; private set; }
 
         /// <summary>
         /// Executes the command.

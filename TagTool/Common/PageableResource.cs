@@ -121,6 +121,12 @@ namespace TagTool.Common
             }
         }
 
+        public ResourceLocation GetLocation()
+        {
+            GetLocation(out ResourceLocation location);
+            return location;
+        }
+
         /// <summary>
         /// Gets the location of the resource by checking its location flags.
         /// </summary>
@@ -155,6 +161,12 @@ namespace TagTool.Common
                     location = ResourceLocation.ResourcesB;
                     return true;
                 }
+                if (Page.OldFlags.HasFlag(OldRawPageFlags.InMods))
+                {
+                    location = ResourceLocation.Mods;
+                    return true;
+                }
+
             }
             else if (Page.NewFlags != 0)
             {

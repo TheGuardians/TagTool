@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Shaders
 {
@@ -15,14 +16,14 @@ namespace TagTool.Commands.Shaders
                 "Specify the directory to your xsd.exe for xbox 360 shader decompiler",
 
                 "UseXSD <Directory>",
-                "")
+                "Specify the directory to your xsd.exe for xbox 360 shader decompiler")
         {
         }
 
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var directory = args[0];
 
@@ -32,14 +33,12 @@ namespace TagTool.Commands.Shaders
                 if (File.Exists(file))
                 {
                     XSDFileInfo = new FileInfo(file);
-                    Console.WriteLine("Stored location of xsd.exe sucessfully!");
+                    Console.WriteLine("Stored location of xsd.exe successfully!");
                     return true;
                 }
-
-
             }
-            Console.WriteLine("Failed to locate xsd.exe at the specified location");
-            return false;
+
+            return new TagToolError(CommandError.FileNotFound, $"Failed to locate xsd.exe in \"{directory}\"");
         }
     }
 }

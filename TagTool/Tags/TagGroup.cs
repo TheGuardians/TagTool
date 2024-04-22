@@ -1,72 +1,39 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using TagTool.Common;
 
 namespace TagTool.Tags
 {
-    /// <summary>
-    /// Describes the type of data in a tag.
-    /// </summary>
-    [TagStructure(Size = 0x10)]
     public class TagGroup : TagStructure, IEquatable<TagGroup>
     {
-        /// <summary>
-        /// Gets the group's tag. Can be -1.
-        /// </summary>
         public Tag Tag;
-
-        /// <summary>
-        /// Gets the parent group's tag. Can be -1.
-        /// </summary>
         public Tag ParentTag;
+        public Tag GrandParentTag;
 
-        /// <summary>
-        /// Gets the grandparent group's tag. Can be -1.
-        /// </summary>
-        public Tag GrandparentTag;
+        public TagGroup() : this(Tag.Null, Tag.Null, Tag.Null){}
 
-        /// <summary>
-        /// Gets the group's name stringID.
-        /// </summary>
-        public StringId Name;
-
-        /// <summary>
-        /// Represents a "null" tag group.
-        /// </summary>
-        public static readonly TagGroup None = new TagGroup(new Tag(-1), new Tag(-1), new Tag(-1), StringId.Invalid);
-
-        /// <summary>
-        /// A dictionary of available tag groups.
-        /// </summary>
-        public static Dictionary<Tag, TagGroup> Instances { get; set; }
-
-        /// <summary>
-        /// Constructs an empty tag group description.
-        /// </summary>
-        public TagGroup()
-            : this(Tag.Null, Tag.Null, Tag.Null, StringId.Invalid)
-        {
-        }
-
-        /// <summary>
-        /// Constructs a new tag group description.
-        /// </summary>
-        /// <param name="tag">The group's tag.</param>
-        /// <param name="parentTag">The parent group's tag. Can be -1.</param>
-        /// <param name="grandparentTag">The grandparent group's tag. Can be -1.</param>
-        /// <param name="name">The group's name stringID.</param>
-        public TagGroup(Tag tag, Tag parentTag, Tag grandparentTag, StringId name)
+        public TagGroup(Tag tag, Tag parentTag, Tag grandparentTag)
         {
             Tag = tag;
             ParentTag = parentTag;
-            GrandparentTag = grandparentTag;
-            Name = name;
+            GrandParentTag = grandparentTag;
+        }
 
-            if (Instances == null)
-                Instances = new Dictionary<Tag, TagGroup>();
+        public TagGroup(Tag tag, Tag parentTag)
+        {
+            Tag = tag;
+            ParentTag = parentTag;
+            GrandParentTag = Tag.Null;
+        }
 
-            Instances[Tag] = this;
+        public TagGroup(Tag tag) 
+        {
+            Tag = tag;
+            ParentTag = Tag.Null;
+            GrandParentTag = Tag.Null;
         }
 
         /// <summary>
@@ -97,7 +64,7 @@ namespace TagTool.Tags
         public bool BelongsTo(params Tag[] groupTags)
         {
             foreach (var groupTag in groupTags)
-                if (Tag.Equals(groupTag) || ParentTag.Equals(groupTag) || GrandparentTag.Equals(groupTag))
+                if (Tag.Equals(groupTag) || ParentTag.Equals(groupTag) || GrandParentTag.Equals(groupTag))
                     return true;
 
             return false;
@@ -105,8 +72,10 @@ namespace TagTool.Tags
 
         public bool Equals(TagGroup other)
         {
-            return Tag == other.Tag && ParentTag == other.ParentTag && GrandparentTag == other.GrandparentTag &&
-                   Name == other.Name;
+            if (other == null)
+                return false;
+
+            return Tag == other.Tag && ParentTag == other.ParentTag && GrandParentTag == other.GrandParentTag;
         }
 
         public override bool Equals(object obj)
@@ -116,7 +85,7 @@ namespace TagTool.Tags
 
         public static bool operator ==(TagGroup lhs, TagGroup rhs)
         {
-            return lhs.Equals(rhs);
+            return EqualityComparer<TagGroup>.Default.Equals(lhs, rhs);
         }
 
         public static bool operator !=(TagGroup lhs, TagGroup rhs)
@@ -129,11 +98,17 @@ namespace TagTool.Tags
             var result = 13;
             result = result * 17 + Tag.GetHashCode();
             result = result * 17 + ParentTag.GetHashCode();
-            result = result * 17 + GrandparentTag.GetHashCode();
-            result = result * 17 + Name.GetHashCode();
+            result = result * 17 + GrandParentTag.GetHashCode();
             return result;
         }
 
         public override string ToString() => Tag.ToString();
+
+        public bool IsNull()
+        {
+            if (Tag.IsNull())
+                return true;
+            return false;
+        }
     }
 }

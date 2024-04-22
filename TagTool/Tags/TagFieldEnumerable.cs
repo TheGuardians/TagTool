@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Collections;
+using TagTool.Common;
+using TagTool.Commands.Common;
 
 namespace TagTool.Tags
 {
@@ -73,41 +75,105 @@ namespace TagTool.Tags
 				// Ensure that fields are in declaration order - GetFields does NOT guarantee 
 				foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly).OrderBy(i => i.MetadataToken))
 				{
-					var attr = TagStructure.GetTagFieldAttribute(type, field);
+					var attr = TagStructure.GetTagFieldAttribute(type, field, Info.Version, Info.CachePlatform);
 
-                    if (CacheVersionDetection.AttributeInCacheVersion(attr, Info.Version))
+                    if (CacheVersionDetection.TestAttribute(attr, Info.Version, Info.CachePlatform))
                     {
-                        CreateTagFieldInfo(field, attr, Info.Version, ref offset);
+						CreateTagFieldInfo(field, attr, Info.Version, Info.CachePlatform, ref offset);
                     }
 				}
 			}
+
+#if DEBUG
+			uint expectedSize = TagStructure.GetStructureSize(Info.Types[0], Info.Version, Info.CachePlatform);
+			if(Info.Structure.Align > 0)
+				offset = offset + (Info.Structure.Align - 1) & ~(Info.Structure.Align - 1);
+			if (Info.Structure.Align > 0)
+				expectedSize = expectedSize + (Info.Structure.Align - 1) & ~(Info.Structure.Align - 1);
+
+			var typename = Info.Types[0].FullName.Replace("TagTool.", "").Replace("Tags.Definitions.", "");
+			if (offset != expectedSize)
+				new TagToolWarning($"Bad Size. Version: {Info.Version}:{Info.CachePlatform}, Type: '{typename}', Expected: 0x{expectedSize:X}, Actual: 0x{offset:X}");
+#endif
 		}
 
-		/// <summary>
-		/// Creates and adds a <see cref="Tags.TagFieldInfo"/> to the <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/>.
-		/// </summary>
-		/// <param name="field">The <see cref="FieldInfo"/> to create the <see cref="Tags.TagFieldInfo"/> from.</param>
-		/// <param name="attribute">The <see cref="TagFieldAttribute"/> for the <see cref="Tags.TagFieldInfo"/>.</param>
-		/// <param name="targetVersion">The target <see cref="CacheVersion"/> the <see cref="Tags.TagFieldInfo"/> belongs to.</param>
-		/// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
-		private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, ref uint offset)
-		{
-			var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion);
+        /// <summary>
+        /// Creates and adds a <see cref="Tags.TagFieldInfo"/> to the <see cref="Tags.TagFieldInfo"/> <see cref="List{T}"/>.
+        /// </summary>
+        /// <param name="field">The <see cref="FieldInfo"/> to create the <see cref="Tags.TagFieldInfo"/> from.</param>
+        /// <param name="attribute">The <see cref="TagFieldAttribute"/> for the <see cref="Tags.TagFieldInfo"/>.</param>
+        /// <param name="targetVersion">The target <see cref="CacheVersion"/> the <see cref="Tags.TagFieldInfo"/> belongs to.</param>
+        /// <param name="cachePlatform"></param>
+        /// <param name="offset">The offset (in bytes) of the field. Gets updated to reflect the new offset following field.</param>
+        private void CreateTagFieldInfo(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform, ref uint offset)
+        {
+			ValidateField(field, attribute, targetVersion, cachePlatform);
 
-			if (fieldSize == 0 && !attribute.Flags.HasFlag(TagFieldFlags.Runtime))
-				throw new InvalidOperationException();
+            var fieldSize = TagFieldInfo.GetFieldSize(field.FieldType, attribute, targetVersion, cachePlatform);
 
-			var tagFieldInfo = new TagFieldInfo(field, attribute, offset, fieldSize);
-			TagFieldInfos.Add(tagFieldInfo);
-			offset += fieldSize;
-		}
+            if (fieldSize == 0 && !attribute.Flags.HasFlag(TagFieldFlags.Runtime))
+                throw new InvalidOperationException();
 
-		/// <summary>
-		/// Finds a <see cref="TagFieldInfo"/> based on a <see cref="FieldInfo"/> <see cref="Predicate{T}"/>.
-		/// </summary>
-		/// <param name="match">The <see cref="FieldInfo"/> <see cref="Predicate{T}"/> to query.</param>
-		/// <returns></returns>
-		public FieldInfo Find(Predicate<FieldInfo> match) =>
+            uint align = TagFieldInfo.GetFieldAlignment(field.FieldType, attribute, targetVersion, cachePlatform);
+            if (align > 0)
+                offset = offset + (align - 1) & ~(align - 1);
+
+            var tagFieldInfo = new TagFieldInfo(field, attribute, offset, fieldSize);
+            TagFieldInfos.Add(tagFieldInfo);
+            offset += fieldSize;
+        }
+        /// <summary>
+        /// Finds a <see cref="TagFieldInfo"/> based on a <see cref="FieldInfo"/> <see cref="Predicate{T}"/>.
+        /// </summary>
+        /// <param name="match">The <see cref="FieldInfo"/> <see cref="Predicate{T}"/> to query.</param>
+        /// <returns></returns>
+        public FieldInfo Find(Predicate<FieldInfo> match) =>
 			TagFieldInfos.Find(f => match.Invoke(f.FieldInfo))?.FieldInfo ?? null;
+
+		private static void ValidateField(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform)
+        {
+#if DEBUG
+			if(attribute.Flags.HasFlag(TagFieldFlags.Padding))
+            {
+				if (field.FieldType != typeof(byte[]))
+					new Exception("Padding fields must be of type Byte[]");
+            }
+            else
+            {
+				ValidateEnumRequiments(field, attribute, targetVersion, cachePlatform);
+			}
+#endif
+		}
+
+		private static void ValidateEnumRequiments(FieldInfo field, TagFieldAttribute attribute, CacheVersion targetVersion, CachePlatform cachePlatform)
+		{
+			if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(FlagBits<>))
+			{
+				var enumType = field.FieldType.GenericTypeArguments[0];
+				var info = TagEnum.GetInfo(enumType, targetVersion, cachePlatform);
+
+                if (!info.IsVersioned)
+					throw new Exception("FlagBits Enum must have a 'TagEnum' attribute with IsVersioned=True");
+                
+                if (attribute.EnumType == null)
+                    throw new Exception("FlagBits Enum must have the 'EnumType' TagField attribute set");
+
+				if (!VersionedEnum.IsSufficientStorageType(info.Type, attribute.EnumType, targetVersion, cachePlatform))
+					throw new Exception($"FlagBits  enum 'EnumType' TagField attribute is not large enough to store all the members for cache version: '{targetVersion}', platform: '{cachePlatform}'");
+			}
+			else if(field.FieldType.IsEnum)
+			{
+				var info = TagEnum.GetInfo(field.FieldType, targetVersion, cachePlatform);
+
+				if (info.IsVersioned)
+				{
+					if (attribute.EnumType == null)
+						throw new Exception("Versioned Enum must have the 'EnumType' TagField attribute set");
+
+					if (!VersionedEnum.IsSufficientStorageType(info.Type, attribute.EnumType, targetVersion, cachePlatform))
+						throw new Exception($"Versioned Enum 'EnumType' TagField attribute is not large enough to store all the members for cache version: '{targetVersion}', platform: '{cachePlatform}'");
+				}
+			}
+		}
 	}
 }

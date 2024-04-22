@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
-using TagTool.Serialization;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 
 namespace TagTool.Commands.Video
 {
-    class ExtractBinkFileCommand : Command
+    public class ExtractBinkFileCommand : Command
     {
         private GameCache Cache { get; }
         private CachedTag Tag { get; }
@@ -32,7 +31,7 @@ namespace TagTool.Commands.Video
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var binkFile = new FileInfo(args[0]);
             

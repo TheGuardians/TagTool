@@ -25,7 +25,7 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count != 0)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var depCounts = new Dictionary<int, int>();
 

@@ -45,14 +45,12 @@ namespace TagTool.Bitmaps.DDS
 
         public DDSHeader(Bitmap.Image image)
         {
-            var mipMapCount = image.MipmapCount != 0 ? (1 + image.MipmapCount) : 0;
-            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type);
+            CreateHeaderFromType(image.Height, image.Width, image.Depth, image.MipmapCount, image.Format, image.Type);
         }
 
         public DDSHeader(BaseBitmap image)
         {
-            var mipMapCount = image.MipMapCount != 0 ? (1 + image.MipMapCount) : 0;
-            CreateHeaderFromType(image.Height, image.Width, image.Depth, mipMapCount, image.Format, image.Type);
+            CreateHeaderFromType(image.Height, image.Width, image.Depth, image.MipMapCount, image.Format, image.Type);
         }
 
         public DDSHeader(uint width, uint height, uint depth, uint mipmapCount, BitmapFormat format, BitmapType type)
@@ -137,11 +135,9 @@ namespace TagTool.Bitmaps.DDS
                 case BitmapType.Array:
                     CreateHeaderVolume(mipMapCount, depth, format);
                     break;
-
                 case BitmapType.CubeMap:
                     CreateHeaderCubemap(mipMapCount, format);
                     break;
-
             }
 
             return;
@@ -150,16 +146,6 @@ namespace TagTool.Bitmaps.DDS
         private void CreateHeaderTexture2D(int mipMapCount, BitmapFormat format)
         {
             Depth = 0;
-
-            if (mipMapCount > 0)
-            {
-                MipMapCount = 1 + mipMapCount;
-                Flags |= DDSFlags.MipMapCount;
-                Caps |= DDSComplexityFlags.MipMap | DDSComplexityFlags.Complex;
-            }
-            else
-                MipMapCount = 0;
-
             SetTextureFormat(mipMapCount, format);
         }
 
@@ -176,34 +162,38 @@ namespace TagTool.Bitmaps.DDS
         {
             Caps |= DDSComplexityFlags.Complex;
             Caps2 |= DDSSurfaceInfoFlags.CubeMapAllFaces;
-
             SetTextureFormat(mipMapCount, format);
         }
 
         private void SetTextureFormat(int mipMapCount, BitmapFormat format)
         {
-            if (mipMapCount > 0)
+            if (mipMapCount > 1)
             {
                 MipMapCount = mipMapCount;
                 Flags |= DDSFlags.MipMapCount;
+                Caps |= DDSComplexityFlags.MipMap;
             }
             else
+            {
                 MipMapCount = 0;
+                Flags &= ~DDSFlags.MipMapCount;
+                Caps &= ~DDSComplexityFlags.MipMap;
+            }
 
             if (BitmapUtils.IsCompressedFormat(format))
             {
-                Flags |= DDSFlags.LinearSize;
                 int blockSize = BitmapFormatUtils.GetBlockSize(format);
                 int blockDimension = BitmapFormatUtils.GetBlockDimension(format);
                 var nearestWidth = blockDimension * ((Height + (blockDimension - 1)) / blockDimension);
                 var nearestHeight = blockDimension * ((Width + (blockDimension - 1)) / blockDimension); ;
                 PitchOrLinearSize = (nearestWidth * nearestHeight / 16) * blockSize;
+                Flags |= DDSFlags.LinearSize;
             }
             else
             {
-                Flags |= DDSFlags.Pitch;
                 int bitsPerPixel = BitmapFormatUtils.GetBitsPerPixel(format);
                 PitchOrLinearSize = (Width * bitsPerPixel + 7) / 8;
+                Flags |= DDSFlags.Pitch;
             }
 
             PixelFormat = new PixelFormat(format);
@@ -278,7 +268,7 @@ namespace TagTool.Bitmaps.DDS
                         break;
 
                     case BitmapFormat.A8Y8:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0x00FF; ABitMask = 0xFF00;
                         break;
 
@@ -288,22 +278,22 @@ namespace TagTool.Bitmaps.DDS
                         break;
 
                     case BitmapFormat.A1R5G5B5:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0x7C00; GBitMask = 0x03E0; BBitMask = 0x001F; ABitMask = 0x8000;
                         break;
 
                     case BitmapFormat.A4R4G4B4:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0xF000; GBitMask = 0x0F00; BBitMask = 0x00F0; ABitMask = 0x000F;
                         break;
 
                     case BitmapFormat.A4R4G4B4Font:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0xF000; GBitMask = 0x0F00; BBitMask = 0x00F0; ABitMask = 0x000F;
                         break;
 
                     case BitmapFormat.A8R8G8B8:
-                        Flags |= DDSPixelFormatFlags.RGB;
+                        Flags |= DDSPixelFormatFlags.RGBA;
                         RBitMask = 0x00FF0000; GBitMask = 0x0000FF00; BBitMask = 0x000000FF; ABitMask = 0xFF000000;
                         break;
 
@@ -324,6 +314,10 @@ namespace TagTool.Bitmaps.DDS
                     case BitmapFormat.A16B16G16R16F:
                         Flags |= DDSPixelFormatFlags.FourCC;
                         FourCC = 0x71;
+                        break;
+                    case BitmapFormat.A2R10G10B10:
+                        Flags |= DDSPixelFormatFlags.RGBA;
+                        RBitMask = 0x000003ff; GBitMask = 0x000ffc00; BBitMask = 0x3ff00000; ABitMask = 0xc0000000;
                         break;
                     default:
                         throw new Exception($"Unsupported bitmap format {format}");

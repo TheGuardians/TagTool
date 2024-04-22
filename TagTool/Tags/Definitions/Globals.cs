@@ -4,41 +4,51 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "globals", Tag = "matg", Size = 0x600, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x554, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x548, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x5AC, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x580, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x608, MaxVersion = CacheVersion.HaloOnline449175)]
-    [TagStructure(Name = "globals", Tag = "matg", Size = 0x618, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline571627)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x618, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline604673)]
     [TagStructure(Name = "globals", Tag = "matg", Size = 0x614, MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "globals", Tag = "matg", Size = 0x714, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
-    [TagStructure(Name = "globals", Tag = "matg", Size = 0x7A8, MinVersion = CacheVersion.HaloReachMCC0824)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x714, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "globals", Tag = "matg", Size = 0x7A8, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class Globals : TagStructure
 	{
-        [TagField(Flags = Padding, Length = 172)]
+        [TagField(Flags = Padding, Length = 172, Platform = CachePlatform.Original)]
+        [TagField(Flags = Padding, Length = 172, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public byte[] Unused;
 
         public GameLanguage Language;
 
-        public List<TagReferenceBlock> HavokObjectCleanupEffects;
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public int MCCUnknown;
 
+        [TagField(Length = 12, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public LanguagePack[] LanguagePacksMCC = new LanguagePack[12];
+
+        public List<HavokCleanupResource> HavokCleanupResources;
         public List<SoundGlobalsDefinition> SoundGlobals;
-
-        public List<AiGlobalsDatum> AiGlobalsOld;
+        public List<AiGlobalsDatum> AiGlobals;
 
         [TagField(ValidTags = new[] { "aigl" }, MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTag AiGlobals;
+        public CachedTag AiGlobalsTag;
 
         public List<DamageTableBlock> DamageTable;
 
-        public uint Unknown45;
-        public uint Unknown46;
-        public uint Unknown47;
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public uint Unknown;
+        // ?????? see List<GNullBlock> Empty in h3ek def. size = 0x0
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        public List<GNullBlock> Empty;
+        // ??????
 
-        public List<TagReferenceBlock> SoundsOld;
+        [TagField(ValidTags = new[] { "ldsc" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag LoadScreenGlobals;
 
+        public List<TagReferenceBlock> Sounds;
         public List<CameraGlobalsDefinition> Camera;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
@@ -52,38 +62,41 @@ namespace TagTool.Tags.Definitions
         public List<DifficultyBlock> Difficulty;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<UnknownBlock1> UnknownBlocks1;
+        public List<CoopDifficultyBlock> CoopDifficulty;
 
         public List<Grenade> Grenades;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<SoftBarrierProperty> SoftBarrierProperties;
 
-        public uint Unknown48;
-        public uint Unknown49;
-        public uint Unknown50;
+        // ?????? see List<GNullBlock> What in h3ek def. size = 0x0
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public List<GNullBlock> UnusedBlock;
 
         public List<InterfaceTagsBlock> InterfaceTags;
 
-        public uint Unknown51;
-        public uint Unknown52;
-        public uint Unknown53;
+        //should be public List<CheatWeapon> WeaponList;
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public List<CheatWeapon> CheatWeapons;
 
-        public uint Unknown54;
-        public uint Unknown55;
-        public uint Unknown56;
+        // ?????? supposed to be CheatPowerups but size doesn't match. should be 16 bytes
+        public List<CheatPowerup> CheatPowerups;
 
         public List<PlayerInformationBlock> PlayerInformation;
-
         public List<PlayerRepresentationBlock> PlayerRepresentation;
+
+        [TagField(Platform = CachePlatform.MCC, Version = CacheVersion.Halo3Retail)]
+        public List<PlayerRepresentationBlock> PlayerRepresentationDebug;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<PlayerCharacterType> PlayerCharacterTypes;
 
-        public List<FallingDamageBlock> FallingDamage;
+        public List<FallingDamageBlock> FallDamage;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownBlock> Unknown60;
+        public List<ShieldBoostBlock> ShieldBoost;
 
         public List<Material> Materials;
 
@@ -103,13 +116,20 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<ForgeColorBlock> ForgeColors;
 
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public List<CinematicsGlobals> CinematicGlobalsMCC;
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public List<CampaignMetagameGlobal> CampaignMetagameGlobalsMCC;
+
         [TagField(ValidTags = new[] { "gegl" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag GameEngineGlobals;
 
-        [TagField(ValidTags = new[] { "mulg" })]
+        [TagField(ValidTags = new[] { "mulg" }, Platform = CachePlatform.Original)]
+        [TagField(ValidTags = new[] { "mulg" }, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
         public CachedTag MultiplayerGlobals;
 
-        [TagField(ValidTags = new[] { "smdt" }, MinVersion = CacheVersion.Halo3ODST)]
+        [TagField(ValidTags = new[] { "smdt" }, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        [TagField(ValidTags = new[] { "smdt" }, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         public CachedTag SurvivalGlobals;
 
         [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -118,46 +138,80 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "motl" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag ObjectTypeList;
 
-        public List<CinematicAnchorBlock> CinematicAnchors;
-        public List<MetagameGlobal> MetagameGlobals;
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public List<CinematicsGlobals> CinematicGlobals;
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public List<CampaignMetagameGlobal> CampaignMetagameGlobals;
 
         [TagField(ValidTags = new[] { "gmeg" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag MedalGlobals;
 
-        [TagField(Length = 12)]
-        public LocaleGlobalsBlock[] LocaleGlobals = new LocaleGlobalsBlock[12];
+        [TagField(Length = 12, Align = 0x4, Platform = CachePlatform.Original)]
+        public LanguagePack[] LanguagePacks = new LanguagePack[12];
+
+        [TagField(Length = 12, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public LanguagePack[] LanguagePacksReachMCC = new LanguagePack[12];
+
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public StringId GlobalWaterMaterialMCC;
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public short GlobalWaterMaterialTypeMCC;
+        [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public short MCCUnknown_Short;
+
+        [TagField(ValidTags = new[] { "mulg" }, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public CachedTag MultiplayerGlobalsMCC;
+        [TagField(ValidTags = new[] { "smdt" }, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
+        public CachedTag SurvivalGlobalsMCC;
 
         [TagField(ValidTags = new[] { "rasg" })]
         public CachedTag RasterizerGlobals;
-
         [TagField(ValidTags = new[] { "cfxs" })]
-        public CachedTag DefaultCameraEffect;
+        public CachedTag DefaultCameraFxSettings;
 
-        [TagField(ValidTags = new[] { "pdm!" }, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "pdm!" }, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag PodiumDefinition;
 
         [TagField(ValidTags = new[] { "wind" })]
-        public CachedTag DefaultWind;
+        public CachedTag DefaultWindSettings;
 
         [TagField(ValidTags = new[] { "wxcg" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag WeatherGlobals;
 
         [TagField(ValidTags = new[] { "jpt!" })]
-        public CachedTag DefaultDamageEffect;
-
+        public CachedTag CollisionDamageEffect;
         [TagField(ValidTags = new[] { "cddf" })]
-        public CachedTag DefaultCollisionDamage;
+        public CachedTag CollisionDamage;
 
-        public StringId DefaultWaterMaterial;
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public StringId GlobalWaterMaterial;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public StringId UnknownMaterial;
+        public StringId GlobalAirMaterial;
 
-        public short UnknownGlobalMaterialIndex;
-        public short Unknown265;
+        [TagField(Platform = CachePlatform.Original)]
+        [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public short GlobalWaterMaterialIndex;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public short GlobalAirMaterialIndex;
+
+        [TagField(Length = 2, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        public byte[] Padding5;
 
         [TagField(ValidTags = new[] { "effg" })]
         public CachedTag EffectGlobals;
+
+        [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+        public CachedTag RenderObjectSkins;
+
+        [TagField(Version = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public float MCC_H3_Unknown;
+
+        // H3/ODST end of base
 
         [TagField(ValidTags = new[] { "hcfd" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag CollisionFilter;
@@ -166,7 +220,7 @@ namespace TagTool.Tags.Definitions
         public CachedTag GroundedFriction;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<UnknownBlock2> UnknownBlocks2;
+        public List<ActiveCamoGlobalsBlock> ActiveCamo;
 
         [TagField(ValidTags = new[] { "igpd" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag IncidentGlobals;
@@ -187,7 +241,7 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "achi" }, MinVersion = CacheVersion.Halo3ODST)]
         public CachedTag AchievementGlobals;
         
-        [TagField(ValidTags = new[] { "inpg" }, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(ValidTags = new[] { "inpg" }, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public CachedTag InputGlobals;
 
         [TagField(ValidTags = new[] { "avat" }, MinVersion = CacheVersion.HaloReach)]
@@ -196,36 +250,38 @@ namespace TagTool.Tags.Definitions
         public CachedTag PerformanceThrottleGlobals;
 
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<UnknownBlock3> UnknownBlocks3;
+        public List<GarbageCollectionBlock> GarbageCollection;
         [TagField(MinVersion = CacheVersion.HaloReach)]
-        public List<UnknownBlock4> UnknownBlocks4;
+        public List<GlobalCameraImpulseBlock> CameraImpulse;
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public List<Material> AlternateMaterials;
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        public float UnknownReachMCC;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown266;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown267;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown268;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown269;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public TagFunction Unknown270 = new TagFunction { Data = new byte[0] };
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown271;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown272;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown273;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown274;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public float Unknown275;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<DamageReportingType> DamageReportingTypes;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline571627)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline571627)]
         public uint Unknown276;
         
 		[TagStructure(Size = 0xC)]
@@ -250,6 +306,11 @@ namespace TagTool.Tags.Definitions
 			}
 		}
 
+        [TagStructure(Size = 0x0)]
+        public class GNullBlock : TagStructure
+        {
+        }
+
         [TagStructure(Size = 0x8, MinVersion = CacheVersion.HaloReach)]
         public class ThumbStickDeadZone : TagStructure
         {
@@ -263,87 +324,90 @@ namespace TagTool.Tags.Definitions
         public class PlayerControlBlock : TagStructure
 		{
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<UnknownBlock> UnknownBlocks1;
+            public List<UnknownBlockReach> UnknownBlocks1;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public List<UnknownBlock> UnknownBlocks2;
+            public List<UnknownBlockReach> UnknownBlocks2;
 
-            public float MagnetismFriction;
-            public float MagnetismAdhesion;
-            public float InconsequentialTargetScale;
+            public float CrosshairMagnetismFriction; // how much the crosshair slows over enemies
+            public float CrosshairMagnetismAdhesion; // how much the crosshair sticks to enemies
+            public float InconsequentialTargetScale; // scales magnetism level for inconsequential targets like infection forms
 
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown1;
+            public float PaddingUnused;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown2;
+            public float PaddingUnused1;
             [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown3;
+            public float PaddingUnused2;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline449175)]
-            public RealPoint2d CrosshairLocation;
+            public RealPoint2d CrosshairLocation; // -1..1, 0 is middle of the screen
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public RealPoint2d CrosshairLocation_Reach;
             [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
             public List<CrosshairLocationBlock> CrosshairLocations;
 
-            //Sprinting
+            //Running
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float SecondsToStart;
+            public float SprintStartDelay; // how long you must be pegged before you start sprinting
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float SecondsToFullSpeed;
+            public float SprintFullSpeedTime; // how long you must sprint before you reach top speed
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float DecayRate;
+            public float SprintDecayRate; // how fast being unpegged decays the timer (seconds per second)
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float FullSpeedMultiplier;
+            public float SprintFullSpeedMultiplier; // how much faster we actually go when at full sprint
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float PeggedMagnitude;
+            public float SprintPeggedMagnitude; // how far the stick needs to be pressed before being considered pegged
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float PeggedAngularThreshold;
+            public float SprintPeggedAngularThreshold; // how far off straight up (in degrees) we consider pegged
+
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Unknown4;
+            public float StaminaDepleteRestoreTime;       // time to restore stamina from empty or deplete from full (seconds)
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Unknown5;
+            public float SprintCooldownTime;       // time between sprint end and next available use (seconds)
+
             [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown6;
+            public uint Unknown6_HO;
 
             //Looking
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown7;
+            public float Unknown7_Reach;
 
-            public float LookDefaultPitchRate;
-            public float LookDefaultYawRate; // need to check
-
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float LookPegThreshold;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float LookYawAccelerationTime;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float LookYawAccelerationScale;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float LookPitchAccelerationTime;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float LookPitchAccelerationScale;
-
-            public float LookAutolevelingScale;
+            public float LookDefaultPitchRate; // degrees
+            public float LookDefaultYawRate; // degrees
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Unknown8;
+            public float LookPegThreshold; // magnitude of yaw for pegged acceleration to kick in
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Unknown9;
+            public float LookYawAccelerationTime; // time for a pegged look to reach maximum effect (seconds)
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public float LookYawAccelerationScale; // maximum effect of a pegged look (scales last value in the look function below)
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public float LookPitchAccelerationTime; // time for a pegged look to reach maximum effect (seconds)
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public float LookPitchAccelerationScale;// maximum effect of a pegged look (scales last value in the look function below)
+
+            public float LookAutolevelingScale; // 1 is fast, 0 is none, >1 will probably be really fast
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Length = 8, Flags = Padding)]
+            public byte[] Padding2;
 
             public float GravityScale;
-            public short Unknown10;
-            public short MinimumAutolevelingTicks;
+
+            [TagField(Length = 2, Flags = Padding)]
+            public byte[] Padding3;
+
+            public short MinimumAutolevelingTicks; // amount of time player needs to move and not look up or down for autolevelling to kick in
 
             [TagField(Gen = CacheGeneration.Third)]
-            public float MinVehicleFlipAngle;
+            public float MinimumVehicleFlipAngle; // 0 means the vehicle's up vector is along the ground, 90 means the up vector is pointing straight up
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<LookFunctionBlock> LookFunction;
 
             [TagField(Gen = CacheGeneration.Third)]
-            public float MinimumActionHoldTime;
-            [TagField(Gen = CacheGeneration.Third)]
-            public float Unknown11;
+            public float MinimumActionHoldTime; // time that player needs to press ACTION to register as a HOLD (seconds)
+            [TagField(Gen = CacheGeneration.Third)] // seconds
+            public float PeggedZoomSupressionThreshold; // for spinny-shotgun goodness
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public int Unknown12;
@@ -378,7 +442,7 @@ namespace TagTool.Tags.Definitions
             public int Unknown26;
 
             [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloReach)]
-            public class UnknownBlock : TagStructure
+            public class UnknownBlockReach : TagStructure
             {
                 public int Flags;
                 public float Unknown1;
@@ -410,7 +474,7 @@ namespace TagTool.Tags.Definitions
                 public uint Unknown7;
             }
 
-            [TagStructure]
+            [TagStructure(Size = 4)]
             public class LookFunctionBlock : TagStructure
 			{
                 public float Scale;
@@ -442,7 +506,7 @@ namespace TagTool.Tags.Definitions
                 public TraitBoolean AssassinationImmunity;
                 public TraitBoolean UnitCanDie;
 
-                [TagField(Length = 0x2, Flags = Padding)]
+                [TagField(Length = 2, Flags = Padding)]
                 public byte[] Unused; // need to double check
 
                 public enum TraitDamageResistancePercentage : sbyte
@@ -729,206 +793,288 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x284)]
         public class DifficultyBlock : TagStructure
-		{
+        {
+            // enemy damage multiplier on easy difficulty
             public float EasyEnemyDamage;
+            // enemy damage multiplier on normal difficulty
             public float NormalEnemyDamage;
+            // enemy damage multiplier on hard difficulty
             public float HardEnemyDamage;
+            // enemy damage multiplier on impossible difficulty
             public float ImpossibleEnemyDamage;
+            // enemy maximum body vitality scale on easy difficulty
             public float EasyEnemyVitality;
+            // enemy maximum body vitality scale on normal difficulty
             public float NormalEnemyVitality;
+            // enemy maximum body vitality scale on hard difficulty
             public float HardEnemyVitality;
+            // enemy maximum body vitality scale on impossible difficulty
             public float ImpossibleEnemyVitality;
+            // enemy maximum shield vitality scale on easy difficulty
             public float EasyEnemyShield;
+            // enemy maximum shield vitality scale on normal difficulty
             public float NormalEnemyShield;
+            // enemy maximum shield vitality scale on hard difficulty
             public float HardEnemyShield;
+            // enemy maximum shield vitality scale on impossible difficulty
             public float ImpossibleEnemyShield;
+            // enemy shield recharge scale on easy difficulty
             public float EasyEnemyRecharge;
+            // enemy shield recharge scale on normal difficulty
             public float NormalEnemyRecharge;
+            // enemy shield recharge scale on hard difficulty
             public float HardEnemyRecharge;
+            // enemy shield recharge scale on impossible difficulty
             public float ImpossibleEnemyRecharge;
+            // friend damage multiplier on easy difficulty
             public float EasyFriendDamage;
+            // friend damage multiplier on normal difficulty
             public float NormalFriendDamage;
+            // friend damage multiplier on hard difficulty
             public float HardFriendDamage;
+            // friend damage multiplier on impossible difficulty
             public float ImpossibleFriendDamage;
+            // friend maximum body vitality scale on easy difficulty
             public float EasyFriendVitality;
+            // friend maximum body vitality scale on normal difficulty
             public float NormalFriendVitality;
+            // friend maximum body vitality scale on hard difficulty
             public float HardFriendVitality;
+            // friend maximum body vitality scale on impossible difficulty
             public float ImpossibleFriendVitality;
+            // friend maximum shield vitality scale on easy difficulty
             public float EasyFriendShield;
+            // friend maximum shield vitality scale on normal difficulty
             public float NormalFriendShield;
+            // friend maximum shield vitality scale on hard difficulty
             public float HardFriendShield;
+            // friend maximum shield vitality scale on impossible difficulty
             public float ImpossibleFriendShield;
+            // friend shield recharge scale on easy difficulty
             public float EasyFriendRecharge;
+            // friend shield recharge scale on normal difficulty
             public float NormalFriendRecharge;
+            // friend shield recharge scale on hard difficulty
             public float HardFriendRecharge;
+            // friend shield recharge scale on impossible difficulty
             public float ImpossibleFriendRecharge;
+            // toughness of infection forms (may be negative) on easy difficulty
             public float EasyInfectionForms;
+            // toughness of infection forms (may be negative) on normal difficulty
             public float NormalInfectionForms;
+            // toughness of infection forms (may be negative) on hard difficulty
             public float HardInfectionForms;
+            // toughness of infection forms (may be negative) on impossible difficulty
             public float ImpossibleInfectionForms;
-            public float EasyUnknown;
-            public float NormalUnknown;
-            public float HardUnknown;
-            public float ImpossibleUnknown;
+            [TagField(Length = 16, Flags = Padding)]
+            public byte[] Padding0;
+            // enemy rate of fire scale on easy difficulty
             public float EasyRateOfFire;
+            // enemy rate of fire scale on normal difficulty
             public float NormalRateOfFire;
+            // enemy rate of fire scale on hard difficulty
             public float HardRateOfFire;
+            // enemy rate of fire scale on impossible difficulty
             public float ImpossibleRateOfFire;
+            // enemy projectile error scale, as a fraction of their base firing error. on easy difficulty
             public float EasyProjectileError;
+            // enemy projectile error scale, as a fraction of their base firing error. on normal difficulty
             public float NormalProjectileError;
+            // enemy projectile error scale, as a fraction of their base firing error. on hard difficulty
             public float HardProjectileError;
+            // enemy projectile error scale, as a fraction of their base firing error. on impossible difficulty
             public float ImpossibleProjectileError;
+            // enemy burst error scale; reduces intra-burst shot distance. on easy difficulty
             public float EasyBurstError;
+            // enemy burst error scale; reduces intra-burst shot distance. on normal difficulty
             public float NormalBurstError;
+            // enemy burst error scale; reduces intra-burst shot distance. on hard difficulty
             public float HardBurstError;
+            // enemy burst error scale; reduces intra-burst shot distance. on impossible difficulty
             public float ImpossibleBurstError;
-            public float EasyTargetDelay;
-            public float NormalTargetDelay;
-            public float HardTargetDelay;
-            public float ImpossibleTargetDelay;
+            // enemy new-target delay scale factor. on easy difficulty
+            public float EasyNewTargetDelay;
+            // enemy new-target delay scale factor. on normal difficulty
+            public float NormalNewTargetDelay;
+            // enemy new-target delay scale factor. on hard difficulty
+            public float HardNewTargetDelay;
+            // enemy new-target delay scale factor. on impossible difficulty
+            public float ImpossibleNewTargetDelay;
+            // delay time between bursts scale factor for enemies. on easy difficulty
             public float EasyBurstSeparation;
+            // delay time between bursts scale factor for enemies. on normal difficulty
             public float NormalBurstSeparation;
+            // delay time between bursts scale factor for enemies. on hard difficulty
             public float HardBurstSeparation;
+            // delay time between bursts scale factor for enemies. on impossible difficulty
             public float ImpossibleBurstSeparation;
+            // additional target tracking fraction for enemies. on easy difficulty
             public float EasyTargetTracking;
+            // additional target tracking fraction for enemies. on normal difficulty
             public float NormalTargetTracking;
+            // additional target tracking fraction for enemies. on hard difficulty
             public float HardTargetTracking;
+            // additional target tracking fraction for enemies. on impossible difficulty
             public float ImpossibleTargetTracking;
+            // additional target leading fraction for enemies. on easy difficulty
             public float EasyTargetLeading;
+            // additional target leading fraction for enemies. on normal difficulty
             public float NormalTargetLeading;
+            // additional target leading fraction for enemies. on hard difficulty
             public float HardTargetLeading;
+            // additional target leading fraction for enemies. on impossible difficulty
             public float ImpossibleTargetLeading;
+            // overcharge chance scale factor for enemies. on easy difficulty
             public float EasyOverchargeChance;
+            // overcharge chance scale factor for enemies. on normal difficulty
             public float NormalOverchargeChance;
+            // overcharge chance scale factor for enemies. on hard difficulty
             public float HardOverchargeChance;
+            // overcharge chance scale factor for enemies. on impossible difficulty
             public float ImpossibleOverchargeChance;
+            // delay between special-fire shots (overcharge, banshee bombs) scale factor for enemies. on easy difficulty
             public float EasySpecialFireDelay;
+            // delay between special-fire shots (overcharge, banshee bombs) scale factor for enemies. on normal difficulty
             public float NormalSpecialFireDelay;
+            // delay between special-fire shots (overcharge, banshee bombs) scale factor for enemies. on hard difficulty
             public float HardSpecialFireDelay;
+            // delay between special-fire shots (overcharge, banshee bombs) scale factor for enemies. on impossible difficulty
             public float ImpossibleSpecialFireDelay;
+            // guidance velocity scale factor for all projectiles targeted on a player. on easy difficulty
             public float EasyGuidanceVsPlayer;
+            // guidance velocity scale factor for all projectiles targeted on a player. on normal difficulty
             public float NormalGuidanceVsPlayer;
+            // guidance velocity scale factor for all projectiles targeted on a player. on hard difficulty
             public float HardGuidanceVsPlayer;
+            // guidance velocity scale factor for all projectiles targeted on a player. on impossible difficulty
             public float ImpossibleGuidanceVsPlayer;
+            // delay period added to all melee attacks, even when berserk. on easy difficulty
             public float EasyMeleeDelayBase;
+            // delay period added to all melee attacks, even when berserk. on normal difficulty
             public float NormalMeleeDelayBase;
+            // delay period added to all melee attacks, even when berserk. on hard difficulty
             public float HardMeleeDelayBase;
+            // delay period added to all melee attacks, even when berserk. on impossible difficulty
             public float ImpossibleMeleeDelayBase;
+            // multiplier for all existing non-berserk melee delay times. on easy difficulty
             public float EasyMeleeDelayScale;
+            // multiplier for all existing non-berserk melee delay times. on normal difficulty
             public float NormalMeleeDelayScale;
+            // multiplier for all existing non-berserk melee delay times. on hard difficulty
             public float HardMeleeDelayScale;
+            // multiplier for all existing non-berserk melee delay times. on impossible difficulty
             public float ImpossibleMeleeDelayScale;
-            public float EasyUnknown2;
-            public float NormalUnknown2;
-            public float HardUnknown2;
-            public float ImpossibleUnknown2;
+            [TagField(Length = 16, Flags = Padding)]
+            public byte[] Padding1;
+            // scale factor affecting the desicions to throw a grenade. on easy difficulty
             public float EasyGrenadeChanceScale;
+            // scale factor affecting the desicions to throw a grenade. on normal difficulty
             public float NormalGrenadeChanceScale;
+            // scale factor affecting the desicions to throw a grenade. on hard difficulty
             public float HardGrenadeChanceScale;
+            // scale factor affecting the desicions to throw a grenade. on impossible difficulty
             public float ImpossibleGrenadeChanceScale;
+            // scale factor affecting the delay period between grenades thrown from the same encounter (lower is more often). on easy difficulty
             public float EasyGrenadeTimerScale;
+            // scale factor affecting the delay period between grenades thrown from the same encounter (lower is more often). on normal difficulty
             public float NormalGrenadeTimerScale;
+            // scale factor affecting the delay period between grenades thrown from the same encounter (lower is more often). on hard difficulty
             public float HardGrenadeTimerScale;
+            // scale factor affecting the delay period between grenades thrown from the same encounter (lower is more often). on impossible difficulty
             public float ImpossibleGrenadeTimerScale;
-            public float EasyUnknown3;
-            public float NormalUnknown3;
-            public float HardUnknown3;
-            public float ImpossibleUnknown3;
-            public float EasyUnknown4;
-            public float NormalUnknown4;
-            public float HardUnknown4;
-            public float ImpossibleUnknown4;
-            public float EasyUnknown5;
-            public float NormalUnknown5;
-            public float HardUnknown5;
-            public float ImpossibleUnknown5;
-            public float EasyMajorUpgradeNormal;
-            public float NormalMajorUpgradeNormal;
-            public float HardMajorUpgradeNormal;
-            public float ImpossibleMajorUpgradeNormal;
-            public float EasyMajorUpgradeFew;
-            public float NormalMajorUpgradeFew;
-            public float HardMajorUpgradeFew;
-            public float ImpossibleMajorUpgradeFew;
-            public float EasyMajorUpgradeMany;
-            public float NormalMajorUpgradeMany;
-            public float HardMajorUpgradeMany;
-            public float ImpossibleMajorUpgradeMany;
+            [TagField(Length = 16, Flags = Padding)]
+            public byte[] Padding2;
+            [TagField(Length = 16, Flags = Padding)]
+            public byte[] Padding3;
+            [TagField(Length = 16, Flags = Padding)]
+            public byte[] Padding4;
+            // fraction of actors upgraded to their major variant. on easy difficulty
+            public float EasyMajorUpgradenormal;
+            // fraction of actors upgraded to their major variant. on normal difficulty
+            public float NormalMajorUpgradenormal;
+            // fraction of actors upgraded to their major variant. on hard difficulty
+            public float HardMajorUpgradenormal;
+            // fraction of actors upgraded to their major variant. on impossible difficulty
+            public float ImpossibleMajorUpgradenormal;
+            // fraction of actors upgraded to their major variant when mix = normal. on easy difficulty
+            public float EasyMajorUpgradefew;
+            // fraction of actors upgraded to their major variant when mix = normal. on normal difficulty
+            public float NormalMajorUpgradefew;
+            // fraction of actors upgraded to their major variant when mix = normal. on hard difficulty
+            public float HardMajorUpgradefew;
+            // fraction of actors upgraded to their major variant when mix = normal. on impossible difficulty
+            public float ImpossibleMajorUpgradefew;
+            // fraction of actors upgraded to their major variant when mix = many. on easy difficulty
+            public float EasyMajorUpgrademany;
+            // fraction of actors upgraded to their major variant when mix = many. on normal difficulty
+            public float NormalMajorUpgrademany;
+            // fraction of actors upgraded to their major variant when mix = many. on hard difficulty
+            public float HardMajorUpgrademany;
+            // fraction of actors upgraded to their major variant when mix = many. on impossible difficulty
+            public float ImpossibleMajorUpgrademany;
+            // Chance of deciding to ram the player in a vehicle on easy difficulty
             public float EasyPlayerVehicleRamChance;
+            // Chance of deciding to ram the player in a vehicle on normal difficulty
             public float NormalPlayerVehicleRamChance;
+            // Chance of deciding to ram the player in a vehicle on hard difficulty
             public float HardPlayerVehicleRamChance;
+            // Chance of deciding to ram the player in a vehicle on impossible difficulty
             public float ImpossiblePlayerVehicleRamChance;
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public uint Unknown7;
-            public uint Unknown8;
-            public uint Unknown9;
-            public uint Unknown10;
-            public uint Unknown11;
-            public uint Unknown12;
-            public uint Unknown13;
-            public uint Unknown14;
-            public uint Unknown15;
-            public uint Unknown16;
-            public uint Unknown17;
-            public uint Unknown18;
-            public uint Unknown19;
-            public uint Unknown20;
-            public uint Unknown21;
-            public uint Unknown22;
-            public uint Unknown23;
-            public uint Unknown24;
-            public uint Unknown25;
-            public uint Unknown26;
-            public uint Unknown27;
-            public uint Unknown28;
-            public uint Unknown29;
-            public uint Unknown30;
-            public uint Unknown31;
-            public uint Unknown32;
-            public uint Unknown33;
+            [TagField(Length = 16, Flags = Padding)]
+            public byte[] Padding5;
+            [TagField(Length = 16, Flags = Padding)]
+            public byte[] Padding6;
+            [TagField(Length = 16, Flags = Padding)]
+            public byte[] Padding7;
+            [TagField(Length = 84, Flags = Padding)]
+            public byte[] Padding8;
         }
 
         [TagStructure(Size = 0x84)]
-        public class UnknownBlock1 : TagStructure
+        public class CoopDifficultyBlock : TagStructure
         {
-            public float Unknown1;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-            public float Unknown11;
-            public float Unknown12;
-            public float Unknown13;
-            public float Unknown14;
-            public float Unknown15;
-            public float Unknown16;
-            public float Unknown17;
-            public float Unknown18;
-            public float Unknown19;
-            public float Unknown20;
-            public float Unknown21;
-            public float Unknown22;
-            public float Unknown23;
-            public float Unknown24;
-            public float Unknown25;
-            public float Unknown26;
-            public float Unknown27;
-            public float Unknown28;
-            public float Unknown29;
-            public float Unknown30;
-            public float Unknown31;
-            public float Unknown32;
-            public float Unknown33;
+            /* vitality */
+            public float TwoPlayerShieldRechargeDelay; // multiplier on enemy shield recharge delay with two coop players
+            public float FourPlayerShieldRechargeDelay; // multiplier on enemy shield recharge delay with four coop players
+            public float SixPlayerShieldRechargeDelay; // multiplier on enemy shield recharge delay with six coop players or more
+            public float TwoPlayerShieldRechargeTimer; // multiplier on enemy shield recharge timer with two coop players
+            public float FourPlayerShieldRechargeTimer; // multiplier on enemy shield recharge timer with four coop players
+            public float SixPlayerShieldRechargeTimer; // multiplier on enemy shield recharge timer with six coop players or more
+
+            /* movement */
+            public float TwoPlayerGrenadeDiveChance; // multiplier on enemy grenade dive chance with two coop players
+            public float FourPlayerGrenadeDiveChance; // multiplier on enemy grenade dive chance with four coop players
+            public float SixPlayerGrenadeDiveChance; // multiplier on enemy grenade dive chance with six coop players or more
+            public float TwoPlayerArmorLockChance; // multiplier on enemy armor lock chance with two coop players
+            public float FourPlayerArmorLockChance; // multiplier on enemy armor lock chance with four coop players
+            public float SixPlayerArmorLockChance; // multiplier on enemy armor lock chance with six coop players or more
+
+            /* evasion */
+            public float TwoPlayerEvasionDangerThreshold; // multiplier on enemy evasion danger threshold with two coop players
+            public float FourPlayerEvasionDangerThreshold; // multiplier on enemy evasion danger threshold with four coop players
+            public float SixPlayerEvasionDangerThreshold; // multiplier on enemy evasion danger threshold with six coop players or more
+            public float TwoPlayerEvasionDelayTimer; // multiplier on enemy evasion delay timer with two coop players
+            public float FourPlayerEvasionDelayTimer; // multiplier on enemy evasion delay timer with four coop players
+            public float SixPlayerEvasionDelayTimer; // multiplier on enemy evasion delay timer with six coop players or more
+            public float TwoPlayerEvasionChance; // multiplier on enemy evasion chance with two coop players
+            public float FourPlayerEvasionChance; // multiplier on enemy evasion chance with four coop players
+            public float SixPlayerEvasionChance; // multiplier on enemy evasion chance with six coop players or more
+
+            /* shooting */
+            public float TwoPlayerBurstDuration; // multiplier on the enemy shooting burst duration with two coop players
+            public float FourPlayerBurstDuration; // multiplier on the enemy shooting burst duration with four coop players
+            public float SixPlayerBurstDuration; // multiplier on the enemy shooting burst duration with six coop players or more
+            public float TwoPlayerBurstSeparation; // multipler on the enemy shooting burst separation with two coop players
+            public float FourPlayerBurstSeparation; // multipler on the enemy shooting burst separation with four coop players
+            public float SixPlayerBurstSeparation; // multipler on the enemy shooting burst separation with six coop players or more
+            public float TwoPlayerDamageModifier; // multipler on the enemy shooting damage multiplier with two coop players
+            public float FourPlayerDamageModifier; // multipler on the enemy shooting damage multiplier with four coop players
+            public float SixPlayerDamageModifier; // multipler on the enemy shooting damage multiplier with six coop players or more
+
+            /* projectile */
+            public float TwoPlayerProjectileSpeed; // multiplier on the speed of projectiles fired by enemies with two coop players
+            public float FourPlayerProjectileSpeed; // multiplier on the speed of projectiles fired by enemies with four coop players
+            public float SixPlayerProjectileSpeed; // multiplier on the speed of projectiles fired by enemies with six coop players or more
         }
 
         [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -936,58 +1082,45 @@ namespace TagTool.Tags.Definitions
         public class Grenade : TagStructure
 		{
             public short MaximumCount;
-            public short Unknown;
+
+            [TagField(Length = 2, Flags = Padding)]
+            public byte[] Padding0;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown6;
+            public float DropPercentage;
 
-            /// <summary>
-            /// The effect produced by the grenade when a biped throws it.
-            /// </summary>
             [TagField(ValidTags = new[] { "effe" })]
-            public CachedTag ThrowingEffect;
+            public CachedTag ThrowingEffect; // The effect produced by the grenade when a biped throws it.
 
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown2;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown4;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown5;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Length = 16, Flags = Padding)]
+            public byte[] Padding1;
 
-            /// <summary>
-            /// The equipment tag associated with the grenade.
-            /// </summary>
             [TagField(Flags = Label, ValidTags = new[] { "eqip" })]
-            public CachedTag Equipment;
+            public CachedTag Equipment; // The equipment tag associated with the grenade.
 
-            /// <summary>
-            /// The projectile tag associated with the grenade.
-            /// </summary>
             [TagField(ValidTags = new[] { "proj" })]
-            public CachedTag Projectile;
+            public CachedTag Projectile; // The projectile tag associated with the grenade.
         }
 
         [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
         public class SoftBarrierProperty : TagStructure
         {
-            public float BipedGive;
-            public float BipedBounciness;
-            public float BipedBumpiness;
-            public float Unknown;
-            public float VehicleGive;
-            public float VehicleBounciness;
-            public float VehicleBumpiness;
+            public float BipedSpringConstant;
+            public float BipedNormalDamping;
+            public float BipedTangentDamping;
+            public float BipedMinTangentDampVelocity;
+            public float VehicleSpringConstant;
+            public float VehicleNormalDamping;
+            public float VehicleTangentDamping;
         }
 
         [TagStructure(Size = 0x120, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x12C, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0x12C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x120, MinVersion = CacheVersion.HaloReach)]
         public class InterfaceTagsBlock : TagStructure
 		{
-            public CachedTag Spinner;
-            public CachedTag Obsolete;
+            public CachedTag SpinnerObsolete;
+            public CachedTag Obsolete2;
             public CachedTag ScreenColorTable;
             public CachedTag HudColorTable;
             public CachedTag EditorColorTable;
@@ -995,7 +1128,7 @@ namespace TagTool.Tags.Definitions
             public CachedTag MotionSensorSweepBitmap;
             public CachedTag MotionSensorSweepBitmapMask;
             public CachedTag MultiplayerHudBitmap;
-            public CachedTag HudDigitsDefinition;
+            public CachedTag Unused;
             public CachedTag MotionSensorBlipBitmap;
             public CachedTag InterfaceGooMap1;
             public CachedTag InterfaceGooMap2;
@@ -1005,7 +1138,7 @@ namespace TagTool.Tags.Definitions
             public CachedTag MultiplayerUiGlobals;
             public CachedTag HudGlobals;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public List<GfxUiString> GfxUiStrings;
 
             [TagStructure(Size = 0x30)]
@@ -1017,45 +1150,57 @@ namespace TagTool.Tags.Definitions
             }
         }
 
+        [TagStructure(Size = 0x10)]
+        public class CheatWeapon : TagStructure
+        {
+            public CachedTag Weapon;
+        }
+
+        [TagStructure(Size = 0x10)]
+        public class CheatPowerup : TagStructure
+        {
+            public CachedTag Powerup;
+        }
+
         [TagStructure(Size = 0xC0, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xC4, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0xCC, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0xCC, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0xF4, MinVersion = CacheVersion.HaloReach)]
         public class PlayerInformationBlock : TagStructure
 		{
-            public float WalkingSpeed;
-            public float RunForward;
-            public float RunBackward;
-            public float RunSideways;
-            public float RunAcceleration;
-            public float SneakForward;
-            public float SneakBackward;
-            public float SneakSideways;
-            public float SneakAcceleration;
-            public float AirborneAcceleration;
+            public float WalkingSpeed; // world units per second
+            public float RunForward; // world units per second
+            public float RunBackward; // world units per second
+            public float RunSideways; // world units per second
+            public float RunAcceleration; // world units per second squared
+            public float SneakForward; // world units per second
+            public float SneakBackward; // world units per second
+            public float SneakSideways; // world units per second
+            public float SneakAcceleration; // world units per second squared
+            public float AirborneAcceleration; // world units per second squared
             public RealPoint3d GrenadeOrigin;
             
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public TagFunction StunFunction = new TagFunction { Data = new byte[0] };
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float StunMovementPenalty;
+            public float StunMovementPenalty; // [0,1] 1.0 prevents moving while stunned
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float StunTurningPenalty;
+            public float StunTurningPenalty; // [0,1] 1.0 turning moving while stunned
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float StunJumpingPenalty;
+            public float StunJumpingPenalty; // [0,1] 1.0 jumping moving while stunned
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public Bounds<float> StunTimeRange;
+            public Bounds<float> StunTimeRange; // (seconds) no stun can last shorter/longer than this
 
-            public Bounds<float> FirstPersonIdleTimeRange;
-            public float FirstPersonSkipFraction;
+            public Bounds<float> FirstPersonIdleTimeRange; // (seconds)
+            public float FirstPersonSkipFraction; // [0,1]
 
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public float Unknown1;
 
-            public CachedTag Unknown2;
-            public CachedTag Unknown3;
-            public CachedTag Unknown4;
+            public CachedTag CoopCountdownSound;
+            public CachedTag CoopRespawnSound;
+            public CachedTag CoopRespawnEffect;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public CachedTag Unknown7;
@@ -1063,10 +1208,10 @@ namespace TagTool.Tags.Definitions
             public int BinocularsZoomCount;
             public Bounds<float> BinocularZoomRange;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown5;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown6;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public float Unknown5;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public float Unknown6;
 
             public CachedTag FlashlightOn;
             public CachedTag FlashlightOff;
@@ -1158,24 +1303,24 @@ namespace TagTool.Tags.Definitions
         public class FallingDamageBlock : TagStructure
 		{
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public Bounds<float> HarmfulFallingDistanceBounds;
+            public Bounds<float> HarmfulFallingDistanceBounds; // world units
 
             [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag FallingDamage;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTag Unknown;
+            public CachedTag JumpingDamage;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTag SoftLanding;
+            public CachedTag SoftLandingDamage;
 
             [TagField(ValidTags = new[] { "jpt!" })]
-            public CachedTag HardLanding;
+            public CachedTag HardLandingDamage;
 
             [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag ScriptDamage;
 
-            public float TerminalVelocity;
+            public float MaximumFallingDistance; // world units
 
             [TagField(ValidTags = new[] { "jpt!" })]
             public CachedTag DistanceDamage;
@@ -1184,55 +1329,53 @@ namespace TagTool.Tags.Definitions
             public CachedTag FallingDamageResponse;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public CachedTag Unknown1;
+            public CachedTag FriendlyFireDamageResponse;
 
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Unknown2;
+            public float RuntimeMaximumFallingVelocity;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Unknown3;
-            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public float Unknown4;
+            public Bounds<float> RuntimeDamageVelocityBounds;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown5;
+            public float PlayerShieldSpillover;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown6;
+            public float CurrentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown7;
+            public float CurrentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown8;
+            public float CurrentDamageDecayRate;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown9;
+            public float RecentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown10;
+            public float RecentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown11;
+            public float AiCurrentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown12;
+            public float AiCurrentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown13;
+            public float AiCurrentDamageDecayRate;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown14;
+            public float AiRecentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown15;
+            public float AiRecentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown16;
+            public float ShieldImpactCurrentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown17;
+            public float ShieldImpactCurrentDamageDecayTime;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown18;
+            public float ShieldImpactCurrentDamageDecayRate;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown19;
+            public float ShieldImpactRecentDamageDecayDelay;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown20;
+            public float ShieldImpactRecentDamageDecayTime;
         }
 
         [TagStructure(Size = 0xC)]
-        public class UnknownBlock : TagStructure //Single block
+        public class ShieldBoostBlock : TagStructure //Single block
 		{
-            public uint Unknown1; //100
-            public uint Unknown2; //1
-            public uint Unknown3; //1
+            public float ShieldBoostDecay; //100
+            public float ShieldBoostRechargeTime; //1
+            public float ShieldBoostStunTime; //1
         }
 
         [Flags]
@@ -1368,37 +1511,40 @@ namespace TagTool.Tags.Definitions
 
             public List<UnderwaterProxy> UnderwaterProxies;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown2;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public short Unknown3;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public short Unknown4;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            public StringId FootstepsInRainMaterial;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            public short RuntimeRainMaterialIndex;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            public byte[] Padding;
 
             [TagStructure(Size = 0x28, MaxVersion = CacheVersion.HaloOnline700123)]
             [TagStructure(Size = 0x10, MinVersion = CacheVersion.HaloReach)]
             public class WaterDragProperty : TagStructure
 			{
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown;
+                public float DragK;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown2;
+                public float DragQ;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown3;
+                public float DragE;
+
+                [TagField(Length = 4, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+                public byte[] Padding0;
+
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown4;
+                public float SuperFloater;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown5;
+                public float Floater;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown6;
+                public float Neutral;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown7;
+                public float Sinker;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown8;
-                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown9;
-                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float Unknown10;
+                public float SuperSinker;
+
+                [TagField(Length = 4, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+                public byte[] Padding1;
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public CachedTag WaterDragProperties;
@@ -1439,67 +1585,61 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x14, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x4C, MinVersion = CacheVersion.HaloReach)]
-        public class CinematicAnchorBlock : TagStructure
+        public class CinematicsGlobals : TagStructure
 		{
             public CachedTag CinematicAnchor;
 
-            public float Unknown1;
+            public float CinematicFilmAperture;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public float Unknown2;
+            public float CinematicSkipUiUpTime;
 
+            // percentage towards the center - 0=default, 0.5=center of the screen
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown3;
+            public Bounds<float> SubtitleRectWidth;
+            // 0=default, 0.5=center of the screen
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown4;
+            public Bounds<float> SubtitleRectHeight;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown5;
+            public RealRgbColor DefaultSubtitleColor;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown6;
+            public RealRgbColor DefaultSubtitleShadowColor;
             [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown7;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown8;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown9;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown10;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown11;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown12;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown13;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown14;
-            [TagField(MinVersion = CacheVersion.HaloReach)]
-            public float Unknown15;
+            public List<CinematicCharactersBlock> CinematicCharacters;
+
+            [TagStructure(Size = 0x1C, MinVersion = CacheVersion.HaloReach)]
+            public class CinematicCharactersBlock : TagStructure
+            {
+                public StringId CharacterName;
+                public RealRgbColor SubtitleColor;
+                public RealRgbColor ShadowColor;
+            }
         }
 
         [TagStructure(Size = 0x48, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0x98, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x38, MinVersion = CacheVersion.HaloReach)]
-        public class MetagameGlobal : TagStructure
+        public class CampaignMetagameGlobal : TagStructure
 		{
             public List<Medal> Medals;
             public List<MultiplierBlock> Difficulty;
             public List<MultiplierBlock> PrimarySkulls;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<MultiplierBlock> SecondarySkulls;
-            public int Unknown;
+            public int FriendlyDeathPenalty;
             public int DeathPenalty;
             public int BetrayalPenalty;
             [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-            public int Unknown2;
-            public float MultikillWindow;
-            public float EmpWindow;
-            
+            public int MultiKillCount; // how many kills for this to happen
+            public float MultiKillWindow; // in what period of time does this have to happen (seconds)
+            public float EmpKillWindow; // time after taking a guys shields down with emp damage you have to get the emp kill bonus (seconds)
+
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown3;
+            public float HijackKillWindowPeriod;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown4;
+            public float SkyjackKillWindowPeriod;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-            public uint Unknown5;
+            public uint KillFromTheGraveRequiredPeriod;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public int FirstWeaponSpree;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
@@ -1562,19 +1702,13 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloReach)]
-        [TagStructure(Size = 0x50, MinVersion = CacheVersion.HaloReachMCC0824)]
-        public class LocaleGlobalsBlock : TagStructure
+        [TagStructure(Size = 0x44, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x50, Align = 0x8, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x50, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public class LanguagePack : TagStructure
         {
-            [TagField(MaxVersion = CacheVersion.HaloReach)]
-            public uint Unknown1;
-            [TagField(MaxVersion = CacheVersion.HaloReach)]
-            public uint Unknown2;
-
-            [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
-            public ulong Unknown1_64;
-            [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
-            public ulong Unknown2_64;
+            public PlatformUnsignedValue StringReferenceAddress;
+            public PlatformUnsignedValue StringDataAddress;
 
             public int StringCount;
             public int LocaleTableSize;
@@ -1589,49 +1723,56 @@ namespace TagTool.Tags.Definitions
 
             public uint Unknown3;
 
-            [TagField(MinVersion = CacheVersion.HaloReachMCC0824)]
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3Retail)]
             public uint Unknown4;
         }
 
         [TagStructure(Size = 0x54)]
-        public class UnknownBlock2 : TagStructure
+        public class ActiveCamoGlobalsBlock : TagStructure
         {
-            public float Unknown1;
-            public float Unknown2;
-            public float Unknown3;
+            // for bipeds, the speed at which you are on the far right of the 'speed to max camo' graph
+            public float BipedSpeedReference; // wu/s
+            // for vehicles, the speed at which you are on the far right of the 'speed to max camo' graph
+            public float VehicleSpeedReference; // wu/s
+            // minimum active camo percentage at which a player's game name will start becoming visible
+            public float CamoValueForGameName;
 
-            public TagFunction Unknown4 = new TagFunction { Data = new byte[0] };
-            public TagFunction Unknown5 = new TagFunction { Data = new byte[0] };
-            public TagFunction Unknown6 = new TagFunction { Data = new byte[0] };
+            public TagFunction CamoValueToDistortion = new TagFunction { Data = new byte[0] };
+            public TagFunction CamoValueToTransparency = new TagFunction { Data = new byte[0] };
+            public TagFunction CamoDistortionTextureStrength = new TagFunction { Data = new byte[0] };
 
-            public List<UnknownBlock> UnknownBlocks;
+            public List<ActiveCamoLevelDefinitionBlock> CamoLevels;
 
             [TagStructure(Size = 0x24)]
-            public class UnknownBlock : TagStructure
+            public class ActiveCamoLevelDefinitionBlock : TagStructure
             {
-                public float Unknown1;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
-                public TagFunction Unknown5 = new TagFunction { Data = new byte[0] };
+                // reduces camo value by this much when throwing a grenade
+                public float GrenadeThrowPenalty; // 0..1
+                // reduces camo by this much when meleeing
+                public float MeleePenalty; // 0..1
+                // when taking damage or doing other actions that reduce camo, we will never drop below this value
+                public float MinimumDingedValue;
+                // time it takes to interpolate from 0.0 to 1.0
+                public float InterpolationTime; // s
+                public TagFunction SpeedToMaximumCamo = new TagFunction { Data = new byte[0] };
             }
         }
 
         [TagStructure(Size = 0x18)]
-        public class UnknownBlock3 : TagStructure
+        public class GarbageCollectionBlock : TagStructure
         {
-            public float Unknown1;
-            public float Unknown2;
-            public float Unknown3;
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
+            public float DroppedItem; // seconds
+            public float DroppedItemByPlayer; // seconds
+            public float DroppedItemInMultiplayer; // seconds
+            public float BrokenConstraints; // seconds
+            public float DeadUnit; // seconds
+            public float DeadPlayer; // seconds
         }
 
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock4 : TagStructure
+        public class GlobalCameraImpulseBlock : TagStructure
         {
-            public TagFunction Unknown = new TagFunction { Data = new byte[0] };
+            public TagFunction Function = new TagFunction { Data = new byte[0] };
         }
 
         [TagStructure(Size = 0x24)]
@@ -1641,6 +1782,14 @@ namespace TagTool.Tags.Definitions
             public short Version;
             [TagField(Flags = Label, Length = 32)]
             public string Name;
+        }
+
+        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
+        public class HavokCleanupResource : TagStructure
+        {
+            [TagField(Flags = Label)]
+            public CachedTag ObjectCleanupEffect;
         }
     }
 }

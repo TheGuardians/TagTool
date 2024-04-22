@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.RenderMethods
@@ -30,8 +31,8 @@ namespace TagTool.Commands.RenderMethods
         public override object Execute(List<string> args)
         {
             if (args.Count != 0)
-                return false;
-            
+                return new TagToolError(CommandError.ArgCount);
+
             var shaderMaps = new Dictionary<StringId, CachedTag>();
 
             foreach (var property in Definition.ShaderProperties)
@@ -47,9 +48,9 @@ namespace TagTool.Commands.RenderMethods
 
                     Console.Write(string.Format("Please enter the {0} index: ", Cache.StringTable.GetString(mapTemplate.Name)));
 
-                    if (!Cache.TryGetCachedTag(Console.ReadLine(), out var shaderMap))
+                    if (!Cache.TagCache.TryGetCachedTag(Console.ReadLine(), out var shaderMap))
                     {
-                        Console.WriteLine($"ERROR: Invalid bitmap name, setting to null.");
+                        new TagToolError(CommandError.CustomError, "Invalid bitmap name, setting to null.");
                         shaderMaps[mapTemplate.Name] = null;
                     }
 
@@ -57,7 +58,7 @@ namespace TagTool.Commands.RenderMethods
                 }
             }
 
-            foreach (var import in Definition.ImportData)
+            foreach (var import in Definition.Parameters)
                 if (shaderMaps.ContainsKey(import.Name))
                     import.Bitmap = shaderMaps[import.Name];
 

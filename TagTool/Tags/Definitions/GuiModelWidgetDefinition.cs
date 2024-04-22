@@ -1,7 +1,8 @@
+using System;
+using System.Collections.Generic;
 using TagTool.Cache;
 using TagTool.Common;
-using System.Collections.Generic;
-using TagTool.Tags.GUI;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Tags.Definitions
 {
@@ -9,110 +10,115 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "gui_model_widget_definition", Tag = "mdl3", Size = 0x84)]
     public class GuiModelWidgetDefinition : TagStructure
 	{
-        public uint Flags;
+        public ModelWidgetFlags Flags;
         public GuiDefinition GuiRenderBlock;
-        public List<CameraRefinement> CameraControl;
+        public List<CameraSettingsBlock> CameraSettings;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown2;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown3;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown4;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown5;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown6;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public float FOV = 25.0f;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown8;
+        public ModelWidgetGlobalsDefinition ModelWidgetGlobals;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownBlock> ZoomFunction;
+        public List<ModelWidgetCameraSliceBlock> TextureCameraSlices;
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort MovementLeft;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort MovementRight;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort MovementUp;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort MovementDown;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown14;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown15;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort ZoomIn;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort ZoomOut;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort RotateLeft;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort RotateRight;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown20;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public ushort Unknown21;
+        [Flags]
+        public enum ModelWidgetFlags : int
+        {
+            DoNotApplyOldContentUpscaling = 1 << 0,
+            OverrideTemplateFlags = 1 << 1,
+            EnableAnimationDebugging = 1 << 2,
+            AllowListItemToOverrideAnimationSkin = 1 << 3
+        }
 
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<TexCam> TextureCameraSections;
+        [TagStructure(Size = 0x40, MinVersion = CacheVersion.Halo3ODST)]
+        public class ModelWidgetGlobalsDefinition : TagStructure
+        {
+            public RealArgbColor TronShaderColor;
+            public float TronShaderIntensity;
+            public float FOV; // degrees
+            public float ZoomSpeed; // wu per tick
+            public List<KeyframeTransitionFunctionBlock> ZoomTransitionFunction;
+            public GamepadButtonDefinition MovementLeft;
+            public GamepadButtonDefinition MovementRight;
+            public GamepadButtonDefinition MovementUp;
+            public GamepadButtonDefinition MovementDown;
+            public GamepadButtonDefinition Unknown16;
+            public GamepadButtonDefinition Unknown17;
+            public GamepadButtonDefinition ZoomIn;
+            public GamepadButtonDefinition ZoomOut;
+            public GamepadButtonDefinition RotateLeft;
+            public GamepadButtonDefinition RotateRight;
+            public GamepadButtonDefinition RotateUp;
+            public GamepadButtonDefinition RotateDown;
+        }
 
         [TagStructure(Size = 0x3C, MaxVersion = CacheVersion.Halo3Retail)]
         [TagStructure(Size = 0xA0, MinVersion = CacheVersion.Halo3ODST)]
-        public class CameraRefinement : TagStructure
+        public class CameraSettingsBlock : TagStructure
 		{
-            public StringId Biped2;
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public float Unknown4;
-            public float BipedAngle; //[0 to 1]
-            public uint Unknown6;
+            public StringId Name;
+
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public RealPoint2d BaseOffsetOld;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealPoint3d BaseOffsetNew;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown10;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown13;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown16;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown19;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public RealVector3d Unknown22;
-
-            public List<ZoomData> ZoomData1;
+            public float Fov;
             [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-            public List<ZoomData> ZoomData2;
+            public float InitialRadialOffset;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public float FinalRadialOffset;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public float CameraRadialStepSize;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public float InitialVerticalOffset;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public float FinalVerticalOffset;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public float CameraVerticalStepSize;
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public float CameraRotationalStep;
 
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown26;
+            public RealPoint3d ModelWorldPosition; // arbitrary location in the world to place the model (wu)
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown27;
+            public RealPoint3d MinimumWorldPosition;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public Angle Unknown28;
+            public RealPoint3d MaximumWorldPosition;
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown29;
+            public RealPoint3d MinimumCameraOffset; // wu
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public Angle Unknown30;
+            public RealPoint3d MinimumCameraFocalOffset; // wu
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown31;
+            public RealPoint3d MaximumCameraOffset; // wu
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown32;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public CachedTag Unknown33;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown34;
+            public RealPoint3d MaximumCameraFocalOffset; // wu
 
-            [TagStructure(Size = 0x14)]
-            public class ZoomData : TagStructure
-			{
-                public TagFunction Unknown;
-            }
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float InitialZoom; // [0,1]
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float MovementSpeed;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float MagnetismConstant;
+
+            public List<KeyframeTransitionFunctionBlock> RadialTransitionFxn; // MovementScaleFxn?
+
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public List<KeyframeTransitionFunctionBlock> VerticalTransitionFxn;
+
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public RealEulerAngles2d InitialRotation; // degrees
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public RealEulerAngles2d MinimumRotation; // degrees
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public RealEulerAngles2d MaximumRotation; // degrees
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public float RotationSpeed;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, ValidTags = new[] { "obje", "scen" })]
+            public CachedTag Model;
+            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            public StringId Variant;
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class KeyframeTransitionFunctionBlock : TagStructure
+        {
+            public TagFunction CustomFunction;
         }
 
         [TagStructure(Size = 0x14)]
@@ -127,6 +133,45 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public Bounds<float> XBounds;   
             public Bounds<float> YBounds;
+        }
+
+        public enum GamepadButtonDefinition : short
+        {
+            LeftTrigger,
+            RightTrigger,
+            DpadUp,
+            DpadDown,
+            DpadLeft,
+            DpadRight,
+            Start,
+            Back,
+            LeftThumb,
+            RightThumb,
+            ButtonA,
+            ButtonB,
+            ButtonX,
+            ButtonY,
+            LeftBumper,
+            RightBumper,
+            LeftStickLeft,
+            LeftStickRight,
+            LeftStickUp,
+            LeftStickDown,
+            RightStickLeft,
+            RightStickRight,
+            RightStickUp,
+            RightStickDown,
+            Unknown
+        }
+
+        [TagStructure(Size = 0x14)]
+        public class ModelWidgetCameraSliceBlock : TagStructure
+        {
+            public StringId Name; // use empty name for default
+            public float Left;
+            public float Right;
+            public float Top;
+            public float Bottom;
         }
     }
 }

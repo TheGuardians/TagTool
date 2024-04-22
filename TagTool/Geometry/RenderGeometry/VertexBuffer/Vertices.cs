@@ -89,6 +89,8 @@ namespace TagTool.Geometry
 
     public class ParticleVertex
     {
+        public RealVector2d Position { get; set; }
+        public RealVector2d Texcoord { get; set; }
     }
 
     public class ContrailVertex
@@ -132,7 +134,7 @@ namespace TagTool.Geometry
     public class TinyPositionVertex
     {
         public RealVector3d Position { get; set; }
-        public ushort Variant { get; set; }
+        public ushort Variant { get; set; } // type index (high 8 bits), motion scale (low 8 bits)
         public RealQuaternion Normal { get; set; }
         public uint Color { get; set; }
     }
@@ -242,22 +244,22 @@ namespace TagTool.Geometry
         public RealVector3d SHCoefficients3 { get; set; }
     }
 
-    public class Unknown1A
+    public class WaterTriangleIndices
     {
-        public ushort[] Vertices{ get; set; }
-        public ushort[] Indices { get; set; }
+        public ushort[] MeshIndices { get; set; }
+        public ushort[] WaterIndices { get; set; }
     }
 
-    public class Unknown1B
+    public class WaterTesselatedParameters
     {
-        public float Unknown1 { get; set; }
-        public float Unknown2 { get; set; }
-        public float Unknown3 { get; set; }
-        public float Unknown4 { get; set; }
-        public float Unknown5 { get; set; }
-        public float Unknown6 { get; set; }
-        public float Unknown7 { get; set; }
-        public float Unknown8 { get; set; }
-        public float Unknown9 { get; set; }
+        public RealVector2d LocalInfo { get; set; }
+        public float LocalInfoPadd;
+        public RealVector2d BaseTex { get; set; }
+        public float BaseTexPadd;
+    }
+
+    public class WorldWaterVertex : WorldVertex
+    {
+        public RealVector2d StaticPerPixel;
     }
 }

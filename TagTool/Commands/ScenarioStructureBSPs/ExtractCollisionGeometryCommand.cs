@@ -4,11 +4,12 @@ using System.IO;
 using System.Numerics;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
-    class ExtractCollisionGeometryCommand : Command
+    public class ExtractCollisionGeometryCommand : Command
     {
         private GameCache CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }
@@ -30,11 +31,11 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             if (Definition.CollisionBspResource == null)
             {
-                Console.WriteLine("ERROR: Collision geometry does not have a resource associated with it.");
+                Console.WriteLine("Collision geometry does not have a resource associated with it.");
                 return true;
             }
 
@@ -42,8 +43,6 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
             using (var resourceStream = new MemoryStream())
             {
-                
-
                 var file = new FileInfo(args[0]);
 
                 if (!file.Directory.Exists)
@@ -58,7 +57,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         for (var i = 0; i < bsp.Vertices.Count; i++)
                         {
                             var vertex = bsp.Vertices[i];
-                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
+                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {-vertex.Point.Y}");
                         }
 
                         writer.WriteLine($"g bsp_surfaces_{resourceDefinition.CollisionBsps.IndexOf(bsp)}");
@@ -104,7 +103,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                         for (var i = 0; i < largeBsp.Vertices.Count; i++)
                         {
                             var vertex = largeBsp.Vertices[i];
-                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
+                            writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {-vertex.Point.Y}");
                         }
 
                         writer.WriteLine($"g large_bsp_surfaces_{resourceDefinition.LargeCollisionBsps.IndexOf(largeBsp)}");
@@ -147,14 +146,14 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                     foreach (var instanceDef in Definition.InstancedGeometryInstances)
                     {
-                        if (instanceDef.MeshIndex == -1)
+                        if (instanceDef.DefinitionIndex == -1)
                             continue;
 
-                        var instance = resourceDefinition.InstancedGeometry[instanceDef.MeshIndex];
+                        var instance = resourceDefinition.InstancedGeometry[instanceDef.DefinitionIndex];
 
                         var instanceName = instanceDef.Name != StringId.Invalid ?
                             CacheContext.StringTable.GetString(instanceDef.Name) :
-                            $"instance_{instanceDef.MeshIndex}";
+                            $"instance_{instanceDef.DefinitionIndex}";
 
                         for (var i = 0; i < instance.CollisionInfo.Vertices.Count; i++)
                         {
@@ -167,7 +166,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
                                     instanceDef.Matrix.m31, instanceDef.Matrix.m32, instanceDef.Matrix.m33, 0.0f,
                                     instanceDef.Matrix.m41, instanceDef.Matrix.m42, instanceDef.Matrix.m43, 0.0f));
 
-                            writer.WriteLine($"v {point.X} {point.Z} {point.Y}");
+                            writer.WriteLine($"v {point.X} {point.Z} {-point.Y}");
                         }
 
                         writer.WriteLine($"g {instanceName}_main_surfaces");
@@ -207,12 +206,12 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                         baseVertex += instance.CollisionInfo.Vertices.Count;
 
-                        foreach (var bsp in instance.CollisionGeometries)
+                        foreach (var bsp in instance.RenderBsp)
                         {
                             for (var i = 0; i < bsp.Vertices.Count; i++)
                             {
                                 var vertex = bsp.Vertices[i];
-                                writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {vertex.Point.Y}");
+                                writer.WriteLine($"v {vertex.Point.X} {vertex.Point.Z} {-vertex.Point.Y}");
                             }
 
                             writer.WriteLine($"g {instanceName}_bsp_surfaces_{resourceDefinition.CollisionBsps.IndexOf(bsp)}");

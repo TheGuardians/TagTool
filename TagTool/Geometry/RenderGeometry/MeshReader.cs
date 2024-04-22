@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TagTool.IO;
 
 namespace TagTool.Geometry
 {
@@ -16,15 +17,19 @@ namespace TagTool.Geometry
         private const int IndexBufferCount = 2;
 
         private readonly CacheVersion _version;
+        private readonly CachePlatform _platform;
+        private readonly EndianFormat _endianness;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshReader"/> class.
         /// </summary>
-        /// <param name="version">The engine version to target.</param>
+        /// <param name="cache">The cache to target.</param>
         /// <param name="mesh">The mesh.</param>
-        public MeshReader(CacheVersion version, Mesh mesh)
+        public MeshReader(GameCache cache, Mesh mesh)
         {
-            _version = version;
+            _version = cache.Version;
+            _platform = cache.Platform;
+            _endianness = cache.Endianness;
             Mesh = mesh;
             VertexStreams = new VertexBufferDefinition[StreamCount];
             IndexBuffers = new IndexBufferDefinition[IndexBufferCount];
@@ -60,7 +65,7 @@ namespace TagTool.Geometry
         public IVertexStream OpenVertexStream(VertexBufferDefinition definition)
         {
             var stream = new MemoryStream(definition.Data.Data);
-            return VertexStreamFactory.Create(_version, stream);
+            return VertexStreamFactory.Create(_version, _platform, stream);
         }
 
         /// <summary>
@@ -86,7 +91,7 @@ namespace TagTool.Geometry
         public IndexBufferStream OpenIndexBufferStream(IndexBufferDefinition definition)
         {
             var stream = new MemoryStream(definition.Data.Data);
-            return new IndexBufferStream(stream);
+            return new IndexBufferStream(stream, _endianness);
         }
 
         /// <summary>
@@ -168,10 +173,13 @@ namespace TagTool.Geometry
             { VertexBufferFormat.Unknown17, 2 },
             { VertexBufferFormat.Decorator, 0 },
             { VertexBufferFormat.ParticleModel, 0 },
-            { VertexBufferFormat.Unknown1A, 2 },
-            { VertexBufferFormat.Unknown1B, 3 },
+            { VertexBufferFormat.WaterTriangleIndices, 2 },
+            { VertexBufferFormat.TesselatedWaterParameters, 3 },
             { VertexBufferFormat.Unknown1C, 0 },
             { VertexBufferFormat.Unused1D, 1 },
+            { VertexBufferFormat.SkinnedCompressed, 0 },
+            { VertexBufferFormat.RigidCompressed, 0 },
+            { VertexBufferFormat.RigidBoned, 0 }
         };
     }
 }

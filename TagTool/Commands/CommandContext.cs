@@ -29,6 +29,11 @@ namespace TagTool.Commands
         public IEnumerable<Command> Commands => CommandsByName.Values;
 
         /// <summary>
+        /// Gets or sets the context's global variables for scripting
+        /// </summary>
+        public Dictionary<object, object> ScriptGlobals { get; set; } = new Dictionary<object, object>();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="CommandContext"/> class.
         /// </summary>
         /// <param name="parent">The parent context. Can be <c>null</c> if none.</param>

@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace TagTool.Commands.Porting
             BlamCache = blamCache;
         }
 
-        private void CopyEvents(List<MultiplayerGlobals.RuntimeBlock.EventBlock> events1, List<MultiplayerGlobals.RuntimeBlock.EventBlock> events2)
+        private void CopyEvents(List<MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock> events1, List<MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock> events2)
         {
             for (var i = 0; i < events1.Count; i++)
             {
@@ -51,17 +52,14 @@ namespace TagTool.Commands.Porting
         public override object Execute(List<string> args)
         {
             if (args.Count != 0)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             MultiplayerGlobals oldMulgDefinition;
 
             using (var stream = HoCache.OpenCacheRead())
             {
-                if (!HoCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
-                {
-                    Console.WriteLine($"ERROR: ElDorado multiplayer_globals tag does not exist.");
-                    return true;
-                }
+                if (!HoCache.TagCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
+                    return new TagToolError(CommandError.TagInvalid, "ElDorado multiplayer_globals tag does not exist");
 
                 oldMulgDefinition = HoCache.Deserialize<MultiplayerGlobals>(stream, edTag);
             }
@@ -70,11 +68,8 @@ namespace TagTool.Commands.Porting
 
             using (var stream = HoCache.OpenCacheReadWrite())
             {
-                if (!HoCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
-                {
-                    Console.WriteLine($"ERROR: ElDorado multiplayer_globals tag does not exist.");
-                    return true;
-                }
+                if (!HoCache.TagCache.TryGetTag<MultiplayerGlobals>(@"multiplayer\multiplayer_globals", out var edTag))
+                    return new TagToolError(CommandError.TagInvalid, "ElDorado multiplayer_globals tag does not exist");
 
                 var mulgDefinition = HoCache.Deserialize<MultiplayerGlobals>(stream, edTag);
 

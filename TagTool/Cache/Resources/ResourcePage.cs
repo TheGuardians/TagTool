@@ -5,7 +5,7 @@ namespace TagTool.Cache.Resources
 {
     [TagStructure(Size = 0x58, Align = 0x8, MaxVersion = CacheVersion.Halo3ODST)]
     [TagStructure(Size = 0x58, Align = 0x8, MinVersion = CacheVersion.HaloReach)]
-    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
     [TagStructure(Size = 0x28, MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
     public class ResourcePage : TagStructure
 	{
@@ -17,7 +17,7 @@ namespace TagTool.Cache.Resources
         /// <summary>
         /// Gets or sets flags containing information about where the resource is located.
         /// </summary>
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
         public OldRawPageFlags OldFlags;
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace TagTool.Cache.Resources
         [TagField(MinVersion = CacheVersion.HaloOnline235640, MaxVersion = CacheVersion.HaloOnline700123)]
         public int Unknown1;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public int Index;
 
         [TagField(Gen = CacheGeneration.Third)]
@@ -58,13 +58,13 @@ namespace TagTool.Cache.Resources
 
         public uint UnknownSize;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown4;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown5;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public uint Unknown6;
     }
 

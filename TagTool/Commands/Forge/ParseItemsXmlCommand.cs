@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using static TagTool.Tags.Definitions.ForgeGlobalsDefinition;
 
@@ -35,7 +33,7 @@ namespace TagTool.Commands.Forge
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var xml = new XmlDocument();
             xml.Load(args[0]);
@@ -61,7 +59,7 @@ namespace TagTool.Commands.Forge
             foreach (var objTagName in extraObjects)
             {
                 CachedTag tag;
-                Cache.TryGetCachedTag(objTagName, out tag);
+                Cache.TagCache.TryGetCachedTag(objTagName, out tag);
                 var item = new PaletteItem();
                 item.Object = tag;
                 item.CategoryIndex = -1;
@@ -161,7 +159,7 @@ namespace TagTool.Commands.Forge
                         CategoryIndex = (short)CategoryStack.Peek().Item2,
                         DescriptionIndex = -1,
                         MaxAllowed = maxAllowed,
-                        Object = Cache.TryGetCachedTag(node.Attributes["tagindex"].InnerText, out var obj) ? obj : null,
+                        Object = Cache.TagCache.TryGetCachedTag(node.Attributes["tagindex"].InnerText, out var obj) ? obj : null,
                         Type = ParseEnum<ForgeGlobalsDefinition.PaletteItemType>(node.Attributes["type"].InnerText)
                             ?? ForgeGlobalsDefinition.PaletteItemType.None,
                         Setters = new List<ForgeGlobalsDefinition.PaletteItem.Setter>()

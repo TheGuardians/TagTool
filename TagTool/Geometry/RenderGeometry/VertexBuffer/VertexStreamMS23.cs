@@ -581,7 +581,7 @@ namespace TagTool.Geometry
             _stream.WriteFloat3(v.SHCoefficients3);
         }
 
-        public Unknown1A ReadUnknown1A()
+        public WaterTriangleIndices ReadWaterTriangleIndices()
         {
             var buffer = _stream.ReadUShort6();
             ushort[] vertices = new ushort[3];
@@ -592,70 +592,68 @@ namespace TagTool.Geometry
                 vertices[i] = buffer[2 * i];
                 indices[i] = buffer[2 * i + 1];
             }
-            return new Unknown1A
+            return new WaterTriangleIndices
             {
-                Vertices = vertices,
-                Indices = indices
+                MeshIndices = vertices,
+                WaterIndices = indices
             };
         }
 
-        public void WriteUnknown1A(Unknown1A v)
+        public void WriteWaterTriangleIndices(WaterTriangleIndices v)
         {
-            for(int i = 0; i < 3; i+=2)
+            for(int i = 0; i < 3; i++)
             {
-                _stream.WriteUShort(v.Vertices[i]);
-                _stream.WriteUShort(v.Indices[i]);
+                _stream.WriteUShort(v.MeshIndices[i]);
+                _stream.WriteUShort(v.WaterIndices[i]);
             }
         }
 
-        public Unknown1B ReadUnknown1B()
+        public WaterTesselatedParameters ReadWaterTesselatedParameters()
         {
-            return new Unknown1B
+            return new WaterTesselatedParameters
             {
-                Unknown1 = _stream.ReadFloat1(),
-                Unknown2 = _stream.ReadFloat1(),
-                Unknown3 = _stream.ReadFloat1(),
-                Unknown4 = 0,
-                Unknown5 = 0,
-                Unknown6 = 0,
-                Unknown7 = _stream.ReadFloat1(),
-                Unknown8 = _stream.ReadFloat1(),
-                Unknown9 = _stream.ReadFloat1(),
+                LocalInfo = _stream.ReadFloat2(),
+                LocalInfoPadd = _stream.ReadFloat1(),
+                BaseTex = _stream.ReadFloat2(),
+                BaseTexPadd = _stream.ReadFloat1(),
             };
         }
 
-        public void WriteUnknown1B(Unknown1B v)
+        public void WriteWaterTesselatedParameters(WaterTesselatedParameters v)
         {
-            _stream.WriteFloat1(v.Unknown1);
-            _stream.WriteFloat1(v.Unknown2);
-            _stream.WriteFloat1(v.Unknown3);
-            _stream.WriteFloat1(v.Unknown7);
-            _stream.WriteFloat1(v.Unknown8);
-            _stream.WriteFloat1(v.Unknown9);
+            _stream.WriteFloat2(v.LocalInfo);
+            _stream.WriteFloat1(v.LocalInfoPadd);
+            _stream.WriteFloat2(v.BaseTex);
+            _stream.WriteFloat1(v.BaseTexPadd);
         }
 
-        //TODO The last 2 float in WorldWaterVertex are unknown
-
-        public WorldVertex ReadWorldWaterVertex()
+        public WorldWaterVertex ReadWorldWaterVertex()
         {
-            return new WorldVertex
+            var position = new RealQuaternion(_stream.ReadFloat3(), 0);
+            var texcoord = _stream.ReadFloat2();
+            var tangent = new RealQuaternion(_stream.ReadFloat3(), 0);
+            var binormal = _stream.ReadFloat3();
+            var spp = _stream.ReadFloat2();
+            var normal = RealVector3d.CrossProduct(binormal, new RealVector3d(tangent.I, tangent.J, tangent.K));
+
+            return new WorldWaterVertex
             {
-                Position = new RealQuaternion(_stream.ReadFloat3(), 0),
-                Texcoord = _stream.ReadFloat2(),
-                Tangent = new RealQuaternion(_stream.ReadFloat3(), 0),
-                Binormal = _stream.ReadFloat3(),
-                Normal = new RealVector3d(0, 0, 1)
+                Position = position,
+                Texcoord = texcoord,
+                Tangent = tangent,
+                Binormal = binormal,
+                Normal = normal,
+                StaticPerPixel = spp
             };
         }
 
-        public void WriteWorldWaterVertex(WorldVertex v)
+        public void WriteWorldWaterVertex(WorldWaterVertex v)
         {
             _stream.WriteFloat3(v.Position.IJK);
             _stream.WriteFloat2(v.Texcoord);
             _stream.WriteFloat3(v.Tangent.IJK);
             _stream.WriteFloat3(v.Binormal);
-            //Temporary hack to have the right size I have no idea what these 2 values are
-            _stream.WriteFloat2(new RealVector2d(1, 1));
+            _stream.WriteFloat2(v.StaticPerPixel);
         }
 
         public int GetVertexSize(VertexBufferFormat type)
@@ -687,9 +685,9 @@ namespace TagTool.Geometry
                 case VertexBufferFormat.World:
                 case VertexBufferFormat.World2:
                     return 0x38;
-                case VertexBufferFormat.Unknown1A:
+                case VertexBufferFormat.WaterTriangleIndices:
                     return 0xC;
-                case VertexBufferFormat.Unknown1B:
+                case VertexBufferFormat.TesselatedWaterParameters:
                     return 0x18;
                 default:
                     return -1;

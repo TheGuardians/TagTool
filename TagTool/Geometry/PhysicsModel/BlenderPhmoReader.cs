@@ -1,6 +1,7 @@
 using SimpleJSON;
 using System;
 using System.IO;
+using TagTool.Commands.Common;
 
 namespace TagTool.Geometry
 {
@@ -27,9 +28,10 @@ namespace TagTool.Geometry
                 contents = sr.ReadToEnd();
                 sr.Close();
             }
-            catch (FileNotFoundException)
+            catch (Exception ex)
             {
-                Console.WriteLine("File: {0} could not be found.", filename);
+                if (ex is FileNotFoundException || ex is DirectoryNotFoundException)
+                    new TagToolError(CommandError.FileNotFound);
                 return null;
             };
 
@@ -38,6 +40,20 @@ namespace TagTool.Geometry
 
             return json;
         }
-
+        public JSONNode ReadString()
+        {
+            try
+            {
+                // Parse the JSON string
+                var jsonNode = JSON.Parse(filename);
+                return jsonNode;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during parsing
+                Console.WriteLine("Error parsing JSON string: " + ex.Message);
+                return null;
+            }
+        }
     }
 }

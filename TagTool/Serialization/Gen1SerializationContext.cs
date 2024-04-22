@@ -25,13 +25,16 @@ namespace TagTool.Serialization
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            return (uint)(address - GameCache.TagCacheGen1.BaseTagAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            if (Tag.AddressToOffsetOverride != null)
+                return Tag.AddressToOffsetOverride(currentOffset, address);
+
+            return (uint)(address - GameCache.TagCacheGen1.BaseTagAddress + GameCache.BaseMapFile.Header.GetTagTableHeaderOffset());
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)
         {
             var reader = new EndianReader(Stream, GameCache.BaseMapFile.EndianFormat);
-            reader.SeekTo(Tag.Offset - GameCache.TagCacheGen1.BaseTagAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            reader.SeekTo(AddressToOffset(0, Tag.Offset));
             return reader;
         }
 
@@ -58,9 +61,9 @@ namespace TagTool.Serialization
         {
             var tag = GameCache.TagCache.GetTag((uint)index);
 
-            var group = (tag != null) ? tag.Group : TagGroup.None;
+            var group = (tag != null) ? tag.Group : new TagGroup();
 
-            if (index == -1 || group == TagGroup.None)
+            if (index == -1 || group.IsNull())
                 return null;
 
             return tag;

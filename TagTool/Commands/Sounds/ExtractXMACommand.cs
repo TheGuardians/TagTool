@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
 using System;
@@ -45,8 +46,7 @@ namespace TagTool.Commands.Sounds
                 directory = "Sounds";
             }
             else
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
 
             if (!Directory.Exists(directory))
             {
@@ -54,17 +54,17 @@ namespace TagTool.Commands.Sounds
                 var answer = Console.ReadLine().ToLower();
 
                 if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return false;
+                    return new TagToolError(CommandError.YesNoSyntax);
 
                 if (answer.StartsWith("y"))
                     Directory.CreateDirectory(directory);
                 else
-                    return false;
+                    return true;
             }
 
             ExtractXMA(directory);
 
-            Console.WriteLine("done.");
+            Console.WriteLine("Done.");
 
             return true;
         }
@@ -79,7 +79,7 @@ namespace TagTool.Commands.Sounds
                 
 
             var resourceDefinition = Cache.ResourceCache.GetSoundResourceDefinition(Sound.Resource);
-            var xmaFileSize = BlamSoundGestalt.GetFileSize(Sound.SoundReference.PitchRangeIndex, Sound.SoundReference.PitchRangeCount);
+            var xmaFileSize = BlamSoundGestalt.GetFileSize(Sound.SoundReference.PitchRangeIndex, Sound.SoundReference.PitchRangeCount, Cache.Platform);
             if (xmaFileSize < 0)
                 return;
 
@@ -87,7 +87,7 @@ namespace TagTool.Commands.Sounds
 
             if (xmaData == null)
             {
-                Console.WriteLine($"ERROR: Failed to find sound data!");
+                new TagToolError(CommandError.CustomError, "Failed to find sound data!");
                 return;
             }
 
@@ -97,7 +97,7 @@ namespace TagTool.Commands.Sounds
             for (int pitchRangeIndex = Sound.SoundReference.PitchRangeIndex; pitchRangeIndex < Sound.SoundReference.PitchRangeIndex + Sound.SoundReference.PitchRangeCount; pitchRangeIndex++)
             {
                 var relativePitchRangeIndex = pitchRangeIndex - Sound.SoundReference.PitchRangeIndex;
-                var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex);
+                var permutationCount = BlamSoundGestalt.GetPermutationCount(pitchRangeIndex, Cache.Platform);
 
                 for (int i = 0; i < permutationCount; i++)
                 {

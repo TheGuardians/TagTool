@@ -78,7 +78,7 @@ namespace TagTool.Commands.Porting
 			{ new Tag("rmw "), @"levels\multi\riverworld\shaders\riverworld_water_rough" },
 			{ new Tag("shit"), @"globals\global_shield_impact_settings" },
 			{ new Tag("sncl"), @"sound\sound_classes" },
-			{ new Tag("snd!"), @"sound\materials\tough\rubber\rubber_small" },
+			{ new Tag("snd!"), @"sound\default_silent" },
 		};
 	}
 }

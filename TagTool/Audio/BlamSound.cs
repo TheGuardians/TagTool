@@ -14,6 +14,7 @@ namespace TagTool.Audio
         public EncodingValue Encoding;
         public Compression Compression;
         public uint SampleCount;
+        public uint FirstSample;
         public int RealPermutationIndex;
         public byte[] Data;
 
@@ -24,11 +25,22 @@ namespace TagTool.Audio
                 case CacheVersion.Halo3Retail:
                 case CacheVersion.Halo3ODST:
                 case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach11883:
                     InitGen3Sound(sound, soundGestalt, permutationGestaltIndex, data);
                     break;
                 default:
                     throw new Exception($"Unsupported cache version {version}");
             }
+        }
+
+        public BlamSound(SampleRate sampleRate, EncodingValue encoding, Compression compression, uint sampleCount, byte[] data)
+        {
+            SampleRate = sampleRate;
+            Encoding = encoding;
+            Compression = compression;
+            SampleCount = sampleCount;
+            Data = data;
+            RealPermutationIndex = 0;
         }
 
         private void InitGen3Sound(Sound sound, SoundCacheFileGestalt soundGestalt, int permutationGestaltIndex, byte[] data)
@@ -37,7 +49,7 @@ namespace TagTool.Audio
             var permutation = soundGestalt.Permutations[permutationGestaltIndex];
             Encoding = platformCodec.Encoding;
             SampleRate = platformCodec.SampleRate;
-            SampleCount = permutation.SampleSize;
+            SampleCount = permutation.SampleCount;
             RealPermutationIndex = permutation.OverallPermutationIndex;
             UpdateFormat(platformCodec.Compression, data);
         }
@@ -46,6 +58,37 @@ namespace TagTool.Audio
         {
             Compression = compression;
             Data = data;
+
+            if(compression == Compression.PCM)
+            {
+                int channelCount;
+
+                switch (Encoding)
+                {
+                    case EncodingValue.Mono:
+                        channelCount = 1;
+                        break;
+                    case EncodingValue.Stereo:
+                        channelCount = 2;
+                        break;
+                    case EncodingValue.Surround:
+                        channelCount = 4;
+                        break;
+                    case EncodingValue._51Surround:
+                        channelCount = 6;
+                        break;
+                    default:
+                        channelCount = 2;
+                        break;
+                }
+                var dataLength = data.Length;
+
+
+                uint newSampleCount = (uint)(((dataLength * 8) / 16) / channelCount);
+                SampleCount = newSampleCount;
+
+            }
+
         }
     }
 }

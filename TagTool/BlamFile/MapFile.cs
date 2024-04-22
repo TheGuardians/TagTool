@@ -1,10 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using TagTool.Cache;
+using TagTool.Cache.MCC;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.BlamFile
 {
@@ -17,6 +21,7 @@ namespace TagTool.BlamFile
         public CacheVersion Version { get; set; }
         public CacheFileVersion MapVersion { get; set; }
         public EndianFormat EndianFormat { get; set; }
+        public CachePlatform CachePlatform { get; set; }
 
         public CacheFileHeader Header;
 
@@ -29,10 +34,10 @@ namespace TagTool.BlamFile
         public void Write(EndianWriter writer)
         {
             var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(Version, EndianFormat);
+            var serializer = new TagSerializer(Version, CachePlatform, EndianFormat);
             serializer.Serialize(dataContext, Header);
 
-            if(Version == CacheVersion.HaloOnline106708)
+            if(CacheVersionDetection.IsBetween(Version, CacheVersion.HaloOnlineED, CacheVersion.HaloOnline106708))
             {
                 if(MapFileBlf != null)
                     MapFileBlf.Write(writer);
@@ -43,21 +48,28 @@ namespace TagTool.BlamFile
         {
             EndianFormat = DetectEndianFormat(reader);
             MapVersion = GetMapFileVersion(reader);
-            Version = DetectCacheVersion(reader);
-            var deserializer = new TagDeserializer(Version);
-            reader.SeekTo(0);
-            var dataContext = new DataSerializationContext(reader);
-            Header = (CacheFileHeader)deserializer.Deserialize(dataContext, typeof(CacheFileHeader));
+            CacheVersion version = CacheVersion.Unknown;
+            CachePlatform platform = CachePlatform.All;
+            DetectCacheVersionAndPlatform(reader, MapVersion, ref version, ref platform);
+            Version = version;
+            CachePlatform = platform;
+
+            Header = CacheFileHeader.Read(MapVersion, Version, CachePlatform, reader);
+
+            if (!Header.IsValid())
+            {
+                new TagToolWarning($"Invalid map file header or footer detected. Verify definition");
+            }
 
             // temporary code until map file format cleanup
             if (MapVersion == CacheFileVersion.HaloOnline)
             {
-                var mapFileHeaderSize = (int)TagStructure.GetTagStructureInfo(typeof(CacheFileHeader), Version).TotalSize;
+                var mapFileHeaderSize = (int)TagStructure.GetTagStructureInfo(Header.GetType(), Version, CachePlatform).TotalSize;
 
                 // Seek to the blf
                 reader.SeekTo(mapFileHeaderSize);
                 // Read blf
-                MapFileBlf = new Blf(Version);
+                MapFileBlf = new Blf(Version, CachePlatform);
                 if (!MapFileBlf.Read(reader))
                     MapFileBlf = null;
             }
@@ -83,7 +95,20 @@ namespace TagTool.BlamFile
         private static bool IsHalo2Vista(EndianReader reader)
         {
             reader.SeekTo(0x24);
-            if (reader.ReadInt32() == -1)
+            var unknownValue = reader.ReadInt32();
+            if (unknownValue == -1 || unknownValue == 0xB165400)
+                return true;
+            else
+                return false;
+        }
+
+        private static bool IsGen3MCCFormat(EndianReader reader)
+        {
+            reader.SeekTo(0x120);
+            CacheVersion version = CacheVersion.Unknown;
+            CachePlatform platform = CachePlatform.All;
+            CacheVersionDetection.GetFromBuildName(reader.ReadString(0x20), ref version, ref platform);
+            if (platform == CachePlatform.MCC)
                 return true;
             else
                 return false;
@@ -92,7 +117,9 @@ namespace TagTool.BlamFile
         private static bool IsModifiedReachFormat(EndianReader reader)
         {
             reader.SeekTo(0x120);
-            var version = CacheVersionDetection.GetFromBuildName(reader.ReadString(0x20));
+            CacheVersion version = CacheVersion.Unknown;
+            CachePlatform platform = CachePlatform.All;
+            CacheVersionDetection.GetFromBuildName(reader.ReadString(0x20), ref version, ref platform);
             if (version == CacheVersion.Unknown)
                 return false;
             else
@@ -119,7 +146,13 @@ namespace TagTool.BlamFile
                 case CacheFileVersion.Halo3Beta:
                 case CacheFileVersion.Halo3:
                 case CacheFileVersion.HaloOnline:
-                    reader.SeekTo(0x11C);
+                    if (IsGen3MCCFormat(reader))
+                        reader.SeekTo(0x120);
+                    else
+                        reader.SeekTo(0x11C);
+                    break;
+                case CacheFileVersion.HaloMCCUniversal:
+                    reader.SeekTo(0xA0);
                     break;
 
                 case CacheFileVersion.HaloReach:
@@ -141,11 +174,35 @@ namespace TagTool.BlamFile
             return (CacheFileVersion)reader.ReadInt32();
         }
 
-        private static CacheVersion DetectCacheVersion(EndianReader reader)
+        private static void DetectCacheVersionAndPlatform(EndianReader reader, CacheFileVersion mapVersion, ref CacheVersion cacheVersion, ref CachePlatform cachePlatform)
         {
             var version = GetMapFileVersion(reader);
             var buildDate = GetBuildDate(reader, version);
-            return CacheVersionDetection.GetFromBuildName(buildDate);
+
+            if (mapVersion == CacheFileVersion.HaloMCCUniversal)
+            {
+                reader.SeekTo(0xC);
+                var engineVersion = (CacheFileHeaderMCC.HaloEngineVersion)reader.ReadSByte();
+                switch(engineVersion)
+                {
+                    case CacheFileHeaderMCC.HaloEngineVersion.Halo3:
+                        cacheVersion = CacheVersion.Halo3Retail;
+                        break;
+                    case CacheFileHeaderMCC.HaloEngineVersion.Halo3ODST:
+                        cacheVersion = CacheVersion.Halo3ODST;
+                        break;
+                    case CacheFileHeaderMCC.HaloEngineVersion.HaloReach:
+                        cacheVersion = CacheVersion.HaloReach;
+                        break;
+                    default:
+                        throw new NotSupportedException("Unsupported engine version");
+                }
+                cachePlatform = CachePlatform.MCC;
+            }
+            else
+            {
+                CacheVersionDetection.GetFromBuildName(buildDate, ref cacheVersion, ref cachePlatform);
+            }
         }
     }
 }

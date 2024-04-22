@@ -3,7 +3,9 @@ using TagTool.Tags;
 
 namespace TagTool.Damage
 {
-    [TagStructure(Size = 0x1)]
+    [TagStructure(Size = 0x1, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x1, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x2, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     public class DamageReportingType : TagStructure
 	{
         [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
@@ -15,16 +17,19 @@ namespace TagTool.Damage
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public Halo3ODSTValue Halo3ODST;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public HaloOnlineValue HaloOnline;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public HaloReachValue HaloReach;
 
         public enum Halo2RetailValue : sbyte
         {
             Guardians,
             FallingDamage,
-            CollisionDamage,
-            MeleeEdamage,
-            Explosion,
+            GenericCollision,
+            GenericMelee,
+            GenericExplosion,
             MagnumPistol,
             PlasmaPistol,
             Needler,
@@ -195,7 +200,7 @@ namespace TagTool.Damage
             ElephantTurret
         }
 
-        public enum HaloOnlineValue : sbyte
+        public enum HaloOnlineValue : short
         {
             GuardiansUnknown,
             Guardians,
@@ -261,6 +266,92 @@ namespace TagTool.Damage
             Teleporter,
             Tripmine,
             DMR
+        }
+
+        public enum HaloReachValue : sbyte
+        {
+            GuardiansUnknown,
+            Guardians,
+            GuardiansScripting,
+            Suicide,
+            Magnum,
+            AssaultRifle,
+            DMR,
+            Shotgun,
+            SniperRifle,
+            RocketLauncher,
+            SpartanLaser,
+            FragGrenade,
+            GrenadeLauncher,
+            PlasmaPistol,
+            Needler,
+            PlasmaRifle,
+            PlasmaRepeater,
+            NeedleRifle,
+            Spiker,
+            PlasmaLauncher,
+            GravityHammer,
+            EnergySword,
+            PlasmaGrenade,
+            ConcussionRifle,
+            Ghost,
+            Revenant,
+            RevenantGunner,
+            Wraith,
+            WraithTurret,
+            Banshee,
+            BansheeBomb,
+            Seraph,
+            Mongoose,
+            Warthog,
+            WarthogChaingun,
+            WarthogGauss,
+            WarthogRocket,
+            Scorpion,
+            ScorpionTurret,
+            Falcon,
+            FalconGunner,
+            FallingDamage,
+            GenericCollision,
+            GenericMelee,
+            GenericExplosion,
+            BirthdayExplosion,
+            Flag,
+            Bomb,
+            BombExplosion,
+            Ball,
+            Teleporter,
+            TransferDamage,
+            ArmorLock,
+            TargetLocator,
+            HumanTurret,
+            PlasmaCannon,
+            PlasmaMortar,
+            PlasmaTurret,
+            ShadeTurret,
+            Sabre,
+            SMG,
+            Carbine,
+            BattleRifle,
+            FocusRifle,
+            FuelRod,
+            MissilePod,
+            BruteShot,
+            Flamethrower,
+            SentinelGun,
+            SpikeGrenade,
+            FirebombGrenade,
+            ElephantTurret,
+            Spectre,
+            SpectreGunner,
+            Tank,
+            Chopper,
+            Hornet,
+            Mantis,
+            Prowler,
+            SentinelBeam,
+            SentinelRPG,
+            Tripmine
         }
     }
 }

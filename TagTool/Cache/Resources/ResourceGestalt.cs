@@ -6,21 +6,12 @@ using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache.Resources
 {
-    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x214, MaxVersion = CacheVersion.HaloReach)]
-    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x214, MinVersion = CacheVersion.HaloReachMCC0824)]
+    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x228, MaxVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x220, Version = CacheVersion.HaloReach11883, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "cache_file_resource_gestalt", Tag = "zone", Size = 0x214, MaxVersion = CacheVersion.HaloReach11883, Platform = CachePlatform.Original)]
     public class ResourceGestalt : TagStructure
 	{
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-        public MapTypeHalo3RetailValue MapTypeHalo3Retail;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public MapTypeHalo3OdstValue MapTypeHalo3Odst;
-
-        [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public MapSubTypeHalo3OdstValue MapSubTypeHalo3Odst;
-
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public MapTypeHalo3RetailValue MapSubTypeHaloReach;
+        public ScenarioTypeEnum MapType;
 
         public ScenarioFlags Flags;
 
@@ -77,27 +68,19 @@ namespace TagTool.Cache.Resources
         public int CampaignId;
         public int MapId;
 
-        public enum MapTypeHalo3RetailValue : short
-        {
-            SinglePlayer,
-            Multiplayer,
-            MainMenu
-        }
-        
-        public enum MapTypeHalo3OdstValue : sbyte
-        {
-            SinglePlayer,
-            Multiplayer,
-            MainMenu
-        }
+        [TagField(Platform = CachePlatform.MCC)]
+        public int Unknown0;
+        [TagField(Platform = CachePlatform.MCC)]
+        public int Unknown1;
 
-        public enum MapSubTypeHalo3OdstValue : sbyte
+        public enum ScenarioTypeEnum : short
         {
-            None,
-            Hub,
-            Level,
-            Scene,
-            Cinematic
+            SinglePlayer,
+            Multiplayer,
+            MainMenu,
+            MultiplayerShared,
+            SinglePlayerShared,
+            SoundsShared
         }
     }
 }

@@ -20,30 +20,6 @@ namespace TagTool.Common
         public uint Value { get; set; }
 
         /// <summary>
-        /// Constructs a new StringID from a set and an index.
-        /// </summary>
-        /// <param name="set">The set the stringID belongs to.</param>
-        /// <param name="index">The index of the stringID within the set.</param>
-        public StringId(int set, int index)
-            : this(0, set, index)
-        {
-        }
-
-        /// <summary>
-        /// Constructs a new StringID from a length, a set, and an index based on Halo 3 format.
-        /// </summary>
-        /// <param name="length">The length of the string.</param>
-        /// <param name="set">The set the stringID belongs to.</param>
-        /// <param name="index">The index of the stringID within the set.</param>
-        public StringId(int length, int set, int index)
-        {
-            var shiftedLength = ((length & 0xFF) << 24);
-            var shiftedSet = ((set & 0xFF) << 16);
-            var shiftedIndex = (index & 0xFFFF);
-            Value = (uint)(shiftedLength | shiftedSet | shiftedIndex);
-        }
-
-        /// <summary>
         /// Constructs a new StringID from a 32-bit value.
         /// </summary>
         /// <param name="value">The 32-bit value of the stringID.</param>

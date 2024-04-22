@@ -7,7 +7,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
     {
         public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, ModelAnimationGraph animation)
         {
-            var groupName = cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
 
             var context = new CommandContext(parent,
                 string.Format("{0:X8}.{1}", tag.Index, groupName));
@@ -21,6 +21,13 @@ namespace TagTool.Commands.ModelAnimationGraphs
         {
             context.AddCommand(new SortModesCommand(cache, animation));
             context.AddCommand(new ApplySprintFixupsCommand(cache));
+            context.AddCommand(new AddAnimationCommand(cache, animation, tag));
+            context.AddCommand(new SetAnimationCommand(cache, animation, tag));
+            context.AddCommand(new ListInheritanceCommand(cache, animation, tag));
+            context.AddCommand(new SetInheritanceCommand(cache, animation, tag));
+            context.AddCommand(new ExtractAnimationCommand(cache, animation));
+            if (cache is GameCacheHaloOnlineBase)
+                context.AddCommand(new RebuildFPAnimationCommand(cache, animation, tag));
         }
     }
 }

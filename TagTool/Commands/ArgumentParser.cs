@@ -19,14 +19,20 @@ namespace TagTool.Commands
             {
                 switch (command[i])
                 {
-                    case '>':
-                        if (quoted)
-                            goto default; // Treat like a normal char when quoted
+                    case '>' when !quoted: // Treat like a normal char when quoted
                         redirectStart = (partStart != -1) ? results.Count + 1 : results.Count;
-                        goto case ' '; // Treat like a space
-                    case ' ':
-                        if (quoted)
-                            goto default; // Treat like a normal char when quoted
+                        if (partStart != -1)
+                            currentArg.Append(command.Substring(partStart, i - partStart));
+                        if (currentArg.Length > 0)
+                        {
+                            var arg = currentArg.ToString();
+                            results.Add(arg);
+                        }
+                        currentArg.Clear();
+                        partStart = -1;
+                        break;
+                    case ' ' when !quoted: // Treat like a normal char when quoted
+                    case '\t' when !quoted:
                         if (partStart != -1)
                             currentArg.Append(command.Substring(partStart, i - partStart));
                         if (currentArg.Length > 0)

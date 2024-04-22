@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using TagTool.Cache.Gen3;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -29,27 +30,38 @@ namespace TagTool.Cache.HaloOnline
         public TagCacheHaloOnlineHeader Header;
 
         public override IEnumerable<CachedTag> TagTable { get => Tags; }
-
-        public TagCacheHaloOnline(Stream stream, Dictionary<int, string> names = null)
+        public readonly StringTableHaloOnline StringTableReference;
+        
+        public TagCacheHaloOnline(CacheVersion version, Stream stream, StringTableHaloOnline stringTable, Dictionary<int, string> names = null)
         {
+            Version = version;
+            CachePlatform = CachePlatform.Original;
+            TagDefinitions = new TagDefinitionsGen3();
+            StringTableReference = stringTable;
             if (stream.Length != 0)
                 Load(new EndianReader(stream), names ?? new Dictionary<int, string>());
             else
                 CreateTagCache(stream);
+
+            if (CacheVersion.Unknown == (Version = CacheVersionDetection.DetectFromTimestamp(Header.CreationTime, out var closestVersion)))
+                Version = closestVersion;
+
+            CachePlatform = CachePlatform.Original;
         }
 
-        public void CreateTagCache(Stream stream)
+        private void CreateTagCache(Stream stream)
         {
             TagCacheHaloOnlineHeader header = new TagCacheHaloOnlineHeader
             {
-                TagTableOffset = 0x20,
-                CreationTime = 0x01D0631BCC791704
+                TagTableOffset = TagStructure.GetStructureSize(typeof(TagCacheHaloOnlineHeader), Version, CachePlatform),
+                CreationTime = CacheVersionDetection.GetTimestamp(Version)
             };
             stream.Position = 0;
             var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
             var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            var serializer = new TagSerializer(Version, CachePlatform);
             serializer.Serialize(dataContext, header);
+            Header = header;
             stream.Position = 0;
         }
 
@@ -58,7 +70,7 @@ namespace TagTool.Cache.HaloOnline
             // Read file header
             reader.SeekTo(0);
             var dataContext = new DataSerializationContext(reader);
-            var deserializer = new TagDeserializer(CacheVersion.HaloOnline106708);
+            var deserializer = new TagDeserializer(Version, CachePlatform);
 
             Header = deserializer.Deserialize<TagCacheHaloOnlineHeader>(dataContext);
 
@@ -87,7 +99,7 @@ namespace TagTool.Cache.HaloOnline
                 Tags.Add(tag);
 
                 reader.BaseStream.Position = tag.HeaderOffset;
-                tag.ReadHeader(reader);
+                tag.ReadHeader(reader, StringTableReference);
             }
         }
 
@@ -101,7 +113,7 @@ namespace TagTool.Cache.HaloOnline
         public override CachedTag AllocateTag(TagGroup type, string name = null)
         {
             var tagIndex = Tags.Count;
-            var tag = new CachedTagHaloOnline(tagIndex, type, name);
+            var tag = new CachedTagHaloOnline(tagIndex, (TagGroupGen3)type, name);
             Tags.Add(tag);
             return tag;
         }
@@ -111,12 +123,12 @@ namespace TagTool.Cache.HaloOnline
         /// </summary>
         public override CachedTag CreateCachedTag(int index, TagGroup group, string name = null)
         {
-            return new CachedTagHaloOnline(index, group, name);
+            return new CachedTagHaloOnline(index, (TagGroupGen3)group, name);
         }
 
         public override CachedTag CreateCachedTag()
         {
-            return new CachedTagHaloOnline(-1, TagGroup.None, null);
+            return new CachedTagHaloOnline(-1, new TagGroupGen3(), null);
         }
 
         /// <summary>
@@ -191,14 +203,17 @@ namespace TagTool.Cache.HaloOnline
             ResizeBlock(stream, tag, tag.HeaderOffset, tag.TotalSize, data.Length);
             tag.TotalSize = (uint)data.Length;
 
-            // Write the data
-            stream.Position = tag.HeaderOffset;
-            stream.Write(data, 0, data.Length);
+            if(data.Length > 0)
+            {
+                // Write the data
+                stream.Position = tag.HeaderOffset;
+                stream.Write(data, 0, data.Length);
 
-            // Re-parse it
-            stream.Position = tag.HeaderOffset;
-            tag.ReadHeader(new BinaryReader(stream));
-            UpdateTagOffsets(new EndianWriter(stream, EndianFormat.LittleEndian));
+                // Re-parse it
+                stream.Position = tag.HeaderOffset;
+                tag.ReadHeader(new BinaryReader(stream), StringTableReference);
+                UpdateTagOffsets(new EndianWriter(stream, EndianFormat.LittleEndian));
+            }
         }
 
         /// <summary>
@@ -213,7 +228,7 @@ namespace TagTool.Cache.HaloOnline
                 throw new ArgumentNullException(nameof(tag));
             else if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            else if (data.Group == TagGroup.None)
+            else if ((data.Group as TagGroupGen3).IsNull())
                 throw new ArgumentException("Cannot assign a tag to a null tag group");
             else if (data.Data == null)
                 throw new ArgumentException("The tag data buffer is null");
@@ -231,7 +246,7 @@ namespace TagTool.Cache.HaloOnline
             // Write in the new header and data
             stream.Position = tag.HeaderOffset;
             var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
-            tag.WriteHeader(writer);
+            tag.WriteHeader(writer, StringTableReference);
             StreamUtil.Fill(stream, 0, (int)(alignedHeaderSize - headerSize));
             stream.Write(data.Data, 0, data.Data.Length);
             StreamUtil.Fill(stream, 0, alignedLength - data.Data.Length);
@@ -257,7 +272,7 @@ namespace TagTool.Cache.HaloOnline
         {
             var data = new CachedTagData
             {
-                Group = tag.Group,
+                Group = (TagGroupGen3)tag.Group,
                 MainStructOffset = tag.DefinitionOffset,
             };
 
@@ -407,7 +422,7 @@ namespace TagTool.Cache.HaloOnline
             Header.TagCount = Tags.Count;
             writer.BaseStream.Position = 0;
             var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
+            var serializer = new TagSerializer(Version, CachePlatform);
             serializer.Serialize(dataContext, Header);
         }
 
@@ -500,7 +515,7 @@ namespace TagTool.Cache.HaloOnline
 
         public override CachedTag GetTag(int index)
         {
-            if (index < 0 || index > Tags.Count)
+            if (index < 0 || index >= Tags.Count)
                 return null;
             return Tags[index];
         }
@@ -509,7 +524,7 @@ namespace TagTool.Cache.HaloOnline
         {
             foreach (var tag in Tags)
             {
-                if (groupTag == tag.Group.Tag && name == tag.Name)
+                if (tag != null && groupTag == tag.Group.Tag && name == tag.Name)
                     return tag;
             }
             return null;

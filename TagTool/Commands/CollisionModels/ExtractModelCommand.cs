@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
 
@@ -29,7 +30,7 @@ namespace TagTool.Commands.CollisionModels
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var file = new FileInfo(args[0]);
 
@@ -55,7 +56,7 @@ namespace TagTool.Commands.CollisionModels
                             for (var i = 0; i < collisionBsp.Geometry.Vertices.Count; i++)
                             {
                                 var v = offset + collisionBsp.Geometry.Vertices[i].Point;
-                                writer.WriteLine($"v {v.X} {v.Z} {v.Y}");
+                                writer.WriteLine($"v {v.X} {v.Z} {-v.Y}");
                             }
 
                             writer.WriteLine($"g {regionName}:{permutationName}");

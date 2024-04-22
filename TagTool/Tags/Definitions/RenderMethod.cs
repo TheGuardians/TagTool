@@ -1,96 +1,287 @@
+using System;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Shaders;
+using System.IO;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using static TagTool.Tags.Definitions.RenderMethodTemplate;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x40)]
+    [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x40, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "render_method", Tag = "rm  ", Size = 0x64, MinVersion = CacheVersion.HaloReach)]
     public class RenderMethod : TagStructure
     {
+        [TagField(ValidTags = new[] { "rmdf" })]
         public CachedTag BaseRenderMethod;
-        public List<RenderMethodDefinitionOptionIndex> RenderMethodDefinitionOptionIndices;
-        public List<ImportDatum> ImportData;
-        public List<ShaderProperty> ShaderProperties;
-        public TagMapping.VariableTypeValue InputVariable;
-        public TagMapping.VariableTypeValue RangeVariable;
-        public TagMapping.OutputModifierValue OutputModifier;
-        public TagMapping.VariableTypeValue OutputModifierInput;
-        public float RuntimeMConstantValue;
-        public int Unknown2; // usually -1
+
+        [TagField(ValidTags = new[] { "rm  " }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag Reference;
+
+        public List<RenderMethodOptionIndex> Options;
+        public List<RenderMethodParameterBlock> Parameters;
+        public List<RenderMethodPostprocessBlock> ShaderProperties; // Postprocess
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint IsTemplate;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int LockedOptions;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<LockedParameter> LockedParameters;
+
+        public RenderMethodRenderFlags RenderFlags;
+        public SortingLayerValue SortLayer;
+
+        [TagField(Platform = CachePlatform.MCC)]
+        public GlobalRenderMethodRuntimeFlagsDefintion RuntimeFlags;
+
+        [TagField(Platform = CachePlatform.Original)]
+        public byte Version;
+
+        public int CustomFogSettingIndex; // skya AtmosphereProperties block index
+        public int PredictionAtomIndex;
 
         [TagStructure(Size = 0x2)]
-        public class RenderMethodDefinitionOptionIndex : TagStructure
+        public class RenderMethodOptionIndex : TagStructure
         {
             public short OptionIndex;
         }
 
         [TagStructure(Size = 0x24)]
-        public class ShaderFunction : TagStructure
+        public class RenderMethodAnimatedParameterBlock : TagStructure
         {
-            // TODO: determine if this is an enum or an index
-            public int Type;
-
+            public FunctionType Type;
             [TagField(Flags = Label)]
             public StringId InputName;
-
             public StringId RangeName;
-
             public float TimePeriod;
-
             public TagFunction Function = new TagFunction { Data = new byte[0] };
+
+            public enum FunctionType : int
+            {
+                Value,
+                Color,
+                ScaleUniform,
+                ScaleX,
+                ScaleY,
+                TranslationX,
+                TranslationY,
+                FrameIndex,
+                Alpha,
+                // NEW (MS23 only)
+                ChangeColorPrimary,
+                ChangeColorSecondary,
+                ChangeColorTertiary,
+                ChangeColorQuaternary,
+                ChangeColorQuinary,
+            }
         }
 
         [TagStructure(Size = 0x3C)]
-        public class ImportDatum : TagStructure
+        public class RenderMethodParameterBlock : TagStructure
         {
             [TagField(Flags = Label)]
             public StringId Name;
+            public RenderMethodOption.ParameterBlock.OptionDataType ParameterType;
 
-            public RenderMethodOption.OptionBlock.OptionDataType Type;
+            [TagField(ValidTags = new[] { "bitm" })]
             public CachedTag Bitmap;
-            public uint Unknown2;
-            public int Unknown3;
-            public short Unknown4;
-            public short Unknown5;
-            public short Unknown6;
-            public short Unknown7;
-            public short Unknown8;
-            public short Unknown9;
-            public uint Unknown10;
-            public List<ShaderFunction> Functions;
+
+            public float RealValue;
+            public int IntBoolValue;
+            public short BitmapFlags;
+            [TagField(Platform = CachePlatform.MCC)]
+            public short BitmapComparisonFunction;
+            public short BitmapFilterMode;
+            public short BitmapAddressMode;
+            public short BitmapAddressModeX;
+            public short BitmapAddressModeY;
+            public short BitmapAnisotropyAmount;
+            public short BitmapExternRTTMode;
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0x2, Platform = CachePlatform.Original)]
+            public byte[] Padding;
+            public List<RenderMethodAnimatedParameterBlock> AnimatedParameters;
         }
 
-        [TagStructure(Size = 0x84)]
-        public class ShaderProperty : TagStructure
+        [TagStructure(Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0xAC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x84, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x8C, Platform = CachePlatform.MCC, Version = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0xB4, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
+        public class RenderMethodPostprocessBlock : TagStructure
         {
+            [TagField(ValidTags = new[] { "rmt2" })]
             public CachedTag Template;
+
             public List<TextureConstant> TextureConstants;
             public List<RealConstant> RealConstants;
             public List<uint> IntegerConstants;
             public uint BooleanConstants; // Each bit indicates true/false. SourceIndex = bit index
-            public List<PackedInteger_10_6> EntryPoints; // Ranges of ParameterTables
-            public List<ParameterTable> ParameterTables; // Ranges of Parameters by usage
-            public List<ParameterMapping> Parameters; // Mapping of constants functions, and registers
-            public List<ShaderFunction> Functions; // Functions for animated parameters
-            public int AlphaBlendMode;
-            public uint BlendFlags;
-            public uint Unknown8; // unused?
-            [TagField(Length = 8)]
-            public short[] QueryableProperties; // Indices of constants. TODO: create an enum
+            public List<TagBlockIndex> EntryPoints; // Ranges of ParameterTables
+            public List<RenderMethodPostprocessPassBlock> Passes; // Ranges of Parameters by usage
+            public List<RenderMethodRoutingInfoBlock> RoutingInfo; // Mapping of constants functions, and registers
+            public List<RenderMethodAnimatedParameterBlock> Functions; // Functions for animated parameters
+            public BlendModeValue BlendMode;
+            public RenderMethodPostprocessFlags Flags;
+            public int ImSoFiredPad;
 
-            [TagStructure(Size = 0x18)]
+            // Indices of constants. TODO: create an enum
+            [TagField(Length = 8, MaxVersion = CacheVersion.HaloOnline700123)]
+            public short[] QueryableProperties; 
+            [TagField(Length = 0x1C, MinVersion = CacheVersion.HaloReach)]
+            public short[] QueryablePropertiesReach;
+
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
+            public short AssetDatumSalt;
+            [TagField(Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
+            public short AssetDatumIndex;
+            [TagField(Length = 0x4, Flags = Padding, Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
+            public byte[] PaddingMCC;
+
+            public enum BlendModeValue : uint
+            {
+                Opaque,
+                Additive,
+                Multiply,
+                AlphaBlend,
+                DoubleMultiply,
+                PreMultipliedAlpha,
+                Maximum,
+                MultiplyAdd,
+                AddSrcTimesDstalpha,
+                AddSrcTimesSrcalpha,
+                InverseAlphaBlend,
+                MotionBlurStatic,
+                MotionBlurInhibit,
+            }
+
+            [Flags]
+            public enum RenderMethodPostprocessFlags : uint
+            {
+                None = 0,
+                ForceSinglePass = 1 << 0, // this shader will compile as single pass even if blend mode is opaque
+                EnableAlphaTest = 1 << 1,
+                SfxDistort_ForceAlphaBlend = 1 << 2 // added by saber
+            }
+
+            [TagStructure(Size = 0x18, Platform = CachePlatform.Original)]
+            [TagStructure(Size = 0x1C, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
+            [TagStructure(Size = 0x18, Platform = CachePlatform.MCC, MinVersion = CacheVersion.Halo3ODST)]
             public class TextureConstant : TagStructure
             {
-                [TagField(Flags = Label)]
+                [TagField(ValidTags = new[] { "bitm" }, Flags = Label)]
                 public CachedTag Bitmap;
+
                 public short BitmapIndex;
-                public sbyte SamplerFlags;
-                public sbyte SamplerFilterMode;
-                public sbyte ExternMode;
-                public sbyte XFormArgumentIndex;
-                public PackedInteger_10_6 Functions = new PackedInteger_10_6(); // Range of Functions
+                public PackedSamplerAddressMode SamplerAddressMode;
+
+                [TagField(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+                public SamplerFilterMode FilterMode;
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public PackedSamplerFilterMode FilterModePacked; // not sure if the anisotropy is used
+
+                [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
+                public byte ComparisonFunction;
+
+                public RenderMethodExternTextureMode ExternTextureMode;
+                public sbyte TextureTransformConstantIndex;
+
+                [TagField(Flags = Padding, Length = 0x1, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
+                public byte[] Padding0;
+
+                public TagBlockIndex TextureTransformOverlayIndices = new TagBlockIndex();
+
+                [TagField(Flags = Padding, Length = 0x2, Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3Retail)]
+                public byte[] Padding1;
+
+                public enum SamplerFilterMode : byte
+                {
+                    Trilinear,
+                    Point,
+                    Bilinear,
+                    Anisotropic1,
+                    Anisotropic2Expensive,
+                    Anisotropic3Expensive,
+                    Anisotropic4EXPENSIVE,
+                    LightprobeTextureArray,
+                    ComparisonPoint,
+                    ComparisonBilinear
+                }
+
+                public enum RenderMethodExternTextureMode : byte
+                {
+                    UseBitmapAsNormal,
+                    TextureCamera,
+                    ZCamera,
+                    Mirror,
+                    Refraction,
+                    Unused,
+                    Scope
+                }
+
+                [TagStructure(Size = 0x1)]
+                public class PackedSamplerFilterMode : TagStructure
+                {
+                    public SamplerFilterMode FilterMode { get => GetFilterMode(); set => SetFilterMode(value); }
+                    public byte Anisotropy { get => GetAnisotropy(); set => SetAnisotropy(value); }
+
+                    private SamplerFilterMode GetFilterMode() => (SamplerFilterMode)(FilterValue & 0xF);
+                    private byte GetAnisotropy() => (byte)(FilterValue >> 4);
+                    private void SetFilterMode(SamplerFilterMode u)
+                    {
+                        if ((byte)u > 0xFu) throw new System.Exception("Out of range");
+                        var b = ((byte)GetAnisotropy() & 0xF) << 4;
+                        FilterValue = (byte)((byte)u | b);
+                    }
+                    private void SetAnisotropy(byte v)
+                    {
+                        if ((byte)v > 0xFu) throw new System.Exception("Out of range");
+                        var a = (byte)GetFilterMode();
+                        var b = ((byte)v & 0xF) << 4;
+                        FilterValue = (byte)(a | b);
+                    }
+
+                    public byte FilterValue;
+                }
+
+                public enum SamplerAddressModeEnum : byte
+                {
+                    Wrap,
+                    Clamp,
+                    Mirror,
+                    BlackBorder,
+                    MirrorOnce,
+                    MirrorOnceBorder
+                }
+
+                [TagStructure(Size = 0x1)]
+                public class PackedSamplerAddressMode : TagStructure
+                {
+                    public SamplerAddressModeEnum AddressU { get => GetU(); set => SetU(value); }
+                    public SamplerAddressModeEnum AddressV { get => GetV(); set => SetV(value); }
+
+                    private SamplerAddressModeEnum GetU() => (SamplerAddressModeEnum)(SamplerAddressUV & 0xF);
+                    private SamplerAddressModeEnum GetV() => (SamplerAddressModeEnum)(SamplerAddressUV >> 4);
+                    private void SetU(SamplerAddressModeEnum u)
+                    {
+                        if ((byte)u > 0xFu) throw new System.Exception("Out of range");
+                        var a = (byte)u;
+                        var b = ((byte)GetV() & 0xF) << 4;
+                        SamplerAddressUV = (byte)(a | b);
+                    }
+                    private void SetV(SamplerAddressModeEnum v)
+                    {
+                        if ((byte)v > 0xFu) throw new System.Exception("Out of range");
+                        var a = (byte)GetU();
+                        var b = ((byte)v & 0xF) << 4;
+                        SamplerAddressUV = (byte)(a | b);
+                    }
+
+                    public byte SamplerAddressUV;
+                }
             }
 
             [TagStructure(Size = 0x10)]
@@ -115,15 +306,15 @@ namespace TagTool.Tags.Definitions
             }
 
             [TagStructure(Size = 0x6)]
-            public class ParameterTable : TagStructure
+            public class RenderMethodPostprocessPassBlock : TagStructure
             {
-                public PackedInteger_10_6 Texture = new PackedInteger_10_6();
-                public PackedInteger_10_6 RealVertex = new PackedInteger_10_6();
-                public PackedInteger_10_6 RealPixel = new PackedInteger_10_6();
+                public TagBlockIndex Texture = new TagBlockIndex();
+                public TagBlockIndex RealVertex = new TagBlockIndex();
+                public TagBlockIndex RealPixel = new TagBlockIndex();
             }
 
             [TagStructure(Size = 0x4)]
-            public class ParameterMapping : TagStructure
+            public class RenderMethodRoutingInfoBlock : TagStructure
             {
                 public enum RenderMethodExternalValue : byte
                 {
@@ -189,6 +380,59 @@ namespace TagTool.Tags.Definitions
                 public byte FunctionIndex;
                 public byte SourceIndex;
             }
+
+            public TextureConstant TryGetTextureConstantFromQueryableProperty(int queryIndex)
+            {
+                if (queryIndex >= 0 && queryIndex < 8 &&
+                    QueryableProperties[queryIndex] != -1)
+                    return TextureConstants[QueryableProperties[queryIndex]];
+                return null;
+            }
+        }
+
+        [TagStructure(Size = 0xC)]
+        public class LockedParameter : TagStructure
+        {
+            public StringId Name;
+            public RenderMethodOption.ParameterBlock.OptionDataType Type;
+            public uint Flags;
+        }
+
+        [Flags]
+        public enum RenderMethodRenderFlags : ushort
+        {
+            None = 0,
+            IgnoreFog = 1 << 0,
+            UseSkyAtmosphereProperties = 1 << 1,
+            UsesDepthCamera = 1 << 2,
+            //DisableWithShields = 1 << 3,
+            //EnableWithShields = 1 << 4,
+        }
+
+        [Flags]
+        public enum GlobalRenderMethodRuntimeFlagsDefintion : byte
+        {
+            UseVSWithMisc = 1 << 0 // custom compiled shader
+        }
+
+        public bool CategoryOptionSelected(GameCache cache, RenderMethodDefinition rmdf, string categoryName, string optionName)
+        {
+            for (int i = 0; i < rmdf.Categories.Count; i++)
+            {
+                if (cache.StringTable.GetString(rmdf.Categories[i].Name) == categoryName)
+                {
+                    for (int j = 0; j < rmdf.Categories[i].ShaderOptions.Count; j++)
+                    {
+                        if (cache.StringTable.GetString(rmdf.Categories[i].ShaderOptions[j].Name) == optionName)
+                        {
+                            return Options[i].OptionIndex == j;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            return false;
         }
     }
 }

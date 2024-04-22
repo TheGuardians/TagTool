@@ -1,13 +1,16 @@
 ﻿using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
+using TagTool.Common;
 
 namespace TagTool.Commands.ScenarioStructureBSPs
 {
-    class ExtractRenderGeometryCommand : Command
+    public class ExtractRenderGeometryCommand : Command
     {
         private GameCache CacheContext { get; }
         private ScenarioStructureBsp Definition { get; }
@@ -30,17 +33,17 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var fileType = args[0];
             var fileName = args[1];
 
             if (fileType != "obj")
-                throw new NotSupportedException(fileType);
+                return new TagToolError(CommandError.FileType);
 
             if (Definition.Geometry.Resource == null)
             {
-                Console.WriteLine("ERROR: Render geometry does not have a resource associated with it.");
+                Console.WriteLine("Render geometry does not have a resource associated with it.");
                 return true;
             }
 
@@ -48,9 +51,9 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             // Deserialize the resource definition
             //
 
-
+            var collresource = CacheContext.ResourceCache.GetStructureBspTagResources(Definition.CollisionBspResource);
             var definition = CacheContext.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
-            Definition.Geometry.SetResourceBuffers(definition);
+            Definition.Geometry.SetResourceBuffers(definition, false);
 
             using (var resourceStream = new MemoryStream())
             {
@@ -61,19 +64,39 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
                 using (var objFile = new StreamWriter(file.Create()))
                 {
-                    var objExtractor = new ObjExtractor(objFile);
+                    var objExtractor = new ObjExtractor(CacheContext, objFile);
 
+                    var i = 0;
                     foreach (var cluster in Definition.Clusters)
                     {
-                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry.Meshes[cluster.MeshIndex]);
-                        objExtractor.ExtractMesh(meshReader, null);
+                        var meshReader = new MeshReader(CacheContext, Definition.Geometry.Meshes[cluster.MeshIndex]);
+                        objExtractor.ExtractMesh(meshReader, null, Definition.Materials, String.Format("cluster_{0}", i));
+                        i++;
                     }
 
                     foreach (var instance in Definition.InstancedGeometryInstances)
                     {
-                        var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
-                        var meshReader = new MeshReader(CacheContext.Version, Definition.Geometry.Meshes[instance.MeshIndex]);
-                        objExtractor.ExtractMesh(meshReader, vertexCompressor);
+                        var instanceDef = collresource.InstancedGeometry[instance.DefinitionIndex];
+                        var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[instanceDef.CompressionIndex]);
+                        var meshReader = new MeshReader(CacheContext, Definition.Geometry.Meshes[instanceDef.MeshIndex]);
+
+                        var scale = Matrix4x4.CreateScale(instance.Scale);
+                        var transform = scale * new Matrix4x4(
+                                    instance.Matrix.m11, instance.Matrix.m12, instance.Matrix.m13, 0.0f,
+                                    instance.Matrix.m21, instance.Matrix.m22, instance.Matrix.m23, 0.0f,
+                                    instance.Matrix.m31, instance.Matrix.m32, instance.Matrix.m33, 0.0f,
+                                    instance.Matrix.m41, instance.Matrix.m42, instance.Matrix.m43, 0.0f);
+
+                        if (CacheContext.Version >= CacheVersion.HaloReach)
+                        {
+                            objExtractor.ExtractMesh(meshReader, vertexCompressor, Definition.Materials,
+                                String.Concat("%", CacheContext.StringTable.GetString(instance.NameReach)), transform);
+                        }
+                        else
+                        {
+                            objExtractor.ExtractMesh(meshReader, vertexCompressor, Definition.Materials,
+                                String.Concat("%", CacheContext.StringTable.GetString(instance.Name)), transform);
+                        }
                     }
 
                     objExtractor.Finish();

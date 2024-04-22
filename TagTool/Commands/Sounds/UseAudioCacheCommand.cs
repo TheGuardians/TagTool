@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Sounds
 {
-    class UseAudioCacheCommand : Command
+    public class UseAudioCacheCommand : Command
     {
         public static DirectoryInfo AudioCacheDirectory = null;
 
@@ -22,7 +23,7 @@ namespace TagTool.Commands.Sounds
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var directory = args[0];
 
@@ -32,7 +33,7 @@ namespace TagTool.Commands.Sounds
                 var answer = Console.ReadLine().ToLower();
 
                 if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return false;
+                    return new TagToolError(CommandError.YesNoSyntax);
 
                 if (answer.StartsWith("y"))
                     Directory.CreateDirectory(directory);
@@ -46,8 +47,7 @@ namespace TagTool.Commands.Sounds
             }
             else
             {
-                Console.WriteLine("Failed to find directory");
-                return false;
+                return new TagToolError(CommandError.DirectoryNotFound, $"\"{directory}\"");
             }
         }
     }

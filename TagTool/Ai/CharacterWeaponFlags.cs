@@ -11,11 +11,7 @@ namespace TagTool.Ai
         UseExtendedSafeToSaveRange = 1 << 2,
         FixedAimingVector = 1 << 3,
         AimAtFeet = 1 << 4,
-        /// <summary>
-        /// Use only for weapons with really, really long barrels (bfg),
-        /// do NOT use for rotating turret weapons (warthog, falcon, etc)
-        /// </summary>
-        ForceAimFromBarrelPosition = 1 << 5,
+        ForceAimFromBarrelPosition = 1 << 5, // Use only for weapons with really, really long barrels (bfg), do NOT use for rotating turret weapons (warthog, falcon, etc)
         FavorForLongRange = 1 << 6,
         FavorForCloseRange = 1 << 7,
         FavorAgainstVehicles = 1 << 8,

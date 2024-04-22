@@ -7,52 +7,30 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x84, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1B4, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Beta)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x1CC, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x258, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "render_model", Tag = "mode", Size = 0x264, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class RenderModel : TagStructure
-	{
+    {
         public StringId Name;
         public FlagsValue Flags;
         public short Version;
         public int Checksum;
 
-        [TagField(Flags = Padding, Length = 8, MaxVersion = CacheVersion.Halo2Vista)]
-        public byte[] Unused1 = new byte[8];
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<RenderGeometryCompression> Compression;
-        
         public List<Region> Regions;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<Section> Sections;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<InvalidSectionPairBit> InvalidSectionPairBits;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<SectionGroup> SectionGroups;
-
-        [TagField(Length = 6, MaxVersion = CacheVersion.Halo2Vista)]
-        public sbyte[] LodSectionIndices = new sbyte[6];
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public short Unknown4;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public int Unknown18;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public int InstanceStartingMeshIndex;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public List<InstancePlacement> InstancePlacements;
 
         public int NodeListChecksum;
         public List<Node> Nodes;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<NodeIndex> NodeMaps;
 
         public List<MarkerGroup> MarkerGroups;
         public List<RenderMaterial> Materials;
@@ -62,27 +40,38 @@ namespace TagTool.Tags.Definitions
 
         public float DontDrawOverCameraCosineAngle;
 
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<PrtInfoBlock> PrtInfo;
-
-        [TagField(MaxVersion = CacheVersion.Halo2Vista)]
-        public List<SectionRenderLeaf> SectionRenderLeaves;
-
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
         public RenderGeometry Geometry = new RenderGeometry();
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public List<TagBlock17> UnknownE8;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<short> NodeMapMapping;
+        [TagField(MinVersion = CacheVersion.Halo3Beta)]
+        public List<SkygenLight> LightgenLights; // first index is sun
 
-        [TagField(Length = 16, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 16, MinVersion = CacheVersion.Halo3Beta)]
         public float[] SHRed = new float[SphericalHarmonics.Order3Count];
-        [TagField(Length = 16, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 16, MinVersion = CacheVersion.Halo3Beta)]
         public float[] SHGreen = new float[SphericalHarmonics.Order3Count];
-        [TagField(Length = 16, MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Length = 16, MinVersion = CacheVersion.Halo3Beta)]
         public float[] SHBlue = new float[SphericalHarmonics.Order3Count];
+        [TagField(Length = 16, MinVersion = CacheVersion.HaloReach)]
+        public float[] VmfLightProbe;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public RealVector3d AnalyticalLightDirection;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public RealRgbColor AnalyticalLightColor;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float DirectSunLightMultiplier;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float SkyDomeAndAllBounceLightMultiplier;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float Sun1stBounceScaler;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float SkyLight1stBounceScaler;
+
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public List<UnknownSHProbe> UnknownSHProbes;
+        public List<VolumeSamplesBlock> VolumeSamples;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<RuntimeNodeOrientation> RuntimeNodeOrientations;
@@ -141,8 +130,9 @@ namespace TagTool.Tags.Definitions
             /// <summary>
             /// A permutation of a region, associating a specific mesh with it.
             /// </summary>
-            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail)]
+            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
             [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x18, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
             public class Permutation : TagStructure
 			{
                 /// <summary>
@@ -160,25 +150,27 @@ namespace TagTool.Tags.Definitions
                 /// <summary>
                 /// The index of the first mesh belonging to the permutation.
                 /// </summary>
-                [TagField(MinVersion = CacheVersion.Halo3Retail)]
+                [TagField(MinVersion = CacheVersion.Halo3Beta)]
                 public short MeshIndex;
 
                 /// <summary>
                 /// The number of meshes belonging to the permutation.
                 /// </summary>
-                [TagField(MinVersion = CacheVersion.Halo3Retail)]
+                [TagField(MinVersion = CacheVersion.Halo3Beta)]
                 public ushort MeshCount;
 
-                [TagField(MinVersion = CacheVersion.Halo3Retail)]
+                [TagField(MinVersion = CacheVersion.Halo3Beta)]
                 public int Unknown8;
 
-                [TagField(MinVersion = CacheVersion.Halo3Retail)]
+                [TagField(MinVersion = CacheVersion.Halo3Beta)]
                 public int UnknownC;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public int Unknown10;
 
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
                 public int Unknown14;
             }
         }
@@ -306,7 +298,7 @@ namespace TagTool.Tags.Definitions
             Bit15 = 1 << 15
         }
 
-        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x3C, MinVersion = CacheVersion.Halo3Beta)]
         public class InstancePlacement : TagStructure
 		{
             public StringId Name;
@@ -351,130 +343,53 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3Beta)]
         public class MarkerGroup : TagStructure
 		{
             public StringId Name;
             public List<Marker> Markers;
 
-            [TagStructure(Size = 0x24)]
+            [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloReach)]
             public class Marker : TagStructure
 			{
                 public sbyte RegionIndex;
                 public sbyte PermutationIndex;
                 public sbyte NodeIndex;
-                public sbyte Unknown3;
+
+                [TagField(MaxVersion = CacheVersion.Halo3ODST, Length = 0x1, Flags = Padding)]
+                public byte[] Padding0;
+
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                public ReachMarkerFlagsDefinition Flags;
+
                 public RealPoint3d Translation;
                 public RealQuaternion Rotation;
                 public float Scale;
-            }
-        }
-
-        [TagStructure(Size = 0x58, MaxVersion = CacheVersion.Halo2Vista)]
-        public class PrtInfoBlock : TagStructure
-		{
-            public ushort ShOrder;
-            public ushort NumberOfClusters;
-            public ushort PcaVectorsPerCluster;
-            public ushort NumberOfRays;
-            public ushort NumberOfBounces;
-            public ushort MaterialIndexForSbsfcScattering;
-            public float LengthScale;
-            public ushort NumberOfLodsInModel;
-            public ushort Unknown;
-            public List<LodInfoBlock> LodInfo;
-            public List<ClusterBasisBlock> ClusterBasis;
-            public List<RawPcaDatum> RawPcaData;
-            public List<Mesh.VertexBuffer> VertexBuffers;
-            public DatumHandle BlockOffset;
-            public int BlockSize;
-            public uint SectionDataSize;
-            public uint ResourceDataSize;
-            public List<TagResourceGen2> Resources;
-
-            [TagField(Flags = Short)]
-            public CachedTag Original;
-
-            public short OwnerTagSectionOffset;
-            public byte RuntimeLinked;
-            public byte RuntimeLoaded;
-
-            [TagField(Flags = Short)]
-            public CachedTag Runtime;
-
-            [TagStructure(Size = 0xC, MaxVersion = CacheVersion.Halo2Vista)]
-            public class LodInfoBlock : TagStructure
-			{
-                public uint ClusterOffset;
-                public List<SectionInfoBlock> SectionInfo;
-
-                [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
-                public class SectionInfoBlock : TagStructure
-				{
-                    public int SectionIndex;
-                    public uint PcaDataOffset;
-                }
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public RealPoint3d Direction;
             }
 
-            [TagStructure(Size = 0x4)]
-            public class ClusterBasisBlock : TagStructure
-			{
-                public float BasisData;
-            }
-
-            [TagStructure(Size = 0x4)]
-            public class RawPcaDatum : TagStructure
-			{
-                public float PcaData;
-            }
-        }
-
-        [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
-        public class SectionRenderLeaf : TagStructure
-		{
-            public List<NodeRenderLeaf> NodeRenderLeaves;
-
-            [TagStructure(Size = 0x10, MaxVersion = CacheVersion.Halo2Vista)]
-            public class NodeRenderLeaf : TagStructure
-			{
-                public List<CollisionLeaf> CollisionLeaves;
-                public List<SurfaceReference> SurfaceReferences;
-
-                [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
-                public class CollisionLeaf : TagStructure
-				{
-                    public short Cluster;
-                    public short SurfaceReferenceCount;
-                    public int FirstSurfaceReferenceIndex;
-                }
-
-                [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
-                public class SurfaceReference : TagStructure
-				{
-                    public short StripIndex;
-                    public short LightmapTriangleIndex;
-                    public int BspNodeIndex;
-                }
+            [Flags]
+            public enum ReachMarkerFlagsDefinition : byte
+            {
+                HasNodeRelativeDirection = 1 << 0
             }
         }
 
         [TagStructure(Size = 0x1C)]
-        public class TagBlock17 : TagStructure
+        public class SkygenLight : TagStructure
 		{
-            public float Unknown0;
-            public float Unknown4;
-            public float Unknown8;
-            public float UnknownC;
-            public float Unknown10;
-            public float Unknown14;
-            public float Unknown18;
+            public RealVector3d Direction;
+            public RealRgbColor RadiantIntensity;
+            public float Magnitude;
         }
 
         [TagStructure(Size = 0x150)]
-        public class UnknownSHProbe : TagStructure
+        public class VolumeSamplesBlock : TagStructure
 		{
             public RealPoint3d Position;
-            [TagField(Length = 81, MinVersion = CacheVersion.Halo3Retail)]
+            [TagField(Length = 81, MinVersion = CacheVersion.Halo3Beta)]
             public float[] Coefficients = new float[81];
         }
 

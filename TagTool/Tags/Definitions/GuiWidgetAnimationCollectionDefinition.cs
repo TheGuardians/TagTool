@@ -2,53 +2,63 @@ using TagTool.Cache;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x240, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x280, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x240, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x270, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x280, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "gui_widget_animation_collection_definition", Tag = "wacd", Size = 0x2B0, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
     public class GuiWidgetAnimationCollectionDefinition : TagStructure
-	{
-        public CachedTag Unknown;
-        public CachedTag Unknown2;
-        public CachedTag Unknown3;
-        public CachedTag Unknown4;
-        public CachedTag Unknown5;
-        public CachedTag Unknown6;
-        public CachedTag Unknown7;
-        public CachedTag Unknown8;
-        public CachedTag Unknown9;
-        public CachedTag Unknown10;
-        public CachedTag Unknown11;
-        public CachedTag Unknown12;
-        public CachedTag Unknown13;
-        public CachedTag Unknown14;
-        public CachedTag Unknown15;
-        public CachedTag Unknown16;
-        public CachedTag Unknown17;
-        public CachedTag Unknown18;
-        public CachedTag Unknown19;
-        public CachedTag Unknown20;
-        public CachedTag Unknown21;
-        public CachedTag Unknown22;
-        public CachedTag Unknown23;
-        public CachedTag Unknown24;
-        public CachedTag Unknown25;
-        public CachedTag Unknown26;
-        public CachedTag Unknown27;
-        public CachedTag Unknown28;
-        public CachedTag Unknown29;
-        public CachedTag Unknown30;
-        public CachedTag Unknown31;
-        public CachedTag Unknown32;
-        public CachedTag Unknown33;
-        public CachedTag Unknown34;
-        public CachedTag Unknown35;
-        public CachedTag Unknown36;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTag Unknown37;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTag Unknown38;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTag Unknown39;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public CachedTag Unknown40;
+    {
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag AmbientFocused;    // plays when idle and has focus
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag AmbientUnfocused;  // plays when idle and does not have focus
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag AmbientDisabledFocused;    // plays when idle, disabled, and has focus
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag AmbientDisabledUnfocused;  // plays when idle, disabled, and does not have focus
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag AmbientFocusedAlt;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag AmbientUnfocusedAlt;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag TransitionFrom;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag TransitionTo;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag TransitionBackFrom;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag TransitionBackTo;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag CycleInPreviousPane;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag CycleInNextPane;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag CycleOutPreviousPane;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag CycleOutNextPane;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag DisplayGroupTransIn;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag DisplayGroupTransOut;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag ControlReceivedFocus;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag ControlLostFocus;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag IndicatorAmbientMoreItems;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag IndicatorAmbientNoMoreItems;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag IndicatorActivatedMoreItems;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag IndicatorActivatedNoMoreItems;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag LoadSubmenuFocused;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag LoadSubmenuUnfocused;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag UnloadSubmenuFocused;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag UnloadSubmenuUnfocused;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag LoadAsSubmenu;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag UnloadAsSubmenu;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag ChildSubmenuAmbientFocused;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag ChildSubmenuAmbientUnfocused;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag Custom0;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag Custom1;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag CustomTransitionIn0;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag CustomTransitionOut0;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag CustomTransitionIn1;
+        [TagField(ValidTags = new[] { "wgan" })] public CachedTag CustomTransitionOut1;
+
+        [TagField(ValidTags = new[] { "wgan" }, MinVersion = CacheVersion.Halo3ODST)]
+        public CachedTag CustomDisplayGroupIn;
+        [TagField(ValidTags = new[] { "wgan" }, MinVersion = CacheVersion.Halo3ODST)]
+        public CachedTag CustomDisplayGroupOut;
+        [TagField(ValidTags = new[] { "wgan" }, MinVersion = CacheVersion.Halo3ODST)]
+        public CachedTag TransitionToOverlaid;
+        [TagField(ValidTags = new[] { "wgan" }, MinVersion = CacheVersion.Halo3ODST)]
+        public CachedTag TransitionFromOverlaid;
+
+        [TagField(ValidTags = new[] { "wgan" }, Platform = CachePlatform.MCC)]
+        public CachedTag MouseEnter;
+        [TagField(ValidTags = new[] { "wgan" }, Platform = CachePlatform.MCC)]
+        public CachedTag MouseLeave;
+        [TagField(ValidTags = new[] { "wgan" }, Platform = CachePlatform.MCC)]
+        public CachedTag MouseHoverAmbient;
     }
 }

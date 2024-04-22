@@ -43,7 +43,7 @@ namespace TagTool.Common
         public float K
         {
             get { return Normal.K; }
-            set { Normal = new RealVector3d(Normal.I, Normal.K, value); }
+            set { Normal = new RealVector3d(Normal.I, Normal.J, value); }
         }
 
         /// <summary>

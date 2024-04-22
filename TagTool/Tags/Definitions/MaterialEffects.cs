@@ -13,18 +13,22 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x24)]
         public class Effect : TagStructure
 		{
-            public List<EffectReference> OldMaterials;
-            public List<EffectReference> Sounds;
-            public List<EffectReference> Effects;
+            public List<OldMaterialEffectBlock> OldMaterials;
+            public List<EffectBlock> Sounds;
+            public List<EffectBlock> Effects;
 
             [TagStructure(Size = 0x28, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x2C, MinVersion = CacheVersion.Halo3ODST)]
-            public class EffectReference : TagStructure
+            public class EffectBlock : TagStructure
 			{
-                public CachedTag Effect;
-                public CachedTag Sound;
+                [TagField(ValidTags = new[] { "scmb", "snd!", "lsnd", "effe" })]
+                public CachedTag Primary;
+                [TagField(ValidTags = new[] { "scmb", "snd!", "lsnd", "effe" })]
+                public CachedTag Secondary;
+                [TagField(Flags = GlobalMaterial)]
                 public StringId MaterialName;
-                public short GlobalMaterialIndex;
+                [TagField(Flags = GlobalMaterial)]
+                public short RuntimeMaterialIndex; // formerly GlobalMaterialIndex
                 public SweetenerModeValue SweetenerMode;
 
                 [TagField(Flags = Padding, Length = 1)]
@@ -34,6 +38,34 @@ namespace TagTool.Tags.Definitions
                 public float MaxVisibilityDistance;
 
                 public enum SweetenerModeValue : sbyte
+                {
+                    Default,
+                    Enabled,
+                    Disabled
+                }
+            }
+
+            [TagStructure(Size = 0x2C)]
+            public class OldMaterialEffectBlock : TagStructure
+            {
+                [TagField(ValidTags = new[] { "effe" })]
+                public CachedTag Effect;
+                [TagField(ValidTags = new[] { "snd!", "lsnd" })]
+                public CachedTag Sound;
+                [TagField(Flags = GlobalMaterial)]
+                public StringId MaterialName;
+                [TagField(Flags = GlobalMaterial)]
+                public short RuntimeMaterialIndex;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] KTRVUIKB;
+
+                public SweeneterModeEnum SweetenerMode;
+
+                [TagField(Length = 3, Flags = Padding)]
+                public byte[] QNGPTA;
+
+                public enum SweeneterModeEnum : sbyte
                 {
                     SweetenerDefault,
                     SweetenerEnabled,

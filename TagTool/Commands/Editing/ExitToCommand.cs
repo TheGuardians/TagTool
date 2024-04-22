@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Editing
 {
@@ -23,7 +24,7 @@ namespace TagTool.Commands.Editing
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var found = false;
 
@@ -38,20 +39,21 @@ namespace TagTool.Commands.Editing
                 {
                     found = true;
                     break;
+                    
                 }
             }
 
             if (!found)
-            {
-                Console.WriteLine($"ERROR: No context named '{request}' was found.");
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"No context named \'{request}\' was found");
 
             // Pop each child context off of the stack until the requested is active.
             while (context != null)
             {
                 if (request == context.Name || requestLow == context.Name.ToLower())
                     break;
+                else if (request == "tags" && context.Name.Contains("pak"))
+                    break;
+
                 ContextStack.Pop();
                 context = ContextStack.Context;
             }

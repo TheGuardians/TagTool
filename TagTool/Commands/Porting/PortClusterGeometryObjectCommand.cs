@@ -2,8 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TagTool.Commands.Common;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Geometry.Utils;
@@ -40,12 +39,10 @@ namespace TagTool.Commands.Porting
             var portingFlags = ParsePortingFlags(argStack);
 
             if (argStack.Count < 1)
-            {
-                Console.WriteLine("ERROR: Expected bsp index!");
-                return false;
-            }
+                return new TagToolError(CommandError.ArgCount, "Expected bsp index!");
 
-            var sbspIndex = int.Parse(argStack.Pop());
+            if (!int.TryParse(argStack.Pop(), out int sbspIndex))
+                return new TagToolError(CommandError.ArgInvalid, "Invalid bsp index");
 
             using (var blamCacheStream = BlamCache.OpenCacheRead())
             using (var hoCacheStream = HoCache.OpenCacheReadWrite())
@@ -81,10 +78,7 @@ namespace TagTool.Commands.Porting
 
                         var index = FindBlockIndex(blamSbsp.Clusters, identifier);
                         if (index == -1)
-                        {
-                            Console.WriteLine($"ERROR: Instance not found by identifier {identifier}!");
-                            return false;
-                        }
+                            return new TagToolError(CommandError.OperationFailed, $"Instance not found by identifier {identifier}!");
 
                         desiredInstances.Add(index, name);
                     }
@@ -149,7 +143,7 @@ namespace TagTool.Commands.Porting
             if (int.TryParse(identifier, out index))
                 return index;
 
-            var labelField = FindLabelField(block[0].GetType(), BlamCache.Version);
+            var labelField = FindLabelField(block[0].GetType(), BlamCache.Version, BlamCache.Platform);
 
             object expectedValue = null;
             if (labelField.FieldType == typeof(StringId))
@@ -167,9 +161,9 @@ namespace TagTool.Commands.Porting
             return -1;
         }
 
-        private static TagFieldInfo FindLabelField(Type type, CacheVersion version)
+        private static TagFieldInfo FindLabelField(Type type, CacheVersion version, CachePlatform platform)
         {
-            return TagStructure.GetTagFieldEnumerable(type, version)
+            return TagStructure.GetTagFieldEnumerable(type, version, platform)
                 .FirstOrDefault(field => field.Attribute != null && field.Attribute.Flags.HasFlag(TagFieldFlags.Label));
         }
 

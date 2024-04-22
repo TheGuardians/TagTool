@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using TagTool.Cache;
+using TagTool.Cache.Gen3;
 using TagTool.Tags;
 
 namespace TagTool.Common
@@ -22,7 +23,10 @@ namespace TagTool.Common
         /// <param name="val">The integer.</param>
         public Tag(int val)
         {
-            Value = val;
+            if (val == -1)
+                Value = Null.Value;
+            else
+                Value = val;
         }
 
         /// <summary>
@@ -72,6 +76,12 @@ namespace TagTool.Common
         /// </summary>
         public int Value { get; set; }
 
+        public bool IsNull()
+        {
+            return Value == -1 || this == Null;
+        }
+
+
 		/// <summary>
 		/// Converts the magic number into its string representation.
 		/// </summary>
@@ -102,16 +112,20 @@ namespace TagTool.Common
                 else if (name.Length == 2)
                     name = $"{name}  ";
             }
-
-            if (TagDefinition.TryFind(name, out var type))
+            var structureType = cache.TagCache.TagDefinitions.GetTagDefinitionType(name);
+            if (structureType != null)
             {
-                var attribute = TagStructure.GetTagStructureAttribute(type);
+                var attribute = TagStructure.GetTagStructureAttribute(structureType, cache.Version, cache.Platform);
                 return new Tag(attribute.Tag);
             }
-
-            foreach (var pair in TagGroup.Instances)
-                if (name == cache.StringTable.GetString(pair.Value.Name))
-                    return pair.Value.Tag;
+            
+            if(cache.TagCache.TagDefinitions.GetType() == typeof(TagDefinitionsGen3))
+            {
+                foreach (var pair in cache.TagCache.TagDefinitions.Types)
+                    if (name == (pair.Key as TagGroupGen3).Name)
+                        return pair.Key.Tag;
+            }
+            
 
             return Null;
         }
@@ -124,7 +138,7 @@ namespace TagTool.Common
                 error = $"{args.Count} arguments supplied; should be 1";
                 return false;
             }
-            else if (!cache.TryParseGroupTag(args[0], out Tag groupTag))
+            else if (!cache.TagCache.TryParseGroupTag(args[0], out Tag groupTag))
             {
                 error = $"Invalid tag group specifier: {args[0]}";
                 return false;
@@ -139,23 +153,26 @@ namespace TagTool.Common
 
         public static bool TryParseGroupTag(GameCache cache, string name, out Tag result)
         {
-            if (TagDefinition.TryFind(name, out var type))
+            var structureType = cache.TagCache.TagDefinitions.GetTagDefinitionType(name);
+            
+            if (structureType != null)
             {
-                var attribute = TagStructure.GetTagStructureAttribute(type);
+                var attribute = TagStructure.GetTagStructureAttribute(structureType, cache.Version, cache.Platform);
                 result = new Tag(attribute.Tag);
                 return true;
             }
 
-            foreach (var pair in TagGroup.Instances)
+            if (cache.TagCache.TagDefinitions.GetType() == typeof(TagDefinitionsGen3))
             {
-                if (name == cache.StringTable.GetString(pair.Value.Name))
-                {
-                    result = pair.Value.Tag;
-                    return true;
-                }
+                foreach (var pair in cache.TagCache.TagDefinitions.Types)
+                    if (name == (pair.Key as TagGroupGen3).Name)
+                    {
+                        result = pair.Key.Tag;
+                        return true;
+                    }
             }
 
-            result = Tag.Null;
+            result = Null;
             return name == "none" || name == "null";
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Tags.Definitions;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Files
 {
@@ -25,7 +26,7 @@ namespace TagTool.Commands.Files
         public override object Execute(List<string> args)
         {
             if (args.Count > 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var baseDir = (args.Count == 1) ? args[0] : Directory.GetCurrentDirectory();
 

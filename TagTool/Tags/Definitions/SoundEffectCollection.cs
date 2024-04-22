@@ -2,28 +2,61 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "sound_effect_collection", Tag = "sfx+", Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
     public class SoundEffectCollection : TagStructure
 	{
-        public List<SoundEffect> SoundEffects;
+        public List<PlatformSoundPlaybackBlock> SoundEffects;
 
         [TagStructure(Size = 0x4C)]
-        public class SoundEffect : TagStructure
+        public class PlatformSoundPlaybackBlock : TagStructure
 		{
             public StringId Name;
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Flags;
-            public uint Unknown4;
-            public uint Unknown5;
+            public List<PlatformSoundOverrideMixbinsBlock> OverrideMixbins;
+            public PlatformSoundPlaybackFlagsDefinition Flags;
+            public uint RadioChannel;
+
+            [TagField(Length = 0x4, Flags = Padding)]
+            public byte[] Padding0;
+
             public List<FilterBlock> Filter;
             public List<PitchLFOBlock> PitchLFO;
             public List<FilterLFOBlock> FilterLFO;
-            public List<SoundEffectBlock> SoundEffect2;
+            public List<SoundEffectBlock> SoundEffect;
+
+            [TagStructure(Size = 0x8)]
+            public class PlatformSoundOverrideMixbinsBlock : TagStructure
+            {
+                public PlatformSoundMixbinEnumDefinition Mixbin;
+                public float Gain; // dB
+
+                public enum PlatformSoundMixbinEnumDefinition : int
+                {
+                    FrontLeft,
+                    FrontRight,
+                    BackLeft,
+                    BackRight,
+                    Center,
+                    LowFrequency,
+                    Reverb,
+                    _3dFrontLeft,
+                    _3dFrontRight,
+                    _3dBackLeft,
+                    _3dBackRight,
+                    DefaultLeftSpeakers,
+                    DefaultRightSpeakers
+                }
+            }
+
+            [Flags]
+            public enum PlatformSoundPlaybackFlagsDefinition : uint
+            {
+                Use3dRadioHack = 1 << 0,
+                ForceFirstPerson = 1 << 1
+            }
 
             [TagStructure(Size = 0x48)]
             public class FilterBlock : TagStructure
@@ -68,43 +101,56 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x48)]
             public class SoundEffectBlock : TagStructure
 			{
-                public CachedTag SoundEffectTemplate;
+                [TagField(ValidTags = new[] { "<fx>" })]
+                public CachedTag Template;
+
                 public List<Component> Components;
                 public List<TemplateCollectionBlock> TemplateCollection;
-                public uint Unknown1;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
+                public byte[] HardwareFormat;
+                public List<GNullBlock> PlatformEffect;
 
                 [TagStructure(Size = 0x18)]
                 public class Component : TagStructure
 				{
+                    [TagField(ValidTags = new[] { "snd!", "lsnd" })]
                     public CachedTag Sound;
                     public uint Gain;
-                    public int Flags;
+                    public SoundEffectComponentFlags Flags;
+
+                    [Flags]
+                    public enum SoundEffectComponentFlags : uint
+                    {
+                        DontPlayAtStart = 1 << 0,
+                        PlayOnStop = 1 << 1,
+                        PlayOnAbnormalStop = 1 << 2,
+                        PlayAlternate = 1 << 3,
+                        PlayAlternateOnAbnormalStop = 1 << 4,
+                        SyncWithOriginLoopingSound = 1 << 5
+                    }
                 }
 
                 [TagStructure(Size = 0x10)]
                 public class TemplateCollectionBlock : TagStructure
 				{
                     public StringId DSPEffect;
-                    public List<Parameter> Parameters;
+                    public List<Parameter> Overrides;
 
                     [TagStructure(Size = 0x2C)]
                     public class Parameter : TagStructure
 					{
                         public StringId Name;
-                        public float Unknown;
-                        public float Unknown2;
-                        public float HardwareOffset;
-                        public float Unknown3;
-                        public float DefaultScalarValue;
+                        public StringId Input;
+                        public StringId Range;
+                        public float TimePeriod; // seconds
+                        public int IntegerValue;
+                        public float RealValue;
                         public TagFunction Function = new TagFunction { Data = new byte[0] };
                     }
+                }
+
+                [TagStructure(Size = 0x0)]
+                public class GNullBlock : TagStructure
+                {
                 }
             }
         }

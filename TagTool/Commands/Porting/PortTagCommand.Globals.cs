@@ -22,40 +22,40 @@ namespace TagTool.Commands.Porting
                 {
                     Data = new List<AiGlobalsDatum>(),
                 };
-                foreach (var value in matg.AiGlobalsOld)
+                foreach (var value in matg.AiGlobals)
                 {
-                    value.SearchRangeInfantry = 30;
-                    value.SearchRangeFlying = 40;
-                    value.SearchRangeVehicle = 40;
-                    value.SearchRangeGiant = 200;
+                    value.PathfindingSearchRanges.Infantry = 30;
+                    value.PathfindingSearchRanges.Flying = 40;
+                    value.PathfindingSearchRanges.Vehicle = 40;
+                    value.PathfindingSearchRanges.Giant = 200;
 
                     //Something may need to be done about squad and formation tags
 
                     aigl.Data.Add(value);
                 }
 
-                CachedTag edTag = CacheContext.TagCacheGenHO.AllocateTag(TagGroup.Instances[new Tag("aigl")]);
+                CachedTag edTag = CacheContext.TagCacheGenHO.AllocateTag(CacheContext.TagCache.TagDefinitions.GetTagGroupFromTag("aigl"));
                 edTag.Name = "globals\ai_globals";
                 CacheContext.Serialize(cacheStream, edTag, aigl);
-                matg.AiGlobals = edTag;
-                matg.AiGlobalsOld = new List<AiGlobalsDatum>();
+                matg.AiGlobalsTag = edTag;
+                matg.AiGlobals = new List<AiGlobalsDatum>();
             }
 
             //Might require adding the GfxUiStrings block
 
             if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
-                matg.Unknown60 = new List<Globals.UnknownBlock>
+                matg.ShieldBoost = new List<Globals.ShieldBoostBlock>
                 {
-                    new Globals.UnknownBlock
+                    new Globals.ShieldBoostBlock
                     {
-                        Unknown1 = 100,
-                        Unknown2 = 1,
-                        Unknown3 = 1
+                        ShieldBoostDecay = 100,
+                        ShieldBoostRechargeTime = 1,
+                        ShieldBoostStunTime = 1
                     }
                 };
 
-                foreach (var metagame in matg.MetagameGlobals)
+                foreach (var metagame in matg.CampaignMetagameGlobals)
                 {
                     //Medal values for H3 do not need to be modified, but if survival is introduced on an H3 port, it will require ODST or HO points
 
@@ -82,7 +82,7 @@ namespace TagTool.Commands.Porting
             return matg;
         }
 
-        private void MergeMultiplayerEvent(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultiplayerGlobals.RuntimeBlock.EventBlock edEvent, MultiplayerGlobals.RuntimeBlock.EventBlock h3Event)
+        private void MergeMultiplayerEvent(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock edEvent, MultiplayerGlobals.MultiplayerRuntimeBlock.EventBlock h3Event)
         {
             if (h3Event.EnglishSound != null)
                 edEvent.EnglishSound = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Event.EnglishSound);

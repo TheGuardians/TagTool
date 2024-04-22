@@ -1,29 +1,30 @@
+using System.Collections.Generic;
 using TagTool.Cache;
-using static TagTool.Tags.TagFieldFlags;
+using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "breakable_surface", Tag = "bsdt", Size = 0x54)]
+    [TagStructure(Name = "breakable_surface", Tag = "bsdt", Size = 0x54, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "breakable_surface", Tag = "bsdt", Size = 0x68, MinVersion = CacheVersion.HaloReach)]
     public class BreakableSurface : TagStructure
-	{
+    {
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public Bounds<float> DirectDamageVitality;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public Bounds<float> CollisionDamageImpulseThresholds;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public Bounds<float> AoeDamageVitality;
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public float MaximumVitality;
+        [TagField(ValidTags = new[] { "effe" })]
         public CachedTag Effect;
+        [TagField(ValidTags = new[] { "snd!" })]
         public CachedTag Sound;
-        public uint Unknown;
-        public uint Unknown2;
-        public uint Unknown3;
-        public uint Unknown4;
+        public List<Effect.Event.ParticleSystem> ParticleEffects;
+        public float ParticleDensity;
+        [TagField(ValidTags = new[] { "bitm" })]
         public CachedTag CrackBitmap;
+        [TagField(ValidTags = new[] { "bitm" })]
         public CachedTag HoleBitmap;
-
-        [TagStructure(Size = 0x24)]
-        public class UnknownBlock : TagStructure
-		{
-            public uint Unknown;
-            public uint Unknown2;
-            public byte[] Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-        }
     }
 }

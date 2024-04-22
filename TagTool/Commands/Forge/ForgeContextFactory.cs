@@ -12,7 +12,7 @@ namespace TagTool.Commands.Forge
     {
         public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag instance, ForgeGlobalsDefinition definition)
         {
-            var groupName = cache.StringTable.GetString(instance.Group.Name);
+            var groupName = instance.Group.ToString();
 
             var context = new CommandContext(parent,
                 string.Format("{0:X8}.{1}", instance.Index, groupName));
@@ -25,6 +25,7 @@ namespace TagTool.Commands.Forge
         public static void Populate(CommandContext context, GameCache cache, CachedTag instance, ForgeGlobalsDefinition definition)
         {
             context.AddCommand(new ParseItemsXmlCommand(cache, instance, definition));
+            context.AddCommand(new MaximizeBudgetCommand(cache as GameCacheHaloOnlineBase, definition));
         }
     }
 }

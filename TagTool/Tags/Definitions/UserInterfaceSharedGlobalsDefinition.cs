@@ -1,60 +1,71 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x160, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x170, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x160, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3CC, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x3DC, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "user_interface_shared_globals_definition", Tag = "wigl", Size = 0x174, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class UserInterfaceSharedGlobalsDefinition : TagStructure
 	{
-        public short IncTextUpdatePeriod;
-        public short IncTextBlockCharacter;
-        public float NearClipPlaneDistance;
-        public float ProjectionPlaneDistance;
-        public float FarClipPlaneDistance;
+        public short IncTextUpdatePeriod; // milliseconds
+        public short IncTextBlockCharacter; // ASCII code
+        public float NearClipPlaneDistance; // objects closer than this are not drawn
+        public float ProjectionPlaneDistance; // distance at which objects are rendered when z=0 (normal size)
+        public float FarClipPlaneDistance; // objects farther than this are not drawn
+
+        [TagField(ValidTags = new [] { "unic" })]
         public CachedTag GlobalStrings;
-        public CachedTag DamageTypeStrings;
+        [TagField(ValidTags = new [] { "unic" })]
+        public CachedTag DamageReportingStrings;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public CachedTag UnknownStrings;
+        [TagField(ValidTags = new[] { "unic" }, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(ValidTags = new[] { "unic" }, MinVersion = CacheVersion.HaloOnlineED, Platform = CachePlatform.Original)]
+        public CachedTag InputStrings;
 
+        [TagField(ValidTags = new[] { "lsnd" })]
         public CachedTag MainMenuMusic;
-        public int MusicFadeTime;
-        public RealArgbColor Color;
+
+        public int MusicFadeTime; // milliseconds
         public RealArgbColor TextColor;
-        public List<TextColorBlock> TextColors;
-        public List<PlayerColor> PlayerColors;
-        public CachedTag UiSounds;
-        public List<Alert> Alerts;
-        public List<Dialog> Dialogs;
+        public RealArgbColor TextShadowColor;
+        public List<ColorPreset> ColorPresets;
+        public List<PlayerColor> PlayerTintColors;
+
+        [TagField(ValidTags = new[] { "uise" })]
+        public CachedTag DefaultSounds;
+
+        public List<GuiAlertDescription> AlertDescriptions;
+        public List<Dialog> DialogDescriptions;
         public List<GlobalDataSource> GlobalDataSources;
-        public float WidescreenBitmapScaleX;
-        public float WidescreenBitmapScaleY;
-        public float StandardBitmapScaleX;
-        public float StandardBitmapScaleY;
-        public float MenuBlurX;
-        public float MenuBlurY;
+        public RealPoint2d WidescreenBitmapScale;
+        public RealPoint2d StandardBitmapScale;
+        public RealPoint2d MenuBlurFactor;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<UiWidgetBiped> UiWidgetBipeds;
+
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId UnknownPlayer1;
+        public StringId Player0Flag;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId UnknownPlayer2;
+        public StringId Player1Flag;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId UnknownPlayer3;
+        public StringId Player2Flag;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId UnknownPlayer4;
+        public StringId Player3Flag;
 
         //Spartan in H3
-        [TagField(Length = 32)] public string UiEliteBipedName;
-        [TagField(Length = 32)] public string UiEliteAiSquadName;
-        public StringId UiEliteAiLocationName;
+        [TagField(Length = 32)] public string McBipedName;
+        [TagField(Length = 32)] public string McAiSquadName;
+        public StringId McAiStartPosition;
         //Elite in H3
-        [TagField(Length = 32)] public string UiOdst1BipedName;
-        [TagField(Length = 32)] public string UiOdst1AiSquadName;
-        public StringId UiOdst1AiLocationName;
+        [TagField(Length = 32)] public string EliteBipedName;
+        [TagField(Length = 32)] public string EliteAiSquadName;
+        public StringId EliteAiStartPosition;
 
         
         [TagField(Length = 32, MinVersion = CacheVersion.Halo3ODST)]
@@ -106,38 +117,38 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public StringId UiOdst4AiLocationName;
         
-        public int SingleScrollSpeed;
-        public int ScrollSpeedTransitionWaitTime;
-        public int HeldScrollSpeed;
-        public int AttractVideoIdleWait;
+        public int NavigationScrollInterval; //milliseconds
+        public int NavigationFastScrollDelay; //milliseconds
+        public int NavigationFastScrollInterval; //milliseconds
+        public int AttractVideoDelay; // seconds
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public TagFunction Unknown;
+        public TagFunction PdaWaypointScaleFunction;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown2;
+        public float PdaCameraVelocity; // pixels per second
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown3;
+        public float CameraAutoMoveDelay;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown4;
+        public float PlayerOffscreenMarkerTolerance; // pixels
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown5;
+        public float PlayerOrientationDeadZone; // area around you where the PDA doesn't auto-orient you (pixels)
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown6;
+        public float PdaAiClumpCullDistance; // wu
+
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        public CachedTag Unknown7;      
+        public CachedTag PdaScreenEffect;      
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public RealArgbColor Unknown17;
+        public RealArgbColor PdaPlayedColor;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public RealArgbColor Unknown18;
+        public RealArgbColor PdaUnplayedColor;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public StringId Unknown19;
-
+        public StringId PdaPoiWaypointPrefix;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown20;
+        public StringId PdaPoiWaypointSuffix;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown21;
+        public uint PdaBriefOpenThreshold;
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public uint Unknown22;
+        public float PdaTextFadetime;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
         public List<ARGBlock> ARG;
@@ -151,7 +162,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [TagStructure(Size = 0x14)]
-        public class TextColorBlock : TagStructure
+        public class ColorPreset : TagStructure
 		{
             public StringId Name;
             public RealArgbColor Color;
@@ -160,46 +171,46 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0x30)]
         public class PlayerColor : TagStructure
 		{
-            public List<PlayerTextColorBlock> PlayerTextColor;
-            public List<TeamTextColorBlock> TeamTextColor;
-            public List<PlayerUiColorBlock> PlayerUiColor;
-            public List<TeamUiColorBlock> TeamUiColor;
+            public List<ColorListBlock> PlayerTextColor;
+            public List<ColorListBlock> TeamTextColor;
+            public List<ColorListBlock> PlayerUiColor;
+            public List<ColorListBlock> TeamUiColor;
 
             [TagStructure(Size = 0x10)]
-            public class PlayerTextColorBlock : TagStructure
-			{
-                public RealArgbColor Color;
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class TeamTextColorBlock : TagStructure
-			{
-                public RealArgbColor Color;
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class PlayerUiColorBlock : TagStructure
-			{
-                public RealArgbColor Color;
-            }
-
-            [TagStructure(Size = 0x10)]
-            public class TeamUiColorBlock : TagStructure
+            public class ColorListBlock : TagStructure
 			{
                 public RealArgbColor Color;
             }
         }
 
         [TagStructure(Size = 0x10)]
-        public class Alert : TagStructure
+        public class GuiAlertDescription : TagStructure
 		{
-            public StringId Name;
-            public byte Flags;
-            public sbyte Unknown;
+            public StringId ErrorName;
+            public GuiAlertFlags Flags;
+            public GuiErrorCategoryEnum ErrorCategory;
             public IconValue Icon;
-            public sbyte Unknown2;
+
+            [TagField(Length = 1, Flags = TagFieldFlags.Padding)]
+            public byte[] Pad0;
+
             public StringId Title;
-            public StringId Body;
+            public StringId Message;
+
+            [Flags]
+            public enum GuiAlertFlags : byte
+            {
+                AllowAutoDismissal = 1 << 0,
+                ShowSpinner = 1 << 1
+            }
+
+            public enum GuiErrorCategoryEnum : sbyte
+            {
+                Default,
+                Networking,
+                StoragereadingwritingFailure,
+                Controller
+            }
 
             public enum IconValue : sbyte
             {
@@ -215,30 +226,50 @@ namespace TagTool.Tags.Definitions
         public class Dialog : TagStructure
 		{
             public StringId Name;
-            public short Unknown;
-            public short Unknown2;
+            public GuiDialogFlags Flags;
+
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+
             public StringId Title;
             public StringId Body;
-            public StringId Option1;
-            public StringId Option2;
-            public StringId Option3;
-            public StringId Option4;
+            public StringId FirstItem;
+            public StringId SecondItem;
+            public StringId ThirdItem;
+            public StringId FourthItem;
             public StringId KeyLegend;
-            public DefaultOptionValue DefaultOption;
-            public short Unknown3;
+            public GuiDialogChoice DefaultOption;
+            public GuiDialogBButtonActionEnum BButtonAction;
 
-            public enum DefaultOptionValue : short
+            [Flags]
+            public enum GuiDialogFlags : ushort
             {
-                Option1,
-                Option2,
-                Option3,
-                Option4,
+                Unused = 1 << 0
+            }
+
+            public enum GuiDialogChoice : short
+            {
+                FirstItem,
+                SecondItem,
+                ThirdItem,
+                FourthItem
+            }
+
+            public enum GuiDialogBButtonActionEnum : short
+            {
+                DismissesDialog,
+                ButtonIgnored,
+                FirstItemActivates,
+                SecondItemActivates,
+                ThirdItemActivates,
+                FourthItemActivates
             }
         }
 
         [TagStructure(Size = 0x10)]
         public class GlobalDataSource : TagStructure
 		{
+            [TagField(ValidTags = new[] { "dsrc" })]
             public CachedTag DataSource;
         }
 

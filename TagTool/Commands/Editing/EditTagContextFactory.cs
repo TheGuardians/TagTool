@@ -6,6 +6,8 @@ using System.IO;
 using System.Xml;
 using TagTool.Commands.Bitmaps;
 using TagTool.Commands.Bipeds;
+using TagTool.Commands.Camera;
+using TagTool.Commands.Decorators;
 using TagTool.Commands.Video;
 using TagTool.Commands.Unicode;
 using TagTool.Commands.CollisionModels;
@@ -20,7 +22,14 @@ using TagTool.Commands.ScenarioLightmaps;
 using TagTool.Commands.Files;
 using TagTool.Commands.ScenarioStructureBSPs;
 using TagTool.Commands.Scenarios;
+using TagTool.Commands.StructureDesigns;
 using TagTool.Cache.HaloOnline;
+using DefinitionsGen2 = TagTool.Tags.Definitions.Gen2;
+using CommandsGen2 = TagTool.Commands.Gen2;
+using DefinitionsGen4 = TagTool.Tags.Definitions.Gen4;
+using CommandsGen4 = TagTool.Commands.Gen4;
+using TagTool.Commands.Common;
+using TagTool.Commands.Tags;
 
 namespace TagTool.Commands.Editing
 {
@@ -35,109 +44,159 @@ namespace TagTool.Commands.Editing
             if (Documentation.ChildNodes.Count == 0 && File.Exists(documentationPath))
                 Documentation.Load(documentationPath);
 
-            var groupName = cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
             var tagName = tag?.Name ?? $"0x{tag.Index:X4}";
 
             var commandContext = new CommandContext(contextStack.Context, string.Format("{0}.{1}", tagName, groupName));
-            
-            switch (tag.Group.Tag.ToString())
+            commandContext.ScriptGlobals.Add(ExecuteCSharpCommand.GlobalTagKey, tag);
+            commandContext.ScriptGlobals.Add(ExecuteCSharpCommand.GlobalDefinitionKey, definition);
+
+            commandContext.AddCommand(new ExecuteCSharpCommand(contextStack));
+            if (CacheVersionDetection.IsInGen(CacheGeneration.Third, cache.Version) || CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, cache.Version))
             {
-                case "bitm":
-                    BitmapContextFactory.Populate(commandContext, cache, tag, (Bitmap)definition);
-                    break;
-                
-                case "bipd":
-                    BipedContextFactory.Populate(commandContext, cache, tag, (Biped)definition);
-                    break;
-                
-                case "bink":
-                    VideoContextFactory.Populate(commandContext, cache, tag, (Bink)definition);
-                    break;
+                switch (tag.Group.Tag.ToString())
+                {
+                    case "bitm":
+                        BitmapContextFactory.Populate(commandContext, cache, tag, (Bitmap)definition);
+                        break;
 
-                case "coll":
-                    CollisionModelContextFactory.Populate(commandContext, cache, tag, (CollisionModel)definition);
-                    break;
+                    case "bipd":
+                        BipedContextFactory.Populate(commandContext, cache, tag, (Biped)definition);
+                        break;
 
-                case "forg":
-                    ForgeContextFactory.Populate(commandContext, cache, tag, (ForgeGlobalsDefinition)definition);
-                    break;
-              
-                case "hlmt":
-                    ModelContextFactory.Populate(commandContext, cache, tag, (Model)definition);
-                    break;
+                    case "bink":
+                        VideoContextFactory.Populate(commandContext, cache, tag, (Bink)definition);
+                        break;
 
-                case "jmad":
-                    AnimationContextFactory.Populate(commandContext, cache, tag, (ModelAnimationGraph)definition);
-                    break;
+                    case "coll":
+                        CollisionModelContextFactory.Populate(commandContext, cache, tag, (CollisionModel)definition);
+                        break;
 
-                case "pmdf":
-                    ParticleModelContextFactory.Populate(commandContext, cache, tag, (ParticleModel)definition);
-                    break;
+                    case "dctr":
+                        DecoratorSetContextFactory.Populate(commandContext, cache, tag, (DecoratorSet)definition);
+                        break;
+                        
+                    case "forg":
+                        ForgeContextFactory.Populate(commandContext, cache, tag, (ForgeGlobalsDefinition)definition);
+                        break;
 
-                case "unic":
-                    UnicodeContextFactory.Populate(commandContext, cache, tag, (MultilingualUnicodeStringList)definition);
-                    break;
+                    case "hlmt":
+                        ModelContextFactory.Populate(commandContext, cache, tag, (Model)definition);
+                        break;
 
-                case "snd!":
-                    SoundContextFactory.Populate(commandContext, cache, tag, (Sound)definition);
-                    break;
+                    case "jmad":
+                        AnimationContextFactory.Populate(commandContext, cache, tag, (ModelAnimationGraph)definition);
+                        break;
 
-                case "rmt2":
-                    RenderMethodTemplateContextFactory.Populate(commandContext, cache, tag, (RenderMethodTemplate)definition);
-                    break;
+                    case "pmdf":
+                        ParticleModelContextFactory.Populate(commandContext, cache, tag, (ParticleModel)definition);
+                        break;
 
-                case "rm  ": // render_method
-                case "rmsh": // shader
-                case "rmd ": // shader_decal
-                case "rmfl": // shader_foliage
-                case "rmhg": // shader_halogram
-                case "rmss": // shader_screen
-                case "rmtr": // shader_terrain
-                case "rmw ": // shader_water
-                case "rmzo": // shader_zonly
-                case "rmcs": // shader_custom
-                    RenderMethodContextFactory.Populate(commandContext, cache, tag, (RenderMethod)definition);
-                    break;
+                    case "unic":
+                        UnicodeContextFactory.Populate(commandContext, cache, tag, (MultilingualUnicodeStringList)definition);
+                        break;
 
-                case "pixl":
-                    ShaderContextFactory<PixelShader>.Populate(commandContext, cache, tag, (PixelShader)definition);
-                    break;
+                    case "snd!":
+                        SoundContextFactory.Populate(commandContext, cache, tag, (Sound)definition);
+                        break;
 
-                case "vtsh":
-                    ShaderContextFactory<VertexShader>.Populate(commandContext, cache, tag, (VertexShader)definition);
-                    break;
+                    case "rmt2":
+                        RenderMethodTemplateContextFactory.Populate(commandContext, cache, tag, (RenderMethodTemplate)definition);
+                        break;
 
-                case "glps":
-                    ShaderContextFactory<GlobalPixelShader>.Populate(commandContext, cache, tag, (GlobalPixelShader)definition);
-                    break;
+                    case "rm  ": // render_method
+                    case "rmsh": // shader
+                    case "rmd ": // shader_decal
+                    case "rmfl": // shader_foliage
+                    case "rmhg": // shader_halogram
+                    case "rmss": // shader_screen
+                    case "rmtr": // shader_terrain
+                    case "rmw ": // shader_water
+                    case "rmzo": // shader_zonly
+                    case "rmcs": // shader_custom
+                    case "rmct": // shader_cortana
+                    case "rmgl": // shader_glass
+                        RenderMethodContextFactory.Populate(commandContext, cache, tag, (RenderMethod)definition);
+                        break;
 
-                case "glvs":
-                    ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cache, tag, (GlobalVertexShader)definition);
-                    break;
+                    case "pixl":
+                        ShaderContextFactory<PixelShader>.Populate(commandContext, cache, tag, (PixelShader)definition);
+                        break;
 
-                case "Lbsp":
-                    LightmapContextFactory.Populate(commandContext, cache, tag, (ScenarioLightmapBspData)definition);
-                    break;
+                    case "vtsh":
+                        ShaderContextFactory<VertexShader>.Populate(commandContext, cache, tag, (VertexShader)definition);
+                        break;
 
+                    case "glps":
+                        ShaderContextFactory<GlobalPixelShader>.Populate(commandContext, cache, tag, (GlobalPixelShader)definition);
+                        break;
 
-                case "vfsl":
-                    VFilesContextFactory.Populate(commandContext, cache, tag, (VFilesList)definition);
-                    break;
+                    case "glvs":
+                        ShaderContextFactory<GlobalVertexShader>.Populate(commandContext, cache, tag, (GlobalVertexShader)definition);
+                        break;
 
-                case "mode": 
-                    RenderModelContextFactory.Populate(commandContext, cache, tag, (RenderModel)definition);
-                    break;
+                    case "Lbsp":
+                        LightmapContextFactory.Populate(commandContext, cache, tag, (ScenarioLightmapBspData)definition);
+                        break;
 
-                case "sbsp":
-                    BSPContextFactory.Populate(commandContext, cache, tag, (ScenarioStructureBsp)definition);
-                    break;
+                    case "vfsl":
+                        VFilesContextFactory.Populate(commandContext, cache, tag, (VFilesList)definition);
+                        break;
 
-                case "scnr":
-                    ScnrContextFactory.Populate(commandContext, cache, tag, (Scenario)definition);
-                    break;                        
+                    case "mode":
+                        RenderModelContextFactory.Populate(commandContext, cache, tag, (RenderModel)definition);
+                        break;
+
+                    case "sbsp":
+                        BSPContextFactory.Populate(commandContext, cache, tag, (ScenarioStructureBsp)definition);
+                        break;
+
+                    case "scnr":
+                        ScnrContextFactory.Populate(commandContext, cache, tag, (Scenario)definition);
+                        break;
+
+                    case "sddt":
+                        StructureDesignContextFactory.Populate(commandContext, cache, tag, (StructureDesign)definition);
+                        break;
+
+                    case "trak":
+                        CameraTrackContextFactory.Populate(commandContext, cache, tag, (CameraTrack)definition);
+                        break;
+                }
             }
-            
-            var structure = TagStructure.GetTagStructureInfo(TagDefinition.Find(tag.Group.Tag), cache.Version);
+
+            if (CacheVersionDetection.IsInGen(CacheGeneration.Second, cache.Version))
+            {
+                switch (tag.Group.Tag.ToString())
+                {
+                    case "sbsp":
+                        CommandsGen2.ScenarioStructureBSPs.BSPContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen2.ScenarioStructureBsp)definition);
+                        break;
+                    case "jmad":
+                        CommandsGen2.ModelAnimationGraphs.AnimationContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen2.ModelAnimationGraph)definition);
+                        break;
+                    case "bitm":
+                        CommandsGen2.Bitmaps.BitmapContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen2.Bitmap)definition);
+                        break;
+                }
+            }
+            if (CacheVersionDetection.IsInGen(CacheGeneration.Fourth, cache.Version))
+            {
+                switch (tag.Group.Tag.ToString())
+                {
+                    case "jmad":
+                        CommandsGen4.ModelAnimationGraphs.ModelContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen4.ModelAnimationGraph)definition);
+                        break;
+                    case "hlmt":
+                        CommandsGen4.Models.ModelContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen4.Model)definition);
+                        break;
+                    case "sbsp":
+                        CommandsGen4.ScenarioStructureBSPs.BSPContextFactory.Populate(commandContext, cache, tag, (DefinitionsGen4.ScenarioStructureBsp)definition);
+                        break;
+                }
+            }
+
+            var structure = TagStructure.GetTagStructureInfo(cache.TagCache.TagDefinitions.GetTagDefinitionType(tag.Group), cache.Version, cache.Platform);
 
             commandContext.AddCommand(new ListFieldsCommand(cache, structure, definition));
             commandContext.AddCommand(new SetFieldCommand(contextStack, cache, tag, structure, definition));
@@ -146,9 +205,13 @@ namespace TagTool.Commands.Editing
             commandContext.AddCommand(new RemoveBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new CopyBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new PasteBlockElementsCommand(contextStack, cache, tag, structure, definition));
+            commandContext.AddCommand(new MoveBlockElementCommand(contextStack, cache, tag, structure, definition));
+            commandContext.AddCommand(new SwapBlockElementsCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new ForEachCommand(contextStack, cache, tag, structure, definition));
             commandContext.AddCommand(new SaveTagChangesCommand(cache, tag, definition));
-            
+            commandContext.AddCommand(new ExportCommandsCommand(cache, definition as TagStructure));
+            commandContext.AddCommand(new FindValueCommand(cache, tag));
+
             commandContext.AddCommand(new ExitToCommand(contextStack));
 
             if(CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, cache.Version))

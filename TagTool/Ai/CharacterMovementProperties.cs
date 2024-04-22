@@ -10,8 +10,8 @@ namespace TagTool.Ai
         public float PathfindingRadius;
         public float DestinationRadius;
         public float DiveGrenadeChance;
-        public AiSize ObstacleLeapMinimumSize;
-        public AiSize ObstacleLeapMaximumSize;
+        public AiSize ObstacleLeapMinSize;
+        public AiSize ObstacleLeapMaxSize;
         public AiSize ObstacleIgnoreSize;
         public AiSize ObstaceSmashableSize;
 
@@ -19,9 +19,9 @@ namespace TagTool.Ai
         public byte[] Unused = new byte[2];
 
         public CharacterJumpHeight JumpHeight;
-        public CharacterMovementHintFlags HintFlags;
-        public float Unknown1;
-        public float Unknown2;
-        public float Unknown3;
+        public CharacterMovementHintFlags MovementHints;
+        public float ThrottleScale;
+        public float ThrottleDampening; // 0 = slow change in throttle, 1 = fast change in throttle
+        public float WalkDistance; // Under this distance, actors will walk instead of run (world units)
     }
 }

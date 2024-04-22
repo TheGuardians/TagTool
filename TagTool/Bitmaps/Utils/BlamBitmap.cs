@@ -25,31 +25,28 @@ public class BaseBitmap
     public int NearestHeight;
     public int NearestWidth;
 
+    public BaseBitmap() { }
+
+    public BaseBitmap(Bitmap.Image image, byte[] data) : this(image)
+    {
+        Data = data;
+    }
+
     public BaseBitmap(Bitmap.Image image)
     {
         Height = image.Height;
         Width = image.Width;
         Depth = image.Depth;
-        MipMapCount = image.MipmapCount;
+        MipMapCount = image.MipmapCount + 1;
         Type = image.Type;
         Flags = image.Flags;
         Curve = image.Curve;
-        MipMapOffset = image.MipMapOffset;
+        MipMapOffset = image.HighResPixelsSize;
         UpdateFormat(image.Format);
     }
 
-    public BaseBitmap(BitmapTextureInteropResource definition, Bitmap.Image image)
+    public BaseBitmap(BitmapTextureInteropResource definition, Bitmap.Image image) : this(definition.Texture.Definition.Bitmap, image)
     {
-        var def = definition.Texture.Definition.Bitmap;
-        Height = def.Height;
-        Width = def.Width;
-        Depth = def.Depth;
-        MipMapCount = def.MipmapCount - 1;
-        Type = def.BitmapType;
-        Flags = image.Flags;
-        Curve = image.Curve;
-        MipMapOffset = image.MipMapOffset;
-        UpdateFormat(image.Format);
     }
 
     public BaseBitmap(BitmapTextureInteropDefinition definition, Bitmap.Image image)
@@ -57,11 +54,11 @@ public class BaseBitmap
         Height = definition.Height;
         Width = definition.Width;
         Depth = definition.Depth;
-        MipMapCount = definition.MipmapCount != 0 ? definition.MipmapCount - 1 : 0;
+        MipMapCount = Math.Max(1, (int)definition.MipmapCount);
         Type = definition.BitmapType;
         Flags = image.Flags;
         Curve = image.Curve;
-        MipMapOffset = image.MipMapOffset;
+        MipMapOffset = image.HighResPixelsSize;
         UpdateFormat(image.Format);
     }
 
@@ -74,7 +71,7 @@ public class BaseBitmap
             Height = def.Height;
             Width = def.Width;
             Depth = def.Depth;
-            MipMapCount = def.MipmapCount - 1;
+            MipMapCount = Math.Max(1, (int)def.MipmapCount);
             Type = def.BitmapType;
             Flags = image.Flags;
             UpdateFormat(image.Format);
@@ -85,12 +82,12 @@ public class BaseBitmap
             Height = def.Height;
             Width = def.Width;
             Depth = def.Depth;
-            MipMapCount = def.MipmapCount - 1;
+            MipMapCount = Math.Max(1, (int)def.MipmapCount);
             Type = def.BitmapType;
             Flags = image.Flags;
             UpdateFormat(image.Format);
         }
-        MipMapOffset = image.MipMapOffset;
+        MipMapOffset = image.HighResPixelsSize;
         Curve = image.Curve;
     }
 

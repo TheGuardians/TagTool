@@ -10,15 +10,28 @@ namespace TagTool.Audio
     [TagStructure(Size = 0x10, MinVersion = CacheVersion.Halo3ODST)]
     public class PitchRangeParameter : TagStructure
 	{
-        public short NaturalPitch;
+        /// <summary>
+        /// the apparent pitch when these samples are played at their recorded pitch.
+        /// </summary>
+        public short NaturalPitch;  // cents
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public short Unknown;
+        public short FirstDeterministicFlagIndex;
 
-        public Bounds<short> BendBounds;
-        public Bounds<short> MaxGainPitchBounds;
+        /// <summary>
+        /// the range of pitches that will be represented using this sample.
+        /// </summary>
+        public Bounds<short> BendBounds;    // cents
 
+        /// <summary>
+        /// the range of pitches that map to full gain.
+        /// </summary>
+        public Bounds<short> MaxGainPitchBounds;    // cents
+
+        /// <summary>
+        /// the actual pitch will be clamped to this
+        /// </summary>
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public Bounds<short> UnknownBounds;
+        public Bounds<short> PlaybackBendBounds;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -7,14 +8,21 @@ using System.Reflection;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Commands.Tags;
+using TagTool.Common;
 using TagTool.IO;
 
 namespace TagTool.Commands
 {
     public static class Program
     {
+        public static string TagToolDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        public static readonly Stopwatch _stopWatch = new Stopwatch();
+        public static int ErrorCount = 0;
+        public static int WarningCount = 0;
+
         static void Main(string[] args)
         {
+            SetDirectories();
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
             ConsoleHistory.Initialize();
 
@@ -25,22 +33,47 @@ namespace TagTool.Commands
 
             if (autoexecCommand == null)
             {
-                Console.WriteLine($"Tag Tool [{Assembly.GetExecutingAssembly().GetName().Version}]");
+                Console.WriteLine($"TagTool [{Assembly.GetExecutingAssembly().GetName().Version}]");
                 Console.WriteLine();
-                Console.WriteLine("Please report any bugs and/or feature requests at");
-                Console.WriteLine("<https://github.com/TheGuardians-CI/TagTool/issues>.");
-                Console.WriteLine();
+                Console.WriteLine("Please report any bugs and/or feature requests:");
+                Console.WriteLine("https://github.com/TheGuardians-CI/TagTool/issues");
             }
 
             start:
             // Get the file path from the first argument
             // If no argument is given, load tags.dat
             // legacy from older cache system where only HO caches could be loaded
+
+            var autoExecFile = new FileInfo(Path.Combine(TagToolDirectory, "autoexec.cmds"));
+
+            if (autoExecFile.Exists && args.Count() == 0)
+            {
+                try
+                {
+                    args = new string[] { File.ReadLines("autoexec.cmds").First() };
+
+                    args[0] = args[0].EndsWith("tags.dat") ? args[0] : 
+                        (args[0].EndsWith("\\") ? args[0] += "tags.dat" : args[0] += "\\tags.dat");
+                }
+                catch
+                {
+                    Console.WriteLine();
+                    new TagToolWarning("Your \"autoexec.cmds\" file contains no lines.");
+                }
+            }
+                
+
             var fileInfo = new FileInfo((args.Length > 0) ? args[0] : "tags.dat");
+            bool defaultCacheIsSet = fileInfo.Exists;
+
+            if (args.Length > 0 && !fileInfo.Exists && !autoExecFile.Exists)
+                new TagToolError(CommandError.CustomError, "Invalid path to a tag cache!");
+            else if (fileInfo.Exists)
+                defaultCacheIsSet = true;
 
             while (!fileInfo.Exists)
             {
-                Console.WriteLine("Enter the path to a Halo cache file (.map or tags.dat)':");
+                Console.WriteLine("\nEnter the path to a Halo cache file (.map/.dat):");
                 Console.Write("> ");
 				var tagCacheFile = Console.ReadLine();
 
@@ -59,12 +92,22 @@ namespace TagTool.Commands
                 //sometimes drag&drop files have quotes placed around them, remove the quotes
                 tagCacheFile = tagCacheFile.Replace("\"", "").Replace("\'", "");
 
-                if (File.Exists(tagCacheFile))
-					fileInfo = new FileInfo(tagCacheFile);
-				else
-					Console.WriteLine("Invalid path to 'tags.dat'!");
+                if (string.IsNullOrWhiteSpace(tagCacheFile))
+                    continue;
 
-                Console.WriteLine();
+                if (!tagCacheFile.EndsWith(".map") && !tagCacheFile.EndsWith(".dat"))
+                {
+                    if (tagCacheFile.Last() == '\\' || tagCacheFile.Last() == '/')
+                        tagCacheFile = tagCacheFile.Substring(0, tagCacheFile.Length - 1);
+
+                    var append = tagCacheFile.EndsWith("maps") ? "tags.dat" : "maps\\tags.dat";
+                    tagCacheFile = Path.Combine(tagCacheFile, append);
+                }
+
+                if (File.Exists(tagCacheFile))
+                    fileInfo = new FileInfo(tagCacheFile);
+                else
+                    new TagToolError(CommandError.CustomError, "Invalid path to a tag cache!");
             }
 
             GameCache gameCache = null;
@@ -78,8 +121,8 @@ namespace TagTool.Commands
             }
             catch (Exception e)
             {
-                Console.WriteLine("ERROR: " + e.Message);
-                Console.WriteLine("STACKTRACE: " + Environment.NewLine + e.StackTrace);
+                new TagToolError(CommandError.CustomError, e.Message);
+                Console.WriteLine("\nSTACKTRACE: " + Environment.NewLine + e.StackTrace);
                 ConsoleHistory.Dump("hott_*_init.log");
                 return;
             }
@@ -97,9 +140,21 @@ namespace TagTool.Commands
             {
                 commandRunner.RunCommand(string.Join(" ", autoexecCommand), false);
                 goto end;
-            }           
+            }
 
-            Console.WriteLine("Enter \"help\" to list available commands. Enter \"exit\" to quit.");
+            
+            if(autoExecFile.Exists)
+            {
+                var autoExecLines = File.ReadAllLines(autoExecFile.FullName);
+
+                // if cache path provided at the start of autoexec.cmds, ignore it when executing
+                autoExecLines = defaultCacheIsSet ? autoExecLines.Skip(1).ToArray() : autoExecLines;
+
+                foreach (var line in autoExecLines)
+                    commandRunner.RunCommand(line);
+            }
+
+            Console.WriteLine("\nEnter \"help\" to list available commands. Enter \"quit\" to quit.");
             while (!commandRunner.EOF)
             {
                 // Read and parse a command
@@ -114,6 +169,48 @@ namespace TagTool.Commands
             }
 
             end: return;
+        }
+
+        public static void SetDirectories()
+        {
+            // Needed to use AddDllDirectory
+            NativeInterop.SetDefaultDllDirectories(0x1000u); // LOAD_LIBRARY_SEARCH_DEFAULT_DIRS
+            // Add the tools directory to the search path to simplify usage of [DllImport]
+            NativeInterop.AddDllDirectory(Path.Combine(TagToolDirectory, "Tools"));
+        }
+
+        public static void ReportElapsed()
+        {
+            _stopWatch.Stop();
+            TimeSpan t = TimeSpan.FromMilliseconds(_stopWatch.ElapsedMilliseconds);
+
+            string timeDisplay = $"{t.TotalMilliseconds} milliseconds";
+
+            if (t.TotalMilliseconds > 10000)
+            {
+                timeDisplay = $"{t.Minutes} minutes and {t.Seconds} seconds";
+
+                if (t.Hours > 0)
+                    timeDisplay = $"{t.Hours} hours, " + timeDisplay;
+            }
+
+            Console.Write($"{timeDisplay} elapsed with ");
+
+            Console.ForegroundColor = (ErrorCount == 0) ? ConsoleColor.Green : ConsoleColor.Red;
+            Console.Write($"{ErrorCount} errors ");
+            Console.ResetColor();
+
+            Console.Write("and ");
+
+            Console.ForegroundColor = (WarningCount == 0) ? Console.ForegroundColor : ConsoleColor.DarkYellow;
+            Console.Write($"{WarningCount} warnings");
+            Console.ResetColor();
+
+            Console.Write(".\n");
+
+            ErrorCount = 0;
+            WarningCount = 0;
+            _stopWatch.Reset();
         }
     }
 }

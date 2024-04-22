@@ -40,23 +40,17 @@ namespace TagTool.Cache
             Serializer.Serialize(new HaloOnlineSerializationContext(stream, this, instance), definition);
         }
 
-        private T Deserialize<T>(ISerializationContext context) =>
+        public T Deserialize<T>(ISerializationContext context) =>
             Deserializer.Deserialize<T>(context);
 
-        private object Deserialize(ISerializationContext context, Type type) =>
+        public object Deserialize(ISerializationContext context, Type type) =>
             Deserializer.Deserialize(context, type);
 
         public override T Deserialize<T>(Stream stream, CachedTag instance) =>
             Deserialize<T>(new HaloOnlineSerializationContext(stream, this, (CachedTagHaloOnline)instance));
 
         public override object Deserialize(Stream stream, CachedTag instance) =>
-            Deserialize(new HaloOnlineSerializationContext(stream, this, (CachedTagHaloOnline)instance), TagDefinition.Find(instance.Group.Tag));
-
-        public T Deserialize<T>(Stream stream, CachedTagHaloOnline instance) =>
-            Deserialize<T>(new HaloOnlineSerializationContext(stream, this, instance));
-
-        public object Deserialize(Stream stream, CachedTagHaloOnline instance) =>
-            Deserialize(new HaloOnlineSerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new HaloOnlineSerializationContext(stream, this, (CachedTagHaloOnline)instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         #endregion
 
@@ -85,42 +79,10 @@ namespace TagTool.Cache
             }
         }
 
-        public TagCacheHaloOnline CreateTagCache(DirectoryInfo directory, out FileInfo file)
-        {
-            if (directory == null)
-                directory = Directory;
-
-            if (!directory.Exists)
-                directory.Create();
-
-            file = new FileInfo(Path.Combine(directory.FullName, "tags.dat"));
-
-            TagCacheHaloOnline cache = null;
-
-            using (var stream = file.Create())
-                cache = CreateTagCache(stream);
-
-            return cache;
-        }
-
-        public TagCacheHaloOnline CreateTagCache(Stream stream)
-        {
-            TagCacheHaloOnlineHeader header = new TagCacheHaloOnlineHeader
-            {
-                TagTableOffset = 0x20,
-                CreationTime = 0x01D0631BCC791704
-            };
-
-            stream.Position = 0;
-            var writer = new EndianWriter(stream, EndianFormat.LittleEndian);
-            var dataContext = new DataSerializationContext(writer);
-            var serializer = new TagSerializer(CacheVersion.HaloOnline106708);
-            serializer.Serialize(dataContext, header);
-            stream.Position = 0;
-
-            return new TagCacheHaloOnline(stream, new Dictionary<int, string>());
-        }
-
         public virtual void SaveTagNames(string path = null) => throw new NotImplementedException();
+
+        public virtual void SaveFonts(Stream fontStream) => throw new NotImplementedException();
+
+        public virtual void AddModFile(string path, Stream file) => throw new NotImplementedException();
     }
 }

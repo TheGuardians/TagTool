@@ -24,8 +24,8 @@ namespace TagTool.Geometry
         private RenderModel.Region.Permutation _currentPermutation;
         private MeshData _currentMesh;
         public readonly List<MeshData> Meshes = new List<MeshData>();
-        private Mesh.Part _currentPart;
-        private readonly List<Mesh.SubPart> _subparts = new List<Mesh.SubPart>();
+        private Part _currentPart;
+        private readonly List<SubPart> _subparts = new List<SubPart>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderModelBuilder"/> class for a particular engine version.
@@ -40,6 +40,7 @@ namespace TagTool.Geometry
             _model.Geometry = new RenderGeometry
             {
                 Meshes = new List<Mesh>(),
+                PerMeshNodeMaps = new List<RenderGeometry.PerMeshNodeMap>(),
                 RuntimeFlags = (RenderGeometryRuntimeFlags)7 // TODO: Figure out what this does, if anything
             };
         }
@@ -177,8 +178,8 @@ namespace TagTool.Geometry
             {
                 Mesh = new Mesh
                 {
-                    Parts = new List<Mesh.Part>(),
-                    SubParts = new List<Mesh.SubPart>(),
+                    Parts = new List<Part>(),
+                    SubParts = new List<SubPart>(),
                     VertexBufferIndices = new short[8] { -1, -1, -1, -1, -1, -1, -1, -1 },
                     IndexBufferIndices = new short[2] { -1, -1 },
                     Flags = MeshFlags.None,
@@ -205,8 +206,26 @@ namespace TagTool.Geometry
 
             Meshes.Add(_currentMesh);
             _model.Geometry.Meshes.Add(_currentMesh.Mesh);
+
+            if (_currentMesh.NodeIndices != null)
+            {
+                _model.Geometry.PerMeshNodeMaps.Add(new RenderGeometry.PerMeshNodeMap()
+                {
+                    NodeIndices = _currentMesh.NodeIndices.Select(x => new RenderGeometry.PerMeshNodeMap.NodeIndex { Node = x }).ToList()
+                });
+            }
+
             _currentPermutation.MeshCount++;
             _currentMesh = null;
+        }
+
+        /// <summary>
+        /// Maps the given node indices to the current mesh.
+        /// </summary>
+        /// <param name="nodeIndices">List of node indices to map.</param>
+        public void MapNodes(byte[] nodeIndices)
+        {
+            _currentMesh.NodeIndices = nodeIndices;
         }
 
         /// <summary>
@@ -282,17 +301,17 @@ namespace TagTool.Geometry
         /// <param name="indexCount">The index count.</param>
         /// <param name="vertexCount">The vertex count.</param>
         /// <exception cref="System.InvalidOperationException">Cannot define a part if no mesh is active</exception>
-        public void BeginPart(short materialIndex, ushort firstIndex, ushort indexCount, ushort vertexCount)
+        public void BeginPart(short materialIndex, int firstIndex, int indexCount, ushort vertexCount)
         {
             if (_currentMesh == null)
                 throw new InvalidOperationException("Cannot define a part if no mesh is active");
 
-            _currentPart = new Mesh.Part
+            _currentPart = new Part
             {
                 MaterialIndex = materialIndex,
                 TransparentSortingIndex = -1,
-                FirstIndexOld = firstIndex,
-                IndexCountOld = indexCount,
+                FirstIndex = firstIndex,
+                IndexCount = indexCount,
                 FirstSubPartIndex = (short)(_currentMesh.Mesh.SubParts.Count - 1),
                 SubPartCount = 0,
                 // TODO: Unknown values here
@@ -329,7 +348,7 @@ namespace TagTool.Geometry
                 throw new InvalidOperationException("Cannot define a part if no mesh is active");
 
             _currentMesh.Mesh.SubParts.Add(
-                new Mesh.SubPart
+                new SubPart
                 {
                     FirstIndex = firstIndex,
                     IndexCount = indexCount,
@@ -342,10 +361,9 @@ namespace TagTool.Geometry
         /// Builds a model tag and resource data.
         /// </summary>
         /// <param name="serializer">The tag serializer to use to serialize the model definition data.</param>
-        /// <param name="resourceDataStream">The stream to write resource data to.</param>
         /// <returns></returns>
         /// <exception cref="System.InvalidOperationException">Cannot build a model if a region is active</exception>
-        public RenderModel Build(TagSerializer serializer, Stream resourceDataStream)
+        public RenderModel Build(TagSerializer serializer)
         {
             if (_currentRegion != null)
                 throw new InvalidOperationException("Cannot build a model if a region is active");
@@ -356,7 +374,7 @@ namespace TagTool.Geometry
 
             CompressVertices();
 
-            BuildResourceData(serializer, resourceDataStream);
+            BuildResourceData(serializer);
 
             return _model;
         }
@@ -431,7 +449,7 @@ namespace TagTool.Geometry
             return result;
         }
 
-        private void BuildResourceData(TagSerializer serializer, Stream resourceDataStream)
+        private void BuildResourceData(TagSerializer serializer)
         {
             var definition = new RenderGeometryApiResourceDefinition
             {
@@ -443,13 +461,13 @@ namespace TagTool.Geometry
             foreach (var mesh in Meshes)
             {
                 // Serialize the mesh's vertex buffer
-                var vertexBufferStart = (int)resourceDataStream.Position;
-                var vertexCount = SerializeVertexBuffer(mesh, resourceDataStream);
-                var vertexBufferEnd = (int)resourceDataStream.Position;
                 var vertexBufferStream = new MemoryStream();
+                var vertexBufferStart = (int)vertexBufferStream.Position;
+                var vertexCount = SerializeVertexBuffer(mesh, vertexBufferStream);
+                StreamUtil.Align(vertexBufferStream, 4);
+                var vertexBufferEnd = (int)vertexBufferStream.Position;
 
-                resourceDataStream.Position = vertexBufferStart;
-                resourceDataStream.CopyTo(vertexBufferStream, vertexBufferEnd - vertexBufferStart);
+                vertexBufferStream.Position = vertexBufferStart;
 
                 // Add a definition for it
                 mesh.Mesh.VertexBufferIndices[0] = (short)definition.VertexBuffers.Count;
@@ -465,14 +483,11 @@ namespace TagTool.Geometry
                 });
 
                 // Serialize the mesh's index buffer
-                var indexBufferStart = vertexBufferEnd;
-                SerializeIndexBuffer(mesh, resourceDataStream);
-                var indexBufferEnd = (int)resourceDataStream.Position;
-
                 var indexBufferStream = new MemoryStream();
-
-                resourceDataStream.Position = indexBufferStart;
-                resourceDataStream.CopyTo(indexBufferStream, indexBufferEnd - indexBufferStart);
+                var indexBufferStart = (int)indexBufferStream.Position;
+                SerializeIndexBuffer(mesh, indexBufferStream);
+                var indexBufferEnd = (int)indexBufferStream.Position;
+                indexBufferStream.Position = indexBufferStart;
 
                 // Add a definition for it
                 mesh.Mesh.IndexBufferIndices[0] = (short)definition.IndexBuffers.Count;
@@ -486,7 +501,6 @@ namespace TagTool.Geometry
                 });
             }
             SerializeDefinitionData(definition);
-            resourceDataStream.Position = 0;
         }
 
         private void SerializeDefinitionData(RenderGeometryApiResourceDefinition definition)
@@ -496,7 +510,7 @@ namespace TagTool.Geometry
 
         private int SerializeVertexBuffer(MeshData mesh, Stream outStream)
         {
-            var vertexStream = VertexStreamFactory.Create(CacheContext.Version, outStream);
+            var vertexStream = VertexStreamFactory.Create(CacheContext.Version, CacheContext.Platform, outStream);
 
             if (mesh.RigidVertices != null)
             {
@@ -549,6 +563,8 @@ namespace TagTool.Geometry
 
             public ushort[] Indices { get; set; }
 
+            public byte[] NodeIndices { get; set; }
+
             public void UnbindVertices()
             {
                 VertexFormat = VertexBufferFormat.Invalid;
@@ -587,8 +603,8 @@ namespace TagTool.Geometry
             { VertexBufferFormat.Unknown17, 0x4 },
             { VertexBufferFormat.Decorator, 0x20 },
             { VertexBufferFormat.ParticleModel, 0x20 },
-            { VertexBufferFormat.Unknown1A, 0xC },
-            { VertexBufferFormat.Unknown1B, 0x24 },
+            { VertexBufferFormat.WaterTriangleIndices, 0xC },
+            { VertexBufferFormat.TesselatedWaterParameters, 0x24 },
             { VertexBufferFormat.Unknown1C, 0x80 },
             { VertexBufferFormat.Unused1D, 0 },
         };

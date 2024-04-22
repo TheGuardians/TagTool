@@ -35,11 +35,11 @@ namespace TagTool.Bitmaps
         A16B16G16R16F,      // 0x19, 16 bit float ABGR
         Q8W8V8U8,           // 0x1A, 8 bit signed 4 channel
         A2R10G10B10,        // 0x1B, 30-bit color 2-bit alpha
-        A16B16G16R16,       // 0x1C, 48-bit color 16-bit alpha
+        A8R8G8B8_reach,     // 0x1C, Seems to be identical to A8R8G8B8
         V16U16,             // 0x1D, v16u16 signed 16-bit normals
         Unused1E,           // 0x1E compressed 4-bit single channel
         Dxt5a,              // 0x1F compressed interpolated single channel
-        Unused20,           // 0x20 compressed channel mask
+        Y16,                // 0x20 compressed channel mask, Reach: 16 bits monochrome texture
         Dxn,                // 0x21, compressed normals: high quality ('ATI2')
         Ctx1,               // 0x22  compressed normals: high compression
         Dxt3aAlpha,         // 0x23 compressed 4-bit alpha channel
@@ -63,56 +63,65 @@ namespace TagTool.Bitmaps
         /// <returns></returns>
         public static int GetBitsPerPixel(BitmapFormat format)
         {
-            int bitsPerPixel = 0;
             switch (format)
             {
-                case BitmapFormat.A8:
-                case BitmapFormat.AY8:
-                case BitmapFormat.Y8:
+                case BitmapFormat.Unused4:
+                case BitmapFormat.Unused5:
+                case BitmapFormat.R6G5B5:
+                case BitmapFormat.UnusedC:
+                case BitmapFormat.UnusedD:
                 case BitmapFormat.P8:
-                    bitsPerPixel = 8;
-                    break;
-
+                    return 0;
+                case BitmapFormat.Dxt1:
+                case BitmapFormat.Unused1E:
+                case BitmapFormat.Dxt5a:
+                case BitmapFormat.Y16:
+                case BitmapFormat.Ctx1:
+                case BitmapFormat.Dxt3aAlpha:
+                case BitmapFormat.Dxt3aMono:
+                case BitmapFormat.Dxt5aAlpha:
+                case BitmapFormat.Dxt5aMono:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt5aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
+                    return 4;
+                case BitmapFormat.A8:
+                case BitmapFormat.Y8:
+                case BitmapFormat.AY8:
+                case BitmapFormat.Dxt3:
+                case BitmapFormat.Dxt5:
+                case BitmapFormat.Dxn:
+                case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.ReachDxnMonoAlpha:
+                    return 8;
                 case BitmapFormat.A8Y8:
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.A1R5G5B5:
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.A4R4G4B4Font:
                 case BitmapFormat.V8U8:
-                    bitsPerPixel = 16;
-                    break;
-
-                case BitmapFormat.A8R8G8B8:
+                case BitmapFormat.G8B8:
+                    return 16;
                 case BitmapFormat.X8R8G8B8:
+                case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.Q8W8V8U8:
                 case BitmapFormat.A2R10G10B10:
                 case BitmapFormat.V16U16:
-                    bitsPerPixel = 32;
-                    break;
-
+                    return 32;
                 case BitmapFormat.RGBFP16:
-                    bitsPerPixel = 48;
-                    break;
-
-                case BitmapFormat.A16B16G16R16:
+                    return 48;
                 case BitmapFormat.A16B16G16R16F:
-                    bitsPerPixel = 64;
-                    break;
-
+                case BitmapFormat.A8R8G8B8_reach:
+                    return 64;
                 case BitmapFormat.RGBFP32:
-                    bitsPerPixel = 96;
-                    break;
-
+                    return 96;
                 case BitmapFormat.ARGBFP32:
                 case BitmapFormat.A32B32G32R32F:
-                    bitsPerPixel = 128;
-                    break;
-
+                    return 128;
                 default:
                     throw new Exception($"Unsupported uncompressed format {format}");
             }
-
-            return bitsPerPixel;
         }
 
         /// <summary>
@@ -167,25 +176,34 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt5a:
                 case BitmapFormat.Dxt3aAlpha:
                 case BitmapFormat.Dxt3aMono:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
+                case BitmapFormat.ReachDxt5aMono:
                     blockDimension = 4;
                     break;
                 case BitmapFormat.Dxt3:
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Dxn:
                 case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.ReachDxnMonoAlpha:
                     blockDimension = 4;
                     break;
                 case BitmapFormat.AY8:
                 case BitmapFormat.Y8:
                 case BitmapFormat.A8:
                 case BitmapFormat.A8Y8:
+                case BitmapFormat.Y16:
                 case BitmapFormat.A16B16G16R16F:
+                case BitmapFormat.A2R10G10B10:
                 case BitmapFormat.A32B32G32R32F:
+                case BitmapFormat.A8R8G8B8_reach:
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.A1R5G5B5:
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.V16U16:
                 case BitmapFormat.R5G6B5:
                     blockDimension = 1;
                     break;
@@ -212,6 +230,10 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt5a:
                 case BitmapFormat.Dxt5aMono:
                 case BitmapFormat.Dxt5aAlpha:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
+                case BitmapFormat.ReachDxt5aMono:
                     compressionFactor = 2;
                     break;
                 case BitmapFormat.A8:
@@ -222,17 +244,22 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxn:
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.A4R4G4B4Font:
+                case BitmapFormat.ReachDxnMonoAlpha:
                     compressionFactor = 1;
                     break;
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.A1R5G5B5:
                 case BitmapFormat.A8Y8:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.Y16:
                 case BitmapFormat.R5G6B5:
                     compressionFactor = 0.5;
                     break;
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.X8R8G8B8:
+                case BitmapFormat.A8R8G8B8_reach:
+                case BitmapFormat.A2R10G10B10:
+                case BitmapFormat.V16U16:
                     compressionFactor = 0.25;
                     break;
                 case BitmapFormat.A16B16G16R16F:
@@ -261,13 +288,16 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Y8:
                 case BitmapFormat.AY8:
                 case BitmapFormat.A8Y8:
+                case BitmapFormat.Y16:
                 case BitmapFormat.A8R8G8B8:
                 case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.A4R4G4B4:
                 case BitmapFormat.R5G6B5:
                 case BitmapFormat.A16B16G16R16F:
+                case BitmapFormat.A8R8G8B8_reach:
                 case BitmapFormat.A32B32G32R32F:
                 case BitmapFormat.V8U8:
+                case BitmapFormat.V16U16:
                     minimalSize = 32;
                     break;
 
@@ -282,6 +312,11 @@ namespace TagTool.Bitmaps
                 case BitmapFormat.Dxt5:
                 case BitmapFormat.Dxn:
                 case BitmapFormat.DxnMonoAlpha:
+                case BitmapFormat.ReachDxnMonoAlpha:
+                case BitmapFormat.ReachDxt3aAlpha:
+                case BitmapFormat.ReachDxt3aMono:
+                case BitmapFormat.ReachDxt5aAlpha:
+                case BitmapFormat.ReachDxt5aMono:
                     minimalSize = 128;
                     break;
                 default:

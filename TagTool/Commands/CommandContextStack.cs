@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TagTool.Cache;
 
 namespace TagTool.Commands
 {
@@ -10,6 +12,16 @@ namespace TagTool.Commands
     public class CommandContextStack
     {
         private Stack<CommandContext> ContextStack { get; } = new Stack<CommandContext>();
+
+        /// <summary>
+        /// Stores argument variables and their values that are used when running commands.
+        /// </summary>
+        public Dictionary<string, string> ArgumentVariables = new Dictionary<string, string>();
+
+        /// <summary>
+        /// An event that is fired when a context is popped from the stack
+        /// </summary>
+        public event Action<CommandContext> ContextPopped;
 
         /// <summary>
         /// Gets the currently-active context, or <c>null</c> if there is none.
@@ -50,12 +62,18 @@ namespace TagTool.Commands
         /// <summary>
         /// Pops the current context off the stack, making the previous one active.
         /// </summary>
-        /// <returns><c>true</c> if more contexts still remain on the stack, <c>false</c> if the stack is now empty.</returns>
         public bool Pop()
         {
-            ContextStack.Pop();
+            if (IsBase())
+                return false;
 
-            return (ContextStack.Count != 0);
+            var context = ContextStack.Pop();
+            ContextPopped?.Invoke(context);
+
+            return true;
         }
+
+        public bool IsBase() => ContextStack.Count == 1;
+        public bool IsModPackage() => Context.Name.ToLower().EndsWith(".pak");
     }
 }

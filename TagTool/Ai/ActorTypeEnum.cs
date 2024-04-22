@@ -1,0 +1,31 @@
+namespace TagTool.Ai
+{
+    public enum ActorTypeEnum : short
+    {
+        Elite,
+        Jackal,
+        Grunt,
+        Hunter,
+        Engineer,
+        Assassin,
+        Player,
+        Marine,
+        Crew,
+        CombatForm,
+        InfectionForm,
+        CarrierForm,
+        Monitor,
+        Sentinel,
+        None,
+        MountedWeapon,
+        Brute,
+        Prophet,
+        Bugger,
+        Juggernaut,
+        PureFormStealth,
+        PureFormTank,
+        PureFormRanged,
+        Scarab,
+        Guardian
+    }
+}

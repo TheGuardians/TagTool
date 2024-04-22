@@ -12,8 +12,11 @@ namespace TagTool.Scripting
         [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public Halo3ODSTValue Halo3ODST;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline106708)]
         public HaloOnlineValue HaloOnline;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public HaloReachValue HaloReach;
 
         public enum Halo3RetailValue : ushort
         {
@@ -280,6 +283,11 @@ namespace TagTool.Scripting
             AnimationBudgetReference,
             LoopingSoundBudgetReference,
             SoundBudgetReference
+        }
+
+        public enum HaloReachValue : ushort
+        {
+            //empty for now
         }
     }
 }

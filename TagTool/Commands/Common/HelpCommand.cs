@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace TagTool.Commands.Common
 {
@@ -25,7 +26,7 @@ namespace TagTool.Commands.Common
         public override object Execute(List<string> args)
         {
             if (args.Count > 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
             if (args.Count == 1)
                 DisplayCommandHelp(args[0]);
             else
@@ -65,11 +66,21 @@ namespace TagTool.Commands.Common
             var width = commands.Max(c => c.Name.Length);
             var format = "{0,-" + width + "}  {1}";
 
+            int bufferWidth = 0;
+            try
+            {
+                bufferWidth = Console.BufferWidth;
+            }
+            catch (Exception ex) { }
+
             Console.WriteLine("Available commands for {0}:", context.Name);
             Console.WriteLine();
             foreach (var command in commands)
             {
-                Console.WriteLine(format, command.Name, command.Description);
+                if (bufferWidth > 0)
+                    Console.WriteLine(format, command.Name, Wrap(command.Description, wrap: bufferWidth - (width + 4), padLeft: width + 3));
+                else
+                    Console.WriteLine(format, command.Name, command.Description);
                 ignore.Add(command.Name);
             }
             Console.WriteLine();
@@ -80,20 +91,36 @@ namespace TagTool.Commands.Common
             var command = ContextStack.Context.GetCommand(commandName);
             if (command == null)
             {
-                Console.WriteLine("Unable to find command: " + commandName);
+                new TagToolError(CommandError.CustomError,$"Unable to find command \"{commandName}\"");
                 return;
             }
-            Console.WriteLine("{0}: {1}", command.Name, command.Description);
-            Console.WriteLine();
-            Console.WriteLine("Usage:");
-            Console.WriteLine("{0}", command.Usage);
-            Console.WriteLine();
-            Console.WriteLine(command.HelpMessage);
+			
+            // Print help info
+            ushort indent = 3;
+            Console.WriteLine(FormatHelpInfo(command.Name, command.Description, indent, wrap:110));
+            Console.WriteLine(FormatHelpInfo("Usage", command.Usage, indent));
+            if (command.Examples != "")
+                Console.WriteLine(FormatHelpInfo("Examples", command.Examples, indent));
+            if (command.HelpMessage != "")
+                Console.WriteLine(FormatHelpInfo("Notes", command.HelpMessage, indent, wrap:110));
         }
 
         private bool IsAvailable(CommandContext context, Command command)
         {
             return (command.Inherit || ContextStack.Context == context);
+        }
+		
+        private static string FormatHelpInfo(string head, string body, ushort indent = 0, int wrap = int.MaxValue)
+        {
+            string indentStr = new string(' ', indent);
+            string Indent(string line) { return (line.StartsWith("- ") ? $"\n{indentStr}" : $"\n{indentStr}  ") + line; }
+            return $"\n{indentStr}{head}:" + String.Join("", body.Split('\n').Select(x => Indent(Wrap(x, wrap, indent + (x.StartsWith("- ") ? 4 : 2)))));          
+        }   
+        
+        private static string Wrap(string strIn, int wrap, int padLeft)
+        {
+            return String.Join("\n".PadRight(padLeft),
+               Regex.Matches(strIn, @"(.{1," + (wrap) + @"})(?:\s|$)").Cast<Match>());
         }
     }
 }

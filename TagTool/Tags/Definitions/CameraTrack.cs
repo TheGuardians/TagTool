@@ -7,17 +7,15 @@ using static TagTool.Tags.TagFieldFlags;
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "camera_track", Tag = "trak", Size = 0x10, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "camera_track", Tag = "trak", Size = 0x14, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "camera_track", Tag = "trak", Size = 0x14, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "camera_track", Tag = "trak", Size = 0x10, MinVersion = CacheVersion.HaloReach)]
     public class CameraTrack : TagStructure
 	{
         public CameraTrackFlags Flags;
 
-        [TagField(Flags = Padding, Length = 3)]
-        public byte[] Unused1 = new byte[3];
+        public List<CameraPoint> ControlPoints;
 
-        public List<CameraPoint> CameraPoints;
-
-        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 4, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused2 = new byte[4];
 
         [TagStructure(Size = 0x1C)]
@@ -29,7 +27,7 @@ namespace TagTool.Tags.Definitions
     }
 
     [Flags]
-    public enum CameraTrackFlags : byte
+    public enum CameraTrackFlags : uint
     {
         None,
         LensEnabled = 1 << 0

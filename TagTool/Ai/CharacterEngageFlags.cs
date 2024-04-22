@@ -6,7 +6,7 @@ namespace TagTool.Ai
     public enum CharacterEngageFlags : int
     {
         None = 0,
-        DefendThreatAxis = 1 << 0,
+        EngagePerch = 1 << 0,
         FightConstantMovement = 1 << 1,
         FlightFightConstantMovement = 1 << 2,
         DisallowCombatCrouching = 1 << 3,

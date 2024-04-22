@@ -16,17 +16,16 @@ namespace TagTool.Commands.Common
 				  "Stopwatch reset - Resets the Stopwatch.\n" +
 				  "Stopwatch restart - Restarts the Stopwatch.\n" +
 				  "Stopwatch start - Starts the Stopwatch.\n" +
-				  "Stopwatch stop - Stops the Stopwatch.\n",
+				  "Stopwatch stop - Stops the Stopwatch.",
 
 				  "Utility command for timing other commands.")
 		{
 		}
 
-		private static readonly Stopwatch _stopWatch = new Stopwatch();
 		public override object Execute(List<string> args)
 		{
 			if (args.Count == 0)
-				return false;
+				return new TagToolError(CommandError.ArgCount);
 
 			for (var a = 0; a < args.Count; a++)
 			{
@@ -35,7 +34,7 @@ namespace TagTool.Commands.Common
 				{
 					case "print":
 						{
-							var milliseconds = StopwatchCommand._stopWatch.ElapsedMilliseconds;
+							var milliseconds = Program._stopWatch.ElapsedMilliseconds;
 							var output = milliseconds.FormatMilliseconds();
 							var startColor = Console.ForegroundColor;
 							Console.ForegroundColor = ConsoleColor.DarkCyan;
@@ -44,19 +43,19 @@ namespace TagTool.Commands.Common
 						}
 						break;
 					case "reset":
-						StopwatchCommand._stopWatch.Reset();
+						Program._stopWatch.Reset();
 						break;
 					case "restart":
-						StopwatchCommand._stopWatch.Restart();
+						Program._stopWatch.Restart();
 						break;
 					case "start":
-						StopwatchCommand._stopWatch.Start();
+						Program._stopWatch.Start();
 						break;
 					case "stop":
-						StopwatchCommand._stopWatch.Stop();
+						Program._stopWatch.Stop();
 						break;
 					default:
-						return false;
+						return new TagToolError(CommandError.ArgInvalid, $"\"{arg}\""); ;
 				}
 			}
 

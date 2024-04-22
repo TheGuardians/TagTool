@@ -1,14 +1,13 @@
 using System;
 using System.Runtime.InteropServices;
 using TagTool.Cache;
-using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags
 {
     /// <summary>
     /// Attribute for automatically-serializable values in a tag.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class TagFieldAttribute : Attribute
     {
 		public static readonly TagFieldAttribute Default = new TagFieldAttribute();
@@ -16,7 +15,7 @@ namespace TagTool.Tags
         /// <summary>
         /// The flags of the field.
         /// </summary>
-        public TagFieldFlags Flags { get; set; } = None;
+        public TagFieldFlags Flags { get; set; } = TagFieldFlags.None;
 
         /// <summary>
         /// The minimum cache version the tag field is present in.
@@ -29,7 +28,7 @@ namespace TagTool.Tags
         public CacheVersion MaxVersion { get; set; } = CacheVersion.Unknown;
 
         /// <summary>
-        /// The tag field version.
+        /// The set of versions the tag field is present in. (Can be combined with MinVersion/MaxVersion)
         /// </summary>
         public CacheVersion Version { get; set; } = CacheVersion.Unknown;
 
@@ -42,6 +41,11 @@ namespace TagTool.Tags
         /// The platforms that the tag field are available on.
         /// </summary>
         public CachePlatform Platform { get; set; } = CachePlatform.All;
+
+        /// <summary>
+		/// The cache build type the structure applies to.
+		/// </summary>
+        public CacheBuildType BuildType { get; set; } = CacheBuildType.Unknown;
 
         /// <summary>
         /// The name of the field to upgrade to (if any).
@@ -62,6 +66,11 @@ namespace TagTool.Tags
         /// <summary>
         /// The power of two to align the field's data to.
         /// Only applicable to fields which contain pointers.
+        /// </summary>
+        public uint DataAlign { get; set; } = 0;
+
+        /// <summary>
+        /// The power of two to align the field to.
         /// </summary>
         public uint Align { get; set; } = 0;
 
@@ -95,6 +104,11 @@ namespace TagTool.Tags
         /// Used when the string written must absolutely be null terminated. For example Maxscript doesn't read fixed length strings
         /// </summary>
         public bool ForceNullTerminated = false;
+
+        /// <summary>
+        /// The underlying type of the Enum.
+        /// </summary>
+        public Type EnumType { get; set; } = null;
     }
 
     [Flags]
@@ -106,9 +120,11 @@ namespace TagTool.Tags
         Padding = 1 << 2,
         Pointer = 1 << 3,
         Runtime = 1 << 4,
-        Relative = 1 << 5,
         Fraction = 1 << 6,
         Resource = 1 << 7,
+        GlobalMaterial = 1 << 8,
+        DebugFill = 1 << 9,
+        Hidden = 1 << 10
     }
 
     public enum TagFieldCompression

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TagTool.Cache.Gen3;
 using TagTool.Common;
 using TagTool.Tags;
 
@@ -12,7 +13,7 @@ namespace TagTool.Cache.HaloOnline
 
         public CachedTagHaloOnline(int index, string name = null) : base(index, name) { }
 
-        public CachedTagHaloOnline(int index, TagGroup group, string name = null) : base(index, group, name) { }
+        public CachedTagHaloOnline(int index, TagGroupGen3 group, string name = null) : base(index, group, name) { }
 
         public override uint DefinitionOffset => Offset;
 
@@ -91,21 +92,24 @@ namespace TagTool.Cache.HaloOnline
         /// <summary>
         /// Reads the header for the tag instance from a stream.
         /// </summary>
-        /// <param name="reader">The stream to read from.</param>
-        internal void ReadHeader(BinaryReader reader)
+        internal void ReadHeader(BinaryReader reader, StringTable stringTable)
         {
             Checksum = reader.ReadUInt32();                        // 0x00 uint32 checksum
             TotalSize = reader.ReadUInt32();                       // 0x04 uint32 total size
-            var numDependencies = reader.ReadInt16();              // 0x08 int16  dependencies count
-            var numDataFixups = reader.ReadInt16();                // 0x0A int16  data fixup count
-            var numResourceFixups = reader.ReadInt16();            // 0x0C int16  resource fixup count
-            var numTagReferenceFixups = reader.ReadInt16();        // 0x0E int16  tag reference fixup count(was padding)
+            var numDependencies = reader.ReadUInt16();              // 0x08 int16  dependencies count
+            var numDataFixups = reader.ReadUInt16();                // 0x0A int16  data fixup count
+            var numResourceFixups = reader.ReadUInt16();            // 0x0C int16  resource fixup count
+            var numTagReferenceFixups = reader.ReadUInt16();        // 0x0E int16  tag reference fixup count(was padding)
             Offset = reader.ReadUInt32();                // 0x10 uint32 main struct offset
             var groupTag = new Tag(reader.ReadInt32());            // 0x14 int32  group tag
             var parentGroupTag = new Tag(reader.ReadInt32());      // 0x18 int32  parent group tag
             var grandparentGroupTag = new Tag(reader.ReadInt32()); // 0x1C int32  grandparent group tag
-            var groupName = new StringId(reader.ReadUInt32());     // 0x20 uint32 group name stringid
-            Group = new TagGroup(groupTag, parentGroupTag, grandparentGroupTag, groupName);
+            var groupId = new StringId(reader.ReadUInt32());     // 0x20 uint32 group name stringid
+
+            if (stringTable.GetString(groupId) == "invalid")
+                Group = new TagGroupGen3(groupTag, parentGroupTag, grandparentGroupTag, "map_list");
+            else
+                Group = new TagGroupGen3(groupTag, parentGroupTag, grandparentGroupTag, stringTable.GetString(groupId));
 
             // Read dependencies
             var dependencies = new HashSet<int>();
@@ -129,19 +133,20 @@ namespace TagTool.Cache.HaloOnline
         /// Writes the header for the tag instance to a stream.
         /// </summary>
         /// <param name="writer">The stream to write to.</param>
-        internal void WriteHeader(BinaryWriter writer)
+        /// <param name="stringTable">Reference to the Halo Online String Table</param>
+        public void WriteHeader(BinaryWriter writer, StringTable stringTable)
         {
             writer.Write(Checksum);
             writer.Write((uint)TotalSize);
-            writer.Write((short)Dependencies.Count);
-            writer.Write((short)PointerOffsets.Count);
-            writer.Write((short)ResourcePointerOffsets.Count);
-            writer.Write((short)TagReferenceOffsets.Count);
+            writer.Write((ushort)Dependencies.Count);
+            writer.Write((ushort)PointerOffsets.Count);
+            writer.Write((ushort)ResourcePointerOffsets.Count);
+            writer.Write((ushort)TagReferenceOffsets.Count);
             writer.Write(DefinitionOffset);
             writer.Write(Group.Tag.Value);
             writer.Write(Group.ParentTag.Value);
-            writer.Write(Group.GrandparentTag.Value);
-            writer.Write(Group.Name.Value);
+            writer.Write(Group.GrandParentTag.Value);
+            writer.Write(stringTable.GetStringId((Group as TagGroupGen3).Name).Value);
 
             // Write dependencies
             foreach (var dependency in Dependencies)
@@ -188,6 +193,14 @@ namespace TagTool.Cache.HaloOnline
         public void AddResourceOffset(uint offset)
         {
             _resourceOffsets.Add(offset);
+        }
+
+        public bool IsEmpty()
+        {
+            if (TotalSize == DefinitionOffset)
+                return true;
+            else
+                return false;
         }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using TagTool.Cache;
 using TagTool.Geometry;
 using TagTool.IO;
-using TagTool.Tags.Resources;
+using TagTool.Commands.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Serialization;
 
 namespace TagTool.Commands.Geometry
 {
@@ -30,11 +29,11 @@ namespace TagTool.Commands.Geometry
 
         public override object Execute(List<string> args)
         {
-            if (args.Count < 1 || args.Count >2)
-                return false;
+            if (args.Count < 1 || args.Count > 2)
+                return new TagToolError(CommandError.ArgCount);
 
             if (args.Count == 2 && (args[0].ToLower() != "raw"))
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             var file = "";
             if (args.Count == 1)

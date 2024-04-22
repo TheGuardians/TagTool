@@ -8,7 +8,8 @@ using TagTool.Havok;
 namespace TagTool.Geometry.BspCollisionGeometry
 {
     [TagStructure(Size = 0x40, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x60, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Size = 0x60, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x6C, MinVersion = CacheVersion.HaloReach)]
     public class CollisionGeometry : TagStructure
 	{
         public TagBlock<Bsp3dNode> Bsp3dNodes;
@@ -57,96 +58,69 @@ namespace TagTool.Geometry.BspCollisionGeometry
     {
         public ulong Value;
 
-        public short Plane
+        public int Plane
         {
-            get => (short)((Value >> 48) & 0xFFFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                var newBytes = BitConverter.GetBytes(value);
-                for (var i = 0; i < newBytes.Length; i++)
-                    allBytes[((allBytes.Length - 1) - 0) - i] = newBytes[(newBytes.Length - 1) - i];
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            get => (int)(Value & 0xffff);
+            set => Value |= ((ulong)value & 0xffff);
         }
 
-        public byte FrontChildLower
+        public int BackChild
         {
-            get => (byte)((Value >> 40) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 2] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            get => (int)((Value >> 16) & 0xffffff);
+            set => Value = (Value & 0xffffff000000ffffUL) | (((ulong)value & 0xffffff) << 16);
         }
 
-        public byte FrontChildMid
+        public int FrontChild
         {
-            get => (byte)((Value >> 32) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 3] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            get => (int)((Value >> 40) & 0xffffff);
+            set => Value = (Value & 0xffffffffffUL) | (((ulong)value & 0xffffff) << 40);
         }
 
-        public byte FrontChildUpper
+        public int GetChild(Side side)
         {
-            get => (byte)((Value >> 24) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 4] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            return side == Side.Front ? FrontChild : BackChild;
         }
 
-        public byte BackChildLower
+        public static int GetChildIndex(int child)
         {
-            get => (byte)((Value >> 16) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 5] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            int index = child & 0x7fffff;
+            int signExtMask = 1 << 22;
+            return (signExtMask ^ index) - signExtMask;
         }
 
-        public byte BackChildMid
+        public static ChildType GetChildType(int child)
         {
-            get => (byte)((Value >> 8) & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 6] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            return (ChildType)((child >> 23) & 1);
         }
 
-        public byte BackChildUpper
+        public static int CreateChild(ChildType type, int index)
         {
-            get => (byte)(Value & 0xFF);
-            set
-            {
-                var allBytes = BitConverter.GetBytes(Value);
-                allBytes[(allBytes.Length - 1) - 7] = value;
-                Value = BitConverter.ToUInt64(allBytes, 0);
-            }
+            return ((int)type << 23) | (index & 0x7fffff);
+        }
+
+        public enum ChildType
+        {
+            Node,
+            Leaf
+        }
+
+        public enum Side
+        {
+            Front,
+            Back
         }
     }
 
     [TagStructure(Size = 0x80)]
-    public class Bsp3dSupernode
+    public class Bsp3dSupernode : TagStructure
     {
         [TagField(Length = 15)]
         public float[] PlaneValues = new float[15];
 
-        public int PlaneDimensions;
-
         [TagField(Length = 16)]
         public int[] ChildIndices = new int[16];
+
+        public int PlaneDimensions;
     }
 
     [TagStructure(Size = 0x10)]
@@ -168,13 +142,13 @@ namespace TagTool.Geometry.BspCollisionGeometry
         public byte Bsp2dReferenceCount_H2;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public short Bsp2dReferenceCount;
+        public ushort Bsp2dReferenceCount;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public short FirstBsp2dReference_H2;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public int FirstBsp2dReference;
+        public uint FirstBsp2dReference;
     }
 
     [TagStructure(Size = 0x4)]
@@ -196,7 +170,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
     [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
     public class Surface : TagStructure
     {
-        public short Plane;
+        public ushort Plane;
 
         public ushort FirstEdge;
 
@@ -206,7 +180,7 @@ namespace TagTool.Geometry.BspCollisionGeometry
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public short MaterialIndex;
         [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public short Unknown;
+        public short BreakableSurfaceSet;
 
         [TagField(MaxVersion = CacheVersion.Halo2Vista)]
         public byte BreakableSurfaceIndex_H2;
@@ -226,19 +200,19 @@ namespace TagTool.Geometry.BspCollisionGeometry
     [TagStructure(Size = 0xC)]
     public class Edge : TagStructure
     {
-        public short StartVertex;
-        public short EndVertex;
+        public ushort StartVertex;
+        public ushort EndVertex;
         public ushort ForwardEdge;
         public ushort ReverseEdge;
-        public short LeftSurface;
-        public short RightSurface;
+        public ushort LeftSurface;
+        public ushort RightSurface;
     }
 
     [TagStructure(Size = 0x10, Align = 0x10)]
     public class Vertex : TagStructure
     {
         public RealPoint3d Point;
-        public short FirstEdge;
+        public ushort FirstEdge;
         public short Sink;
     }
 
@@ -249,10 +223,11 @@ namespace TagTool.Geometry.BspCollisionGeometry
         TwoSided = 1 << 0,
         Invisible = 1 << 1,
         Climbable = 1 << 2,
-        Invalid = 1 << 3,
-        Conveyor = 1 << 4,
-        Slip = 1 << 5,
-        PlaneNegated = 1 << 6
+        Breakable = 1 << 3,
+        Invalid = 1 << 4,
+        Conveyor = 1 << 5,
+        Slip = 1 << 6,
+        PlaneNegated = 1 << 7
     }
 
     [Flags]

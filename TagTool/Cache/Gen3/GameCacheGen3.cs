@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.Audio;
 using TagTool.BlamFile;
 using TagTool.Cache.Gen3;
 using TagTool.Cache.Resources;
@@ -8,6 +9,7 @@ using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
+using TagTool.Commands.Common;
 
 namespace TagTool.Cache
 {
@@ -16,10 +18,14 @@ namespace TagTool.Cache
         public MapFile BaseMapFile;
         public FileInfo CacheFile;
         public string NetworkKey;
-        
+       
+
         public StringTableGen3 StringTableGen3;
         public TagCacheGen3 TagCacheGen3;
         public ResourceCacheGen3 ResourceCacheGen3;
+
+        public DirectoryInfo FMODSoundCacheDirectory;
+        public FMODSoundCache FMODSoundCache;
 
         public override TagCache TagCache => TagCacheGen3;
         public override StringTable StringTable => StringTableGen3;
@@ -40,15 +46,25 @@ namespace TagTool.Cache
 
         public uint TagAddressToOffset(uint address)
         {
-            var baseAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                BaseMapFile.Header.VirtualBaseAddress64 :
-                (ulong)BaseMapFile.Header.VirtualBaseAddress32;
+            var headerGen3 = (CacheFileHeaderGen3)BaseMapFile.Header;
 
-            var unpackedAddress = CacheVersionDetection.IsInPlatform(CachePlatform.Only64Bit, Version) ?
-                (((ulong)address << 2) + 0x50000000) :
-                (ulong)address;
+            if (Version == CacheVersion.Halo3Beta)
+                return (uint)(address - (headerGen3.VirtualBaseAddress.Get32BitValue() - headerGen3.GetTagMemoryHeader().MemoryBufferOffset));
 
-            return (uint)(unpackedAddress - (baseAddress - (ulong)BaseMapFile.Header.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection)));
+            ulong tagDataSectionOffset = headerGen3.SectionTable.GetSectionOffset(CacheFileSectionType.TagSection);
+
+            if(Platform == CachePlatform.MCC)
+            {
+                ulong bucketOffset = 0;
+                if (Version >= CacheVersion.HaloReach)
+                    bucketOffset = address >> 28 << 28;
+
+                return (uint)((address << 2) - headerGen3.VirtualBaseAddress.Value + tagDataSectionOffset + bucketOffset);
+            }
+            else
+            {
+                return (uint)(address - headerGen3.VirtualBaseAddress.Value + tagDataSectionOffset);
+            }
         }
 
         public Dictionary<string, GameCacheGen3> SharedCacheFiles { get; } = new Dictionary<string, GameCacheGen3>();
@@ -58,12 +74,15 @@ namespace TagTool.Cache
             BaseMapFile = mapFile;
             Version = BaseMapFile.Version;
             CacheFile = file;
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
-            Endianness = BaseMapFile.EndianFormat;
-            var interop = mapFile.Header.SectionTable;
+            Platform = BaseMapFile.CachePlatform;
 
-            DisplayName = mapFile.Header.Name + ".map";
+            Deserializer = new TagDeserializer(Version, Platform);
+            Serializer = new TagSerializer(Version, Platform);
+            Endianness = BaseMapFile.EndianFormat;
+
+            var headerGen3 = (CacheFileHeaderGen3)BaseMapFile.Header;
+
+            DisplayName = mapFile.Header.GetName() + ".map";
 
             Directory = file.Directory;
 
@@ -71,17 +90,26 @@ namespace TagTool.Cache
             using(var reader = new EndianReader(cacheStream, Endianness))
             {
                 StringTableGen3 = new StringTableGen3(reader, BaseMapFile);
-                TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3);
+                TagCacheGen3 = new TagCacheGen3(reader, BaseMapFile, StringTableGen3, Platform);
                 ResourceCacheGen3 = new ResourceCacheGen3(this);
 
-                if(TagCacheGen3.Instances.Count > 0)
+                if (TagCacheGen3.Instances.Count > 0)
                 {
-                    if (BaseMapFile.Header.SectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
+                    if (Version == CacheVersion.Halo3Beta || headerGen3.SectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
                         LocaleTables = new List<LocaleTable>();
                     else
                     {
-                        var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.GlobalInstances["matg"]);
-                        LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
+                        //Allow caches to open even if Globals cannot deserialize
+                        try
+                        {
+                            var globals = Deserialize<Globals>(cacheStream, TagCacheGen3.GlobalInstances["matg"]);
+                            LocaleTables = LocalesTableGen3.CreateLocalesTable(reader, BaseMapFile, globals);
+                        }
+                        catch
+                        {
+                            new TagToolWarning("Failed to build locales table (Invalid Globals definition?)");
+                            LocaleTables = new List<LocaleTable>();
+                        }                                          
                     }
                 }
             }
@@ -98,6 +126,25 @@ namespace TagTool.Cache
                     NetworkKey = "SneakerNetReigns";
                     break;
             }
+
+            if(Platform == CachePlatform.MCC)
+            {
+                if (CacheFile.Directory.FullName.Contains("steamapps\\workshop\\content"))
+                {
+                    string root = CacheFile.Directory.FullName.Split(new string[] { "workshop" }, StringSplitOptions.None)[0];
+                    string game = "halo3";
+
+                    if (Version != CacheVersion.Halo3Retail)
+                        game = Version.ToString();
+
+                    FMODSoundCacheDirectory = new DirectoryInfo(Path.Combine(root, "common\\Halo The Master Chief Collection", game, "fmod\\pc"));
+                }
+                else
+                    FMODSoundCacheDirectory = new DirectoryInfo(Path.Combine(CacheFile.Directory.FullName, @"..\fmod\pc"));
+
+                if(FMODSoundCacheDirectory.Exists)
+                    FMODSoundCache = new FMODSoundCache(FMODSoundCacheDirectory);
+            }
         }
 
         #region Serialization
@@ -106,7 +153,7 @@ namespace TagTool.Cache
             Deserialize<T>(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance));
 
         public override object Deserialize(Stream stream, CachedTag instance) =>
-            Deserialize(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new Gen3SerializationContext(stream, this, (CachedTagGen3)instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
         {
@@ -140,7 +187,7 @@ namespace TagTool.Cache
             Deserialize<T>(new Gen3SerializationContext(stream, this, instance));
 
         public object Deserialize(Stream stream, CachedTagGen3 instance) =>
-            Deserialize(new Gen3SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new Gen3SerializationContext(stream, this, instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         #endregion
 
@@ -151,7 +198,7 @@ namespace TagTool.Cache
 
         public void ResizeSection(CacheFileSectionType type, int requestedAdditionalSpace)
         {
-            var sectionTable = BaseMapFile.Header.SectionTable;
+            var sectionTable = ((CacheFileHeaderGen3)BaseMapFile.Header).SectionTable;
             var section = sectionTable.Sections[(int)type];
 
             var sectionFileOffset = sectionTable.GetSectionOffset(type);

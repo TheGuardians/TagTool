@@ -4,13 +4,15 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Scripting;
-using TagTool.Serialization;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 using TagTool.Tags.Resources;
-using TagTool.Tags;
+using TagTool.Geometry;
+using TagTool.BlamFile;
 
 namespace TagTool.Commands.Porting
 {
@@ -18,9 +20,23 @@ namespace TagTool.Commands.Porting
     {
         private Scenario CurrentScenario = null;
 
-        private Scenario ConvertScenario(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
+        private static readonly byte[] DefaultScenarioFxFunction = new byte[] { 0x01, 0x34, 0x00, 0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+        public Scenario ConvertScenario(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, Scenario scnr, string tagName)
         {
             CurrentScenario = scnr;
+
+            if (CacheVersionDetection.GetGameTitle(BlamCache.Version) == GameTitle.Halo3)
+                scnr.Flags |= ScenarioFlags.H3Compatibility;
+
+            foreach (var zoneset in scnr.ZoneSets)
+            {
+                // cex_ff_halo references bsps that don't exist, remove them
+                zoneset.Bsps &= (Scenario.BspFlags)(scnr.StructureBsps.Count >= 32 ? uint.MaxValue : ~(-1u << scnr.StructureBsps.Count));
+                if (scnr.BspAtlas == null || scnr.BspAtlas.Count == 0)
+                    zoneset.HintPreviousZoneSet = -1;
+            }
+               
 
             //
             // Halo 3 scenario ai data
@@ -168,7 +184,7 @@ namespace TagTool.Commands.Porting
                     }
                 }
 
-                foreach (var pathfindingdata in scnr.AiPathfindingData)
+                foreach (var pathfindingdata in scnr.AiUserHintData)
                 {
                     foreach (var cookieCutter in pathfindingdata.CookieCutters)
                     {
@@ -320,7 +336,7 @@ namespace TagTool.Commands.Porting
                             {
                                 if (entry1.Item1 >= pathfindingBsps.Count || entry1.Item2 >= pathfindingBsps[entry1.Item1].PathfindingData[0].Sectors.Count)
                                 {
-                                    Console.WriteLine("WARNING: Invalid zone area sector data!");
+                                    new TagToolWarning("Invalid zone area sector data!");
                                     continue;
                                 }
 
@@ -390,19 +406,641 @@ namespace TagTool.Commands.Porting
                 }
             }
 
+            AddPrematchCamera(cacheStream, scnr, tagName);
+
             //
-            // Fix cutscene title colors
+            // Convert PlayerStartingProfiles
             //
 
-            foreach (var cutsceneTitle in scnr.CutsceneTitles)
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
-                cutsceneTitle.TextColor = ConvertColor(cutsceneTitle.TextColor);
-                cutsceneTitle.ShadowColor = ConvertColor(cutsceneTitle.ShadowColor);
+                if (scnr.PlayerStartingProfile.Count >= 4)
+                {
+                    var profile_0 = scnr.PlayerStartingProfile[0];
+                    var profile_1 = scnr.PlayerStartingProfile[1];
+                    var profile_2 = scnr.PlayerStartingProfile[2];
+                    var profile_3 = scnr.PlayerStartingProfile[3];
+
+                    scnr.PlayerStartingProfile.Insert(1, profile_2);
+                    scnr.PlayerStartingProfile.Insert(2, profile_2); 
+                    scnr.PlayerStartingProfile.Insert(3, profile_2); 
+
+                    scnr.PlayerStartingProfile.Insert(4, profile_0);
+                    scnr.PlayerStartingProfile.Insert(5, profile_2);
+                    scnr.PlayerStartingProfile.Insert(6, profile_2);
+                    scnr.PlayerStartingProfile.Insert(7, profile_2);
+
+                    scnr.PlayerStartingProfile.Insert(8, profile_1);
+                    scnr.PlayerStartingProfile.Insert(9, profile_3);
+                    scnr.PlayerStartingProfile.Insert(10, profile_3);
+                    scnr.PlayerStartingProfile.Insert(11, profile_3);
+
+                    scnr.PlayerStartingProfile.Insert(12, profile_1);
+                    scnr.PlayerStartingProfile.Insert(13, profile_3);
+                    scnr.PlayerStartingProfile.Insert(14, profile_3);
+                    scnr.PlayerStartingProfile.Insert(15, profile_3);
+
+                    scnr.PlayerStartingProfile.RemoveAt(16);
+                    scnr.PlayerStartingProfile.RemoveAt(16);
+                    scnr.PlayerStartingProfile.RemoveAt(16);
+                }
             }
 
             //
+            // Convert scripts
+            //
+
+            if (FlagIsSet(PortingFlags.Scripts))
+            {
+                foreach (var global in scnr.Globals)
+                {
+                    ConvertHsType(global.Type);
+                }
+
+                foreach (var script in scnr.Scripts)
+                {
+                    ConvertHsType(script.ReturnType);
+
+                    foreach (var parameter in script.Parameters)
+                        ConvertHsType(parameter.Type);
+                }
+
+                foreach (var expr in scnr.ScriptExpressions)
+                {
+                    ConvertScriptExpression(cacheStream, blamCacheStream, resourceStreams, scnr, expr);
+                }
+
+                AdjustScripts(scnr, tagName);
+            }
+            else
+            {
+                scnr.Globals = new List<HsGlobal>();
+                scnr.Scripts = new List<HsScript>();
+                scnr.ScriptExpressions = new List<HsSyntaxNode>();
+            }
+
+            //
+            // Remove functions from default screen fx
+            //
+
+            if (scnr.DefaultScreenFx != null)
+            {
+                var defaultSefc = CacheContext.Deserialize<AreaScreenEffect>(cacheStream, scnr.DefaultScreenFx);
+                foreach (var screenEffect in defaultSefc.ScreenEffects)
+                {
+                    screenEffect.AngleFalloffFunction.Data = DefaultScenarioFxFunction;
+                    screenEffect.DistanceFalloffFunction.Data = DefaultScenarioFxFunction;
+                    screenEffect.TimeEvolutionFunction.Data = DefaultScenarioFxFunction;
+                }
+                CacheContext.Serialize(cacheStream, scnr.DefaultScreenFx, defaultSefc);
+            }
+
+            //
+            // Reach fixups
+            //
+
+            if(BlamCache.Version >= CacheVersion.HaloReach)
+            {
+                for(int i = 0; i < scnr.TriggerVolumes.Count; i++)
+                    scnr.TriggerVolumes[i] = ConvertTriggerVolumeReach(scnr.TriggerVolumes[i]);
+            }
+
+            if (BlamCache.Version >= CacheVersion.HaloReach && Flags.HasFlag(PortingFlags.Recursive))
+            {
+                // convert structure design
+
+                if (scnr.StructureDesigns.Count > 0)
+                {
+                    if (scnr.StructureDesigns.Count > 1)
+                    {
+                        new TagToolWarning("Multiple structure designs currently not supported.");
+                    }
+                    else
+                    {
+                        var sddtTag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, scnr.StructureDesigns[0].StructureDesign);
+                        for (int i = 0; i < scnr.StructureBsps.Count; i++)
+                            scnr.StructureBsps[i].Design = sddtTag;
+                    }
+                }
+
+                var lightmap = CacheContext.Deserialize<ScenarioLightmap>(cacheStream, scnr.Lightmap);
+
+                for (int i = 0; i < scnr.StructureBsps.Count; i++)
+                {
+                    if (scnr.StructureBsps[i].StructureBsp == null)
+                        continue;
+
+                    var sbsp = CacheContext.Deserialize<ScenarioStructureBsp>(cacheStream, scnr.StructureBsps[i].StructureBsp);
+
+
+                    // Reach doesn't have these blocks in sbsp anymore, move it back
+                    sbsp.CameraFxPalette = scnr.CameraFx;
+                    sbsp.AtmospherePalette = scnr.Atmosphere;
+                    sbsp.AcousticsPalette = scnr.AcousticsPalette;
+
+
+                    // Rebuild reach instanced geometry instance per pixel data
+                    //
+                    // Prior to reach the "LodDataIndex" was the index of the instanced geometry instance per pixel data.
+                    // In reach this is the mesh index, the per pixel data is indexed by instance index instead, 
+                    // with a -1 vertex buffer index for instances that do not have per pixel data
+
+                    if (lightmap.PerPixelLightmapDataReferences[i].LightmapBspData != null)
+                    {
+                        var Lbsp = CacheContext.Deserialize<ScenarioLightmapBspData>(cacheStream, lightmap.PerPixelLightmapDataReferences[i].LightmapBspData);
+                        var newPerPixelLighting = new List<RenderGeometry.StaticPerPixelLighting>();
+                        for (int instanceIndex = 0; instanceIndex < sbsp.InstancedGeometryInstances.Count; instanceIndex++)
+                        {
+                            var lightingElement = Lbsp.Geometry.InstancedGeometryPerPixelLighting[instanceIndex];
+                            if (lightingElement.VertexBufferIndex != -1)
+                            {
+                                sbsp.InstancedGeometryInstances[instanceIndex].LightmapTexcoordBlockIndex = (short)newPerPixelLighting.Count;
+                                newPerPixelLighting.Add(lightingElement);
+                            }
+                            else
+                            {
+                                sbsp.InstancedGeometryInstances[instanceIndex].LightmapTexcoordBlockIndex = -1;
+                            }
+                        }
+                        Lbsp.Geometry.InstancedGeometryPerPixelLighting = newPerPixelLighting;
+
+                        // Fixup foliage material
+                        foreach (var mesh in Lbsp.Geometry.Meshes)
+                        {
+                            foreach (var part in mesh.Parts)
+                            {
+                                if (part.MaterialIndex != -1 && 
+                                    sbsp.Materials[part.MaterialIndex].RenderMethod != null &&
+                                    sbsp.Materials[part.MaterialIndex].RenderMethod.Group.Tag == "rmfl")
+                                {
+                                    part.FlagsNew |= Part.PartFlagsNew.PreventBackfaceCulling;
+                                }
+                            }
+                        }
+
+                        CacheContext.Serialize(cacheStream, lightmap.PerPixelLightmapDataReferences[i].LightmapBspData, Lbsp);
+                    }
+
+                    // Fixup instance bsp physics
+                    for (int instanceIndex = 0; instanceIndex < sbsp.InstancedGeometryInstances.Count; instanceIndex++)
+                    {
+                        var instance = sbsp.InstancedGeometryInstances[instanceIndex];
+                        foreach(var bspPhysics in instance.BspPhysics)
+                        {
+                            bspPhysics.GeometryShape.BspIndex = (sbyte)i;
+                            bspPhysics.GeometryShape.CollisionGeometryShapeKey = (ushort)instanceIndex;
+                        }
+                    }
+
+                    CacheContext.Serialize(cacheStream, scnr.StructureBsps[i].StructureBsp, sbsp);
+                }
+
+                // Generate skya from fog parameters
+
+                if (!CacheContext.TagCache.TryGetTag(tagName + ".skya", out scnr.SkyParameters))
+                {
+                    SkyAtmParameters skya = new SkyAtmParameters();
+                    skya.AtmosphereSettings = new List<SkyAtmParameters.AtmosphereProperty>();
+                    skya.UnderwaterSettings = new List<SkyAtmParameters.UnderwaterBlock>();
+
+                    List<string> convertedWaterFog = new List<string>();
+
+                    // Convert atmosphere globals
+
+                    if (scnr.AtmosphereGlobals != null)
+                    {
+                        var atgf = BlamCache.Deserialize<AtmosphereGlobals>(blamCacheStream, scnr.AtmosphereGlobals);
+
+                        skya.Flags = SkyAtmParameters.SkyAtmFlags.None;
+                        skya.FogBitmap = atgf.FogBitmap != null ? (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, atgf.FogBitmap, null, atgf.FogBitmap.Name) : null;
+                        skya.TextureRepeatRate = atgf.TextureRepeatRate;
+                        skya.DistanceBetweenSheets = atgf.DistanceBetweenSheets;
+                        skya.DepthFadeFactor = atgf.DepthFadeFactor;
+                        skya.ClusterSearchRadius = 25.0f;
+                        skya.TransparentSortDistance = atgf.TransparentSortDistance;
+                        skya.TransparentSortLayer = atgf.TransparentSortLayer;
+
+                        foreach (var underwaterSetting in atgf.UnderwaterSettings)
+                        {
+                            var unwt = new SkyAtmParameters.UnderwaterBlock
+                            {
+                                Name = (StringId)ConvertData(cacheStream, blamCacheStream, resourceStreams, underwaterSetting.Name, null, null),
+                                Murkiness = underwaterSetting.Murkiness,
+                                FogColor = underwaterSetting.FogColor
+                            };
+
+                            skya.UnderwaterSettings.Add(unwt);
+
+                            convertedWaterFog.Add(CacheContext.StringTable.GetString(unwt.Name));
+                        }
+                    }
+
+                    // Convert underwater fog
+
+                    foreach (var sDesign in scnr.StructureDesigns)
+                    {
+                        if (sDesign.StructureDesign != null)
+                        {
+                            var blamSddt = BlamCache.Deserialize<StructureDesign>(blamCacheStream, BlamCache.TagCache.GetTag<StructureDesign>(sDesign.StructureDesign.Name));
+
+                            foreach (var waterInstance in blamSddt.WaterInstances)
+                            {
+                                var waterNameId = (StringId)ConvertData(cacheStream, blamCacheStream, resourceStreams, blamSddt.WaterGroups[waterInstance.WaterNameIndex].Name, null, null);
+                                var waterName = CacheContext.StringTable.GetString(waterNameId);
+
+                                if (!convertedWaterFog.Contains(waterName))
+                                {
+                                    var unwt = new SkyAtmParameters.UnderwaterBlock
+                                    {
+                                        Name = waterNameId,
+                                        Murkiness = waterInstance.FogMurkiness,
+                                        FogColor = waterInstance.FogColor
+                                    };
+
+                                    skya.UnderwaterSettings.Add(unwt);
+
+                                    convertedWaterFog.Add(waterName);
+                                }
+                            }
+                        }
+                    }
+
+                    // Convert atmospheres
+
+                    foreach (var atmospherePalette in scnr.Atmosphere)
+                    {
+                        while (atmospherePalette.AtmosphereSettingIndex >= skya.AtmosphereSettings.Count)
+                            skya.AtmosphereSettings.Add(new SkyAtmParameters.AtmosphereProperty());
+
+                        if (atmospherePalette.AtmosphereFog != null)
+                        {
+                            var fogg = BlamCache.Deserialize<AtmosphereFog>(blamCacheStream, atmospherePalette.AtmosphereFog);
+
+                            var atmosphereSettings = skya.AtmosphereSettings[atmospherePalette.AtmosphereSettingIndex];
+
+                            atmosphereSettings.Flags |= SkyAtmParameters.AtmosphereProperty.AtmosphereFlags.EnableAtmosphere;
+                            atmosphereSettings.Name = (StringId)ConvertData(cacheStream, blamCacheStream, resourceStreams, atmospherePalette.Name, null, null);
+
+                            // Patchy Fog
+
+                            if (fogg.Flags.HasFlag(AtmosphereFog.AtmosphereFogFlags.PatchyFogEnabled))
+                                atmosphereSettings.Flags |= SkyAtmParameters.AtmosphereProperty.AtmosphereFlags.PatchyFog;
+
+                            atmosphereSettings.SheetDensity = fogg.PatchyFog.SheetDensity;
+                            atmosphereSettings.FullIntensityHeight = fogg.PatchyFog.FullIntensityHeight;
+                            atmosphereSettings.HalfIntensityHeight = fogg.PatchyFog.HalfIntensityHeight;
+                            atmosphereSettings.WindDirection = fogg.PatchyFog.WindDirection;
+
+                            if (fogg.WeatherEffect != null)
+                                atmosphereSettings.WeatherEffect = (CachedTag)ConvertData(cacheStream, blamCacheStream, resourceStreams, fogg.WeatherEffect, null, null);
+
+                            // Scattering
+                            // TODO: proper conversion for fog.
+
+                            AtmosphereFog.FogSettings fogSettings = null;
+
+                            if (fogg.Flags.HasFlag(AtmosphereFog.AtmosphereFogFlags.GroundFogEnabled))
+                                fogSettings = fogg.GroundFog;
+                            else if (fogg.Flags.HasFlag(AtmosphereFog.AtmosphereFogFlags.SkyFogEnabled))
+                                fogSettings = fogg.SkyFog;
+
+                            if (fogSettings != null)
+                            {
+                                atmosphereSettings.Flags |= SkyAtmParameters.AtmosphereProperty.AtmosphereFlags.OverrideRealSunValues;
+                                atmosphereSettings.Color = fogSettings.FogColor;
+                                atmosphereSettings.Intensity = 3.0f; // tweak?
+                                atmosphereSettings.SunAnglePitch = 0.0f;
+                                atmosphereSettings.SunAngleYaw = 0.0f;
+
+                                // Test for direction
+                                //if (scnr.SkyReferences.Count > 0 && scnr.SkyReferences[0].SkyObject != null)
+                                //{
+                                //    var skyObje = CacheContext.Deserialize<GameObject>(cacheStream, scnr.SkyReferences[0].SkyObject);
+                                //    var hlmt = CacheContext.Deserialize<Model>(cacheStream, skyObje.Model);
+                                //    var mode = CacheContext.Deserialize<RenderModel>(cacheStream, hlmt.RenderModel);
+                                //
+                                //    if (mode.LightgenLights.Count > 0)
+                                //    {
+                                //        var direction = mode.LightgenLights.Last().Direction;
+                                //
+                                //        atmosphereSettings.SunAnglePitch = (float)(Math.Acos(direction.K) / Math.PI) * 180.0f;
+                                //        atmosphereSettings.SunAngleYaw = (float)(Math.Asin(direction.J / Math.Sin(atmosphereSettings.SunAnglePitch)) / Math.PI) * 180.0f;
+                                //    }
+                                //}
+
+                                atmosphereSettings.SeaLevel = fogSettings.BaseHeight; // WU, lowest height of scenario
+                                atmosphereSettings.RayleignHeightScale = fogSettings.FogHeight; // WU, height above sea where atmo 30% thick
+                                atmosphereSettings.MieHeightScale = fogSettings.FogHeight; // WU, height above sea where atmo 30% thick
+
+                                atmosphereSettings.MaxFogThickness = fogSettings.FogThickness * 10000.0f;
+                            }
+
+                            atmosphereSettings.RayleighMultiplier = 0.0f; // scattering amount, small
+                            atmosphereSettings.MieMultiplier = 0.0f; // scattering amount, large
+
+                            atmosphereSettings.SunPhaseFunction = 0.2f;
+                            atmosphereSettings.Desaturation = 0.0f;
+                            atmosphereSettings.DistanceBias = fogg.DistanceBias;
+
+                            // placeholder for now
+
+                            atmosphereSettings.BetaM = new RealVector3d(0.0002946603f, 0.0005024257f, 0.001058603f);
+                            atmosphereSettings.BetaP = new RealVector3d(0.001434321f, 0.001849472f, 0.002627869f);
+                            atmosphereSettings.BetaMThetaPrefix = new RealVector3d(1.788872E-05f, 3.050209E-05f, 6.426741E-05f);
+                            atmosphereSettings.BetaPThetaPrefix = new RealVector3d(0.0003334733f, 0.0004336488f, 0.0006244543f);
+                        }
+                    }
+
+                    CachedTag skyTag = CacheContext.TagCache.AllocateTag<SkyAtmParameters>(tagName);
+                    CacheContext.Serialize(cacheStream, skyTag, skya);
+
+                    scnr.SkyParameters = skyTag;
+                }
+
+                // set Game Object Reset Height
+
+                scnr.SpawnData = new List<Scenario.SpawnDatum> { new Scenario.SpawnDatum { GameObjectResetHeight = -20f } };
+
+                // gametype object processing
+
+                if (scnr.MapType == ScenarioMapType.Multiplayer)
+                    AddGametypeObjects(scnr);
+            }
+
+            //
+            // Misc multiplayer fixups
+            //
+
+            if (scnr.PlayerStartingProfile == null || scnr.PlayerStartingProfile.Count == 0)
+            {
+                scnr.PlayerStartingProfile = new List<Scenario.PlayerStartingProfileBlock>() {
+                    new Scenario.PlayerStartingProfileBlock() {
+                        Name = "start_assault",
+                        PrimaryWeapon = CacheContext.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap"),
+                        PrimaryRoundsLoaded = 32,
+                        PrimaryRoundsTotal = 108,
+                        StartingFragGrenadeCount = 2
+                    }
+                };
+            }
+            else if (scnr.MapType == ScenarioMapType.Multiplayer)
+            {
+                if (string.IsNullOrEmpty(scnr.PlayerStartingProfile[0].Name))
+                    scnr.PlayerStartingProfile[0].Name = "start_assault";
+
+                if (scnr.PlayerStartingProfile[0].PrimaryWeapon == null)
+                    scnr.PlayerStartingProfile[0].PrimaryWeapon = CacheContext.TagCache.GetTag(@"objects\weapons\rifle\assault_rifle\assault_rifle", "weap");
+            }
+
+            if (scnr.MapType == ScenarioMapType.Multiplayer && BlamCache.Version == CacheVersion.Halo3Retail)
+            {
+                var spawnpoint = -1;
+                for (int i = 0; i < scnr.SceneryPalette.Count; i++)
+                {
+                    if (scnr.SceneryPalette[i].Object?.Name == @"objects\multi\spawning\respawn_point")
+                    {
+                        spawnpoint = i;
+                        break;
+                    }
+                }
+
+                if (spawnpoint != -1)
+                {
+                    for (int i = 0; i < scnr.Scenery.Count; i++)
+                    {
+                        if (scnr.Scenery[i].PaletteIndex == spawnpoint)
+                            scnr.Scenery[i].Multiplayer.Team = MultiplayerTeamDesignator.Neutral;
+                    }
+                }
+            }
+
+            return scnr;
+        }
+
+        private Scenario.TriggerVolume ConvertTriggerVolumeReach(Scenario.TriggerVolume volume)
+        {
+            RealVector3d ProjectPointOnPlane(RealPlane3d plane, RealVector3d point)
+            {
+                var o = new RealVector3d(plane.I * plane.D, plane.J * plane.D, plane.K * plane.D);
+                var v = point - o;
+                var n = plane.Normal;
+                float dist = (n.I * v.I) + (n.J * v.J) + (n.K * v.K);
+                return point - dist * n;
+            }
+
+
+            if (volume.Type == Scenario.TriggerVolumeType.Sector)
+            {
+                foreach (var triangle in volume.RuntimeTriangles)
+                {
+                    triangle.BoundsX0 = triangle.BoundsY0 = triangle.BoundsZ0 = float.MaxValue;
+                    triangle.BoundsX1 = triangle.BoundsY1 = triangle.BoundsZ1 = -float.MaxValue;
+
+                    var points = new[] { triangle.Vertex0, triangle.Vertex1, triangle.Vertex2 };
+                    for (int i = 0; i < points.Length; i++)
+                    {
+                        var proj = ProjectPointOnPlane(triangle.Plane0, new RealVector3d(points[i].X, points[i].Y, 0));
+                        triangle.BoundsX0 = Math.Min(triangle.BoundsX0, proj.I);
+                        triangle.BoundsX1 = Math.Max(triangle.BoundsX1, proj.I);
+                        triangle.BoundsY0 = Math.Min(triangle.BoundsY0, proj.J);
+                        triangle.BoundsY1 = Math.Max(triangle.BoundsY1, proj.J);
+                        triangle.BoundsZ0 = Math.Min(triangle.BoundsZ0, proj.K);
+                        triangle.BoundsZ1 = Math.Max(triangle.BoundsZ1, proj.K);
+                    }
+
+                    triangle.Plane1.Normal *= -1;
+                    triangle.Plane1.D *= -1;
+                }
+            }
+
+            return volume;
+        }
+
+        public void AddGametypeObjects(Scenario scnr)
+        {
+            scnr.SceneryPalette = scnr.SceneryPalette ?? new List<Scenario.ScenarioPaletteEntry>();
+            scnr.CratePalette = scnr.CratePalette ?? new List<Scenario.ScenarioPaletteEntry>();
+
+            if (scnr.CratePalette.Count > 0)
+            {
+                scnr.CratePalette.AddRange(new List<Scenario.ScenarioPaletteEntry>
+                    {
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\assault\assault_bomb_goal_area", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\assault\assault_bomb_spawn_point", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_flag_spawn_point", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\infection\infection_haven_static", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\juggernaut\juggernaut_destination_static", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\vip\vip_destination_static", "bloc") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\territories\territory_static", "bloc") }
+                    });
+
+                ProcessMegaloLabels(scnr.CratePalette, scnr.Crates);
+
+                // Teleporters must be neutral.
+
+                for (int i = 0; i < scnr.CratePalette.Count(); i++)
+                {
+                    var obj = scnr.CratePalette[i].Object;
+                    if (obj != null && obj.Name.Contains("teleporter"))
+                    {
+                        foreach (var instance in scnr.Crates.Where(n => n.PaletteIndex == i))
+                            instance.Multiplayer.Team = MultiplayerTeamDesignator.Neutral;
+                    }
+                }
+
+                // Reach uses a unified CTF spawn and return object. A duplicate of these instances will be used for flag spawn locations
+
+                short flagSpawnIndex = GetPaletteIndex(scnr.CratePalette, @"objects\multi\ctf\ctf_flag_return_area");
+                List<Scenario.CrateInstance> flagSpawns = new List<Scenario.CrateInstance>();
+                
+                foreach (var bloc in scnr.Crates.Where(n => n.PaletteIndex == flagSpawnIndex))
+                    flagSpawns.Add(bloc.DeepClone());
+
+                foreach (var flagSpawn in flagSpawns)
+                {
+                    flagSpawn.PaletteIndex = GetPaletteIndex(scnr.CratePalette, @"objects\multi\ctf\ctf_flag_spawn_point");
+                    flagSpawn.NameIndex = -1;
+                }
+
+                scnr.Crates.AddRange(flagSpawns);
+            }
+
+            if (scnr.SceneryPalette.Count > 0)
+            {
+                scnr.SceneryPalette.AddRange(new List<Scenario.ScenarioPaletteEntry>
+                    {
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\assault\assault_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_flag_at_home_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_flag_away_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\infection\infection_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\koth\koth_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\oddball\oddball_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\territories\territories_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\vip\vip_respawn_zone", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\assault\assault_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\ctf\ctf_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\infection\infection_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\koth\koth_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\oddball\oddball_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\territories\territories_initial_spawn_point", "scen") },
+                        new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\vip\vip_initial_spawn_point", "scen") }
+                    });
+
+                ProcessMegaloLabels(scnr.SceneryPalette, scnr.Scenery);
+            }
+        }
+
+        private void ProcessMegaloLabels<T>(List<Scenario.ScenarioPaletteEntry> palette, List<T> instanceList)
+        {
+            foreach (var instance in instanceList)
+            {
+                var mpProperties = (Scenario.MultiplayerObjectProperties)(instance.GetType().GetField("Multiplayer").GetValue(instance));
+                var permutationInstance = (instance as Scenario.PermutationInstance);
+                var newPaletteIndex = permutationInstance.PaletteIndex;
+                var ctfReturnIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_return_area");
+                switch (mpProperties.MegaloLabel)
+                {
+                    case "ctf_res_zone_away":
+                        newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_away_respawn_zone") : -1);
+                        break;
+                    case "ctf_res_zone":
+                        newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_at_home_respawn_zone") : -1);
+                        break;
+                    case "ctf_flag_return":
+                        {
+                            newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_return_area") : -1);
+                            //if (mpProperties.Team == MultiplayerTeamDesignator.Neutral)
+                            //    newPaletteIndex = -1;
+                        }
+                        break;
+                    case "terr_object":
+                        newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\territories\territory_static");
+                        break;
+                    case "as_goal": // assault plant point
+                        newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\assault\assault_bomb_goal_area") : -1);
+                        break;
+                    case "as_bomb": // assault bomb spawn
+                        newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\assault\assault_bomb_spawn_point") : -1);
+                        break;
+                    case "stp_goal": // substitute stockpile goal for juggernaut destination
+                        newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\juggernaut\juggernaut_destination_static");
+                        break;
+                    case "stp_flag": // substitute stockpile flag spawn for VIP destination
+                        newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\vip\vip_destination_static");
+                        break;
+                    case "assault":
+                        newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\assault\assault_respawn_zone") : -1);
+                        break;
+                    case "inf_spawn":
+                        newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_initial_spawn_point");
+                        break;
+                    case "ffa_only":
+                        newPaletteIndex = -1;
+                        break;
+                    case "inf_haven":
+                        newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_respawn_zone");
+                        break;
+                    case "stockpile":
+                        newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\vip\vip_initial_spawn_point");
+                        break;
+                    case "ctf":
+                        newPaletteIndex = (short)(CheckTeamValue(permutationInstance) ? GetPaletteIndex(palette, @"objects\multi\ctf\ctf_initial_spawn_point") : -1);
+                        break;
+                    case "oddball_ball":
+                    case "koth_hill":
+                    case "team_only":
+                    case "hh_drop_point":
+                    case "none":
+                        break;
+                    case "inv_objective":
+                    case "inv_obj_flag":
+                    case "invasion":
+                        newPaletteIndex = -1;
+                        break;
+                    default:
+                        //if (!string.IsNullOrEmpty(mpProperties.MegaloLabel))
+                        //    new TagToolWarning($"unknown megalo label: {mpProperties.MegaloLabel}");
+                        break;
+                }
+
+                permutationInstance.PaletteIndex = newPaletteIndex;
+            }
+        }
+
+        public short GetPaletteIndex(List<Scenario.ScenarioPaletteEntry> palette, string name)
+        {
+            var itemIndex = palette.FindIndex(x => (x.Object != null && x.Object.Name == name));
+
+            return (short)itemIndex;
+        }
+
+        public bool CheckTeamValue(Scenario.PermutationInstance instance)
+        {
+            bool validforRvB = false;
+            var validTeams = new List<string> { "Red", "Blue", "Neutral" };
+
+            if (instance is Scenario.CrateInstance && validTeams.Contains((instance as Scenario.CrateInstance).Multiplayer.Team.ToString()))
+                validforRvB = true;
+            else if (instance is Scenario.SceneryInstance && validTeams.Contains((instance as Scenario.SceneryInstance).Multiplayer.Team.ToString()))
+                validforRvB = true;
+
+            return validforRvB;
+        }
+
+        private void AddPrematchCamera(Stream cacheStream, Scenario scnr, string tagName)
+        {
+            //
             // Add prematch camera position
             //
+
+            var existingCameraPoint = scnr.CutsceneCameraPoints.FirstOrDefault(cameraPoint => cameraPoint.Name == "prematch_camera");
+            if (existingCameraPoint != null)
+            {
+                // if we already have one, just add the flag for HO
+                existingCameraPoint.Flags |= Scenario.CutsceneCameraPointFlags.PrematchCameraHack;
+                return;
+            }  
 
             var createPrematchCamera = false;
 
@@ -587,41 +1225,6 @@ namespace TagTool.Commands.Porting
 
             if (createPrematchCamera)
                 scnr.CutsceneCameraPoints = new List<Scenario.CutsceneCameraPoint>() { MultiplayerPrematchCamera(position, orientation) };
-
-            //
-            // Convert scripts
-            //
-
-            if (FlagIsSet(PortingFlags.Scripts))
-            {
-                foreach (var global in scnr.Globals)
-                {
-                    ConvertHsType(global.Type);
-                }
-
-                foreach (var script in scnr.Scripts)
-                {
-                    ConvertHsType(script.ReturnType);
-
-                    foreach (var parameter in script.Parameters)
-                        ConvertHsType(parameter.Type);
-                }
-
-                foreach (var expr in scnr.ScriptExpressions)
-                {
-                    ConvertScriptExpression(cacheStream, blamCacheStream, resourceStreams, scnr, expr);
-                }
-
-                AdjustScripts(scnr, tagName);
-            }
-            else
-            {
-                scnr.Globals = new List<HsGlobal>();
-                scnr.Scripts = new List<HsScript>();
-                scnr.ScriptExpressions = new List<HsSyntaxNode>();
-            }
-
-            return scnr;
         }
 
         /// <summary>
@@ -747,15 +1350,15 @@ namespace TagTool.Commands.Porting
             }
 
             // Some script expressions use opcode as a script reference. Only continue if it is a reference
-            if (!ScriptInfo.ValueTypes[BlamCache.Version].ContainsKey(expr.Opcode))
+            if (!ScriptInfo.ValueTypes[(BlamCache.Version, BlamCache.Platform)].ContainsKey(expr.Opcode))
             {
-                Console.WriteLine($"ERROR: not in {BlamCache.Version} opcode table 0x{expr.Opcode:X3}.");
+                new TagToolError(CommandError.CustomError, $"not in {BlamCache.Version} opcode table 0x{expr.Opcode:X3}.");
                 return;
             }
 
-            var blamValueTypeName = ScriptInfo.ValueTypes[BlamCache.Version][expr.Opcode];
+            var blamValueTypeName = ScriptInfo.ValueTypes[(BlamCache.Version, BlamCache.Platform)][expr.Opcode];
 
-            foreach (var valueType in ScriptInfo.ValueTypes[CacheContext.Version])
+            foreach (var valueType in ScriptInfo.ValueTypes[(CacheContext.Version, CacheContext.Platform)])
             {
                 if (valueType.Value == blamValueTypeName)
                 {
@@ -799,17 +1402,17 @@ namespace TagTool.Commands.Porting
                     return;
             }
 
-            if (!ScriptInfo.Scripts[BlamCache.Version].ContainsKey(expr.Opcode))
+            if (!ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)].ContainsKey(expr.Opcode))
             {
-                Console.WriteLine($"ERROR: not in {BlamCache.Version} opcode table: 0x{expr.Opcode:X3}. (ConvertScriptExpressionOpcode)");
+                new TagToolError(CommandError.CustomError, $"not in {BlamCache.Version} opcode table: 0x{expr.Opcode:X3}. (ConvertScriptExpressionOpcode)");
                 return;
             }
 
-            var blamScript = ScriptInfo.Scripts[BlamCache.Version][expr.Opcode];
+            var blamScript = ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)][expr.Opcode];
 
             bool match;
 
-            foreach (var entry in ScriptInfo.Scripts[CacheContext.Version])
+            foreach (var entry in ScriptInfo.Scripts[(CacheContext.Version, CacheContext.Platform)])
             {
                 var newOpcode = entry.Key;
                 var newScript = entry.Value;
@@ -842,7 +1445,7 @@ namespace TagTool.Commands.Porting
             // If no match was found, the opcode is currently unsupported.
             //
 
-            Console.WriteLine($"WARNING: No equivalent script op was found for '{ScriptInfo.Scripts[BlamCache.Version][expr.Opcode].Name}' (0x{expr.Opcode:X3}, expr {scnr.ScriptExpressions.IndexOf(expr)})");
+            new TagToolWarning($"No equivalent script op was found for '{ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)][expr.Opcode].Name}' (0x{expr.Opcode:X3}, expr {scnr.ScriptExpressions.IndexOf(expr)})");
 
             ConvertScriptExpressionUnsupportedOpcode(expr);
         }
@@ -951,15 +1554,16 @@ namespace TagTool.Commands.Porting
             }
 #endif
 
-            Array.Reverse(expr.Data, 0, dataSize);
+            if(!CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                Array.Reverse(expr.Data, 0, dataSize);
 
             if (expr.Flags == HsSyntaxNodeFlags.GlobalsReference)
             {
                 if (expr.Data[2] == 0xFF && expr.Data[3] == 0xFF)
                 {
                     var opcode = BitConverter.ToUInt16(expr.Data, 0) & ~0x8000;
-                    var name = ScriptInfo.Globals[BlamCache.Version][opcode];
-                    opcode = ScriptInfo.Globals[CacheContext.Version].First(p => p.Value == name).Key | 0x8000;
+                    var name = ScriptInfo.Globals[(BlamCache.Version, BlamCache.Platform)][opcode];
+                    opcode = ScriptInfo.Globals[(CacheContext.Version, CacheContext.Platform)].First(p => p.Value == name).Key | 0x8000;
                     var bytes = BitConverter.GetBytes(opcode);
                     expr.Data[0] = bytes[0];
                     expr.Data[1] = bytes[1];
@@ -1018,7 +1622,13 @@ namespace TagTool.Commands.Porting
             if (!FlagIsSet(PortingFlags.Recursive))
                 return;
 
-            var tag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, BlamCache.TagCache.GetTag(BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0)));
+            uint tagIndex;
+            if (CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                tagIndex = BitConverter.ToUInt32(expr.Data, 0);
+            else
+                tagIndex = BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
+
+            var tag = ConvertTag(cacheStream, blamCacheStream, resourceStreams, BlamCache.TagCache.GetTag(tagIndex));
 
             if (tag == null)
                 return;
@@ -1028,14 +1638,19 @@ namespace TagTool.Commands.Porting
 
         public void ConvertScriptStringIdExpressionData(Stream cacheStream, Stream blamCacheStream, Dictionary<ResourceLocation, Stream> resourceStreams, HsSyntaxNode expr)
         {
-            int blamStringId = (int)BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
-            var value = BlamCache.StringTable.GetString(new StringId((uint)blamStringId));
+            uint blamStringId;
+            if (CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                blamStringId = BitConverter.ToUInt32(expr.Data, 0);
+            else
+                blamStringId =  BitConverter.ToUInt32(expr.Data.Reverse().ToArray(), 0);
+
+            var value = BlamCache.StringTable.GetString(new StringId(blamStringId));
 
             if (value == null)
                 return;
 
             if (!CacheContext.StringTable.Contains(value))
-                ConvertStringId(new StringId((uint)blamStringId));
+                ConvertStringId(new StringId(blamStringId));
 
             var edStringId = CacheContext.StringTable.GetStringId(value);
             expr.Data = BitConverter.GetBytes(edStringId.Value).ToArray();
@@ -1044,6 +1659,83 @@ namespace TagTool.Commands.Porting
         public bool ConvertScriptUsingPresets(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
         {
             // Return false to convert normally.
+            var blamScripts = ScriptInfo.Scripts[(BlamCache.Version, BlamCache.Platform)];
+            if (BlamCache.Platform == CachePlatform.MCC)
+            {
+                var opName = blamScripts[expr.Opcode].Name;
+                switch (opName)
+                {
+                    case "vehicle_test_seat_list":
+                        expr.Opcode = 0x114;
+                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
+                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
+                        {
+                            UpdateAiTestSeat(cacheStream, scnr, expr);
+                        }
+                        return true;
+
+                    case "vehicle_test_seat":
+                        expr.Opcode = 0x115; // -> vehicle_test_seat_unit
+                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
+                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Boolean)
+                        {
+                            UpdateAiTestSeat(cacheStream, scnr, expr);
+                        }
+                        return true;
+
+                    case "campaign_metagame_award_primary_skull":
+                        expr.Opcode = 0x1E5; // ^
+                        return true;
+
+                    case "campaign_metagame_award_secondary_skull":
+                        expr.Opcode = 0x1E6; // ^
+                        return true;
+
+                    case "player_action_test_cinematic_skip":
+                        expr.Opcode = 0x2F5; // player_action_test_jump
+                        return true;
+
+                    case "cinematic_object_get_unit":
+                    case "cinematic_object_get_scenery":
+                    case "cinematic_object_get_effect_scenery":
+                        expr.Opcode = 0x391; // -> cinematic_object_get
+                        return true;
+                    case "cinematic_scripting_create_object":
+                        expr.Opcode = 0x6A2;
+                        return true;
+                    case "cinematic_scripting_start_animation":
+                        expr.Opcode = 0x6A1;
+                        return true;
+                    case "cinematic_scripting_destroy_object":
+                        expr.Opcode = 0x6A6;
+                        return true;
+                    case "cinematic_scripting_create_and_animate_object":
+                        expr.Opcode = 0x6A3;
+                        return true;
+                    case "cinematic_scripting_create_and_animate_cinematic_object":
+                        expr.Opcode = 0x6A5;
+                        return true;
+                    case "cinematic_scripting_create_and_animate_object_no_animation":
+                        expr.Opcode = 0x6A4;
+                        return true;
+                    case "chud_show_weapon_stats":
+                        expr.Opcode = 0x423; // -> chud_show_crosshair
+                        return true;
+                    case "objectives_secondary_show":
+                        expr.Opcode = 0x4AE; // -> objectives_show
+                        return true;
+                    case "objectives_secondary_unavailable":
+                        expr.Opcode = 0x4B2; // -> objectives_show
+                        return true;
+                    case "mp_wake_script":
+                        expr.Opcode = 0x6A7; // ^
+                        UpdateMpWakeScript(cacheStream, scnr, expr);
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }        
 
             if (BlamCache.Version == CacheVersion.Halo3Retail)
             {
@@ -1101,29 +1793,48 @@ namespace TagTool.Commands.Porting
                         expr.Opcode = 0x391; // -> cinematic_object_get
                         return true;
 
-                    case 0x34D: // cinematic_scripting_destroy_object; remove last argument
-                        expr.Opcode = 0x3A0;
+                    //case 0x34D: // cinematic_scripting_destroy_object; remove last argument
+                    //    expr.Opcode = 0x3A0;
+                    //    return true;
+                    //
+                    //case 0x353: // cinematic_scripting_create_and_animate_cinematic_object
+                    //    expr.Opcode = 0x3A6;
+                    //    // Remove the additional H3 argument
+                    //    if (expr.Flags == HsSyntaxNodeFlags.Group &&
+                    //        expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Void)
+                    //    {
+                    //        var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+                    //        for (var n = 1; n < 4; n++)
+                    //            exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
+                    //
+                    //        var expr2 = scnr.ScriptExpressions[exprIndex];
+                    //        var expr3 = scnr.ScriptExpressions[expr2.NextExpressionHandle.Index];
+                    //
+                    //        expr2.NextExpressionHandle = expr3.NextExpressionHandle;
+                    //    }
+                    //    return true;
+                    //
+                    //case 0x354: //cinematic_scripting_create_and_animate_object_no_animation
+                    //    expr.Opcode = 0x3A7; // ^
+                    //    return true;
+
+                    case 0x34A:
+                        expr.Opcode = 0x6A2;
                         return true;
-
-                    case 0x353: // cinematic_scripting_create_and_animate_cinematic_object
-                        expr.Opcode = 0x3A6;
-                        // Remove the additional H3 argument
-                        if (expr.Flags == HsSyntaxNodeFlags.Group &&
-                            expr.ValueType.HaloOnline == HsType.HaloOnlineValue.Void)
-                        {
-                            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
-                            for (var n = 1; n < 4; n++)
-                                exprIndex = scnr.ScriptExpressions[exprIndex].NextExpressionHandle.Index;
-
-                            var expr2 = scnr.ScriptExpressions[exprIndex];
-                            var expr3 = scnr.ScriptExpressions[expr2.NextExpressionHandle.Index];
-
-                            expr2.NextExpressionHandle = expr3.NextExpressionHandle;
-                        }
+                    case 0x34C:
+                        expr.Opcode = 0x6A1;
                         return true;
-
-                    case 0x354: //cinematic_scripting_create_and_animate_object_no_animation
-                        expr.Opcode = 0x3A7; // ^
+                    case 0x34D:
+                        expr.Opcode = 0x6A6;
+                        return true;
+                    case 0x352:
+                        expr.Opcode = 0x6A3;
+                        return true;
+                    case 0x353:
+                        expr.Opcode = 0x6A5;
+                        return true;
+                    case 0x354:
+                        expr.Opcode = 0x6A4;
                         return true;
 
                     case 0x3CD: // chud_show_weapon_stats
@@ -1137,6 +1848,10 @@ namespace TagTool.Commands.Porting
                     case 0x44F: // objectives_secondary_unavailable
                     case 0x44E: // objectives_primary_unavailable
                         expr.Opcode = 0x4B2; // -> objectives_show
+                        return true;
+                    case 0x118: // unit_add_equipment
+                        expr.Opcode = 0x136; // -> unit_add_equipment
+                        UpdateUnitAddEquipmentScript(cacheStream, scnr, expr);
                         return true;
 
                     default:
@@ -1159,6 +1874,71 @@ namespace TagTool.Commands.Porting
                 return false;
         }
 
+        private void UpdateUnitAddEquipmentScript(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
+        {
+            if (BlamCache.Version == CacheVersion.Halo3Retail)
+            {
+                var exprIndex = scnr.ScriptExpressions.IndexOf(expr);
+                var profileExpr = scnr.ScriptExpressions[exprIndex + 3]; // <StartingProfile> parameter
+
+                if (profileExpr.StringAddress != 0)
+                {
+                    if (profileExpr.ValueType.Halo3Retail.ToString() != "StartingProfile")
+                        return;
+
+                    using (var scriptStringStream = new MemoryStream(scnr.ScriptStrings))
+                    using (var scriptStringReader = new BinaryReader(scriptStringStream))
+                    {
+                        var profileName = "";
+                        scriptStringReader.BaseStream.Position = profileExpr.StringAddress;
+                        for (char c; (c = scriptStringReader.ReadChar()) != 0x00; profileName += c) ;
+
+                        var startingProfileIndex = scnr.PlayerStartingProfile.FindIndex(sp => sp.Name == profileName);
+
+                        if (startingProfileIndex == -1)
+                        {
+                            new TagToolWarning($"StartingProfile reference could not be converted {profileName}");
+                            return;
+                        }
+
+                        profileExpr.ValueType.Halo3Retail = HsType.Halo3RetailValue.StartingProfile;
+                        profileExpr.Data = new byte[] { (byte)((startingProfileIndex >> 8)), (byte)(startingProfileIndex & 0xFF), 0xFF, 0xFF };
+                        return;
+                    }
+                }
+            }
+        }
+
+        private void UpdateMpWakeScript(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
+        {
+            var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
+            
+            var stringExpr = scnr.ScriptExpressions[exprIndex]; // <string> parameter
+
+            if(stringExpr.StringAddress != 0)
+            {
+                using (var scriptStringStream = new MemoryStream(scnr.ScriptStrings))
+                using (var scriptStringReader = new BinaryReader(scriptStringStream))
+                {
+                    var scriptName = "";
+                    scriptStringReader.BaseStream.Position = stringExpr.StringAddress;
+                    for (char c; (c = scriptStringReader.ReadChar()) != 0x00; scriptName += c);
+
+                    for(var i = 0; i < scnr.Scripts.Count; i++)
+                    {
+                        var script = scnr.Scripts[i];
+                        if(scriptName == script.ScriptName)
+                        {
+
+                            stringExpr.ValueType.Halo3Retail = HsType.Halo3RetailValue.Script;
+                            stringExpr.Data = BitConverter.GetBytes(i).ToArray();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         private void UpdateAiTestSeat(Stream cacheStream, Scenario scnr, HsSyntaxNode expr)
         {
             var exprIndex = scnr.ScriptExpressions.IndexOf(expr) + 1;
@@ -1168,19 +1948,28 @@ namespace TagTool.Commands.Porting
             var vehicleExpr = scnr.ScriptExpressions[exprIndex]; // <vehicle> parameter
             var seatMappingExpr = scnr.ScriptExpressions[vehicleExpr.NextExpressionHandle.Index]; // <string_id> parameter
 
-            var seatMappingStringId = new StringId(BitConverter.ToUInt32(seatMappingExpr.Data.Reverse().ToArray(), 0));
+            StringId seatMappingStringId;
+            if(CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                seatMappingStringId = new StringId(BitConverter.ToUInt32(seatMappingExpr.Data, 0));
+            else
+                seatMappingStringId = new StringId(BitConverter.ToUInt32(seatMappingExpr.Data.Reverse().ToArray(), 0));
+
             var seatMappingString = BlamCache.StringTable.GetString(seatMappingStringId);
             var seatMappingIndex = (int)-1;
 
             if (vehicleExpr.Flags == HsSyntaxNodeFlags.Group &&
                 seatMappingStringId != StringId.Invalid)
             {
-                if (vehicleExpr.Opcode == 0x193) // ai_vehicle_get_from_starting_location
+                if (vehicleExpr.Opcode == (BlamCache.Platform == CachePlatform.MCC ? 0x194 : 0x193)) // ai_vehicle_get_from_starting_location
                 {
                     var expr3 = scnr.ScriptExpressions[++exprIndex]; // function name
                     var expr4 = scnr.ScriptExpressions[expr3.NextExpressionHandle.Index]; // <ai> parameter
 
-                    var value = BitConverter.ToUInt32(expr4.Data.Reverse().ToArray(), 0);
+                    uint value;
+                    if(CacheVersionDetection.IsLittleEndian(BlamCache.Version, BlamCache.Platform))
+                        value = BitConverter.ToUInt32(expr4.Data.ToArray(), 0);
+                    else
+                        value = BitConverter.ToUInt32(expr4.Data.Reverse().ToArray(), 0);
 
                     if (value != uint.MaxValue)
                     {
@@ -1190,12 +1979,25 @@ namespace TagTool.Commands.Porting
                         var fireTeam = scnr.Squads[(int)squadIndex].Fireteams[(int)fireTeamIndex];
 
                         var unitInstance = scnr.VehiclePalette[fireTeam.VehicleTypeIndex].Object;
+
+                        if(unitInstance.Index == -1)
+                        {
+                            new TagToolWarning($"Unit tag reference invalid in script in UpdateAiTestSeat! squads index {squadIndex} fireteam index {fireTeamIndex}");
+                            return;
+                        }
+
                         var unitDefinition = (Unit)CacheContext.Deserialize<Vehicle>(cacheStream, unitInstance);
 
                         var variantName = CacheContext.StringTable.GetString(unitDefinition.DefaultModelVariant);
 
                         if (fireTeam.VehicleVariant != StringId.Invalid)
                             variantName = CacheContext.StringTable.GetString(fireTeam.VehicleVariant);
+
+                        if (unitDefinition.Model.Index == -1)
+                        {
+                            new TagToolWarning($"Unit model tag reference invalid in UpdateAiTestSeat! Unit {unitInstance.Name}");
+                            return;
+                        }
 
                         var modelDefinition = CacheContext.Deserialize<Model>(cacheStream, unitDefinition.Model);
                         var modelVariant = default(Model.Variant);
@@ -1215,7 +2017,7 @@ namespace TagTool.Commands.Porting
                         for (var seatIndex = 0; seatIndex < unitDefinition.Seats.Count; seatIndex++)
                         {
                             var seat = unitDefinition.Seats[seatIndex];
-                            var seatName = CacheContext.StringTable.GetString(seat.SeatAnimation);
+                            var seatName = CacheContext.StringTable.GetString(seat.Label);
 
                             if (seatMappingString == seatName)
                             {
@@ -1239,7 +2041,7 @@ namespace TagTool.Commands.Porting
                                 for (var seatIndex = 0; seatIndex < definition.Seats.Count; seatIndex++)
                                 {
                                     var seat = definition.Seats[seatIndex];
-                                    var seatName = CacheContext.StringTable.GetString(seat.SeatAnimation);
+                                    var seatName = CacheContext.StringTable.GetString(seat.Label);
 
                                     if (seatMappingString == seatName)
                                     {
@@ -1352,15 +2154,9 @@ namespace TagTool.Commands.Porting
                 "00001572,E9970624,FFFFFFFF,0000,00000000,Expression,FunctionName,begin, //default:E9790606",
             },
 
-            ["sc100"] = new List<string>
-            {
-                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,"// E9770604 prevent cinematic skipping,
-            },
-
             ["sc110"] = new List<string>
             {
                 "00002188,EBFF088C,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EBE1086E disable pda_breadcrumbs",
-                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604 prevent cinemtics from looping",
                 "00018320,AB044790,AA6446F0,0000,00000000,Expression,FunctionName,begin,// AA4046CC disable waypoints temp",
 
                 // autoremove:
@@ -1375,30 +2171,6 @@ namespace TagTool.Commands.Porting
                 "00005173,F7A81435,FFFFFFFF,0014,3614A9F7,Group,Void,// F7BD144A was pointing at F7BD144A",
                 "00018193,AA854711,AAA0472C,0627,124786AA,Group,Void,// AA9B4727 was pointing at AA9B4727",
                 "00023201,BE155AA1,BE1B5AA7,0014,A25A16BE,Group,Void,// BE185AA4 was pointing at BE185AA4",
-            },
-
-            ["c100"] = new List<string>
-            {
-                "00000293,E4980125,E48E011B,0000,00000000,Expression,FunctionName,begin,// E4860113",
-                "00000444,E52F01BC,E53D01CA,030F,BD0130E5,Group,Void,unit_action_test_reset,// E53401C1",
-                "00000495,E56201EF,E57001FD,030F,F00163E5,Group,Void,unit_action_test_reset,// E56701F4",
-                "00000509,E57001FD,E5780205,0667,FE0171E5,Group,Void,chud_show_navpoint,// FFFFFFFF",
-                "00000548,E5970224,E5A50232,030F,250298E5,Group,Void,unit_action_test_reset,// E59C0229",
-                "00000562,E5A50232,E5B70244,0000,3302A6E5,Group,Void,begin,// FFFFFFFF",
-                "00000622,E5E1026E,E5EF027C,030F,6F02E2E5,Group,Void,unit_action_test_reset,// E5E60273",
-                "00000636,E5EF027C,E6090296,0000,7D02F0E5,Group,Void,begin,// FFFFFFFF",
-                "00000715,E63E02CB,E64C02D9,030F,CC023FE6,Group,Void,unit_action_test_reset,// E64302D0",
-                "00000729,E64C02D9,E66E02FB,0000,DA024DE6,Group,Void,begin,// FFFFFFFF",
-                "00000852,E6C70354,E6D0035D,03F4,5503C8E6,Group,Void,sound_impulse_start,// E6CC0359",
-                "00000884,E6E70374,FFFFFFFF,03F4,7503E8E6,Group,Void,sound_impulse_start,//E6EC0379",
-                "00001572,E9970624,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// E9790606",
-                "00001043,E7860413,E79B0428,0112,140487E7,Group,Void,unit_enable_vision_mode,// E78B0418",
-                "00001064,E79B0428,E7AD043A,0009,29049CE7,ScriptReference,Void,,// E79D042A",
-                "00001328,E8A30530,E8B80545,0112,3105A4E8,Group,Void,unit_enable_vision_mode,// E8A80535",
-                "00004033,F3340FC1,FFFFFFFF,0002,C20F35F3,Group,Void,if,// F3420FCF",
-                "00013476,981834A4,982834B4,005A,A5341998,Group,Void,object_set_function_variable,// 982234AE cinematic_scripting_set_user_input_constraints",
-                "00014308,9B5837E4,9B6837F4,005A,E537599B,Group,Void,object_set_function_variable,// 9B6237EE cinematic_scripting_set_user_input_constraints",
-                "00020922,B52E51BA,B53D51C9,03A1,BB512FB5,Group,Void,cinematic_scripting_start_effect,// B53751C3 cinematic_scripting_set_user_input_constraints"
             },
 
             ["c200"] = new List<string>
@@ -1417,186 +2189,17 @@ namespace TagTool.Commands.Porting
                 "00001572,E9970624,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// E9790606"
             },
 
-            ["sc150"] = new List<string>
-            {
-                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604",
-            },
-
             ["sc140"] = new List<string>
             {
-                "00000909,E700038D,E6F60383,0000,00000000,Expression,FunctionName,begin,// E6EE037B",
-                "00001098,E7BD044A,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// E7970424",
-                "00001148,E7EF047C,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// E7CA0457",
-                "00001219,E83604C3,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// E7FF048C",
-                "00001309,E890051D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// E84904D6",
-                "00001418,E8FD058A,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// E8A60533",
-                "00001468,E92F05BC,E93805C5,03F4,BD0530E9,Group,Void,sound_impulse_start,// E93405C1",
-                "00001500,E94F05DC,FFFFFFFF,03F4,DD0550E9,Group,Void,sound_impulse_start,// E95405E1",
-                "00001659,E9EE067B,EA030690,0112,7C06EFE9,Group,Void,unit_enable_vision_mode,// E9F30680",
-                "00001680,EA030690,EA1506A2,0012,910604EA,ScriptReference,Void,,// EA050692",
-                "00001944,EB0B0798,EB2007AD,0112,99070CEB,Group,Void,unit_enable_vision_mode,// EB10079D",
-                "00002188,EBFF088C,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EBE1086E",
-                "00005201,F7C41451,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// F7A2142F",
-                "00015275,9F1F3BAB,9F293BB5,0192,AC3B209F,Group,Void,ai_force_active,// 9F233BAF",
-                "00015458,9FD63C62,9FE03C6C,0192,633CD79F,Group,Void,ai_force_active,// 9FDA3C66",
-                "00015771,A10F3D9B,A1193DA5,0192,9C3D10A1,Group,Void,ai_force_active,// A1133D9F",
-                "00015966,A1D23E5E,A1DC3E68,0192,5F3ED3A1,Group,Void,ai_force_active,// A1D63E62",
-                "00016351,A3533FDF,A35A3FE6,017F,E03F54A3,Group,Void,ai_allegiance,// A3573FE3",
-                "00016405,A3894015,A3A44030,0002,16408AA3,Group,Void,if,// A390401C",
-                "00016728,A4CC4158,A4D64162,0192,5941CDA4,Group,Void,ai_force_active,// A4D0415C",
-                "00018114,AA3646C2,AA4046CC,0178,C34637AA,Group,Void,ai_magically_see,// AA3A46C6",
-                "00018134,AA4A46D6,AA5346DF,0166,D7464BAA,Group,Void,ai_place,// AA4D46D9",
-                "00021577,B7BD5449,B7C3544F,0333,4A54BEB7,Group,Void,switch_zone_set,// B7C0544C",
-                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604",
-                "00018790,ACDA4966,ACDB4967,0044,70010000,GlobalsReference,Vehicle,Value,//makes phantom fill up, allows level to finish"
+                "00018790,ACDA4966,ACDB4967,0044,70010000,GlobalsReference,Vehicle,Value,//makes phantom fill up, allows level to finish",
+                "00025501,C711639D,FFFFFFFF,0006,0000003C,Expression,Real,real,value," // convert default near_clip value (0.04 -> 0.0078125)
             },
 
             ["h100"] = new List<string>
             {
-                "00000909,E700038D,E6F60383,0000,00000000,Expression,FunctionName,begin,// E6EE037B",
-                "00001060,E7970424,E7A50432,030F,250498E7,Group,Void,unit_action_test_reset,// E79C0429",
-                "00001111,E7CA0457,E7D80465,030F,5804CBE7,Group,Void,unit_action_test_reset,// E7CF045C",
-                "00001125,E7D80465,E7E0046D,0667,6604D9E7,Group,Void,chud_show_navpoint,// FFFFFFFF",
-                "00001164,E7FF048C,E80D049A,030F,8D0400E8,Group,Void,unit_action_test_reset,// E8040491",
-                "00001178,E80D049A,E81F04AC,0000,9B040EE8,Group,Void,begin,// FFFFFFFF",
-                "00001238,E84904D6,E85704E4,030F,D7044AE8,Group,Void,unit_action_test_reset,// E84E04DB",
-                "00001252,E85704E4,E87104FE,0000,E50458E8,Group,Void,begin,// FFFFFFFF",
-                "00001331,E8A60533,E8B40541,030F,3405A7E8,Group,Void,unit_action_test_reset,// E8AB0538",
-                "00001336,E8AB0538,E8D60563,0002,3905ACE8,Group,Void,if,// E8D60563",
-                "00001345,E8B40541,E8D60563,0000,4205B5E8,Group,Void,begin,// FFFFFFFF",
-                "00001468,E92F05BC,E93805C5,03F4,BD0530E9,Group,Void,sound_impulse_start,// E93405C1",
-                "00001500,E94F05DC,FFFFFFFF,03F4,DD0550E9,Group,Void,sound_impulse_start,// E95405E1",
-                "00001659,E9EE067B,EA030690,0112,7C06EFE9,Group,Void,unit_enable_vision_mode,// E9F30680",
-                "00001680,EA030690,EA1506A2,0012,910604EA,ScriptReference,Void,,// EA050692",
-                "00001944,EB0B0798,EB2007AD,0112,99070CEB,Group,Void,unit_enable_vision_mode,// EB10079D",
-                "00002188,EBFF088C,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EBE1086E",
-                "00005201,F7C41451,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// F7A2142F",
-                "00012780,956031EC,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// 954D31D9",
-                "00012813,9581320D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// 956631F2",
-                "00015198,9ED23B5E,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// 9D5439E0",
-                "00016273,A3053F91,A3113F9D,0002,923F06A3,Group,Void,if,// A30B3F97",
-                "00016285,A3113F9D,A31D3FA9,0112,9E3F12A3,Group,Void,unit_enable_vision_mode,// A3173FA3",
-                "00016606,A45240DE,A46940F5,0112,DF4053A4,Group,Void,unit_enable_vision_mode,// A45840E4",
-                "00017061,A61942A5,A62342AF,0004,A6421AA6,Group,Void,set,// A61D42A9",
-                "00018774,ACCA4956,ACD44960,013A,5749CBAC,Group,Void,device_set_power,// ACCE495A",
-                "00019806,B0D24D5E,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B0BA4D46",
-                "00019836,B0F04D7C,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B0D84D64",
-                "00019866,B10E4D9A,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B0F64D82",
-                "00019896,B12C4DB8,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B1144DA0",
-                "00020043,B1BF4E4B,B1C84E54,0014,4C4EC0B1,Group,Void,sleep,// B1C24E4E",
-                "00020052,B1C84E54,B1D54E61,0014,554EC9B1,Group,Void,sleep,// B1CB4E57",
-                "00020089,B1ED4E79,B1F94E85,0002,7A4EEEB1,Group,Void,if,// B1F34E7F",
-                "00020113,B2054E91,B2104E9C,0014,924E06B2,Group,Void,sleep,// B2084E94",
-                "00020847,B4E3516F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B25A4EE6",
-                "00020937,B53D51C9,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B5095195",
-                "00020994,B5765202,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B54251CE",
-                "00021051,B5AF523B,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B57B5207",
-                "00021108,B5E85274,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B5B45240",
-                "00021639,B7FB5487,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B7D75463",
-                "00021815,B8AB5537,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B86554F1",
-                "00022191,BA2356AF,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// B9D45660",
-                "00022480,BB4457D0,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// BB03578F",
-                "00022823,BC9B5927,FFFFFFFF,040D,28599CBC,Group,Void,vehicle_auto_turret,// BCA2592E",
-                "00022920,BCFC5988,FFFFFFFF,040D,8959FDBC,Group,Void,vehicle_auto_turret,// BD03598F",
-                "00023021,BD6159ED,FFFFFFFF,040D,EE5962BD,Group,Void,vehicle_auto_turret,// BD6859F4",
-                "00023115,BDBF5A4B,FFFFFFFF,040D,4C5AC0BD,Group,Void,vehicle_auto_turret,// BDC65A52",
-                "00023224,BE2C5AB8,FFFFFFFF,040D,B95A2DBE,Group,Void,vehicle_auto_turret,// BE335ABF",
-                "00023357,BEB15B3D,FFFFFFFF,040D,3E5BB2BE,Group,Void,vehicle_auto_turret,// BEB85B44",
-                "00023407,BEE35B6F,BEE85B74,01C9,705BE4BE,ScriptReference,Void,,// BEE55B71",
-                "00023449,BF0D5B99,BEE35B6F,0000,00000000,Expression,FunctionName,begin,// BEDD5B69",
-                "00024398,C2C25F4E,C2F05F7C,004F,4F5FC3C2,Group,Void,object_create_folder_anew,// C2C55F51",
-                "00025402,C6AE633A,C6B2633E,0000,00000000,Expression,FunctionName,begin,// C6AF633B",
-                "00025462,C6EA6376,C6EE637A,0000,00000000,Expression,FunctionName,begin,// C6EB6377",
-                "00025508,C71863A4,C71C63A8,0000,00000000,Expression,FunctionName,begin,// C71963A5",
-                "00025906,C8A66532,C84864D4,0000,00000000,Expression,FunctionName,begin,// C83B64C7",
-                "00026011,C90F659B,C8B1653D,0000,00000000,Expression,FunctionName,begin,// C8AB6537",
-                "00026116,C9786604,C91A65A6,0000,00000000,Expression,FunctionName,begin,// C91465A0",
-                "00026221,C9E1666D,C983660F,0000,00000000,Expression,FunctionName,begin,// C97D6609",
-                "00026326,CA4A66D6,C9EC6678,0000,00000000,Expression,FunctionName,begin,// C9E66672",
-                "00026431,CAB3673F,CA5566E1,0000,00000000,Expression,FunctionName,begin,// CA4F66DB",
-                "00027261,CDF16A7D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// CDC06A4C",
-                "00027330,CE366AC2,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// CDF76A83",
-                "00027448,CEAC6B38,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// CE3C6AC8",
-                "00027580,CF306BBC,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// CEB26B3E",
-                "00036488,F1FC8E88,F19F8E2B,0000,00000000,Expression,FunctionName,begin,// F19C8E28",
-                "00037912,F78C9418,F7959421,0002,19948DF7,Group,Void,if,// F792941E",
-                "00038519,F9EB9677,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,//F9E49670",
-                "00040775,82BC9F47,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// 81CD9E58",
-                "00040831,82F49F7F,FFFFFFFF,0014,809FF582,Group,Void,sleep,// 82F79F82",
-                "00041280,84B5A140,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// 83339FBE",
-                "00041327,84E4A16F,84F6A181,0141,70A1E584,Group,Void,device_group_set_immediate,// 84E8A173",
-                "00041542,85BBA246,85CDA258,0141,47A2BC85,Group,Void,device_group_set_immediate,// 85BFA24A",
-                "00041751,868CA317,869EA329,0141,18A38D86,Group,Void,device_group_set_immediate,// 8690A31B",
-                "00041972,8769A3F4,8774A3FF,0141,F5A36A87,Group,Void,device_group_set_immediate,// 876DA3F8",
-                "00043346,8CC7A952,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,G:ai_wave_07_squad_02// 8C21A8AC",
-            },
-
-            ["l200"] = new List<string>
-            {
-                "00000909,E700038D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// E6EE037B",
-                "00001060,E7970424,E7A50432,030F,250498E7,Group,Void,unit_action_test_reset,// E79C0429 bypass pda check",
-                "00001111,E7CA0457,E7D80465,030F,5804CBE7,Group,Void,unit_action_test_reset,// E7CF045C",
-                "00001125,E7D80465,E7E0046D,0667,6604D9E7,Group,Void,chud_show_navpoint,// FFFFFFFF",
-                "00001164,E7FF048C,E80D049A,030F,8D0400E8,Group,Void,unit_action_test_reset,// E8040491",
-                "00001178,E80D049A,E81F04AC,0000,9B040EE8,Group,Void,begin,// FFFFFFFF",
-                "00001238,E84904D6,E85704E4,030F,D7044AE8,Group,Void,unit_action_test_reset,// E84E04DB",
-                "00001252,E85704E4,E87104FE,0000,E50458E8,Group,Void,begin,// FFFFFFFF",
-                "00001278,E87104FE,E8740501,0014,FF0472E8,Group,Void,sleep,",
-                "00001331,E8A60533,E8B40541,030F,3405A7E8,Group,Void,unit_action_test_reset,// E8AB0538 not sure if i should bypass the begin",
-                "00001345,E8B40541,E8D60563,0000,4205B5E8,Group,Void,begin,// FFFFFFFF",
-                "00001468,E92F05BC,E93805C5,03F4,BD0530E9,Group,Void,sound_impulse_start,// E93405C1",
-                "00001500,E94F05DC,FFFFFFFF,03F4,DD0550E9,Group,Void,sound_impulse_start,// E95405E1",
-                "00001659,E9EE067B,EA030690,0112,7C06EFE9,Group,Void,unit_enable_vision_mode,// E9F30680",
-                "00001680,EA030690,EA1506A2,0012,910604EA,ScriptReference,Void,,// EA050692",
-                "00001944,EB0B0798,EB2007AD,0112,99070CEB,Group,Void,unit_enable_vision_mode,// EB10079D",
-                "00002188,EBFF088C,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EBE1086E",
-                "00005201,F7C41451,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// F7A2142F",
-                "00011278,8F822C0E,8F8C2C18,0141,0F2C838F,Group,Void,device_group_set_immediate,// 8F862C12",
-                "00011307,8F9F2C2B,8FD02C5C,0014,2C2CA08F,Group,Void,sleep,// 8FA22C2E",
-                "00011412,90082C94,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// 8FDD2C69",
-                "00013111,96AB3337,96B1333D,0017,3833AC96,Group,Void,wake,// 96AE333A",
-                "00013215,9713339F,971C33A8,0166,A0331497,Group,Void,ai_place,// 971633A2",
-                "00013263,974333CF,974933D5,0017,D0334497,Group,Void,wake,// 974633D2",
-                "00013377,97B53441,97BE344A,0166,4234B697,Group,Void,ai_place,// 97B83444",
-                "00013428,97E83474,97EE347A,0017,7534E997,Group,Void,wake,// 97EB3477",
-                "00013542,985A34E6,986034EC,0017,E7345B98,Group,Void,wake,// 985D34E9",
-                "00013696,98F43580,98FD3589,0166,8135F598,Group,Void,ai_place,// 98F73583",
-                "00013792,995435E0,995A35E6,0017,E1355599,Group,Void,wake,// 995735E3",
-                "00013936,99E43670,99ED3679,0166,7136E599,Group,Void,ai_place,// 99E73673",
-                "00013960,99FC3688,9A02368E,0017,8936FD99,Group,Void,wake,// 99FF368B",
-                "00014093,9A81370D,9A8A3716,0166,0E37829A,Group,Void,ai_place,// 9A843710",
-                "00014113,9A953721,9A9B3727,0017,2237969A,Group,Void,wake,// 9A983724",
-                "00014250,9B1E37AA,9B2737B3,0166,AB371F9B,Group,Void,ai_place,// 9B2137AD",
-                "00014270,9B3237BE,9B3B37C7,0166,BF37339B,Group,Void,ai_place,// 9B3537C1",
-                "00014290,9B4637D2,9B4F37DB,0166,D337479B,Group,Void,ai_place,// 9B4937D5",
-                "00014313,9B5D37E9,9B6337EF,0017,EA375E9B,Group,Void,wake,// 9B6037EC",
-                "00014817,9D5539E1,9D5B39E7,04EC,E239569D,Group,Void,data_mine_set_mission_segment,// 9D5839E4",
-                "00015167,9EB33B3F,9EBC3B48,001D,403BB49E,Group,Void,print,// 9EB63B42",
-                "00015336,9F5C3BE8,FFFFFFFF,0016,E93B5D9F,Group,Void,sleep_until,// 9F663BF2",
-                "00015361,9F753C01,9F7B3C07,04EC,023C769F,Group,Void,data_mine_set_mission_segment,// 9F783C04",
-                "00015760,A1043D90,A10A3D96,04EC,913D05A1,Group,Void,data_mine_set_mission_segment,// A1073D93",
-                "00016074,A23E3ECA,A2443ED0,04EC,CB3E3FA2,Group,Void,data_mine_set_mission_segment,// A2413ECD",
-                "00016535,A40B4097,A411409D,04EC,98400CA4,Group,Void,data_mine_set_mission_segment,// A40E409A",
-                "00016938,A59E422A,A5A74233,0166,2B429FA5,Group,Void,ai_place,// A5A1422D",
-                "00017274,A6EE437A,A6F44380,04EC,7B43EFA6,Group,Void,data_mine_set_mission_segment,// A6F1437D",
-                "00017728,A8B44540,A8BD4549,0014,4145B5A8,Group,Void,sleep,// A8B74543",
-                "00018175,AA7346FF,AA794705,04EC,004774AA,Group,Void,data_mine_set_mission_segment,// AA764702",
-                "00018437,AB794805,AB82480E,0166,06487AAB,Group,Void,ai_place,// AB7C4808",
-                "00018846,AD12499E,AD1B49A7,0166,9F4913AD,Group,Void,ai_place,// AD1549A1",
-                "00018866,AD2649B2,AD2F49BB,0166,B34927AD,Group,Void,ai_place,// AD2949B5",
-                "00020192,B2544EE0,B25A4EE6,04EC,E14E55B2,Group,Void,data_mine_set_mission_segment,// B2574EE3",
-                "00023448,BF0C5B98,BF155BA1,0158,995B0DBF,Group,Void,ai_dialogue_enable,// BF0F5B9B",
-                "00024050,C1665DF2,FFFFFFFF,0169,F35D67C1,Group,Void,ai_cannot_die,// C16A5DF6",
-                "00028696,D38C7018,D3957021,0371,19708DD3,Group,Void,fade_in,// D392701E",
-
-                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604 prevent cinematic from looping; to fix properly",
-                "00001555,E9860613,FFFFFFFF,0376,140687E9,Group,Void,cinematic_skip_stop_internal,// E9880615 prevent cinematic from looping; to fix properly",
-                "00015667,A0A73D33,A0A23D2E,0000,00000000,Expression,FunctionName,begin,// A0933D1F // test: force cop to teleport to open the hatch",
-            },
-
-            ["sc130"] = new List<string>
-            {
-                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,"// E9770604 prevent cinematic skipping,
+                "00016022,A20A3E96,A21F3EAB,0014,973E0BA2,Group,Void,sleep,", //get rid of f_l100_look_training
+                "00017763,A8D74563,A94545D1,03EA,6445D8A8,Group,Void,game_save_cancel,", //get rid of all pda training
+                "00016088,A24C3ED8,A2653EF1,0000,00000000,Expression,FunctionName,begin,", //get rid of health and vision training
             },
 
             ["l300"] = new List<string>
@@ -1657,103 +2260,28 @@ namespace TagTool.Commands.Porting
                 "00035397,EDB98A45,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// ED068992 disable the whole thing for now",
                 "00035767,EF2B8BB7,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,// EF238BAF",
                 "00035910,EFBA8C46,EFC08C4C,0333,478CBBEF,Group,Void,switch_zone_set,// EFBD8C49",
-                "00001538,E9750602,FFFFFFFF,0376,030676E9,Group,Void,cinematic_skip_stop_internal,// E9770604 prevent cinematic skipping",
             },
 
             ["005_intro"] = new List<string>
             {
                 "00002585,ED8C0A19,ED920A1F,0424,1A0A8DED,Group,Void,,chud_show_shield,ED8F0A1C",
                 "00003019,EF3E0BCB,EF440BD1,0424,CC0B3FEF,Group,Void,chud_show_shield,", // to fix
-                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, prevents cinematic looping
                 "00002221,EC2008AD,EC2F08BC,0053,AE0821EC,ScriptReference,Void,", // disable g_player_training as it freezes scripts
-            },
-
-            ["010_jungle"] = new List<string>
-            {
-                // default:
-                "00000319,E4B2013F,E4A70134,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
-            },
-
-            ["020_base"] = new List<string>
-            {
-                 // default:
-                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
-             },
-
-            ["030_outskirts"] = new List<string>
-            {
-                // default:
-                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
             },
 
             ["040_voi"] = new List<string>
             {         
-                // default:
-                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
-
                 "00001611,E9BE064B,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,C:player_disable_movement",
                 "00009478,887A2506,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,C:player_disable_movement",
                 "00012297,937D3009,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,C:player_disable_movement",
             },
 
-            ["050_floodvoi"] = new List<string>
-            {
-                // default:
-                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
-            },
-
             ["070_waste"] = new List<string>
-            {                // default:
-                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
-
+            {
                 // Default script lines:
                 "00001611,E9BE064B,FFFFFFFF,0005,01FFFFFF,Expression,Boolean,boolean,",
                 "00009478,887A2506,887B2507,0013,3C000040,Expression,Ai,ai,",
                 "00012297,937D3009,937E300A,0002,00000000,Expression,FunctionName,,if",
-            },
-
-            ["100_citadel"] = new List<string>
-            {
-                // default:
-                "00000557,E5A0022D,E5950222,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000557,E5A0022D,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
-            },
-
-            ["110_hc"] = new List<string>
-            {              
-                // default:
-                "00000319,E4B2013F,E4A70134,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
-            },
-
-            ["120_halo"] = new List<string>
-            {
-                // default:
-                "00000319,E4B2013F,E4A70134,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
-            },
-
-            ["130_epilogue"] = new List<string>
-            {
-                // default:
-                "00000319,E4B2013F,E4A70134,0000,00000000,Expression,FunctionName,begin,", // disable cinematic_skip_stop, stops cinematics from looping
-                // modified:
-                "00000319,E4B2013F,FFFFFFFF,0000,00000000,Expression,FunctionName,begin,",
             },
         };
     }

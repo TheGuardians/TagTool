@@ -30,6 +30,8 @@ namespace TagTool.Bitmaps.DDS
         // The RGB data in the pixel format structure is valid.
         RGB = 0x40,
 
+        RGBA = 0x41,
+        
         // The surface will accept pixel data in the format specified and compress it during the write.
         Compressed = 0x80,
 

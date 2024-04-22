@@ -1,5 +1,6 @@
 ﻿using TagTool.Bitmaps;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace TagTool.Commands.RenderModels
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var directory = args[0];
 
@@ -40,12 +41,12 @@ namespace TagTool.Commands.RenderModels
                 var answer = Console.ReadLine().ToLower();
 
                 if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return false;
+                    return new TagToolError(CommandError.YesNoSyntax);
 
                 if (answer.StartsWith("y"))
                     Directory.CreateDirectory(directory);
                 else
-                    return false;
+                    return true;
             }
 
             using (var cacheStream = Cache.OpenCacheRead())
@@ -78,7 +79,7 @@ namespace TagTool.Commands.RenderModels
                                 using (var outStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                                 using(var writer = new EndianWriter(outStream))
                                 {
-                                    var ddsFile = BitmapExtractor.ExtractBitmap(Cache, bitmap, j);
+                                    var ddsFile = BitmapExtractor.ExtractBitmap(Cache, bitmap, j, property.TextureConstants[i].Bitmap.Name);
                                     ddsFile.Write(writer);
                                 }
 

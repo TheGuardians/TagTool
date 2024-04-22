@@ -6,22 +6,65 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "effect_globals", Tag = "effg", Size = 0xC)]
     public class EffectGlobals : TagStructure
 	{
-        public List<UnknownBlock> Unknown;
+        public List<HoldbackBlock> Holdbacks;
 
         [TagStructure(Size = 0x14)]
-        public class UnknownBlock : TagStructure
+        public class HoldbackBlock : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
-            public List<UnknownBlock2> Unknown3;
+            public EffectHoldbackTypeEnum HoldbackType;
+
+            public enum EffectHoldbackTypeEnum : int
+            {
+                TypeEffect,
+                TypeEvent,
+                TypeLocation,
+                TypeLightprobe,
+                TypeEffectMessage,
+                TypeBeamSystem,
+                TypeBeamLocation,
+                TypeBeam,
+                TypeBeamProfileRow,
+                TypeContrailSystem,
+                TypeContrailLocation,
+                TypeContrail,
+                TypeContrailProfileRow,
+                TypeDecalSystem,
+                TypeDecal,
+                TypeDecalVertex,
+                TypeDecalIndex,
+                TypeLightVolumeSystem,
+                TypeLightVolumeLocation,
+                TypeLightVolume,
+                TypeLightVolumeProfileRow,
+                TypeParticleSystem,
+                TypeParticleLocation,
+                TypeParticleEmitter,
+                TypeCpuParticle,
+                TypeGpuParticleRow,
+                TypeContrailQueue,
+                TypeParticleQueue
+            }
+
+            public uint OverallBudget;
+            public List<PriorityBlock> PriorityLevels;
 
             [TagStructure(Size = 0x10)]
-            public class UnknownBlock2 : TagStructure
+            public class PriorityBlock : TagStructure
 			{
-                public uint Unknown;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
+                public GlobalEffectPriorityEnum Type;
+                public uint AbsoluteCount;
+                public uint RelativePercentage;
+                public uint CountAvailableAtThisPriority;
+
+                public enum GlobalEffectPriorityEnum : int
+                {
+                    Low,
+                    Normal,
+                    AboveNormal,
+                    High,
+                    VeryHigh,
+                    Essential
+                }
             }
         }
     }

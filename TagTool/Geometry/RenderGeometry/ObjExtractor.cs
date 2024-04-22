@@ -3,6 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
+using TagTool.Cache;
+using TagTool.IO;
+using static TagTool.Geometry.ModelExtractor;
 
 namespace TagTool.Geometry
 {
@@ -12,17 +16,27 @@ namespace TagTool.Geometry
     public class ObjExtractor
     {
         private readonly TextWriter _writer;
+        private readonly GameCache CacheContext;
         private readonly StringWriter _faceWriter = new StringWriter();
         private uint _baseIndex = 1;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjExtractor"/> class.
         /// </summary>
+        /// <param name="cache">The cache to target</param>
         /// <param name="writer">The stream to write the output file to.</param>
-        public ObjExtractor(TextWriter writer)
+        public ObjExtractor(GameCache cache, TextWriter writer)
         {
+            CacheContext = cache;
             _writer = writer;
             WriteHeader();
+        }
+
+        public struct VertexTransform
+        {
+            public RealVector3d Forward;
+            public RealVector3d Up;
+            public RealPoint3d Position;
         }
 
         /// <summary>
@@ -31,10 +45,20 @@ namespace TagTool.Geometry
         /// <param name="reader">The mesh reader to use.</param>
         /// <param name="compressor">The vertex compressor to use.</param>
         /// <param name="name">The name of the mesh.</param>
-        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, string name = null)
+        /// <param name="transform">An optional transform to apply to the vertices</param>
+        /// <param name="materials">An optional list of materials for naming materials properly</param>
+
+        public void ExtractMesh(MeshReader reader, VertexCompressor compressor, List<RenderMaterial> materials, string name = null, Matrix4x4? transform = null)
         {
-            var vertices = ReadVertices(reader);
+            List<ObjVertex> vertices;
+            if (CacheContext.Version >= CacheVersion.HaloReach)
+                vertices = ReadVerticesReach(reader);
+            else
+                vertices = ReadVertices(reader);
             DecompressVertices(vertices, compressor);
+
+            if (transform != null)
+                TransformVertices(vertices, transform.Value);
 
             var indicesList = new List<ushort[]>();
             var indexCount = 0;
@@ -46,12 +70,18 @@ namespace TagTool.Geometry
 
                 indicesList.Add(indices);
 
-                if (part.IndexCountOld > 0)
+                if (part.IndexCount > 0)
                     indexCount += indices.Length;
             }
 
-            if (indexCount == 0)
+            if (indexCount == 0 || vertices.Count == 0)
                 return;
+
+            //recalculate vertex normals
+            RealQuaternion[] vertexPositions = vertices.Select(v => v.Position).ToArray();
+            RealVector3d[] vertexNormals = CalculateVertexNormals(vertexPositions, indicesList);
+            for (var v = 0; v < vertexNormals.Length; v++)
+                vertices[v].Normal = vertexNormals[v];
 
             foreach (var vertex in vertices)
                 _writer.WriteLine("v {0} {1} {2}", vertex.Position.I, vertex.Position.J, vertex.Position.K);
@@ -63,14 +93,35 @@ namespace TagTool.Geometry
                 _writer.WriteLine("vt {0} {1}", vertex.TexCoords.I, 1 - vertex.TexCoords.J);
 
             var partIndex = 0;
+            
+            if (indicesList.Count != 0)
+                _writer.WriteLine($"o {name}");
 
             foreach (var indices in indicesList)
             {
                 var triangles = GenerateTriangles(indices);
 
                 if (triangles.Count() != 0)
-                    _writer.WriteLine($"g {name}_part_{partIndex++}");
+                {
+                    if (materials != null)
+                    {
+                        if (materials[reader.Mesh.Parts[partIndex].MaterialIndex].RenderMethod != null)
+                        {
+                            _writer.WriteLine($"usemtl {materials[reader.Mesh.Parts[partIndex].MaterialIndex].RenderMethod.Name}");
+                        }
+                        else
+                        {
+                            _writer.WriteLine($"usemtl {name}_material_{reader.Mesh.Parts[partIndex].MaterialIndex}");
+                        }
+                    }
+                    else
+                    {
+                        _writer.WriteLine($"usemtl {name}_material_{reader.Mesh.Parts[partIndex].MaterialIndex}");
+                    }
 
+                    _writer.WriteLine($"g {name}_part_{partIndex++}");
+                }
+                    
                 foreach (var triangle in triangles)
                     _writer.WriteLine(triangle);
             }
@@ -85,6 +136,82 @@ namespace TagTool.Geometry
         {
             _writer.Write(_faceWriter.ToString());
             _faceWriter.Close();
+        }
+
+        private RealVector3d[] CalculateVertexNormals(RealQuaternion[] vertices, List<ushort[]> indicesList)
+        {
+            Vector3[] vertexNormals = new Vector3[vertices.Length];
+
+            // Initialize all vertex normals to zero
+            for (int i = 0; i < vertexNormals.Length; i++)
+            {
+                vertexNormals[i] = Vector3.Zero;
+            }
+
+            // Calculate face normals and add them to vertex normals
+            foreach(var indices in indicesList)
+            {
+                for (int i = 0; i < indices.Length; i += 3)
+                {
+                    int index1 = indices[i];
+                    int index2 = indices[i + 1];
+                    int index3 = indices[i + 2];
+
+                    Vector3 v1 = Vector3FromRealQuaternion(vertices[index1]);
+                    Vector3 v2 = Vector3FromRealQuaternion(vertices[index2]);
+                    Vector3 v3 = Vector3FromRealQuaternion(vertices[index3]);
+
+                    Vector3 faceNormal = Vector3.Cross(v2 - v1, v3 - v1);
+
+                    vertexNormals[index1] += faceNormal;
+                    vertexNormals[index2] += faceNormal;
+                    vertexNormals[index3] += faceNormal;
+                }
+            }
+
+            // Normalize vertex normals
+            RealVector3d[] result = new RealVector3d[vertices.Length];
+            for (int i = 0; i < vertexNormals.Length; i++)
+            {
+                result[i] = RealQuaternionFromVector3(Vector3.Normalize(vertexNormals[i])).IJK;
+            }
+
+            return result;
+        }
+        private RealQuaternion RealQuaternionFromVector3(Vector3 input)
+        {
+            return new RealQuaternion(input.X, input.Y, input.Z);
+        }
+
+        private Vector3 Vector3FromRealQuaternion(RealQuaternion input)
+        {
+            return new Vector3(input.I, input.J, input.K);
+        }
+
+        private static List<ObjVertex> ReadVerticesReach(MeshReader reader)
+        {
+            // Open a vertex reader on stream 0 (main vertex data)
+            var mainBuffer = reader.VertexStreams[0];
+            if (mainBuffer == null)
+                return new List<ObjVertex>();
+
+            VertexStreamReach vertexReader = (VertexStreamReach)reader.OpenVertexStream(mainBuffer);
+
+            switch (reader.Mesh.ReachType)
+            {
+                case VertexTypeReach.Rigid:
+                    return ReadRigidVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.Skinned:
+                    return ReadSkinnedVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.World:
+                    return ReadWorldVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.RigidCompressed:
+                    return ReadRigidCompressedVertices(vertexReader, mainBuffer.Count);
+                case VertexTypeReach.RigidBoned:
+                    return ReadRigidBonedVertices(vertexReader, mainBuffer.Count);
+                default:
+                    throw new InvalidOperationException("Only Rigid, Skinned, World meshes are supported");
+            }
         }
 
         /// <summary>
@@ -128,6 +255,50 @@ namespace TagTool.Geometry
             for (var i = 0; i < count; i++)
             {
                 var rigid = reader.ReadRigidVertex();
+                result.Add(new ObjVertex
+                {
+                    Position = rigid.Position,
+                    Normal = rigid.Normal,
+                    TexCoords = rigid.Texcoord,
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Reads rigid vertices into a format-independent list.
+        /// </summary>
+        /// <param name="reader">The vertex reader to read from.</param>
+        /// <param name="count">The number of vertices to read.</param>
+        /// <returns>The vertices that were read.</returns>
+        private static List<ObjVertex> ReadRigidCompressedVertices(VertexStreamReach reader, int count)
+        {
+            var result = new List<ObjVertex>();
+            for (var i = 0; i < count; i++)
+            {
+                var rigid = reader.ReadReachRigidVertex();
+                result.Add(new ObjVertex
+                {
+                    Position = rigid.Position,
+                    Normal = rigid.Normal,
+                    TexCoords = rigid.Texcoord,
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Reads rigid boned vertices.
+        /// </summary>
+        /// <param name="reader">The vertex reader to read from.</param>
+        /// <param name="count">The number of vertices to read.</param>
+        /// <returns>The vertices that were read.</returns>
+        private static List<ObjVertex> ReadRigidBonedVertices(VertexStreamReach reader, int count)
+        {
+            var result = new List<ObjVertex>();
+            for (var i = 0; i < count; i++)
+            {
+                var rigid = reader.ReadReachRigidBonedVertex();
                 result.Add(new ObjVertex
                 {
                     Position = rigid.Position,
@@ -227,22 +398,22 @@ namespace TagTool.Geometry
         /// <param name="reader">The mesh reader to use.</param>
         /// <param name="part">The mesh part to read.</param>
         /// <returns>The index buffer converted into a triangle list.</returns>
-        private static ushort[] ReadIndices(MeshReader reader, Mesh.Part part)
+        private static ushort[] ReadIndices(MeshReader reader, Part part)
         {
             // Use index buffer 0
             var indexBuffer = reader.IndexBuffers[0];
             if (indexBuffer == null)
-                throw new InvalidOperationException("Index buffer 0 is null");
+                return new ushort[0];
 
             // Read the indices
             var indexStream = reader.OpenIndexBufferStream(indexBuffer);
-            indexStream.Position = part.FirstIndexOld;
+            indexStream.Position = part.FirstIndex;
             switch (indexBuffer.Format)
             {
                 case IndexBufferFormat.TriangleList:
-                    return indexStream.ReadIndices(part.IndexCountOld);
+                    return indexStream.ReadIndices(part.IndexCount);
                 case IndexBufferFormat.TriangleStrip:
-                    return indexStream.ReadTriangleStrip(part.IndexCountOld);
+                    return indexStream.ReadTriangleStrip(part.IndexCount);
                 default:
                     throw new InvalidOperationException("Unsupported index buffer type: " + indexBuffer.Format);
             }
@@ -296,6 +467,23 @@ namespace TagTool.Geometry
                 yield return $"f {a}/{a}/{a} {b}/{b}/{b} {c}/{c}/{c}";
             }
         }
+
+        /// <summary>
+        /// Applys a transformation to a list of vertices
+        /// </summary>
+        /// <param name="vertices">The list of vertices</param>
+        /// <param name="transform">The transform to apply</param>
+        private void TransformVertices(List<ObjVertex> vertices, Matrix4x4 transform)
+        {
+            foreach (var vertex in vertices)
+            {
+                var p = Vector3.Transform(new Vector3(vertex.Position.I, vertex.Position.J, vertex.Position.K), transform);
+                var n = Vector3.TransformNormal(new Vector3(vertex.Normal.I, vertex.Normal.J, vertex.Normal.K), transform);
+                vertex.Position = new RealQuaternion(p.X, p.Y, p.Z);
+                vertex.Normal = new RealVector3d(n.X, n.Y, n.Z);
+            }
+        }
+
 
         private class ObjVertex
         {

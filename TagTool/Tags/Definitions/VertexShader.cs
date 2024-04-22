@@ -7,15 +7,15 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "vertex_shader", Tag = "vtsh", Size = 0x20, MinVersion = CacheVersion.Halo3Retail)]
     public class VertexShader : TagStructure
 	{
-        public uint Unknown;
-        public List<DrawModeList> DrawModeLists;
-        public uint Unknown3;
+        public EntryPointBitMask EntryPointsMask;
+        public List<VertexShaderEntryPoint> EntryPoints;
+        public int Version;
         public List<VertexShaderBlock> Shaders;
 
         [TagStructure(Size = 0xC)]
-        public class DrawModeList : TagStructure
+        public class VertexShaderEntryPoint : TagStructure
 		{
-            public List<ShaderDrawMode> DrawModes;
+            public List<ShortOffsetCountBlock> SupportedVertexTypes;
         }
     }
 }

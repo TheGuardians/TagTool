@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.Models
@@ -27,7 +28,7 @@ namespace TagTool.Commands.Models
         public override object Execute(List<string> args)
         {
             if (args.Count != 0)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var variantNames = Definition.Variants.Select(v => Cache.StringTable.GetString(v.Name) ?? v.Name.ToString()).OrderBy(n => n).ToList();
 

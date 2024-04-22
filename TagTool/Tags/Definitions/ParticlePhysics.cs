@@ -2,22 +2,28 @@ using TagTool.Cache;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using static TagTool.Effects.EditableProperty;
+using static TagTool.Tags.Definitions.Effect.Event.ParticleSystem.Emitter.ParticleMovementData;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "particle_physics", Tag = "pmov", Size = 0x20, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "particle_physics", Tag = "pmov", Size = 0x2C, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "particle_physics", Tag = "pmov", Size = 0x2C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "particle_physics", Tag = "pmov", Size = 0x30, MinVersion = CacheVersion.HaloReach)]
     public class ParticlePhysics : TagStructure
 	{
         public CachedTag Template;
-        public FlagsValue Flags;
-        public List<Movement> Movements;
+        public ParticleMovementFlags Flags;
+        public List<ParticleController> Movements;
 
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
-        public byte[] Unused1;
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Padding_ED;
+
+        [TagField(ValidTags = new[] { "bitm" }, MinVersion = CacheVersion.HaloReach)]
+        public CachedTag TurbulenceTexture;
 
         [Flags]
-        public enum FlagsValue : uint
+        public enum ParticleMovementFlags : uint
         {
             None = 0,
             Physics = 1 << 0,
@@ -27,21 +33,24 @@ namespace TagTool.Tags.Definitions
             CollideWithVehicles = 1 << 4,
             CollideWithBipeds = 1 << 5,
             Swarm = 1 << 6,
-            Wind = 1 << 7
+            Wind = 1 << 7,
+            Bit8 = 1 << 8
         }
 
         [TagStructure(Size = 0x18)]
-        public class Movement : TagStructure
+        public class ParticleController : TagStructure
 		{
-            public TypeValue Type;
-            public byte Flags;
-            [TagField(Flags = Padding, Length = 1)]
-            public byte Unused;
-            public List<Parameter> Parameters;
-            public int Unknown2;
-            public int Unknown3;
+            public ParticleMovementType Type;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ParticleControllerFlags Flags;
+            [TagField(Flags = Padding, Length = 2, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(Flags = Padding, Length = 1, MinVersion = CacheVersion.HaloReach)]
+            public byte[] Padding0;
+            public List<ParticleControllerParameter> Parameters;
+            public int RuntimeMConstantParameters;
+            public ParticlePropertyScalar.ParticleStatesFlags RuntimeMUsedParticleStates;
 
-            public enum TypeValue : short
+            public enum ParticleMovementType : short
             {
                 Physics,
                 Collider,
@@ -49,11 +58,30 @@ namespace TagTool.Tags.Definitions
                 Wind
             }
 
+            [Flags]
+            public enum ParticleControllerFlags : byte
+            {
+                PropertiesFullyIndexed = 1 << 0
+            }
+
             [TagStructure(Size = 0x24)]
-            public class Parameter : TagStructure
+            public class ParticleControllerParameter : TagStructure
 			{
                 public int ParameterId;
-                public TagMapping Property;
+                public ParticlePropertyScalar Property;
+            }
+
+            public ParticlePropertyScalar.ParticleStatesFlags ValidateUsedStates()
+            {
+                ParticlePropertyScalar.ParticleStatesFlags usedStates = ParticlePropertyScalar.ParticleStatesFlags.None;
+
+                foreach (var parameter in Parameters)
+                {
+                    usedStates |= ParticleEditablePropertyEvaluate(parameter.Property, "ParticlePhysics",
+                        0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+                }
+
+                return usedStates;
             }
         }
     }

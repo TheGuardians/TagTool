@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using TagTool.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Serialization;
 using System.Runtime.InteropServices;
 using TagTool.Cache.HaloOnline;
@@ -21,11 +22,11 @@ namespace TagTool.Commands.Editing
             : base(true,
 
                   "PokeTagChanges",
-                  $"Pokes changes made to the current {cache.StringTable.GetString(tag.Group.Name)} definition to a running game's memory.",
+                  $"Pokes changes made to the current {tag.Group} definition to a running game's memory.",
 
                   "PokeTagChanges [process id]",
 
-                  $"Pokes changes made to the current {cache.StringTable.GetString(tag.Group.Name)} definition to a running game's memory.")
+                  $"Pokes changes made to the current {tag.Group} definition to a running game's memory.")
         {
             Cache = cache;
             Tag = tag;
@@ -35,21 +36,20 @@ namespace TagTool.Commands.Editing
         public override object Execute(List<string> args)
         {
             if (args.Count > 1)
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
 
             Process process;
 
             if (args.Count == 1)
             {
                 if (!int.TryParse(args[0], NumberStyles.HexNumber, null, out int processId) || processId < 0)
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid ProcessId \"{args[0]}\"");
 
-            #if !DEBUG
+#if !DEBUG
                 try
                 {
-            #endif
-                    process = Process.GetProcessById(processId);
+#endif
+                process = Process.GetProcessById(processId);
             #if !DEBUG
                 }
                 catch (ArgumentException)
@@ -64,10 +64,7 @@ namespace TagTool.Commands.Editing
                 var processes = Process.GetProcessesByName("eldorado");
 
                 if (processes.Length == 0)
-                {
-                    Console.Error.WriteLine("Unable to find any eldorado.exe processes.");
-                    return true;
-                }
+                    return new TagToolError(CommandError.OperationFailed, "Unable to find any eldorado.exe processes");
 
                 process = processes[0];
             }
@@ -77,23 +74,80 @@ namespace TagTool.Commands.Editing
                 var address = GetTagAddress(processStream, Tag.Index);
                 if(address != 0)
                 {
-                    var runtimeContext = new RuntimeSerializationContext(Cache, processStream, address, Tag.Offset, Tag.CalculateHeaderSize(), Tag.TotalSize);
+                    //first get a raw copy of the tag in the cache
+                    byte[] tagcachedata;
+                    using (var stream = Cache.OpenCacheRead())
+                    using (var outstream = new MemoryStream())
+                    using (EndianWriter writer = new EndianWriter(outstream, EndianFormat.LittleEndian))
+                    {
+                        //deserialize the cache def then reserialize to a stream
+                        var cachedef = Cache.Deserialize(stream, Tag);
+                        var dataContext = new DataSerializationContext(writer);                     
+                        Cache.Serializer.Serialize(dataContext, cachedef);
+                        StreamUtil.Align(outstream, 0x10);
+                        tagcachedata = outstream.ToArray();
+                    }
+                        
+                    //then serialize the current version of the tag in the editor
+                    byte[] editordata;
+                    using (MemoryStream stream = new MemoryStream())
+                    using (EndianWriter writer = new EndianWriter(stream, EndianFormat.LittleEndian))
+                    {
+                        var dataContext = new DataSerializationContext(writer);
+                        Cache.Serializer.Serialize(dataContext, Value);
+                        StreamUtil.Align(stream, 0x10);
+                        editordata = stream.ToArray();
+                    }
+
+                    //length should make to make sure the serializer is consistent
+                    if(tagcachedata.Length != editordata.Length)
+                    {
+                        return new TagToolError(CommandError.OperationFailed, $"Error: tag size changed or the serializer failed!");
+                    }
+
+                    //some very rare tags have a size that doesn't match our serialized version, need to fix root cause
+                    if(tagcachedata.Length != Tag.TotalSize - Tag.CalculateHeaderSize())
+                    {
+                        return new TagToolError(CommandError.OperationFailed, $"Sorry can't poke this specific tag yet (only happens with very rare specific tags), go bug a dev");
+                    }
 
                     //pause the process during poking to prevent race conditions
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
                     process.Suspend();
-                    Cache.Serializer.Serialize(runtimeContext, Value);
+
+                    //write diffed bytes only
+                    int patchedbytes = 0;
+                    int headersize = (int)Tag.CalculateHeaderSize();
+                    for(var i = 0; i < editordata.Length; i++)
+                    {
+                        if(editordata[i] != tagcachedata[i])
+                        {
+                            processStream.Seek(address + headersize + i, SeekOrigin.Begin);
+                            processStream.WriteByte(editordata[i]);
+                            patchedbytes++;
+                        }
+                    }
+                    processStream.Flush();
+
                     process.Resume();
                     stopWatch.Stop();
 
-                    Console.WriteLine($"Poked tag at 0x{address.ToString("X8")} in {stopWatch.ElapsedMilliseconds / 1000.0f} seconds");
-                }  
+                    Console.WriteLine($"Patched {patchedbytes} bytes in {stopWatch.ElapsedMilliseconds / 1000.0f} seconds");
+                }
                 else
-                    Console.Error.WriteLine("Tag 0x{0:X} is not loaded in process 0x{1:X}.", Tag.Index, process.Id);
+                    return new TagToolError(CommandError.OperationFailed, $"Tag 0x{Tag.Index:X} is not loaded in process 0x{process.Id:X}.");
             }
 
             return true;
+        }
+
+        public void DumpData(string filename, byte[] data)
+        {
+            using (var fs = new FileStream(filename, FileMode.Create, FileAccess.Write))
+            {
+                fs.Write(data, 0, data.Length);
+            }
         }
 
         private static uint GetTagAddress(ProcessMemoryStream stream, int tagIndex)

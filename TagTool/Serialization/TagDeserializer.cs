@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Shaders;
@@ -10,6 +11,9 @@ using static TagTool.Tags.TagFieldFlags;
 using BindingFlags = System.Reflection.BindingFlags;
 using System.IO;
 using System.Linq;
+using TagTool.Geometry.BspCollisionGeometry;
+using System.Runtime.ExceptionServices;
+using System.Diagnostics;
 
 namespace TagTool.Serialization
 {
@@ -18,15 +22,19 @@ namespace TagTool.Serialization
 	/// </summary>
     public class TagDeserializer
     {
-        public CacheVersion Version { get; }
+        public CacheVersion Version { get; protected set; }
+        public CachePlatform CachePlatform { get; protected set; }
+        public Stack<string> CurrentFieldPath { get; protected set; } = new Stack<string>();
 
         /// <summary>
         /// Constructs a tag deserializer for a specific engine version.
         /// </summary>
         /// <param name="version">The engine version to target.</param>
-        public TagDeserializer(CacheVersion version)
+        /// <param name="cachePlatform"></param>
+        public TagDeserializer(CacheVersion version, CachePlatform cachePlatform)
         {
             Version = version;
+            CachePlatform = cachePlatform;
         }
 
         /// <summary>
@@ -41,6 +49,15 @@ namespace TagTool.Serialization
             return (T)Convert.ChangeType(result, typeof(T));
         }
 
+        public IEnumerable<T> Deserialize<T>(ISerializationContext context, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                var result = Deserialize(context, typeof(T));
+                yield return (T)Convert.ChangeType(result, typeof(T));
+            }
+        }
+
         /// <summary>
         /// Deserializes tag data into an object.
         /// </summary>
@@ -49,9 +66,30 @@ namespace TagTool.Serialization
         /// <returns>The object that was read.</returns>
         public object Deserialize(ISerializationContext context, Type structureType)
         {
-			var info = TagStructure.GetTagStructureInfo(structureType, Version);
+			var info = TagStructure.GetTagStructureInfo(structureType, Version, CachePlatform);
 			var reader = context.BeginDeserialize(info);
-            var result = DeserializeStruct(reader, context, info);
+            if (reader.Length == 0)
+                return null;
+            object result = null;
+            if (Debugger.IsAttached)
+            {
+                result = DeserializeStruct(reader, context, info);
+            }
+            //if no debugger then create a more user-friendly exception
+            else
+            {
+                try
+                {
+                    result = DeserializeStruct(reader, context, info);
+                }
+                catch (Exception ex)
+                {
+                    string outPath = string.Join(".", CurrentFieldPath.ToArray().Reverse());
+                    new TagToolError(CommandError.CustomError, $"Structure deserialization failed at path {outPath}");
+                    ExceptionDispatchInfo.Capture(ex).Throw();
+                }
+            }
+            
             context.EndDeserialize(info, result);
             return result;
         }
@@ -68,11 +106,15 @@ namespace TagTool.Serialization
         {
             var baseOffset = reader.BaseStream.Position;
             var instance = Activator.CreateInstance(info.Types[0]);
+            if(info.Structure.Name != null)
+                CurrentFieldPath.Push(info.Structure.Name);
 
-			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(info.Types[0], info.Version))
+			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(info.Types[0], info.Version, info.CachePlatform))
                 DeserializeProperty(reader, context, instance, tagFieldInfo, baseOffset);
-
-			if (info.TotalSize > 0)
+            
+            if (info.Structure.Name != null)
+                CurrentFieldPath.Pop();
+            if (info.TotalSize > 0)
                 reader.BaseStream.Position = baseOffset + info.TotalSize;
 
             return instance;
@@ -91,26 +133,24 @@ namespace TagTool.Serialization
         {
             var attr = tagFieldInfo.Attribute;
 
-            if (attr.Flags.HasFlag(Runtime) || !CacheVersionDetection.AttributeInCacheVersion(attr, Version))
+            if (attr.Flags.HasFlag(Runtime) || !CacheVersionDetection.TestAttribute(attr, Version, CachePlatform))
                 return;
 
-            if (tagFieldInfo.FieldType.IsArray && attr.Flags.HasFlag(Relative))
+            uint align = TagFieldInfo.GetFieldAlignment(tagFieldInfo.FieldType, tagFieldInfo.Attribute, Version, CachePlatform);
+            if (align > 0)
             {
-                var type = instance.GetType();
-                var field = type.GetField(
-                    attr.Field,
-                    BindingFlags.Instance | BindingFlags.Public);
-
-                var attr2 = TagStructure.GetTagFieldAttribute(type, field);
-                if(CacheVersionDetection.AttributeInCacheVersion(attr2, Version))
-                {
-                    attr.Length = (int)Convert.ChangeType(field.GetValue(instance), typeof(int));
-                }
-                else throw new InvalidOperationException(attr2.Field);
+                var fieldOffset = (uint)(reader.BaseStream.Position - baseOffset);
+                reader.BaseStream.Position += -fieldOffset & (align - 1);
             }
 
             if (attr.Flags.HasFlag(Padding))
             {
+                //disable padding warnings for gen2 defs
+                if (Version <= CacheVersion.Halo2Vista)
+                {
+                    reader.BaseStream.Position += attr.Length;
+                    return;
+                }
 #if DEBUG
                 var unused = reader.ReadBytes(attr.Length);
 
@@ -118,7 +158,7 @@ namespace TagTool.Serialization
                 {
                     if (b != 0)
                     {
-                        Console.WriteLine($"WARNING: non-zero padding found in {tagFieldInfo.FieldInfo.DeclaringType.FullName}.{tagFieldInfo.FieldInfo.Name} = {b}");
+                        new TagToolWarning($"Non-zero padding found in {tagFieldInfo.FieldInfo.DeclaringType.FullName}.{tagFieldInfo.FieldInfo.Name} = {b}");
                         break;
                     }
                 }
@@ -128,9 +168,15 @@ namespace TagTool.Serialization
             }
             else
             {
+                if (tagFieldInfo.FieldInfo.Name != null)
+                    CurrentFieldPath.Push(tagFieldInfo.FieldInfo.Name);
+
                 var value = DeserializeValue(reader, context, attr, tagFieldInfo.FieldType);
                 tagFieldInfo.SetValue(instance, value);
-            }
+
+                if (tagFieldInfo.FieldInfo.Name != null)
+                    CurrentFieldPath.Pop();
+            }            
         }
 
         /// <summary>
@@ -141,7 +187,7 @@ namespace TagTool.Serialization
         /// <param name="valueInfo">The value information. Can be <c>null</c>.</param>
         /// <param name="valueType">The type of the value to deserialize.</param>
         /// <returns>The deserialized value.</returns>
-        public object DeserializeValue(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
+        public virtual object DeserializeValue(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo, Type valueType)
         {
             if (valueType.IsPrimitive)
                 return DeserializePrimitiveValue(reader, valueType);
@@ -208,7 +254,7 @@ namespace TagTool.Serialization
 
             // enum = Enum type
             if (valueType.IsEnum)
-                return DeserializePrimitiveValue(reader, valueType.GetEnumUnderlyingType());
+                return DeserializeEnum(reader, valueInfo, valueType);
 
             // string = ASCII string
             if (valueType == typeof(string))
@@ -238,8 +284,10 @@ namespace TagTool.Serialization
                 return new RealRgbColor(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             else if (valueType == typeof(RealArgbColor))
                 return new RealArgbColor(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
+            else if (valueType == typeof(RealRgbaColor))
+                return new RealRgbaColor(reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression), reader.ReadSingle(compression));
             else if (valueType == typeof(ArgbColor))
-                return new ArgbColor(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+                return new ArgbColor(reader.ReadUInt32());
 
             if (valueType == typeof(Point2d))
                 return new Point2d(reader.ReadInt16(), reader.ReadInt16());
@@ -297,6 +345,7 @@ namespace TagTool.Serialization
             if (valueType == typeof(Angle))
                 return Angle.FromRadians(reader.ReadSingle(compression));
 
+
             if (valueType == typeof(DatumHandle))
                 return new DatumHandle(reader.ReadUInt32());
 
@@ -326,8 +375,86 @@ namespace TagTool.Serialization
 			if (valueType == typeof(PixelShaderReference))
                 return DeserializePixelShaderReference(reader, context);
 
+            if (valueType == typeof(PlatformUnsignedValue))
+                return DeserializePlatfornUnsignedValue(reader);
+
+            if (valueType == typeof(PlatformSignedValue))
+                return DeserializePlatfornSignedValue(reader);
+
+            if (valueType == typeof(IndexBufferIndex))
+                return DeserializeIndexBufferIndex(reader);
+
+            if (valueType == typeof(StructureSurfaceToTriangleMapping))
+                return DeserializePlaneReference(reader);
+
+            if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(FlagBits<>))
+                return DeserializeFlagBits(reader, valueInfo, valueType);
+
             // Assume the value is a structure
-            return DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(valueType, Version));
+            return DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(valueType, Version, CachePlatform));
+        }
+
+        private object DeserializeFlagBits(EndianReader reader, TagFieldAttribute valueInfo, Type valueType)
+        {
+            var enumType = valueType.GenericTypeArguments[0];
+            object value = DeserializePrimitiveValue(reader, valueInfo.EnumType ?? valueType.GetEnumUnderlyingType());
+            uint castedValue = (uint)Convert.ChangeType(value, typeof(uint));
+            return VersionedEnum.ImportFlags(enumType, castedValue, Version, CachePlatform);
+        }
+
+        private object DeserializeEnum(EndianReader reader, TagFieldAttribute valueInfo, Type valueType)
+        {
+            var storageType = valueInfo.EnumType ?? valueType.GetEnumUnderlyingType();
+            object value = DeserializePrimitiveValue(reader, storageType);
+
+            var enumInfo = TagEnum.GetInfo(valueType, Version, CachePlatform);
+            if(enumInfo.Attribute.IsVersioned)
+            {
+                return ConvertVersionedEnumValue(valueInfo, valueType, value, enumInfo);
+            }
+            else
+            {
+                if (valueInfo.EnumType != null)
+                    value = CastEnumValue(valueType, valueInfo.EnumType, value);
+
+                return value;
+            }
+        }
+
+        private object ConvertVersionedEnumValue(TagFieldAttribute valueInfo, Type valueType, object value, TagEnumInfo enumInfo)
+        {
+            try
+            {
+                return VersionedEnum.ImportValue(valueType, (int)Convert.ChangeType(value, typeof(int)), Version, CachePlatform);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                new TagToolWarning($"Enum value out of range {enumInfo.Type.FullName} = {value}");
+
+                // We're unable to convert the value, nothing we can do. Cast the value as is.
+                return CastEnumValue(enumInfo.Type, valueInfo.EnumType, value);
+            }
+        }
+
+        private static object CastEnumValue(Type enumType, Type valueType, object value)
+        {
+            switch(Type.GetTypeCode(valueType))
+            {
+                case TypeCode.Byte:
+                    return Enum.ToObject(enumType, (byte)value);
+                case TypeCode.UInt16:
+                    return Enum.ToObject(enumType, (ushort)value);
+                case TypeCode.UInt32:
+                    return Enum.ToObject(enumType, (uint)value);
+                case TypeCode.SByte:
+                    return Enum.ToObject(enumType, (sbyte)value);
+                case TypeCode.Int16:
+                    return Enum.ToObject(enumType, (short)value);
+                case TypeCode.Int32:
+                    return Enum.ToObject(enumType, (int)value);
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         /// <summary>
@@ -350,7 +477,7 @@ namespace TagTool.Serialization
             if (count == 0)
             {
                 // Null tag block
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+                reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0xC : 0x8);
                 return result;
             }
 
@@ -368,7 +495,7 @@ namespace TagTool.Serialization
                 addMethod.Invoke(result, new[] { element });
             }
 
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+            reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0xC : 0x8);
 
             return result;
         }
@@ -393,7 +520,7 @@ namespace TagTool.Serialization
             if (count == 0)
             {
                 // Null tag block
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+                reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0xC : 0x8);
                 return result;
             }
 
@@ -413,7 +540,7 @@ namespace TagTool.Serialization
                 addMethod.Invoke(result, new[] { element });
             }
 
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x8);
+            reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0xC : 0x8);
 
             return result;
         }
@@ -479,14 +606,20 @@ namespace TagTool.Serialization
         public CachedTag DeserializeTagReference(EndianReader reader, ISerializationContext context, TagFieldAttribute valueInfo)
         {
             if (valueInfo == null || !valueInfo.Flags.HasFlag(Short))
-                reader.BaseStream.Position += (Version > CacheVersion.Halo2Vista ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
+                reader.BaseStream.Position += (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0xC : 0x4); // Skip the class name and zero bytes, it's not important
             
             var result = context.GetTagByIndex(reader.ReadInt32());
 
             if (result != null && valueInfo != null && valueInfo.ValidTags != null)
-                foreach (string tag in valueInfo.ValidTags)
-                    if (!result.IsInGroup(tag))
-                        throw new Exception($"Invalid group for tag reference: {result.Group.Tag}");
+            {
+                if(!valueInfo.ValidTags.Any(x => result.IsInGroup(x)))
+                {
+                    var groups = string.Join(", ", valueInfo.ValidTags);
+                    new TagToolWarning($"Tag reference with invalid group found during deserialization:"
+                        + $"\n - { result.Name }.{ result.Group.Tag}" 
+                        + $"\n - valid groups: {groups}");
+                }
+            }
 
             return result;
         }
@@ -502,49 +635,61 @@ namespace TagTool.Serialization
             // Read size and pointer
             var startOffset = reader.BaseStream.Position;
             var size = reader.ReadInt32();
-            if (Version > CacheVersion.Halo2Vista)
+            if (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version))
                 reader.BaseStream.Position = startOffset + 0xC;
             var pointer = reader.ReadUInt32();
             if (pointer == 0)
             {
                 // Null data reference
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+                reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0x14 : 0x8);
                 return new byte[0];
             }
 
             // Read the data
             var result = new byte[size];
-            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x4)), pointer);
+            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0xC : 0x4)), pointer);
             reader.Read(result, 0, size);
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
+            reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0x14 : 0x8);
             return result;
         }
 
         public virtual TagData DeserializeTagData(EndianReader reader, ISerializationContext context)
         {
+            var tagData = new TagData();
+
             // Read size and pointer
             var startOffset = reader.BaseStream.Position;
             var size = reader.ReadInt32();
-            if (Version > CacheVersion.Halo2Vista)
-                reader.BaseStream.Position = startOffset + 0xC;
+
+            if(CacheVersionDetection.IsInGen(CacheGeneration.First, Version))
+            {
+                reader.ReadUInt32(); // 1 when offset below is valid maybe
+                tagData.Gen1ExternalOffset = reader.ReadUInt32();
+            }
+            else if (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version))
+                 reader.BaseStream.Position = startOffset + 0xC;
+
             var pointer = reader.ReadUInt32();
+
+            tagData.Data = new byte[0];
+            tagData.Size = size;
+            tagData.Address = pointer;
+
             if (pointer == 0)
             {
                 // Null data reference
-                reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
-                return new TagData();
+                reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0x14 : 0x8);
+                return tagData;
             }
 
             // Read the data
             var result = new byte[size];
-            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (Version > CacheVersion.Halo2Vista ? 0xC : 0x4)), pointer);
+            reader.BaseStream.Position = context.AddressToOffset((uint)(startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0xC : 0x4)), pointer);
             reader.Read(result, 0, size);
-            reader.BaseStream.Position = startOffset + (Version > CacheVersion.Halo2Vista ? 0x14 : 0x8);
-
-            var tagData = new TagData();
+            reader.BaseStream.Position = startOffset + (!CacheVersionDetection.IsInGen(CacheGeneration.Second, Version) ? 0x14 : 0x8);
 
             tagData.Data = result;
-            
+           
             return tagData;
         }
 
@@ -604,7 +749,60 @@ namespace TagTool.Serialization
             return Activator.CreateInstance(rangeType, min, max);
         }
 
-		public PixelShaderReference DeserializePixelShaderReference(EndianReader reader, ISerializationContext context)
+        public IndexBufferIndex DeserializeIndexBufferIndex(EndianReader reader)
+        {
+            if (Version >= CacheVersion.HaloReach || Version == CacheVersion.HaloOnlineED)
+                return new IndexBufferIndex(reader.ReadInt32());
+            else
+                return new IndexBufferIndex(reader.ReadUInt16());
+        }
+
+        public object DeserializePlaneReference(EndianReader reader)
+        {
+            if (Version >= CacheVersion.HaloReach || Version == CacheVersion.HaloOnlineED)
+            {
+                var value = reader.ReadUInt32();
+                return new StructureSurfaceToTriangleMapping((int)(value >> 12), (int)(value & 0xFFF));
+            }
+            else
+            {
+                ushort triangleIndex = reader.ReadUInt16();
+                ushort clusterIndex = reader.ReadUInt16();
+                return new StructureSurfaceToTriangleMapping(triangleIndex, clusterIndex);
+            }
+        }
+
+        public PlatformUnsignedValue DeserializePlatfornUnsignedValue(EndianReader reader)
+        {
+            var platformType = CacheVersionDetection.GetPlatformType(CachePlatform);
+            switch (platformType)
+            {
+                case PlatformType._64Bit:
+                    return new PlatformUnsignedValue(reader.ReadUInt64());
+
+                default:
+                case PlatformType._32Bit:
+                    return new PlatformUnsignedValue(reader.ReadUInt32());
+                
+            }
+        }
+
+        public PlatformSignedValue DeserializePlatfornSignedValue(EndianReader reader)
+        {
+            var platformType = CacheVersionDetection.GetPlatformType(CachePlatform);
+            switch (platformType)
+            {
+                case PlatformType._64Bit:
+                    return new PlatformSignedValue(reader.ReadInt64());
+
+                default:
+                case PlatformType._32Bit:
+                    return new PlatformSignedValue(reader.ReadInt32());
+
+            }
+        }
+
+        public PixelShaderReference DeserializePixelShaderReference(EndianReader reader, ISerializationContext context)
 		{
 			// This reference is a uint32 pointer, we'll be moving the stream position around. Right before returning
 			// from this method 'reader.SeekTo(endPosition)' will bring us to where the serializer expects the next
@@ -619,13 +817,13 @@ namespace TagTool.Serialization
 			var headerOffset = context.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
 			reader.SeekTo(headerOffset);
 
-			var header = (PixelShaderHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(PixelShaderHeader)));
+			var header = (PixelShaderHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(PixelShaderHeader), Version, CachePlatform));
 
 			if (header.ShaderDataAddress == 0)
 				return null;
 
 			var debugHeaderOffset = reader.Position;
-			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(ShaderDebugHeader)));
+			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(ShaderDebugHeader), Version, CachePlatform));
 
 			if ((debugHeader.Magic >> 16) != 0x102A)
 				return null;
@@ -706,13 +904,13 @@ namespace TagTool.Serialization
 			var headerOffset = context.AddressToOffset((uint)(reader.BaseStream.Position - 4), headerAddress);
 			reader.SeekTo(headerOffset);
 
-			var header = (VertexShaderHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(VertexShaderHeader)));
+			var header = (VertexShaderHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(VertexShaderHeader), Version, CachePlatform));
 
 			if (header.ShaderDataAddress == 0)
 				return null;
 
 			var debugHeaderOffset = reader.Position;
-			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(ShaderDebugHeader)));
+			var debugHeader = (ShaderDebugHeader)DeserializeStruct(reader, context, TagStructure.GetTagStructureInfo(typeof(ShaderDebugHeader), Version, CachePlatform));
 
 			if ((debugHeader.Magic >> 16) != 0x102A)
 				return null;

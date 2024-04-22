@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
@@ -29,14 +30,14 @@ namespace TagTool.Commands.Editing
             Cache = cache;
             ContextStack = contextStack;
             Tag = tag;
-            Structure = TagStructure.GetTagStructureInfo(value.GetType(), Cache.Version);
+            Structure = TagStructure.GetTagStructureInfo(value.GetType(), Cache.Version, Cache.Platform);
             Owner = value;
         }
 
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var blockName = args[0];
             var ownerType = Owner.GetType();
@@ -74,10 +75,7 @@ namespace TagTool.Commands.Editing
 					f.Name.ToSnakeCase() == blockNameSnake);
 
 			if (field == null)
-            {
-                Console.WriteLine("{0} does not contain a block named \"{1}\"", ownerType.Name, blockName);
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"\"{ownerType.Name}\" does not contain a tag block named \"{blockName}\".");
             
             var contextName = "";
             object blockValue = null;
@@ -87,7 +85,7 @@ namespace TagTool.Commands.Editing
             if (structureAttribute != null)
             {
                 if (args.Count != 1)
-                    return false;
+                    return new TagToolError(CommandError.ArgCount, "");
 
                 blockValue = field.GetValue(Owner);
                 contextName = $"{blockName}";
@@ -95,39 +93,32 @@ namespace TagTool.Commands.Editing
             else
             {
                 if (args.Count != 2)
-                    return false;
-                
+                    return new TagToolError(CommandError.ArgCount);
+
                 IList fieldValue = null;
 
                 if (field.FieldType.GetInterface("IList") == null || (fieldValue = (IList)field.GetValue(Owner)) == null)
-                {
-                    Console.WriteLine("{0} does not contain a block named \"{1}\"", ownerType.Name, blockName);
-                    return false;
-                }
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{ownerType.Name}\" does not contain a tag block named \"{blockName}\".");
 
                 int blockIndex = 0;
 
                 if (args[1] == "*")
                     blockIndex = fieldValue.Count - 1;
                 else if (!int.TryParse(args[1], out blockIndex))
-                {
-                    Console.WriteLine("Invalid index requested from block {0}: {1}", blockName, blockIndex);
-                    return false;
-                }
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid index \"{blockIndex}\" requested from block \"{blockName}\"");
 
                 if (blockIndex >= fieldValue.Count || blockIndex < 0)
-                {
-                    Console.WriteLine("Invalid index requested from block {0}: {1}", blockName, blockIndex);
-                    return false;
-                }
+                    return new TagToolError(CommandError.ArgInvalid, $"Invalid index \"{blockIndex}\" requested from block \"{blockName}\"");
 
                 blockValue = fieldValue[blockIndex];
                 contextName = $"{blockName}[{blockIndex}]";
             }
 
-            var blockStructure = TagStructure.GetTagStructureInfo(blockValue.GetType(), Cache.Version);
+            var blockStructure = TagStructure.GetTagStructureInfo(blockValue.GetType(), Cache.Version, Cache.Platform);
 
             var blockContext = new CommandContext(ContextStack.Context, contextName);
+            blockContext.ScriptGlobals.Add(ExecuteCSharpCommand.GlobalElementKey, blockValue);
+
             blockContext.AddCommand(new ListFieldsCommand(Cache, blockStructure, blockValue));
             blockContext.AddCommand(new SetFieldCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             //blockContext.AddCommand(new ExtractResourceCommand(ContextStack, CacheContext, Tag, blockStructure, blockValue));
@@ -136,8 +127,12 @@ namespace TagTool.Commands.Editing
             blockContext.AddCommand(new RemoveBlockElementsCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new CopyBlockElementsCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new PasteBlockElementsCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
+            blockContext.AddCommand(new MoveBlockElementCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
+            blockContext.AddCommand(new SwapBlockElementsCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
             blockContext.AddCommand(new ForEachCommand(ContextStack, Cache, Tag, blockStructure, blockValue));
+            blockContext.AddCommand(new ExportCommandsCommand(Cache, blockValue as TagStructure));
             blockContext.AddCommand(new ExitToCommand(ContextStack));
+            blockContext.AddCommand(new ExecuteCSharpCommand(ContextStack));
             ContextStack.Push(blockContext);
 
             if (deferredNames.Count != 0)

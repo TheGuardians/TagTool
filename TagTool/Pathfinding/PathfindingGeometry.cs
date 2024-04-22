@@ -48,6 +48,12 @@ namespace TagTool.Pathfinding
         public TagBlock<Door> Doors;
     }
 
+    [TagStructure(Size = 0x1)]
+    public class StructureBspPathfindingEdgesBlock : TagStructure
+    {
+        public sbyte Midpoint;
+    }
+
     [TagStructure(Size = 0x8)]
     public class Sector : TagStructure
     {
@@ -145,7 +151,7 @@ namespace TagTool.Pathfinding
 
         public int ObjectUniqueID;
         public short OriginBspIndex;
-        public ScenarioObjectType ObjectType;
+        public GameObjectType8 ObjectType;
         public Scenario.ScenarioInstance.SourceValue Source;
 
         [TagStructure(Size = 0x18)]
@@ -188,10 +194,9 @@ namespace TagTool.Pathfinding
             HoistLink,
             WallJumpLink,
             BreakableFloor,
-            Unknown8,
-            Unknown9,
-            UnknownA,
-            // TODO: Add more?
+            RailLink,
+            SeamLink,
+            DoorLink,
         }
 
         [Flags]
@@ -200,12 +205,6 @@ namespace TagTool.Pathfinding
             None = 0,
             Bidirectional = 1 << 0,
             Closed = 1 << 1,
-            Unknown2 = 1 << 2,
-            Unknown3 = 1 << 3,
-            Unknown4 = 1 << 4,
-            Unknown5 = 1 << 5,
-            Unknown6 = 1 << 6,
-            Unknown7 = 1 << 7
         }
 
         [Flags]

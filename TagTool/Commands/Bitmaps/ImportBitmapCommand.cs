@@ -5,6 +5,7 @@ using System.IO;
 using TagTool.Bitmaps;
 using TagTool.Tags.Definitions;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags;
 using TagTool.Bitmaps.DDS;
@@ -24,7 +25,7 @@ namespace TagTool.Commands.Bitmaps
                   "ImportBitmap",
                   "Imports an image from a DDS file.",
 
-                  "ImportBitmap <image index> <dds file>",
+                  "ImportBitmap <image index> <dds file> [curve mode]",
 
                   "The image index must be in hexadecimal.\n" +
                   "No conversion will be done on the data in the DDS file.\n" +
@@ -37,27 +38,62 @@ namespace TagTool.Commands.Bitmaps
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 2)
-                return false;
+            if (args.Count > 3 || args.Count < 2)
+                return new TagToolError(CommandError.ArgCount);
 
-            if (!int.TryParse(args[0], NumberStyles.HexNumber, null, out int imageIndex))
-                return false;
+            if (!int.TryParse(args[0], NumberStyles.Integer, null, out int imageIndex))
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             if (Bitmap.Images.Count == 0)
             {
                 Bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
                 Bitmap.Images.Add(new Bitmap.Image { Signature = new Tag("bitm") });
-                Bitmap.Resources.Add(new TagResourceReference());
+                Bitmap.HardwareTextures.Add(new TagResourceReference());
             }
 
-            if (imageIndex < 0 || imageIndex >= Bitmap.Images.Count)
+            if (imageIndex >= Bitmap.Images.Count)
             {
-                Console.Error.WriteLine("Invalid image index.");
-                return true;
+                Bitmap.Images.Add(new Bitmap.Image { Signature = new Tag("bitm") });
+                Bitmap.HardwareTextures.Add(new TagResourceReference());
+                imageIndex = Bitmap.Images.Count - 1;
+                new TagToolWarning($"Index exceeds image count; new image created at index {imageIndex}");
             }
+            else if (imageIndex < 0)
+                return new TagToolError(CommandError.ArgInvalid, "Invalid image index");
 
             var imagePath = args[1];
-            
+            if (!File.Exists(imagePath))
+                return new TagToolError(CommandError.FileNotFound, $"\"{imagePath}\"");
+
+            BitmapImageCurve curve = BitmapImageCurve.xRGB;
+            string inputCurve = null;
+            if (args.Count == 3)
+                inputCurve = args[2];
+
+            if (inputCurve != null)
+            {
+                switch (inputCurve)
+                {
+                    case "linear":
+                        curve = BitmapImageCurve.Linear;
+                        break;
+                    case "sRGB":
+                    case "srgb":
+                        curve = BitmapImageCurve.sRGB;
+                        break;
+                    case "gamma2":
+                        curve = BitmapImageCurve.Gamma2;
+                        break;
+                    case "xRGB":
+                    case "xrgb":
+                        curve = BitmapImageCurve.xRGB;
+                        break;
+                    default:
+                        Console.WriteLine($"Invalid bitmap curve {inputCurve}, using xRGB instead");
+                        break;
+                }
+            }
+
             Console.WriteLine("Importing image data...");
 
 #if !DEBUG
@@ -72,12 +108,12 @@ namespace TagTool.Commands.Bitmaps
                     file.Read(reader);
                 }
 
-                var bitmapTextureInteropDefinition = BitmapInjector.CreateBitmapResourceFromDDS(Cache, file);
+                var bitmapTextureInteropDefinition = BitmapInjector.CreateBitmapResourceFromDDS(Cache, file, curve);
                 var reference = Cache.ResourceCache.CreateBitmapResource(bitmapTextureInteropDefinition);
 
                 // set the tag data
 
-                Bitmap.Resources[imageIndex] = reference;
+                Bitmap.HardwareTextures[imageIndex] = reference;
                 Bitmap.Images[imageIndex] = BitmapUtils.CreateBitmapImageFromResourceDefinition(bitmapTextureInteropDefinition.Texture.Definition.Bitmap);
 
                 using (var tagsStream = Cache.OpenCacheReadWrite())
@@ -86,8 +122,7 @@ namespace TagTool.Commands.Bitmaps
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Importing image data failed: " + ex.Message);
-                return true;
+                return new TagToolError(CommandError.OperationFailed, "Importing image data failed: " + ex.Message);
             }
 #endif
 

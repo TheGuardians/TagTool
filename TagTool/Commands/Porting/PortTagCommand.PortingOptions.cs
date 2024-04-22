@@ -72,11 +72,11 @@ namespace TagTool.Commands.Porting
 			[PortingFlagDescription("Include 'Scripting.Script' tag-blocks.")]
 			Scripts = 1 << 8,
 
-			// <summary>
-			// TBD.
-			// </summary>
-			//[PortingFlagDescription("TBD.")]
-			//ShaderTest = 1 << 9,
+			/// <summary>
+			/// Include udlg tags and their referenced audio.
+			/// </summary>
+			[PortingFlagDescription("Port udlg tags and associated audio for bipeds.")]
+			Dialogue = 1 << 9,
 
 			/// <summary>
 			/// Attempt to match shaders to existing tags.
@@ -85,16 +85,16 @@ namespace TagTool.Commands.Porting
 			MatchShaders = 1 << 10,
 
 			/// <summary>
+			/// Only use templates that have the exact same render method options
+			/// </summary>
+			[PortingFlagDescription("Only use templates that have the exact same render method options")]
+			PefectShaderMatchOnly = 1 << 11,
+
+			/// <summary>
 			/// Keep cache in memory during porting.
 			/// </summary>
 			[PortingFlagDescription("Keep cache in memory during porting.")]
-			Memory = 1 << 11,
-
-			/// <summary>
-			/// Include <see cref="ShaderHalogram"/> (rmhg) tags.
-			/// </summary>
-			[PortingFlagDescription("Include 'ShaderHalogram' (rmhg) tags.")]
-			Rmhg = 1 << 12,
+			Memory = 1 << 12,
 
 			/// <summary>
 			/// Allow using existing tags from Ms30.
@@ -120,8 +120,26 @@ namespace TagTool.Commands.Porting
             [PortingFlagDescription("Use a regular expression to determine target tags")]
             Regex = 1 << 16,
 
-            // No [PortingFlagDescription] here means we'll flag names as the description.
-            Default = Recursive | Audio | Elites | ForgePalette | Squads | Scripts | MatchShaders | Rmhg | Ms30 | Print | Merge
+			/// <summary>
+			/// Attempt to generate shaders.
+			/// </summary>
+			[PortingFlagDescription("Attempt to generate shaders.")]
+			GenerateShaders = 1 << 17,
+
+			/// <summary>
+			/// Add a multiplayerobject block for spawnable tag types.
+			/// </summary>
+			[PortingFlagDescription("Add to forge palette by category index: ex. MPobject[17,Item_Name] (underscores -> spaces)")]
+			MPobject = 1 << 18,
+
+			[PortingFlagDescription("Multipurpose Reach flag used for specific tweaks.")]
+			ReachMisc = 1 << 19,
+
+			[PortingFlagDescription("Auto rescale gui during porting")]
+			AutoRescaleGui = 1 << 20,
+
+			// No [PortingFlagDescription] here means we'll flag names as the description.
+			Default = Print | Recursive | Merge | Scripts | Squads | ForgePalette | Elites | Audio | Dialogue | MatchShaders | GenerateShaders
 		}
 
 		/// <summary>
@@ -168,16 +186,20 @@ namespace TagTool.Commands.Porting
 		/// Parses porting flag options from a <see cref="List{T}"/> of <see cref="string"/>.
 		/// </summary>
 		/// <param name="args"></param>
-		private void ParsePortingOptions(List<string> args)
+		private string[] ParsePortingOptions(List<string> args)
 		{
 			Flags = PortingFlags.Default;
 
 			var flagNames = Enum.GetNames(typeof(PortingFlags)).Select(name => name.ToLower());
 			var flagValues = Enum.GetValues(typeof(PortingFlags)) as PortingFlags[];
 
+			string[] argParameters = new string[0];
+
 			for (var a = 0; a < args.Count(); a++)
 			{
-				var arg = args[a].ToLower();
+				string[] argSegments = args[a].Split('[');
+
+				var arg = argSegments[0].ToLower();
 
 				// Support legacy arguments
 				arg = arg.Replace("single", $"!{nameof(PortingFlags.Recursive)}");
@@ -192,7 +214,7 @@ namespace TagTool.Commands.Porting
 				else if (!toggleOn && arg.StartsWith("no"))
 					arg = arg.Remove(0, 2);
 
-				// Throw exceptiosn at clumsy typers.
+				// Throw exceptions at clumsy typers.
 				if (!flagNames.Contains(arg))
 					throw new FormatException($"Invalid {typeof(PortingFlags).FullName}: {args[0]}");
 
@@ -204,7 +226,14 @@ namespace TagTool.Commands.Porting
 							SetFlags(flagValues[i]);
 						else
 							RemoveFlags(flagValues[i]);
+
+				// Get forge palette info if provided
+				if (arg == "mpobject" && argSegments.Count() > 1)
+				{
+					argParameters = argSegments[1].Split(']')[0].Split(',');
+				}
 			}
+			return argParameters;
 		}
 
 		/// <summary>

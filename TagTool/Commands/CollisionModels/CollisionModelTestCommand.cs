@@ -34,30 +34,25 @@ namespace TagTool.Commands.CollisionModels
         {
             //Arguments needed: filepath, <new>|<tagIndex>
             if (args.Count < 2)
-            {
-                return false;
-            }
+                return new TagToolError(CommandError.ArgCount);
 
             CachedTag tag;
 
             // optional argument: forces overwriting of tags that are not type: coll
             var b_force = (args.Count >= 3 && args[2].ToLower().Equals("force"));
 
-            if (args[1].ToLower().Equals("new") && TagGroup.Instances.TryGetValue("coll", out var collGroup))
+            if (args[1].ToLower().Equals("new"))
             {
-                tag = Cache.TagCacheGenHO.AllocateTag(collGroup);
+                tag = Cache.TagCacheGenHO.AllocateTag(Cache.TagCache.TagDefinitions.GetTagDefinitionType("coll"));
             }
             else
             {
-                if (!Cache.TryGetTag(args[1], out tag))
-                    return false;
+                if (!Cache.TagCache.TryGetTag(args[1], out tag))
+                    return new TagToolError(CommandError.TagInvalid);
             }
 
             if (!b_force && !tag.IsInGroup("coll"))
-            {
-                Console.WriteLine("Tag to override was not of class- 'coll'. Use third argument- 'force' to inject into this tag.");
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, "Tag to override was not of class- 'coll'. Use third argument- 'force' to inject into this tag.");
 
             string filepath = args[0];
             string[] fpaths = null;
@@ -65,7 +60,7 @@ namespace TagTool.Commands.CollisionModels
             bool b_singleFile = Path.GetExtension(filepath).Equals(".model_collision_geometry")
                 && !Directory.Exists(filepath);
 
-            var modelbuilder = new CollisionGeometryBuilder();
+            var modelbuilder = new LegacyCollisionGeometryConverter();
             int n_objects = 1;
 
             if (!b_singleFile)
@@ -73,43 +68,33 @@ namespace TagTool.Commands.CollisionModels
                 fpaths = Directory.GetFiles(filepath, "*.model_collision_geometry");
 
                 if (fpaths.Length == 0)
-                {
-                    Console.WriteLine("No Halo 1 coll tags in directory: \"{0}\"", filepath);
-                    return false;
-                }
+                    return new TagToolError(CommandError.ArgInvalid, $"No Halo 1 coll tags in directory: \"{filepath}\"");
 
                 filepath = fpaths[0];
                 n_objects = fpaths.Length;
             }
             
-            Console.WriteLine(
-                (n_objects == 1 ? "Loading coll tag..." : "Loading coll tags..."), n_objects);
+            Console.WriteLine((n_objects == 1 ? "Loading coll tag..." : "Loading coll tags..."), n_objects);
 
             if (!modelbuilder.ParseFromFile(filepath))
-                return false;
+                return new TagToolError(CommandError.OperationFailed, $"Failed to parse collision file \"{filepath}\"");
 
             coll = modelbuilder.Build();
 
             if (coll == null)
-            {
-                Console.WriteLine("Builder produced null result.");
-                return false;
-            }
+                return new TagToolError(CommandError.OperationFailed, "Builder produced null result");
 
             if (!b_singleFile)
             {
                 for (int i = 1; i < fpaths.Length; ++i)
                 {
                     if (!modelbuilder.ParseFromFile(fpaths[i]))
-                        return false;
+                        return new TagToolError(CommandError.OperationFailed, $"Failed to parse collision file \"{filepath}\"");
 
                     var coll2 = modelbuilder.Build();
 
                     if (coll2 == null)
-                    {
-                        Console.WriteLine("Builder produced null result.");
-                        return false;
-                    }
+                        return new TagToolError(CommandError.OperationFailed, "Builder produced null result");
 
                     coll.Regions.Add(coll2.Regions[0]);
                 }

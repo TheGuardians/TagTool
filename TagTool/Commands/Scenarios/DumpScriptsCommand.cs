@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TagTool.IO;
+using System.Linq;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Scripting;
 using TagTool.Tags.Definitions;
@@ -13,126 +16,100 @@ namespace TagTool.Commands.Scenarios
         private Scenario Definition { get; }
         private GameCache Cache { get; }
         private List<string> CsvQueue1 { get; }
+        private Dictionary<DatumHandle, string> Globals { get; }
+        private CachedTag Tag { get; }
 
-        public DumpScriptsCommand(GameCache cache, Scenario definition) :
+        public DumpScriptsCommand(GameCache cache, CachedTag tag, Scenario definition) :
             base(true,
                 
                 "DumpScripts",
-                "Extract a scenario's scripts to use as hardcoded presets for PortTagCommand.Scenario or with the test command AdjustScriptsFromFile.",
+                "Extract a scenario or function's scripts to use as hardcoded presets for PortTagCommand.Scenario or with the test command AdjustScriptsFromFile.",
 
-                "DumpScripts [print] <CSV File>",
-                "Extract a scenario's scripts to use as hardcoded presets for PortTagCommand.Scenario or with the test command AdjustScriptsFromFile.")
+                "DumpScripts [function name] [CSV Filename]",
+                "Extract a scenario or function's scripts to use as hardcoded presets for PortTagCommand.Scenario or with the test command AdjustScriptsFromFile.")
         {
             Definition = definition;
+            Tag = tag;
             Cache = cache;
             CsvQueue1 = new List<string>();
+            Globals = new Dictionary<DatumHandle, string>();
         }
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 2)
-                return false;
+            string functionName = "";
+            string mapName = Tag.Name.Split('\\').Last();
+            string csvFileName = $"_{Definition.MapId}_{mapName}_compiled.csv";
 
-            var csvFileName = $"{Cache.Version.ToString()}_{Definition.MapId}_scripts.csv";
-            bool printToConsole = false;
-
-            if (args.Count > 0 && args[0].ToLower() == "print")
-            {
-                printToConsole = true;
-                if (args.Count == 2)
-                    csvFileName = args[1];
-            }
-            else if (args.Count == 1)
-                csvFileName = args[0];
-
-            var globals = new Dictionary<DatumHandle, string>();
-
-            CsvAdd("Globals", printToConsole);
-            for (int index = 0; index < Definition.Globals.Count; index++)
-            {
-                CsvAdd($"{index:D4}," +
-                       $"{index:X4}," +
-                       $"{Definition.Globals[index].InitializationExpressionHandle:X8}," +
-                       $"{Definition.Globals[index].InitializationExpressionHandle.Salt:X4}," +
-                       $"{Definition.Globals[index].Name,-0x20}," +
-                       $"{GetHsTypeAsString(Cache.Version, Definition.Globals[index].Type)}",
-                       printToConsole);
-
-                globals.Add(Definition.Globals[index].InitializationExpressionHandle, Definition.Globals[index].Name);
-            }
-
-            CsvAdd("Scripts", printToConsole);
-            for (int index = 0; index < Definition.Scripts.Count; index++)
-            {
-                CsvAdd($"{index:D4}," +
-                       $"{index:X4}," +
-                       $"{Definition.Scripts[index].Type.ToString()}," +
-                       $"{GetHsTypeAsString(Cache.Version, Definition.Scripts[index].ReturnType)}," +
-                       $"{Definition.Scripts[index].ScriptName}," +
-                       $"A:{Definition.Scripts[index].RootExpressionHandle:X8}",
-                       printToConsole);
-            }
-
-            for (int index = 0; index < Definition.ScriptExpressions.Count; index++)
-            {
-                if (Definition.ScriptExpressions[index].Opcode == 0xBABA)
-                    continue;
-
-                string scriptGroupName = "";
-
-                if (Definition.ScriptExpressions[index].NextExpressionHandle == DatumHandle.None &&
-                    Definition.ScriptExpressions[index].Flags == HsSyntaxNodeFlags.Group &&
-                    Definition.ScriptExpressions[index].Opcode == 0x0)
+        switch (args.Count)
+        {
+            case 0:
                 {
-                    var relativeHsScript = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == Definition.ScriptExpressions[index].Identifier);
-                    if (relativeHsScript != null)
-                        scriptGroupName = $",S:{relativeHsScript.ScriptName}";
+                    if (Cache.Version == CacheVersion.HaloOnlineED)
+                        csvFileName = "ED" + csvFileName;
+                    else
+                        csvFileName = $"{Cache.Version}" + csvFileName;
+                }
+                break;
+            case 1:
+                csvFileName = args[0];
+                break;
+            case 2:
+                functionName = args[0];
+                csvFileName = args[1];
+                break;
+            default:
+                return new TagToolError(CommandError.ArgCount);
+        }
+
+            if (functionName != "")
+            {
+                DumpFunction(functionName);
+            }
+            else
+            {
+                CsvAdd("Globals");
+                for (int index = 0; index < Definition.Globals.Count; index++)
+                {
+                    CsvAdd($"{index:D4}," +
+                           $"{index:X4}," +
+                           $"{Definition.Globals[index].InitializationExpressionHandle:X8}," +
+                           $"{Definition.Globals[index].InitializationExpressionHandle.Salt:X4}," +
+                           $"{Definition.Globals[index].Name,-0x20}," +
+                           $"{GetHsTypeAsString(Cache.Version, Definition.Globals[index].Type)}");
+
+                    Globals.Add(Definition.Globals[index].InitializationExpressionHandle, Definition.Globals[index].Name);
                 }
 
-                DatumHandle expressionHandle = new DatumHandle((uint)((Definition.ScriptExpressions[index].Identifier << 16) + index));
+                CsvAdd("Scripts");
+                for (int index = 0; index < Definition.Scripts.Count; index++)
+                {
+                    CsvAdd($"{index:D4}," +
+                           $"{index:X4}," +
+                           $"{Definition.Scripts[index].Type.ToString()}," +
+                           $"{GetHsTypeAsString(Cache.Version, Definition.Scripts[index].ReturnType)}," +
+                           $"{Definition.Scripts[index].ScriptName}," +
+                           $"A:{Definition.Scripts[index].RootExpressionHandle:X8}");
+                }
 
-                if (globals.ContainsKey(expressionHandle))
-                    scriptGroupName = $"G:{globals[expressionHandle]}";
-
-                string opcodeName = "";
-
-                if (ScriptExpressionIsValue(Definition.ScriptExpressions[index]) && ScriptInfo.ValueTypes[Cache.Version].ContainsKey(Definition.ScriptExpressions[index].Opcode))
-                    opcodeName = $"{ScriptInfo.ValueTypes[Cache.Version][Definition.ScriptExpressions[index].Opcode]},value";
-
-                else if (ScriptInfo.Scripts[Cache.Version].ContainsKey(Definition.ScriptExpressions[index].Opcode))
-                    opcodeName = ScriptInfo.Scripts[Cache.Version][Definition.ScriptExpressions[index].Opcode].Name;
-
-                if ((Definition.ScriptExpressions[index].Flags == HsSyntaxNodeFlags.ScriptReference) || (index > 0 && Definition.ScriptExpressions[index - 1].Flags == HsSyntaxNodeFlags.ScriptReference))
-                    opcodeName = "";
-
-                CsvAdd($"{index:D8}," +
-                       $"{((Definition.ScriptExpressions[index].Identifier << 16) | index):X8}," +
-                       $"{Definition.ScriptExpressions[index].NextExpressionHandle.Value:X8}," +
-                       $"{Definition.ScriptExpressions[index].Opcode:X4}," +
-                       $"{Definition.ScriptExpressions[index].Data[0]:X2}" +
-                       $"{Definition.ScriptExpressions[index].Data[1]:X2}" +
-                       $"{Definition.ScriptExpressions[index].Data[2]:X2}" +
-                       $"{Definition.ScriptExpressions[index].Data[3]:X2}," +
-                       $"{Definition.ScriptExpressions[index].Flags}," +
-                       $"{GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[index].ValueType)}," +
-                       $"{opcodeName}," +
-                       $"{scriptGroupName}",
-                       printToConsole);
+                for (int index = 0; index < Definition.ScriptExpressions.Count; index++)
+                {
+                    ParseScriptExpression(index, 0);
+                }
             }
 
             CsvDumpQueueToFile(CsvQueue1, csvFileName);
             return true;
         }
 
-        private void CsvAdd(string inputLine, bool print)
+        private void CsvAdd(string inputLine)
         {
             CsvQueue1.Add(inputLine);
-            if (print)
-                Console.WriteLine($"{inputLine}");
         }
 
         private void CsvDumpQueueToFile(List<string> lines, string path)
         {
+            path = @"haloscript\" + path;
             var fileOut = new FileInfo(path);
 
             if (!fileOut.Directory.Exists)
@@ -181,11 +158,12 @@ namespace TagTool.Commands.Scenarios
                 case CacheVersion.Halo3ODST:
                     return type.Halo3ODST.ToString();
 
+                case CacheVersion.HaloOnlineED:
                 case CacheVersion.HaloOnline106708:
                     return type.HaloOnline.ToString();
 
                 default:
-                    Console.WriteLine($"WARNING: No HsType found for cache \"{version}\". Defaulting to HaloOnline");
+                    new TagToolWarning($"No HsType found for cache \"{version}\". Defaulting to HaloOnline");
                     return type.HaloOnline.ToString();
             }
         }
@@ -200,13 +178,140 @@ namespace TagTool.Commands.Scenarios
                 case CacheVersion.Halo3ODST:
                     return (int)type.Halo3ODST;
 
+                case CacheVersion.HaloOnlineED:
                 case CacheVersion.HaloOnline106708:
                     return (int)type.HaloOnline;
 
                 default:
-                    Console.WriteLine($"WARNING: No HsType found for cache \"{version}\". Defaulting to HaloOnline");
+                    new TagToolWarning($"No HsType found for cache \"{version}\". Defaulting to HaloOnline");
                     return (int)type.HaloOnline;
             }
+        }
+
+        private void ParseScriptExpression(int index, int tabcount)
+        {
+            if (Definition.ScriptExpressions[index].Opcode == 0xBABA)
+                return;
+
+            List<string> tablist = new List<string>();
+            for (int i = 0; i < tabcount; i++)
+            {
+                tablist.Add("\t");
+            }
+
+            string tabs = string.Concat(tablist);
+
+            string scriptGroupName = "";
+
+            if (Definition.ScriptExpressions[index].NextExpressionHandle == DatumHandle.None &&
+                Definition.ScriptExpressions[index].Flags == HsSyntaxNodeFlags.Group &&
+                Definition.ScriptExpressions[index].Opcode == 0x0)
+            {
+                var relativeHsScript = Definition.Scripts.Find(x => x.RootExpressionHandle.Salt == Definition.ScriptExpressions[index].Identifier);
+                if (relativeHsScript != null)
+                    scriptGroupName = $",S:{relativeHsScript.ScriptName}";
+            }
+
+            DatumHandle expressionHandle = new DatumHandle((uint)((Definition.ScriptExpressions[index].Identifier << 16) + index));
+
+            if (Globals.ContainsKey(expressionHandle))
+                scriptGroupName = $"G:{Globals[expressionHandle]}";
+
+            string opcodeName = "";
+
+            if (ScriptExpressionIsValue(Definition.ScriptExpressions[index]) && ScriptInfo.ValueTypes[(Cache.Version, Cache.Platform)].ContainsKey(Definition.ScriptExpressions[index].Opcode))
+                opcodeName = $"{ScriptInfo.ValueTypes[(Cache.Version, Cache.Platform)][Definition.ScriptExpressions[index].Opcode]},value";
+
+            else if (ScriptInfo.Scripts[(Cache.Version, Cache.Platform)].ContainsKey(Definition.ScriptExpressions[index].Opcode))
+                opcodeName = ScriptInfo.Scripts[(Cache.Version, Cache.Platform)][Definition.ScriptExpressions[index].Opcode].Name;
+
+            try
+            {
+                if ((Definition.ScriptExpressions[index].Flags == HsSyntaxNodeFlags.ScriptReference) || (index > 0 && Definition.ScriptExpressions[index - 1].Flags == HsSyntaxNodeFlags.ScriptReference))
+                    opcodeName = $"call {Definition.Scripts[Definition.ScriptExpressions[index].Opcode].ScriptName}";
+            }
+            catch (Exception)
+            {
+                new TagToolError(CommandError.CustomError, "Out-of-range exception in Definition.Scripts! (?)");
+            }
+
+            CsvAdd(tabs +
+                   $"{index:D8}," +
+                   $"{((Definition.ScriptExpressions[index].Identifier << 16) | index):X8}," +
+                   $"{Definition.ScriptExpressions[index].NextExpressionHandle.Value:X8}," +
+                   $"{Definition.ScriptExpressions[index].Opcode:X4}," +
+                   $"{Definition.ScriptExpressions[index].Data[0]:X2}" +
+                   $"{Definition.ScriptExpressions[index].Data[1]:X2}" +
+                   $"{Definition.ScriptExpressions[index].Data[2]:X2}" +
+                   $"{Definition.ScriptExpressions[index].Data[3]:X2}," +
+                   $"{Definition.ScriptExpressions[index].Flags}," +
+                   $"{GetHsTypeAsString(Cache.Version, Definition.ScriptExpressions[index].ValueType)}," +
+                   $"{opcodeName}," +
+                   $"{scriptGroupName}");
+        }
+
+        private void DumpFunction(string function_name)
+        {
+            Stack<int> ContextStack = new Stack<int>();
+            int index = 0;
+            int lastindex = 0;
+            foreach(var Script in Definition.Scripts)
+            {
+                if (Script.ScriptName == function_name)
+                {
+                    index = Script.RootExpressionHandle.Index;
+                    break;
+                }
+            }
+            while (true)
+            {
+                ParseScriptExpression(index, ContextStack.Count);
+                lastindex = index;
+                if (Definition.ScriptExpressions[index].Flags == HsSyntaxNodeFlags.Group)
+                {
+                    if (Definition.ScriptExpressions[index].NextExpressionHandle != DatumHandle.None)
+                    {
+                        ContextStack.Push(Definition.ScriptExpressions[index].NextExpressionHandle.Index);
+                        index = BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, Definition.ScriptExpressions[index].Data, 4), 0) & 0xFFFF;
+                        continue;
+                    }
+                    else
+                    {
+                        index = BitConverter.ToInt16(SortExpressionDataArray(Cache.Endianness, Definition.ScriptExpressions[index].Data, 4), 0) & 0xFFFF;
+                        continue;
+                    }
+                }
+                else if (Definition.ScriptExpressions[index].NextExpressionHandle == DatumHandle.None)
+                {
+                    if(ContextStack.Count == 0)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        index = ContextStack.Pop();
+                        continue;
+                    }
+                }
+
+                index = Definition.ScriptExpressions[index].NextExpressionHandle.Index;
+            }
+        }
+
+        private byte[] SortExpressionDataArray(EndianFormat format, byte[] data, int dataLength)
+        {
+            if (format == EndianFormat.BigEndian)
+            {
+                byte[] newData = new byte[dataLength];
+
+                // reverse the data array, but only to the specified length
+                for (int i = 0; i < dataLength; i++)
+                    newData[i] = data[(dataLength - 1) - i];
+
+                return newData;
+            }
+
+            return data;
         }
     }
 }

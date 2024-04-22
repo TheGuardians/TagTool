@@ -33,7 +33,7 @@ namespace TagTool.Commands.Definitions
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var type = args[0];
             var outDir = args[1];
@@ -54,7 +54,7 @@ namespace TagTool.Commands.Definitions
                     writer = new CppLayoutWriter();
                     break;
                 default:
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{type}\"");
             }
 
             Directory.CreateDirectory(outDir);
@@ -88,7 +88,7 @@ namespace TagTool.Commands.Definitions
                     {
                         Console.WriteLine("Writing {0} layout", groupTag);
 
-                        var name = Cache.StringTable.GetString(lastTag.Group.Name);
+                        var name = lastTag.Group.ToString();
                         var tagLayout = LayoutGuessFinalizer.MakeLayout(layout, name, groupTag);
                         var path = Path.Combine(outDir, writer.GetSuggestedFileName(tagLayout));
 

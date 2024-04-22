@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using TagTool.IO;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Tags
 {
@@ -26,11 +27,10 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 2)
-                return false;
-
+                return new TagToolError(CommandError.ArgCount);
 
             if (!int.TryParse(args[0], NumberStyles.HexNumber, null, out int tagIndex) || tagIndex < 0)
-                return false;
+                return new TagToolError(CommandError.ArgInvalid, $"\"{args[0]}\"");
 
             Process process;
 
@@ -38,7 +38,7 @@ namespace TagTool.Commands.Tags
             {
 
                 if (!int.TryParse(args[1], NumberStyles.HexNumber, null, out int processId) || processId < 0)
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{args[1]}\"");
 
                 try
                 {
@@ -71,7 +71,7 @@ namespace TagTool.Commands.Tags
                 if (address != 0)
                     Console.WriteLine("Tag 0x{0:X} is loaded at 0x{1:X8} in process 0x{2:X}.", tagIndex, address, process.Id);
                 else
-                    Console.Error.WriteLine("Tag 0x{0:X} is not loaded in process 0x{1:X}.", tagIndex, process.Id);
+                    Console.WriteLine("Tag 0x{0:X} is not loaded in process 0x{1:X}.", tagIndex, process.Id);
             }
 
             return true;

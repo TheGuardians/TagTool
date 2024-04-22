@@ -4,10 +4,14 @@ using TagTool.Tags;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Tags.Resources;
+using System;
+using TagTool.Tags.Definitions.Common;
 
 namespace TagTool.Geometry
 {
-    [TagStructure(Name = "render_geometry", Size = 0x84)]
+    [TagStructure(Name = "render_geometry", Size = 0x84, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "render_geometry", Size = 0x9C, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "render_geometry", Size = 0xA8, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
     public class RenderGeometry : TagStructure
 	{
         /// <summary>
@@ -30,11 +34,11 @@ namespace TagTool.Geometry
         /// </summary>
         public List<BoundingSphere> BoundingSpheres;
 
-        public List<UnknownBlock> Unknown2;
+        public List<UserDataBlock> UserData;
 
-        public List<GeometryTagResource> GeometryTagResources; 
+        public List<PerMeshRawDataBlock> GeometryTagResources; 
 
-        public List<MoppClusterVisiblity> MeshClusterVisibility;
+        public List<PerMeshMoppBlock> MeshClusterVisibility;
 
         /// <summary>
         /// The per-mesh node mappings of the render geometry.
@@ -46,14 +50,49 @@ namespace TagTool.Geometry
         /// </summary>
         public List<PerMeshSubpartVisibilityBlock> PerMeshSubpartVisibility;
 
-        public uint Unknown7;
-        public uint Unknown8;
-        public uint Unknown9;
 
+        public List<PerMeshPrtDataBlock> PerMeshPrtData;
+
+        // TODO: review reach definitions
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown10;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown11;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public uint Unknown12;
 
         public List<StaticPerPixelLighting> InstancedGeometryPerPixelLighting;
 
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<WaterBoundingBox> WaterBoundingBoxes;
+
         public TagResourceReference Resource;
+
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
+        public List<ConstantBufferInteropBlock> ConstantBufferInterop;
+
+        [TagStructure(Size = 0xC)]
+        public class ConstantBufferInteropBlock : TagStructure
+        {
+            public uint InteropPointer;
+            public int Unknown;
+
+            [TagField(Length = 0x4, Flags = Padding)]
+            public byte[] Padding0;
+        }
+
+        [TagStructure(Size = 0x20)]
+        public class PerMeshPrtDataBlock : TagStructure
+        {
+            public byte[] MeshPcaData;
+            public List<PerInstancePrtDataBlock> PerInstancePrtData;
+
+            [TagStructure(Size = 0x14)]
+            public class PerInstancePrtDataBlock : TagStructure
+            {
+                public byte[] MeshPcaData;
+            }
+        }
 
         [TagStructure(Size = 0x30)]
         public class BoundingSphere : TagStructure
@@ -70,19 +109,27 @@ namespace TagTool.Geometry
         }
 
         [TagStructure(Size = 0x18)]
-        public class UnknownBlock : TagStructure
-		{
-            public byte UnknownByte1;
-            public byte UnknownByte2;
-            public short Unknown2;
-            public byte[] Unknown3;
+        public class UserDataBlock : TagStructure
+        {
+            public RenderGeometryUserDataType DataType;
+            public sbyte DataCount;
+            public ushort DataSize;
+            [TagField(MinVersion = CacheVersion.Halo3Retail)]
+            public byte[] Data;
+            [TagField(MaxVersion = CacheVersion.Halo3Beta, Length = 0x14)]
+            public byte[] DataBeta;
+
+            public enum RenderGeometryUserDataType : sbyte
+            {
+                PrtInfo
+            }
         }
 
         [TagStructure(Size = 0x20)]
-        public class MoppClusterVisiblity : TagStructure
+        public class PerMeshMoppBlock : TagStructure
 		{
-            public byte[] MoppData;
-            public List<short> UnknownMeshPartIndicesCount;
+            public byte[] MoppCode;
+            public List<short> MoppReorderTable;
         }
 
         [TagStructure(Size = 0xC)]
@@ -103,15 +150,26 @@ namespace TagTool.Geometry
             public List<BoundingSphere> BoundingSpheres;
         }
 
-        [TagStructure(Size = 0x10)]
+        [TagStructure(Size = 0x1C)]
+        public class WaterBoundingBox : TagStructure
+        {
+            public short MeshIndex;
+            public short PartIndex;
+            public RealPoint3d PositionBoundLower;
+            public RealPoint3d PositionBoundUpper;
+        }
+
+        [TagStructure(Size = 0x10, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x2, MinVersion = CacheVersion.HaloReach)]
         public class StaticPerPixelLighting : TagStructure
 		{
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<int> UnusedVertexBuffer;
 
             public short VertexBufferIndex;
 
-            [TagField(Flags = Padding, Length = 2)]
-            public byte[] Unused;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public short Unknown1;
 
             [TagField(Flags = Runtime)]
             public VertexBufferDefinition VertexBuffer;
@@ -122,12 +180,65 @@ namespace TagTool.Geometry
         /// Unused tag mesh data
         /// </summary>
         [TagStructure(Size = 0x2C)]
-        public class GeometryTagResource : TagStructure
+        public class PerMeshRawDataBlock : TagStructure
         {
-            public List<float> VertexBuffer;
-            public List<short> IndexBuffer;
-            [TagField(Flags = Padding, Length = 20)]
-            public byte[] Unused;
+            public List<RawVertexBlock> RawVertices;
+            public List<IndicesWordBlock> RawIndices;
+            public List<RawWaterBlock> RawWaterData;
+            public short ParameterizedTextureWidth;
+            public short ParameterizedTextureHeight;
+            public PerMeshRawDataFlags Flags;
+
+            [Flags]
+            public enum PerMeshRawDataFlags : uint
+            {
+                IndicesAreTriangleStrips = 1 << 0,
+                IndicesAreTriangleLists = 1 << 1,
+                IndicesAreQuadLists = 1 << 2
+            }
+
+            [TagStructure(Size = 0x60)]
+            public class RawVertexBlock : TagStructure
+            {
+                public RealPoint3d Position;
+                public RealPoint2d Texcoord;
+                public RealPoint3d Normal;
+                public RealPoint3d Binormal;
+                public RealPoint3d Tangent;
+                public RealPoint2d LightmapTexcoord;
+                [TagField(Length = 4)]
+                public byte[] NodeIndices;
+                [TagField(Length = 4)]
+                public float[] NodeWeights;
+                public RealPoint3d VertexColor;
+            }
+
+            [TagStructure(Size = 0x2)]
+            public class IndicesWordBlock : TagStructure
+            {
+                public short Word;
+            }
+
+            [TagStructure(Size = 0x18)]
+            public class RawWaterBlock : TagStructure
+            {
+                public List<IndicesWordBlock> RawWaterIndices;
+                public List<RawWaterAppendBlock> RawWaterVertices;
+
+                [TagStructure(Size = 0x2)]
+                public class IndicesWordBlock : TagStructure
+                {
+                    public short Word;
+                }
+
+                [TagStructure(Size = 0x24)]
+                public class RawWaterAppendBlock : TagStructure
+                {
+                    public RealPoint3d LocalInfo;
+                    public RealPoint3d WaterVelocity;
+                    public RealPoint3d BaseTexcoord;
+                }
+            }
         }
 
         //
@@ -138,7 +249,7 @@ namespace TagTool.Geometry
         /// Set the runtime VertexBufferResources and IndexBufferResources fields given the resource definition
         /// </summary>
         /// <param name="resourceDefinition"></param>
-        public void SetResourceBuffers(RenderGeometryApiResourceDefinition resourceDefinition)
+        public void SetResourceBuffers(RenderGeometryApiResourceDefinition resourceDefinition, bool allowShared)
         {
             bool[] convertedVertexBuffers = new bool[resourceDefinition.VertexBuffers.Count];
             bool[] convertedIndexBuffers = new bool[resourceDefinition.IndexBuffers.Count];
@@ -155,14 +266,15 @@ namespace TagTool.Geometry
                     {
                         if (vertexBufferIndex < resourceDefinition.VertexBuffers.Count)
                         {
-                            if(convertedVertexBuffers[vertexBufferIndex] == false)
+                            if(convertedVertexBuffers[vertexBufferIndex] == false || allowShared)
                             {
                                 convertedVertexBuffers[vertexBufferIndex] = true;
                                 mesh.ResourceVertexBuffers[i] = resourceDefinition.VertexBuffers[vertexBufferIndex].Definition;
                             }
                             else
                             {
-                                throw new System.Exception("Sharing vertex buffers is not supported");
+                                mesh.VertexBufferIndices[i] = -1;
+                                System.Console.WriteLine("Sharing vertex buffers not supported, ignoring it.");
                             }
                         }
                             
@@ -178,7 +290,7 @@ namespace TagTool.Geometry
                     {
                         if (indexBufferIndex < resourceDefinition.IndexBuffers.Count)
                         {
-                            if(convertedIndexBuffers[indexBufferIndex] == false)
+                            if(convertedIndexBuffers[indexBufferIndex] == false || allowShared)
                             {
                                 mesh.ResourceIndexBuffers[i] = resourceDefinition.IndexBuffers[indexBufferIndex].Definition;
                                 convertedIndexBuffers[indexBufferIndex] = true;

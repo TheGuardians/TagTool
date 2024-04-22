@@ -1,4 +1,5 @@
-﻿using TagTool.Tags;
+﻿using System;
+using TagTool.Tags;
 
 namespace TagTool.Audio
 {
@@ -11,7 +12,8 @@ namespace TagTool.Audio
         {
             _22khz,
             _44khz,
-            _32khz
+            _32khz,
+            _48khz
         }
 
         public int GetSampleRateHz()
@@ -20,13 +22,15 @@ namespace TagTool.Audio
             {
                 case SampleRateValue._22khz:
                     return 22050;
-
                 case SampleRateValue._32khz:
                     return 32000;
-
                 case SampleRateValue._44khz:
-                default:
                     return 44100;
+                case SampleRateValue._48khz:
+                    return 48000;
+                default:
+                    throw new NotSupportedException();
+                    
             }
         }
 
@@ -36,13 +40,14 @@ namespace TagTool.Audio
             {
                 case SampleRateValue._22khz:
                     return 22.050f;
-
                 case SampleRateValue._32khz:
                     return 32.000f;
-
                 case SampleRateValue._44khz:
-                default:
                     return 44.100f;
+                case SampleRateValue._48khz:
+                    return 48.000f;
+                default:
+                    throw new NotSupportedException();
             }
         }
     }

@@ -7,28 +7,28 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "podium_settings", Tag = "pdm!", Size = 0x3C)]
     public class PodiumSettings : TagStructure
 	{
-        public uint Unknown;
-        public uint Unknown2;
-        public uint Unknown3;
-        public Angle Unknown4;
-        public Angle Unknown5;
-        public uint Unknown6;
-        public Angle Unknown7;
-        public int Unknown8;
-        public CachedTag Unknown9;
-        public List<UnknownBlock> Unknown10;
+        public float CameraOffsetX;
+        public float CameraOffssetY;
+        public float CameraOffsetZ;
+        public Angle CameraOrientationY;
+        public Angle CameraOrientationP;
+        public Angle CameraOrientationR;
+        public Angle CameraFov;
+        public int TickDelay;
+        public CachedTag Unknown;
+        public List<PodiumBiped> PodiumBipeds;
 
         [TagStructure(Size = 0x2C)]
-        public class UnknownBlock : TagStructure
+        public class PodiumBiped : TagStructure
 		{
-            public uint Unknown;
-            public uint Unknown2;
-            public uint Unknown3;
-            public Angle Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public int Unknown7;
-            public CachedTag Effect;
+            public float OffsetX;
+            public float OffsetY;
+            public float OffsetZ;
+            public Angle RotationI;
+            public Angle RotationJ;
+            public Angle RotationK;
+            public int SpawnDelay;
+            public CachedTag SpawnEffect;
         }
     }
 }

@@ -4,25 +4,24 @@ using TagTool.Tags;
 
 namespace TagTool.Audio
 {
-    [TagStructure(Size = 0x1C, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo2Vista)]
     [TagStructure(Size = 0x24, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Size = 0x30, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
     public class Promotion : TagStructure
 	{
         public List<Rule> Rules;
         public List<RuntimeTimer> RuntimeTimers;
-        public int Unknown1;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        public uint Unknown1;
         public uint Unknown2;
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public uint Unknown3;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint LongestPermutationDuration;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint TotalSampleSize;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Gen = CacheGeneration.HaloOnline)]
         public uint Unknown11;
 
         [TagStructure(Size = 0x10)]
@@ -30,15 +29,20 @@ namespace TagTool.Audio
 		{
             public short PitchRangeIndex;
             public short MaximumPlayingCount;
-            public float SuppressionTime;
-            public int Unknown;
-            public int Unknown2;
+
+            /// <summary>
+            /// time from when first permutation plays to when another sound from an equal or lower promotion can play
+            /// </summary>
+            public float SuppressionTime;   // seconds
+
+            public uint Unknown1;
+            public uint Unknown2;
         }
 
         [TagStructure(Size = 0x4)]
         public class RuntimeTimer : TagStructure
 		{
-            public int Unknown;
+            public int Timer;
         }
     }
 }

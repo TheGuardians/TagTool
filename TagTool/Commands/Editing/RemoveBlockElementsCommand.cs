@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags;
 
 namespace TagTool.Commands.Editing
@@ -30,17 +31,21 @@ namespace TagTool.Commands.Editing
             Owner = owner;
         }
 
+        private CommandContext previousContext;
+        private object previousOwner;
+        private TagStructureInfo previousStructure;
+
         public override object Execute(List<string> args)
         {
             if (args.Count < 1 || args.Count > 3)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var fieldName = args[0];
             var fieldNameLow = fieldName.ToLower();
 
-            var previousContext = ContextStack.Context;
-            var previousOwner = Owner;
-            var previousStructure = Structure;
+            previousContext = ContextStack.Context;
+            previousOwner = Owner;
+            previousStructure = Structure;
 
             if (fieldName.Contains("."))
             {
@@ -53,10 +58,8 @@ namespace TagTool.Commands.Editing
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
-                    return false;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
+                    return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
                 command = (ContextStack.Context.GetCommand("EditBlock") as EditBlockCommand);
@@ -66,10 +69,8 @@ namespace TagTool.Commands.Editing
 
                 if (Owner == null)
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
-                    return false;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
+                    return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
 
@@ -78,18 +79,14 @@ namespace TagTool.Commands.Editing
 
 
 
-            var fieldType = field.FieldType;
 
-            if ((field == null) ||
-                (!fieldType.IsGenericType) ||
-                (fieldType.GetInterface("IList") == null))
+            if ((field == null) || (!field.FieldType.IsGenericType) || (field.FieldType.GetInterface("IList") == null))
             {
-                Console.WriteLine("ERROR: {0} does not contain a tag block named \"{1}\".", Structure.Types[0].Name, args[0]);
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
-                return false;
+                ContextReturn(previousContext, previousOwner, previousStructure);
+                return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a tag block named \"{args[0]}\".");
             }
+
+            var fieldType = field.FieldType;
 
             var blockValue = field.GetValue(Owner) as IList;
 
@@ -106,7 +103,8 @@ namespace TagTool.Commands.Editing
 
             if (index < 0)
             {
-                Console.WriteLine("TagBlock is already null!");
+                Console.WriteLine("TagBlock is already null.");
+                ContextReturn(previousContext, previousOwner, previousStructure);
                 return true;
             }
 
@@ -128,8 +126,8 @@ namespace TagTool.Commands.Editing
                     }
                     else if (!int.TryParse(args[1], out index) || index < 0 || index >= blockValue.Count)
                     {
-                        Console.WriteLine($"Invalid index specified: {args[1]}");
-                        return false;
+                        ContextReturn(previousContext, previousOwner, previousStructure);
+                        return new TagToolError(CommandError.ArgInvalid, $"Invalid index specified: {args[1]}");
                     }
                 }
 
@@ -142,8 +140,7 @@ namespace TagTool.Commands.Editing
                     }
                     else if (!int.TryParse(args[2], out count) || count < 1)
                     {
-                        Console.WriteLine($"Invalid number specified: {args[2]}");
-                        return false;
+                        return new TagToolError(CommandError.ArgInvalid, $"Invalid amount specified: {args[2]}");
                     }
                 }
             }
@@ -162,10 +159,7 @@ namespace TagTool.Commands.Editing
             }
 
             if (index + count > blockValue.Count)
-            {
-                Console.WriteLine($"ERROR: Too many block elements specified to be removed: {count}. Maximum at index {index} can be {blockValue.Count - index}");
-                return false;
-            }
+                return new TagToolError(CommandError.ArgInvalid, $"Amount \"{count}\" exceeds the range of existing blocks");
 
             for (var i = 0; i < count; i++)
                 blockValue.RemoveAt(index);
@@ -187,11 +181,17 @@ namespace TagTool.Commands.Editing
             Console.WriteLine($"Successfully removed {count} {itemString} from {field.Name} at index {index}: {typeString}");
             Console.WriteLine(valueString);
 
-            while (ContextStack.Context != previousContext) ContextStack.Pop();
-            Owner = previousOwner;
-            Structure = previousStructure;
+            ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
         }
+
+        public void ContextReturn(CommandContext previousContext, object previousOwner, TagStructureInfo previousStructure)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
+            Owner = previousOwner;
+            Structure = previousStructure;
+        }
+
     }
 }

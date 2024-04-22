@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Commands.Tags
 {
-    class ImportTagCommand : Command
+    public class ImportTagCommand : Command
     {
         private GameCacheHaloOnlineBase Cache { get; }
 
@@ -26,18 +27,16 @@ namespace TagTool.Commands.Tags
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
-
-            if (!Cache.TryGetCachedTag(args[0], out var instance))
-                return false;
+                return new TagToolError(CommandError.ArgCount);
+            if (!Cache.TagCache.TryGetCachedTag(args[0], out var instance))
+                return new TagToolError(CommandError.TagInvalid);
 
             var path = args[1];
 
             if (!File.Exists(path))
-                return false;
+                return new TagToolError(CommandError.FileNotFound, $"\"{path}\"");
 
             byte[] data;
-
             using (var inStream = File.OpenRead(path))
             {
                 data = new byte[inStream.Length];
@@ -45,7 +44,13 @@ namespace TagTool.Commands.Tags
             }
 
             using (var stream = Cache.OpenCacheReadWrite())
+            {
                 Cache.TagCacheGenHO.SetTagDataRaw(stream, (CachedTagHaloOnline)instance, data);
+
+                // Reserialize to avoid issues with missing tag reference fixups
+                var definition = Cache.Deserialize(stream, instance);
+                Cache.Serialize(stream, instance, definition);
+            }
 
             Console.WriteLine($"Imported 0x{data.Length:X} bytes.");
 

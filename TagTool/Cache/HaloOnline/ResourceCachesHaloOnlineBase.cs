@@ -13,6 +13,8 @@ namespace TagTool.Cache.HaloOnline
     public abstract class ResourceCachesHaloOnlineBase : ResourceCache
     {
         public GameCacheHaloOnlineBase Cache;
+        public TagDeserializer Deserializer;
+        public TagSerializer Serializer;
 
         public PageableResource GetPageableResource(TagResourceReference resourceReference)
         {
@@ -40,7 +42,7 @@ namespace TagTool.Cache.HaloOnline
         /// <param name="dataStream">The stream to read the resource data from.</param>
         /// <exception cref="System.ArgumentNullException">resource</exception>
         /// <exception cref="System.ArgumentException">The input stream is not open for reading;dataStream</exception>
-        public void AddResource(PageableResource resource, Stream dataStream)
+        public virtual void AddResource(PageableResource resource, Stream dataStream)
         {
             if (resource == null)
                 throw new ArgumentNullException("resource");
@@ -65,7 +67,7 @@ namespace TagTool.Cache.HaloOnline
         /// </summary>
         /// <param name="resource">The resource reference to initialize.</param>
         /// <param name="data">The pre-compressed data to store.</param>
-        public void AddRawResource(PageableResource resource, byte[] data)
+        public virtual void AddRawResource(PageableResource resource, byte[] data)
         {
             if (resource == null)
                 throw new ArgumentNullException("resource");
@@ -129,13 +131,14 @@ namespace TagTool.Cache.HaloOnline
                 return cache.ExtractRaw(stream, resource.Page.Index, resource.Page.CompressedBlockSize);
         }
 
+
         /// <summary>
         /// Compresses and replaces the data for a resource.
         /// </summary>
         /// <param name="resource">The resource whose data should be replaced. On success, the reference will be adjusted to account for the new data.</param>
         /// <param name="dataStream">The stream to read the new data from.</param>
         /// <exception cref="System.ArgumentException">Thrown if the input stream is not open for reading.</exception>
-        public void ReplaceResource(PageableResource resource, Stream dataStream)
+        public virtual void ReplaceResource(PageableResource resource, Stream dataStream)
         {
             if (resource == null)
                 throw new ArgumentNullException("resource");
@@ -148,11 +151,53 @@ namespace TagTool.Cache.HaloOnline
                 var dataSize = (int)(dataStream.Length - dataStream.Position);
                 var data = new byte[dataSize];
                 dataStream.Read(data, 0, dataSize);
-                var compressedSize = cache.Compress(stream, resource.Page.Index, data);
+
+                uint compressedSize;
+                if (resource.Page.Index != -1)
+                    compressedSize = cache.Compress(stream, resource.Page.Index, data);
+                else
+                    resource.Page.Index = cache.Add(stream, data, out compressedSize); 
+
                 resource.Page.CompressedBlockSize = compressedSize;
                 resource.Page.UncompressedBlockSize = (uint)dataSize;
                 resource.DisableChecksum();
             }
+        }
+        
+        public void ReplaceResource(PageableResource resource, object resourceDefinition)
+        {
+            if (resource == null)
+                throw new ArgumentNullException("resource");
+
+            var definitionStream = new MemoryStream();
+            var dataStream = new MemoryStream();
+
+            using (var definitionWriter = new EndianWriter(definitionStream, EndianFormat.LittleEndian))
+            using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
+            {
+                var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
+                Serializer.Serialize(context, resourceDefinition);
+
+                var data = dataStream.ToArray();
+                var definitionData = definitionStream.ToArray();
+                dataStream.Position = 0;
+
+                resource.DisableChecksum();
+
+                dataStream.Position = 0;
+                ReplaceResource(resource, dataStream);
+
+                // add resource definition and fixups
+                resource.Resource.DefinitionData = definitionData;
+                resource.Resource.FixupLocations = context.FixupLocations;
+                resource.Resource.DefinitionAddress = context.MainStructOffset;
+                resource.Resource.InteropLocations = context.InteropLocations;
+            }
+        }
+
+        public void ReplaceResource(TagResourceReference resource, object resourceDefinition)
+        {
+            ReplaceResource(resource.HaloOnlinePageableResource, resourceDefinition);
         }
 
         /// <summary>
@@ -160,7 +205,7 @@ namespace TagTool.Cache.HaloOnline
         /// </summary>
         /// <param name="resource">The resource whose data should be replaced. On success, the reference will be adjusted to account for the new data.</param>
         /// <param name="data">The raw, pre-compressed data to use.</param>
-        public void ReplaceRawResource(PageableResource resource, byte[] data)
+        public virtual void ReplaceRawResource(PageableResource resource, byte[] data)
         {
             if (resource == null)
                 throw new ArgumentNullException("resource");
@@ -197,6 +242,12 @@ namespace TagTool.Cache.HaloOnline
             if (resourceReference == null || resourceReference.HaloOnlinePageableResource == null)
                 return false;
             var page = resourceReference.HaloOnlinePageableResource.Page;
+            if(page != null)
+            {
+                var index = resourceReference.HaloOnlinePageableResource.Page.Index;
+                if (index == -1)
+                    return false;
+            }
             var resource = resourceReference.HaloOnlinePageableResource.Resource;
             if (page == null || resource == null)
                 return false;
@@ -218,11 +269,15 @@ namespace TagTool.Cache.HaloOnline
             }
         }
 
-        private T GetResourceDefinition<T>(TagResourceReference resourceReference)
+        private new T GetResourceDefinition<T>(TagResourceReference resourceReference)
+        {
+            return (T)GetResourceDefinition(resourceReference, typeof(T));
+        }
+
+        public override object GetResourceDefinition(TagResourceReference resourceReference, Type definitionType)
         {
             var tagResource = GetPageableResource(resourceReference).Resource;
 
-            T result;
             byte[] resourceDefinitionData = tagResource.DefinitionData;
             ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
 
@@ -237,12 +292,10 @@ namespace TagTool.Cache.HaloOnline
             using (var dataReader = new EndianReader(dataStream, EndianFormat.LittleEndian))
             {
                 var context = new ResourceDefinitionSerializationContext(dataReader, definitionDataReader, tagResource.DefinitionAddress.Type);
-                var deserializer = new ResourceDeserializer(Cache.Version);
                 // deserialize without access to the data
                 definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
-                result = deserializer.Deserialize<T>(context);
+                return Deserializer.Deserialize(context, definitionType);
             }
-            return result;
         }
 
         public override BinkResource GetBinkResource(TagResourceReference resourceReference)
@@ -304,8 +357,32 @@ namespace TagTool.Cache.HaloOnline
                 return null;
             return GetResourceDefinition<SoundResourceDefinition>(resourceReference);
         }
+        public override Tags.Resources.Gen4.BitmapTextureInteropResource GetBitmapTextureInteropResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.ModelAnimationTagResource GetModelAnimationTagResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.CollisionModelResource GetCollisionModelResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinitionGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.StructureBspTagResources GetStructureBspTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.StructureBspCacheFileTagResources GetStructureBspCacheFileTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
 
-        private TagResourceReference CreateResource<T>(T resourceDefinition, ResourceLocation location, TagResourceTypeGen3 resourceType)
+        protected virtual TagResourceReference CreateResource<T>(T resourceDefinition, ResourceLocation location, TagResourceTypeGen3 resourceType)
         {
             var resourceReference = new TagResourceReference();
             var pageableResource = new PageableResource();
@@ -325,8 +402,7 @@ namespace TagTool.Cache.HaloOnline
             using (var dataWriter = new EndianWriter(dataStream, EndianFormat.LittleEndian))
             {
                 var context = new ResourceDefinitionSerializationContext(dataWriter, definitionWriter, CacheAddressType.Definition);
-                var serializer = new ResourceSerializer(Cache.Version);
-                serializer.Serialize(context, resourceDefinition);
+                Serializer.Serialize(context, resourceDefinition);
 
                 var data = dataStream.ToArray();
                 var definitionData = definitionStream.ToArray();

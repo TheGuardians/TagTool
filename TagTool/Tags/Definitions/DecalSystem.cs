@@ -1,93 +1,80 @@
 using TagTool.Common;
 using System.Collections.Generic;
 using System;
+using System.IO;
+using TagTool.Cache;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "decal_system", Tag = "decs", Size = 0x24)]
+    [TagStructure(Name = "decal_system", Tag = "decs", Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "decal_system", Tag = "decs", Size = 0x3C, MinVersion = CacheVersion.HaloReach)]
     public class DecalSystem : TagStructure
 	{
-        public FlagsValue Flags;
+        public DecalSystemFlags Flags;
+        public int MaxOverlapping; // 0= no limit
+        public float OverlappingThreshold;
 
-        /// <summary>
-        /// Bigger sizes keep more decals around but use much more memory
-        /// </summary>
-        [TagField(Format = "Triangles")]
-        public short RingBufferSize;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public int ChainUpgradeThreshold; // 0= no upgrade, how many of this will upgrade
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float ChainUpgradeCheckingRadius;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public CachedTag NextDecalChain;
 
-        /// <summary>
-        /// Above entry is for MP -- SP can be different
-        /// </summary>
-        [TagField(Format = "Triangles")]
-        public short RingBufferSizeSinglePlayer;
-
-        /// <summary>
-        /// Material shader lifetime is modulated from 1 to 0 over this time
-        /// </summary>
-        public float MaterialShaderFadeTime;
-
-        /// <summary>
-        /// If set to non-zero, this will override manual scaling in Sapien and smash it with these values
-        /// </summary>
-        public RealPoint2d DecalScaleOverride;
+        public Bounds<float> DistanceFadeRange;
 
         public List<DecalDefinitionBlock> Decal;
-
         public float RuntimeMaxRadius;
 
         [Flags]
-        public enum FlagsValue : int
+        public enum DecalSystemFlags : uint
         {
-            None = 0,
-            Bit0 = 1 << 0,
-            Bit1 = 1 << 1,
-            Bit2 = 1 << 2,
-            Bit3 = 1 << 3,
-            Bit4 = 1 << 4,
-            Bit5 = 1 << 5,
-            Bit6 = 1 << 6,
-            Bit7 = 1 << 7,
-            Bit8 = 1 << 8,
-            Bit9 = 1 << 9,
-            Bit10 = 1 << 10,
-            Bit11 = 1 << 11,
-            Bit12 = 1 << 12,
-            Bit13 = 1 << 13,
-            Bit14 = 1 << 14,
-            Bit15 = 1 << 15,
-            Bit16 = 1 << 16,
-            Bit17 = 1 << 17,
-            Bit18 = 1 << 18,
-            Bit19 = 1 << 19,
-            Bit20 = 1 << 20,
-            Bit21 = 1 << 21,
-            Bit22 = 1 << 22,
-            Bit23 = 1 << 23,
-            Bit24 = 1 << 24,
-            Bit25 = 1 << 25,
-            Bit26 = 1 << 26,
-            Bit27 = 1 << 27,
-            Bit28 = 1 << 28,
-            Bit29 = 1 << 29,
-            Bit30 = 1 << 30,
-            Bit31 = 1 << 31
+            RandomRotation = 1 << 0,
+            RandomUMirror = 1 << 1,
+            RandomVMirror = 1 << 2,
+            ForceQuaduseWithCare = 1 << 3,
+            ForcePlanar = 1 << 4,
+            RestrictToSingleMaterial = 1 << 5,
+            UsePrimaryCollisionOnly = 1 << 6,
+            DontCollideWithStructure = 1 << 7,
+            DontCollideWithInstances = 1 << 8,
+            DrawsOnlyInVisionMode = 1 << 9,
         }
 
-        [TagStructure(Size = 0x74)]
+        [Flags]
+        public enum DecalSystemFlagsReach : uint
+        {
+            // TODO: conversion
+            RandomRotation = 1 << 0,
+            RandomUMirror = 1 << 1,
+            RandomVMirror = 1 << 2,
+            ForceQuaduseWithCare = 1 << 3,
+            ForcePlanar = 1 << 4,
+            RestrictToSingleMaterial = 1 << 5,
+            UsePrimaryCollisionOnly = 1 << 6,
+            DontCollideWithStructure = 1 << 7,
+            DontCollideWithInstances = 1 << 8,
+            UsingRelativeOverlappingRadius = 1 << 9,
+            RespectsNegativeHorizontalScale = 1 << 10,
+            RespectsNegativeVerticalScale = 1 << 11
+        }
+
+        [TagStructure(Size = 0x74, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x98, MinVersion = CacheVersion.HaloReach)]
         public class DecalDefinitionBlock : TagStructure
 		{
             public StringId DecalName;
-
-            public FlagsValue Flags;
+            public DecalFlags Flags;
 
             public RenderMethod RenderMethod;
 
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public uint SpecularModulate;
+
             [TagField(Format = "World Units")]
             public Bounds<float> Radius;
-
             [TagField(Format = "Seconds")]
             public Bounds<float> DecayTime;
-
             [TagField(Format = "Seconds")]
             public Bounds<float> Lifespan;
 
@@ -103,47 +90,27 @@ namespace TagTool.Tags.Definitions
             [TagField(Format = "Degrees")]
             public float CullAngle;
 
-            public int Unknown2; // more flags?
-
-            public float DepthBias;
+            public DecalPass Pass;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public float RuntimeSpecularMultiplier;
             public float RuntimeBitmapAspect;
 
             [Flags]
-            public enum FlagsValue : int
+            public enum DecalFlags : uint
             {
                 None = 0,
-                Bit0 = 1 << 0,
-                Bit1 = 1 << 1,
-                Bit2 = 1 << 2,
-                Bit3 = 1 << 3,
+                SpecularModulate = 1 << 0,
+                BumpModulate = 1 << 1,
+                RandomSpriteSequence = 1 << 2,
+                AdditiveBlendMode = 1 << 3,
                 Bit4 = 1 << 4,
-                Bit5 = 1 << 5,
-                Bit6 = 1 << 6,
-                Bit7 = 1 << 7,
-                Bit8 = 1 << 8,
-                Bit9 = 1 << 9,
-                Bit10 = 1 << 10,
-                Bit11 = 1 << 11,
-                Bit12 = 1 << 12,
-                Bit13 = 1 << 13,
-                Bit14 = 1 << 14,
-                Bit15 = 1 << 15,
-                Bit16 = 1 << 16,
-                Bit17 = 1 << 17,
-                Bit18 = 1 << 18,
-                Bit19 = 1 << 19,
-                Bit20 = 1 << 20,
-                Bit21 = 1 << 21,
-                Bit22 = 1 << 22,
-                Bit23 = 1 << 23,
-                Bit24 = 1 << 24,
-                Bit25 = 1 << 25,
-                Bit26 = 1 << 26,
-                Bit27 = 1 << 27,
-                Bit28 = 1 << 28,
-                Bit29 = 1 << 29,
-                Bit30 = 1 << 30,
-                Bit31 = 1 << 31
+                Bit5 = 1 << 5
+            }
+
+            public enum DecalPass : uint
+            {
+                PreLighting,
+                PostLighting
             }
         }
     }

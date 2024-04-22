@@ -1,6 +1,7 @@
 using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -8,14 +9,14 @@ namespace TagTool.Tags.Definitions
     public class TextValuePairDefinition : TagStructure
 	{
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-        public ParameterValue_H3 ParameterH3;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public ParameterValue ParameterHO;
+        public GameVariantParametersH3 ParameterH3;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        public GameVariantParameters Parameter;
         public StringId Name;
         public StringId Description;
         public List<TextValuePair> TextValuePairs;
 
-        public enum ParameterValue_H3 : int
+        public enum GameVariantParametersH3 : int
         {
             IntGlobalTeams,
             IntGlobalRoundsReset,
@@ -640,7 +641,7 @@ namespace TagTool.Tags.Definitions
             IntGlobalTraitsTemplateForcedColor,
         }
 
-        public enum ParameterValue : int
+        public enum GameVariantParameters : int
         {
             IntGlobalTeams,
             IntGlobalNewUnknown,
@@ -1270,22 +1271,31 @@ namespace TagTool.Tags.Definitions
             IntGlobalTraitsTemplateForcedColor,
         }
 
-        [TagStructure(Size = 0x14)]
-        public class TextValuePair : TagStructure
+		[TagStructure(Size = 0x14)]
+		public class TextValuePair : TagStructure
 		{
-            public byte Flags;
+            public TextValuePairFlags Flags;
             public ExpectedValueTypeValue ExpectedValueType;
-            public short Unknown;
-            public int IntegerValue;
+
+            [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding0;
+
+            public int EnumeratedValue;
             public StringId StringidValue;
             public StringId Name;
             public StringId Description;
+
+            [Flags]
+            public enum TextValuePairFlags : byte
+            {
+                DefaultSetting = 1 << 0
+            }
 
             public enum ExpectedValueTypeValue : sbyte
             {
                 IntegerIndex,
                 StringidReference,
-                Incremental,
+                RealRange, // formerly "Incremental"
             }
         }
     }

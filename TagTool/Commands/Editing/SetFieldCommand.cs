@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags;
 using TagTool.Cache.HaloOnline;
+using static TagTool.Tags.Definitions.RenderMethod.RenderMethodPostprocessBlock.TextureConstant;
 
 namespace TagTool.Commands.Editing
 {
@@ -39,7 +41,7 @@ namespace TagTool.Commands.Editing
         public override object Execute(List<string> args)
         {
             if (args.Count < 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var fieldName = args[0];
             var fieldNameLow = fieldName.ToLower();
@@ -61,10 +63,8 @@ namespace TagTool.Commands.Editing
 
                 if (command.Execute(new List<string> { blockName }).Equals(false))
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
-                    return false;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
+                    return new TagToolError(CommandError.ArgInvalid, $"TagBlock \"{blockName}\" does not exist in the specified context");
                 }
 
                 command = (ContextStack.Context.GetCommand("EditBlock") as EditBlockCommand);
@@ -74,10 +74,8 @@ namespace TagTool.Commands.Editing
 
                 if (Owner == null)
                 {
-                    while (ContextStack.Context != previousContext) ContextStack.Pop();
-                    Owner = previousOwner;
-                    Structure = previousStructure;
-                    return false;
+                    ContextReturn(previousContext, previousOwner, previousStructure);
+                    return new TagToolError(CommandError.OperationFailed, "Command context owner was null");
                 }
             }
 
@@ -89,11 +87,8 @@ namespace TagTool.Commands.Editing
 
             if (field == null)
             {
-                Console.WriteLine("ERROR: {0} does not contain a field named \"{1}\".", Structure.Types[0].Name, fieldName);
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
-                return false;
+                ContextReturn(previousContext, previousOwner, previousStructure);
+                return new TagToolError(CommandError.ArgInvalid, $"\"{Structure.Types[0].Name}\" does not contain a field named \"{fieldName}\".");
             }
 
             var fieldType = field.FieldType;
@@ -104,10 +99,8 @@ namespace TagTool.Commands.Editing
 
             if (fieldValue != null && fieldValue.Equals(false))
             {
-                while (ContextStack.Context != previousContext) ContextStack.Pop();
-                Owner = previousOwner;
-                Structure = previousStructure;
-                return false;
+                ContextReturn(previousContext, previousOwner, previousStructure);
+                return new TagToolError(CommandError.OperationFailed, $"Field value could not be parsed for type \"{field.FieldType.ToString()}\"");
             }
 
             if (Cache is GameCacheHaloOnlineBase && field.FieldType == typeof(PageableResource))
@@ -202,7 +195,7 @@ namespace TagTool.Commands.Editing
 
                     var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 
-                    valueString = $"[0x{instance.Index:X4}] {tagName}.{Cache.StringTable.GetString(instance.Group.Name)}";
+                    valueString = $"[0x{instance.Index:X4}] {tagName}.{instance.Group}";
                 }
                 else if (fieldType == typeof(TagFunction))
                 {
@@ -216,6 +209,11 @@ namespace TagTool.Commands.Editing
                     var pageable = (PageableResource)fieldValue;
                     pageable.GetLocation(out var location);
                     valueString = pageable == null ? "null" : $"{{ Location: {location}, Index: 0x{pageable.Page.Index:X4}, CompressedSize: 0x{pageable.Page.CompressedBlockSize:X8} }}";
+                }
+                else if (fieldType == typeof(PackedSamplerAddressMode))
+                {
+                    var packedAddressMode = (PackedSamplerAddressMode)fieldValue;
+                    valueString = $"{{ AddressU: {packedAddressMode.AddressU}, AddressV: {packedAddressMode.AddressV} }}";
                 }
                 else if (fieldInfo.FieldType.IsArray && fieldInfo.Attribute.Length != 0)
                 {
@@ -253,9 +251,7 @@ namespace TagTool.Commands.Editing
                     $":: {documentationNode.FirstChild.InnerText.Replace("\r\n", "").TrimStart().TrimEnd()}" :
                     "");
 
-            while (ContextStack.Context != previousContext) ContextStack.Pop();
-            Owner = previousOwner;
-            Structure = previousStructure;
+            ContextReturn(previousContext, previousOwner, previousStructure);
 
             return true;
         }
@@ -354,7 +350,7 @@ namespace TagTool.Commands.Editing
 
                 try
                 {
-                    found = Enum.Parse(type, query);
+                    found = Enum.Parse(type, query, true);
                 }
                 catch
                 {
@@ -450,14 +446,25 @@ namespace TagTool.Commands.Editing
 
                 var blamType = Activator.CreateInstance(type) as IBlamType;
                 if (!blamType.TryParse(cache, args, out blamType, out string error))
-                    Console.WriteLine(error);
+                    new TagToolError(CommandError.CustomError, error);
                 return blamType;
             }
             else if (type == typeof(CachedTag))
             {
-                if (args.Count != 1 || !cache.TryGetCachedTag(args[0], out var tagInstance))
+                if (args.Count != 1 || !cache.TagCache.TryGetCachedTag(args[0], out var tagInstance))
                     return false;
                 output = tagInstance;
+            }
+            else if (type == typeof(PackedSamplerAddressMode))
+            {
+                if (args.Count != 2)
+                    return false;
+
+                if (!Enum.TryParse<SamplerAddressModeEnum>(args[0], out var parsedU)
+                    || !Enum.TryParse<SamplerAddressModeEnum>(args[1], out var parsedV))
+                    return false;
+
+                output = new PackedSamplerAddressMode() { AddressU = parsedU, AddressV = parsedV };
             }
             else if (cache is GameCacheHaloOnlineBase && type == typeof(PageableResource))
             {
@@ -513,10 +520,17 @@ namespace TagTool.Commands.Editing
                             resourceLocation = ResourceLocation.Lightmaps;
                             break;
 
+                        case "mods":
+                            resourceLocation = ResourceLocation.Mods;
+                            break;
+
                         default:
                             throw new FormatException($"Invalid resource location: {args[0]}");
                     }
-                    
+
+                    if (cache is GameCacheModPackage)
+                        resourceLocation = ResourceLocation.Mods;
+
                     var resourceFile = new FileInfo(args[1]);
 
                     if (!resourceFile.Exists)
@@ -576,6 +590,13 @@ namespace TagTool.Commands.Editing
             else if (type == typeof(RealQuaternion))
                 return 4;
             else throw new NotImplementedException();
+        }
+
+        public void ContextReturn(CommandContext previousContext, object previousOwner, TagStructureInfo previousStructure)
+        {
+            while (ContextStack.Context != previousContext) ContextStack.Pop();
+            Owner = previousOwner;
+            Structure = previousStructure;
         }
     }
 }

@@ -3,56 +3,105 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using static TagTool.Tags.Definitions.Gen4.MultiplayerGlobals.MultiplayerUniversalBlock;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "multiplayer_globals", Tag = "mulg", Size = 0x18)]
     public class MultiplayerGlobals : TagStructure
 	{
-        public List<UniversalBlock> Universal;
-        public List<RuntimeBlock> Runtime;
+        public List<MultiplayerUniversalBlock> Universal;
+        public List<MultiplayerRuntimeBlock> Runtime;
 
-        [TagStructure(Size = 0xB4, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0xB4, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0xD0, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0xD8, MaxVersion = CacheVersion.HaloOnline449175)]
-        [TagStructure(Size = 0xD0, MinVersion = CacheVersion.HaloOnline498295)]
-        public class UniversalBlock : TagStructure
-		{
+        [TagStructure(Size = 0xD0, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x5C, MinVersion = CacheVersion.HaloReach)]
+        public class MultiplayerUniversalBlock : TagStructure
+        {
+            [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+            public CachedTag MultiplayerZoneRequiredResources;
+
+            [TagField(ValidTags = new[] { "unic" })]
             public CachedTag RandomPlayerNameStrings;
+            [TagField(ValidTags = new[] { "unic" })]
             public CachedTag TeamNameStrings;
-            public List<TeamColor> TeamColors;
 
-            public List<ArmorCustomizationBlock> ArmorCustomization;
+            [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<MultiplayerColor> TeamColors;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
+            public List<CustomizedModelCharacter> CustomizableCharacters;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline235640)]
+            public List<CustomizedModelCharacter_HO> SpartanArmorCustomization;
+            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline235640)]
+            public List<CustomizedModelCharacter_HO> EliteArmorCustomization;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public List<Consumable> Equipment;
-
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public List<EnergyRegenerationBlock> EnergyRegeneration;
 
-            public CachedTag MultiplayerStrings;
-            public CachedTag SandboxUiStrings;
-            public CachedTag SandboxUiProperties;
+            [TagField(ValidTags = new[] { "unic" })] public CachedTag MultiplayerStrings;
+            [TagField(ValidTags = new[] { "unic" })] public CachedTag SandboxUiStrings;
+            [TagField(ValidTags = new[] { "jmrq" })] public CachedTag SandboxObjectProperties;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<GameVariantWeapon> GameVariantWeapons;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<GameVariantVehicle> GameVariantVehicles;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public List<GameVariantGrenadeBlock> GameVariantGrenades;
+            [TagField(Platform = CachePlatform.MCC, MaxVersion = CacheVersion.Halo3ODST)]
             public List<GameVariantEquipmentBlock> GameVariantEquipment;
-            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTag Unknown2;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
+            public CachedTag UnknownHO;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<WeaponSet> WeaponSets;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
             public List<VehicleSet> VehicleSets;
 
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
             public List<PodiumAnimation> PodiumAnimations;
 
-            public CachedTag EngineSettings;
+            [TagField(ValidTags = new[] { "wezr" }, MaxVersion = CacheVersion.HaloOnline700123)]
+            public CachedTag GameEngineSettings;
 
             [TagStructure(Size = 0xC)]
-            public class TeamColor : TagStructure
+            public class MultiplayerColor : TagStructure
 			{
                 public RealRgbColor Color;
             }
 
+            [TagStructure(Size = 0x14)]
+            public class CustomizedModelCharacter_HO : TagStructure
+            {
+                public StringId ArmorRegion;
+                public StringId BipedRegion;
+
+                public List<Permutation> Permutations;
+
+                [TagStructure(Size = 0x30)]
+                public class Permutation : TagStructure
+                {
+                    public StringId Name;
+                    public CachedTag ThirdPersonArmorObject;
+                    public CachedTag FirstPersonArmorObject;
+
+                    public Int16 Unknown1;
+                    public Int16 Unknown2;
+
+                    public StringId ParentAttachMarker;
+                    public StringId ChildAttachMarker;
+                }
+            }
+
             [TagStructure(Size = 0x10)]
-            public class ArmorCustomizationBlock : TagStructure
+            public class CustomizedModelCharacter : TagStructure
 			{
                 [TagField(Flags = Label)]
                 public StringId CharacterName;
@@ -63,21 +112,27 @@ namespace TagTool.Tags.Definitions
 				{
                     [TagField(Flags = Label)]
                     public StringId Name;
-                    public List<Permuation> Permuations;
+                    public List<Permutation> Permutations;
 
-                    [TagStructure(Size = 0x1C)]
-                    public class Permuation : TagStructure
+                    [TagStructure(Size = 0x1C, Platform = CachePlatform.Original)]
+                    [TagStructure(Size = 0x14, Platform = CachePlatform.MCC)]
+                    public class Permutation : TagStructure
 					{
                         [TagField(Flags = Label)]
                         public StringId Name;
                         public StringId Description;
-                        public FlagsValue Flags;
-                        public short Unknown;
+
+                        [TagField(Platform = CachePlatform.Original)]
+                        public CustomizedModelSelectionFlags Flags;
+                        [TagField(Platform = CachePlatform.Original, Length = 2, Flags = Padding)]
+                        public byte[] Padding0;
+                        [TagField(Platform = CachePlatform.Original)]
                         public StringId AchievementRequirement;
+
                         public List<VariantBlock> Variant;
 
                         [Flags]
-                        public enum FlagsValue : ushort
+                        public enum CustomizedModelSelectionFlags : ushort
                         {
                             None = 0,
                             HasRequirement = 1 << 0,
@@ -114,6 +169,8 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(Flags = Label)]
                 public StringId Name;
+
+                [TagField(ValidTags = new[] { "eqip" })]
                 public CachedTag Object;
                 public short Type;
 
@@ -133,7 +190,8 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(Flags = Label)]
                 public StringId Name;
-                public float RandomChance;
+                public float RandomChance; // [0-1] used only for random weapon set
+                [TagField(ValidTags = new[] { "weap" })]
                 public CachedTag Weapon;
             }
 
@@ -142,15 +200,27 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(Flags = Label)]
                 public StringId Name;
+                [TagField(ValidTags = new[] { "vehi" })]
                 public CachedTag Vehicle;
             }
 
             [TagStructure(Size = 0x14)]
-            public class GameVariantEquipmentBlock : TagStructure
+            public class GameVariantGrenadeBlock : TagStructure
 			{
                 [TagField(Flags = Label)]
                 public StringId Name;
+                [TagField(ValidTags = new[] { "eqip" })]
                 public CachedTag Grenade;
+            }
+
+            [TagStructure(Size = 0x18)]
+            public class GameVariantEquipmentBlock : TagStructure
+            {
+                [TagField(Flags = Label)]
+                public StringId Name;
+                public float RandomChance; // [0-1] used only for random weapon set
+                [TagField(ValidTags = new[] { "eqip" })]
+                public CachedTag Equipment;
             }
 
             [TagStructure(Size = 0x10)]
@@ -195,7 +265,7 @@ namespace TagTool.Tags.Definitions
             [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloOnline498295)]
             public class PodiumAnimation : TagStructure
 			{
-                [TagField(Flags = Label)]
+                [TagField(Flags = Label, ValidTags = new[] { "jmad" })]
                 public CachedTag AnimationGraph;
                 [TagField(MinVersion = CacheVersion.HaloOnline498295)]
                 public CachedTag Unknown;
@@ -204,7 +274,7 @@ namespace TagTool.Tags.Definitions
                 public List<StanceAnimation> StanceAnimations;
                 public List<MoveAnimation> MoveAnimations;
 
-                [TagStructure]
+                [TagStructure(Size = 0x34)]
                 public class StanceAnimation : TagStructure
 				{
                     [TagField(Flags = Label, Length = 32)]
@@ -213,10 +283,11 @@ namespace TagTool.Tags.Definitions
                     public StringId LoopAnimation;
                     public StringId UnarmedTransition;
                     public StringId ArmedTransition;
-                    public float Unknown;
+                    public float CameraDistanceOffset;
                 }
 
-                [TagStructure]
+                [TagStructure(Size = 0x50, MaxVersion = CacheVersion.HaloOnline449175)]
+                [TagStructure(Size = 0x58, MinVersion = CacheVersion.HaloOnline498295)]
                 public class MoveAnimation : TagStructure
 				{
                     [TagField(Flags = Label, Length = 32)]
@@ -224,139 +295,207 @@ namespace TagTool.Tags.Definitions
                     public StringId InAnimation;
                     public StringId LoopAnimation;
                     public StringId OutAnimation;
-                    public int Unknown;
-                    public CachedTag PrimaryWeapon;
-                    public CachedTag SecondaryWeapon;
+                    [TagField(MaxVersion = CacheVersion.HaloOnlineED)]
+                    public float Offset;
+                    [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+                    public WeaponLoadout WeaponLoadout;
+
+                    [TagField(Flags = Label, ValidTags = new[] { "weap" })]
+                    public CachedTag CustomPrimaryWeapon;
+                    [TagField(Flags = Label, ValidTags = new[] { "weap" })]
+                    public CachedTag CustomSecondaryWeapon;
+
+                    [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+                    public float Unknown2;
+                    [TagField(MinVersion = CacheVersion.HaloOnline498295)]
+                    public float Unknown3;
+                }
+
+                public enum WeaponLoadout : int
+                {
+                    Unarmed,
+                    LoadoutPrimary,
+                    LoadoutSecondary,
+                    Custom
                 }
             }
         }
 
-        [TagStructure(Size = 0x20C, MaxVersion = CacheVersion.Halo3Retail)]
-        [TagStructure(Size = 0x2A8, MaxVersion = CacheVersion.HaloOnline449175)]
-        [TagStructure(Size = 0x308, MinVersion = CacheVersion.HaloOnline498295)]
-        public class RuntimeBlock : TagStructure
-		{
-            public CachedTag SandboxEditorUnit;
-            public CachedTag SandboxEditorObject;
-            public CachedTag Flag;
-            public CachedTag Ball;
-            public CachedTag Bomb;
-            public CachedTag VipZone;
-            public CachedTag InGameStrings;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTag Unknown;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTag Unknown2;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTag Unknown3;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTag Unknown4;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTag Unknown5;
+        [TagStructure(Size = 0x27C, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x20C, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagStructure(Size = 0x2A8, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline449175)]
+        [TagStructure(Size = 0x308, MinVersion = CacheVersion.HaloOnline498295, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x1D4, MinVersion = CacheVersion.HaloReach)]
+        public class MultiplayerRuntimeBlock : TagStructure
+        {
+            [TagField(ValidTags = new[] { "unit" })] public CachedTag EditorBiped;
+            [TagField(ValidTags = new[] { "obje" })] public CachedTag EditorHelperObject;
+            [TagField(ValidTags = new[] { "item" })] public CachedTag Flag;
+            [TagField(ValidTags = new[] { "item" })] public CachedTag Ball;
+            [TagField(ValidTags = new[] { "item" })] public CachedTag Bomb;
+            [TagField(ValidTags = new[] { "obje" })] public CachedTag VipInfluenceArea;
+            [TagField(ValidTags = new[] { "unic" })] public CachedTag InGameStrings;
+
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public HORuntimeFxStruct HaloOnlineRuntimeEffects;
+
             public List<Sound> Sounds;
             public List<LoopingSound> LoopingSounds;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public List<EventBlock> UnknownEvents;
-            public List<EventBlock> GeneralEvents;
-            public List<EventBlock> FlavorEvents;
-            public List<EventBlock> SlayerEvents;
-            public List<EventBlock> CtfEvents;
-            public List<EventBlock> OddballEvents;
-            public List<EventBlock> KingOfTheHillEvents;
-            public List<EventBlock> VipEvents;
-            public List<EventBlock> JuggernautEvents;
-            public List<EventBlock> TerritoriesEvents;
-            public List<EventBlock> AssaultEvents;
-            public List<EventBlock> InfectionEvents;
-            public int DefaultFragGrenadeCount;
-            public int DefaultPlasmaGrenadeCount;
+
+            [TagField(MinVersion = CacheVersion.HaloReach, ValidTags = new[] { "mgls" })]
+            public CachedTag MegaloSounds;
+            [TagField(MinVersion = CacheVersion.HaloReach, ValidTags = new[] { "coms" })]
+            public CachedTag CommunicationSounds;
+
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public List<EventBlock> EarnWpEvents;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> GeneralEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> FlavorEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> SlayerEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> CtfEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> OddballEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> KingOfTheHillEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> VipEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> JuggernautEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> TerritoriesEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> AssaultEvents;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)] public List<EventBlock> InfectionEvents;
+
+            public int MaximumFragCount;
+            public int MaximumPlasmaCount;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<RequisitionConstantsReachBlock> RequisitionConstants;
+
             public List<MultiplayerConstant> MultiplayerConstants;
             public List<StateResponse> StateResponses;
-            public CachedTag ScoreboardEmblemBitmap;
-            public CachedTag ScoreboardDeadEmblemBitmap;
-            public CachedTag DefaultShapeShader;
-            public CachedTag Unknown6;
-            public CachedTag CtfIntroUi;
-            public CachedTag SlayerIntroUi;
-            public CachedTag OddballIntroUi;
-            public CachedTag KingOfTheHillIntroUi;
-            public CachedTag SandboxIntroUi;
-            public CachedTag VipIntroUi;
-            public CachedTag JuggernautIntroUi;
-            public CachedTag TerritoriesIntroUi;
-            public CachedTag AssaultIntroUi;
-            public CachedTag InfectionIntroUi;
-            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTag SimulationInterpolation1;
-            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTag SimulationInterpolation2;
-            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTag SimulationInterpolation3;
-            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTag SimulationInterpolation4;
-            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTag SimulationInterpolation5;
-            [TagField(MinVersion = CacheVersion.HaloOnline498295)]
-            public CachedTag Unknown13;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTag MenuMusic1;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTag MenuMusic2;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTag MenuMusic3;
-            [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-            public CachedTag MenuMusic4;
+
+            [TagField(ValidTags = new[] { "bitm" })] public CachedTag ScoreboardEmblemBitmap;
+            [TagField(ValidTags = new[] { "bitm" })] public CachedTag ScoreboardDeadBitmap;
+            [TagField(ValidTags = new[] { "rm  " })] public CachedTag HillShader;
+
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public IntroMessageStruct GameIntroMessages;
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public ReachIntroMessageStruct ReachGameIntroMessages;
+
+            [TagField(MinVersion = CacheVersion.HaloOnline498295, Platform = CachePlatform.Original)]
+            [TagField(Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+            public SimulationInterpolationStruct SimulationInterpolationDefaults;
+
+            [TagField(ValidTags = new[] { "coop" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag CoopSpawningGlobals;
+            [TagField(ValidTags = new[] { "msit" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag MegaloStringIdTable;
+
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public CachedTag MusicFirstPlace;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public CachedTag MusicSecondPlace;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public CachedTag MusicThirdPlace;
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public CachedTag MusicPostMatch;
 
             [TagStructure(Size = 0x10)]
             public class Sound : TagStructure
-			{
-                [TagField(Flags = Label)]
+            {
+                [TagField(ValidTags = new[] { "snd!" }, Flags = Label)]
                 public CachedTag Type;
             }
 
             [TagStructure(Size = 0x10)]
             public class LoopingSound : TagStructure
-			{
-                [TagField(Flags = Label)]
+            {
+                [TagField(ValidTags = new[] { "lsnd" }, Flags = Label)]
                 public CachedTag Type;
             }
 
-			[TagStructure(Size = 0x104, MaxVersion = CacheVersion.Halo3Retail)]
-			[TagStructure(Size = 0x108, MaxVersion = CacheVersion.Halo3ODST)]
-			[TagStructure(Size = 0x10C, MaxVersion = CacheVersion.HaloOnline449175)]
+            [TagStructure(Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC, Size = 0xC0)]
+            [TagStructure(MaxVersion = CacheVersion.HaloOnline700123, Size = 0xB0)]
+            public class IntroMessageStruct : TagStructure
+            {
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Pregame;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Ctf;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Slayer;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Oddball;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag King;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Sandbox;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Vip;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Juggernaut;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Territories;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Assault;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Infection;
+
+                [TagField(ValidTags = new[] { "chdt" }, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+                public CachedTag Survival;
+            }
+
+            [TagStructure(Size = 0x50)]
+            public class ReachIntroMessageStruct : TagStructure
+            {
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Unused;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Sandbox;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Custom;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Campaign;
+                [TagField(ValidTags = new[] { "chdt" })] public CachedTag Survival;
+            }
+
+            [TagStructure(Size = 0x104, MaxVersion = CacheVersion.Halo3Retail)]
+            [TagStructure(Size = 0x108, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x10C, MaxVersion = CacheVersion.HaloOnline449175)]
             [TagStructure(Size = 0x20C, MinVersion = CacheVersion.HaloOnline498295)]
             public class EventBlock : TagStructure
-			{
-                public ushort Flags;
-                public TypeValue Type;
+            {
+                public GameEngineEventFlags Flags;
+                public TypeValue RuntimeEventType;
+
                 [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public EventValue Event_H3;
-                [TagField(Flags = Label, MinVersion = CacheVersion.HaloOnline106708)]
+                public GameEngineGeneralEventH3 Event_H3;
+
+                [TagField(Flags = Label, MinVersion = CacheVersion.Halo3ODST)]
                 public StringId Event;
+
                 [TagField(Length = 256, MinVersion = CacheVersion.HaloOnline498295)]
-                public string Unknown_;
+                public string Unknown1;
+
                 public AudienceValue Audience;
-                public short Unknown;
-                [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-                public short Unknown2_;
-                public TeamValue Team;
-                public short Unknown2;
+                public short DisplayPriority;
+                public short SubPriority;
+                public EventResponseContext DisplayContext;
+
+                [TagField(Length = 2, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.Halo3Retail)]
+                public byte[] Padding0;
+
                 public StringId DisplayString;
-                public StringId DisplayMedal;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public uint Unknown3;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public uint Unknown4;
-                public RequiredFieldValue RequiredField;
-                public RequiredFieldValue ExcludedAudience;
-                public RequiredFieldValue RequiredField2;
-                public RequiredFieldValue ExcludedAudience2;
+                public StringId MedalAward;
+
+                [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+                public short EarnedWp; // earned wp/exp
+                [TagField(Length = 2, Flags = TagFieldFlags.Padding, MinVersion = CacheVersion.HaloOnlineED)]
+                public byte[] Padding1;
+
+                [TagField(MinVersion = CacheVersion.Halo3ODST)]
+                public float SurvivalDisplayTime; // seconds
+
+                public EventInputEnum RequiredField;
+                public EventInputEnum ExcludedAudience;
+                public EventInputEnum SplitscreenSuppression;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding2;
+
                 public StringId PrimaryString;
                 public int PrimaryStringDuration;
                 public StringId PluralDisplayString;
                 public float SoundDelayAnnouncerOnly;
-                public ushort SoundFlags;
-                public short Unknown5;
+                public SoundResponseFlags SoundFlags;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding3;
+
                 public CachedTag EnglishSound;
                 public CachedTag JapaneseSound;
                 public CachedTag GermanSound;
@@ -369,10 +508,14 @@ namespace TagTool.Tags.Definitions
                 public CachedTag ChineseSimplifiedSound;
                 public CachedTag PortugueseSound;
                 public CachedTag PolishSound;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
+                public float Probability;
+                public List<SoundResponseDefinitionBlock> SoundPermutations;
+
+                [Flags]
+                public enum GameEngineEventFlags : ushort
+                {
+                    QuantityMessage = 1 << 0
+                }
 
                 public enum TypeValue : short
                 {
@@ -389,14 +532,14 @@ namespace TagTool.Tags.Definitions
                     Assault,
                     Infection,
                     Survival,
-                    Unknown,
+                    EarnWp, // HO
                 }
 
-                public enum EventValue : short
+                public enum GameEngineGeneralEventH3 : short
                 {
                     Kill,
                     Suicide,
-                    Betrayal,
+                    KillTeammate,
                     Victory,
                     TeamVictory,
                     Unused1,
@@ -429,28 +572,30 @@ namespace TagTool.Tags.Definitions
                     RoundOver,
                     _30SecondsLeft,
                     _10SecondsLeft,
-                    KillFalling,
-                    KillCollision,
-                    KillMelee,
+                    Killfalling,
+                    Killcollision,
+                    Killmelee,
                     SuddenDeath,
                     PlayerBootedPlayer,
-                    KillFlagCarrier,
-                    KillBombCarrier,
-                    KillStickyGrenade,
-                    KillSniper,
-                    KillStandardMelee,
+                    KillflagCarrier,
+                    KillbombCarrier,
+                    KillstickyGrenade,
+                    Killsniper,
+                    KillstMelee,
                     BoardedVehicle,
-                    StartTeamNotice,
+                    StartTeamNoti,
                     Telefrag,
                     _10SecsToWin,
                     Team10SecsToWin,
-                    KillBulltrue,
-                    KillPostMortem,
-                    Highjack,
+                    Bulltrue,
+                    DeathFromTheGrave,
+                    Hijack,
                     Skyjack,
-                    KillLaser,
-                    KillFire,
-                    Wheelman,
+                    KillspartanLaser,
+                    Killflame,
+                    AssisttoDriver,
+                    Assist,
+                    PreGameOver
                 }
 
                 public enum AudienceValue : short
@@ -462,15 +607,17 @@ namespace TagTool.Tags.Definitions
                     All
                 }
 
-                public enum TeamValue : short
+                public enum EventResponseContext : short
                 {
-                    NonePlayerOnly,
-                    Cause,
-                    Effect,
-                    All
+                    Self,
+                    Friendly,
+                    Enemy,
+                    Neutral,
+                    Unknown4, // HO
+                    Unknown5  // HO
                 }
 
-                public enum RequiredFieldValue : short
+                public enum EventInputEnum : short
                 {
                     None,
                     CausePlayer,
@@ -478,179 +625,247 @@ namespace TagTool.Tags.Definitions
                     EffectPlayer,
                     EffectTeam
                 }
+
+                [Flags]
+                public enum SoundResponseFlags : ushort
+                {
+                    AnnouncerSound = 1 << 0
+                }
+
+                [TagStructure(Size = 0xC8)]
+                public class SoundResponseDefinitionBlock : TagStructure
+                {
+                    public GameEngineSoundResponseFlagsDefinition SoundFlags;
+                    [TagField(Length = 2, Flags = TagFieldFlags.Padding)]
+                    public byte[] AGQD;
+                    public CachedTag EnglishSound;
+                    public CachedTag JapaneseSound;
+                    public CachedTag GermanSound;
+                    public CachedTag FrenchSound;
+                    public CachedTag SpanishSound;
+                    public CachedTag MexicanSound;
+                    public CachedTag ItalianSound;
+                    public CachedTag KoreanSound;
+                    public CachedTag ChineseSoundtraditional;
+                    public CachedTag ChineseSoundsimplified;
+                    public CachedTag PortugueseSound;
+                    public CachedTag PolishSound;
+                    public float Probability;
+
+                    [Flags]
+                    public enum GameEngineSoundResponseFlagsDefinition : ushort
+                    {
+                        AnnouncerSound = 1 << 0
+                    }
+                }
             }
 
-            [TagStructure(Size = 0x21C, MaxVersion = CacheVersion.Halo3Retail)]
-            [TagStructure(Size = 0x220, MinVersion = CacheVersion.HaloOnline106708)]
+            [TagStructure(Size = 0x21C, MaxVersion = CacheVersion.Halo3ODST)]
+            [TagStructure(Size = 0x220, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x150, MinVersion = CacheVersion.HaloReach)]
             public class MultiplayerConstant : TagStructure
-			{
-                public float Unknown;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
-                public float Unknown5;
-                public float Unknown6;
-                public float Unknown7;
-                public float Unknown8;
-                public float Unknown9;
-                public float Unknown10;
-                public float Unknown11;
-                public float Unknown12;
-                public float Unknown13;
-                public float Unknown14;
-                public float Unknown15;
-                public float Unknown16;
-                public float Unknown17;
-                public float Unknown18;
-                public float Unknown19;
-                public float Unknown20;
-                public float Unknown21;
-                public float Unknown22;
-                public float Unknown23;
-                public float Unknown24;
-                public float Unknown25;
-                public float Unknown26;
-                public List<Weapon> Weapons;
-                public List<Vehicle> Vehicles;
-                public List<Projectile> Projectiles;
-                public List<EquipmentBlock> Equipment;
-                public float Unknown27;
-                public float Unknown28;
-                public float Unknown29;
-                public float Unknown30;
-                public float Unknown31;
-                public float Unknown32;
-                public float Unknown33;
-                public float Unknown34;
-                public float Unknown35;
-                public float Unknown36;
-                public float Unknown37;
-                public float Unknown38;
-                public float Unknown39;
-                public float Unknown40;
-                public float Unknown41;
-                public float Unknown42;
-                public float Unknown43;
-                public float Unknown44;
-                public float Unknown45;
-                public float Unknown46;
-                public float Unknown47;
-                public float Unknown48;
-                public float Unknown49;
-                public float Unknown50;
-                public float Unknown51;
-                public float Unknown52;
-                public float Unknown53;
-                public float Unknown54;
-                public float Unknown55;
-                public float Unknown56;
-                public float Unknown57;
-                public float Unknown58;
-                public float Unknown59;
-                public float Unknown60;
-                public float Unknown61;
-                public float Unknown62;
-                public float Unknown63;
-                public float Unknown64;
-                public float Unknown65;
-                public float Unknown66;
+            {
+                public SpawnConstantStruct ForbidEnemySpawnConstants;
+                public SpawnConstantStruct EnemySpawnBiasConstants;
+                public SpawnConstantStruct AllySpawnBias;
+                public SpawnConstantStruct SpectatedAllySpawnBias;
+                public SpawnConstantStruct ForbidAllySpawnConstants;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public SpawnConstantStruct DeadTeammateSpawnBias;
+
+                public float DeadTeammateInfluenceDuration; // seconds
+
+                public List<WeaponSpawnInfluence> Weapons;
+                public List<VehicleSpawnInfluence> Vehicles;
+                public List<ProjectileSpawnInfluence> Projectiles;
+                public List<EquipmentSpawnInfluence> Equipment;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public GametypeSpawnConstantStruct GametypeSpawnConstants;
+
                 public float MaximumRandomSpawnBias;
-                public float TeleporterRechargeTime;
-                public float GrenadeDangerWeight;
-                public float GrenadeDangerInnerRadius;
-                public float GrenadeDangerOuterRadius;
-                public float GrenadeDangerLeadTime;
-                public float VehicleDangerMinimumSpeed;
-                public float VehicleDangerWeight;
-                public float VehicleDangerRadius;
-                public float VehicleDangerLeadTime;
-                public float VehicleNearbyPlayerDistance;
-                public CachedTag HillShader;
-                public float Unknown67;
-                public float Unknown68;
-                public float Unknown69;
-                public float Unknown70;
-                public CachedTag BombExplodeEffect;
-                public CachedTag Unknown71;
-                public CachedTag BombExplodeDamageEffect;
-                public CachedTag BombDefuseEffect;
-                public CachedTag CursorImpactEffect;
+                public float TeleporterRechargeTime; // seconds
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public GrenadeDangerStruct GrenadeConstants;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public VehicleConstantStruct VehicleConstants;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public CachedTag HillBitmap;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public FlagConstantStruct FlagConstants;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public float TerritoriesWaypointVerticalOffset;
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public BombEffectStruct AssaultBombEffects;
+
+                public CachedTag ForgeCursorImpactEffect;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public StringId BombDefusalString;
+
                 public StringId BlockedTeleporterString;
-                [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-                public int Unknown72;
-                public StringId Unknown73;
+
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+                public int UnknownHO;
+
+                public StringId VoluntaryRespawnControlInstructions;
                 public StringId SpawnAllowedDefaultRespawnString;
-                public StringId SpawnAtPlayerLookingAtSelfString;
-                public StringId SpawnAtPlayerLookingAtTargetString;
-                public StringId SpawnAtPlayerLookingAtPotentialTargetString;
+                public StringId SpawnAtPlayerAllowedLookingAtSelfString;
+                public StringId SpawnAtPlayerAllowedLookingAtTargetString;
+                public StringId SpawnAtPlayerAllowedLookingAtPotentialTargetString;
                 public StringId SpawnAtTerritoryAllowedLookingAtTargetString;
                 public StringId SpawnAtTerritoryAllowedLookingAtPotentialTargetString;
                 public StringId PlayerOutOfLivesString;
                 public StringId InvalidSpawnTargetString;
-                public StringId TargettedPlayerEnemiesNearbyString;
-                public StringId TargettedPlayerUnfriendlyTeamString;
-                public StringId TargettedPlayerIsDeadString;
-                public StringId TargettedPlayerInCombatString;
-                public StringId TargettedPlayerTooFarFromOwnedFlagString;
+                public StringId TargetedPlayerEnemiesNearbyString;
+                public StringId TargetedPlayerUnfriendlyTeamString;
+                public StringId TargetedPlayerIsDeadString;
+                public StringId TargetedPlayerInCombatString;
+                public StringId TargetedPlayerTooFarFromOwnedFlagString;
                 public StringId NoAvailableNetpointsString;
                 public StringId NetpointContestedString;
 
-                [TagStructure(Size = 0x20)]
-                public class Weapon : TagStructure
-				{
-                    [TagField(Flags = Label)]
-                    public CachedTag Type;
-                    public float Unknown1;
-                    public float Unknown2;
-                    public float Unknown3;
-                    public float Unknown4;
+                [TagStructure(Size = 0x14, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagStructure(Size = 0x20, MinVersion = CacheVersion.HaloReach)]
+                public class SpawnConstantStruct : TagStructure
+                {
+                    public float FullWeightRadius; // (world units)
+                    public float FalloffRadius; // (world units)
+
+                    [TagField(MinVersion = CacheVersion.HaloReach)]
+                    public List<FunctionBlock> FalloffFunction;
+
+                    public float CylinderUpperHeight; // (world units)
+                    public float CylinderLowerHeight; // (world units)
+                    public float Weight;
+
+                    [TagStructure(Size = 0x14)]
+                    public class FunctionBlock : TagStructure
+                    {
+                        public TagFunction Function;
+                    }
                 }
 
                 [TagStructure(Size = 0x20)]
-                public class Vehicle : TagStructure
-				{
-                    [TagField(Flags = Label)]
-                    public CachedTag Type;
-                    public float Unknown1;
-                    public float Unknown2;
-                    public float Unknown3;
-                    public float Unknown4;
+                public class WeaponSpawnInfluence : TagStructure
+                {
+                    [TagField(Flags = Label, ValidTags = new[] { "weap" })]
+                    public CachedTag Weapon;
+                    public float FullWeightRadius; // (world units)
+                    public float FalloffRadius; // (world units)
+                    public float FalloffConeRadius; // (world units)
+                    public float Weight;
+                }
+
+                [TagStructure(Size = 0x20)]
+                public class VehicleSpawnInfluence : TagStructure
+                {
+                    [TagField(Flags = Label, ValidTags = new[] { "vehi" })]
+                    public CachedTag Vehicle;
+                    public float PillRadius; // (world units)
+                    public float LeadTime; // (seconds)
+                    public float MinimumVelocity; // (world units per second)
+                    public float Weight;
                 }
 
                 [TagStructure(Size = 0x1C)]
-                public class Projectile : TagStructure
-				{
-                    [TagField(Flags = Label)]
-                    public CachedTag Type;
-                    public float Unknown;
-                    public float Unknown2;
-                    public float Unknown3;
+                public class ProjectileSpawnInfluence : TagStructure
+                {
+                    [TagField(Flags = Label, ValidTags = new[] { "proj" })]
+                    public CachedTag Projectile;
+                    public float LeadTime; // (seconds)
+                    public float CollisionCylinderRadius; // (world units)
+                    public float Weight;
                 }
 
                 [TagStructure(Size = 0x14)]
-                public class EquipmentBlock : TagStructure
-				{
+                public class EquipmentSpawnInfluence : TagStructure
+                {
                     [TagField(Flags = Label)]
-                    public CachedTag Type;
-                    public float Unknown;
+                    public CachedTag Equipment;
+                    public float Weight;
+                }
+
+                [TagStructure(Size = 0xA0)]
+                public class GametypeSpawnConstantStruct : TagStructure
+                {
+                    public SpawnConstantStruct KingOfTheHill;
+                    public SpawnConstantStruct Oddball;
+                    public SpawnConstantStruct CaptureTheFlag;
+                    public SpawnConstantStruct TeraSpawnConstants;
+                    public SpawnConstantStruct Territories;
+                    public SpawnConstantStruct InfectionHumans;
+                    public SpawnConstantStruct InfectionZombies;
+                    public SpawnConstantStruct Vip;
+                }
+
+                [TagStructure(Size = 0x10)]
+                public class GrenadeDangerStruct : TagStructure
+                {
+                    public float Weight;
+                    public float InnerRadius;
+                    public float OuterRadius;
+                    public float LeadTime; // seconds
+                }
+
+                [TagStructure(Size = 0x14)]
+                public class VehicleConstantStruct : TagStructure
+                {
+                    public float DangerMinimumSpeed; // wu/sec
+                    public float DangerWeight;
+                    public float DangerRadius;
+                    public float DangerLeadTime; // seconds
+                    public float NearbyPlayerDistance; // how nearby a player is to count a vehicle as 'occupied'
+                }
+
+                [TagStructure(Size = 0xC)]
+                public class FlagConstantStruct : TagStructure
+                {
+                    public float ReturnDistance;
+                    public float ContestedInnerRadius;
+                    public float ContestedOuterRadius;
+                }
+
+                [TagStructure(Size = 0x40)]
+                public class BombEffectStruct : TagStructure
+                {
+                    [TagField(ValidTags = new[] { "effe", "jpt!" })] public CachedTag ExplodeEffect;
+                    [TagField(ValidTags = new[] { "effe", "jpt!" })] public CachedTag ExplodeSecondaryEffect;
+                    [TagField(ValidTags = new[] { "effe", "jpt!" })] public CachedTag ExplodeDamageEffect;
+                    [TagField(ValidTags = new[] { "effe", "jpt!" })] public CachedTag DefuseEffect;
                 }
             }
 
             [TagStructure(Size = 0x24)]
             public class StateResponse : TagStructure
 			{
-                public ushort Flags;
-                public short Unknown;
+                public GameEngineStatusFlags Flags;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding0;
+
                 [TagField(Flags = Label)]
-                public StateValue State;
-                public short Unknown2;
+                public GameEngineStatus State;
+
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding1;
+
                 public StringId FreeForAllMessage;
                 public StringId TeamMessage;
-                public CachedTag Unknown3;
-                public uint Unknown4;
+                public CachedTag Unused;
 
-                public enum StateValue : short
+                [TagField(Length = 4, Flags = Padding)]
+                public byte[] Padding2;
+
+                [Flags]
+                public enum GameEngineStatusFlags : ushort
+                {
+                    Unused = 1 << 0
+                }
+
+                public enum GameEngineStatus : short
                 {
                     WaitingForSpaceToClear,
                     Observing,
@@ -680,7 +895,126 @@ namespace TagTool.Tags.Definitions
                     LimitedLivesFinal,
                     PlayingWinningUnlimited,
                     PlayingTiedUnlimited,
-                    PlayingLosingUnlimited
+                    PlayingLosingUnlimited,
+                    StartingSoon
+                }
+            }
+
+            [TagStructure(Size = 0x60)]
+            public class SimulationInterpolationStruct : TagStructure
+            {
+                [TagField(ValidTags = new [] { "siin" })] public CachedTag Biped;
+                [TagField(ValidTags = new [] { "siin" })] public CachedTag Vehicle;
+                [TagField(ValidTags = new [] { "siin" })] public CachedTag Crate;
+                [TagField(ValidTags = new [] { "siin" })] public CachedTag Item;
+                [TagField(ValidTags = new [] { "siin" })] public CachedTag Projectile;
+                [TagField(ValidTags = new [] { "siin" })] public CachedTag Object;
+            }
+
+            [TagStructure(Size = 0x50)]
+            public class HORuntimeFxStruct : TagStructure
+            {
+                [TagField(ValidTags = new[] { "obje" })] public CachedTag ThusIRefuteTheeEffect;
+                [TagField(ValidTags = new[] { "effe" })] public CachedTag AutoFlipEffect;
+                [TagField(ValidTags = new[] { "effe" })] public CachedTag SafetyBoosterEffect;
+                [TagField(ValidTags = new[] { "snd!" })] public CachedTag RespawnBeep;
+                [TagField(ValidTags = new[] { "snd!" })] public CachedTag EarlyRespawnSound;
+            }
+
+
+            [TagStructure(Size = 0x5C)]
+            public class RequisitionConstantsReachBlock : TagStructure
+            {
+                public float FtlBonusFraction; // multiplier to apply to money earned by minions to also give to the fireteam leader
+
+                /* AWARD AMOUNTS */
+                public int Kill;
+                public int Assist;
+                public int FireTeamLeaderKill;
+                public int VehicleKill; // Default, only applies if the vehicle doesn't have a custom award amount in the scenario requisition palette.
+                public int ObjectiveDestroyed; // awarded to entire team
+                public int ObjectiveArmed; // awarded to entire team
+                public int ObjectiveDisarmed; // awarded to entire team
+                public int ObjectiveDefending; // awarded every 3 seconds to any individuals near secondary defensive objectives
+                public int NeutralTerritoryOwned; // awarded every 3 seconds to entire team that owns BFG
+                public int ServedAsReinforcementTarget; // awarded to a reinforcement target when a teammate spawns on him (to encourage cooperation)
+                public int UberassaultGunCaptured; // awarded on gaining ownership of a gun to every member of the new owning team
+                public int UberassaultGunOwned; // awarded every 3 seconds to the entire team that owns this gun.  Money from multiple guns stacks (so if you own all 3, you'll get 3x this money every 3 seconds).
+
+                /* PENALTY AMOUNTS */
+                public int BetrayedATeammate;
+
+                /* FIRE TEAM TIER KILL REQUIREMENTS */
+                public int BronzeKillMinimum;
+                public int SilverKillMinimum;
+                public int GoldKillMinimum;
+
+                /* FIRE TEAM TIER BONUS MULTIPLIERS */
+                public float BronzeMultiplier;
+                public float SilverMultiplier;
+                public float GoldMultiplier;
+
+                /* FIRE TEAM TIER TIME REQUIREMENT */
+                public int BronzeAdvancementTime;
+                public int SilverAdvancementTime;
+                public int GoldAdvancementTime;
+            }
+
+            [TagStructure(Size = 0x24)]
+            public class GameEngineStatusResponseBlock : TagStructure
+            {
+                public GameEngineStatusFlagsDefinition Flags;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] FAW;
+                public GameEngineStatusEnumDefinition State;
+                [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+                public byte[] BNYFIDDGX;
+                public StringId FfaMessage;
+                public StringId TeamMessage;
+                public CachedTag Unused;
+                [TagField(Length = 0x4, Flags = TagFieldFlags.Padding)]
+                public byte[] GTL;
+
+                [Flags]
+                public enum GameEngineStatusFlagsDefinition : ushort
+                {
+                    Unused = 1 << 0
+                }
+
+                public enum GameEngineStatusEnumDefinition : short
+                {
+                    WaitingForSpaceToClear,
+                    Observing,
+                    RespawningSoon,
+                    SittingOut,
+                    OutOfLives,
+                    PlayingWinning,
+                    PlayingTied,
+                    PlayingLosing,
+                    GameOverWon,
+                    GameOverTied,
+                    GameOverLost,
+                    GameOverYouLostButGameTied,
+                    YouHaveFlag,
+                    EnemyHasFlag,
+                    FlagNotHome,
+                    CarryingOddball,
+                    YouAreJuggy,
+                    YouControlHill,
+                    SwitchingSidesSoon,
+                    PlayerRecentlyStarted,
+                    YouHaveBomb,
+                    FlagContested,
+                    BombContested,
+                    LimitedLivesLeftMultiple,
+                    LimitedLivesLeftSingle,
+                    LimitedLivesLeftFinal,
+                    PlayingWinningUnlimited,
+                    PlayingTiedUnlimited,
+                    PlayingLosingUnlimited,
+                    WaitingToSpawn,
+                    WaitingForGameStart,
+                    Blank
                 }
             }
         }

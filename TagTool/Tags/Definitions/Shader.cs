@@ -7,6 +7,7 @@ namespace TagTool.Tags.Definitions
 	[TagStructure(Name = "shader", Tag = "rmsh", Size = 0x4)]
     public class Shader : RenderMethod
     {
+        [TagField(Flags = TagFieldFlags.GlobalMaterial)]
         public StringId Material;
     }
 }

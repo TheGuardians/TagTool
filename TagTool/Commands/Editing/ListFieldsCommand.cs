@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Collections;
 using TagTool.Tags;
-using TagTool.Common;
 using TagTool.Cache;
+using TagTool.Common;
+using TagTool.Commands.Common;
 using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Commands.Editing
@@ -20,9 +21,12 @@ namespace TagTool.Commands.Editing
                   "ListFields",
                   $"Lists the fields in the current {structure.Types[0].Name} definition.",
 
-                  "ListFields",
+                  "ListFields [filters] [!][value]",
 
-                  $"Lists the fields in the current {structure.Types[0].Name} definition.")
+                  $"Lists the fields in the current {structure.Types[0].Name} definition." +
+                  $"\nUse commas to separate filters (ex. accel,bounds,crate)."+
+                  "\n\nIf the value arg is provided, only fields with an equivalent value"
+                  +"\nare printed. Prefix with ! to only print fields that are not equivalent.")
         {
             Cache = cache;
             Structure = structure;
@@ -31,11 +35,12 @@ namespace TagTool.Commands.Editing
 
         public override object Execute(List<string> args)
         {
-            if (args.Count > 1)
-                return false;
+            if (args.Count > 2)
+                return new TagToolError(CommandError.ArgCount);
 
-            var match = (args.Count == 1);
-            var token = match ? args[0].ToLower() : "";
+            var match = (args.Count >= 1);
+            string[] tokens = match ? args[0].ToLower().Split(',') : new string[] { "" };
+            string valueToken = (args.Count == 2) ? args[1] : null;
 
 			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(Structure))
 			{
@@ -44,8 +49,32 @@ namespace TagTool.Commands.Editing
 
 				var nameString = tagFieldInfo.Name;
 
-				if (match && !nameString.ToLower().Contains(token))
-					continue;
+				if (match)
+				{
+					var matchFound = false;
+					foreach (var token in tokens)
+					{
+                        if (nameString.ToLower().Contains(token.Trim()))
+                        {
+                            matchFound = true;
+
+                            if (valueToken != null)
+                            {
+                                var value = tagFieldInfo.GetValue(Value)?.ToString();
+
+                                if (value == null)
+                                    value = "null";
+
+                                if (valueToken.StartsWith("!"))
+                                    matchFound = (value != valueToken.Substring(1));
+                                else
+                                    matchFound = (value == valueToken);
+                            }
+                        }
+                    }
+                    if (!matchFound)
+						continue;
+				}
 
 				var fieldType = tagFieldInfo.FieldType;
 				var fieldValue = tagFieldInfo.GetValue(Value);
@@ -71,7 +100,7 @@ namespace TagTool.Commands.Editing
 
 					var tagName = instance?.Name ?? $"0x{instance.Index:X4}";
 
-					valueString = $"[0x{instance.Index:X4}] {tagName}.{Cache.StringTable.GetString(instance.Group.Name)}";
+					valueString = $"[0x{instance.Index:X4}] {tagName}.{instance.Group}";
 				}
 				else if (fieldType == typeof(TagFunction))
 				{

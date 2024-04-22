@@ -10,55 +10,72 @@ namespace TagTool.Tags.Definitions
     public class CinematicScene : TagStructure
 	{
         public StringId Name;
-
         [TagField(Length = 32)]
         public string AnchorName;
-
-        public uint Unknown1;
-        public byte[] ImportScript1;
-
-        public List<PuppetBlock> Puppets;
+        public SceneResetObjectLightingEnum ResetObjectLighting;
+        [TagField(Length = 2, Flags = Padding)]
+        public byte[] Padd;
+        public byte[] ImportScriptHeader;
+        public List<ObjectBlock> Objects;
         public List<ShotBlock> Shots;
         public List<TextureCameraBlock> TextureCameras;
+        public byte[] ImportScriptFooter;
+        public uint Version;
 
-        public byte[] importScript2;
-        public uint Unknown3;
-        
+        public enum SceneResetObjectLightingEnum : short
+        {
+            Default,
+            DontResetLighting,
+            ResetLighting
+        }
+
         [TagStructure(Size = 0x74)]
-        public class PuppetBlock : TagStructure
+        public class ObjectBlock : TagStructure
 		{
             [TagField(Length = 32)]
             public string ImportName;
 
             [TagField(Flags = Label)]
-            public StringId Name;
-            public StringId Variant;
+            public StringId Identifier;
+            public StringId VariantName;
             public CachedTag PuppetAnimation;
             public CachedTag PuppetObject;
+            public ObjectFlags Flags;
+            public uint ShotsActiveFlags;
+            public CinematicCoopTypeFlags OverrideCreationFlags;
+            public byte[] ImportOverrideCreationScript;
+            public List<AttachmentsBlock> Attachments;
 
-            public short Flags;
-            public short Unknown1;
-            public int Unknown2;
-            public int Unknown3;
+            [Flags]
+            public enum ObjectFlags : uint
+            {
+                None,
+                PlacedManuallyInSapien = 1 << 0,
+                ObjectComesFromGame = 1 << 1,
+                NameIsFunctionCall = 1 << 2,
+                EffectObject = 1 << 3,
+                NoLightmapShadow = 1 << 4,
+                UseMasterChiefPlayerAppearance = 1 << 5,
+                UseDervishArbiterPlayerAppearance = 1 << 6
+            }
 
-            public byte[] ImportScript;
-
-            public List<UnknownBlock> Unknown7;
+            [Flags]
+            public enum CinematicCoopTypeFlags : uint
+            {
+                SinglePlayer = 1 << 0,
+                _2PlayerCoop = 1 << 1,
+                _3PlayerCoop = 1 << 2,
+                _4PlayerCoop = 1 << 3
+            }
 
             [TagStructure(Size = 0x38)]
-            public class UnknownBlock : TagStructure
+            public class AttachmentsBlock : TagStructure
 			{
-                public uint Unknown1;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
-                public uint Unknown9;
-                public uint Unknown10;
-                public CachedTag Unknown11;
+                public StringId ObjectMarkerName;
+                [TagField(Length = 32)]
+                public string AttachmentObjectName;
+                public StringId AttachmentMarkerName;
+                public CachedTag AttachmentType;
             }
         }
 
@@ -66,14 +83,14 @@ namespace TagTool.Tags.Definitions
         [TagStructure(Size = 0xBC, MinVersion = CacheVersion.Halo3ODST)]
         public class ShotBlock : TagStructure
 		{
-            public byte[] OpeningImportScripts;
-            public int Unknown1;
-            public uint Unknown2;
-            public float Unknown3;
+            public byte[] ImportScriptHeader;
+            public ShotFlags Flags;
+            public float EnvironmentDarken;
+            public float ForcedExposure;
             public List<LightingBlock> Lighting;
-            public List<UnknownBlock> Unknown4;
-            public List<SoundBlock> Sounds;
-            public List<BackgroundSoundBlock> BackgroundSounds;
+            public List<ClipBlock> Clips;
+            public List<DialogueBlock> Dialogue;
+            public List<MusicBlock> Music;
             public List<EffectBlock> Effects;
             public List<FunctionBlock> Functions;
 
@@ -83,69 +100,90 @@ namespace TagTool.Tags.Definitions
             public List<CortanaEffectBlock> CortanaEffects;
             public List<ImportScriptBlock> ImportScripts;
 
-            //Might be an extra unused block
             [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown5;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown6;
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
-            public uint Unknown7;
+            public List<UserInputConstraintsBlock> UserInputConstraints;
 
-            public byte[] ImportScript1;
-            public int LoadedFrameCount;
-            public List<FrameBlock> Frames;
+            public byte[] ImportScriptFooter;
+            public int FrameCount;
+            public List<CameraFrame> CameraFrames;
+
+            [Flags]
+            public enum ShotFlags : int
+            {
+                None = 0,
+                InstantAutoExposure = 1 << 0,
+                ForceExposure = 1 << 1,
+                GenerateLoopingScript = 1 << 2
+            }
 
             [TagStructure(Size = 0x18, MaxVersion = CacheVersion.Halo3Retail)]
             [TagStructure(Size = 0x1C, MinVersion = CacheVersion.Halo3ODST)]
             public class LightingBlock : TagStructure
 			{
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
-                public uint Unknown;
+                public LightingFlags Flags;
+                [Flags]
+                public enum LightingFlags : int
+                {
+                    None = 0,
+                    PersistsAcrossShots = 1 << 0
+                }
 
                 [TagField(Flags = Label)]
                 public CachedTag CinematicLight;
-                public int OwnerPuppetIndex;
+                public int ObjectIndex;
                 public StringId Marker;
             }
 
+            [TagStructure(Size = 0x14)]
+            public class UserInputConstraintsBlock : TagStructure
+            {
+                public int Frame;
+                public int Ticks;
+                public Rectangle2d MaximumLookAngles;
+                public float FrictionalForce;
+            }
+
             [TagStructure(Size = 0x2C)]
-            public class UnknownBlock : TagStructure
+            public class ClipBlock : TagStructure
 			{
-                public uint Unknown1;
-                public uint Unknown2;
-                public uint Unknown3;
-                public uint Unknown4;
-                public uint Unknown5;
-                public uint Unknown6;
-                public uint Unknown7;
-                public uint Unknown8;
+                public RealPoint3d PlaneCenter;
+                public RealPoint3d PlaneDirection;
+                public uint FrameStart;
+                public uint FrameEnd;
 
-                public List<UnknownBlock2> Unknown9;
+                public List<ClipObject> Objects;
 
-                [TagStructure(Size =0x4)]
-                public class UnknownBlock2 : TagStructure
+                [TagStructure(Size = 0x4)]
+                public class ClipObject : TagStructure
 				{
-                    public uint Unknown;
+                    public uint ObjectIndex;
                 }
-
             }
 
             [TagStructure(Size = 0x24)]
-            public class SoundBlock : TagStructure
+            public class DialogueBlock : TagStructure
 			{
                 [TagField(Flags = Label)]
                 public CachedTag Sound;
                 public int Frame;
-                public float Unknown1;
-                public StringId Unknown2;
-                public uint Unknown3;
-                public StringId Unknown4;
+                public float Scale;
+                public StringId LipsyncActor;
+                public StringId DefaultSoundEffect;
+                public StringId Subtitle;
             }
 
             [TagStructure(Size = 0x18)]
-            public class BackgroundSoundBlock : TagStructure
+            public class MusicBlock : TagStructure
 			{
-                public uint Unknown1;
+                public MusicFlags Flags;
+                [Flags]
+                public enum MusicFlags : int
+                {
+                    None = 0,
+                    StopMusicAtFrameRatherThanStartingIt = 1 << 0
+                }
+
                 [TagField(Flags = Label)]
                 public CachedTag Sound;
                 public int Frame;
@@ -158,24 +196,31 @@ namespace TagTool.Tags.Definitions
                 public CachedTag Effect;
                 public int Frame;
                 public StringId Marker;
-                public int OwnerPuppetIndex;
+                public int MarkerParent;
             }
 
             [TagStructure(Size = 0x14)]
             public class FunctionBlock : TagStructure
 			{
-                public int OwnerPuppetIndex;
+                public int ObjectIndex;
                 [TagField(Flags = Label)]
                 public StringId TargetFunctionName;
-                public List<UnknownBlock2> Unknown;
+                public List<KeyFrame> KeyFrames;
 
                 [TagStructure(Size = 0x10)]
-                public class UnknownBlock2 : TagStructure
+                public class KeyFrame : TagStructure
 				{
-                    public uint Unknown1;
-                    public int Unknown2;
-                    public float Unknown3;
-                    public float Unknown4;
+                    public KeyFrameFlags Flags;
+                    [Flags]
+                    public enum KeyFrameFlags : int
+                    {
+                        None = 0,
+                        ClearFunction = 1 << 0
+                    }
+
+                    public int Frame;
+                    public float Value;
+                    public float InterpolationTime;
                 }
             }
 
@@ -183,17 +228,17 @@ namespace TagTool.Tags.Definitions
             public class ScreenEffectBlock : TagStructure
 			{
                 [TagField(Flags = Label)]
-                public CachedTag Effect;
+                public CachedTag ScreenEffect;
                 public int StartFrame;
-                public int EndFrame;
+                public int StopFrame;
             }
 
             [TagStructure(Size = 0x14)]
             public class CortanaEffectBlock : TagStructure
 			{
                 [TagField(Flags = Label)]
-                public CachedTag Effect;
-                public uint Unknown;
+                public CachedTag CortanaEffect;
+                public uint Frame;
             }
 
             [TagStructure(Size = 0x18)]
@@ -202,36 +247,6 @@ namespace TagTool.Tags.Definitions
                 public int Frame;
                 public byte[] ImportScript;
             }
-
-            [TagStructure(Size = 0x44)]
-            public class FrameBlock : TagStructure
-			{
-                public RealPoint3d Position;
-                public float Unknown1;
-                public float Unknown2;
-                public float Unknown3;
-                public float Unknown4;
-                public float Unknown5;
-                public float Unknown6;
-                public float Unknown7;
-                public float Unknown8;
-                public float FOV;
-
-                //Depth of field options
-
-                public FlagBits Flags;
-                public float NearPlane;
-                public float FarPlane;
-                public float FocalDepth;
-                public float BlurAmount;
-
-                [Flags]
-                public enum FlagBits : int
-                {
-                    None,
-                    EnableDepthOfField = 1 << 0
-                }
-            }
         }
 
         [TagStructure(Size = 0x14)]
@@ -239,7 +254,7 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Flags = Label)]
             public StringId Name;
-            public StringId Unknown;
+            public StringId Type;
             public List<CameraShotBlock> Shots;
 
             [TagStructure(Size = 0xC)]
@@ -249,27 +264,39 @@ namespace TagTool.Tags.Definitions
 
                 [TagStructure(Size = 0x48)]
                 public class FrameBlock : TagStructure
-				{
-                    public uint UnknownIndex;
-                    public RealPoint3d Position;
-                    public float Unknown1;
-                    public float Unknown2;
-                    public float Unknown3;
-                    public float Unknown4;
-                    public float Unknown5;
-                    public float Unknown6;
-                    public float Unknown7;
-                    public float Unknown8;
-                    public float FOV;
+                {
+                    public CinematicExtraCameraFrameFlags Flags;
+                    public CameraFrame CameraFrame;
 
-                    //Depth of field options
-
-                    public int Flags;
-                    public float NearPlane;
-                    public float FarPlane;
-                    public float FocalDepth;
-                    public float BlurAmount;
+                    [Flags]
+                    public enum CinematicExtraCameraFrameFlags : uint
+                    {
+                        Enabled = 1 << 0
+                    }
                 }
+            }
+        }
+
+        [TagStructure(Size = 0x44)]
+        public class CameraFrame : TagStructure
+        {
+            public RealPoint3d CameraPosition;
+            public RealVector3d CameraForward;
+            public RealVector3d CameraUp;
+            public float HorizontalFieldOfView;
+            public float HorizontalFilmAperture;
+            public float FocalLength;
+            public FlagBits Flags;
+            public float NearFocalPlaneDistance;
+            public float FarFocalPlaneDistance;
+            public float FocalDepth;
+            public float BlurAmount;
+
+            [Flags]
+            public enum FlagBits : int
+            {
+                None,
+                EnableDepthOfField = 1 << 0
             }
         }
     }

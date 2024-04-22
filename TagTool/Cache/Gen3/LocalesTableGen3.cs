@@ -23,11 +23,11 @@ namespace TagTool.Cache.Gen3
                 case CacheVersion.Halo3ODST:
                     localesKey = "";
                     break;
-                case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach when baseMapFile.CachePlatform == CachePlatform.Original:
                     localesKey = "BungieHaloReach!";
                     break;
             }
-            var sectionTable = baseMapFile.Header.SectionTable;
+            var sectionTable = ((CacheFileHeaderGen3)baseMapFile.Header).SectionTable;
 
             if (sectionTable.Sections[(int)CacheFileSectionType.LocalizationSection].Size == 0)
                 return new List<LocaleTable>();
@@ -37,7 +37,13 @@ namespace TagTool.Cache.Gen3
                 LocaleTable table = new LocaleTable();
                 var languageIndex = (int)language;
 
-                var localeBlock = matg.LocaleGlobals[languageIndex];
+                var localeBlock = matg.LanguagePacks[languageIndex];
+
+                if (baseMapFile.CachePlatform == CachePlatform.MCC && baseMapFile.Version <= CacheVersion.Halo3ODST)
+                    localeBlock = matg.LanguagePacksMCC[languageIndex];
+
+                if (baseMapFile.CachePlatform == CachePlatform.MCC && baseMapFile.Version >= CacheVersion.HaloReach)
+                    localeBlock = matg.LanguagePacksReachMCC[languageIndex];
 
                 if (localeBlock.StringCount == 0)
                     continue;

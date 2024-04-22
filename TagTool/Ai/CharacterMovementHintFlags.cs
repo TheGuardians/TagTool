@@ -3,7 +3,7 @@ using System;
 namespace TagTool.Ai
 {
     [Flags]
-    public enum CharacterMovementHintFlags : int
+    public enum CharacterMovementHintFlags : uint
     {
         None = 0,
         VaultStep = 1 << 0,

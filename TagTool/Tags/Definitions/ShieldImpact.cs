@@ -6,7 +6,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "shield_impact", Tag = "shit", Size = 0xA4, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "shield_impact", Tag = "shit", Size = 0xB0, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "shield_impact", Tag = "shit", Size = 0x1E4, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "shield_impact", Tag = "shit", Size = 0x1E4, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Name = "shield_impact", Tag = "shit", Size = 0x1E0, MinVersion = CacheVersion.HaloReach)]
     public class ShieldImpact : TagStructure
 	{
@@ -18,29 +18,52 @@ namespace TagTool.Tags.Definitions
         [TagField(MaxVersion = CacheVersion.Halo3ODST)]
         public H3ValuesBlock H3Values;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public ShieldIntensityBlock ShieldIntensity;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public ShieldEdgeBlock ShieldEdge;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public PlasmaBlock Plasma;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public ExtrusionOscillationBlock ExtrusionOscillation;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public HitResponseBlock HitResponse;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public RealQuaternion EdgeScales;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public RealQuaternion EdgeOffsets;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public RealQuaternion PlasmaScales;
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
-        public RealQuaternion DepthFadeParameters;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        public RealQuaternion EdgeScales; // outer scale, inner scale, plasmaedge outer scale, plasmaedge inner scale
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        public RealQuaternion EdgeOffsets; // outer offset, inner offset, plasmaedge outer offset, plasmaedge inner offset
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        public RealQuaternion PlasmaScales; // U scale, V scale, plasmanoise power scale, plasmanoise power offset
+        [TagField(MinVersion = CacheVersion.HaloOnlineED)]
+        public RealQuaternion DepthFadeParameters; // edge depth fade, plasma depth fade, unused, unused
+
+        public void UpdateParameters()
+        {
+            float edgeOuterFade = ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius;
+            float edgeInnerFade = ShieldEdge.CenterRadius - ShieldEdge.OuterFadeRadius;
+            float plasmaOuterFade = Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius;
+            float plasmaInnerFade = Plasma.PlasmaCenterRadius - Plasma.PlasmaOuterFadeRadius;
+
+            float outerScale = RealMath.SafeRcp(edgeOuterFade);
+            float innerScale = RealMath.SafeRcp(edgeInnerFade);
+            float plasmaOuterScale = RealMath.SafeRcp(plasmaOuterFade);
+            float plasmaInnerScale = RealMath.SafeRcp(plasmaInnerFade);
+
+            float outerOffset = -RealMath.SafeRcp(RealMath.SafeDiv(edgeOuterFade, ShieldEdge.OuterFadeRadius));
+            float innerOffset = -RealMath.SafeRcp(RealMath.SafeDiv(edgeInnerFade, ShieldEdge.InnerFadeRadius));
+            float plasmaOuterOffset = -RealMath.SafeRcp(RealMath.SafeDiv(plasmaOuterFade, Plasma.PlasmaOuterFadeRadius));
+            float plasmaInnerOffset = -RealMath.SafeRcp(RealMath.SafeDiv(plasmaInnerFade, Plasma.PlasmaInnerFadeRadius));
+
+            EdgeScales = new RealQuaternion(outerScale, innerScale, plasmaOuterScale, plasmaInnerScale);
+            EdgeOffsets = new RealQuaternion(outerOffset, innerOffset, plasmaOuterOffset, plasmaInnerOffset);
+            PlasmaScales = new RealQuaternion(Plasma.TilingScale, Plasma.TilingScale, -(Plasma.CenterSharpness - Plasma.EdgeSharpness), Plasma.CenterSharpness);
+            DepthFadeParameters = new RealQuaternion(RealMath.SafeRcp(ShieldEdge.DepthFadeRange), RealMath.SafeRcp(Plasma.PlasmaDepthFadeRange));
+        }
 
         /// <summary>
         /// Shield intensity is a combination of recent damage and current damage.
@@ -61,12 +84,12 @@ namespace TagTool.Tags.Definitions
         /// Radius 0.0 corresponds to the area of the surface directly facing the camera(the center).
         /// You can control separately the inner and outer fades.
         /// </summary>
-        [TagStructure(Size = 0x4C, MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x4C, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         [TagStructure(Size = 0x48, MinVersion = CacheVersion.HaloReach)]
         public class ShieldEdgeBlock : TagStructure
-		{
-            [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
-            public float OneIfOvershield;
+        {
+            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+            public float OvershieldScale;
             public float DepthFadeRange;            //In world units
             public float OuterFadeRadius;           //Within [0,1]
             public float CenterRadius;              //Within [0,1]
@@ -82,9 +105,9 @@ namespace TagTool.Tags.Definitions
         /// Scroll speed controls how fast the textures scroll on the surface.
         /// You can specify separate sharpness values for the edge and the center.
         /// </summary>
-        [TagStructure(Size = 0xB0, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagStructure(Size = 0xB0, MinVersion = CacheVersion.HaloOnlineED)]
         public class PlasmaBlock : TagStructure
-		{
+        {
             public float PlasmaDepthFadeRange;      //In world units
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTag PlasmaNoiseBitmap1;
@@ -102,42 +125,41 @@ namespace TagTool.Tags.Definitions
             public ShieldImpactFunction PlasmaEdgeColor;
             public ShieldImpactFunction PlasmaEdgeIntensity;
         }
-        //
-        // Values for H3/ODST.  Needs more reversing
-        //
-        [TagStructure(Size = 0x6C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-        [TagStructure(Size = 0x64, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3Retail)]
+
+        [TagStructure(Size = 0xA4, MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0xAC, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
         public class H3ValuesBlock : TagStructure
-		{
-            public CachedTag Bitmap1;
-            public CachedTag Bitmap2;
+        {
+            public CachedTag ShieldImpactNoiseTexture1;
+            public CachedTag ShieldImpactNoiseTexture2;
+            public float ExtrusionDistance;
 
-            public float Unknown1;
-            public float Unknown2;
-
+            [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+            public float TextureScale;
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
-            public float Unknown3;
+            public RealVector2d TextureScaleUV;
 
-            public float Unknown4;
-            public float Unknown5;
-            public float Unknown6;
-            public float Unknown7;
-            public float Unknown8;
-            public float Unknown9;
-            public float Unknown10;
-
-            public RealRgbColor Color1;
-            public float Magnitude1;
-            public RealRgbColor Color2;
-            public float Magnitude2;
-            public RealRgbColor Color3;
-            public float Magnitude3;
-            public RealRgbColor Color4;
-            public float Magnitude4;
-            public RealRgbColor Color5;
-            public float Magnitude5;
-            public RealRgbColor Color6;
-            public float Magnitude6;
+            public float ScrollSpeed;
+            public float PlasmaSharpness1;
+            public float PlasmaScale1;
+            public float PlasmaThreshold1;
+            public float PlasmaSharpness2;
+            public float PlasmaScale2;
+            public float PlasmaThreshold2;
+            public RealRgbColor OvershieldColor1;
+            public float OvershieldIntensity1;
+            public RealRgbColor OvershieldColor2;
+            public float OvershieldIntensity2;
+            public RealRgbColor OvershieldAmbientColor;
+            public float OvershieldAmbientIntensity;
+            public RealRgbColor ImpactColor1;
+            public float ImpactIntensity1;
+            public RealRgbColor ImpactColor2;
+            public float ImpactIntensity2;
+            public RealRgbColor ImpactAmbientColor;
+            public float ImpactAmbientIntensity;
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST)]
+            public float AlphaBlackOffset;
         }
 
         /// <summary>
@@ -149,7 +171,7 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         [TagStructure(Size = 0x60)]
         public class ExtrusionOscillationBlock : TagStructure
-		{
+        {
             [TagField(ValidTags = new[] { "bitm" })]
             public CachedTag OscillationBitmap1;
             [TagField(ValidTags = new[] { "bitm" })]
@@ -171,13 +193,10 @@ namespace TagTool.Tags.Definitions
 
         [TagStructure(Size = 0x3C)]
         public class HitResponseBlock : TagStructure
-		{
-            /// <summary>
-            /// The hit time of the hit response in seconds.
-            /// </summary>
-            public float HitTime;
+        {
+            public float HitTime; // (seconds) time of the hit response
             public ShieldImpactFunction HitColor;
-	        public ShieldImpactFunction HitIntensity;
+            public ShieldImpactFunction HitIntensity;
         }
         
     }
@@ -195,16 +214,14 @@ namespace TagTool.Tags.Definitions
         DontRenderAsEffect = 1 << 3 // HO only
     }
 
-    /// <summary>
-    /// You can use the following variables as inputs to the functions here, in addition to any object variables:
-    /// {shield_vitality (percentage of shield remaining),
-    /// shield_intensity (mixture of recent and current damage),
-    /// current_shield_damage,
-    /// recent_shield_damage}
-    /// </summary>
+    // The following variables can be inputs to the functions, in addition to any object variables:
+    // shield_vitality (percentage of shield remaining)
+    // shield_intensity (mixture of recent and current damage)
+    // current_shield_damage
+    // recent_shield_damage
     [TagStructure(Size = 0x1C)]
     public class ShieldImpactFunction : TagStructure
-	{
+    {
         public StringId InputVariable;
         public StringId RangeVariable;
         public TagFunction Function = new TagFunction { Data = new byte[0] };

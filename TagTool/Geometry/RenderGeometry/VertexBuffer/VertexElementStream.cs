@@ -275,6 +275,44 @@ namespace TagTool.Geometry
             Writer.Write((x << 22) | (y << 12) | (z << 2));
         }
 
+        public RealQuaternion ReadUDec4()
+        {
+            var val = Reader.ReadUInt32();
+            var x = (float)((val >> 0) & 0x3FF);
+            var y = (float)((val >> 10) & 0x3FF);
+            var z = (float)((val >> 20) & 0x3FF);
+            var w = (float)((val >> 30) & 0x3);
+            return new RealQuaternion(x, y, z, w);
+        }
+
+        public void WriteUDec4(RealQuaternion v)
+        {
+            var x = (uint)v.I & 0x3FF;
+            var y = (uint)v.J & 0x3FF;
+            var z = (uint)v.K & 0x3FF;
+            var w = (uint)v.W & 0x3;
+            Writer.Write((w << 30) | (z << 20) | (y << 10) | x);
+        }
+
+        public RealQuaternion ReadUDec4N()
+        {
+            var val = Reader.ReadUInt32();
+            var x = DenormalizeUnsigned10BitInt((ushort)((val >> 0) & 0x3FF));
+            var y = DenormalizeUnsigned10BitInt((ushort)((val >> 10) & 0x3FF));
+            var z = DenormalizeUnsigned10BitInt((ushort)((val >> 20) & 0x3FF));
+            var w = DenormalizeUnsigned3BitInt((byte)((val >> 30) & 0x3));
+            return new RealQuaternion(x, y, z, w);
+        }
+
+        public void WriteUDec4N(RealQuaternion v)
+        {
+            var x = NormalizeUnsigned10BitInt(v.I);
+            var y = NormalizeUnsigned10BitInt(v.J);
+            var z = NormalizeUnsigned10BitInt(v.K);
+            var w = NormalizeUnsigned3BitInt(v.W);
+            Writer.Write( (w << 30 ) | (z << 20) | (y << 10) | (x << 0));
+        }
+
         public RealVector3d ReadDec3N()
         {
             var val = Reader.ReadUInt32();
@@ -284,12 +322,22 @@ namespace TagTool.Geometry
             return new RealVector3d(x, y, z);
         }
 
+        public RealQuaternion ReadDec4N()
+        {
+            var val = Reader.ReadUInt32();
+            var x = DenormalizeSigned10BitInt((ushort)((val >> 0) & 0x3FF));
+            var y = DenormalizeSigned10BitInt((ushort)((val >> 10) & 0x3FF));
+            var z = DenormalizeSigned10BitInt((ushort)((val >> 20) & 0x3FF));
+            var w = DenormalizeUnsigned3BitInt((byte)((val >> 30) & 0x3));
+            return new RealQuaternion(x, y, z, w);
+        }
+
         public void WriteDec3N(RealVector3d v)
         {
             var x = NormalizeSigned10BitInt(v.I);
             var y = NormalizeSigned10BitInt(v.J);
             var z = NormalizeSigned10BitInt(v.K);
-            Writer.Write((x << 22) | (y << 12) | (z << 2));
+            Writer.Write((z << 20) | (y << 10) | (x << 0));
         }
 
         public RealVector3d ReadDHen3N()
@@ -310,6 +358,17 @@ namespace TagTool.Geometry
             var x = (DHenN3 & 0x3FF);
             var y = ((DHenN3 >> 10) & 0x7FF);
             var z = ((DHenN3 >> 21) & 0x7FF);
+            return new RealVector3d(x, y, z);
+        }
+
+        public RealVector3d ReadUHenD3N()
+        {
+            var val = Reader.ReadUInt32();
+
+            var x = (val & 0x7ff) / 2047.0f;
+            var y = ((val >> 11) & 0x7ff) / 2047.0f;
+            var z = ((val >> 22) & 0x3ff) / 1023.0f;
+
             return new RealVector3d(x, y, z);
         }
 
@@ -529,6 +588,16 @@ namespace TagTool.Geometry
             return value / 1023.0f;
         }
 
+        /// <summary>
+        /// Convert a 3 bit int into an unsigned floating point number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static float DenormalizeUnsigned3BitInt(byte value)
+        {
+            return value / 3.0f;
+        }
+
         /// <summary> 
         /// Convert a float to a 10 bit unsigned integer
         /// 0x200 is never returned by convention
@@ -556,6 +625,18 @@ namespace TagTool.Geometry
             uint result = (uint)(Clamp(value, 0.0f, 1.0f)*1023.0f);
             return (result & 0x3FF);
         }
+
+        /// <summary>
+        /// Convert a float to a 3 bit unsigned integer
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static uint NormalizeUnsigned3BitInt(float value)
+        {
+            uint result = (uint)(Clamp(value, 0.0f, 1.0f) * 3.0f);
+            return (result & 0x3);
+        }
+
 
         internal void SeekTo(int offset, SeekOrigin origin)
         {

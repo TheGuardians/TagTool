@@ -13,13 +13,13 @@ namespace TagTool.Geometry
 {
     public static class IndexBufferConverter
     {
-        public static void ConvertIndexBuffer(CacheVersion inVersion, CacheVersion outVersion, IndexBufferDefinition indexBuffer)
+        public static void ConvertIndexBuffer(CacheVersion inVersion, CachePlatform inPlatform, CacheVersion outVersion, CachePlatform outPlatform, IndexBufferDefinition indexBuffer)
         {
             using (var outputStream = new MemoryStream())
             using (var inputStream = new MemoryStream(indexBuffer.Data.Data))
             {
-                var inIndexStream = new IndexBufferStream(inputStream, CacheVersionDetection.IsLittleEndian(inVersion) ? EndianFormat.LittleEndian : EndianFormat.BigEndian);
-                var outIndexStream = new IndexBufferStream(outputStream, CacheVersionDetection.IsLittleEndian(outVersion) ? EndianFormat.LittleEndian : EndianFormat.BigEndian);
+                var inIndexStream = new IndexBufferStream(inputStream, CacheVersionDetection.IsLittleEndian(inVersion, inPlatform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian);
+                var outIndexStream = new IndexBufferStream(outputStream, CacheVersionDetection.IsLittleEndian(outVersion, outPlatform) ? EndianFormat.LittleEndian : EndianFormat.BigEndian);
                 var indexCount = indexBuffer.Data.Data.Length / 2;
                 for (var j = 0; j < indexCount; j++)
                     outIndexStream.WriteIndex(inIndexStream.ReadIndex());

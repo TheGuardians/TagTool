@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Geometry;
 using TagTool.Tags.Definitions;
 
@@ -30,17 +31,17 @@ namespace TagTool.Commands.ScenarioLightmaps
         public override object Execute(List<string> args)
         {
             if (args.Count != 2)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var fileType = args[0];
             var fileName = args[1];
 
             if (fileType != "obj")
-                throw new NotSupportedException(fileType);
+                return new TagToolError(CommandError.FileType);
 
             if (Definition.Geometry.Resource == null)
             {
-                Console.WriteLine("ERROR: Render geometry does not have a resource associated with it.");
+                Console.WriteLine("Render geometry does not have a resource associated with it.");
                 return true;
             }
 
@@ -49,7 +50,7 @@ namespace TagTool.Commands.ScenarioLightmaps
             //
 
             var definition = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
-            Definition.Geometry.SetResourceBuffers(definition);
+            Definition.Geometry.SetResourceBuffers(definition, false);
 
             using (var resourceStream = new MemoryStream())
             {
@@ -63,13 +64,13 @@ namespace TagTool.Commands.ScenarioLightmaps
 
                 using (var objFile = new StreamWriter(file.Create()))
                 {
-                    var objExtractor = new ObjExtractor(objFile);
+                    var objExtractor = new ObjExtractor(Cache, objFile);
 
                     foreach (var mesh in Definition.Geometry.Meshes)
                     {
                         var vertexCompressor = new VertexCompressor(Definition.Geometry.Compression[0]);
-                        var meshReader = new MeshReader(Cache.Version, mesh);
-                        objExtractor.ExtractMesh(meshReader, vertexCompressor);
+                        var meshReader = new MeshReader(Cache, mesh);
+                        objExtractor.ExtractMesh(meshReader, vertexCompressor, null);
                     }
 
                     objExtractor.Finish();

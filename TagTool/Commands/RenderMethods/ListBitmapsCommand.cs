@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 
 namespace TagTool.Commands.RenderMethods
@@ -29,7 +30,7 @@ namespace TagTool.Commands.RenderMethods
         public override object Execute(List<string> args)
         {
             if (args.Count != 0)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             foreach (var property in Definition.ShaderProperties)
             {
@@ -41,8 +42,11 @@ namespace TagTool.Commands.RenderMethods
                 for (var i = 0; i < template.TextureParameterNames.Count; i++)
                 {
                     var mapTemplate = template.TextureParameterNames[i];
+                    string bitmName = property.TextureConstants[i].Bitmap?.ToString();
+                    if (bitmName == null)
+                        bitmName = "NULL";
 
-                    Console.WriteLine($"Bitmap {i} ({Cache.StringTable.GetString(mapTemplate.Name)}): {property.TextureConstants[i].Bitmap.Group.Tag} 0x{property.TextureConstants[i].Bitmap.Index:X4}");
+                    Console.WriteLine($"[{i}] {Cache.StringTable.GetString(mapTemplate.Name)} {bitmName}");
                 }
             }
 

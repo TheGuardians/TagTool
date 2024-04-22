@@ -7,7 +7,7 @@ namespace TagTool.Commands.Scenarios
     {
         public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, Scenario scenario)
         {
-            var groupName = cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
 
             var context = new CommandContext(parent,
                 string.Format("{0:X8}.{1}", tag.Index, groupName));
@@ -21,11 +21,17 @@ namespace TagTool.Commands.Scenarios
         {
             context.AddCommand(new CopyForgePaletteCommand(cache, scenario));
             context.AddCommand(new ExtractScriptsCommand(cache, tag, scenario));
-            context.AddCommand(new DumpScriptsCommand(cache, scenario));
+            context.AddCommand(new DumpScriptsCommand(cache, tag, scenario));
+            context.AddCommand(new ImportScriptsCommand(scenario));
             context.AddCommand(new CompileScriptsCommand(cache, scenario));
             context.AddCommand(new ListScriptsCommand(cache, tag, scenario));
             context.AddCommand(new ExtractZonesAreasModelCommand(cache, scenario));
-            context.AddCommand(new ConvertGeometryCommand(cache, scenario));
+            
+            if(cache is GameCacheHaloOnlineBase hoCache)
+            {
+                context.AddCommand(new ConvertInstancedGeometryCommand(cache, scenario));
+                context.AddCommand(new ImportMapVariantCommand(hoCache, tag, scenario));
+            }
         }
     }
 }

@@ -710,7 +710,6 @@ namespace SimpleJSON
             get { return m_Dict.Count; }
         }
 
-
         public override void Add(string aKey, JSONNode aItem)
         {
             if (!string.IsNullOrEmpty(aKey))
@@ -775,7 +774,18 @@ namespace SimpleJSON
             {
                 if (result.Length > 2)
                     result += ", ";
-                result += "\"" + Escape(N.Key) + "\":" + N.Value.ToString();
+                result += "\"" + Escape(N.Key) + "\":";
+
+                var value = N.Value.ToString().Trim(new char[] {'\"'});
+
+                if (double.TryParse(value, out double compDouble))
+                {
+                    result += value;
+                }
+                else if (value == N.Value.AsBool.ToString())
+                    result += N.Value.AsBool.ToString();
+                else
+                    result += N.Value.ToString();
             }
             result += "}";
             return result;
@@ -793,6 +803,12 @@ namespace SimpleJSON
             result += "\n" + aPrefix + "}";
             return result;
         }
+
+        public Dictionary<string, JSONNode> ToDictionary()
+        {
+            return m_Dict;
+        }
+
         public override void Serialize(System.IO.BinaryWriter aWriter)
         {
             aWriter.Write((byte)JSONBinaryTag.Class);

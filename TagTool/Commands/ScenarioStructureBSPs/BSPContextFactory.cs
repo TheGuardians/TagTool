@@ -8,7 +8,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
     {
         public static CommandContext Create(CommandContext parent, GameCache cache, CachedTag tag, ScenarioStructureBsp bsp)
         {
-            var groupName = cache.StringTable.GetString(tag.Group.Name);
+            var groupName = tag.Group.ToString();
 
             var context = new CommandContext(parent,
                 string.Format("{0:X8}.{1}", tag.Index, groupName));
@@ -20,7 +20,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
 
         public static void Populate(CommandContext commandContext, GameCache cache, CachedTag tag, ScenarioStructureBsp bsp)
         {
-            commandContext.AddCommand(new GenerateJumpHintsCommand(cache, tag, bsp));
+            commandContext.AddCommand(new GenerateStructureSurfacesCommand(cache, tag, bsp));
             commandContext.AddCommand(new DumpRenderGeometryCommand(cache, bsp.DecoratorGeometry, "Decorator"));
             commandContext.AddCommand(new DumpRenderGeometryCommand(cache, bsp.Geometry, "Bsp"));
             commandContext.AddCommand(new MoppDataCommand(bsp));

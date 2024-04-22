@@ -7,6 +7,7 @@ namespace TagTool.Scripting
         Continuous,
         Static,
         CommandScript,
-        Stub
+        Stub,
+        Extern
     }
 }

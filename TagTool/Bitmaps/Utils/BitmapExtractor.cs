@@ -10,14 +10,16 @@ namespace TagTool.Bitmaps
 {
     public static class BitmapExtractor
     {
-        public static byte[] ExtractBitmapData(GameCache cache, Bitmap bitmap, int imageIndex)
+        public static byte[] ExtractBitmapData(GameCache cache, Bitmap bitmap, int imageIndex, ref Bitmap.Image image)
         {
-            var resourceReference = bitmap.Resources[imageIndex];
+            var resourceReference = bitmap.HardwareTextures[imageIndex];
             var resourceDefinition = cache.ResourceCache.GetBitmapTextureInteropResource(resourceReference);
             if (cache is GameCacheHaloOnlineBase)
             {
                 if(resourceDefinition != null)
                 {
+                    image.Width = resourceDefinition.Texture.Definition.Bitmap.Width;
+                    image.Height = resourceDefinition.Texture.Definition.Bitmap.Height;
                     return resourceDefinition.Texture.Definition.PrimaryResourceData.Data;
                 }
                 else
@@ -56,29 +58,33 @@ namespace TagTool.Bitmaps
             }
         }
 
-        public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex)
+        public static BaseBitmap ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex, string tagName, bool forDDS = true)
         {
             if (cache is GameCacheHaloOnlineBase)
             {
-                byte[] data = ExtractBitmapData(cache, bitmap, imageIndex);
-                DDSHeader header = new DDSHeader(bitmap.Images[imageIndex]);
-                return new DDSFile(header, data);
+                var image = bitmap.Images[imageIndex].DeepCloneV2();
+                return new BaseBitmap(image, ExtractBitmapData(cache, bitmap, imageIndex, ref image));
             }
-            else if (cache.GetType() == typeof(GameCacheGen3))
+            else if (CacheVersionDetection.GetGeneration(cache.Version) ==  CacheGeneration.Third)
             {
-                var baseBitmap = BitmapConverter.ConvertGen3Bitmap(cache, bitmap, imageIndex, true);
-                if (baseBitmap == null)
-                    return null;
-                return new DDSFile(baseBitmap);
+                return BitmapConverter.ConvertGen3Bitmap(cache, bitmap, imageIndex, tagName, forDDS);
             }
-            else
-                return null;
-            
+
+            return null;
         }
 
-        public static byte[] ExtractBitmapToDDSArray(GameCache cache, Bitmap bitmap, int imageIndex)
+        public static DDSFile ExtractBitmap(GameCache cache, Bitmap bitmap, int imageIndex, string tagName)
         {
-            var ddsFile = ExtractBitmap(cache, bitmap, imageIndex);
+            var baseBitmap = ExtractBitmap(cache, bitmap, imageIndex, tagName, true);
+            if (baseBitmap == null)
+                return null;
+
+            return new DDSFile(baseBitmap);
+        }
+
+        public static byte[] ExtractBitmapToDDSArray(GameCache cache, Bitmap bitmap, int imageIndex, string tagName)
+        {
+            var ddsFile = ExtractBitmap(cache, bitmap, imageIndex, tagName);
             var stream = new MemoryStream();
             using(var writer = new EndianWriter(stream))
             {

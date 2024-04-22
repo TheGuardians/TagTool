@@ -10,7 +10,7 @@ namespace TagTool.Geometry
     /// A material describing how a mesh part should be rendered.
     /// </summary>
     [TagStructure(Size = 0x20, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline571627)]
+    [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline604673)]
     [TagStructure(Size = 0x30, MaxVersion = CacheVersion.HaloOnline700123)]
     [TagStructure(Size = 0x2C, MinVersion = CacheVersion.HaloReach)]
     public class RenderMaterial : TagStructure
@@ -30,13 +30,31 @@ namespace TagTool.Geometry
         [TagField(MinVersion = CacheVersion.HaloOnline700123, MaxVersion = CacheVersion.HaloOnline700123)]
         public List<Skin> Skins;
 
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<Property> Properties;
 
-        public int Unknown;
+        public int ImportedMaterialIndex;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float LightmapResolutionScale;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public ArgbColor LightmapAdditiveTransparencyColor;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public ArgbColor LightmapTraslucencyTintColor;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float LightmapAnalyticalLightAbsorb;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public float LightmapNormalLightAbsorb;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public byte LightmapFlags;
+
         public sbyte BreakableSurfaceIndex;
-        public sbyte Unknown2;
-        public sbyte Unknown3;
-        public sbyte Unknown4;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public short LightmapChartGroupIndex;
+
+        [TagField(Length = 3, Flags = TagFieldFlags.Padding, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Padding1;
 
         [TagStructure(Size = 0x14)]
         public class Skin : TagStructure
@@ -46,46 +64,33 @@ namespace TagTool.Geometry
             public CachedTag RenderMethod;
         }
 
-        [TagStructure(Size = 0x2, MaxVersion = CacheVersion.Halo2Vista)]
-        [TagStructure(Size = 0x4, MinVersion = CacheVersion.Halo3Retail)]
-        public class PropertyType : TagStructure
-		{
-            [TagField(Flags = Label, MaxVersion = CacheVersion.Halo2Vista)]
-            public Halo2Value Halo2;
-
-            [TagField(Flags = Label, MinVersion = CacheVersion.Halo3Retail)]
-            public Halo3Value Halo3;
-
-            public enum Halo2Value : short
-            {
-                LightmapResolution,
-                LightmapPower,
-                LightmapHalfLife,
-                LightmapDiffuseScale
-            }
-
-            public enum Halo3Value : int
-            {
-                LightmapResolution,
-                LightmapPower,
-                LightmapHalfLife,
-                LightmapDiffuseScale
-            }
-        }
+      
 
         [TagStructure(Size = 0x8, MaxVersion = CacheVersion.Halo2Vista)]
         [TagStructure(Size = 0xC, MinVersion = CacheVersion.Halo3Retail)]
         public class Property : TagStructure
 		{
             public PropertyType Type;
-
-            [TagField(MaxVersion = CacheVersion.Halo2Vista)]
+ 
             public short ShortValue;
 
             [TagField(MinVersion = CacheVersion.Halo3Retail)]
             public int IntValue;
 
             public float RealValue;
+
+            public enum PropertyType : short
+            {
+                LightmapResolution,
+                LightmapPower,
+                LightmapHalfLife,
+                LightmapDiffuseScale,
+                LightmapPhotonFidelity,
+                LightmapTranslucencyTintColor,
+                LightmapTransparencyOverride,
+                LightmapAdditiveTransparency,
+                LightmapIgnoreDefaultResScale
+            }
         }
     }
 }

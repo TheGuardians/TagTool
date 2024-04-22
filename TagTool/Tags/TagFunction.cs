@@ -6,7 +6,8 @@ using TagTool.IO;
 
 namespace TagTool.Tags
 {
-    [TagStructure(Size = 0x14)]
+    [TagStructure(Size = 0x8, MaxVersion = Cache.CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x14, MinVersion = Cache.CacheVersion.Halo3Beta)]
     public class TagFunction : TagStructure
     {
         public byte[] Data;
@@ -47,6 +48,17 @@ namespace TagTool.Tags
             ThreeColor,
             FourColor
         }
+
+        public static readonly TagFunction DefaultConstant = new TagFunction
+        {
+            Data = new byte[32]
+            {
+                0x01,0x34,0x00,0x00,0x00,0x00,0x80,0x3F,
+                0x00,0x00,0x80,0x3F,0x00,0x00,0x00,0x00,
+                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+                0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+            }
+        };
 
         [TagStructure(Size = 0x20)]
         public /*was_struct*/ class ScalarFunctionHeader : TagStructure

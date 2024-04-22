@@ -1,12 +1,9 @@
 ﻿using TagTool.Cache;
-using TagTool.Geometry;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
-using TagTool.Tags.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TagTool.Serialization;
-using Assimp;
 using TagTool.Tools.Geometry;
 using TagTool.IO;
 
@@ -36,12 +33,10 @@ namespace TagTool.Commands.RenderModels
         {
             string modelFileName;
 
-            if(args.Count == 1)
-            {
-                modelFileName = args[0];
-            }
-            else
-                return false;
+            if (args.Count != 1)
+                return new TagToolError(CommandError.ArgCount);
+
+            modelFileName = args[0];
 
             if (Definition.Geometry.Resource == null)
             {
@@ -54,7 +49,7 @@ namespace TagTool.Commands.RenderModels
             using (var stream = Cache.OpenCacheRead())
             {
                 var resource = Cache.ResourceCache.GetRenderGeometryApiResourceDefinition(Definition.Geometry.Resource);
-                Definition.Geometry.SetResourceBuffers(resource);
+                Definition.Geometry.SetResourceBuffers(resource, false);
 
                 geometryFormat.InitGen3(Cache, Definition);
 

@@ -16,13 +16,18 @@ namespace TagTool.Geometry
                 writeVertex(readVertex(), i);
         }
 
-        public static void ConvertVertexBuffer(CacheVersion inVersion, CacheVersion outVersion, VertexBufferDefinition vertexBuffer)
+        public static void ConvertVertexBuffer(CacheVersion inVersion, CachePlatform inPlatform, CacheVersion outVersion, CachePlatform outPlatform, VertexBufferDefinition vertexBuffer)
         {
             using (var outputStream = new MemoryStream())
             using (var inputStream = new MemoryStream(vertexBuffer.Data.Data))
             {
-                var inVertexStream = VertexStreamFactory.Create(inVersion, inputStream);
-                var outVertexStream = VertexStreamFactory.Create(outVersion, outputStream);
+                var inVertexStream = VertexStreamFactory.Create(inVersion, inPlatform, inputStream);
+                var outVertexStream = VertexStreamFactory.Create(outVersion, outPlatform, outputStream);
+
+                VertexStreamReach reachVertexStream = null;
+                if (inVersion >= CacheVersion.HaloReach)
+                    reachVertexStream = (VertexStreamReach)inVertexStream;
+
                 var count = vertexBuffer.Count;
 
                 switch (vertexBuffer.Format)
@@ -32,7 +37,12 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = ConvertVectorSpace(v.Binormal);
+
+                            if (inVersion >= CacheVersion.HaloReach)
+                                v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
+                            else
+                                v.Binormal = ConvertVectorSpace(v.Binormal);
+
                             outVertexStream.WriteWorldVertex(v);
                         });
                         break;
@@ -42,7 +52,12 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = ConvertVectorSpace(v.Binormal);
+
+                            if (inVersion >= CacheVersion.HaloReach)
+                                v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
+                            else
+                                v.Binormal = ConvertVectorSpace(v.Binormal);
+
                             outVertexStream.WriteRigidVertex(v);
                         });
                         break;
@@ -52,7 +67,12 @@ namespace TagTool.Geometry
                         {
                             v.Normal = ConvertVectorSpace(v.Normal);
                             v.Tangent = ConvertVectorSpace(v.Tangent);
-                            v.Binormal = ConvertVectorSpace(v.Binormal);
+
+                            if (inVersion >= CacheVersion.HaloReach)
+                                v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
+                            else
+                                v.Binormal = ConvertVectorSpace(v.Binormal);
+
                             outVertexStream.WriteSkinnedVertex(v);
                         });
                         break;
@@ -64,11 +84,14 @@ namespace TagTool.Geometry
                     case VertexBufferFormat.StaticPerVertex:
                         ConvertVertices(count, inVertexStream.ReadStaticPerVertexData, (v, i) =>
                         {
-                            v.Color1 = ConvertColorSpace(v.Color1);
-                            v.Color2 = ConvertColorSpace(v.Color2);
-                            v.Color3 = ConvertColorSpace(v.Color3);
-                            v.Color4 = ConvertColorSpace(v.Color4);
-                            v.Color5 = ConvertColorSpace(v.Color5);
+                            if (inPlatform != CachePlatform.MCC)
+                            {
+                                v.Color1 = ConvertColorSpace(v.Color1);
+                                v.Color2 = ConvertColorSpace(v.Color2);
+                                v.Color3 = ConvertColorSpace(v.Color3);
+                                v.Color4 = ConvertColorSpace(v.Color4);
+                                v.Color5 = ConvertColorSpace(v.Color5);
+                            }
                             outVertexStream.WriteStaticPerVertexData(v);
                         });
                         break;
@@ -106,106 +129,12 @@ namespace TagTool.Geometry
                         vertexBuffer.Format = VertexBufferFormat.World;
                         goto case VertexBufferFormat.World;
 
-                        /*
-                    case VertexBufferFormat.Unknown1A:
-
-                        var waterData = WaterData[CurrentWaterBuffer];
-
-                        // Reformat Vertex Buffer
-                        vertexBuffer.Format = VertexBufferFormat.World;
-                        vertexBuffer.VertexSize = 0x34;
-                        vertexBuffer.Count = waterData.IndexBufferLength;
-
-                        // Create list of indices for later use.
-                        Unknown1BIndices = new List<ushort>();
-
-                        for (int k = 0; k < waterData.PartData.Count(); k++)
-                        {
-                            Tuple<int, int, bool> currentPartData = waterData.PartData[k];
-
-                            // Not water, add garbage data
-                            if (currentPartData.Item3 == false)
-                            {
-                                for (int j = 0; j < currentPartData.Item2; j++)
-                                    WriteUnusedWorldWaterData(outputStream);
-                            }
-                            else
-                            {
-                                ConvertVertices(currentPartData.Item2 / 3, inVertexStream.ReadUnknown1A, (v, i) =>
-                                {
-                                    // Store current stream position
-                                    var tempStreamPosition = inputStream.Position;
-
-                                    // Open previous world buffer (H3)
-                                    var worldVertexBufferBasePosition = OriginalBufferOffsets[OriginalBufferOffsets.Count() - 3];
-                                    inputStream.Position = worldVertexBufferBasePosition;
-
-                                    for (int j = 0; j < 3; j++)
-                                    {
-                                        inputStream.Position = 0x20 * v.Vertices[j] + worldVertexBufferBasePosition;
-
-                                        WorldVertex w = inVertexStream.ReadWorldVertex();
-
-                                        Unknown1BIndices.Add(v.Indices[j]);
-
-                                        // The last 2 floats in WorldWater are unknown.
-
-                                        outVertexStream.WriteWorldWaterVertex(w);
-                                    }
-
-                                    // Restore position for reading the next vertex correctly
-                                    inputStream.Position = tempStreamPosition;
-                                });
-                            }
-                        }
-                        break;
-
-                    case VertexBufferFormat.Unknown1B:
-
-                        var waterDataB = WaterData[CurrentWaterBuffer];
-
-                        // Adjust vertex size to match HO. Set count of vertices
-
-                        vertexBuffer.VertexSize = 0x18;
-
-                        var originalCount = vertexBuffer.Count;
-                        vertexBuffer.Count = waterDataB.IndexBufferLength;
-
-                        var basePosition = inputStream.Position;
-                        var unknown1BPosition = 0;
-
-                        for (int k = 0; k < waterDataB.PartData.Count(); k++)
-                        {
-                            Tuple<int, int, bool> currentPartData = waterDataB.PartData[k];
-
-                            // Not water, add garbage data
-                            if (currentPartData.Item3 == false)
-                            {
-                                for (int j = 0; j < currentPartData.Item2; j++)
-                                    WriteUnusedUnknown1BData(outputStream);
-                            }
-                            else
-                            {
-                                for (int j = unknown1BPosition; j < Unknown1BIndices.Count() && j - unknown1BPosition < currentPartData.Item2; j++)
-                                {
-                                    inputStream.Position = basePosition + 0x24 * Unknown1BIndices[j];
-                                    ConvertVertices(1, inVertexStream.ReadUnknown1B, (v, i) => outVertexStream.WriteUnknown1B(v));
-                                    unknown1BPosition++;
-                                }
-                            }
-                        }
-
-                        // Get to the end of Unknown1B in H3 data
-                        inputStream.Position = basePosition + originalCount * 0x24;
-
-                        CurrentWaterBuffer++;
-
-                        break;
-                        */
                     case VertexBufferFormat.ParticleModel:
                         ConvertVertices(count, inVertexStream.ReadParticleModelVertex, (v, i) =>
                         {
-                            v.Normal = ConvertVectorSpace(v.Normal);
+                            if (inPlatform != CachePlatform.MCC)
+                                v.Normal = ConvertVectorSpace(v.Normal);
+
                             outVertexStream.WriteParticleModelVertex(v);
                         });
                         break;
@@ -213,11 +142,35 @@ namespace TagTool.Geometry
                     case VertexBufferFormat.TinyPosition:
                         ConvertVertices(count, inVertexStream.ReadTinyPositionVertex, (v, i) =>
                         {
+                            if (!CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, inVersion))
+                                v.Variant = (ushort)UShort2Short(v.Variant);
+
                             v.Position = ConvertPositionShort(v.Position);
-                            v.Variant = (ushort)((v.Variant >> 8) & 0xFF);
                             v.Normal = ConvertNormal(v.Normal);
                             outVertexStream.WriteTinyPositionVertex(v);
                         });
+                        break;
+                    
+                    case VertexBufferFormat.RigidCompressed:
+                        ConvertVertices(count, reachVertexStream.ReadReachRigidVertex, (v, i) =>
+                        {
+                            v.Normal = ConvertVectorSpace(v.Normal);
+                            v.Tangent = ConvertVectorSpace(v.Tangent);
+                            v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
+                            outVertexStream.WriteRigidVertex(v);
+                        });
+                        vertexBuffer.Format = VertexBufferFormat.Rigid;
+                        break;
+
+                    case VertexBufferFormat.SkinnedCompressed:
+                        ConvertVertices(count, reachVertexStream.ReadReachSkinnedVertex, (v, i) =>
+                        {
+                            v.Normal = ConvertVectorSpace(v.Normal);
+                            v.Tangent = ConvertVectorSpace(v.Tangent);
+                            v.Binormal = GenerateReachBinormals(v.Normal, v.Tangent.IJK, v.Tangent.W);
+                            outVertexStream.WriteSkinnedVertex(v);
+                        });
+                        vertexBuffer.Format = VertexBufferFormat.Skinned;
                         break;
 
                     default:
@@ -326,6 +279,26 @@ namespace TagTool.Geometry
         public static RealVector3d ConvertPositionShort(RealVector3d position)
         {
             return new RealVector3d(position.ToArray().Select(e => FixRoundingShort(ConvertFromNormalBasis(e))).ToArray());
+        }
+
+        public static RealVector3d GenerateReachBinormalsNoSign(RealVector2d uv, RealVector3d tangent, RealVector3d normal)
+        {
+            return Math.Sign(uv.I - 0.5) * RealVector3d.CrossProduct(normal, tangent);
+        }
+
+        public static RealVector3d GenerateReachBinormals(RealVector3d normal, RealVector3d tangent, float sign)
+        {
+            return RealVector3d.CrossProductNoNorm(normal, tangent) * sign;
+        }
+
+        /// <summary>
+        /// Convert ushort [0,65535] to short [-32767,32767]
+        /// </summary>
+        private static short UShort2Short(ushort value)
+        {
+            if (value <= short.MaxValue)
+                return (short)(value - short.MaxValue);
+            return (short)(value - short.MaxValue - 1);
         }
     }
 }

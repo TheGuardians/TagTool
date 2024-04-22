@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TagTool.Bitmaps;
 using TagTool.Bitmaps.DDS;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.IO;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
@@ -44,24 +46,13 @@ namespace TagTool.Commands.Bitmaps
                 directory = "Bitmaps";
             }
             else
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
-            if (!Directory.Exists(directory))
-            {
-                Console.Write("Destination directory does not exist. Create it? [y/n] ");
-                var answer = Console.ReadLine().ToLower();
-
-                if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
-                    return false;
-
-                if (answer.StartsWith("y"))
-                    Directory.CreateDirectory(directory);
-                else
-                    return false;
-            }
+            Directory.CreateDirectory(directory);
 
             var ddsOutDir = directory;
             string name;
+
             if(Tag.Name != null)
             {
                 var split = Tag.Name.Split('\\');
@@ -69,6 +60,7 @@ namespace TagTool.Commands.Bitmaps
             }
             else
                 name = Tag.Index.ToString("X8");
+
             if (Bitmap.Images.Count > 1)
             {
                 ddsOutDir = Path.Combine(directory, name);
@@ -78,16 +70,20 @@ namespace TagTool.Commands.Bitmaps
             for (var i = 0; i < Bitmap.Images.Count; i++)
             {
                 var bitmapName = (Bitmap.Images.Count > 1) ? i.ToString() : name;
-                bitmapName += ".dds";
+
                 var outPath = Path.Combine(ddsOutDir, bitmapName);
+                var ddsFile = BitmapExtractor.ExtractBitmap(Cache, Bitmap, i, Tag.Name);
 
-                var ddsFile = BitmapExtractor.ExtractBitmap(Cache, Bitmap, i);
-
-                if(ddsFile == null)
+                if (File.Exists(outPath + ".dds"))
                 {
-                    Console.WriteLine($"Invalid bitmap data");
-                    return true;
+                    var bitmLongName = bitmapName + CreateLongName(Tag);
+                    outPath = Path.Combine(ddsOutDir, bitmLongName);
                 }
+
+                outPath += ".dds";
+
+                if (ddsFile == null || ddsFile.BitmapData is null)
+                    return new TagToolError(CommandError.OperationFailed, "Invalid bitmap data");
 
                 using(var fileStream = File.Open(outPath, FileMode.Create, FileAccess.Write))
                 using(var writer = new EndianWriter(fileStream, EndianFormat.LittleEndian))
@@ -99,6 +95,24 @@ namespace TagTool.Commands.Bitmaps
             Console.WriteLine("Done!");
 
             return true;
+        }
+
+        public string CreateLongName(CachedTag tag)
+        {
+            string concatenation = " (";
+            List<string> split = tag.Name.Split('\\').ToList();
+            string[] cutKeywords = { "objects", "levels", "multi", "dlc", "solo", "characters"};
+
+            split.RemoveAt(split.Count - 1);
+            foreach (string s in cutKeywords)
+            {
+                if (split.Contains(s))
+                    split.RemoveAt(split.IndexOf(s));
+            }
+
+            concatenation += string.Join("_", split.ToArray()) + ")";
+
+            return concatenation;
         }
     }
 }

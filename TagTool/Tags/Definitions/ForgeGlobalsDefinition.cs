@@ -5,9 +5,15 @@ using TagTool.Common;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0xC0)]
+    [TagStructure(Name = "forge_globals_definition", Tag = "forg", Size = 0x104)]
     public class ForgeGlobalsDefinition : TagStructure
     {
+        [TagField(Flags = TagFieldFlags.Hidden)]
+        public int Version;
+
+        [TagField(ValidTags = new[] { "rm  " })]
+        public CachedTag DefaultBoundaryRenderMethod;
+
         [TagField(ValidTags = new[] { "rm  " })]
         public CachedTag InvisibleRenderMethod;
 
@@ -20,6 +26,9 @@ namespace TagTool.Tags.Definitions
 
         [TagField(ValidTags = new[] { "obje" })]
         public CachedTag PrematchCameraObject;
+
+        [TagField(ValidTags = new[] { "obje" })]
+        public CachedTag PostmatchObject;
 
         [TagField(ValidTags = new[] { "obje" })]
         public CachedTag ModifierObject;
@@ -35,6 +44,12 @@ namespace TagTool.Tags.Definitions
         public List<PaletteItem> Palette;
         public List<WeatherEffect> WeatherEffects;
         public List<Sky> Skies;
+
+        [TagField(ValidTags = new[] { "obje" })]
+        public CachedTag FxObject;
+
+        [TagField(ValidTags = new[] { "obje" })]
+        public CachedTag FxLight;
 
         [TagStructure(Size = 0x30)]
         public class ReForgeMaterial : TagStructure

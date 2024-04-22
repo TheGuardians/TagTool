@@ -27,16 +27,21 @@ namespace TagTool.Cache
         public override StringTable StringTable => null;
         public override ResourceCache ResourceCache => throw new NotImplementedException();
 
+        public ResourceCacheGen1 BitmapResources = null;
+        public ResourceCacheGen1 SoundResources = null;
+        public ResourceCacheGen1 LocalizationResources = null;
+
         public GameCacheGen1(MapFile mapFile, FileInfo file)
         {
             BaseMapFile = mapFile;
             CacheFile = file;
             Version = BaseMapFile.Version;
+            Platform = BaseMapFile.CachePlatform;
             CacheFile = file;
-            Deserializer = new TagDeserializer(Version);
-            Serializer = new TagSerializer(Version);
+            Deserializer = new TagDeserializer(Version, Platform);
+            Serializer = new TagSerializer(Version, Platform);
             Endianness = BaseMapFile.EndianFormat;
-            DisplayName = mapFile.Header.NameOld + ".map";
+            DisplayName = mapFile.Header.GetName() + ".map";
             Directory = file.Directory;
 
             using (var cacheStream = OpenCacheRead())
@@ -44,6 +49,15 @@ namespace TagTool.Cache
             {
                 TagCacheGen1 = new TagCacheGen1(reader, mapFile);
             }
+
+            var bitmapResourceCachePath = Path.Combine(Directory.FullName, "bitmaps.map");
+            if (File.Exists(bitmapResourceCachePath))
+                BitmapResources = new ResourceCacheGen1(this, bitmapResourceCachePath);
+
+            var soundResourceCachePath = Path.Combine(Directory.FullName, "sounds.map");
+            if (File.Exists(soundResourceCachePath))
+                SoundResources = new ResourceCacheGen1(this, soundResourceCachePath);
+
         }
 
         #region Serialization
@@ -52,7 +66,7 @@ namespace TagTool.Cache
             Deserialize<T>(new Gen1SerializationContext(stream, this, (CachedTagGen1)instance));
 
         public override object Deserialize(Stream stream, CachedTag instance) =>
-            Deserialize(new Gen1SerializationContext(stream, this, (CachedTagGen1)instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new Gen1SerializationContext(stream, this, (CachedTagGen1)instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         public override void Serialize(Stream stream, CachedTag instance, object definition)
         {
@@ -86,7 +100,7 @@ namespace TagTool.Cache
             Deserialize<T>(new Gen1SerializationContext(stream, this, instance));
 
         public object Deserialize(Stream stream, CachedTagGen1 instance) =>
-            Deserialize(new Gen1SerializationContext(stream, this, instance), TagDefinition.Find(instance.Group.Tag));
+            Deserialize(new Gen1SerializationContext(stream, this, instance), TagCache.TagDefinitions.GetTagDefinitionType(instance.Group));
 
         #endregion
 

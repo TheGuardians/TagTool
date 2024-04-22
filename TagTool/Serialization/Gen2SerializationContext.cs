@@ -18,20 +18,40 @@ namespace TagTool.Serialization
 
         public Gen2SerializationContext(Stream stream, GameCacheGen2 gameCache, CachedTagGen2 tag)
         {
-            GameCache = gameCache;
             Tag = tag;
-            Stream = stream;
+
+            if (tag.IsShared && gameCache.Version == CacheVersion.Halo2Vista)
+            {
+                GameCache = gameCache.VistaSharedTagCache;
+                Stream = ((GameCacheGen2.Gen2CacheStream)stream).SharedStream;
+            }
+            else
+            {
+                GameCache = gameCache;
+                Stream = stream;
+            }
         }
 
         public uint AddressToOffset(uint currentOffset, uint address)
         {
-            return (uint)(address - GameCache.TagCacheGen2.BaseTagAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            if (Tag.AddressToOffsetOverride != null)
+                return Tag.AddressToOffsetOverride(currentOffset, address);
+
+            uint tagDataSectionOffset = GameCache.BaseMapFile.Header.GetTagMemoryHeader().MemoryBufferOffset + (uint)GameCache.BaseMapFile.Header.GetTagTableHeaderOffset();
+
+            uint tagDataOffset;
+            if (GameCache.Version == CacheVersion.Halo2Vista)
+                tagDataOffset = (address - GameCache.TagCacheGen2.VirtualAddress) - GameCache.BaseMapFile.Header.GetTagMemoryHeader().MemoryBufferOffset;
+            else
+                tagDataOffset = (address - GameCache.TagCacheGen2.VirtualAddress);
+
+            return tagDataSectionOffset + tagDataOffset;
         }
 
         public EndianReader BeginDeserialize(TagStructureInfo info)
         {
             var reader = new EndianReader(Stream, GameCache.BaseMapFile.EndianFormat);
-            reader.SeekTo(Tag.Offset - GameCache.TagCacheGen2.BaseTagAddress + GameCache.BaseMapFile.Header.TagsHeaderAddress32);
+            reader.SeekTo(AddressToOffset(0, Tag.DefinitionOffset));
             return reader;
         }
 
@@ -58,9 +78,9 @@ namespace TagTool.Serialization
         {
             var tag = GameCache.TagCache.GetTag((uint)index);
 
-            var group = (tag != null) ? tag.Group : TagGroup.None;
+            var group = (tag != null) ? tag.Group : new TagGroup();
 
-            if (index == -1 || group == TagGroup.None)
+            if (index == -1 || group.IsNull())
                 return null;
 
             return tag;

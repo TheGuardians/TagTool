@@ -31,10 +31,16 @@ namespace TagTool.Geometry
         Unknown17,            // Size = 0x4
         Decorator,            // Size = 0x20
         ParticleModel,        // Size = 0x20
-        Unknown1A,            // Size = 0xC
-        Unknown1B,            // Size = 0x24
+        WaterTriangleIndices,            // Size = 0xC
+        TesselatedWaterParameters,            // Size = 0x18
         Unknown1C,            // Size = 0x80
         Unused1D,             // Invalid
-        World2                // Size = 0x38 (1.235640+ only)
+        World2,               // Size = 0x38 (1.235640+ only)
+
+        RigidCompressed = 0x24,    // Size 0x10
+        SkinnedCompressed = 0x25,  // Size = 0x18
+
+        RigidBoned = 0x2F //Size = 0x18
+
     }
 }

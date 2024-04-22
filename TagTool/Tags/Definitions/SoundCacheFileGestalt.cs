@@ -4,13 +4,16 @@ using TagTool.Audio;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0x58, MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
-    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xB8, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xC4, MinVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xDC, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xC8, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xB8, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xD4, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
+    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xC4, Version = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Name = "sound_cache_file_gestalt", Tag = "ugh!", Size = 0xDC, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
     public class SoundCacheFileGestalt : TagStructure
 	{
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        [TagField(Platform = CachePlatform.MCC)]
+        public uint ContentType;
+
         public List<PlatformCodec> PlatformCodecs;
 
         public List<PlaybackParameter> PlaybackParameters;
@@ -18,37 +21,54 @@ namespace TagTool.Tags.Definitions
         public List<ImportName> ImportNames;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<UnknownBlock> Unknown;
+        public List<PitchRangeDistance> PitchRangeDistances;
 
         public List<PitchRangeParameter> PitchRangeParameters;
         public List<PitchRange> PitchRanges;
         public List<Permutation> Permutations;
 
-        [TagField(Version = CacheVersion.HaloReach)]
+        [TagField(MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.MCC)]
         public List<LanguagePermutation> LanguagePermutations;
 
-        // Unknown9 block Reach
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<Unknown6C> UnknownReach1;
 
-        // not in Reach
-
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public List<CustomPlayback> CustomPlaybacks;
 
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
         public List<LanguageBlock> Languages;
 
-        public List<RuntimePermutationFlag> RuntimePermutationFlags;
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public TagFunction Unknown2 = new TagFunction { Data = new byte[0] };
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
-        public uint Unknown3;
-        [TagField(MinVersion = CacheVersion.Halo3Retail)]
+        /// <summary>
+        /// Bit vector
+        /// </summary>
+        public List<sbyte> RuntimePermutationFlags;
+
+        public TagFunction NativeSampleData = new TagFunction { Data = new byte[0] };
         public uint Unknown4;
+        public uint Unknown5;
 
         public List<PermutationChunk> PermutationChunks;
         public List<Promotion> Promotions;
-        public List<ExtraInfo> ExtraInfo; 
+        public List<ExtraInfo> ExtraInfo;
 
-        //Unknown15 Reach
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<int> UnknownReach2;
+
+
+        [TagStructure(MinVersion = CacheVersion.HaloReach, Size = 0x2C)]
+        public class Unknown6C : TagStructure
+        {
+            public int Unknown1;
+            public CachedTag Unknown2;
+            public int Unknown3;
+            public int Unknown4;
+            public int Unknown5;
+            public int Unknown6;
+            public int Unknown7;
+            public int Unknown8;
+        }
+
 
         //
         // Functions for sound conversion 
@@ -113,23 +133,49 @@ namespace TagTool.Tags.Definitions
         /// Get the index of the first permutation in a pitch range block.
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
-        public int GetFirstPermutationIndex(int pitchRangeIndex)
+        public int GetFirstPermutationIndex(int pitchRangeIndex, CachePlatform platform)
         {
-            return PitchRanges[pitchRangeIndex].FirstPermutationIndex;
+            var pitchRange = PitchRanges[pitchRangeIndex];
+            return GetFirstPermutationIndex(pitchRange, platform);
+        }
+
+        /// <summary>
+        /// Get the index of the first permutation in a pitch range block.
+        /// </summary>
+        /// <param name="pitchRange"></param>
+        /// <param name="platform"></param>
+        /// <returns></returns>
+        public int GetFirstPermutationIndex(PitchRange pitchRange, CachePlatform platform)
+        {
+            if (platform == CachePlatform.MCC)
+            {
+                return (int)(pitchRange.EncodedPermutationInfoMCC << 12 >> 12);
+            }
+            else
+            {
+                return pitchRange.FirstPermutationIndex;
+            }
         }
 
         /// <summary>
         /// Get the number of permutation in the pitch range block.
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
-        public int GetPermutationCount(int pitchRangeIndex)
+        public int GetPermutationCount(int pitchRangeIndex, CachePlatform platform)
         {
             var pitchRange = PitchRanges[pitchRangeIndex];
-            int permutationCount = pitchRange.EncodedPermutationCount;
-            permutationCount = (permutationCount >> 4) & 63;
-            return permutationCount;
+            if (platform == CachePlatform.MCC)
+            {
+                return (int)((pitchRange.EncodedPermutationInfoMCC >> 20) & 63);
+            }
+            else
+            {
+                return (pitchRange.EncodedPermutationCount >> 4) & 63;
+            } 
         }
 
         /// <summary>
@@ -149,21 +195,22 @@ namespace TagTool.Tags.Definitions
         /// <returns></returns>
         public uint GetPermutationSamples(int permutationIndex)
         {
-            return Permutations[permutationIndex].SampleSize;
+            return Permutations[permutationIndex].SampleCount;
         }
 
         /// <summary>
         /// Get the total number of audio samples in a pitch range block.
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
-        public uint GetSamplesPerPitchRange(int pitchRangeIndex)
+        public uint GetSamplesPerPitchRange(int pitchRangeIndex, CachePlatform platform)
         {
             uint samples = 0;
-            var pitchRange = PitchRanges[pitchRangeIndex];
-            var firstPermutationIndex = GetFirstPermutationIndex(pitchRangeIndex);
 
-            for(int i = 0; i < GetPermutationCount(pitchRangeIndex); i++)
+            var firstPermutationIndex = GetFirstPermutationIndex(pitchRangeIndex, platform);
+
+            for(int i = 0; i < GetPermutationCount(pitchRangeIndex, platform); i++)
             {
                 samples += GetPermutationSamples(firstPermutationIndex + i);
             }
@@ -175,11 +222,12 @@ namespace TagTool.Tags.Definitions
         /// Get the order of the permutations.
         /// </summary>
         /// <param name="pitchRangeIndex"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
-        public int[] GetPermutationOrder(int pitchRangeIndex)
+        public int[] GetPermutationOrder(int pitchRangeIndex, CachePlatform platform)
         {
             var pitchRange = PitchRanges[pitchRangeIndex];
-            var permutationCount = GetPermutationCount(pitchRangeIndex);
+            var permutationCount = GetPermutationCount(pitchRangeIndex, platform);
             int[] permutationOrder = new int[permutationCount];
 
             for(int i = 0; i < permutationCount; i++)
@@ -194,8 +242,9 @@ namespace TagTool.Tags.Definitions
         /// </summary>
         /// <param name="basePitchRangeIndex"></param>
         /// <param name="pitchRangeCount"></param>
+        /// <param name="platform"></param>
         /// <returns></returns>
-        public int GetFileSize(int basePitchRangeIndex, int pitchRangeCount)
+        public int GetFileSize(int basePitchRangeIndex, int pitchRangeCount, CachePlatform platform)
         {
             int fileSize = 0;
 
@@ -207,7 +256,7 @@ namespace TagTool.Tags.Definitions
             //Loop through all the permutation in all pitch ranges to get the largest offset, then use the maxIndex to get totalSize
             for(int i = basePitchRangeIndex; i < basePitchRangeIndex + pitchRangeCount; i++)
             {
-                for( int j = GetFirstPermutationIndex(i); j < GetFirstPermutationIndex(i)+GetPermutationCount(i); j++)
+                for( int j = GetFirstPermutationIndex(i, platform); j < GetFirstPermutationIndex(i, platform)+GetPermutationCount(i, platform); j++)
                 {
                     if (GetPermutationOffset(j) >= maxOffset)
                     {

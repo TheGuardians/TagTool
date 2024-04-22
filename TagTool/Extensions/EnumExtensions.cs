@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace System
 {
-	static class EnumExtensions
+	public static class EnumExtensions
 	{
 		public static IEnumerable<Enum> GetFlags(this Enum value)
 		{
@@ -58,5 +58,23 @@ namespace System
         {
             return value.HasFlag(flags);
         }
+
+		public static object ConvertLexical(this Enum value, Type targetType)
+		{
+			var members = value.ToString()
+				.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+				.Where(x => targetType.IsEnumDefined(x))
+				.ToArray();
+
+			if(members.Length == 0)
+				return Activator.CreateInstance(targetType);
+
+			return Enum.Parse(targetType, string.Join(", ", members));
+		}
+
+        public static U ConvertLexical<U>(this Enum value) where U : Enum
+		{
+			return (U)ConvertLexical(value, typeof(U));
+		}
 	}
 }

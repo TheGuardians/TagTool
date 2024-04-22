@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Common;
+using TagTool.Commands.Common;
 using TagTool.Tags.Definitions;
 using TagTool.Scripting;
 using TagTool.Scripting.Compiler;
@@ -32,12 +33,12 @@ namespace TagTool.Commands.Scenarios
         public override object Execute(List<string> args)
         {
             if (args.Count != 1)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
 
             var srcTxt = new FileInfo(args[0]);
 
             if (!srcTxt.Exists)
-                throw new FileNotFoundException(srcTxt.FullName);
+                return new TagToolError(CommandError.FileNotFound, $"\"{args[0]}\"");
 
             ScriptCompiler scriptCompiler = new ScriptCompiler(Cache, Definition);
 

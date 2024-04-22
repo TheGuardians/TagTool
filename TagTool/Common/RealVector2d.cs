@@ -17,6 +17,12 @@ namespace TagTool.Common
             J = y;
         }
 
+        public RealVector2d(float x)
+        {
+            I = x;
+            J = x;
+        }
+
         public RealVector2d(float[] elements) :
             this(elements[0], elements[1])
         {
@@ -39,12 +45,45 @@ namespace TagTool.Common
         public static bool operator !=(RealVector2d a, RealVector2d b) =>
             !a.Equals(b);
 
+        public static RealVector2d operator +(RealVector2d a, float b)
+        {
+            return new RealVector2d(a.I + b, a.J + b);
+        }
+
+        public static RealVector2d operator -(RealVector2d a, float b)
+        {
+            return new RealVector2d(a.I - b, a.J - b);
+        }
+
+        public static RealVector2d operator *(RealVector2d a, float b)
+        {
+            return new RealVector2d(a.I * b, a.J * b);
+        }
+
+        public static RealVector2d operator *(RealVector2d a, RealVector2d b)
+        {
+            return new RealVector2d(a.I * b.I, a.J * b.J);
+        }
+
         public override int GetHashCode() =>
             13 * 17 + I.GetHashCode()
                * 17 + J.GetHashCode();
 
         public override string ToString() =>
             $"{{ I: {I}, J: {J} }}";
+
+        public static RealVector2d Frac(RealVector2d a)
+        {
+            RealVector2d result = new RealVector2d
+            {
+                I = a.I - (float)Math.Floor(a.I),
+                J = a.J - (float)Math.Floor(a.J)
+            };
+
+            return result;
+        }
+
+        public float Dot() => I * I + J * J;
 
         public bool TryParse(GameCache cache, List<string> args, out IBlamType result, out string error)
         {

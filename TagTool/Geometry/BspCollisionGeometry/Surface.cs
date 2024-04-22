@@ -8,36 +8,57 @@ using TagTool.Tags;
 
 namespace TagTool.Geometry.BspCollisionGeometry
 {
-    /// <summary>
-    /// Represents a list of planes that forms a relatively flat surface. Used in lighting code.
-    /// </summary>
-    [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail)]
-    [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3ODST)]
-    public class SurfacesPlanes : TagStructure
+    [TagStructure(Size = 0x4, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+    [TagStructure(Size = 0x8, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    public class StructureSurface : TagStructure
     {
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
-        public ushort PlaneIndexOld;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public int PlaneIndexNew;
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        public ushort FirstSurfaceToTriangleMappingIndexOld;
 
-        [TagField(MaxVersion = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        public int FirstSurfaceToTriangleMappingIndex;
+
+        [TagField(MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        public short SurfaceToTriangleMappingCountOld;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        public int SurfaceToTriangleMappingCount;
+    }
+
+    [TagStructure(Size = 0x8)]
+    public class LargeStructureSurface : TagStructure
+    {
+        public int FirstSurfaceToTriangleMappingIndex;
+        public int SurfaceToTriangleMappingCount;
+    }
+
+    [TagStructure(Size = 0x4, MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+    public class SmallSurfacesPlanes : TagStructure
+    {
+        public ushort PlaneIndexOld;
         public short PlaneCountOld;
-        [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public int PlaneCountNew;
     }
 
     [TagStructure(Size = 0x4)]
     public class EdgeToSeamMapping : TagStructure
     {
         public short SeamIndex;  //used in the structure seam global
-        public short SeamIdentifierIndexEdgeMappingIndex;
+        public short SeamEdgeIndex;
     }
 
-    [TagStructure(Size = 0x4)]
-    public class PlaneReference : TagStructure
+    public struct StructureSurfaceToTriangleMapping
     {
-        public short Unknown1;
-        public short ClusterIndex;
+        public int TriangleIndex;
+        public int ClusterIndex;
+
+        public StructureSurfaceToTriangleMapping(int triangleIndex = -1, int clusterIndex = -1)
+        {
+            TriangleIndex = triangleIndex;
+            ClusterIndex = clusterIndex;
+        }
     }
 
     [TagStructure(Size = 0x8)]

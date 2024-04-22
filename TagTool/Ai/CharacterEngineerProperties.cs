@@ -6,52 +6,20 @@ namespace TagTool.Ai
     [TagStructure(Size = 0x38)]
     public class CharacterEngineerProperties : TagStructure
 	{
-        /// <summary>
-        /// World Units; The amount that the engineer attempts to rise before dying.
-        /// </summary>
-        public float DeathHeight;
+        public float DeathHeight; // try and rise this amount before dying (wu)
+        public float DeathRiseTime; // spend this time rising (seconds)
+        public float DeathDetonationTime; // spend this time detonating (seconds)
+        public float ShieldBoostRadiusMax; // Boost the shields of allies within this radius during combat
+        public float ShieldBoostRadiusMin; // Allies within this radius get maximum shield boost
+        public float ShieldBoostVitality; // Boost allies' shields by this amount during combat
 
-        /// <summary>
-        /// Seconds; The amount of time that the engineer spends rising before dying.
-        /// </summary>
-        public float DeathRiseTime;
-
-        /// <summary>
-        /// Seconds; The amount of time that the engineer spends detonating on death.
-        /// </summary>
-        public float DeathDetonationTime;
-
-        /// <summary>
-        /// The radius that the engineer boosts the shields of allies during combat.
-        /// </summary>
-        public float ShieldBoostRadius;
-
-        /// <summary>
-        /// Seconds; The time within the shield boost pings of the engineer.
-        /// </summary>
-        public float ShieldBoostPeriod;
-
-        /// <summary>
-        /// The strenght of the engineer shield boost.
-        /// </summary>
-        public float ShieldBoostStrenght;
-
+        /* Detonation Thresholds */
         public float DetonationShieldThreshold;
         public float DetonationBodyVitality;
+        public float ProximityRadius; // if target enters within this radius, either detonate or deploy equipment (wus)
+        public float ProximityDetonationChance; // chance of detonating if target enters the drain radius radius
 
-        /// <summary>
-        /// World Units; If target enters within this radius, either detonate or deploy equipment.
-        /// </summary>
-        public float ProximityRadius;
-
-        /// <summary>
-        /// The chance that the engineer will detonate if target enters the drain radius.
-        /// </summary>
-        public float ProximityDetonationChance;
-
-        /// <summary>
-        /// The equipment that the engineer deploys if target enters radius and detonation is not chosen.
-        /// </summary>
-        public CachedTag ProximityEquipment;
+        [TagField(ValidTags = new[] { "eqip" })]
+        public CachedTag ProximityEquipment; // if target enters radius and detonation is not chosen, deploy this equipment.
     }
 }

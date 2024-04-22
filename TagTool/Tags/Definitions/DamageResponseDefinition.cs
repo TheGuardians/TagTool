@@ -2,114 +2,233 @@ using TagTool.Cache;
 using TagTool.Common;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0xC, MaxVersion = CacheVersion.Halo3ODST)]
-    [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0x18, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0x18, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Name = "damage_response_definition", Tag = "drdf", Size = 0x18, MinVersion = CacheVersion.HaloReach)]
     public class DamageResponseDefinition : TagStructure
-	{
-        public List<ResponseBlock> Responses;
+    {
+        public List<DamageResponseClass> Classes;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public List<AreaControlBlockStruct> AreaControl;
 
-        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(Flags = Padding, Length = 12, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public byte[] Unused;
 
-        [TagStructure(Size = 0xC0)]
-        public class ResponseBlock : TagStructure
-		{
-            public ResponseTypeValue ResponseType;
-            public short Unknown;
-            public short Unknown2;
-            public short Unknown3;
-            public uint Unknown4;
-            public uint Unknown5;
-            public uint Unknown6;
-            public float Unknown7;
-            public uint Unknown8;
-            public uint Unknown9;
-            public float Unknown10;
-            public float Unknown11;
-            public short Unknown12;
-            public short Unknown13;
-            public float Unknown14;
-            public float Unknown15;
-            public float Unknown16;
-            public float Unknown17;
-            public short Unknown18;
-            public short Unknown19;
-            public float Unknown20;
-            public float Unknown21;
-            public float Unknown22;
-            public float Unknown23;
-            public float Unknown24;
-            public float Unknown25;
-            public float Unknown26;
-            public float LowFrequencyVibrationDuration;
-            public TagFunction LowFrequencyVibrationFunction = new TagFunction { Data = new byte[0] };
-            public float HighFrequencyVibrationDuration;
-            public TagFunction HighFrequencyVibrationFunction = new TagFunction { Data = new byte[0] };
-            public float Duration;
-            public FadeFunctionValue FadeFunction;
-            public short Unknown27;
-            public Angle Rotation;
-            public float Pushback;
-            public float JitterMin;
-            public float JitterMax;
-            public float Duration2;
-            public FalloffFunctionValue FalloffFunction;
-            public short Unknown28;
-            public float RandomTranslation;
-            public Angle RandomRotation;
-            public WobbleFunctionValue WobbleFunction;
-            public short Unknown29;
-            public float WobbleFunctionPeriod;
-            public float WobbleWeight;
+        [TagStructure(Size = 0xAC, MaxVersion = CacheVersion.Halo3Beta)]
+        [TagStructure(Size = 0xC0, MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+        [TagStructure(Size = 0x84, MinVersion = CacheVersion.HaloReach)]
+        public class DamageResponseClass : TagStructure
+        {
+            public DamageResponseClassTypeEnum Type;
+            public DamageResponseClassFlags Flags;
 
-            public enum ResponseTypeValue : short
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public DamageResponseScreenFlashStruct ScreenFlash;
+            [TagField(MinVersion = CacheVersion.Halo3Retail, MaxVersion = CacheVersion.HaloOnline700123)]
+            public DamageResponseMotionBlurStruct MotionBlur;
+
+            public DamageResponseDirectionalFlashStruct DirectionalFlash;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public DamageResponseMotionSensorPing MotionSensorPing;
+            [TagField(ValidTags = new[] { "rmbl" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag RumbleReference;
+            [TagField(ValidTags = new[] { "csdt" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag CameraShakeReachReference;
+            [TagField(ValidTags = new[] { "sidt" }, MinVersion = CacheVersion.HaloReach)]
+            public CachedTag SimulatedInput;
+
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public Rumble Rumble;
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+            public CameraShake CameraShake;
+
+            [TagField(MinVersion = CacheVersion.HaloReach)]
+            public List<DamageResponseGlobalSoundEffectBlockStruct> GlobalSoundEffect;
+
+            public enum DamageResponseClassTypeEnum : short
             {
                 Shielded,
                 Unshielded,
                 All
             }
 
-            public enum FadeFunctionValue : short
+            [Flags]
+            public enum DamageResponseClassFlags : ushort
             {
-                Linear,
-                Late,
-                VeryLate,
-                Early,
-                VeryEarly,
-                Cosine,
-                Zero,
-                One
+                IgnoreOnNoDamage = 1 << 0
             }
 
-            public enum FalloffFunctionValue : short
+            [TagStructure(Size = 0x20)]
+            public class DamageResponseScreenFlashStruct : TagStructure
             {
-                Linear,
-                Late,
-                VeryLate,
-                Early,
-                VeryEarly,
-                Cosine,
-                Zero,
-                One
+                public ScreenFlashTypeEnum Type;
+                public ScreenFlashPriorityEnum Priority;
+                public float Duration;
+                public GlobalReverseTransitionFunctionsEnum FadeFunction;
+
+                [TagField(Length = 2, Flags = Padding, MinVersion = CacheVersion.Halo3Retail)]
+                public byte[] Padding0;
+
+                public float MaxIntensity;
+                public RealArgbColor FlashColor;
+
+                public enum ScreenFlashTypeEnum : short
+                {
+                    Add,
+                    Multiply,
+                    AlphaBlend,
+                    DoubleMultiply,
+                    Max,
+                    MultiplyAdd,
+                    InvAlphaBlend
+                }
+
+                public enum ScreenFlashPriorityEnum : short
+                {
+                    Low,
+                    Medium,
+                    High
+                }
+
+                public enum GlobalReverseTransitionFunctionsEnum : short
+                {
+                    Linear,
+                    Late,
+                    VeryLate,
+                    Early,
+                    VeryEarly,
+                    Cosine,
+                    Zero,
+                    One
+                }
             }
 
-            public enum WobbleFunctionValue : short
+            [TagStructure(Size = 0x14)]
+            public class DamageResponseMotionBlurStruct : TagStructure
             {
-                One,
-                Zero,
-                Cosine,
-                CosineVariablePeriod,
-                DiagonalWave,
-                DiagonalWaveVariablePeriod,
-                Slide,
-                SlideVariablePeriod,
-                Noise,
-                Jitter,
-                Wander,
-                Spark
+                public float Duration;
+                public ScreenFlashPriorityEnum Priority;
+                public GlobalReverseTransitionFunctionsEnum FadeFunction;
+                public float MotionBlurEffectScale;
+                public float MotionBlurCapScale;
+                public float MotionBlurCenterFalloffScale;
+
+                public enum ScreenFlashPriorityEnum : short
+                {
+                    Low,
+                    Medium,
+                    High
+                }
+
+                public enum GlobalReverseTransitionFunctionsEnum : short
+                {
+                    Linear,
+                    Late,
+                    VeryLate,
+                    Early,
+                    VeryEarly,
+                    Cosine,
+                    Zero,
+                    One
+                }
+            }
+
+            [TagStructure(Size = 0x24, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagStructure(Size = 0x40, MinVersion = CacheVersion.HaloReach)]
+            public class DamageResponseDirectionalFlashStruct : TagStructure
+            {
+                public float Duration;
+
+                public GlobalReverseTransitionFunctionsEnum FadeFunction;
+                [TagField(Length = 2, Flags = Padding)]
+                public byte[] Padding0;
+
+                [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
+                public float Size;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float CenterSize;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float OffscreenSize;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float CenterAlpha;
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public float OffscreenAlpha;
+
+                public float InnerScale;
+                public float OuterScale;
+                public RealArgbColor FlashColor;
+
+                [TagField(MinVersion = CacheVersion.HaloReach)]
+                public RealArgbColor ArrowColor;
+
+                public enum GlobalReverseTransitionFunctionsEnum : short
+                {
+                    Linear,
+                    Late,
+                    VeryLate,
+                    Early,
+                    VeryEarly,
+                    Cosine,
+                    Zero,
+                    One
+                }
+            }
+        }
+
+        [TagStructure(Size = 0x4)]
+        public class DamageResponseMotionSensorPing : TagStructure
+        {
+            public short PingDuration; // ticks
+            public short PingScale;
+        }
+
+        [TagStructure(Size = 0x18)]
+        public class DamageResponseGlobalSoundEffectBlockStruct : TagStructure
+        {
+            public StringId EffectName;
+            public TagFunction ScaleDuration; // seconds
+        }
+
+        [TagStructure(Size = 0x4C)]
+        public class AreaControlBlockStruct : TagStructure
+        {
+            public AreaControlFlags Flags;
+            [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+            public byte[] Padding;
+            // the maximum distance this player feedback will affect
+            public float MaximumDistance; // world units
+            public AreaControlScalarFunctionStruct DistanceFalloff;
+            public AreaControlScalarFunctionStruct AngleFalloff;
+            public AreaControlScalarObjectFunctionStruct ObjectFalloff;
+
+            [Flags]
+            public enum AreaControlFlags : ushort
+            {
+                DistanceFalloff = 1 << 0,
+                AngleFalloff = 1 << 1,
+                ObjectFunctionFalloff = 1 << 2,
+                // use the head position and facing vector of the unit instead of the player camera
+                UseUnitPosition = 1 << 3
+            }
+
+            [TagStructure(Size = 0x14)]
+            public class AreaControlScalarFunctionStruct : TagStructure
+            {
+                public TagFunction Mapping;
+            }
+
+            [TagStructure(Size = 0x1C)]
+            public class AreaControlScalarObjectFunctionStruct : TagStructure
+            {
+                public StringId InputVariable;
+                public StringId RangeVariable;
+                public TagFunction Mapping;
             }
         }
     }

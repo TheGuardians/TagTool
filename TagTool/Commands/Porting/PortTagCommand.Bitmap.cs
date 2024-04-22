@@ -18,18 +18,6 @@ namespace TagTool.Commands.Porting
             bitmap.Flags = BitmapRuntimeFlags.UsingTagInteropAndTagResource;
             bitmap.UnknownB4 = 0;
 
-            if (BlamCache.Version == CacheVersion.HaloReach)
-            {
-                bitmap.TightBoundsOld = bitmap.TightBoundsNew;
-                
-                foreach(var image in bitmap.Images)
-                {
-                    // For all formats above #38 (reach DXN, CTX1, DXT3a_mono, DXT3a_alpha, DXT5a_mono, DXT5a_alpha, DXN_mono_alpha), subtract 5 to match with H3/ODST/HO enum
-                    if (image.Format >= (BitmapFormat)38)
-                        image.Format = image.Format - 5;
-                }
-            }
-
             //
             // For each bitmaps, apply conversion process and create a new list of resources that will replace the one from H3.
             //
@@ -42,10 +30,14 @@ namespace TagTool.Commands.Porting
                 if (resource == null)
                     return null;
                 resourceList.Add(resource);
+
+                //increment of Mipmapcount in BlamBitmap unnecessary for Reach
+                if (BlamCache.Version >= CacheVersion.HaloReach && bitmap.Images[i].MipmapCount > 0)
+                    bitmap.Images[i].MipmapCount--;
             }
 
-            bitmap.Resources = resourceList;
-            bitmap.InterleavedResources = null;
+            bitmap.HardwareTextures = resourceList;
+            bitmap.InterleavedHardwareTextures = null;
 
             //fixup for HO expecting 6 sequences in sensor_blips bitmap
             if (tagName == "ui\\chud\\bitmaps\\sensor_blips")
@@ -59,7 +51,7 @@ namespace TagTool.Commands.Porting
         
         private TagResourceReference ConvertBitmap(Bitmap bitmap, Dictionary<ResourceLocation, Stream> resourceStreams, int imageIndex, string tagName)
         {
-            BaseBitmap baseBitmap = BitmapConverter.ConvertGen3Bitmap(BlamCache, bitmap, imageIndex);
+            BaseBitmap baseBitmap = BitmapConverter.ConvertGen3Bitmap(BlamCache, bitmap, imageIndex, tagName);
 
             if (baseBitmap == null)
                 return null;

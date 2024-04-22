@@ -67,12 +67,12 @@ namespace TagTool.Havok
             return result;
         }
 
-        public static List<byte> ConvertMoppCodes(CacheVersion sourceVerison, CacheVersion destVersion, List<byte> moppData)
+        public static List<byte> ConvertMoppCodes(CacheVersion sourceVerison, CachePlatform sourcePlatform, CacheVersion destVersion, List<byte> moppData)
         {
             if (moppData == null || moppData.Count == 0)
                 return moppData;
             // Only halo 3 beta/retail mopp codes need to be update since they use more bits for addresses. A runtime patch is also required to fix the mopps just in time.
-            if (sourceVerison > CacheVersion.Halo3Retail)
+            if (sourceVerison > CacheVersion.Halo3Retail || sourcePlatform == CachePlatform.MCC)
                 return moppData;
 
             for (var i = 0; i < moppData.Count; i++)
@@ -314,33 +314,33 @@ namespace TagTool.Havok
             return moppData;
         }
 
-        public static byte[] ConvertHkpMoppData(CacheVersion sourceVersion, CacheVersion destVersion, byte[] data)
+        public static byte[] ConvertHkpMoppData(CacheVersion sourceVersion, CacheVersion destVersion, CachePlatform inCache, CachePlatform outCache, byte[] data)
         {
             if (data == null || data.Length == 0)
                 return data;
 
             byte[] result;
-            using (var inputReader = new EndianReader(new MemoryStream(data), CacheVersionDetection.IsLittleEndian(sourceVersion) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+            using (var inputReader = new EndianReader(new MemoryStream(data), CacheVersionDetection.IsLittleEndian(sourceVersion, inCache) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
             using (var outputStream = new MemoryStream())
-            using (var outputWriter = new EndianWriter(outputStream, CacheVersionDetection.IsLittleEndian(destVersion) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
+            using (var outputWriter = new EndianWriter(outputStream, CacheVersionDetection.IsLittleEndian(destVersion, outCache) ? EndianFormat.LittleEndian : EndianFormat.BigEndian))
             {
                 var dataContext = new DataSerializationContext(inputReader, outputWriter);
-                var deserializer = new TagDeserializer(sourceVersion);
-                var serializer = new TagSerializer(destVersion);
+                var deserializer = new TagDeserializer(sourceVersion, inCache);
+                var serializer = new TagSerializer(destVersion, outCache);
                 while (!inputReader.EOF)
                 {
                     var header = deserializer.Deserialize<HkpMoppCode>(dataContext);
-                    var dataSize = header.ArrayBase.GetCapacity();
+                    var dataSize = header.ArrayBase.Size;
                     var alignedSize = dataSize + 0xf & ~0xf;
                     var nextOffset = inputReader.Position + alignedSize;
                     List<byte> moppCodes = new List<byte>();
-                    for (int j = 0; j < header.ArrayBase.GetCapacity(); j++)
+                    for (int j = 0; j < dataSize; j++)
                     {
                         moppCodes.Add(inputReader.ReadByte());
                     }
                     inputReader.SeekTo(nextOffset);
 
-                    moppCodes = ConvertMoppCodes(sourceVersion, destVersion, moppCodes);
+                    moppCodes = ConvertMoppCodes(sourceVersion, inCache, destVersion, moppCodes);
 
                     serializer.Serialize(dataContext, header);
                     for (int j = 0; j < moppCodes.Count; j++)

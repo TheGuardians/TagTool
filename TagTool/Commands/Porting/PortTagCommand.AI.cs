@@ -131,14 +131,14 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            if (edDef.ActAttachments.Count == h3Def.ActAttachments.Count)
+            if (edDef.ActivityObjects.Count == h3Def.ActivityObjects.Count)
             {
-                for (var i = 0; i < edDef.ActAttachments.Count; i++)
+                for (var i = 0; i < edDef.ActivityObjects.Count; i++)
                 {
-                    if (edDef.ActAttachments[i].Crate != null || h3Def.ActAttachments[i].Crate == null)
+                    if (edDef.ActivityObjects[i].Crate != null || h3Def.ActivityObjects[i].Crate == null)
                         continue;
 
-                    edDef.ActAttachments[i].Crate = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Def.ActAttachments[i].Crate);
+                    edDef.ActivityObjects[i].Crate = ConvertTag(cacheStream, blamCacheStream, resourceStreams, h3Def.ActivityObjects[i].Crate);
 
                     merged = true;
                 }

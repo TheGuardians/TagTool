@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Layouts;
 
@@ -33,7 +34,7 @@ namespace TagTool.Commands.Definitions
         public override object Execute(List<string> args)
         {
             if (args.Count != 3)
-                return false;
+                return new TagToolError(CommandError.ArgCount);
             var inDir = args[0];
             var type = args[1];
             var outDir = args[2];
@@ -47,7 +48,7 @@ namespace TagTool.Commands.Definitions
                     writer = new CppLayoutWriter();
                     break;
                 default:
-                    return false;
+                    return new TagToolError(CommandError.ArgInvalid, $"\"{type}\"");
             }
             Directory.CreateDirectory(outDir);
 
@@ -66,7 +67,7 @@ namespace TagTool.Commands.Definitions
                 var pluginPath = Path.Combine(inDir, pluginFileName);
                 if (!File.Exists(pluginPath))
                 {
-                    Console.Error.WriteLine("WARNING: No plugin found for the '{0}' tag group", tag.Group.Tag);
+                    new TagToolWarning($"No plugin found for the '{tag.Group.Tag}' tag group");
                     continue;
                 }
 
@@ -74,14 +75,14 @@ namespace TagTool.Commands.Definitions
 
                 // Load the plugin into a layout
                 AssemblyPluginLoadResults loadedPlugin;
-                var groupName = Cache.StringTable.GetString(tag.Group.Name);
+                var groupName = tag.Group.ToString();
                 using (var reader = XmlReader.Create(pluginPath))
                     loadedPlugin = AssemblyPluginLoader.LoadPlugin(reader, groupName, tag.Group.Tag);
 
                 // Warn the user about conflicts
                 numConflicts += loadedPlugin.Conflicts.Count;
                 foreach (var conflict in loadedPlugin.Conflicts)
-                    Console.WriteLine("WARNING: Field \"{0}\" at offset 0x{1:X} in block \"{2}\" conflicts!", conflict.Name, conflict.Offset, conflict.Block ?? "(root)");
+                    new TagToolWarning($"Field \"{conflict.Name}\" at offset 0x{conflict.Offset:X} in block \"{conflict.Block ?? "(root)"}\" conflicts!");
 
                 // Write it
                 var outPath = Path.Combine(outDir, writer.GetSuggestedFileName(loadedPlugin.Layout));

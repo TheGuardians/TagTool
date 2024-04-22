@@ -3,7 +3,7 @@ using System;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Tag = "devi", Size = 0x98, MinVersion = CacheVersion.Halo3Retail)]
+    [TagStructure(Name = "device", Tag = "devi", Size = 0x98, MinVersion = CacheVersion.Halo3Retail)]
     public class Device : GameObject
     {
         public DeviceFlagBits DeviceFlags;
@@ -14,14 +14,27 @@ namespace TagTool.Tags.Definitions
         public float DepoweredPositionTransitionTime;
         public float DepoweredPositionAccelerationTime;
         public LightmapFlagBits LightmapFlags;
+        [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
+        public byte[] Padding3;
+
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag OpenUp;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag CloseDown;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag Opened;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag Closed;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag Depowered;
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag Repowered;
+
         public float DelayTime;
+
+        [TagField(ValidTags = new[] { "snd!", "effe" })]
         public CachedTag DelayEffect;
+
         public float AutomaticActivationRadius;
 
         [Flags]
@@ -41,7 +54,7 @@ namespace TagTool.Tags.Definitions
         }
 
         [Flags]
-        public enum LightmapFlagBits : int
+        public enum LightmapFlagBits : ushort
         {
             None,
             DoNotUseInLightmap = 1 << 0,

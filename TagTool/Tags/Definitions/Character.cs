@@ -2,6 +2,7 @@ using TagTool.Ai;
 using TagTool.Cache;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using System;
 
 namespace TagTool.Tags.Definitions
 {
@@ -9,18 +10,15 @@ namespace TagTool.Tags.Definitions
     [TagStructure(MinVersion = CacheVersion.Halo3ODST, Size = 0x1F8, Name = "character", Tag = "char")]
     public class Character : TagStructure
 	{
-        public uint Flags;
+        public CharacterFlags Flags;
         public CachedTag ParentCharacter;
         public CachedTag Unit;
-        /// <summary>
-        /// Creature reference for swarm characters ONLY
-        /// </summary>
-        public CachedTag Creature;
+        public CachedTag Creature; // Creature reference for swarm characters ONLY
         public CachedTag Style;
         public CachedTag MajorCharacter;
 
         public List<CharacterVariant> Variants;
-        public List<CharacterUnitDialogue> UnitDialogue;
+        public List<CharacterVoiceProperties> Voice;
         public List<CharacterGeneralProperties> GeneralProperties;
         public List<CharacterVitalityProperties> VitalityProperties;
         public List<CharacterPlacementProperties> PlacementProperties;
@@ -42,7 +40,7 @@ namespace TagTool.Tags.Definitions
         public List<CharacterBoardingProperties> BoardingProperties;
 
         [TagField(MinVersion = CacheVersion.Halo3ODST)]
-        public List<CharacterBunkerProperties> BunkerProperties;
+        public List<CharacterKungfuProperties> KungfuProperties;
 
         public List<CharacterGuardianProperties> GuardianProperties;       
         public List<CharacterCombatformProperties> CombatformProperties;
@@ -60,8 +58,20 @@ namespace TagTool.Tags.Definitions
         public List<CharacterVehicleProperties> VehicleProperties;
         public List<CharacterMorphProperties> MorphProperties;
         public List<CharacterEquipmentProperties> EquipmentProperties;
-        public List<CharacterMetagameProperties> MetagameProperties;
-        public List<CharacterActAttachment> ActAttachments;
-        
+        public List<CharacterMetagameProperties> CampaignMetagameBucket;
+        public List<CharacterActAttachment> ActivityObjects;
+
+        [Flags]
+        public enum CharacterFlags : uint
+        {
+            None,
+            Bit0 = 1 << 0,
+            Bit1 = 1 << 1,
+            Bit2 = 1 << 2,
+            Bit3 = 1 << 3,
+            Bit4 = 1 << 4,
+            Bit5 = 1 << 5,
+            Bit6 = 1 << 6
+        }
     }
 }

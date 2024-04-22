@@ -17,11 +17,13 @@ namespace TagTool.Cache.Gen3
         public ResourceGestalt ResourceGestalt;
         public ResourceLayoutTable ResourceLayoutTable;
         public GameCacheGen3 Cache;
+        public ResourcePageLruvCache ResourcePageCache;
 
         public ResourceCacheGen3(GameCacheGen3 cache, bool load = false)
         {
             isLoaded = false;
             Cache = cache;
+            ResourcePageCache = new ResourcePageLruvCache(2L * 1024 * 1024 * 1024); // 2GB;
 
             if (load)
                 LoadResourceCache();
@@ -29,19 +31,25 @@ namespace TagTool.Cache.Gen3
 
         public void LoadResourceCache()
         {
+            var gen3Header = (CacheFileHeaderGen3)Cache.BaseMapFile.Header;
+
             // means no resources
-            if (Cache.BaseMapFile.Header.SectionTable.Sections[(int)CacheFileSectionType.ResourceSection].Size == 0)
+            if (Cache.Version > CacheVersion.Halo3Beta && gen3Header.SectionTable.Sections[(int)CacheFileSectionType.ResourceSection].Size == 0)
                 return;
             // means resources but no tags, campaign.map for example. The resource section only contains pages for resources
-            else if (Cache.BaseMapFile.Header.SectionTable.Sections[(int)CacheFileSectionType.TagSection].Size == 0)
+            else if (Cache.Version > CacheVersion.Halo3Beta && gen3Header.SectionTable.Sections[(int)CacheFileSectionType.TagSection].Size == 0)
                 return;
-            // TODO: figure out another way to handle this
             else
             {
                 using (var cacheStream = Cache.OpenCacheRead())
                 {
                     ResourceGestalt = Cache.Deserialize<ResourceGestalt>(cacheStream, Cache.TagCacheGen3.GlobalInstances["zone"]);
-                    ResourceLayoutTable = Cache.Deserialize<ResourceLayoutTable>(cacheStream, Cache.TagCacheGen3.GlobalInstances["play"]);
+
+                    // there's probably a better way to determine which to use
+                    if (ResourceGestalt.LayoutTable.Sections.Count > 0)
+                        ResourceLayoutTable = ResourceGestalt.LayoutTable;
+                    else
+                        ResourceLayoutTable = Cache.Deserialize<ResourceLayoutTable>(cacheStream, Cache.TagCacheGen3.GlobalInstances["play"]);
                 }
             }
             isLoaded = true;
@@ -101,21 +109,46 @@ namespace TagTool.Cache.Gen3
             if (!IsResourceValid(tagResource))
                 return null;
 
-            byte[] primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
-            byte[] secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
+            Memory<byte> primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
+            Memory<byte> secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
 
-            if (primaryResourceData == null)
+            if (primaryResourceData.IsEmpty)
                 primaryResourceData = new byte[0];
 
-            if (secondaryResourceData == null)
+            if (secondaryResourceData.IsEmpty)
                 secondaryResourceData = new byte[0];
 
+            //
+            // Reorganize primary and secondary resources into a single contiguous data[]
+            //
+
             byte[] data = new byte[primaryResourceData.Length + secondaryResourceData.Length];
-            Array.Copy(primaryResourceData, 0, data, 0, primaryResourceData.Length);
-            Array.Copy(secondaryResourceData, 0, data, primaryResourceData.Length, secondaryResourceData.Length);
 
             if (data.Length == 0)
                 return null;
+
+            var primarySubPageTable = GetPrimarySubpageTable(resourceReference.Gen3ResourceID);
+            var secondarySubPageTable = GetSecondarySubpageTable(resourceReference.Gen3ResourceID);
+
+            if (primarySubPageTable == null)
+                return null;
+
+            var primaryRunningOffset = 0;
+            foreach (var subPage in primarySubPageTable.Subpages)
+            {
+                primaryResourceData.CopyTo(primaryRunningOffset, data, subPage.Offset, subPage.Size);
+                primaryRunningOffset += subPage.Size;
+            }
+
+            if (secondarySubPageTable != null && secondaryResourceData.Length > 0)
+            {
+                var secondaryRunningOffset = 0;
+                foreach (var subPage in secondarySubPageTable.Subpages)
+                {
+                    secondaryResourceData.CopyTo(secondaryRunningOffset, data, subPage.Offset, subPage.Size);
+                    secondaryRunningOffset += subPage.Size;
+                }
+            }
 
             // does not exist in gen3, create one.
             var resourceDef = new SoundResourceDefinition
@@ -155,6 +188,30 @@ namespace TagTool.Cache.Gen3
             return GetResourceDefinition<StructureBspCacheFileTagResources>(resourceReference);
         }
 
+        public override Tags.Resources.Gen4.BitmapTextureInteropResource GetBitmapTextureInteropResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.ModelAnimationTagResource GetModelAnimationTagResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.CollisionModelResource GetCollisionModelResourceGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.RenderGeometryApiResourceDefinition GetRenderGeometryApiResourceDefinitionGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.StructureBspTagResources GetStructureBspTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
+        public override Tags.Resources.Gen4.StructureBspCacheFileTagResources GetStructureBspCacheFileTagResourcesGen4(TagResourceReference resourceReference)
+        {
+            throw new NotImplementedException();
+        }
         public override TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition)
         {
             throw new NotImplementedException();
@@ -203,7 +260,7 @@ namespace TagTool.Cache.Gen3
         private void ApplyResourceDefinitionFixups(ResourceData tagResource, byte[] resourceDefinitionData)
         {
             using (var resourceDefinitionStream = new MemoryStream(resourceDefinitionData))
-            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, EndianFormat.BigEndian))
+            using (var fixupWriter = new EndianWriter(resourceDefinitionStream, Cache.Endianness))
             {
                 for (int i = 0; i < tagResource.FixupLocations.Count; i++)
                 {
@@ -214,44 +271,52 @@ namespace TagTool.Cache.Gen3
             }
         }
 
-        private T GetResourceDefinition<T>(TagResourceReference resourceReference)
+        public override object GetResourceDefinition(TagResourceReference resourceReference, Type definitionType)
         {
             var tagResource = GetTagResourceFromReference(resourceReference);
 
-            T result;
             byte[] resourceDefinitionData = new byte[tagResource.DefinitionDataLength];
             Array.Copy(ResourceGestalt.DefinitionData, tagResource.DefinitionDataOffset, resourceDefinitionData, 0, tagResource.DefinitionDataLength);
 
             ApplyResourceDefinitionFixups(tagResource, resourceDefinitionData);
 
-            byte[] primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
-            byte[] secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
+            Memory<byte> primaryResourceData = GetPrimaryResource(resourceReference.Gen3ResourceID);
+            Memory<byte> secondaryResourceData = GetSecondaryResource(resourceReference.Gen3ResourceID);
 
-            if (primaryResourceData == null)
+            if (primaryResourceData.IsEmpty && secondaryResourceData.IsEmpty && (definitionType ==  typeof(BitmapTextureInteropResource) || definitionType == typeof(BitmapTextureInterleavedInteropResource)))
+                return null;
+
+            if (primaryResourceData.IsEmpty)
                 primaryResourceData = new byte[0];
 
-            if (secondaryResourceData == null)
+            if (secondaryResourceData.IsEmpty)
                 secondaryResourceData = new byte[0];
 
+
             using (var definitionDataStream = new MemoryStream(resourceDefinitionData))
-            using (var dataStream = new MemoryStream(primaryResourceData))
-            using (var secondaryDataStream = new MemoryStream(secondaryResourceData))
-            using (var definitionDataReader = new EndianReader(definitionDataStream, EndianFormat.BigEndian))
-            using (var dataReader = new EndianReader(dataStream, EndianFormat.BigEndian))
-            using (var secondaryDataReader = new EndianReader(secondaryDataStream, EndianFormat.BigEndian))
+            using (var dataStream = new FixedMemoryStream(primaryResourceData))
+            using (var secondaryDataStream = new FixedMemoryStream(secondaryResourceData))
+            using (var definitionDataReader = new EndianReader(definitionDataStream, Cache.Endianness))
+            using (var dataReader = new EndianReader(dataStream, Cache.Endianness))
+            using (var secondaryDataReader = new EndianReader(secondaryDataStream, Cache.Endianness))
             {
                 var context = new ResourceDefinitionSerializationContext(dataReader, secondaryDataReader, definitionDataReader, tagResource.DefinitionAddress.Type);
-                var deserializer = new ResourceDeserializer(Cache.Version);
+                var deserializer = new ResourceDeserializer(Cache.Version, Cache.Platform);
                 definitionDataReader.SeekTo(tagResource.DefinitionAddress.Offset);
-                result = deserializer.Deserialize<T>(context);
+                return deserializer.Deserialize(context, definitionType);
             }
-            return result;
         }
 
-        private byte[] ReadSegmentData(ResourceData resource, int pageIndex, int offset, int sizeIndex)
+        private Memory<byte> ReadSegmentData(ResourceData resource, int pageIndex, int offset, int sizeIndex)
         {
             var page = ResourceLayoutTable.Pages[pageIndex];
-            var decompressed = ReadPageData(resource, page);
+
+            byte[] decompressed;
+            if(!ResourcePageCache.TryGetPage(pageIndex, out decompressed))
+            {
+                decompressed = ReadPageData(resource, page);
+                ResourcePageCache.AddPage(pageIndex, decompressed);
+            }
 
             int length;
             if (sizeIndex != -1)
@@ -259,12 +324,40 @@ namespace TagTool.Cache.Gen3
             else
                 length = decompressed.Length - offset;
 
-            var data = new byte[length];
-            Array.Copy(decompressed, offset, data, 0, length);
-            return data;
+            return decompressed.AsMemory(offset, length);
         }
 
-        private byte[] GetPrimaryResource(DatumHandle ID)
+        private ResourceSubpageTable GetPrimarySubpageTable(DatumHandle ID)
+        {
+            var resource = ResourceGestalt.TagResources[ID.Index];
+
+            if (resource.SegmentIndex == -1)
+                return null;
+
+            var segment = ResourceLayoutTable.Sections[resource.SegmentIndex];
+
+            if (segment.RequiredSizeIndex == -1)
+                return null;
+            else
+                return ResourceLayoutTable.SubpageTables[segment.RequiredSizeIndex];
+        }
+
+        private ResourceSubpageTable GetSecondarySubpageTable(DatumHandle ID)
+        {
+            var resource = ResourceGestalt.TagResources[ID.Index];
+
+            if (resource.SegmentIndex == -1)
+                return null;
+
+            var segment = ResourceLayoutTable.Sections[resource.SegmentIndex];
+
+            if (segment.OptionalSizeIndex == -1)
+                return null;
+            else
+                return ResourceLayoutTable.SubpageTables[segment.OptionalSizeIndex];
+        }
+
+        private Memory<byte> GetPrimaryResource(DatumHandle ID)
         {
             var resource = ResourceGestalt.TagResources[ID.Index];
 
@@ -282,7 +375,7 @@ namespace TagTool.Cache.Gen3
             return ReadSegmentData(resource, segment.RequiredPageIndex, segment.RequiredSegmentOffset, segment.RequiredSizeIndex);
         }
 
-        private byte[] GetSecondaryResource(DatumHandle ID)
+        private Memory<byte> GetSecondaryResource(DatumHandle ID)
         {
             var resource = ResourceGestalt.TagResources[ID.Index];
 
@@ -334,10 +427,18 @@ namespace TagTool.Cache.Gen3
             var decompressed = new byte[page.UncompressedBlockSize];
 
             using (var cacheStream = cache.OpenCacheRead())
-            using (var reader = new EndianReader(cacheStream, EndianFormat.BigEndian))
+            using (var reader = new EndianReader(cacheStream, Cache.Endianness))
             {
-                var sectionTable = cache.BaseMapFile.Header.SectionTable;
-                var blockOffset = sectionTable.GetOffset(CacheFileSectionType.ResourceSection, page.BlockAddress);
+                uint blockOffset = 0;
+                if (page.SharedCacheIndex < 0 || (ResourceLayoutTable.SharedFiles[page.SharedCacheIndex].Flags & 1) != 0)
+                {
+                    var sectionTable = ((CacheFileHeaderGen3)cache.BaseMapFile.Header).SectionTable;
+                    blockOffset = sectionTable.GetOffset(CacheFileSectionType.ResourceSection, page.BlockAddress);
+                }
+                else
+                {
+                    blockOffset = ResourceLayoutTable.SharedFiles[page.SharedCacheIndex].BlockOffset + page.BlockAddress;
+                }
 
                 reader.SeekTo(blockOffset);
                 var compressed = reader.ReadBytes(BitConverter.ToInt32(BitConverter.GetBytes(page.CompressedBlockSize), 0));
@@ -346,7 +447,7 @@ namespace TagTool.Cache.Gen3
                     return compressed;
 
                 if (page.CompressionCodecIndex == -1)
-                    reader.BaseStream.Read(decompressed, 0, BitConverter.ToInt32(BitConverter.GetBytes(page.UncompressedBlockSize), 0));
+                    return compressed;
                 else
                     using (var readerDeflate = new DeflateStream(new MemoryStream(compressed), CompressionMode.Decompress))
                         readerDeflate.Read(decompressed, 0, BitConverter.ToInt32(BitConverter.GetBytes(page.UncompressedBlockSize), 0));
@@ -355,4 +456,6 @@ namespace TagTool.Cache.Gen3
             return decompressed;
         }
     }
+
+    
 }

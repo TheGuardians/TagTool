@@ -8,13 +8,13 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "color_table", Tag = "colo", Size = 0xC)]
     public class ColorTable : TagStructure
 	{
-        public List<ColorTableBlock> ColorTables;
+        public List<ColorTableBlock> Colors;
 
         [TagStructure(Size = 0x30)]
         public class ColorTableBlock : TagStructure
 		{
             [TagField(Flags = Label, Length = 32)]
-            public string String;
+            public string Name;
 
             public RealArgbColor Color;
         }

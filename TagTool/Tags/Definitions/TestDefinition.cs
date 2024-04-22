@@ -24,7 +24,7 @@ namespace TagTool.Tags.Definitions
             // TODO:
         }
 
-        [TagStructure(Size = 0x1E0)]
+        [TagStructure(Size = 0x1E2)]
         public class TestBlockDefinition : TagStructure
         {
             public byte     Byte; // 1

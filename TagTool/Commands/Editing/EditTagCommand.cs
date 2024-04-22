@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TagTool.Cache;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Editing
 {
@@ -30,8 +31,10 @@ namespace TagTool.Commands.Editing
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 1 || !Cache.TryGetCachedTag(args[0], out var tag))
-                return false;
+            if (args.Count != 1)
+                return new TagToolError(CommandError.ArgCount);
+            if (!Cache.TagCache.TryGetCachedTag(args[0], out var tag))
+                return new TagToolError(CommandError.TagInvalid, $"\"{args[0]}\"");
 
             var oldContext = ContextStack.Context;
 
@@ -42,7 +45,7 @@ namespace TagTool.Commands.Editing
 
             ContextStack.Push(EditTagContextFactory.Create(ContextStack, Cache, TagInstance, TagDefinition));
 
-            var groupName = Cache.StringTable.GetString(TagInstance.Group.Name);
+            var groupName = TagInstance.Group.ToString();
             var tagName = TagInstance?.Name ?? $"0x{TagInstance.Index:X4}";
 
             Console.WriteLine($"Tag {tagName}.{groupName} has been opened for editing.");

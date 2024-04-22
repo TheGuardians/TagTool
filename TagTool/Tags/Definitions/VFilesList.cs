@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
     /// <summary>
     /// Contains a list of vfiles.
     /// </summary>
-    [TagStructure(Name = "vfiles_list", Tag = "vfsl", Size = 0x20, MinVersion = CacheVersion.HaloOnline106708)]
+    [TagStructure(Name = "vfiles_list", Tag = "vfsl", Size = 0x20, MinVersion = CacheVersion.HaloOnlineED)]
     public class VFilesList : TagStructure
 	{
         /// <summary>

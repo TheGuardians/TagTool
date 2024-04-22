@@ -6,24 +6,24 @@ namespace TagTool.Audio
 {
     [TagStructure(Size = 0x1)]
     public class SoundClass : TagStructure
-	{
+    {
         [TagField(MinVersion = CacheVersion.HaloXbox, MaxVersion = CacheVersion.HaloCustomEdition)]
         public SoundClassHalo Halo;
 
-        [TagField(Version = CacheVersion.Halo3Retail)]
+        [TagField(MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo2Vista)]
+        public SoundClassHalo2 Halo2;
+
+        [TagField(MinVersion = CacheVersion.Halo3Beta, MaxVersion = CacheVersion.Halo3Retail)]
         public SoundClassHalo3Retail Halo3Retail;
 
         [TagField(Version = CacheVersion.Halo3ODST)]
         public SoundClassHalo3ODST Halo3ODST;
 
-        [TagField(MinVersion = CacheVersion.HaloOnline106708)]
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
         public SoundClassHaloOnline HaloOnline;
 
-        [TagField(Version = CacheVersion.HaloReach)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public SoundClassHaloReach HaloReach;
-
-        [TagField(MinVersion = CacheVersion.Halo2Xbox, MaxVersion = CacheVersion.Halo2Vista)]
-        public SoundClassHalo2 Halo2;
 
         public enum SoundClassHalo2 : sbyte
         {
@@ -417,7 +417,15 @@ namespace TagTool.Audio
 
             switch (from)
             {
+                case CacheVersion.Halo2Alpha:
+                case CacheVersion.Halo2Beta:
+                case CacheVersion.Halo2Xbox:
+                case CacheVersion.Halo2Vista:
+                    value = Halo2.ToString();
+                    break;
+
                 case CacheVersion.Halo3Retail:
+                case CacheVersion.Halo3Beta:
                     value = Halo3Retail.ToString();
                     break;
 
@@ -426,9 +434,13 @@ namespace TagTool.Audio
                     break;
 
                 case CacheVersion.HaloReach:
+                case CacheVersion.HaloReach11883:
                     value = HaloReach.ToString();
                     break;
             }
+
+            if (CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, from))
+                value = HaloOnline.ToString();
 
             // Fix class to match to equivalent ones
 
@@ -475,6 +487,9 @@ namespace TagTool.Audio
 
             else if (value.Equals("WeaponReadyThirdPerson"))
                 value = "WeaponReady";
+
+            else if (value.Equals("EquipmentEffect"))
+                value = "ObjectLooping";
 
             // Fix the surround sound class
 
