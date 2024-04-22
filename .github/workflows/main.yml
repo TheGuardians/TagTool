@@ -1,0 +1,57 @@
+name: TagTool Build
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Determine Version
+      id: determine_version
+      run: |
+        $version = git rev-parse --short=8 HEAD
+        echo "::set-output name=version::$version"
+
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+      
+    - name: Install 7Zip
+      run: |
+        Invoke-WebRequest -Uri "https://www.7-zip.org/a/7z1900-x64.msi" -OutFile "$env:TEMP\7z.msi"
+        Start-Process -Wait -FilePath msiexec -ArgumentList "/i", "$env:TEMP\7z.msi", "/quiet" 
+
+    - name: Restore Packages
+      run: nuget restore TagTool.sln
+
+    - name: Update AssemblyInfo.cs
+      run: |
+        version=${{ steps.determine_version.outputs.version }}
+        echo "[assembly: AssemblyVersion(\"$version\")]" > TagTool/Properties/AssemblyInfo.cs
+
+    - name: Build solution
+      run: msbuild TagTool.sln -t:rebuild -property:Platform=x64 -property:Configuration=Release
+
+    - name: Zip Release
+      run: |
+        & "C:\Program Files\7-Zip\7z.exe" a release_x64.7z TagTool/bin/x64/Release/*
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release_x64.7z
+        tag_name: ${{ steps.determine_version.outputs.version }}
+        release_name: TagTool Release ${{ steps.determine_version.outputs.version }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
