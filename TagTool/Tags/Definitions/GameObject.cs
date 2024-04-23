@@ -882,7 +882,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
     public class ObjectDefinitionFlags : VersionedFlags
     {
-        [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
         public ObjectFlags Flags;
 
         [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
