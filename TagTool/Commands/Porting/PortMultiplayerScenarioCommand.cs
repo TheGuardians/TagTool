@@ -888,7 +888,7 @@ namespace TagTool.Commands.Porting
                     // fixup the allowed bsps
                     placement.CanAttachToBspFlags = (ushort)mask;
                     // tell it to always spawn
-                    placement.PlacementFlags &= ~ObjectPlacementFlags.NotAutomatically;
+                    placement.PlacementFlags.Flags &= ~ObjectPlacementFlags.ObjectLocationPlacementFlags.NotAutomatically;
 
                     // add the placement to the new list
                     newPlacements.Add(placement);

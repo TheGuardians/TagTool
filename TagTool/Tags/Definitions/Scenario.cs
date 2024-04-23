@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using static TagTool.Tags.Definitions.Gen4.Scenario;
+using static TagTool.Tags.Definitions.Item;
 
 namespace TagTool.Tags.Definitions
 {
@@ -385,7 +386,7 @@ namespace TagTool.Tags.Definitions
 
         [TagField(ValidTags = new[] { "chmt" })]
         public CachedTag GlobalLighting;
-        [TagField(Platform = CachePlatform .MCC)]
+        [TagField(Platform = CachePlatform.MCC)]
         public List<NullBlock> ChocolateMountains;
         [TagField(ValidTags = new[] { "sLdT" })]
         public CachedTag Lightmap;
@@ -1219,25 +1220,48 @@ namespace TagTool.Tags.Definitions
             public short PlacementIndex;
         }
 
-        [Flags]
-        public enum ObjectPlacementFlags : int
+        [TagStructure(Size = 0x4)]
+        public class ObjectPlacementFlags : VersionedFlags
         {
-            None = 0,
-            NotAutomatically = 1 << 0,
-            NotOnEasy = 1 << 1,
-            NotOnNormal = 1 << 2,
-            NotOnHard = 1 << 3,
-            LockTypeToEnvObject = 1 << 4,
-            LockTransformToEnvObject = 1 << 5,
-            NeverPlaced = 1 << 6,
-            LockNameToEnvObject = 1 << 7,
-            CreateAtRest = 1 << 8,
-            StoreOrientations = 1 << 9,
-            Startup = 1 << 10,
-            AttachPhysically = 1 << 11,
-            AttachWithScale = 1 << 12,
-            NoParentLighting = 1 << 13
-        }
+            [TagField(Platform = CachePlatform.Original)]
+            public ObjectLocationPlacementFlags Flags;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public ObjectLocationPlacementFlagsMCC FlagsMCC;
+
+            [Flags]
+            public enum ObjectLocationPlacementFlags : int
+            {
+                None = 0,
+                NotAutomatically = 1 << 0,
+                NotOnEasy = 1 << 1,
+                NotOnNormal = 1 << 2,
+                NotOnHard = 1 << 3,
+                LockTypeToEnvObject = 1 << 4,
+                LockTransformToEnvObject = 1 << 5,
+                NeverPlaced = 1 << 6,
+                LockNameToEnvObject = 1 << 7,
+                CreateAtRest = 1 << 8,
+                StoreOrientations = 1 << 9,
+                Startup = 1 << 10,
+                AttachPhysically = 1 << 11,
+                AttachWithScale = 1 << 12,
+                NoParentLighting = 1 << 13
+            }
+
+            public enum ObjectLocationPlacementFlagsMCC : uint
+            {
+                NotAutomatically = 1 << 0,
+                LockTypeToEnvObject = 1 << 1,
+                LockTransformToEnvObject = 1 << 2,
+                NeverPlaced = 1 << 3,
+                LockNameToEnvObject = 1 << 4,
+                CreateAtRest = 1 << 5,
+                StoreOrientations = 1 << 6,
+                PvsBound = 1 << 7,
+                Startup = 1 << 8
+            }
+        }      
 
         [TagStructure(Size = 0x1C)]
         public class ObjectNodeOrientation : TagStructure
@@ -4686,10 +4710,11 @@ namespace TagTool.Tags.Definitions
             public CachedTag Reference;
         }
 
-        [TagStructure(Size = 0x2C)]
+        [TagStructure(Size = 0x1C, Platform = CachePlatform.MCC)]
+        [TagStructure(Size = 0x2C, Platform = CachePlatform.Original)]
         public class ScreenEffectReference : TagStructure
         {
-            [TagField(Length = 0x10, Flags = Padding)]
+            [TagField(Length = 0x10, Flags = Padding, Platform = CachePlatform.Original)]
             public byte[] HLYWEJXGX;
             public CachedTag ScreenEffect;
             public StringId PrimaryInput; // interpolator

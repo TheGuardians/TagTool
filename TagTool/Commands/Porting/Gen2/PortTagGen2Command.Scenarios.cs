@@ -806,7 +806,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     PaletteIndex = machobj.Type,
                     NameIndex = machobj.Name,
-                    PlacementFlags = (Scenario.ObjectPlacementFlags)machobj.ObjectData.PlacementFlags,
+                    PlacementFlags = new Scenario.ObjectPlacementFlags { Flags = (Scenario.ObjectPlacementFlags.ObjectLocationPlacementFlags)machobj.ObjectData.PlacementFlags },
                     Position = machobj.ObjectData.Position,
                     Rotation = machobj.ObjectData.Rotation,
                     Scale = machobj.ObjectData.Scale,
@@ -841,7 +841,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     PaletteIndex = ctrlobj.Type,
                     NameIndex = ctrlobj.Name,
-                    PlacementFlags = (Scenario.ObjectPlacementFlags)ctrlobj.ObjectData.PlacementFlags,
+                    PlacementFlags = new Scenario.ObjectPlacementFlags { Flags = (Scenario.ObjectPlacementFlags.ObjectLocationPlacementFlags)ctrlobj.ObjectData.PlacementFlags },
                     Position = ctrlobj.ObjectData.Position,
                     Rotation = ctrlobj.ObjectData.Rotation,
                     Scale = ctrlobj.ObjectData.Scale,
@@ -874,7 +874,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     PaletteIndex = crateobj.Type,
                     NameIndex = crateobj.Name,
-                    PlacementFlags = (Scenario.ObjectPlacementFlags)crateobj.ObjectData.PlacementFlags,
+                    PlacementFlags = new Scenario.ObjectPlacementFlags { Flags = (Scenario.ObjectPlacementFlags.ObjectLocationPlacementFlags)crateobj.ObjectData.PlacementFlags },
                     Position = crateobj.ObjectData.Position,
                     Rotation = crateobj.ObjectData.Rotation,
                     Scale = crateobj.ObjectData.Scale,
@@ -903,7 +903,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     PaletteIndex = scenobj.Type,
                     NameIndex = scenobj.Name,
-                    PlacementFlags = (Scenario.ObjectPlacementFlags)scenobj.ObjectData.PlacementFlags,
+                    PlacementFlags = new Scenario.ObjectPlacementFlags { Flags = (Scenario.ObjectPlacementFlags.ObjectLocationPlacementFlags)scenobj.ObjectData.PlacementFlags },
                     Position = scenobj.ObjectData.Position,
                     Rotation = scenobj.ObjectData.Rotation,
                     Scale = scenobj.ObjectData.Scale,
@@ -935,7 +935,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     PaletteIndex = bipdobj.Type,
                     NameIndex = bipdobj.Name,
-                    PlacementFlags = (Scenario.ObjectPlacementFlags)bipdobj.ObjectData.PlacementFlags,
+                    PlacementFlags = new Scenario.ObjectPlacementFlags { Flags = (Scenario.ObjectPlacementFlags.ObjectLocationPlacementFlags)bipdobj.ObjectData.PlacementFlags },
                     Position = bipdobj.ObjectData.Position,
                     Rotation = bipdobj.ObjectData.Rotation,
                     Scale = bipdobj.ObjectData.Scale,
@@ -971,7 +971,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     PaletteIndex = weapobj.Type,
                     NameIndex = weapobj.Name,
-                    PlacementFlags = (Scenario.ObjectPlacementFlags)weapobj.ObjectData.PlacementFlags,
+                    PlacementFlags = new Scenario.ObjectPlacementFlags { Flags = (Scenario.ObjectPlacementFlags.ObjectLocationPlacementFlags)weapobj.ObjectData.PlacementFlags },
                     Position = weapobj.ObjectData.Position,
                     Rotation = weapobj.ObjectData.Rotation,
                     Scale = weapobj.ObjectData.Scale,
@@ -1002,7 +1002,7 @@ namespace TagTool.Commands.Porting.Gen2
                 {
                     PaletteIndex = eqipobj.Type,
                     NameIndex = eqipobj.Name,
-                    PlacementFlags = (Scenario.ObjectPlacementFlags)eqipobj.ObjectData.PlacementFlags,
+                    PlacementFlags = new Scenario.ObjectPlacementFlags { Flags = (Scenario.ObjectPlacementFlags.ObjectLocationPlacementFlags)eqipobj.ObjectData.PlacementFlags },
                     Position = eqipobj.ObjectData.Position,
                     Rotation = eqipobj.ObjectData.Rotation,
                     Scale = eqipobj.ObjectData.Scale,
@@ -1116,7 +1116,6 @@ namespace TagTool.Commands.Porting.Gen2
                                 {
                                     PaletteIndex = (short)palette_index,
                                     NameIndex = -1,
-                                    PlacementFlags = Scenario.ObjectPlacementFlags.None,
                                     Position = NetgameEquipment.Position,
                                     Rotation = NetgameEquipment.Orientation.Orientation,
                                     Scale = 1,
@@ -1166,7 +1165,7 @@ namespace TagTool.Commands.Porting.Gen2
                                     {
                                         PaletteIndex = (short)palette_index,
                                         NameIndex = -1,
-                                        PlacementFlags = Scenario.ObjectPlacementFlags.None,
+                                        PlacementFlags = new Scenario.ObjectPlacementFlags { Flags = Scenario.ObjectPlacementFlags.ObjectLocationPlacementFlags.None},
                                         Position = NetgameEquipment.Position,
                                         Rotation = NetgameEquipment.Orientation.Orientation,
                                         Scale = 1,
@@ -1202,7 +1201,7 @@ namespace TagTool.Commands.Porting.Gen2
                                     {
                                         PaletteIndex = (short)palette_index,
                                         NameIndex = -1,
-                                        PlacementFlags = Scenario.ObjectPlacementFlags.None,
+                                        PlacementFlags = new Scenario.ObjectPlacementFlags { Flags = Scenario.ObjectPlacementFlags.ObjectLocationPlacementFlags.None},
                                         Position = NetgameEquipment.Position,
                                         Rotation = NetgameEquipment.Orientation.Orientation,
                                         Scale = 1,

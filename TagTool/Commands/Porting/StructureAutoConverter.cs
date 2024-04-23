@@ -18,10 +18,10 @@ namespace TagTool.Commands.Porting
             this.destCacheInfo = destCacheInfo;
         }
 
-        public StructureAutoConverter(CacheVersion sourceVersion, CachePlatform sourcePlatform, CacheVersion destVerstion, CachePlatform destPlatform)
+        public StructureAutoConverter(CacheVersion sourceVersion, CachePlatform sourcePlatform, CacheVersion destVersion, CachePlatform destPlatform)
         {
             sourceCacheInfo = new GameCacheInfo(sourceVersion, sourcePlatform);
-            destCacheInfo = new GameCacheInfo(destVerstion, destPlatform);
+            destCacheInfo = new GameCacheInfo(destVersion, destPlatform);
         }
 
         public StructureAutoConverter(GameCache sourceCache, GameCache destCache)
@@ -149,26 +149,15 @@ namespace TagTool.Commands.Porting
             output = default(T);
             if (input == null)
                 return false;
+            var members = input.ToString()
+                .Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Where(x => enumType.IsEnumDefined(x))
+                .ToArray();
+            if (members.Length == 0)
+                return false;
 
-            string setstring = "";
-            bool result = false;
-            string[] inputlist = input.ToString().ToUpper().Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string en in Enum.GetNames(enumType))
-            {
-                if (inputlist.Contains(en.ToUpper()))
-                {
-                    if (result)
-                        setstring += $",{en}";
-                    else
-                        setstring += $"{en}";
-                    result = true;
-                }
-            }
-
-            if (result)
-                output = (T)Enum.Parse(enumType, setstring, true);
-
-            return result;
+            output = (T)Enum.Parse(enumType, string.Join(", ", members));
+            return true;
         }
 
         public void InitTagBlocks(object input)

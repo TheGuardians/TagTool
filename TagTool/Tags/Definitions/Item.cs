@@ -10,7 +10,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "item", Tag = "item", Size = 0xBC, MinVersion = CacheVersion.HaloReach)]
     public class Item : GameObject
     {
-        public ItemFlagBits ItemFlags;
+        public ItemDefinitionFlags ItemFlags;
 
         [TagField(Platform = CachePlatform.Original)]
         public ObsoleteItemFieldStruct ObsoleteItemFields;
@@ -59,6 +59,23 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "grfr" }, MinVersion = CacheVersion.HaloReach)]
         public CachedTag GroundedFrictionSettings;
 
+        [TagStructure(Size = 0x4)]
+        public class ItemDefinitionFlags : VersionedFlags
+        {
+            [TagField(Platform = CachePlatform.Original)]
+            public ItemFlagBits Flags;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public ItemFlagBitsMCC FlagsMCC;
+        }
+
+        [Flags]
+        public enum ItemFlagBitsMCC : uint
+        {
+            None,
+            AlwaysMaintainsZUp = 1 << 0,
+            CrateStyleCollisionFilter = 1 << 1,
+        }
 
         [Flags]
         public enum ItemFlagBits : uint

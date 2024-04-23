@@ -1648,6 +1648,10 @@ namespace TagTool.Commands.Porting
                 case ObjectTypeFlags objectTypeFlags:
 					return ConvertObjectTypeFlags(objectTypeFlags);
 
+                case VersionedFlags versionedFlags:
+                    versionedFlags.ConvertFlags(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform);
+                    return versionedFlags;
+
                 case GameObject.MultiplayerObjectBlock multiplayer when BlamCache.Version >= CacheVersion.HaloReach:
                     {
                         multiplayer.Type = multiplayer.TypeReach.ConvertLexical<MultiplayerObjectType>();

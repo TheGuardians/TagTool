@@ -15,7 +15,7 @@ namespace TagTool.Tags.Definitions
     [TagStructure(Name = "unit", Tag = "unit", Size = 0x3A0, MinVersion = CacheVersion.HaloReach)]
     public class Unit : GameObject
     {
-        public UnitFlagBits UnitFlags; // int
+        public UnitDefinitionFlags UnitFlags; // int
         public DefaultTeamValue DefaultTeam; // short
         public ConstantSoundVolumeValue ConstantSoundVolume; // short
 
@@ -238,8 +238,45 @@ namespace TagTool.Tags.Definitions
             PegsThrottle = 1 << 0
         }
 
+        [TagStructure(Size = 0x4)]
+        public class UnitDefinitionFlags : VersionedFlags
+        {
+            [TagField(Platform = CachePlatform.Original)]
+            public UnitFlagBits Flags;
+
+            [TagField(Platform = CachePlatform.MCC)]
+            public UnitFlagBitsMCC FlagsMCC;
+        }
+
         [Flags]
-        public enum UnitFlagBits : int
+        public enum UnitFlagBitsMCC : uint
+        {
+            CircularAiming = 1 << 0,
+            DestroyedAfterDying = 1 << 1,
+            FiresFromCamera = 1 << 2,
+            DoesntShowReadiedWeapon = 1 << 3,
+            CausesPassengerDialogue = 1 << 4,
+            ResistsPings = 1 << 5,
+            MeleeAttackIsFatal = 1 << 6,
+            DontRefaceDuringPings = 1 << 7,
+            HasNoAiming = 1 << 8,
+            SimpleCreature = 1 << 9,
+            CannotOpenDoorsAutomatically = 1 << 10,
+            NotInstantlyKilledByMelee = 1 << 11,
+            FlashlightPowerDoesntTransferToWeapon = 1 << 12,
+            TopLevelForAOEDamage = 1 << 13,
+            SpecialCinematicUnit = 1 << 14,
+            IgnoredByAutoaiming = 1 << 15,
+            UseVelocityAsAcceleration = 1 << 16,
+            ActsAsGunnerForParent = 1 << 17,
+            ControlledByParentGunner = 1 << 18,
+            ParentsPrimaryWeapon = 1 << 19,
+            UnitHasBoost = 1 << 20,
+            AllowAimWhileOpeningOrClosing = 1 << 21
+        }
+
+        [Flags]
+        public enum UnitFlagBits : uint
         {
             CircularAiming = 1 << 0,
             DestroyedAfterDying = 1 << 1,

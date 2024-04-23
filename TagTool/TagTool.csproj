@@ -1727,6 +1727,7 @@
     <Compile Include="Tags\Resources\BinkResource.cs" />
     <Compile Include="Tags\Resources\SoundResourceDefinition.cs" />
     <Compile Include="Havok\BipedPhysicsFlags.cs" />
+    <Compile Include="Tags\VersionedFlags.cs" />
     <Compile Include="Tools\Geometry\BlamModelFile.cs" />
     <Compile Include="Video\Utils\VideoUtils.cs" />
   </ItemGroup>

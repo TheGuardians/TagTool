@@ -18,10 +18,6 @@ namespace TagTool.Tags.Definitions
         [TagField(Flags = Padding, Length = 2, MinVersion = CacheVersion.HaloReach)]
         public byte[] pad = new byte[2];
 
-        [TagField(MinVersion = CacheVersion.HaloReach)]
-        public GameObjectFlagsReach ReachObjectFlags;
-
-        [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
         public ObjectDefinitionFlags ObjectFlags;
 
         public float BoundingRadius; // world units
@@ -882,8 +878,45 @@ namespace TagTool.Tags.Definitions
         DamageNotBlockedByObstructions = 1 << 15
     }
 
+    [TagStructure(Size = 0x2, MaxVersion = CacheVersion.HaloOnline700123)]
+    [TagStructure(Size = 0x4, MinVersion = CacheVersion.HaloReach)]
+    public class ObjectDefinitionFlags : VersionedFlags
+    {
+        [TagField(MaxVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
+        public ObjectFlags Flags;
+
+        [TagField(MinVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.MCC)]
+        public ObjectFlagsMCC FlagsMCC;
+
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public GameObjectFlagsReach FlagsReach;
+    }
+
     [Flags]
-    public enum ObjectDefinitionFlags : ushort
+    public enum ObjectFlagsMCC : ushort
+    {
+        DoesNotCastShadow = 1 << 0,
+        SearchCardinalDirectionLightmapsOnFailure = 1 << 1,
+        PreservesInitialDamageOwner = 1 << 2,
+        NotAPathfindingObstacle = 1 << 3,
+        // object passes all function values to parent and uses parent's markers
+        ExtensionOfParent = 1 << 4,
+        DoesNotCauseCollisionDamage = 1 << 5,
+        EarlyMover = 1 << 6,
+        EarlyMoverLocalizedPhysics = 1 << 7,
+        ObjectScalesAttachments = 1 << 8,
+        NonPhysicalInMapEditor = 1 << 9,
+        // use this for the mac gun on spacestation
+        AttachToClustersByDynamicSphere = 1 << 10,
+        EffectsCreatedByThisObjectDoNotSpawnObjectsInMultiplayer = 1 << 11,
+        // specificly the flying observer camera
+        DoesNotCollideWithCamera = 1 << 12,
+        // AOE damage being applied to this object does not test for obstrutions.
+        DamageNotBlockedByObstructions = 1 << 13
+    }
+
+    [Flags]
+    public enum ObjectFlags : ushort
     {
         None = 0,
         DoesNotCastShadow = 1 << 0,
