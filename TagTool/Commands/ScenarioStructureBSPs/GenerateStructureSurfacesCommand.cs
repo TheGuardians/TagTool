@@ -150,7 +150,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         {
             // Do nothing if the instanced geometry has no collision
             var collisionBsp = instanceDef.CollisionInfo;
-            if (collisionBsp.Surfaces.Count == 0)
+            if (collisionBsp.Surfaces.Count == 0 || instanceDef.MeshIndex == -1)
                 return;
 
             // Do nothing if the instanced geometry has no vertex data
