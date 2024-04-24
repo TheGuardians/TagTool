@@ -24,7 +24,7 @@ namespace TagTool.Cache
         public TagCacheGen3 TagCacheGen3;
         public ResourceCacheGen3 ResourceCacheGen3;
 
-        public DirectoryInfo FMODSoundCacheDirectory;
+        public List<DirectoryInfo> FMODSoundCacheDirectories = new List<DirectoryInfo>();
         public FMODSoundCache FMODSoundCache;
 
         public override TagCache TagCache => TagCacheGen3;
@@ -129,6 +129,7 @@ namespace TagTool.Cache
 
             if(Platform == CachePlatform.MCC)
             {
+                //check if this is a mod
                 if (CacheFile.Directory.FullName.Contains("steamapps\\workshop\\content"))
                 {
                     string root = CacheFile.Directory.FullName.Split(new string[] { "workshop" }, StringSplitOptions.None)[0];
@@ -136,14 +137,18 @@ namespace TagTool.Cache
 
                     if (Version != CacheVersion.Halo3Retail)
                         game = Version.ToString();
-
-                    FMODSoundCacheDirectory = new DirectoryInfo(Path.Combine(root, "common\\Halo The Master Chief Collection", game, "fmod\\pc"));
+                    DirectoryInfo mainDirectory = new DirectoryInfo(Path.Combine(root, "common\\Halo The Master Chief Collection", game, "fmod\\pc"));
+                    if (mainDirectory.Exists)
+                        FMODSoundCacheDirectories.Add(mainDirectory);
+                    else
+                        new TagToolWarning("Failed to find main mcc sound banks!");
                 }
-                else
-                    FMODSoundCacheDirectory = new DirectoryInfo(Path.Combine(CacheFile.Directory.FullName, @"..\fmod\pc"));
-
-                if(FMODSoundCacheDirectory.Exists)
-                    FMODSoundCache = new FMODSoundCache(FMODSoundCacheDirectory);
+                DirectoryInfo localDirectory = new DirectoryInfo(Path.Combine(CacheFile.Directory.FullName, @"..\fmod\pc"));
+                if (localDirectory.Exists)
+                    FMODSoundCacheDirectories.Add(localDirectory);
+                if (FMODSoundCacheDirectories.Count == 0)
+                    new TagToolWarning("Failed to load any FMOD sound banks!");
+                FMODSoundCache = new FMODSoundCache(FMODSoundCacheDirectories);
             }
         }
 

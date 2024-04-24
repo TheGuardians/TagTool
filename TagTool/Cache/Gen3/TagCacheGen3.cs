@@ -262,7 +262,7 @@ namespace TagTool.Cache.Gen3
                     }
 
                     newReader.SeekTo(stringOffsets[i]);
-                    Instances[i].Name = newReader.ReadNullTerminatedString();
+                    Instances[i].Name = newReader.ReadNullTerminatedString().Replace(' ', '_');
                 }
             }
 
