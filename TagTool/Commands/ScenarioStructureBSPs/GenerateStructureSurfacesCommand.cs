@@ -675,7 +675,7 @@ namespace TagTool.Commands.ScenarioStructureBSPs
             {
                 Mesh = renderGeometry.Meshes[meshIndex];
                 Indices = ReadMeshIndices(cache, Mesh);
-                Vertices = ReadMeshVertices(cache, Mesh, compressionIndex == -1 ? null : new VertexCompressor(renderGeometry.Compression[compressionIndex]));
+                Vertices = ReadMeshVertices(cache, Mesh, compressionIndex == -1 || compressionIndex >= renderGeometry.Compression.Count ? null : new VertexCompressor(renderGeometry.Compression[compressionIndex]));
             }
 
             private static ushort[] ReadMeshIndices(GameCache cache, Mesh mesh)
