@@ -1446,7 +1446,8 @@ namespace TagTool.Commands.Porting
 
             foreach (var effectEvent in effe.Events)
             {
-                if (BlamCache.Platform == CachePlatform.MCC)
+                if (effectEvent.Parts.Any(p => p.Flags.HasFlag(EffectEventPartFlags.MakeEveryTick)) 
+                    && BlamCache.Platform == CachePlatform.MCC)
                 {
                     effectEvent.DurationBounds.Lower *= 2;
                     effectEvent.DurationBounds.Upper *= 2;

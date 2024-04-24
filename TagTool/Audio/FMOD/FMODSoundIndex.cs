@@ -49,7 +49,6 @@ namespace TagTool.Audio
                 var info = deserializer.Deserialize<FMODSoundInfo>(dataContext);
                 if(HashLookup.ContainsKey(info.Hash))
                 {
-                    new TagToolWarning($"Duplicate sound of {info.Filename} found in sound cache! Skipping...");
                     index++;
                     continue;
                 }

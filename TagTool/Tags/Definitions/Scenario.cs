@@ -1682,7 +1682,7 @@ namespace TagTool.Tags.Definitions
                 DoesNotCloseAutomatically = 1 << 5,
                 IgnoresPlayer = 1 << 6,
                 IgnoresAi = 1 << 7,
-                Bit8 = 1 << 8,
+                NeverClosesOnPlayer = 1 << 8,
                 Bit9 = 1 << 9,
                 Bit10 = 1 << 10,
                 Bit11 = 1 << 11,
@@ -5504,22 +5504,27 @@ namespace TagTool.Tags.Definitions
             public CachedTag CinematicLight;
         }
 
-        [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail)]
+        [TagStructure(Size = 0x54, MaxVersion = CacheVersion.Halo3Retail, Platform = CachePlatform.Original)]
+        [TagStructure(Size = 0x5C, MaxVersion = CacheVersion.HaloReach, Platform = CachePlatform.MCC)]
         [TagStructure(Size = 0x6C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloReach)]
         public class PlayerRepresentationBlock : TagStructure
         {
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
             [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
             public StringId Name;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
             public ReachPlayerRepFlags Flags;
 
-            [TagField(MinVersion = CacheVersion.Halo3ODST)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
             public PlayerModelChoiceEnum ModelChoice;
-            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
+            [TagField(MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
+            [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
             public PlayerRepresentationClassEnum Class;
 
-            [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST)]
+            [TagField(Length = 0x2, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123, Platform = CachePlatform.MCC)]
+            [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.Halo3ODST, Platform = CachePlatform.Original)]
             public byte[] pad;
 
             [TagField(MinVersion = CacheVersion.HaloReach)]
