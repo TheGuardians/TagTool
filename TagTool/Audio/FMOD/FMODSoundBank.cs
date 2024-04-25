@@ -55,23 +55,24 @@ namespace TagTool.Audio
         private byte[] ExtractInternal(int index)
         {
             FMOD_RESULT result = MasterSound.GetSubSound(index, out FMODSound subsound);
-            if (result != FMOD_RESULT.OK)
-                throw new Exception($"Failed to get subsound index: {index}. {result}");
+            string soundName = Index[index].Filename;
+            if (result != FMOD_RESULT.OK)               
+                throw new Exception($"{result} - Failed to get subsound of sound {soundName}.");
 
             using (subsound)
             {
                 result = subsound.GetLength(out uint length, FMOD_TIMEUNIT.PCMBYTES);
                 if (result != FMOD_RESULT.OK)
-                    throw new Exception($"Failed to get sound length. {result}");
+                    throw new Exception($"{result} - Failed to get sound length of sound {soundName}.");
 
                 result = subsound.SeekData(0);
                 if (result != FMOD_RESULT.OK)
-                    throw new Exception($"Failed to seek sound data. {result}");
+                    throw new Exception($"{result} - Failed to seek sound data of sound {soundName}.");
 
                 var buffer = new byte[length];
                 result = subsound.ReadData(buffer, (uint)buffer.Length, out uint read);
                 if (result != FMOD_RESULT.OK)
-                    throw new Exception($"Failed to read sound data. {result}");
+                    throw new Exception($"{result} - Failed to read sound data of sound {soundName}.");
 
                 return buffer;
             }

@@ -34,7 +34,16 @@ namespace TagTool.Commands.Porting
 
         public void WaitForPendingSoundConversion()
         {
-            Task.WaitAll(SoundConversionTasks.Values.ToArray());
+            try
+            {
+                Task.WaitAll(SoundConversionTasks.Values.ToArray());
+            }
+            catch (AggregateException ex)
+            {
+                foreach (var inner in ex.InnerExceptions)
+                    new TagToolError(CommandError.CustomError, inner.Message);
+                throw (ex);
+            }         
         }
 
         private Sound FinishConvertSound(SoundConversionResult result)
