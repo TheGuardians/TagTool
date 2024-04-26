@@ -21,6 +21,7 @@ using TagTool.IO;
 using System.Collections.Concurrent;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Commands.ScenarioStructureBSPs;
+using TagTool.Commands.Files;
 
 namespace TagTool.Commands.Porting
 {
@@ -1207,6 +1208,11 @@ namespace TagTool.Commands.Porting
                                 block.Flags = block.FlagsReach.ConvertLexical<Scenario.StructureBspBlock.StructureBspFlags>();
                             }
                         }
+
+                        _deferredActions.Add(() =>
+                        {
+                            new UpdateMapFilesCommand(CacheContext).Execute(new List<string> { });
+                        });
                     }
                     break;
 
