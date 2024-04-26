@@ -22,6 +22,7 @@ using System.Collections.Concurrent;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Commands.ScenarioStructureBSPs;
 using TagTool.Commands.Files;
+using System.Runtime.ExceptionServices;
 
 namespace TagTool.Commands.Porting
 {
@@ -319,10 +320,8 @@ namespace TagTool.Commands.Porting
             }
             catch (Exception e)
             {
-                Console.WriteLine();
-                Console.WriteLine($"{e.GetType().Name} while porting '{blamTag.Name}.{blamTag.Group.Tag.ToString()}':");
-                Console.WriteLine();
-                throw e;
+                new TagToolError(CommandError.CustomError, $"{e.GetType().Name} while porting '{blamTag.Name}.{blamTag.Group.Tag.ToString()}':");
+                ExceptionDispatchInfo.Capture(e).Throw();
             }
 #endif
             PortedTags[blamTag.Index] = result;
