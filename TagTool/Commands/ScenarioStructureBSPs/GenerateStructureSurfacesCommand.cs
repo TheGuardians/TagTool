@@ -224,10 +224,10 @@ namespace TagTool.Commands.ScenarioStructureBSPs
         public static List<SurfaceTriangle>[] GenerateStructureSurfaceTriangleLists(CollisionGeometry collisionBsp, MeshData meshData)
         {
             var surfaceTriangleLists = new List<SurfaceTriangle>[collisionBsp.Surfaces.Count];
-            Parallel.For(0, collisionBsp.Surfaces.Count, surfaceIndex =>
+            for(var surfaceIndex = 0; surfaceIndex < collisionBsp.Surfaces.Count; surfaceIndex++)
             {
                 surfaceTriangleLists[surfaceIndex] = GenerateSurfaceTrianglesList(collisionBsp, surfaceIndex, meshData);
-            });
+            };
             return surfaceTriangleLists;
         }
 
