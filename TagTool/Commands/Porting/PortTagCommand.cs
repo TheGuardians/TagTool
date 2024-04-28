@@ -337,7 +337,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private void PreConvertReachDefinition(object definition)
+        private void PreConvertReachDefinition(object definition, Stream blamCacheStream)
         {
             if(definition is ScenarioStructureBsp sbsp)
             {
@@ -556,10 +556,22 @@ namespace TagTool.Commands.Porting
                 var newMaterials = new List<Projectile.ProjectileMaterialResponseBlock>();
                 var converter = new StructureAutoConverter(BlamCache, CacheContext);
                 converter.TranslateList(proj.MaterialResponsesNew, newMaterials);
+
                 if (proj.MaterialResponses != null && proj.MaterialResponses.Count > 0)
                     proj.MaterialResponses.AddRange(newMaterials);
                 else
                     proj.MaterialResponses = newMaterials;
+
+                // some reach old materials have mismatched names and indices
+                var reachGlobals = DeserializeTagCached<Globals>(BlamCache, blamCacheStream, BlamCache.TagCache.FindFirstInGroup<Globals>());
+                var reachMaterials = reachGlobals.AlternateMaterials;
+                foreach (var response in proj.MaterialResponses)
+                {
+                    if (response.RuntimeMaterialIndex < 0 || response.RuntimeMaterialIndex >= reachMaterials.Count)
+                        response.RuntimeMaterialIndex = -1;
+                    else if (reachMaterials[response.RuntimeMaterialIndex].Name != response.MaterialName)
+                        response.RuntimeMaterialIndex = (short)reachMaterials.FindIndex(m => m.Name == response.MaterialName);
+                }
 
                 // preconvert projectile flags
                 converter.TranslateEnum(proj.FlagsReach, out proj.Flags, proj.Flags.GetType());
@@ -792,7 +804,7 @@ namespace TagTool.Commands.Porting
 
             if(BlamCache.Version >= CacheVersion.HaloReach)
             {
-                PreConvertReachDefinition(blamDefinition);
+                PreConvertReachDefinition(blamDefinition, blamCacheStream);
             }
 
 			switch (blamDefinition)
@@ -1980,6 +1992,17 @@ namespace TagTool.Commands.Porting
                 // we don't have wet materials
                 if (name.StartsWith("wet_"))
                     name = name.Substring(4);
+
+                // other reach fixups
+                Dictionary<string, string> substitutions = new Dictionary<string, string>
+                {
+                    {"hard_metal_thin_hum_spartan", "hard_metal_thin_hum_masterchief"},
+                    {"energy_shield_thin_hum_spartan", "energy_shield_thin_hum_masterchief"},
+                    {"energy_shield_invulnerable", "energy_shield_invincible"},
+                    {"energy_hologram", "energy_holo"},
+                };
+                if (substitutions.TryGetValue(name, out var sub))
+                    name = sub;
 
                 // search for the name in the destination materials
                 var matchIndex = (short)materials.FindIndex(x => CacheContext.StringTable.GetString(x.Name) == name);
