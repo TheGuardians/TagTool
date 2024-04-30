@@ -1675,10 +1675,19 @@ namespace TagTool.Shaders.ShaderGenerator
             //ChudShader eChudShader = (ChudShader)Enum.Parse(typeof(ChudShader), chudShader, true);
 
             List<ShaderStage> supportedEntries = new List<ShaderStage> { ShaderStage.Default };
-            if (chudShader == "chud_turbulence")
+
+            switch (chudShader)
             {
-                supportedEntries.Add(ShaderStage.Albedo);
-                supportedEntries.Add(ShaderStage.Dynamic_Light);
+                case "chud_turbulence":
+                    supportedEntries.Add(ShaderStage.Albedo);
+                    supportedEntries.Add(ShaderStage.Dynamic_Light);
+                    break;
+                case "chud_double_gradient": // ???
+                    chudShader = "chud_meter_double_gradient";
+                    break;
+                case "chud_radial_gradient": // ???
+                    chudShader = "chud_meter_radial_gradient";
+                    break;
             }
 
             List<VertexType> supportedVertices = new List<VertexType> { (chudShader == "chud_sensor" ? VertexType.FancyChud : VertexType.SimpleChud) };

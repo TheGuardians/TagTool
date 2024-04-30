@@ -604,6 +604,16 @@ namespace TagTool.Commands.Shaders
             public RenderMethodTemplate Template;
         }
 
+        public struct SExplicitRecompileInfo
+        {
+            public CachedTag PixelTag;
+            public CachedTag VertexTag;
+            public bool IsChud;
+            public PixelShader PixelShader;
+            public VertexShader VertexShader;
+            public string ExplicitName;
+        }
+
         /// <summary>
         /// For async recompile
         /// </summary>
@@ -909,6 +919,22 @@ namespace TagTool.Commands.Shaders
                 recompileInfo.AllRmopParameters, recompileInfo.Name, out recompileInfo.PixelShader, out recompileInfo.VertexShader);
 
             return recompileInfo;
+        }
+
+        public static SExplicitRecompileInfo GenerateExplicitShaderAsync(GameCache cache, SExplicitRecompileInfo info)
+        {
+            Stream fakeStream = null;// unused atm
+
+            if (info.IsChud)
+            {
+                ShaderGeneratorNew.GenerateChudShader(cache, fakeStream, info.ExplicitName, out info.PixelShader, out info.VertexShader);
+            }
+            else
+            {
+                ShaderGeneratorNew.GenerateExplicitShader(cache, fakeStream, info.ExplicitName, out info.PixelShader, out info.VertexShader);
+            }
+
+            return info;
         }
     }
 }
