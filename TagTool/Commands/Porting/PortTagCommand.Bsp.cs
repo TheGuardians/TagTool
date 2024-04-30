@@ -107,7 +107,7 @@ namespace TagTool.Commands.Porting
             // Set compatibility flag for H3 mopps for the engine to perform some fixups just in time
             //
 
-            if (BlamCache.Version == CacheVersion.Halo3Retail || BlamCache.Version == CacheVersion.Halo3Beta)
+            if (BlamCache.Platform == CachePlatform.Original && (BlamCache.Version == CacheVersion.Halo3Retail || BlamCache.Version == CacheVersion.Halo3Beta))
                 sbsp.CompatibilityFlags |= ScenarioStructureBsp.StructureBspCompatibilityValue.UseMoppIndexPatch;
 
             if (BlamCache.Version >= CacheVersion.HaloReach)
