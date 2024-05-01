@@ -875,6 +875,7 @@ namespace TagTool.Commands.Porting
                     });
 
                 ProcessMegaloLabels(scnr.CratePalette, scnr.Crates);
+                scnr.Crates = scnr.Crates.Where(e => e.PaletteIndex != -1).ToList();
 
                 // Teleporters must be neutral.
 
@@ -907,6 +908,11 @@ namespace TagTool.Commands.Porting
 
             if (scnr.SceneryPalette.Count > 0)
             {
+                var invisible_spawn = scnr.SceneryPalette.FindIndex(e => e.Object?.Name == "objects\\multi\\spawning\\respawn_point_invisible");
+                if (invisible_spawn != -1)
+                    foreach (var entry in scnr.Scenery.Where(e => e.PaletteIndex == invisible_spawn).Skip(1))
+                        entry.PaletteIndex = -1;
+
                 scnr.SceneryPalette.AddRange(new List<Scenario.ScenarioPaletteEntry>
                     {
                         new Scenario.ScenarioPaletteEntry { Object = CacheContext.TagCache.GetTag(@"objects\multi\assault\assault_respawn_zone", "scen") },
@@ -928,17 +934,23 @@ namespace TagTool.Commands.Porting
                     });
 
                 ProcessMegaloLabels(scnr.SceneryPalette, scnr.Scenery);
+                scnr.Scenery = scnr.Scenery.Where(e => e.PaletteIndex != -1).ToList();
             }
         }
 
         private void ProcessMegaloLabels<T>(List<Scenario.ScenarioPaletteEntry> palette, List<T> instanceList)
         {
+            List<string> stripped = new List<string>();
             foreach (var instance in instanceList)
             {
                 var mpProperties = (Scenario.MultiplayerObjectProperties)(instance.GetType().GetField("Multiplayer").GetValue(instance));
+                if (mpProperties == null)
+                    return;
+
                 var permutationInstance = (instance as Scenario.PermutationInstance);
                 var newPaletteIndex = permutationInstance.PaletteIndex;
                 var ctfReturnIndex = GetPaletteIndex(palette, @"objects\multi\ctf\ctf_flag_return_area");
+
                 switch (mpProperties.MegaloLabel)
                 {
                     case "ctf_res_zone_away":
@@ -975,9 +987,6 @@ namespace TagTool.Commands.Porting
                     case "inf_spawn":
                         newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_initial_spawn_point");
                         break;
-                    case "ffa_only":
-                        newPaletteIndex = -1;
-                        break;
                     case "inf_haven":
                         newPaletteIndex = GetPaletteIndex(palette, @"objects\multi\infection\infection_respawn_zone");
                         break;
@@ -989,20 +998,31 @@ namespace TagTool.Commands.Porting
                         break;
                     case "oddball_ball":
                     case "koth_hill":
-                    case "team_only":
-                    case "hh_drop_point":
+                    case "slayer":
+                    case "lift":
                     case "none":
                         break;
-                    case "inv_objective":
-                    case "inv_obj_flag":
-                    case "invasion":
-                        newPaletteIndex = -1;
-                        break;
+                    //case "team_only":
+                    //case "hh_drop_point":
+                    //case "inv_objective":
+                    //case "inv_obj_flag":
+                    //case "invasion":
+                    //    newPaletteIndex = -1;
+                    //    break;
                     default:
-                        //if (!string.IsNullOrEmpty(mpProperties.MegaloLabel))
-                        //    new TagToolWarning($"unknown megalo label: {mpProperties.MegaloLabel}");
+                        if (!string.IsNullOrEmpty(mpProperties.MegaloLabel))
+                        {
+                            newPaletteIndex = -1;
+                            if(!stripped.Contains(mpProperties.MegaloLabel))
+                            {
+                                stripped.Add(mpProperties.MegaloLabel);
+                                Console.WriteLine($"Placements with label \"{mpProperties.MegaloLabel}\" stripped");
+                            }
+                        }
                         break;
                 }
+
+                mpProperties.SpawnFlags &= ~MultiplayerObjectPlacementSpawnFlags.HideUnlessRequired;
 
                 permutationInstance.PaletteIndex = newPaletteIndex;
             }
