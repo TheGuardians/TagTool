@@ -58,6 +58,7 @@ namespace TagTool.Commands.Porting
 		};
 
 		private readonly Dictionary<Tag, CachedTag> DefaultTags = new Dictionary<Tag, CachedTag> { };
+		private bool ScenarioPort = false;
 
 		public PortTagCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache) :
 			base(true,
@@ -167,6 +168,9 @@ namespace TagTool.Commands.Porting
             }
 
 			ProcessDeferredActions();
+
+			if (ScenarioPort && FlagIsSet(PortingFlags.UpdateMapFiles))
+				new UpdateMapFilesCommand(CacheContext).Execute(new List<string> { });
 
 			return true;
 		}
@@ -336,7 +340,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private void PreConvertReachDefinition(object definition)
+        private void PreConvertReachDefinition(object definition, Stream blamCacheStream)
         {
             if(definition is ScenarioStructureBsp sbsp)
             {
@@ -464,15 +468,27 @@ namespace TagTool.Commands.Porting
                     {"objects\\equipment\\active_camouflage\\active_camouflage", "objects\\equipment\\invisibility_equipment\\invisibility_equipment"}
                 };
 
+                Dictionary<string, string> reachWeapons = new Dictionary<string, string>()
+                {
+                    {"objects\\weapons\\melee\\energy_sword\\energy_sword", "objects\\weapons\\melee\\energy_blade\\energy_blade"}
+                };
+
                 ReplaceObjects(scenario.SceneryPalette, reachObjectives);
                 ReplaceObjects(scenario.CratePalette, reachObjectives);
                 ReplaceObjects(scenario.VehiclePalette, reachVehicles);
                 ReplaceObjects(scenario.EquipmentPalette, reachEquipment);
+                ReplaceObjects(scenario.WeaponPalette, reachWeapons);
 
-                if (!FlagIsSet(PortingFlags.ReachMisc))
+                foreach (var entry in scenario.Weapons)
                 {
-                    CullNewObjects(scenario.SceneryPalette, scenario.Scenery, reachObjectives);
-                    CullNewObjects(scenario.CratePalette, scenario.Crates, reachObjectives);
+                    if (entry.Multiplayer.MegaloLabel == "inv_weapon")
+                        entry.PaletteIndex = -1;
+                }
+
+                foreach (var entry in scenario.Vehicles)
+                {
+                    if (entry.Multiplayer.MegaloLabel == "inv_vehicle")
+                        entry.PaletteIndex = -1;
                 }
 
                 CullNewObjects(scenario.VehiclePalette, scenario.Vehicles, reachObjectives);
@@ -481,6 +497,16 @@ namespace TagTool.Commands.Porting
 
                 RemoveNullPlacements(scenario.SceneryPalette, scenario.Scenery);
                 RemoveNullPlacements(scenario.CratePalette, scenario.Crates);
+
+                // remove unsupported healthpack controls
+                if (BlamCache.TagCache.TryGetCachedTag("objects\\levels\\shared\\device_controls\\health_station\\health_station.ctrl", out CachedTag healthCtrl))
+                {
+                    short index = (short)scenario.ControlPalette.FindIndex(e => e.Object == healthCtrl);
+                    if (index != -1)
+                        scenario.ControlPalette[index].Object = null;
+
+                    RemoveNullPlacements(scenario.ControlPalette, scenario.Controls);
+                }
             }
 
             //if (definition is SkyAtmParameters skya)
@@ -555,10 +581,22 @@ namespace TagTool.Commands.Porting
                 var newMaterials = new List<Projectile.ProjectileMaterialResponseBlock>();
                 var converter = new StructureAutoConverter(BlamCache, CacheContext);
                 converter.TranslateList(proj.MaterialResponsesNew, newMaterials);
+
                 if (proj.MaterialResponses != null && proj.MaterialResponses.Count > 0)
                     proj.MaterialResponses.AddRange(newMaterials);
                 else
                     proj.MaterialResponses = newMaterials;
+
+                // some reach old materials have mismatched names and indices
+                var reachGlobals = DeserializeTagCached<Globals>(BlamCache, blamCacheStream, BlamCache.TagCache.FindFirstInGroup<Globals>());
+                var reachMaterials = reachGlobals.AlternateMaterials;
+                foreach (var response in proj.MaterialResponses)
+                {
+                    if (response.RuntimeMaterialIndex < 0 || response.RuntimeMaterialIndex >= reachMaterials.Count)
+                        response.RuntimeMaterialIndex = -1;
+                    else if (reachMaterials[response.RuntimeMaterialIndex].Name != response.MaterialName)
+                        response.RuntimeMaterialIndex = (short)reachMaterials.FindIndex(m => m.Name == response.MaterialName);
+                }
 
                 // preconvert projectile flags
                 converter.TranslateEnum(proj.FlagsReach, out proj.Flags, proj.Flags.GetType());
@@ -593,8 +631,22 @@ namespace TagTool.Commands.Porting
                     string name = block.Object.Name;
                     if (replacements.TryGetValue(name, out string result))
                         block.Object.Name = result;
-                    else if (name.EndsWith("weak_anti_respawn_zone") || name.EndsWith("weak_respawn_zone") || name.EndsWith("danger_zone"))
+                    
+                    if (name.Contains("spawning\\fireteam"))
                         block.Object = null;
+
+                    switch(name)
+                    {
+                        case "objects\\multi\\boundaries\\soft_kill_volume":
+                            BlamCache.TagCache.TryGetCachedTag("objects\\multi\\boundaries\\kill_volume.scen", out block.Object);
+                            break;
+                        case "objects\\multi\\boundaries\\safe_volume":
+                        case "objects\\multi\\boundaries\\soft_safe_volume":
+                        case "objects\\multi\\named_location_area\\named_location_area":
+                        case "objects\\multi\\spawning\\danger_zone":
+                            block.Object = null;
+                            break;
+                    }
                 }
             }
         }
@@ -605,13 +657,13 @@ namespace TagTool.Commands.Porting
             {
                 List<int> indices = new List<int>();
 
-                foreach (Scenario.ScenarioPaletteEntry block in palette)
-                    if (block.Object == null)
-                        foreach (var instance in instanceList)
-                        {
-                            if (!(instance is Scenario.EquipmentInstance) && (instance as Scenario.PermutationInstance).PaletteIndex == palette.IndexOf(block))
-                                indices.Add(instanceList.IndexOf(instance));
-                        }
+                for (int i = 0; i < instanceList.Count; i++)
+                {
+                    var paletteIndex = (instanceList[i] as Scenario.ScenarioInstance).PaletteIndex;
+                    if (paletteIndex == -1 || palette[paletteIndex].Object == null)
+                        indices.Add(i);
+                }
+
 
                 indices.Sort();
                 indices.Reverse();
@@ -791,7 +843,7 @@ namespace TagTool.Commands.Porting
 
             if(BlamCache.Version >= CacheVersion.HaloReach)
             {
-                PreConvertReachDefinition(blamDefinition);
+                PreConvertReachDefinition(blamDefinition, blamCacheStream);
             }
 
 			switch (blamDefinition)
@@ -1208,10 +1260,7 @@ namespace TagTool.Commands.Porting
                             }
                         }
 
-                        _deferredActions.Add(() =>
-                        {
-                            new UpdateMapFilesCommand(CacheContext).Execute(new List<string> { });
-                        });
+                        ScenarioPort = true;
                     }
                     break;
 
@@ -1740,19 +1789,17 @@ namespace TagTool.Commands.Porting
                             case "stockpile":
                                 scnrObj.EngineFlags |= GameEngineSubTypeFlags.Vip;
                                 break;
-                            case "ffa_only":
-                            case "team_only":
-                            case "hh_drop_point":
-                            case "rally":
-                            case "rally_flag":
-                            case "race_flag":
-                            case "race_spawn":
-                            case "as_spawn":
-                            case "none":
-                                break;
+                            //case "ffa_only":
+                            //case "team_only":
+                            //case "hh_drop_point":
+                            //case "rally":
+                            //case "rally_flag":
+                            //case "race_flag":
+                            //case "race_spawn":
+                            //case "as_spawn":
+                            //case "none":
+                            //    break;
                             default:
-                                //if (!string.IsNullOrEmpty(scnrObj.MegaloLabel))
-                                //    new TagToolWarning($"unknown megalo label: {scnrObj.MegaloLabel}");
                                 break;
                         }
 
@@ -1984,6 +2031,17 @@ namespace TagTool.Commands.Porting
                 // we don't have wet materials
                 if (name.StartsWith("wet_"))
                     name = name.Substring(4);
+
+                // other reach fixups
+                Dictionary<string, string> substitutions = new Dictionary<string, string>
+                {
+                    {"hard_metal_thin_hum_spartan", "hard_metal_thin_hum_masterchief"},
+                    {"energy_shield_thin_hum_spartan", "energy_shield_thin_hum_masterchief"},
+                    {"energy_shield_invulnerable", "energy_shield_invincible"},
+                    {"energy_hologram", "energy_holo"},
+                };
+                if (substitutions.TryGetValue(name, out var sub))
+                    name = sub;
 
                 // search for the name in the destination materials
                 var matchIndex = (short)materials.FindIndex(x => CacheContext.StringTable.GetString(x.Name) == name);

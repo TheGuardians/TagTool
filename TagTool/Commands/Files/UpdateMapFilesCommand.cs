@@ -121,7 +121,9 @@ namespace TagTool.Commands.Files
                             var scnr = Cache.Deserialize<Scenario>(tagStream, scenario);
 
                             var mapBuilder = new MapFileBuilder(Cache.Version);
-                            mapBuilder.MapInfo = mapInfo.Scenario;
+                            if (mapInfo != null)
+                                mapBuilder.MapInfo = mapInfo.Scenario;
+
                             map = mapBuilder.Build(scenario, scnr);
                         }
                         

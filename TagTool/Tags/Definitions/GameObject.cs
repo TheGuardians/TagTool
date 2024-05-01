@@ -463,7 +463,6 @@ namespace TagTool.Tags.Definitions
                 ValidInitialPlayerSpawn = 1 << 2,
                 FixedBoundaryOrientation = 1 << 3,
                 CandyMonitorShouldIgnore = 1 << 4,
-                Bit4 = 1 << 4,
                 Bit5 = 1 << 5,
                 Bit6 = 1 << 6,
                 Bit7 = 1 << 7,
