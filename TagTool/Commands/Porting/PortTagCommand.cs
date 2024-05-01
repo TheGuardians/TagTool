@@ -58,6 +58,7 @@ namespace TagTool.Commands.Porting
 		};
 
 		private readonly Dictionary<Tag, CachedTag> DefaultTags = new Dictionary<Tag, CachedTag> { };
+		private bool ScenarioPort = false;
 
 		public PortTagCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache) :
 			base(true,
@@ -167,6 +168,9 @@ namespace TagTool.Commands.Porting
             }
 
 			ProcessDeferredActions();
+
+			if (ScenarioPort && FlagIsSet(PortingFlags.UpdateMapFiles))
+				new UpdateMapFilesCommand(CacheContext).Execute(new List<string> { });
 
 			return true;
 		}
@@ -1256,13 +1260,7 @@ namespace TagTool.Commands.Porting
                             }
                         }
 
-                        if (Flags.HasFlag(PortingFlags.UpdateMapFiles))
-                        {
-                            _deferredActions.Add(() =>
-                            {
-                                new UpdateMapFilesCommand(CacheContext).Execute(new List<string> { });
-                            });
-                        }
+                        ScenarioPort = true;
                     }
                     break;
 
