@@ -137,9 +137,12 @@ namespace TagTool.Commands.Porting
 
 			[PortingFlagDescription("Auto rescale gui during porting")]
 			AutoRescaleGui = 1 << 20,
+			
+			[PortingFlagDescription("Auto Update map files")]
+			UpdateMapFiles = 1 << 21,
 
 			// No [PortingFlagDescription] here means we'll flag names as the description.
-			Default = Print | Recursive | Merge | Scripts | Squads | ForgePalette | Elites | Audio | Dialogue | MatchShaders | GenerateShaders
+			Default = Print | Recursive | Merge | Scripts | Squads | ForgePalette | Elites | Audio | Dialogue | MatchShaders | GenerateShaders | UpdateMapFiles
 		}
 
 		/// <summary>

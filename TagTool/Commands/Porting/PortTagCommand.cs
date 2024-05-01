@@ -1256,10 +1256,13 @@ namespace TagTool.Commands.Porting
                             }
                         }
 
-                        _deferredActions.Add(() =>
+                        if (Flags.HasFlag(PortingFlags.UpdateMapFiles))
                         {
-                            new UpdateMapFilesCommand(CacheContext).Execute(new List<string> { });
-                        });
+                            _deferredActions.Add(() =>
+                            {
+                                new UpdateMapFilesCommand(CacheContext).Execute(new List<string> { });
+                            });
+                        }
                     }
                     break;
 
