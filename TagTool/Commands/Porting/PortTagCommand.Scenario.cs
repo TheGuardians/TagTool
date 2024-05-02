@@ -406,7 +406,7 @@ namespace TagTool.Commands.Porting
                 }
             }
 
-            AddPrematchCamera(cacheStream, scnr, tagName);
+            AddHOCameras(cacheStream, scnr, tagName);
 
             //
             // Convert PlayerStartingProfiles
@@ -1048,20 +1048,32 @@ namespace TagTool.Commands.Porting
             return validforRvB;
         }
 
-        private void AddPrematchCamera(Stream cacheStream, Scenario scnr, string tagName)
+        private void AddHOCameras(Stream cacheStream, Scenario scnr, string tagName)
         {
+
+            //
+            // Add podium camera position
+            //
+
+            var existingPodiumCameraPoint = scnr.CutsceneCameraPoints.FirstOrDefault(cameraPoint => cameraPoint.Name == "podium_camera");
+            if (existingPodiumCameraPoint != null)
+            {
+                // if we already have one, just add the flag for HO
+                existingPodiumCameraPoint.Flags |= Scenario.CutsceneCameraPointFlags.PodiumCameraHack;
+            }
+
             //
             // Add prematch camera position
             //
 
-            var existingCameraPoint = scnr.CutsceneCameraPoints.FirstOrDefault(cameraPoint => cameraPoint.Name == "prematch_camera");
-            if (existingCameraPoint != null)
+            var existingPrematchCameraPoint = scnr.CutsceneCameraPoints.FirstOrDefault(cameraPoint => cameraPoint.Name == "prematch_camera");
+            if (existingPrematchCameraPoint != null)
             {
                 // if we already have one, just add the flag for HO
-                existingCameraPoint.Flags |= Scenario.CutsceneCameraPointFlags.PrematchCameraHack;
+                existingPrematchCameraPoint.Flags |= Scenario.CutsceneCameraPointFlags.PrematchCameraHack;
                 return;
-            }  
-
+            }
+            
             var createPrematchCamera = false;
 
             var position = new RealPoint3d();
