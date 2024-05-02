@@ -24,6 +24,7 @@ namespace TagTool.Commands.Scenarios
             context.AddCommand(new DumpScriptsCommand(cache, tag, scenario));
             context.AddCommand(new ImportScriptsCommand(scenario));
             context.AddCommand(new CompileScriptsCommand(cache, scenario));
+            context.AddCommand(new CompilePodiumScriptsCommand(cache, scenario));
             context.AddCommand(new ListScriptsCommand(cache, tag, scenario));
             context.AddCommand(new ExtractZonesAreasModelCommand(cache, scenario));
             
