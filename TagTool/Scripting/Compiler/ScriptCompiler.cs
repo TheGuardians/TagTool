@@ -26,6 +26,8 @@ namespace TagTool.Scripting.Compiler
         private ushort NextIdentifier = 0xE37F;
         private HsScript CurrentScript = null;
 
+        private bool IgnoreExternDuplicates;
+
         public ScriptCompiler(GameCache cache, Scenario definition)
         {
             Cache = cache;
@@ -38,6 +40,41 @@ namespace TagTool.Scripting.Compiler
 
             StringWriter = new BinaryWriter(new MemoryStream());
             StringOffsets = new Dictionary<string, uint>();
+
+            IgnoreExternDuplicates = false;
+        }
+
+        public void AppendCompileFile(FileInfo file)
+        {
+            IgnoreExternDuplicates = true;
+
+            //
+            // Reuse exisitng scripts before compiling new ones
+            //
+
+            Scripts = Definition.Scripts;
+            Globals = Definition.Globals;
+            ScriptExpressions = Definition.ScriptExpressions;
+
+            var memoryStream = new MemoryStream(Definition.ScriptStrings);
+            var binaryReader = new BinaryReader(memoryStream);
+            StringWriter = new BinaryWriter(new MemoryStream());
+
+            // Copy data from BinaryReader to StringWriter
+            var buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = binaryReader.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                StringWriter.Write(buffer, 0, bytesRead);
+            }
+
+            // Set the position of StringWriter
+            StringWriter.BaseStream.Position = memoryStream.Length;
+
+            ScriptSourceFileReferences = Definition.ScriptSourceFileReferences;
+
+            //proceed normally
+            CompileFile(file);
         }
 
         public void CompileFile(FileInfo file)
@@ -386,6 +423,9 @@ namespace TagTool.Scripting.Compiler
             {
                 if (s.ScriptName != scriptName || s.Parameters.Count != scriptParams.Count)
                     continue;
+
+                if (IgnoreExternDuplicates && s.Type == HsScriptType.Extern && script.Type == HsScriptType.Extern)
+                    return;
 
                 exists = true;
 
