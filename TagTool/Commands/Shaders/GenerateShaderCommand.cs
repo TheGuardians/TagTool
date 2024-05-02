@@ -225,8 +225,17 @@ namespace TagTool.Commands.Shaders
             {
                 var rasg = Cache.Deserialize<RasterizerGlobals>(stream, Cache.TagCache.GetTag("globals\\rasterizer_globals.rasterizer_globals"));
 
-                CachedTag pixlTag = rasg.DefaultShaders[(int)value].PixelShader ?? Cache.TagCache.AllocateTag<PixelShader>($"rasterizer\\shaders\\{value}");
-                CachedTag vtshTag = rasg.DefaultShaders[(int)value].VertexShader ?? Cache.TagCache.AllocateTag<VertexShader>($"rasterizer\\shaders\\{value}");
+                CachedTag pixlTag;
+                if (rasg.DefaultShaders[(int)value].PixelShader != null)
+                    pixlTag = Cache.TagCache.GetTag(rasg.DefaultShaders[(int)value].PixelShader.Index);
+                else
+                    pixlTag = Cache.TagCache.AllocateTag<PixelShader>($"rasterizer\\shaders\\{value}");
+
+                CachedTag vtshTag;
+                if (rasg.DefaultShaders[(int)value].VertexShader != null)
+                    vtshTag = Cache.TagCache.GetTag(rasg.DefaultShaders[(int)value].VertexShader.Index);
+                else
+                    vtshTag = Cache.TagCache.AllocateTag<VertexShader>($"rasterizer\\shaders\\{value}");
 
                 ShaderGeneratorNew.GenerateExplicitShader(Cache, stream, value.ToString(), out PixelShader pixl, out VertexShader vtsh);
 
@@ -258,8 +267,17 @@ namespace TagTool.Commands.Shaders
                 var matg = Cache.Deserialize<Globals>(stream, Cache.TagCache.FindFirstInGroup("matg"));
                 var chgd = Cache.Deserialize<ChudGlobalsDefinition>(stream, matg.InterfaceTags[0].HudGlobals);
 
-                CachedTag pixlTag = chgd.HudShaders[(int)value].PixelShader ?? Cache.TagCache.AllocateTag<PixelShader>($"rasterizer\\shaders\\{value}");
-                CachedTag vtshTag = chgd.HudShaders[(int)value].VertexShader ?? Cache.TagCache.AllocateTag<VertexShader>($"rasterizer\\shaders\\{value}");
+                CachedTag pixlTag;
+                if (chgd.HudShaders[(int)value].PixelShader != null)
+                    pixlTag = Cache.TagCache.GetTag(chgd.HudShaders[(int)value].PixelShader.Index);
+                else
+                    pixlTag = Cache.TagCache.AllocateTag<PixelShader>($"rasterizer\\shaders\\{value}");
+
+                CachedTag vtshTag;
+                if (chgd.HudShaders[(int)value].VertexShader != null)
+                    vtshTag = Cache.TagCache.GetTag(chgd.HudShaders[(int)value].VertexShader.Index);
+                else
+                    vtshTag = Cache.TagCache.AllocateTag<VertexShader>($"rasterizer\\shaders\\{value}");
 
                 ShaderGeneratorNew.GenerateChudShader(Cache, stream, value.ToString(), out PixelShader pixl, out VertexShader vtsh);
 
@@ -283,13 +301,17 @@ namespace TagTool.Commands.Shaders
                 if (pixel)
                 {
                     GlobalPixelShader glps = TagTool.Shaders.ShaderGenerator.ShaderGeneratorNew.GenerateSharedPixelShaders(Cache, rmdf, type);
-                    Cache.Serialize(stream, rmdf.GlobalPixelShader, glps);
+                    CachedTag glpsTag = Cache.TagCache.GetTag(rmdf.GlobalPixelShader.Index);
+                    Cache.Serialize(stream, glpsTag, glps);
                 }
                 else
                 {
                     GlobalVertexShader glvs = TagTool.Shaders.ShaderGenerator.ShaderGeneratorNew.GenerateSharedVertexShaders(Cache, rmdf, type);
-                    Cache.Serialize(stream, rmdf.GlobalVertexShader, glvs);
+                    CachedTag glvsTag = Cache.TagCache.GetTag(rmdf.GlobalVertexShader.Index);
+                    Cache.Serialize(stream, glvsTag, glvs);
                 }
+                Cache.SaveStrings();
+                (Cache as GameCacheHaloOnlineBase).SaveTagNames();
             }
 
             Console.WriteLine($"Generated global {(pixel ? "pixel" : "vertex")} shader for {shaderType}");
