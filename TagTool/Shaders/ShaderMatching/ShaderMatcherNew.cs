@@ -405,9 +405,17 @@ namespace TagTool.Shaders.ShaderMatching
 
                     string methodName = BaseCache.StringTable.GetString(baseRmdfDefinition.Categories[i].Name);
 
-                    if (methodName == "reach_compatibility")
+                    if (PortingCache.Version >= CacheVersion.HaloReach && methodName == "reach_compatibility")
                     {
-                        newOptions.Add(PortingCache.Version >= CacheVersion.HaloReach ? (byte)1 : (byte)0);
+                        if (portingRmdfDefinition.GetCategoryOption(PortingCache, "detail", srcRmt2Descriptor.Options) == "repeat")
+                        {
+                            int potentialIndex = baseRmdfDefinition.GetCategoryOptionIndex(BaseCache, "reach_compatibility", "enabled_detail_repeat");
+                            newOptions.Add(potentialIndex != -1 ? (byte)potentialIndex : (byte)1);
+                        }
+                        else
+                        {
+                            newOptions.Add(1);
+                        }
                         continue;
                     }
 
