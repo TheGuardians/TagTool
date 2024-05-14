@@ -249,7 +249,10 @@ namespace TagTool.Commands.Porting
                 if (arg.Length > 1)
                 {
                     not = arg[0] == '!';
-                    flagName = arg.Substring(1);
+                    if (not)
+                        flagName = arg.Substring(1);
+                    else 
+                        flagName = arg;
                 }
 
 
@@ -475,9 +478,6 @@ namespace TagTool.Commands.Porting
                 if (conversionFlags.HasFlag(MultiplayerScenarioConversionFlags.SpawnPoint))
                     AddRespawnPoint(scnr, 0, spawnPoint, new RealEulerAngles3d());
 
-                // add the prematch camera
-                AddPrematchCamera(scnr, spawnPoint + new RealPoint3d(0, 0, 0.62f), new RealEulerAngles3d());
-
                 // add generic player starting profile
                 AddPlayerStartingProfile(scnr);
 
@@ -522,17 +522,6 @@ namespace TagTool.Commands.Porting
                     map.Write(new EndianWriter(mapFileStream));
                 }
             }
-        }
-
-        private void AddPrematchCamera(Scenario scnr, RealPoint3d position, RealEulerAngles3d rotation)
-        {
-            scnr.CutsceneCameraPoints.Add(new CutsceneCameraPoint()
-            {
-                Position = position,
-                Orientation = rotation,
-                Flags = CutsceneCameraPointFlags.PrematchCameraHack,
-                Name = "prematch_camera",
-            });
         }
 
         private void AddRespawnPoint(Scenario scnr, int bspIndex, RealPoint3d position, RealEulerAngles3d rotation)
@@ -707,7 +696,12 @@ namespace TagTool.Commands.Porting
                 Scenario.Scripts?.Clear();
                 Scenario.Globals?.Clear();
                 Scenario.CutsceneFlags?.Clear();
-                Scenario.CutsceneCameraPoints?.Clear();
+                for(int i = Scenario.CutsceneCameraPoints.Count - 1; i >= 0; i--)
+                {
+                    var cameraPoint = Scenario.CutsceneCameraPoints[i];
+                    if(cameraPoint.Name!= "prematch_camera" && cameraPoint.Name != "podium_camera")
+                    Scenario.CutsceneCameraPoints.RemoveAt(i);
+                }
                 Scenario.Cinematics?.Clear();
                 Scenario.CinematicLighting?.Clear();
                 Scenario.CutsceneTitles?.Clear();

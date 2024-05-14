@@ -172,7 +172,7 @@ namespace TagTool.Cache
                 result = GetTag(tagIndex);
 
                 if (result == null) // failsafe for null tags
-                    result = CreateCachedTag(tagIndex, new TagGroup());
+                    result = CreateCachedTag(tagIndex, new TagGroupGen3());
 
                 return true;
             }

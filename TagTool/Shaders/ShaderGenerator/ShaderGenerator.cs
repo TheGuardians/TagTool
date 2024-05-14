@@ -703,7 +703,7 @@ namespace TagTool.Shaders.ShaderGenerator
             switch (shaderType)
             {
                 case HaloShaderGenerator.Globals.ShaderType.Water:
-                    if (categoryName == "waveshape" || categoryName == "global_shape")
+                    if (categoryName == "waveshape" || categoryName == "global_shape" || categoryName == "reach_compatibility")
                         return true;
                     break;
                 case HaloShaderGenerator.Globals.ShaderType.Particle:

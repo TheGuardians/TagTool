@@ -1004,19 +1004,16 @@ namespace TagTool.Tags.Definitions
         CanPenetrateWalls = 1 << 5,
         CannotBeRestarted = 1 << 6,
         ForceUseOwnLightprobe = 1 << 7,
-        ForceLooping = 1 << 8,
-        ObsoleteEffectOrdnanceIsGone = 1 << 9,
-        RenderInHologramPass = 1 << 10,
-        LightprobeOnlySampleAirprobes = 1 << 11,
-        PlayEffectEvenOutsideBsps = 1 << 12,
-        DrawLensFlaresWhenStopped = 1 << 13,
-        KillParticlesWhenStopped = 1 << 14,
-        PlayEvenOnHiddenObjects = 1 << 15,
-        DisableFirstPersonPartsInBlindSkull = 1 << 16,
-        HidesAssociatedObjectOnEffectDeletion = 1 << 17,
-        BypassMpThrottle = 1 << 18,
-        RenderInNonFirstPersonPass = 1 << 19,
-        UseAveragedLocationsForLods = 1 << 20
+        // Beyond here is runtime flags
+        ForceLooping = 1 << 8, // delay <= 0 && duration <= 0 (duration of 0 is postprocessed, 1/tickrate)
+        Deterministic = 1 << 9,
+        TintFromLightmap = 1 << 10,
+        TintFromDiffuseTexture = 1 << 11, // geometry sampler
+        HasEnvironmentRestrictedPart = 1 << 12, // parts->create_in_environment != 0 || ( part->type==beam && any(location->name==stringid(child)) )
+        UnusedBit = 1 << 13, // unused
+        HasEnvironmentRestrictedParticleSystem = 1 << 14, // system->environment != 0
+        TrackSubframeMovements = 1 << 15,
+        UnknownHO = 1 << 16 // HO only. unknown
     }
 
     [Flags]
@@ -1033,19 +1030,15 @@ namespace TagTool.Tags.Definitions
         ForceUseOwnLightprobe = 1 << 7,
         HeavyPerformance = 1 << 8,
         HalfResolution = 1 << 9,
+        // Beyond here is runtime flags
         ForceLooping = 1 << 10,
-        ObsoleteEffectOrdnanceIsGone = 1 << 11,
-        RenderInHologramPass = 1 << 12,
-        LightprobeOnlySampleAirprobes = 1 << 13,
-        PlayEffectEvenOutsideBsps = 1 << 14,
-        DrawLensFlaresWhenStopped = 1 << 15,
-        KillParticlesWhenStopped = 1 << 16,
-        PlayEvenOnHiddenObjects = 1 << 17,
-        DisableFirstPersonPartsInBlindSkull = 1 << 18,
-        HidesAssociatedObjectOnEffectDeletion = 1 << 19,
-        BypassMpThrottle = 1 << 20,
-        RenderInNonFirstPersonPass = 1 << 21,
-        UseAveragedLocationsForLods = 1 << 22
+        Deterministic = 1 << 11,
+        TintFromLightmap = 1 << 12,
+        TintFromDiffuseTexture = 1 << 13,
+        HasEnvironmentRestrictedPart = 1 << 14,
+        UnusedBit = 1 << 15,
+        HasEnvironmentRestrictedParticleSystem = 1 << 16,
+        TrackSubframeMovements = 1 << 17
     }
 
     public enum GlobalEffectPriorityEnum : byte

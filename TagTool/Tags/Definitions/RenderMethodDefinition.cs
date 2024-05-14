@@ -3,6 +3,7 @@ using TagTool.Common;
 using TagTool.Shaders;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 namespace TagTool.Tags.Definitions
 {
@@ -152,6 +153,33 @@ namespace TagTool.Tags.Definitions
                     return true;
             }
             return false;
+        }
+
+        public string GetCategoryOption(GameCache cache, string categoryName, byte[] options)
+        {
+            for (int i = 0; i < Categories.Count; i++)
+            {
+                if (cache.StringTable.GetString(Categories[i].Name) == categoryName)
+                    return cache.StringTable.GetString(Categories[i].ShaderOptions[options[i]].Name);
+            }
+            return "INVALID_CATEGORY";
+        }
+
+        public int GetCategoryOptionIndex(GameCache cache, string categoryName, string optionName)
+        {
+            for (int i = 0; i < Categories.Count; i++)
+            {
+                if (cache.StringTable.GetString(Categories[i].Name) == categoryName)
+                {
+                    for (int j = 0; j < Categories[i].ShaderOptions.Count; j++)
+                    {
+                        if (cache.StringTable.GetString(Categories[i].ShaderOptions[j].Name) == optionName)
+                            return j;
+                    }
+                    break;
+                }
+            }
+            return -1;
         }
     }
 }
