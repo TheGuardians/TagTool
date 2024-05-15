@@ -8,6 +8,7 @@ using static TagTool.Tags.Definitions.Gen4.BreakableSurface.ParticleSystemDefini
 using System.Linq;
 using TagTool.Commands.Common;
 using static TagTool.Effects.EditableProperty;
+using System.IO;
 
 namespace TagTool.Tags.Definitions
 {
@@ -450,8 +451,15 @@ namespace TagTool.Tags.Definitions
                         None,
                         Postprocessed = 1 << 0,
                         IsCpu = 1 << 1,
+                        // This flag is enabled (and disables IsCpu) in the following conditions:
+                        // (Postprocessed == true &&
+                        // Emitter.ParticleMovement.Flags.HasFlag(Wind) &&
+                        // ParticleSystem.CanUpdateOnGpu())
                         IsGpu = 1 << 2,
+                        // This flag is enabled if:
+                        // (Postprocess == true && ParticleSystem.CanUpdateOnGpu())
                         BecomesGpuWhenAtRest = 1 << 3,
+                        // I'm not sure what this is or why it's set.
                         AlphaBlackPoint_Bit3 = 1 << 4,
                     }
 
@@ -970,6 +978,21 @@ namespace TagTool.Tags.Definitions
                             cotStates |= RuntimeMGpuData.ParticleProperties.ParticleAlphaBlackPoint;
                     }
                 }
+
+                public bool CanUpdateOnGpu(GameCache cache, Stream stream)
+                {
+                    bool noAttachments = true;
+
+                    if (this.Particle != null)
+                    {
+                        var prt3 = cache.Deserialize<Particle>(stream, this.Particle);
+
+                        if (!prt3.Flags.HasFlag(Definitions.Particle.FlagsValue.NoAttachments))
+                            noAttachments = false;
+                    }
+
+                    return noAttachments && this.Flags.HasFlag(ParticleSystemFlags.TurnOffNearFadeOnEnhancedGraphics);
+                }
             }
         }
 
@@ -1010,7 +1033,7 @@ namespace TagTool.Tags.Definitions
         TintFromLightmap = 1 << 10,
         TintFromDiffuseTexture = 1 << 11, // geometry sampler
         HasEnvironmentRestrictedPart = 1 << 12, // parts->create_in_environment != 0 || ( part->type==beam && any(location->name==stringid(child)) )
-        UnusedBit = 1 << 13, // unused
+        HasEnvironmentRestrictedAcceleration = 1 << 13, // unused
         HasEnvironmentRestrictedParticleSystem = 1 << 14, // system->environment != 0
         TrackSubframeMovements = 1 << 15,
         UnknownHO = 1 << 16 // HO only. unknown
@@ -1036,7 +1059,7 @@ namespace TagTool.Tags.Definitions
         TintFromLightmap = 1 << 12,
         TintFromDiffuseTexture = 1 << 13,
         HasEnvironmentRestrictedPart = 1 << 14,
-        UnusedBit = 1 << 15,
+        HasEnvironmentRestrictedAcceleration = 1 << 15,
         HasEnvironmentRestrictedParticleSystem = 1 << 16,
         TrackSubframeMovements = 1 << 17
     }

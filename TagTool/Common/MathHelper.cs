@@ -25,5 +25,25 @@ namespace TagTool.Common
             
             return (radius * radius) >= RealVector3d.Magnitude(d);
         }
+
+        public static float Clamp(float value, float min, float max)
+        {
+            return Math.Min(Math.Max(value, min), max);
+        }
+
+        public static RealRgbColor Clamp(RealRgbColor value, float min, float max)
+        {
+            return new RealRgbColor
+            {
+                Red = Math.Min(Math.Max(value.Red, min), max),
+                Green = Math.Min(Math.Max(value.Green, min), max),
+                Blue = Math.Min(Math.Max(value.Blue, min), max),
+            };
+        }
+
+        public static float Lerp(float a, float b, float s)
+        {
+            return ((1.0f - s) * a) + (s * b);
+        }
     }
 }
