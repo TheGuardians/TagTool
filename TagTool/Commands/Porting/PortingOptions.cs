@@ -24,6 +24,9 @@ namespace TagTool.Commands.Porting
         [Description("Convert CTX1 bitmaps to DXN (default is DXT1)")]
         public bool HqNormalMapConversion = false;
 
+        [Description("Regenerates the structure surface triangle mappings")]
+        public bool RegenerateStructureSurfaces = false;
+
         public static PortingOptions Current = new PortingOptions();
     }
 }

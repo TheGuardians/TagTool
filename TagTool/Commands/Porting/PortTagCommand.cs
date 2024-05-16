@@ -1238,7 +1238,7 @@ namespace TagTool.Commands.Porting
                 case Scenario scnr:
                     {
                         blamDefinition = ConvertScenario(cacheStream, blamCacheStream, resourceStreams, scnr, blamTag.Name);
-                        if (BlamCache.Platform == CachePlatform.MCC)
+                        if (PortingOptions.Current.RegenerateStructureSurfaces)
                         {
                             foreach (var block in scnr.StructureBsps)
                             {
