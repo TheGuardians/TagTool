@@ -442,8 +442,23 @@ namespace TagTool.Shaders.ShaderMatching
                         //    optionName = "cook_torrance_odst";
                         //if (methodName == "material_model" && optionName == "cook_torrance_rim_fresnel")
                         //    optionName = "cook_torrance";
-                        if (PortingCache.Version == CacheVersion.HaloReach && methodName == "environment_mapping" && optionName == "dynamic")
-                            optionName = "dynamic_reach";
+
+                        if (PortingCache.Version == CacheVersion.HaloReach)
+                        {
+                            if (methodName == "environment_mapping" && optionName == "dynamic")
+                            {
+                                optionName = "dynamic_reach";
+                            }
+                            else if (methodName == "material_model")
+                            {
+                                if (optionName == "cook_torrance")
+                                    optionName = "cook_torrance_reach";
+                                else if (optionName == "two_lobe_phong")
+                                    optionName = "two_lobe_phong_reach";
+                                //else if (optionName == "organism")
+                                //    optionName = "organism_reach";
+                            }
+                        }
 
                         // TODO: fill this switch, Reach shadergen might take some time...
                         // fixup names (remove when full rmdf + shader generation for each gen3 game)
