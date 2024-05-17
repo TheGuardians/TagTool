@@ -38,8 +38,10 @@ namespace TagTool.Commands.Porting
             SpawnPoint = (1 << 5),
             [Description("Keep path finding data")]
             PathFinding = (1 << 6),
+            [Description("Ported scenario will use levels\\custom\\")]
+            CustomScenarioPath = (1 << 7),
 
-			Default = Objects | DeviceObjects | SpawnPoint
+			Default = Objects | DeviceObjects | SpawnPoint | CustomScenarioPath
         }
 
         public PortMultiplayerScenarioCommand(GameCacheHaloOnlineBase cacheContext, GameCache blamCache, PortTagCommand portTag) :
@@ -104,7 +106,10 @@ namespace TagTool.Commands.Porting
                 if (!Regex.IsMatch(scenarioName, "[a-z0-9_]+"))
                     return new TagToolError(CommandError.CustomMessage, "Scenario name must consist of lowercase alphanumeric characters and underscores");
 
-                scenarioPath = $@"levels\custom\{scenarioName}\{scenarioName}";
+                if (conversionFlags.HasFlag(MultiplayerScenarioConversionFlags.CustomScenarioPath))
+                    scenarioPath = $@"levels\custom\{scenarioName}\{scenarioName}";
+                else
+                    scenarioPath = blamScnrTag.Name;
 
                 //
                 // try to parse the map id, if not use the randomly generated one unless it's actually invalid/out of range
