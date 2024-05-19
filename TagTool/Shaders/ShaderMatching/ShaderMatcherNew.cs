@@ -496,10 +496,6 @@ namespace TagTool.Shaders.ShaderMatching
                             case @"depth_fade\low_res":
                                 optionName = "on";
                                 break;
-                            // MCC rmsh //
-                            case @"material_model\cook_torrance_pbr_maps":
-                                optionName = "cook_torrance";
-                                break;
                         }
 
                         bool matchFound = false;
