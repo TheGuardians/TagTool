@@ -1,4 +1,5 @@
 ﻿using System;
+using TagTool.Common;
 
 namespace TagTool.Bitmaps.Utils
 {
@@ -44,6 +45,32 @@ namespace TagTool.Bitmaps.Utils
                 default:
                     return Sample2dPoint(x, y);
             }
+        }
+
+        public RGBAColor Sample2dOffset(float x, float y, int offsetX, int offsetY)
+        {
+            float pixelWidth = 1.0f / GetWidth();
+            float pixelHeight = 1.0f / GetHeight();
+            float pxOffsetX = pixelWidth * offsetX;
+            float pxOffsetY = pixelHeight * offsetY;
+
+            x += pxOffsetX;
+            y += pxOffsetY;
+
+            switch (FilterMode)
+            {
+                case FilteringMode.Bilinear:
+                    return Sample2dBilinear(x, y);
+                case FilteringMode.Point:
+                default:
+                    return Sample2dPoint(x, y);
+            }
+        }
+
+        public RealVector4d Sample2dOffsetF(float x, float y, int offsetX, int offsetY)
+        {
+            RGBAColor sample = Sample2dOffset(x, y, offsetX, offsetY);
+            return new RealVector4d(sample.R / 255.0f, sample.G / 255.0f, sample.B / 255.0f, sample.A / 255.0f);
         }
 
         private float PixelWidth() => 1.0f / Width;
