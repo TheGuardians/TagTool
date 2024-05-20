@@ -1481,73 +1481,74 @@ namespace TagTool.Bitmaps
             return buffer;
         }
 
+        public static List<byte[]> DecodeCubemap(byte[] bitmRaw, BitmapFormat format, int virtualWidth, int virtualHeight)
+        {
+            int faceSize = virtualWidth * virtualHeight; // HACK DXT5 ONLY
+
+            List<byte[]> result = new List<byte[]>();//new byte[rawFaceSize * 6];
+
+            for (int i = 0; i < 6; i++)
+            {
+                result.Add(DecodeBitmap(bitmRaw.Skip(faceSize * i).ToArray(), format, virtualWidth, virtualHeight));
+            }
+
+            return result;
+        }
+
+        // WARNING: internal decoders should only decode by virtual dimensions, not array length!
         public static byte[] DecodeBitmap(byte[] bitmRaw, BitmapFormat format, int virtualWidth, int virtualHeight)
         {
             switch (format)
             {
                 case BitmapFormat.A8:
-                    bitmRaw = DecodeA8(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeA8(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.Y8:
-                    bitmRaw = DecodeY8(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeY8(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.AY8:
-                    bitmRaw = DecodeAY8(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeAY8(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.A8Y8:
-                    bitmRaw = DecodeA8Y8(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeA8Y8(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.Y16:
-                    bitmRaw = DecodeY16(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeY16(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.R5G6B5:
-                    bitmRaw = DecodeR5G6B5(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeR5G6B5(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.A1R5G5B5:
-                    bitmRaw = DecodeA1R5G5B5(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeA1R5G5B5(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.A4R4G4B4:
-                    bitmRaw = DecodeA4R4G4B4(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeA4R4G4B4(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.X8R8G8B8:
                 case BitmapFormat.A8R8G8B8:
-                    bitmRaw = DecodeA8R8G8B8(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeA8R8G8B8(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.Dxt1:
-                    bitmRaw = DecodeDxt1(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeDxt1(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.Dxt3:
-                    bitmRaw = DecodeDxt3(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeDxt3(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.Dxt5:
-                    bitmRaw = DecodeDxt5(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeDxt5(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.Dxt5a:
                 case BitmapFormat.Dxt5aAlpha:
                 case BitmapFormat.Dxt5aMono:
                 case BitmapFormat.ReachDxt5aMono:
                 case BitmapFormat.ReachDxt5aAlpha:
-                    bitmRaw = DecodeDxt5A(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeDxt5A(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.Dxt3aAlpha:
                 case BitmapFormat.Dxt3aMono:
                 case BitmapFormat.ReachDxt3aMono:
                 case BitmapFormat.ReachDxt3aAlpha:
-                    bitmRaw = DecodeDxt3A(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeDxt3A(bitmRaw, virtualWidth, virtualHeight);
 
                 /* case BitmapFormat.Dxt3a1111:
                      bitmRaw = DecodeDxt3A1111(bitmRaw, virtualWidth, virtualHeight);
@@ -1555,39 +1556,30 @@ namespace TagTool.Bitmaps
 
                 case BitmapFormat.DxnMonoAlpha:
                 case BitmapFormat.ReachDxnMonoAlpha:
-                    bitmRaw = DecodeDxnMA(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeDxnMA(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.Dxn:
-                    bitmRaw = DecodeDxn(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeDxn(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.Ctx1:
-                    bitmRaw = DecodeCtx1(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeCtx1(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.P8:
                 case BitmapFormat.A4R4G4B4Font:
-                    bitmRaw = DecodeP8(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeP8(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.V8U8:
-                    bitmRaw = DecodeV8U8(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeV8U8(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.V16U16:
-                    bitmRaw = DecodeV16U16(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeV16U16(bitmRaw, virtualWidth, virtualHeight);
 
                 case BitmapFormat.A8R8G8B8_reach:
-                    bitmRaw = DecodeA8R8G8B8(bitmRaw, virtualWidth, virtualHeight);
-                    break;
+                    return DecodeA8R8G8B8(bitmRaw, virtualWidth, virtualHeight);
 
                 default:
                     throw new NotSupportedException("Unsupported bitmap format.");
             }
-
-            return bitmRaw;
         }
 
         public static byte[] EncodeBitmap(byte[] bitm, BitmapFormat format, int virtualWidth, int virtualHeight)
