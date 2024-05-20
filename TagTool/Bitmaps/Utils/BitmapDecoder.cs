@@ -1483,7 +1483,7 @@ namespace TagTool.Bitmaps
 
         public static List<byte[]> DecodeCubemap(byte[] bitmRaw, BitmapFormat format, int virtualWidth, int virtualHeight)
         {
-            int faceSize = virtualWidth * virtualHeight; // HACK DXT5 ONLY
+            int faceSize = (virtualWidth * virtualHeight * BitmapFormatUtils.GetBitsPerPixel(format)) / 8;
 
             List<byte[]> result = new List<byte[]>();//new byte[rawFaceSize * 6];
 
