@@ -37,7 +37,8 @@ using System.Text;
 using System.Threading.Tasks;
 using TagTool.Common;
 using static TagTool.Bitmaps.Utils.SquishLib;
-using static TagTool.Tags.Definitions.Scenario.AiObjective;
+using System.Numerics;
+using TagTool.Extensions;
 
 namespace TagTool.Bitmaps.Utils
 {
@@ -105,12 +106,13 @@ namespace TagTool.Bitmaps.Utils
                 return i;
             }
 
-            public static int FloatTo565(RealVector3d colour)
+			// 3d vector
+            public static int FloatTo565(Vector<float> colour)
             {
                 // get the components in the correct range
-                int r = FloatToInt(31.0f * colour.I, 31);
-                int g = FloatToInt(63.0f * colour.J, 63);
-                int b = FloatToInt(31.0f * colour.K, 31);
+                int r = FloatToInt(31.0f * colour[0], 31);
+                int g = FloatToInt(63.0f * colour[1], 63);
+                int b = FloatToInt(31.0f * colour[2], 31);
 
                 // pack into a single value
                 return (r << 11) | (g << 5) | b;
@@ -135,7 +137,8 @@ namespace TagTool.Bitmaps.Utils
                 }
             }
 
-            public static void WriteColourBlock3(RealVector3d start, RealVector3d end, byte[] indices, byte[] block)
+			//3d vectors
+            public static void WriteColourBlock3(Vector<float> start, Vector<float> end, byte[] indices, byte[] block)
             {
                 // get the packed values
                 int a = FloatTo565(start);
@@ -171,7 +174,8 @@ namespace TagTool.Bitmaps.Utils
                 WriteColourBlock(a, b, remapped, block);
             }
 
-            public static void WriteColourBlock4(RealVector3d start, RealVector3d end, byte[] indices, byte[] block)
+			// 3d vectors
+            public static void WriteColourBlock4(Vector<float> start, Vector<float> end, byte[] indices, byte[] block)
             {
                 // get the packed values
                 int a = FloatTo565(start);
@@ -209,7 +213,8 @@ namespace TagTool.Bitmaps.Utils
 
         public static class SquishMath
         {
-            public static RealVector3d GetMultiplicity1Evector(Sym3x3 matrix, float evalue)
+			// 3d
+            public static Vector<float> GetMultiplicity1Evector(Sym3x3 matrix, float evalue)
             {
                 // compute M
                 Sym3x3 m = new Sym3x3();
@@ -246,16 +251,17 @@ namespace TagTool.Bitmaps.Utils
                 switch (mi)
                 {
                     case 0:
-                        return new RealVector3d(u[0], u[1], u[2]);
+                        return VectorExtensions.InitializeVector(new float[] { u[0], u[1], u[2] });
                     case 1:
                     case 3:
-                        return new RealVector3d(u[1], u[3], u[4]);
+                        return VectorExtensions.InitializeVector(new float[] { u[1], u[3], u[4] });
                     default:
-                        return new RealVector3d(u[2], u[4], u[5]);
+                        return VectorExtensions.InitializeVector(new float[] { u[2], u[4], u[5] });
                 }
             }
 
-            public static RealVector3d GetMultiplicity2Evector(Sym3x3 matrix, float evalue)
+			// 3d
+            public static Vector<float> GetMultiplicity2Evector(Sym3x3 matrix, float evalue)
             {
                 // compute M
                 Sym3x3 m = new Sym3x3();
@@ -284,18 +290,19 @@ namespace TagTool.Bitmaps.Utils
                 {
                     case 0:
                     case 1:
-                        return new RealVector3d(-m[1], m[0], 0.0f);
+                        return VectorExtensions.InitializeVector(new float[] { -m[1], m[0], 0.0f });
                     case 2:
-                        return new RealVector3d(m[2], 0.0f, -m[0]);
+                        return VectorExtensions.InitializeVector(new float[] { m[2], 0.0f, -m[0] });
                     case 3:
                     case 4:
-                        return new RealVector3d(0.0f, -m[4], m[3]);
+                        return VectorExtensions.InitializeVector(new float[] { 0.0f, -m[4], m[3] });
                     default:
-                        return new RealVector3d(0.0f, -m[5], m[4]);
+                        return VectorExtensions.InitializeVector(new float[] { 0.0f, -m[5], m[4] });
                 }
             }
 
             public static float LengthSquared(RealVector3d v) => RealVector3d.DotProduct(v, v);
+            public static float LengthSquared3d(Vector<float> v) => VectorExtensions.Dot3d(v, v);
 
 
             public static RealVector3d Min(RealVector3d a, RealVector3d b) =>
@@ -308,6 +315,45 @@ namespace TagTool.Bitmaps.Utils
             public static RealVector4d Max(RealVector4d a, RealVector4d b) =>
                 new RealVector4d(Math.Max(a.I, b.I), Math.Max(a.J, b.J), Math.Max(a.K, b.K), Math.Max(a.W, b.W));
 
+            public static Vector<float> Max4d(Vector<float> a, Vector<float> b)
+			{
+				return VectorExtensions.InitializeVector(new float[]
+				{
+					Math.Max(a[0], b[0]),
+                    Math.Max(a[1], b[1]),
+                    Math.Max(a[2], b[2]),
+                    Math.Max(a[3], b[3])
+                });
+            }
+            public static Vector<float> Min4d(Vector<float> a, Vector<float> b)
+            {
+                return VectorExtensions.InitializeVector(new float[]
+                {
+                    Math.Min(a[0], b[0]),
+                    Math.Min(a[1], b[1]),
+                    Math.Min(a[2], b[2]),
+                    Math.Min(a[3], b[3])
+                });
+            }
+            public static Vector<float> Max3d(Vector<float> a, Vector<float> b)
+            {
+                return VectorExtensions.InitializeVector(new float[]
+                {
+                    Math.Max(a[0], b[0]),
+                    Math.Max(a[1], b[1]),
+                    Math.Max(a[2], b[2])
+                });
+            }
+            public static Vector<float> Min3d(Vector<float> a, Vector<float> b)
+            {
+                return VectorExtensions.InitializeVector(new float[]
+                {
+                    Math.Min(a[0], b[0]),
+                    Math.Min(a[1], b[1]),
+                    Math.Min(a[2], b[2])
+                });
+            }
+
             public static RealVector3d Truncate(RealVector3d input) => new RealVector3d(
                     input.I > 0.0f ? (float)Math.Floor(input.I) : (float)Math.Ceiling(input.I),
                     input.J > 0.0f ? (float)Math.Floor(input.J) : (float)Math.Ceiling(input.J),
@@ -319,6 +365,19 @@ namespace TagTool.Bitmaps.Utils
                     input.K > 0.0f ? (float)Math.Floor(input.K) : (float)Math.Ceiling(input.K),
                     input.W > 0.0f ? (float)Math.Floor(input.W) : (float)Math.Ceiling(input.W)
                 );
+            public static Vector<float> Truncate4d(Vector<float> input) => VectorExtensions.InitializeVector(new float[]
+				{
+					input[0] > 0.0f ? (float)Math.Floor(input[0]) : (float)Math.Ceiling(input[0]),
+					input[1] > 0.0f ? (float)Math.Floor(input[1]) : (float)Math.Ceiling(input[1]),
+					input[2] > 0.0f ? (float)Math.Floor(input[2]) : (float)Math.Ceiling(input[2]),
+					input[3] > 0.0f ? (float)Math.Floor(input[3]) : (float)Math.Ceiling(input[3])
+				});
+            public static Vector<float> Truncate3d(Vector<float> input) => VectorExtensions.InitializeVector(new float[]
+                {
+                    input[0] > 0.0f ? (float)Math.Floor(input[0]) : (float)Math.Ceiling(input[0]),
+                    input[1] > 0.0f ? (float)Math.Floor(input[1]) : (float)Math.Ceiling(input[1]),
+                    input[2] > 0.0f ? (float)Math.Floor(input[2]) : (float)Math.Ceiling(input[2])
+                });
 
 
             public static bool CompareAnyLessThan(RealVector4d a, RealVector4d b) =>
@@ -544,7 +603,8 @@ namespace TagTool.Bitmaps.Utils
 
 			float[] m_x; //[6]
 
-			public RealVector3d ComputePrincipleComponent()
+			// 3d
+			public Vector<float> ComputePrincipleComponent()
             {
                 float FLT_EPSILON = 1.192092896e-07F;
                 var matrix = this;
@@ -570,7 +630,7 @@ namespace TagTool.Bitmaps.Utils
                 if (FLT_EPSILON < Q)
                 {
                     // only one root, which implies we have a multiple of the identity
-                    return new RealVector3d(1.0f, 1.0f, 1.0f);
+                    return VectorExtensions.InitializeVector(new float[] { 1.0f, 1.0f, 1.0f });
                 }
                 else if (Q < -FLT_EPSILON)
                 {
@@ -615,31 +675,32 @@ namespace TagTool.Bitmaps.Utils
                 }
             }
 
-            public static Sym3x3 ComputeWeightedCovariance(int n, RealVector3d[] points, float[] weights)
+			// 3d
+            public static Sym3x3 ComputeWeightedCovariance(int n, Vector<float>[] points, float[] weights)
 			{
 				// compute the centroid
 				float total = 0.0f;
-				RealVector3d centroid = new RealVector3d( 0.0f, 0.0f, 0.0f );
+                Vector<float> centroid = VectorExtensions.InitializeVector();
 				for( int i = 0; i < n; ++i )
 				{
 					total += weights[i];
 					centroid += weights[i]*points[i];
 				}
-				centroid /= total;
+				centroid *= (1.0f / total);
 			
 				// accumulate the covariance matrix
 				Sym3x3 covariance = new Sym3x3(0.0f);
 				for( int i = 0; i < n; ++i )
 				{
-                    RealVector3d a = points[i] - centroid;
-                    RealVector3d b = weights[i]*a;
+                    Vector<float> a = points[i] - centroid;
+                    Vector<float> b = weights[i]*a;
 					
-					covariance[0] += a.I * b.I;
-					covariance[1] += a.I * b.J;
-					covariance[2] += a.I * b.K;
-					covariance[3] += a.J * b.J;
-					covariance[4] += a.J * b.K;
-					covariance[5] += a.K * b.K;
+					covariance[0] += a[0] * b[0];
+					covariance[1] += a[0] * b[1];
+					covariance[2] += a[0] * b[2];
+					covariance[3] += a[1] * b[1];
+					covariance[4] += a[1] * b[2];
+					covariance[5] += a[2] * b[2];
 				}
 				
 				// return it
@@ -670,7 +731,7 @@ namespace TagTool.Bitmaps.Utils
 				Transparent = false;
 
 				// init arrays
-				Points = new RealVector3d[16];
+				Points = new Vector<float>[16];
 				Weights = new float[16];
 				Remap = new int[16];
 
@@ -712,7 +773,7 @@ namespace TagTool.Bitmaps.Utils
 							float w = (float)(rgba[4 * i + 3] + 1) / 256.0f;
 
 							// add the point
-							Points[Count] = new RealVector3d(x, y, z);
+							Points[Count] = VectorExtensions.InitializeVector(new float[] { x, y, z });
 							Weights[Count] = (weightByAlpha ? w : 1.0f);
 							Remap[i] = Count;
 
@@ -762,12 +823,12 @@ namespace TagTool.Bitmaps.Utils
 			}
 
 			public int GetCount() => Count;
-			public RealVector3d[] GetPoints() => Points;
+			public Vector<float>[] GetPoints() => Points; //3d
 			public float[] GetWeights() => Weights;
 			public bool IsTransparent() => Transparent;
 
 			private int Count;
-			private RealVector3d[] Points; // [16]
+			private Vector<float>[] Points; // 3d [16]
 			private float[] Weights; // [16]
 			private int[] Remap; // [16]
 			private bool Transparent;
@@ -792,13 +853,13 @@ namespace TagTool.Bitmaps.Utils
 
 			public SingleColourFit(ColourSet colours, uint flags) : base(colours, flags)
 			{
-				// grab the single colour
-				RealVector3d[] values = m_colours.GetPoints();
+                // grab the single colour
+                Vector<float>[] values = m_colours.GetPoints();
 				List<byte> colour_list = new List<byte>
 				{
-					(byte)FloatToInt(255.0f * values[0].I, 255),
-					(byte)FloatToInt(255.0f * values[0].J, 255),
-					(byte)FloatToInt(255.0f * values[0].K, 255)
+					(byte)FloatToInt(255.0f * values[0][0], 255),
+					(byte)FloatToInt(255.0f * values[0][1], 255),
+					(byte)FloatToInt(255.0f * values[0][2], 255)
 				};
 				m_colour = colour_list.ToArray();
 
@@ -888,16 +949,16 @@ namespace TagTool.Bitmaps.Utils
 					// keep it if the error is lower
 					if (error < m_error)
 					{
-						m_start = new RealVector3d(
+						m_start = VectorExtensions.InitializeVector( new float[] {
 							(float)sources[0].start / 31.0f,
 							(float)sources[1].start / 63.0f,
 							(float)sources[2].start / 31.0f
-						);
-						m_end = new RealVector3d(
+						});
+						m_end = VectorExtensions.InitializeVector( new float[] {
 							(float)sources[0].end / 31.0f,
 							(float)sources[1].end / 63.0f,
 							(float)sources[2].end / 31.0f
-							);
+						});
 						m_index = (byte)(2 * index);
 						m_error = error;
 					}
@@ -905,8 +966,8 @@ namespace TagTool.Bitmaps.Utils
 			}
 
 			private byte[] m_colour; // [3]
-			private RealVector3d m_start;
-			private RealVector3d m_end;
+			private Vector<float> m_start; // 3d
+			private Vector<float> m_end; //3d
 			private byte m_index;
 			private int m_error;
 			private int m_besterror;
@@ -919,37 +980,37 @@ namespace TagTool.Bitmaps.Utils
                 // initialise the metric
                 bool perceptual = ((m_flags & (uint)SquishFlags.kColourMetricPerceptual) != 0);
                 if (perceptual)
-                    m_metric = new RealVector3d(0.2126f, 0.7152f, 0.0722f);
+                    m_metric = VectorExtensions.InitializeVector(new float[] { 0.2126f, 0.7152f, 0.0722f });
                 else
-                    m_metric = new RealVector3d(1.0f, 1.0f, 1.0f);
+                    m_metric = VectorExtensions.InitializeVector(new float[] { 1.0f, 1.0f, 1.0f });
 
                 // initialise the best error
                 m_besterror = float.MaxValue;
 
                 // cache some values
                 int count = m_colours.GetCount();
-                RealVector3d[] values = m_colours.GetPoints();
+                Vector<float>[] values = m_colours.GetPoints();
                 float[] weights = m_colours.GetWeights();
 
                 // get the covariance matrix
                 Sym3x3 covariance = Sym3x3.ComputeWeightedCovariance(count, values, weights);
 
                 // compute the principle component
-                RealVector3d principle = covariance.ComputePrincipleComponent();
+                Vector<float> principle = covariance.ComputePrincipleComponent();
 
                 // get the min and max range as the codebook endpoints
-                RealVector3d start = new RealVector3d(0.0f, 0.0f, 0.0f);
-                RealVector3d end = new RealVector3d(0.0f, 0.0f, 0.0f);
+                Vector<float> start = VectorExtensions.InitializeVector();
+                Vector<float> end = VectorExtensions.InitializeVector();
                 if (count > 0)
                 {
                     float min, max;
 
                     // compute the range
                     start = end = values[0];
-                    min = max = RealVector3d.DotProduct(values[0], principle);
+                    min = max = VectorExtensions.Dot3d(values[0], principle);
                     for (int i = 1; i < count; ++i)
                     {
-                        float val = RealVector3d.DotProduct(values[i], principle);
+                        float val = VectorExtensions.Dot3d(values[i], principle);
                         if (val < min)
                         {
                             start = values[i];
@@ -964,27 +1025,27 @@ namespace TagTool.Bitmaps.Utils
                 }
 
                 // clamp the output to [0, 1]
-                RealVector3d one = new RealVector3d(1.0f, 1.0f, 1.0f);
-                RealVector3d zero = new RealVector3d(0.0f, 0.0f, 0.0f);
-                start = SquishMath.Min(one, SquishMath.Max(zero, start));
-                end = SquishMath.Min(one, SquishMath.Max(zero, end));
+                Vector<float> one = VectorExtensions.InitializeVector(new float[] { 1.0f, 1.0f, 1.0f });
+                Vector<float> zero = VectorExtensions.InitializeVector();
+                start = SquishMath.Min3d(one, SquishMath.Max3d(zero, start));
+                end = SquishMath.Min3d(one, SquishMath.Max3d(zero, end));
 
                 // clamp to the grid and save
-                RealVector3d grid = new RealVector3d(31.0f, 63.0f, 31.0f);
-                RealVector3d gridrcp = new RealVector3d(1.0f / 31.0f, 1.0f / 63.0f, 1.0f / 31.0f);
-                RealVector3d half = new RealVector3d(0.5f, 0.5f, 0.5f);
-                m_start = SquishMath.Truncate(grid * start + half) * gridrcp;
-                m_end = SquishMath.Truncate(grid * end + half) * gridrcp;
+                Vector<float> grid = VectorExtensions.InitializeVector(new float[] { 31.0f, 63.0f, 31.0f });
+                Vector<float> gridrcp = VectorExtensions.InitializeVector(new float[] { 1.0f / 31.0f, 1.0f / 63.0f, 1.0f / 31.0f });
+                Vector<float> half = VectorExtensions.InitializeVector(new float[] { 0.5f, 0.5f, 0.5f });
+                m_start = SquishMath.Truncate3d(grid * start + half) * gridrcp;
+                m_end = SquishMath.Truncate3d(grid * end + half) * gridrcp;
             }
 
             protected override void Compress3(byte[] block)
 			{
                 // cache some values
                 int count = m_colours.GetCount();
-                RealVector3d[] values = m_colours.GetPoints();
+                Vector<float>[] values = m_colours.GetPoints();
 
                 // create a codebook
-                RealVector3d[] codes = new RealVector3d[]
+                Vector<float>[] codes = new Vector<float>[]
 				{
                     m_start,
 					m_end,
@@ -1001,7 +1062,7 @@ namespace TagTool.Bitmaps.Utils
                     int idx = 0;
                     for (int j = 0; j < 3; ++j)
                     {
-                        float d = SquishMath.LengthSquared(m_metric * (values[i] - codes[j]));
+                        float d = SquishMath.LengthSquared3d(m_metric * (values[i] - codes[j]));
                         if (d < dist)
                         {
                             dist = d;
@@ -1035,10 +1096,10 @@ namespace TagTool.Bitmaps.Utils
 			{
 				// cache some values
 				int count = m_colours.GetCount();
-				RealVector3d[] values = m_colours.GetPoints();
+                Vector<float>[] values = m_colours.GetPoints();
 
-				// create a codebook
-				RealVector3d[] codes = new RealVector3d[] {
+                // create a codebook
+                Vector<float>[] codes = new Vector<float>[] {
 					m_start,
 					m_end,
 					(2.0f / 3.0f) * m_start + (1.0f / 3.0f) * m_end,
@@ -1055,7 +1116,7 @@ namespace TagTool.Bitmaps.Utils
                     int idx = 0;
                     for (int j = 0; j < 4; ++j)
                     {
-                        float d = SquishMath.LengthSquared(m_metric * (values[i] - codes[j]));
+                        float d = SquishMath.LengthSquared3d(m_metric * (values[i] - codes[j]));
                         if (d < dist)
                         {
                             dist = d;
@@ -1085,9 +1146,10 @@ namespace TagTool.Bitmaps.Utils
                 }
             }
 
-            private RealVector3d m_metric;
-            private RealVector3d m_start;
-            private RealVector3d m_end;
+			// all 3d
+            private Vector<float> m_metric;
+            private Vector<float> m_start;
+            private Vector<float> m_end;
             private float m_besterror;
         }
 
@@ -1101,27 +1163,27 @@ namespace TagTool.Bitmaps.Utils
                     orderList.Add(new byte[16]);
 				m_order = orderList.ToArray();
 
-				List<RealVector4d> pointWeightsList = new List<RealVector4d>();
+				List<Vector<float>> pointWeightsList = new List<Vector<float>>();
 				for (int i = 0; i < 16; i++)
-					pointWeightsList.Add(new RealVector4d());
+					pointWeightsList.Add(VectorExtensions.InitializeVector());
                 m_points_weights = pointWeightsList.ToArray();
 
                 // set the iteration count
                 m_iterationCount = (m_flags & (uint)SquishFlags.kColourIterativeClusterFit) != 0 ? kMaxIterations : 1;
 
                 // initialise the best error
-                m_besterror = new RealVector4d(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);  // ..
+                m_besterror = float.MaxValue;  // ..
 
                 // initialise the metric
                 bool perceptual = ((m_flags & (uint)SquishFlags.kColourMetricPerceptual) != 0);
                 if (perceptual)
-                    m_metric = new RealVector4d(0.2126f, 0.7152f, 0.0722f, 0.0f);
+                    m_metric = VectorExtensions.InitializeVector(new float[] { 0.2126f, 0.7152f, 0.0722f, 0.0f });
                 else
-                    m_metric = new RealVector4d(1.0f, 1.0f, 1.0f, 1.0f); // ..
+                    m_metric = VectorExtensions.InitializeVector(new float[] { 1.0f, 1.0f, 1.0f, 1.0f }); // ..
 
                 // cache some values
                 int count = m_colours.GetCount();
-                RealVector3d[] values = m_colours.GetPoints();
+                Vector<float>[] values = m_colours.GetPoints();
 
                 // get the covariance matrix
                 Sym3x3 covariance = Sym3x3.ComputeWeightedCovariance(count, values, m_colours.GetWeights());
@@ -1130,18 +1192,19 @@ namespace TagTool.Bitmaps.Utils
                 m_principle = covariance.ComputePrincipleComponent();
             }
 
-			private bool ConstructOrdering(ref RealVector3d axis, int iteration)
+			// axis 3d
+			private bool ConstructOrdering(ref Vector<float> axis, int iteration)
 			{
 				// cache some values
 				int count = m_colours.GetCount();
-                RealVector3d[] values = m_colours.GetPoints();
+                Vector<float>[] values = m_colours.GetPoints();
 
 				// build the list of dot products
 				float[] dps = new float[16];
 				byte[] order = m_order[iteration];
 				for( int i = 0; i < count; ++i )
 				{
-					dps[i] = RealVector3d.DotProduct( values[i], axis );
+					dps[i] = VectorExtensions.Dot3d( values[i], axis );
 					order[i] = (byte)i;
 				}
 					
@@ -1176,17 +1239,17 @@ namespace TagTool.Bitmaps.Utils
 					if( same )
 						return false;
 				}
-				
-				// copy the ordering and weight all the points
-				RealVector3d[] unweighted = m_colours.GetPoints();
+
+                // copy the ordering and weight all the points
+                Vector<float>[] unweighted = m_colours.GetPoints();
 				float[] weights = m_colours.GetWeights();
-				m_xsum_wsum = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
+				m_xsum_wsum = VectorExtensions.InitializeVector(new float[] { 0.0f, 0.0f, 0.0f, 0.0f });
 				for( int i = 0; i < count; ++i )
 				{
 					int j = order[i];
-					RealVector4d p = new RealVector4d(unweighted[j].I, unweighted[j].J, unweighted[j].K, 1.0f);
-					RealVector4d w = new RealVector4d(weights[j], weights[j], weights[j], weights[j]);
-					RealVector4d x = p*w;
+					Vector<float> p = VectorExtensions.InitializeVector(new float[] { unweighted[j][0], unweighted[j][1], unweighted[j][2], 1.0f });
+					Vector<float> w = VectorExtensions.InitializeVector(new float[] { weights[j], weights[j], weights[j], weights[j] });
+                    Vector<float> x = p*w;
 					m_points_weights[i] = x;
 					m_xsum_wsum += x;
 				}
@@ -1197,21 +1260,21 @@ namespace TagTool.Bitmaps.Utils
 			{
                 // declare variables
                 int count = m_colours.GetCount();
-                RealVector4d two = new RealVector4d(2.0f, 2.0f, 2.0f, 2.0f);
-                RealVector4d one = new RealVector4d(1.0f, 1.0f, 1.0f, 1.0f);
-                RealVector4d half_half2 = new RealVector4d( 0.5f, 0.5f, 0.5f, 0.25f );
-                RealVector4d zero = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
-                RealVector4d half = new RealVector4d(0.5f, 0.5f, 0.5f, 0.5f);
-                RealVector4d grid = new RealVector4d( 31.0f, 63.0f, 31.0f, 0.0f );
-                RealVector4d gridrcp = new RealVector4d( 1.0f / 31.0f, 1.0f / 63.0f, 1.0f / 31.0f, 0.0f );
+                Vector<float> two = VectorExtensions.InitializeVector(new float[] { 2.0f, 2.0f, 2.0f, 2.0f });
+                Vector<float> one = VectorExtensions.InitializeVector(new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+                Vector<float> half_half2 = VectorExtensions.InitializeVector(new float[] { 0.5f, 0.5f, 0.5f, 0.25f });
+                Vector<float> zero = VectorExtensions.InitializeVector();
+                Vector<float> half = VectorExtensions.InitializeVector(new float[] { 0.5f, 0.5f, 0.5f, 0.5f });
+                Vector<float> grid = VectorExtensions.InitializeVector(new float[] { 31.0f, 63.0f, 31.0f, 0.0f });
+                Vector<float> gridrcp = VectorExtensions.InitializeVector(new float[] { 1.0f / 31.0f, 1.0f / 63.0f, 1.0f / 31.0f, 0.0f });
 
                 // prepare an ordering using the principle axis
                 ConstructOrdering(ref m_principle, 0);
 
                 // check all possible clusters and iterate on the total order
-                RealVector4d beststart = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
-                RealVector4d bestend = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
-                RealVector4d besterror = m_besterror;
+                Vector<float> beststart = VectorExtensions.InitializeVector();
+                Vector<float> bestend = VectorExtensions.InitializeVector();
+                float besterror = m_besterror;
                 byte[] bestindices = new byte[16];
                 int bestiteration = 0;
                 int besti = 0, bestj = 0;
@@ -1220,49 +1283,49 @@ namespace TagTool.Bitmaps.Utils
                 for (int iterationIndex = 0; ;)
                 {
                     // first cluster [0,i) is at the start
-                    RealVector4d part0 = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
+                    Vector<float> part0 = VectorExtensions.InitializeVector();
                     for (int i = 0; i < count; ++i)
                     {
                         // second cluster [i,j) is half along
-                        RealVector4d part1 = (i == 0) ? m_points_weights[0] : new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
+                        Vector<float> part1 = (i == 0) ? m_points_weights[0] : VectorExtensions.InitializeVector();
                         int jmin = (i == 0) ? 1 : i;
                         for (int j = jmin; ;)
                         {
                             // last cluster [j,count) is at the end
-                            RealVector4d part2 = m_xsum_wsum - part1 - part0;
+                            Vector<float> part2 = m_xsum_wsum - part1 - part0;
 
                             // compute least squares terms directly
-                            RealVector4d alphax_sum = part1 * half_half2 + part0;
-                            RealVector4d alpha2_sum = alphax_sum.WWWW;
+                            Vector<float> alphax_sum = part1 * half_half2 + part0;
+                            float alpha2_sum = alphax_sum[3];
 
-                            RealVector4d betax_sum = part1 * half_half2 + part2;
-                            RealVector4d beta2_sum = betax_sum.WWWW;
+                            Vector<float> betax_sum = part1 * half_half2 + part2;
+                            float beta2_sum = betax_sum[3];
 
-                            RealVector4d alphabeta_sum = (part1 * half_half2).WWWW;
+                            float alphabeta_sum = (part1[3] * half_half2[3]);
 
                             // compute the least-squares optimal points
-                            RealVector4d factor = 1.0f / (-1.0f * (alphabeta_sum * alphabeta_sum - (alpha2_sum * beta2_sum)));
-                            RealVector4d a = -1.0f * (betax_sum * alphabeta_sum - (alphax_sum * beta2_sum)) * factor;
-                            RealVector4d b = -1.0f * (alphax_sum * alphabeta_sum - (betax_sum * alpha2_sum)) * factor;
+                            float factor = 1.0f / (-1.0f * (alphabeta_sum * alphabeta_sum - (alpha2_sum * beta2_sum)));
+                            Vector<float> a = -1.0f * (betax_sum * alphabeta_sum - (alphax_sum * beta2_sum)) * factor;
+                            Vector<float> b = -1.0f * (alphax_sum * alphabeta_sum - (betax_sum * alpha2_sum)) * factor;
 
                             // clamp to the grid
-                            a = SquishMath.Min(one, SquishMath.Max(zero, a));
-                            b = SquishMath.Min(one, SquishMath.Max(zero, b));
-                            a = SquishMath.Truncate(grid * a + half) * gridrcp;
-                            b = SquishMath.Truncate(grid * b + half) * gridrcp;
+                            a = SquishMath.Min4d(one, SquishMath.Max4d(zero, a));
+                            b = SquishMath.Min4d(one, SquishMath.Max4d(zero, b));
+                            a = SquishMath.Truncate4d(grid * a + half) * gridrcp;
+                            b = SquishMath.Truncate4d(grid * b + half) * gridrcp;
 
                             // compute the error (we skip the constant xxsum)
-                            RealVector4d e1 = (a * a) * alpha2_sum + (b * b * beta2_sum);
-                            RealVector4d e2 = -1.0f * (a * alphax_sum - (a * b * alphabeta_sum));
-                            RealVector4d e3 = -1.0f * (b * betax_sum - e2);
-                            RealVector4d e4 = two * e3 + e1;
+                            Vector<float> e1 = (a * a) * alpha2_sum + (b * b * beta2_sum);
+                            Vector<float> e2 = -1.0f * (a * alphax_sum - (a * b * alphabeta_sum));
+                            Vector<float> e3 = -1.0f * (b * betax_sum - e2);
+                            Vector<float> e4 = two * e3 + e1;
 
                             // apply the metric to the error term
-                            RealVector4d e5 = e4 * m_metric;
-                            RealVector4d error = e5.XXXX + e5.YYYY + e5.ZZZZ;
+                            Vector<float> e5 = e4 * m_metric;
+                            float error = e5[0] + e5[1] + e5[2];
 
                             // keep the solution if it wins
-                            if (SquishMath.CompareAnyLessThan(error, besterror))
+                            if (error < besterror)
                             {
                                 beststart = a;
                                 bestend = b;
@@ -1293,13 +1356,13 @@ namespace TagTool.Bitmaps.Utils
                         break;
 
                     // stop if a new iteration is an ordering that has already been tried
-                    RealVector3d axis = (bestend - beststart).XYZ;
+                    Vector<float> axis = VectorExtensions.Convert4dTo3d(bestend - beststart);
                     if (!ConstructOrdering(ref axis, iterationIndex))
                         break;
                 }
 
                 // save the block if necessary
-                if (SquishMath.CompareAnyLessThan(besterror, m_besterror))
+                if (besterror < m_besterror)
                 {
                     // remap the indices
                     byte[] order = m_order[bestiteration];
@@ -1315,7 +1378,7 @@ namespace TagTool.Bitmaps.Utils
                     m_colours.RemapIndices(unordered, bestindices);
 
                     // save the block
-                    ColourBlock.WriteColourBlock3(beststart.XYZ, bestend.XYZ, bestindices, block);
+                    ColourBlock.WriteColourBlock3(VectorExtensions.Convert4dTo3d(beststart), VectorExtensions.Convert4dTo3d(bestend), bestindices, block);
 
                     // save the error
                     m_besterror = besterror;
@@ -1326,23 +1389,23 @@ namespace TagTool.Bitmaps.Utils
 			{
                 // declare variables
                 int count = m_colours.GetCount();
-                RealVector4d two = new RealVector4d(2.0f, 2.0f, 2.0f, 2.0f);
-                RealVector4d one = new RealVector4d(1.0f, 1.0f, 1.0f, 1.0f);
-                RealVector4d onethird_onethird2 = new RealVector4d( 1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 9.0f );
-                RealVector4d twothirds_twothirds2 = new RealVector4d( 2.0f / 3.0f, 2.0f / 3.0f, 2.0f / 3.0f, 4.0f / 9.0f );
-                RealVector4d twonineths = new RealVector4d(2.0f / 9.0f, 2.0f / 9.0f, 2.0f / 9.0f, 2.0f / 9.0f);
-                RealVector4d zero = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
-                RealVector4d half = new RealVector4d(0.5f, 0.5f, 0.5f, 0.5f);
-                RealVector4d grid = new RealVector4d( 31.0f, 63.0f, 31.0f, 0.0f );
-                RealVector4d gridrcp = new RealVector4d( 1.0f / 31.0f, 1.0f / 63.0f, 1.0f / 31.0f, 0.0f );
+                Vector<float> two = VectorExtensions.InitializeVector(new float[] { 2.0f, 2.0f, 2.0f, 2.0f });
+                Vector<float> one = VectorExtensions.InitializeVector(new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+                Vector<float> onethird_onethird2 = VectorExtensions.InitializeVector(new float[] { 1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 9.0f });
+                Vector<float> twothirds_twothirds2 = VectorExtensions.InitializeVector(new float[] { 2.0f / 3.0f, 2.0f / 3.0f, 2.0f / 3.0f, 4.0f / 9.0f });
+                Vector<float> twonineths = VectorExtensions.InitializeVector(new float[] { 2.0f / 9.0f, 2.0f / 9.0f, 2.0f / 9.0f, 2.0f / 9.0f });
+                Vector<float> zero = VectorExtensions.InitializeVector();
+                Vector<float> half = VectorExtensions.InitializeVector(new float[] { 0.5f, 0.5f, 0.5f, 0.5f });
+                Vector<float> grid = VectorExtensions.InitializeVector(new float[] { 31.0f, 63.0f, 31.0f, 0.0f });
+                Vector<float> gridrcp = VectorExtensions.InitializeVector(new float[] { 1.0f / 31.0f, 1.0f / 63.0f, 1.0f / 31.0f, 0.0f });
 
                 // prepare an ordering using the principle axis
                 ConstructOrdering(ref m_principle, 0);
 
                 // check all possible clusters and iterate on the total order
-                RealVector4d beststart = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
-                RealVector4d bestend = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
-                RealVector4d besterror = m_besterror;
+                Vector<float> beststart = VectorExtensions.InitializeVector();
+                Vector<float> bestend = VectorExtensions.InitializeVector();
+                float besterror = m_besterror;
                 byte[] bestindices = new byte[16];
                 int bestiteration = 0;
                 int besti = 0, bestj = 0, bestk = 0;
@@ -1351,53 +1414,55 @@ namespace TagTool.Bitmaps.Utils
                 for (int iterationIndex = 0; ;)
                 {
                     // first cluster [0,i) is at the start
-                    RealVector4d part0 = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
+                    Vector<float> part0 = VectorExtensions.InitializeVector();
                     for (int i = 0; i < count; ++i)
                     {
                         // second cluster [i,j) is one third along
-                        RealVector4d part1 = new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
+                        Vector<float> part1 = VectorExtensions.InitializeVector();
                         for (int j = i; ;)
                         {
                             // third cluster [j,k) is two thirds along
-                            RealVector4d part2 = (j == 0) ? m_points_weights[0] : new RealVector4d(0.0f, 0.0f, 0.0f, 0.0f);
+                            Vector<float> part2 = (j == 0) ? m_points_weights[0] : VectorExtensions.InitializeVector();
                             int kmin = (j == 0) ? 1 : j;
                             for (int k = kmin; ;)
                             {
+								// TODO: swap to 128bit vectors where possible
+
                                 // last cluster [k,count) is at the end
-                                RealVector4d part3 = m_xsum_wsum - part2 - part1 - part0;
+                                Vector<float> part3 = m_xsum_wsum - part2 - part1 - part0;
 
                                 // compute least squares terms directly
-                                RealVector4d alphax_sum = (part2 * onethird_onethird2 + (part1 * twothirds_twothirds2 + part0));
-                                RealVector4d alpha2_sum = alphax_sum.WWWW;
+                                Vector<float> alphax_sum = (part2 * onethird_onethird2 + (part1 * twothirds_twothirds2 + part0));
+                                float alpha2_sum = alphax_sum[3];
 
-                                RealVector4d betax_sum = (part1 * onethird_onethird2 + (part2 * twothirds_twothirds2 + part3));
-                                RealVector4d beta2_sum = betax_sum.WWWW;
+                                Vector<float> betax_sum = (part1 * onethird_onethird2 + (part2 * twothirds_twothirds2 + part3));
+                                float beta2_sum = betax_sum[3];
 
-                                RealVector4d alphabeta_sum = twonineths * (part1 + part2).WWWW;
+                                Vector<float> alphabeta_sum = twonineths * (part1[3] + part2[3]);
 
                                 // compute the least-squares optimal points
-                                RealVector4d factor = 1.0f / (-1.0f * (alphabeta_sum * alphabeta_sum - (alpha2_sum * beta2_sum)));
-                                RealVector4d a = -1.0f * (betax_sum * alphabeta_sum - (alphax_sum * beta2_sum)) * factor;
-                                RealVector4d b = -1.0f * (alphax_sum * alphabeta_sum - (betax_sum * alpha2_sum)) * factor;
+                                Vector<float> factor = -VectorExtensions.Subtract4d(alphabeta_sum * alphabeta_sum, alpha2_sum * beta2_sum);
+                                Vector<float> a = -(betax_sum * alphabeta_sum - (alphax_sum * beta2_sum)) / factor;
+                                Vector<float> b = -(alphax_sum * alphabeta_sum - (betax_sum * alpha2_sum)) / factor;
 
                                 // clamp to the grid
-                                a = SquishMath.Min(one, SquishMath.Max(zero, a));
-                                b = SquishMath.Min(one, SquishMath.Max(zero, b));
-                                a = SquishMath.Truncate(grid * a + half) * gridrcp;
-                                b = SquishMath.Truncate(grid * b + half) * gridrcp;
+                                a = SquishMath.Min4d(one, SquishMath.Max4d(zero, a));
+                                b = SquishMath.Min4d(one, SquishMath.Max4d(zero, b));
+                                a = SquishMath.Truncate4d(grid * a + half) * gridrcp;
+                                b = SquishMath.Truncate4d(grid * b + half) * gridrcp;
 
                                 // compute the error (we skip the constant xxsum)
-                                RealVector4d e1 = a * a * alpha2_sum + (b * b * beta2_sum);
-                                RealVector4d e2 = -1.0f * (a * alphax_sum - (a * b * alphabeta_sum));
-                                RealVector4d e3 = -1.0f * (b * betax_sum - e2);
-                                RealVector4d e4 = two * e3 + e1;
+                                Vector<float> e1 = a * a * alpha2_sum + (b * b * beta2_sum);
+                                Vector<float> e2 = -(a * alphax_sum - (a * b * alphabeta_sum));
+                                Vector<float> e3 = -(b * betax_sum - e2);
+                                Vector<float> e4 = two * e3 + e1;
 
                                 // apply the metric to the error term
-                                RealVector4d e5 = e4 * m_metric;
-                                RealVector4d error = e5.XXXX + e5.YYYY + e5.ZZZZ;
+                                Vector<float> e5 = e4 * m_metric;
+                                float error = e5[0] + e5[1] + e5[2];
 
                                 // keep the solution if it wins
-                                if (SquishMath.CompareAnyLessThan(error, besterror))
+                                if (error < besterror)
                                 {
                                     beststart = a;
                                     bestend = b;
@@ -1436,13 +1501,13 @@ namespace TagTool.Bitmaps.Utils
                         break;
 
                     // stop if a new iteration is an ordering that has already been tried
-                    RealVector3d axis = (bestend - beststart).XYZ;
+                    Vector<float> axis = VectorExtensions.Convert4dTo3d(bestend - beststart);
                     if (!ConstructOrdering(ref axis, iterationIndex))
                         break;
                 }
 
                 // save the block if necessary
-                if (SquishMath.CompareAnyLessThan(besterror, m_besterror))
+                if (besterror < m_besterror)
                 {
                     // remap the indices
                     byte[] order = m_order[bestiteration];
@@ -1460,7 +1525,7 @@ namespace TagTool.Bitmaps.Utils
                     m_colours.RemapIndices(unordered, bestindices);
 
                     // save the block
-                    ColourBlock.WriteColourBlock4(beststart.XYZ, bestend.XYZ, bestindices, block);
+                    ColourBlock.WriteColourBlock4(VectorExtensions.Convert4dTo3d(beststart), VectorExtensions.Convert4dTo3d(bestend), bestindices, block);
 
                     // save the error
                     m_besterror = besterror;
@@ -1470,12 +1535,12 @@ namespace TagTool.Bitmaps.Utils
             private static readonly int kMaxIterations = 8;
 
             private int m_iterationCount;
-            private RealVector3d m_principle;
+            private Vector<float> m_principle; //3d
             private byte[][] m_order; //  [16][kMaxIterations]
-            private RealVector4d[] m_points_weights; //[16]
-            private RealVector4d m_xsum_wsum;
-            private RealVector4d m_metric;
-            private RealVector4d m_besterror;
+            private Vector<float>[] m_points_weights; //4d [16]
+            private Vector<float> m_xsum_wsum;//4d
+            private Vector<float> m_metric;	  //4d
+            private float m_besterror;//4d
         }
 
 		// NOTE that the return value is RGBA not BGRA

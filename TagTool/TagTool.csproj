@@ -469,6 +469,7 @@
     <Compile Include="Effects\EditableProperty.cs" />
     <Compile Include="Effects\EmitterCustomPointPlotter.cs" />
     <Compile Include="Effects\ParticleGpu.cs" />
+    <Compile Include="Extensions\VectorExtensions.cs" />
     <Compile Include="Fonts\FontBitmapPacker.cs" />
     <Compile Include="Fonts\FontPackage.cs" />
     <Compile Include="Geometry\Ass\AssFormat.cs" />
