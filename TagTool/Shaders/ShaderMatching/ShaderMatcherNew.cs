@@ -445,11 +445,12 @@ namespace TagTool.Shaders.ShaderMatching
 
                         if (PortingCache.Version == CacheVersion.HaloReach)
                         {
-                            if (methodName == "environment_mapping" && optionName == "dynamic")
-                            {
-                                optionName = "dynamic_reach";
-                            }
-                            else if (methodName == "material_model")
+                            // keep in sync with cubemap conversion - not needed anymore?
+                            //if (methodName == "environment_mapping" && optionName == "dynamic")
+                            //{
+                            //    optionName = "dynamic_reach";
+                            //}
+                            if (methodName == "material_model")
                             {
                                 if (optionName == "cook_torrance")
                                     optionName = "cook_torrance_reach";

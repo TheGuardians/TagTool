@@ -280,6 +280,7 @@
     <Compile Include="Audio\SoundDistanceParameters.cs" />
     <Compile Include="Audio\Utils\AudioUtils.cs" />
     <Compile Include="Bitmaps\BitmapCurveMode.cs" />
+    <Compile Include="Bitmaps\Utils\BitmapDownsampler.cs" />
     <Compile Include="Bitmaps\Utils\BitmapSampler.cs" />
     <Compile Include="Bitmaps\Utils\BitmapUtilsPC.cs" />
     <Compile Include="Bitmaps\Utils\RGBAColor.cs" />
@@ -400,6 +401,7 @@
     <Compile Include="Cache\HaloOnline\StringTableHaloOnline.cs" />
     <Compile Include="Cache\HaloOnline\TagCacheHaloOnline.cs" />
     <Compile Include="Cache\ModPackages\GameCacheModPackage.cs" />
+    <Compile Include="Commands\Bitmaps\GenerateMipmapsCommand.cs" />
     <Compile Include="Commands\Bitmaps\ReencodeBitmapCommand.cs" />
     <Compile Include="Commands\Camera\CameraTrackContextFactory.cs" />
     <Compile Include="Commands\Camera\AdjustPositionCommand.cs" />
@@ -467,6 +469,7 @@
     <Compile Include="Effects\EditableProperty.cs" />
     <Compile Include="Effects\EmitterCustomPointPlotter.cs" />
     <Compile Include="Effects\ParticleGpu.cs" />
+    <Compile Include="Extensions\VectorExtensions.cs" />
     <Compile Include="Fonts\FontBitmapPacker.cs" />
     <Compile Include="Fonts\FontPackage.cs" />
     <Compile Include="Geometry\Ass\AssFormat.cs" />

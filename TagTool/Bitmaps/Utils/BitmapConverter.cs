@@ -6,6 +6,7 @@ using System.IO;
 using TagTool.Bitmaps.DDS;
 using TagTool.Cache;
 using TagTool.Commands;
+using TagTool.Extensions;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
 using TagTool.Tags.Resources;
@@ -147,6 +148,31 @@ namespace TagTool.Bitmaps.Utils
             {
                 if (resultBitmap.Format >= (BitmapFormat)38)
                     resultBitmap.Format -= 5;
+
+                // cubemap compatibility - this is required for h3 shaders to look correct when using reach dynamic cubemaps
+                if (bitmap.Images[imageIndex].ExponentBias == 2)
+                {
+                    byte[] rawData = BitmapDecoder.DecodeBitmap(resultBitmap.Data, resultBitmap.Format, bitmap.Images[imageIndex].Width, bitmap.Images[imageIndex].Height);
+
+                    const float oneDiv255 = 1.0f / 255.0f;
+                    float expBias = (float)Math.Pow(2.0f, bitmap.Images[imageIndex].ExponentBias); // 4.0f
+                    for (int i = 0; i < rawData.Length; i += 4)
+                    {
+                        var vector = VectorExtensions.InitializeVector(new float[] { rawData[i], rawData[i + 1], rawData[i + 2], rawData[i + 3] });
+
+                        vector *= oneDiv255; // 0-1 range
+                        // need more math here. not sure if it can be prebaked. this should do for now.
+                        vector *= vector;
+                        vector *= 255.0f; // 0-255 range
+
+                        rawData[i + 0] = (byte)vector[0];
+                        rawData[i + 1] = (byte)vector[1];
+                        rawData[i + 2] = (byte)vector[2];
+                        //rawData[i + 3] = (byte)(biasedAlpha * 255.0f); // no need to touch alpha.
+                    }
+
+                    resultBitmap.Data = BitmapDecoder.EncodeBitmap(rawData, resultBitmap.Format, bitmap.Images[imageIndex].Width, bitmap.Images[imageIndex].Height);
+                }
             }
 
             if (cachePlatform == CachePlatform.MCC)

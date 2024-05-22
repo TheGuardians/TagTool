@@ -1,10 +1,12 @@
 ﻿using System;
+using TagTool.Common;
 
 namespace TagTool.Bitmaps.Utils
 {
     public class BitmapSampler
     {
         private byte[] Rgba;
+        private uint StreamOffset;
         private int Width;
         private int Height;
         private FilteringMode FilterMode;
@@ -19,6 +21,18 @@ namespace TagTool.Bitmaps.Utils
             FilterMode = filter;
             MipmapCount = mipCount;
             CurrentLevel = 0;
+            StreamOffset = 0;
+        }
+
+        public BitmapSampler(byte[] rgba, uint streamOffset, int width, int height, FilteringMode filter = FilteringMode.Point, int mipCount = 0)
+        {
+            Rgba = rgba;
+            Width = width;
+            Height = height;
+            FilterMode = filter;
+            MipmapCount = mipCount;
+            CurrentLevel = 0;
+            StreamOffset = streamOffset;
         }
 
         public void SetData(byte[] d) => Rgba = d;
@@ -46,10 +60,36 @@ namespace TagTool.Bitmaps.Utils
             }
         }
 
+        public RGBAColor Sample2dOffset(float x, float y, int offsetX, int offsetY)
+        {
+            float pixelWidth = 1.0f / GetWidth();
+            float pixelHeight = 1.0f / GetHeight();
+            float pxOffsetX = pixelWidth * offsetX;
+            float pxOffsetY = pixelHeight * offsetY;
+
+            x += pxOffsetX;
+            y += pxOffsetY;
+
+            switch (FilterMode)
+            {
+                case FilteringMode.Bilinear:
+                    return Sample2dBilinear(x, y);
+                case FilteringMode.Point:
+                default:
+                    return Sample2dPoint(x, y);
+            }
+        }
+
+        public RealVector4d Sample2dOffsetF(float x, float y, int offsetX, int offsetY)
+        {
+            RGBAColor sample = Sample2dOffset(x, y, offsetX, offsetY);
+            return new RealVector4d(sample.R / 255.0f, sample.G / 255.0f, sample.B / 255.0f, sample.A / 255.0f);
+        }
+
         private float PixelWidth() => 1.0f / Width;
         private float PixelHeight() => 1.0f / Height;
         private int UvToIndex(float x, float y) => 4 * ((int)(y * Height) * Width + (int)(x * Width));
-        private RGBAColor GetColour(int index) => new RGBAColor(Rgba[index], Rgba[index + 1], Rgba[index + 2], Rgba[index + 3]);
+        private RGBAColor GetColour(int index) => new RGBAColor(Rgba[StreamOffset + index], Rgba[StreamOffset + index + 1], Rgba[StreamOffset + index + 2], Rgba[StreamOffset + index + 3]);
         private RGBAColor Sample2dPoint(int index) => GetColour(index);
         private RGBAColor Sample2dPoint(float x, float y) => Sample2dPoint(UvToIndex(x, y));
         private RGBAColor Sample2dPointBounded(float x, float y, bool hasX, bool hasY) => GetColourBounded(UvToIndex(x, y), x, y, hasX, hasY);
