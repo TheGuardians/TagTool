@@ -165,7 +165,7 @@ namespace TagTool.Commands.Tags
         {
             if (tag == null)
                 return;
-            if (CurrentFlags.HasFlag(ReportFlags.IncludeBaseCache) && tag.IsEmpty())
+            if (!CurrentFlags.HasFlag(ReportFlags.IncludeBaseCache) && tag.IsEmpty())
                 return;
 
             if (visitedTags.Add(tag))
