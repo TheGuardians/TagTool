@@ -335,6 +335,10 @@ namespace TagTool.Commands.Porting
             {
                 Lbsp.LightmapSHCoefficientsBitmap.Name = $"{LbspTag.Name}_16f_lp_array_dxt5";
                 Lbsp.LightmapDominantLightDirectionBitmap.Name = $"{LbspTag.Name}_16f_lp_array_intensity_dxt5";
+
+                // can't async bitmaps here... only pending should be the lightmaps anyway as they are the first tagref ported from a scenario
+                WaitForPendingBitmapConversion();
+                ProcessDeferredActions(); // process pending bitmaps (and sounds if any are ready)
                 convertedLightmap.ImportIntoLbsp(CacheContext, cacheStream, Lbsp);
             }
 

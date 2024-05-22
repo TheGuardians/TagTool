@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Reflection;
 using TagTool.Tags.Definitions.Common;
+using System.Threading;
 
 namespace TagTool.Commands.Porting
 {
@@ -438,7 +439,7 @@ namespace TagTool.Commands.Porting
             {
                 var porttag = new PortTagCommand(destCache, srcCache);
                 porttag.SetFlags(portingFlags);
-                porttag.InitializeSoundConverter();
+                porttag.ConcurrencyLimiter = new SemaphoreSlim(PortingOptions.Current.MaxThreads); // for async conversion
 
                 var sldtTag = scnr.Lightmap;
                 tagRenamer.Rename(sldtTag, $"{scenarioPath}_faux_lightmap");
@@ -490,6 +491,7 @@ namespace TagTool.Commands.Porting
                 destCache.Serialize(destStream, scnrTag, scnr);
 
                 porttag.WaitForPendingSoundConversion();
+                porttag.WaitForPendingBitmapConversion();
                 porttag.ProcessDeferredActions();
             }
     

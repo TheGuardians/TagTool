@@ -22,7 +22,7 @@ using System.Collections.Concurrent;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Commands.ScenarioStructureBSPs;
 using TagTool.Commands.Files;
-using System.Runtime.ExceptionServices;
+using System.Threading;
 
 namespace TagTool.Commands.Porting
 {
@@ -44,6 +44,8 @@ namespace TagTool.Commands.Porting
 
         private DirectoryInfo TempDirectory { get; } = new DirectoryInfo(Path.GetTempPath());
         private BlockingCollection<Action> _deferredActions = new BlockingCollection<Action>();
+
+        internal SemaphoreSlim ConcurrencyLimiter;
 
         string[] argParameters = new string[0];
 
@@ -87,7 +89,7 @@ namespace TagTool.Commands.Porting
 
 			var initialStringIdCount = CacheContext.StringTableHaloOnline.Count;
 
-            InitializeSoundConverter();
+            ConcurrencyLimiter = new SemaphoreSlim(PortingOptions.Current.MaxThreads); // for async conversion
             CachedTagData.Clear();
 
             /*
@@ -127,6 +129,7 @@ namespace TagTool.Commands.Porting
                     }
 
                     WaitForPendingSoundConversion();
+                    WaitForPendingBitmapConversion();
                     ProcessDeferredActions();
                     if (BlamCache is GameCacheGen3 gen3Cache)
                         gen3Cache.ResourceCacheGen3.ResourcePageCache.Clear();
@@ -172,7 +175,7 @@ namespace TagTool.Commands.Porting
 			if (ScenarioPort && FlagIsSet(PortingFlags.UpdateMapFiles))
 				new UpdateMapFilesCommand(CacheContext).Execute(new List<string> { });
 
-			return true;
+            return true;
 		}
 
         private bool TagIsValid(CachedTag blamTag, Stream blamCacheStream, out CachedTag resultTag)
@@ -943,8 +946,19 @@ namespace TagTool.Commands.Porting
                         blamDefinition = bitm;
                         break;
                     }
-                    blamDefinition = ConvertBitmap(blamTag, bitm, resourceStreams);
-					break;
+                    isDeferred = true;
+                    blamDefinition = ConvertBitmapAsync(blamTag, bitm, (BitmapConversionResult result) =>
+                    {
+                        _deferredActions.Add(() =>
+                        {
+                            blamDefinition = FinishConvertBitmap(result, blamTag.Name);
+                            CacheContext.Serialize(cacheStream, edTag, blamDefinition);
+
+                            if (FlagIsSet(PortingFlags.Print))
+                                Console.WriteLine($"['{edTag.Group.Tag}', 0x{edTag.Index:X4}] {edTag.Name}.{(edTag.Group as TagGroupGen3).Name}");
+                        });
+                    });
+                    break;
 
 				case CameraFxSettings cfxs:
 					blamDefinition = ConvertCameraFxSettings(cfxs, blamTag.Name);
