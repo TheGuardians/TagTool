@@ -22,6 +22,7 @@ using System.Collections.Concurrent;
 using TagTool.Geometry.BspCollisionGeometry;
 using TagTool.Commands.ScenarioStructureBSPs;
 using TagTool.Commands.Files;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 
 namespace TagTool.Commands.Porting
