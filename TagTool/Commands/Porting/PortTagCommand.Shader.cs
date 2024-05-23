@@ -5,11 +5,67 @@ using System.IO;
 using TagTool.Shaders.ShaderMatching;
 using System;
 using TagTool.Shaders.ShaderConverter;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Linq;
+using TagTool.Commands.Common;
 
 namespace TagTool.Commands.Porting
 {
     partial class PortTagCommand
     {
+        public List<string> PendingTemplates = new List<string>();
+        public Dictionary<CachedTag, (CachedTag, object, object)> DeferredRenderMethods = new Dictionary<CachedTag, (CachedTag, object, object)>(); // format: base cache tag, (blam tag, converted definition, blam cache definition)
+        public Dictionary<string, Task> TemplateConversionTasks = new Dictionary<string, Task>();
+
+        public class TemplateConversionResult
+        {
+            public RenderMethodTemplate Definition;
+            public PixelShader PixelShaderDefinition;
+            public VertexShader VertexShaderDefinition;
+            public CachedTag Tag;
+        }
+
+        public void WaitForPendingTemplateConversion()
+        {
+            try
+            {
+                Task.WaitAll(TemplateConversionTasks.Values.ToArray());
+            }
+            catch (AggregateException ex)
+            {
+                foreach (var inner in ex.InnerExceptions)
+                    new TagToolError(CommandError.CustomError, inner.Message);
+                throw (ex);
+            }
+        }
+
+        public void FinishConvertTemplate(TemplateConversionResult result, 
+            string tagName,
+            out RenderMethodTemplate rmt2, 
+            out PixelShader pixl, 
+            out VertexShader vtsh)
+        {
+            var task = TemplateConversionTasks[tagName];
+            TemplateConversionTasks.Remove(tagName);
+
+            if (!task.IsFaulted)
+            {
+                rmt2 = result.Definition;
+                pixl = result.PixelShaderDefinition;
+                vtsh = result.VertexShaderDefinition;
+            }
+            else
+            {
+                // rethrow the exception
+                task.GetAwaiter().GetResult();
+                rmt2 = null;
+                pixl = null;
+                vtsh = null;
+            }
+        }
+
         public ShaderMatcherNew Matcher = new ShaderMatcherNew();
 
         private RasterizerGlobals ConvertRasterizerGlobals(RasterizerGlobals rasg)
@@ -21,8 +77,22 @@ namespace TagTool.Commands.Porting
             return rasg;
         }
 
-        private object ConvertShader(Stream cacheStream, Stream blamCacheStream, object definition, CachedTag blamTag, object blamDefinition)
+        private void FinalizeRenderMethods(Stream cacheStream, Stream blamCacheStream)
         {
+            foreach (var deferredRm in DeferredRenderMethods)
+            {
+                var definition = ConvertShaderInternal(cacheStream, blamCacheStream, (RenderMethod)deferredRm.Value.Item2, deferredRm.Value.Item1, (RenderMethod)deferredRm.Value.Item3);
+
+                CacheContext.Serialize(cacheStream, deferredRm.Key, definition);
+
+                if (FlagIsSet(PortingFlags.Print))
+                    Console.WriteLine($"['{deferredRm.Key.Group.Tag}', 0x{deferredRm.Key.Index:X4}] {deferredRm.Key.Name}.{(deferredRm.Key.Group as Cache.Gen3.TagGroupGen3).Name}");
+            }
+        }
+
+        private object ConvertShader(Stream cacheStream, Stream blamCacheStream, object definition, CachedTag blamTag, object blamDefinition, CachedTag edTag, out bool isDeferred)
+        {
+            isDeferred = false;
             switch (definition)
             {
                 case ShaderFoliage rmfl:
@@ -37,6 +107,13 @@ namespace TagTool.Commands.Porting
                 case ShaderScreen rmss:
                 case ShaderZonly rmzo:
                 case ShaderCortana rmct:
+                    var rmDef = (RenderMethod)definition;
+                    if (rmDef.ShaderProperties.Count > 0 && PendingTemplates.Contains(rmDef.ShaderProperties[0].Template.Name))
+                    {
+                        DeferredRenderMethods.Add(edTag, (blamTag, definition, blamDefinition)); // easier to defer and convert later
+                        isDeferred = true;
+                        return definition;
+                    }
                     return ConvertShaderInternal(cacheStream, blamCacheStream, (RenderMethod)definition, blamTag, (RenderMethod)blamDefinition);
 
                 case ContrailSystem cntl:
@@ -151,7 +228,7 @@ namespace TagTool.Commands.Porting
         {
             // Verify that the ShaderMatcher is ready to use
             if (!Matcher.IsInitialized)
-                Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, FlagIsSet(PortingFlags.Ms30), FlagIsSet(PortingFlags.PefectShaderMatchOnly));
+                Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, this, FlagIsSet(PortingFlags.Ms30), FlagIsSet(PortingFlags.PefectShaderMatchOnly));
 
             return Matcher.FindClosestTemplate(blamRmt2, BlamCache.Deserialize<RenderMethodTemplate>(blamCacheStream, blamRmt2), FlagIsSet(PortingFlags.GenerateShaders));
         }

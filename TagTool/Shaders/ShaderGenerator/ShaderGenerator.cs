@@ -1047,6 +1047,43 @@ namespace TagTool.Shaders.ShaderGenerator
             return allRmopParameters;
         }
 
+        public static List<RenderMethodOption.ParameterBlock> GatherParametersAsync(Dictionary<string, RenderMethodOption> renderMethodOptions, RenderMethodDefinition rmdf, List<byte> options, bool includeGlobal = true)
+        {
+            List<RenderMethodOption.ParameterBlock> allRmopParameters = new List<RenderMethodOption.ParameterBlock>();
+
+            if (includeGlobal)
+            {
+                if (rmdf.GlobalOptions != null)
+                {
+                    var globalRmop = renderMethodOptions[rmdf.GlobalOptions.Name];
+                    allRmopParameters.AddRange(globalRmop.Parameters);
+                }
+            }
+
+            for (int i = 0; i < rmdf.Categories.Count; i++)
+            {
+                if (rmdf.Categories[i].ShaderOptions.Count == 0)
+                    continue;
+
+                var option = rmdf.Categories[i].ShaderOptions[i < options.Count ? options[i] : 0];
+
+                if (option.Option != null)
+                {
+                    var rmop = renderMethodOptions[option.Option.Name];
+
+                    foreach (var parameter in rmop.Parameters)
+                    {
+                        if (allRmopParameters.Any(x => x.Name == parameter.Name)) // prevent duplicates
+                            continue;
+
+                        allRmopParameters.Add(parameter);
+                    }
+                }
+            }
+
+            return allRmopParameters;
+        }
+
         /// <summary>
         /// Non async
         /// </summary>
@@ -1548,70 +1585,6 @@ namespace TagTool.Shaders.ShaderGenerator
             }
 
             return glvs;
-        }
-
-        public static bool VerifyRmt2Routing(GameCache cache, Stream stream, RenderMethodTemplate rmt2, RenderMethodDefinition rmdf, List<byte> options)
-        {
-            bool anyMissing = false;
-
-            var allParameters = GatherParameters(cache, stream, rmdf, options);
-
-            var pixl = cache.Deserialize<PixelShader>(stream, rmt2.PixelShader);
-
-            foreach (var entry in rmdf.EntryPoints)
-            {
-                if (rmt2.EntryPoints[(int)entry.EntryPoint].Count > 0)
-                {
-                    int iEnd = rmt2.EntryPoints[(int)entry.EntryPoint].Count + rmt2.EntryPoints[(int)entry.EntryPoint].Offset;
-                    for (int i = rmt2.EntryPoints[(int)entry.EntryPoint].Offset; i < iEnd; i++)
-                    {
-                        var pass = rmt2.Passes[i];
-
-                        if (pass.Values[(int)ParameterUsage.PS_Real].Count > 0)
-                        {
-                            foreach (var constant in pixl.Shaders[pixl.EntryPointShaders[(int)entry.EntryPoint].Offset].PCConstantTable.Constants)
-                            {
-                                if (constant.RegisterType != ShaderParameter.RType.Vector)
-                                    continue;
-
-                                string constantName = cache.StringTable.GetString(constant.ParameterName);
-                                bool found = false;
-
-                                int jEnd = pass.Values[(int)ParameterUsage.PS_Real].Offset + pass.Values[(int)ParameterUsage.PS_Real].Count;
-                                for (int j = pass.Values[(int)ParameterUsage.PS_Real].Offset; j < jEnd; j++)
-                                {
-                                    if (rmt2.RoutingInfo[j].DestinationIndex == constant.RegisterIndex)
-                                    {
-                                        found = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!found)
-                                {
-                                    jEnd = pass.Values[(int)ParameterUsage.PS_RealExtern].Offset + pass.Values[(int)ParameterUsage.PS_RealExtern].Count;
-                                    for (int j = pass.Values[(int)ParameterUsage.PS_RealExtern].Offset; j < jEnd; j++)
-                                    {
-                                        if (rmt2.RoutingInfo[j].DestinationIndex == constant.RegisterIndex)
-                                        {
-                                            found = true;
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                if (!found)
-                                {
-                                    Console.WriteLine($"WARNING: {constantName} not bound in rmt2");
-                                    anyMissing = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return !anyMissing;
         }
 
         public static void GenerateExplicitShader(GameCache cache, Stream stream, string explicitShader, out PixelShader pixl, out VertexShader vtsh)

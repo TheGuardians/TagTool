@@ -44,7 +44,7 @@ namespace TagTool.Commands.Porting
         private readonly List<Tag> ResourceTagGroups = new List<Tag> { new Tag("snd!"), new Tag("bitm"), new Tag("Lbsp") }; // for null tag detection
 
         private DirectoryInfo TempDirectory { get; } = new DirectoryInfo(Path.GetTempPath());
-        private BlockingCollection<Action> _deferredActions = new BlockingCollection<Action>();
+        internal BlockingCollection<Action> _deferredActions = new BlockingCollection<Action>();
 
         internal SemaphoreSlim ConcurrencyLimiter;
 
@@ -131,7 +131,9 @@ namespace TagTool.Commands.Porting
 
                     WaitForPendingSoundConversion();
                     WaitForPendingBitmapConversion();
+                    WaitForPendingTemplateConversion();
                     ProcessDeferredActions();
+                    FinalizeRenderMethods(cacheStream, blamCacheStream);
                     if (BlamCache is GameCacheGen3 gen3Cache)
                         gen3Cache.ResourceCacheGen3.ResourcePageCache.Clear();
 
@@ -1392,9 +1394,9 @@ namespace TagTool.Commands.Porting
                     {
                         // Verify that the ShaderMatcher is ready to use
                         if (!Matcher.IsInitialized)
-                            Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, FlagIsSet(PortingFlags.Ms30), FlagIsSet(PortingFlags.PefectShaderMatchOnly));
+                            Matcher.Init(CacheContext, BlamCache, cacheStream, blamCacheStream, this, FlagIsSet(PortingFlags.Ms30), FlagIsSet(PortingFlags.PefectShaderMatchOnly));
 
-                        blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag, BlamCache.Deserialize(blamCacheStream, blamTag));
+                        blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag, BlamCache.Deserialize(blamCacheStream, blamTag), edTag, out isDeferred);
                         if (blamDefinition == null) // convert shader failed
                             return GetDefaultShader(blamTag.Group.Tag);
                     }
