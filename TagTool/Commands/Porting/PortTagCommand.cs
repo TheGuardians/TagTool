@@ -261,7 +261,7 @@ namespace TagTool.Commands.Porting
                     {
                         case "rmcs":
                         case "rmgl":
-                            resultTag = GetDefaultShader(blamTag.Group.Tag, resultTag);
+                            resultTag = GetDefaultShader(blamTag.Group.Tag);
                             return false;
                     }
                 }
@@ -282,7 +282,7 @@ namespace TagTool.Commands.Porting
                 // TODO: add code for "!MatchShaders" -- if a perfect match isnt found a null tag will be left in the cache
 
                 // "ConvertTagInternal" isnt called so the default shader needs to be set here
-                resultTag = GetDefaultShader(blamTag.Group.Tag, resultTag);
+                resultTag = GetDefaultShader(blamTag.Group.Tag);
                 return false;
             }
             else if (blamTag.Group.Tag == "glvs" || blamTag.Group.Tag == "glps" || blamTag.Group.Tag == "rmdf")
@@ -1387,7 +1387,7 @@ namespace TagTool.Commands.Porting
                 case BeamSystem beam:
                 case ShaderCortana rmct:
                     if (!FlagIsSet(PortingFlags.MatchShaders))
-                        return GetDefaultShader(blamTag.Group.Tag, edTag);
+                        return GetDefaultShader(blamTag.Group.Tag);
                     else
                     {
                         // Verify that the ShaderMatcher is ready to use
@@ -1396,7 +1396,7 @@ namespace TagTool.Commands.Porting
 
                         blamDefinition = ConvertShader(cacheStream, blamCacheStream, blamDefinition, blamTag, BlamCache.Deserialize(blamCacheStream, blamTag));
                         if (blamDefinition == null) // convert shader failed
-                            return GetDefaultShader(blamTag.Group.Tag, edTag);
+                            return GetDefaultShader(blamTag.Group.Tag);
                     }
                     break;
             }

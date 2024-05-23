@@ -7,9 +7,6 @@ using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.Tags.Definitions;
-using HaloShaderGenerator.Shader;
-using static TagTool.Tags.Definitions.RenderMethodTemplate;
-using TagTool.Cache.HaloOnline;
 
 namespace TagTool.Shaders.ShaderMatching
 {
@@ -19,10 +16,7 @@ namespace TagTool.Shaders.ShaderMatching
         private GameCache PortingCache;
         private Stream BaseCacheStream;
         private Stream PortingCacheStream;
-        private Dictionary<CachedTag, RenderMethodTemplate> _rmt2Cache;
-        private List<string> UpdatedRmdf;
 
-        public static string DefaultTemplate => @"shaders\shader_templates\_0_0_0_0_0_0_0_0_0_0_0.rmt2";
         public bool IsInitialized { get; private set; } = false;
         public bool UseMs30 { get; set; } = false;
         public bool PerfectMatchesOnly { get; set; } = false;
@@ -32,8 +26,6 @@ namespace TagTool.Shaders.ShaderMatching
            ["default"] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
            ["shader"] = new int[] { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 }
         };
-
-        
 
         public ShaderMatcherNew()
         {
@@ -47,8 +39,6 @@ namespace TagTool.Shaders.ShaderMatching
             PortingCache = portingCache;
             BaseCacheStream = baseCacheStream;
             PortingCacheStream = portingCacheStream;
-            _rmt2Cache = new Dictionary<CachedTag, RenderMethodTemplate>();
-            UpdatedRmdf = new List<string>();
             IsInitialized = true;
         }
 
@@ -60,7 +50,6 @@ namespace TagTool.Shaders.ShaderMatching
             PortingCache = null;
             BaseCacheStream = null;
             PortingCacheStream = null;
-            UpdatedRmdf = null;
             IsInitialized = false;
         }
 
@@ -374,15 +363,6 @@ namespace TagTool.Shaders.ShaderMatching
         }
 
         /// <summary>
-        /// Modifies the input render method to make it work using the matchedTemplate
-        /// </summary>
-        private RenderMethod MatchRenderMethods(RenderMethod renderMethod, RenderMethodTemplate matchedTemplate, RenderMethodTemplate originalTemplate)
-        {
-
-            return renderMethod;
-        }
-
-        /// <summary>
         /// Rebuilds an rmt2's options in memory so indices match up with the base cache
         /// </summary>
         private Rmt2Descriptor RebuildRmt2Options(Rmt2Descriptor srcRmt2Descriptor, Stream baseStream, Stream portingStream)
@@ -530,31 +510,6 @@ namespace TagTool.Shaders.ShaderMatching
             return srcRmt2Descriptor;
         }
 
-        private Rmt2ParameterMatch MatchParameterBlocks(List<ShaderArgument> sourceBlock, List<ShaderArgument> destBlock)
-        {
-            var result = new Rmt2ParameterMatch();
-
-            var destNames = destBlock.Select(x => BaseCache.StringTable.GetString(x.Name));
-            var sourceNames = sourceBlock.Select(x => PortingCache.StringTable.GetString(x.Name));
-
-            result.SourceCount = sourceNames.Count();
-            result.DestCount = destNames.Count();
-            result.MissingFromDest = sourceNames.Except(destNames).Count();
-            result.MissingFromSource = destNames.Except(sourceNames).Count();
-            result.Common = destNames.Intersect(sourceNames).Count();
-
-            return result;
-        }
-
-        private RenderMethodTemplate GetTemplate(CachedTag tag)
-        {
-            RenderMethodTemplate template;
-            if (!_rmt2Cache.TryGetValue(tag, out template))
-                template = _rmt2Cache[tag] = BaseCache.Deserialize<RenderMethodTemplate>(BaseCacheStream, tag);
-
-            return template;
-        }
-
         public class Rmt2Pairing
         {
             public Rmt2ParameterMatch RealParams;
@@ -694,68 +649,6 @@ namespace TagTool.Shaders.ShaderMatching
             string rmdfName = $"{prefix}shaders\\{type}";
 
             return BaseCache.TagCache.GetTag(rmdfName, "rmdf");
-        }
-
-
-        private List<string> GetRenderMethodDefinitionMethods(RenderMethodDefinition rmdf, GameCache cache)
-        {
-            var result = new List<string>();
-            foreach(var method in rmdf.Categories)
-            {
-                var str = cache.StringTable.GetString(method.Name);
-                result.Add(str);
-            }
-            return result;
-        }
-
-        private List<string> GetMethodOptions(RenderMethodDefinition rmdf, int methodIndex, GameCache cache)
-        {
-            var result = new List<string>();
-            var method = rmdf.Categories[methodIndex];
-            foreach(var option in method.ShaderOptions)
-            {
-                result.Add(cache.StringTable.GetString(option.Name));
-            }
-            return result;
-        }
-
-        private void FindClosestShaderTemplate(CachedTag sourceRmt2)
-        {
-            // somehow build a list of rmt2 of the same type
-            List<CachedTag> candidateTemplates = new List<CachedTag>();
-
-            // defined method search order, ignore last method from ms30
-            List<int> methodOrder = new List<int> {0, 2, 3, 1, 6, 4, 5, 7, 8, 9, 10};
-
-            Dictionary<CachedTag, int> matchLevelDictionary = new Dictionary<CachedTag, int>();
-            Rmt2Descriptor sourceRmt2Desc;
-            if (!Rmt2Descriptor.TryParse(sourceRmt2.Name, out sourceRmt2Desc))
-                return;
-
-            while (candidateTemplates.Count != 0)
-            {
-                var template = candidateTemplates.Last();
-                Rmt2Descriptor destRmt2Desc;
-                if (!Rmt2Descriptor.TryParse(template.Name, out destRmt2Desc))
-                {
-                    candidateTemplates.Remove(template);
-                    matchLevelDictionary[template] = 0;
-                }
-                else
-                {
-                    var matchLevel = 0;
-                    for(int i = 0; i < methodOrder.Count; i++)
-                    {
-                        var methodIndex = methodOrder[i];
-                        // we need to define a ordering on the method options, so that there is a single best rmt2
-                        if (sourceRmt2Desc.Options[methodIndex] == destRmt2Desc.Options[methodIndex])
-                            matchLevel++;
-                        else
-                            break;
-                    }
-                    matchLevelDictionary[template] = matchLevel;
-                } 
-            }
         }
     }
 }
