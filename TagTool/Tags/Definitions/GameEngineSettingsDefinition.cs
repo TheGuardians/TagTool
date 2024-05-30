@@ -326,8 +326,7 @@ namespace TagTool.Tags.Definitions
                 {
                     None,
                     TeamsEnabled = 1 << 0,
-                    RoundResetsPlayers = 1 << 1,
-                    RoundResetsMap = 1 << 2
+                    SpectatingEnabled = 1 << 1
                 }
 
                 public enum RoundResetsValue : sbyte
@@ -343,9 +342,9 @@ namespace TagTool.Tags.Definitions
             public class RespawnSetting : TagStructure
             {
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public FlagsValue Flags;
+                public RespawnFlagsH3 FlagsH3;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-                public FlagsValueHO FlagsHO;
+                public RespawnFlags Flags;
                 public sbyte LivesPerRound;
                 public sbyte SharedTeamLives;
 
@@ -371,7 +370,7 @@ namespace TagTool.Tags.Definitions
                 public sbyte Unknown6;
 
                 [Flags]
-                public enum FlagsValue : ushort
+                public enum RespawnFlagsH3 : ushort
                 {
                     None,
                     InheritRespawnTime = 1 << 0,
@@ -380,7 +379,7 @@ namespace TagTool.Tags.Definitions
                     RespawnOnKills = 1 << 3
                 }
                 [Flags]
-                public enum FlagsValueHO : ushort
+                public enum RespawnFlags : ushort
                 {
                     None,
                     InheritRespawnTime = 1 << 0,
@@ -395,12 +394,12 @@ namespace TagTool.Tags.Definitions
             public class SocialSetting : TagStructure
 			{
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
-                public FlagsValue Flags;
+                public SocialFlagsH3 FlagsH3;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-                public FlagsValueHO FlagsHO;
+                public SocialFlags Flags;
 
                 [Flags]
-                public enum FlagsValue : int
+                public enum SocialFlagsH3 : int
                 {
                     None,
                     ObserversEnabled = 1 << 0,
@@ -413,7 +412,7 @@ namespace TagTool.Tags.Definitions
                     DeadPlayerVoiceEnabled = 1 << 7
                 }
                 [Flags]
-                public enum FlagsValueHO : int
+                public enum SocialFlags : int
                 {
                     None,
                     ObserversEnabled = 1 << 0,

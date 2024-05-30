@@ -3,6 +3,8 @@ using TagTool.Common;
 using System;
 using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
+using static TagTool.Tags.Definitions.Effect.Event.ParticleSystem.Emitter;
+using static TagTool.Effects.EditableProperty;
 
 namespace TagTool.Tags.Definitions
 {
@@ -71,9 +73,9 @@ namespace TagTool.Tags.Definitions
         [TagField(ValidTags = new[] { "pmdf" })]
         public CachedTag ParticleModel;
 
-        public uint RuntimeMUsedParticleStates;
-        public uint RuntimeMConstantPerParticleProperties;
-        public uint RuntimeMConstantOverTimeProperties;
+        public ParticlePropertyScalar.ParticleStatesFlags RuntimeMUsedParticleStates;
+        public int RuntimeMConstantPerParticleProperties;
+        public int RuntimeMConstantOverTimeProperties;
         public List<RuntimeMSpritesBlock> RuntimeMSprites;
         public List<RuntimeMFramesBlock> RuntimeMFrames;
 
@@ -124,6 +126,11 @@ namespace TagTool.Tags.Definitions
                 Collision,
                 Death,
                 FirstCollision
+            }
+
+            public void Postprocess()
+            {
+                // todo
             }
         }
 
@@ -195,7 +202,7 @@ namespace TagTool.Tags.Definitions
             None = 0,
             FrameAnimationOneShot = 1 << 0,
             CanAnimateBackwards = 1 << 1,
-            Bit2 = 1 << 2,
+            DisableFrameBlending = 1 << 2,
             Bit3 = 1 << 3
         }
 
@@ -211,6 +218,87 @@ namespace TagTool.Tags.Definitions
 		{
             [TagField(Length = 4)]
             public float[] RuntimeMCount = new float[4];
+        }
+
+        private ParticlePropertyScalar.ParticleStatesFlags ValidateAttachmentState(Attachment attachment)
+        {
+            ParticlePropertyScalar.ParticleStatesFlags usedStates = 0;
+            if (attachment.PrimaryScale != ParticlePropertyScalar.ParticleStates.Velocity)
+                usedStates |= (ParticlePropertyScalar.ParticleStatesFlags)(1 << (int)attachment.PrimaryScale);
+            if (attachment.SecondaryScale != ParticlePropertyScalar.ParticleStates.Velocity)
+                usedStates |= (ParticlePropertyScalar.ParticleStatesFlags)(1 << (int)attachment.SecondaryScale);
+
+            // updates the states. probably not necessary since we are already dealing with postprocessed data
+            //attachment.Postprocess();
+            //
+            //if (attachment.PrimaryScale != ParticlePropertyScalar.ParticleStates.Velocity)
+            //    usedStates |= (ParticlePropertyScalar.ParticleStatesFlags)(1 << (int)attachment.PrimaryScale);
+            //if (attachment.SecondaryScale != ParticlePropertyScalar.ParticleStates.Velocity)
+            //    usedStates |= (ParticlePropertyScalar.ParticleStatesFlags)(1 << (int)attachment.SecondaryScale);
+
+            return usedStates;
+        }
+
+        public ParticlePropertyScalar.ParticleStatesFlags ValidateUsedStates()
+        {
+            ParticlePropertyScalar.ParticleStatesFlags usedStates = ParticlePropertyScalar.ParticleStatesFlags.None;
+
+            usedStates |= ParticleEditablePropertyEvaluate(AspectRatio, "AspectRatio",
+                0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+            usedStates |= ParticleEditablePropertyEvaluate(Color, "Color",
+                0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+            usedStates |= ParticleEditablePropertyEvaluate(Intensity, "Intensity",
+                0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+            usedStates |= ParticleEditablePropertyEvaluate(Alpha, "Alpha",
+                0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+            usedStates |= ParticleEditablePropertyEvaluate(FrameIndex, "FrameIndex",
+                0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+            usedStates |= ParticleEditablePropertyEvaluate(AnimationRate, "AnimationRate",
+                0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+
+            foreach (var attachment in Attachments)
+            {
+                usedStates |= ValidateAttachmentState(attachment);
+            }
+
+            return usedStates;
+        }
+
+        public void GetConstantStates(out int cppStates, out int cotStates)
+        {
+            cppStates = 0;
+
+            if (this.AspectRatio.IsConstantPerParticle())
+                cppStates |= 1;
+            if (this.Color.IsConstantPerParticle())
+                cppStates |= 2;
+            if (this.Intensity.IsConstantPerParticle())
+                cppStates |= 4;
+            if (this.Alpha.IsConstantPerParticle())
+                cppStates |= 8;
+            if (this.FrameIndex.IsConstantPerParticle())
+                cppStates |= 16;
+            if (this.AnimationRate.IsConstantPerParticle())
+                cppStates |= 32;
+            if (this.PaletteAnimation.IsConstantPerParticle())
+                cppStates |= 64;
+
+            cotStates = 0;
+
+            if (this.AspectRatio.IsConstantOverTime())
+                cppStates |= 1;
+            if (this.Color.IsConstantOverTime())
+                cppStates |= 2;
+            if (this.Intensity.IsConstantOverTime())
+                cppStates |= 4;
+            if (this.Alpha.IsConstantOverTime())
+                cppStates |= 8;
+            if (this.FrameIndex.IsConstantOverTime())
+                cppStates |= 16;
+            if (this.AnimationRate.IsConstantOverTime())
+                cppStates |= 32;
+            if (this.PaletteAnimation.IsConstantOverTime())
+                cppStates |= 64;
         }
     }
 }

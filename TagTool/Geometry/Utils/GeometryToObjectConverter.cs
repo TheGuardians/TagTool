@@ -105,7 +105,7 @@ namespace TagTool.Geometry.Utils
             else
                 geoID = StructureBsp.InstancedGeometryInstances[geometryIndex].Name;
 
-            string geoname = SourceCache.StringTable.GetString(geoID);
+            string geoname = SourceCache.StringTable.GetString(geoID).Replace('|','-');
 
             var tagName = $"objects\\{scenarioFolder}\\instanced\\{bspindex}{geometryIndex}_{geoname}";
 
@@ -231,7 +231,7 @@ namespace TagTool.Geometry.Utils
                 ObjectType = new GameObjectType16() { Halo3ODST = GameObjectTypeHalo3ODST.Scenery }, // TODO: generic object type
                 BoundingRadius = boundingSphere,
                 AccelerationScale = 1.0f,
-                SweetenerSize = GameObject.SweetenerSizeValue.Large,
+                SweetenerSize = GameObject.SweetenerSizeValue.Default,
                 MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>()
                 {
                     new GameObject.MultiplayerObjectBlock() { DefaultSpawnTime = 30, DefaultAbandonTime = 60 }
@@ -390,6 +390,8 @@ namespace TagTool.Geometry.Utils
                     foreach (var bspPhysics in instancedGeometryInstance.BspPhysics)
                     {
                         var data = ConvertData(bspPhysics);
+                        data.GeometryShape.Scale = 1.0f;
+                        data.MoppBvTreeShape.Scale = 1.0f;
                         permutation.BspPhysics.Add(new CollisionBspPhysicsDefinition()
                         {
                             GeometryShape = data.GeometryShape,

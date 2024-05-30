@@ -12,24 +12,30 @@ namespace TagTool.Commands.Porting
     class MergeAnimationGraphsCommand : Command
     {
         private GameCache CacheContext { get; }
-        private GameCache BlamCache;
+        private GameCache BlamCache { get; }
+        private PortTagCommand PortTag { get; }
 
         private HashSet<string> MergedAnimationGraphs { get; }
         private Dictionary<string, (Dictionary<string, (short, short)>, Dictionary<short, short>)> MergedAnimationData { get; }
         private int MergedAnimationGraphCount { get; set; } = 0;
-
-        private PortTagCommand PortTag { get; }
 
         private Stream CacheStream { get; set; }
         private Stream BlamCacheStream { get; set; }
         private Dictionary<ResourceLocation, Stream> ResourceStreams { get; set; }
 
         public MergeAnimationGraphsCommand(GameCache cacheContext, GameCache blamCache, PortTagCommand portTagCommand) :
-            base(false,
-                "MergeAnimationGraphs",
-                "",
-                "MergeAnimationGraphs",
-                "")
+            base(true,
+
+                  "MergeAnimationGraphs",
+                  "Merges all animation graphs from the blam cache to the base cache",
+
+                  "MergeAnimationGraphs <replace> <blamTag> <edTag>",
+
+                  "Merges all animation graphs from the blam cache to the base cache\n" +
+                  "When replace is specified, existing animations in the destination animation graph will be replaced and updated\n" +
+                  "BlamTag and edTag are optional, when they are specified, only the specified animation graphs are merged\n"
+
+                )
         {
             CacheContext = cacheContext;
             BlamCache = blamCache;
@@ -40,9 +46,37 @@ namespace TagTool.Commands.Porting
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 0)
-                return new TagToolError(CommandError.ArgCount);
+            if (args.Count == 0 || (args.Count == 1 && args[0].Equals("replace", StringComparison.OrdinalIgnoreCase)))
+            {
+                bool replace = args.Count == 1 && args[0].Equals("replace", StringComparison.OrdinalIgnoreCase);
+                MergeAllAnimationGraphs(replace);
+            }
+            else if (args.Count == 2 || (args.Count == 3 && args[0].Equals("replace", StringComparison.OrdinalIgnoreCase)))
+            {
+                var blamTagPath = args[args.Count - 2];
+                var edTagPath = args[args.Count - 1];
+                var replace = args.Count == 3 && args[0].Equals("replace", StringComparison.OrdinalIgnoreCase);
 
+                var blamTag = BlamCache.TagCache.GetTag(blamTagPath);
+                var edTag = CacheContext.TagCache.GetTag(edTagPath);
+
+                if (blamTag == null || edTag == null)
+                    return new TagToolError(CommandError.TagInvalid);
+
+                MergeAnimationGraphs(edTag, blamTag, replace);
+
+                Console.WriteLine($"Merged animation graphs '{blamTagPath}' and '{edTagPath}' successfully.");
+            }
+            else
+            {
+                return new TagToolError(CommandError.ArgCount);
+            }
+
+            return true;
+        }
+
+        private void MergeAllAnimationGraphs(bool replace)
+        {
             MergedAnimationGraphs.Clear();
 
             var names = new HashSet<string>();
@@ -62,13 +96,13 @@ namespace TagTool.Commands.Porting
                 if (edTag == null || MergedAnimationGraphs.Contains(name))
                     continue;
 
-                foreach (var h3Tag in BlamCache.TagCache.TagTable)
+                foreach (var blamTag in BlamCache.TagCache.TagTable)
                 {
-                    if (h3Tag == null || !h3Tag.IsInGroup("jmad"))
+                    if (blamTag == null || !blamTag.IsInGroup("jmad"))
                         continue;
 
-                    if (h3Tag.Name == name)
-                        MergeAnimationGraphs(edTag, h3Tag);
+                    if (blamTag.Name == name)
+                        MergeAnimationGraphs(edTag, blamTag, replace);
                 }
             }
 
@@ -78,14 +112,18 @@ namespace TagTool.Commands.Porting
                 Console.WriteLine("No animation graphs were merged.");
             else
                 Console.WriteLine($"Merged {count} animation graph{(count == 1 ? "" : "s")} successfully.");
-
-            return true;
         }
 
         private void MergeAnimationTagReferences(List<ModelAnimationGraph.AnimationTagReference> edReferences, List<ModelAnimationGraph.AnimationTagReference> h3References)
         {
+            if (h3References.Count == 0)
+                return;
+
             for (var i = 0; i < edReferences.Count; i++)
             {
+                if (i >= h3References.Count)
+                    break;
+
                 var edReference = edReferences[i];
                 var h3Reference = h3References[i];
 
@@ -100,7 +138,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        private Dictionary<string, (short, short)> MergeAnimations(CachedTag h3Tag, ModelAnimationGraph h3Def, List<ModelAnimationGraph.Animation> edAnimations)
+        private Dictionary<string, (short, short)> MergeAnimations(CachedTag h3Tag, ModelAnimationGraph h3Def, List<ModelAnimationGraph.Animation> edAnimations, bool replace)
         {
             var result = new Dictionary<string, (short, short)>(); // (h3Index, edIndex)
 
@@ -114,12 +152,16 @@ namespace TagTool.Commands.Porting
                 var edAnimation = edAnimations.Find(a => animationName == CacheContext.StringTable.GetString(a.Name));
                 var edIndex = (short)(edAnimation != null ? edAnimations.IndexOf(edAnimation) : edAnimations.Count);
 
-                result[animationName] = ((short)(edAnimation != null ? -1 : h3Def.Animations.IndexOf(h3Animation)), edIndex);
+                result[animationName] = ((short)(edAnimation != null && !replace ? -1 : h3Def.Animations.IndexOf(h3Animation)), edIndex);
 
-                if (edAnimation == null)
+                if (edAnimation == null || replace)
                 {
-                    edAnimation = (ModelAnimationGraph.Animation)PortTag.ConvertData(CacheStream, BlamCacheStream, ResourceStreams, h3Animation.DeepClone(), h3Def, h3Tag.Name);
-                    edAnimations.Add(edAnimation);
+                    var convertedAnimation = (ModelAnimationGraph.Animation)PortTag.ConvertData(CacheStream, BlamCacheStream, ResourceStreams, h3Animation.DeepClone(), h3Def, h3Tag.Name);
+
+                    if (edAnimation == null)
+                        edAnimations.Add(convertedAnimation);
+                    else
+                        edAnimations[edIndex] = convertedAnimation;
                 }
             }
 
@@ -140,7 +182,7 @@ namespace TagTool.Commands.Porting
             return result;
         }
 
-        private List<ModelAnimationGraph.Mode> MergeModes(CachedTag h3Tag, ModelAnimationGraph h3Def, List<ModelAnimationGraph.Mode> edModes, Dictionary<string, (short, short)> indices)
+        private List<ModelAnimationGraph.Mode> MergeModes(CachedTag h3Tag, ModelAnimationGraph h3Def, List<ModelAnimationGraph.Mode> edModes, Dictionary<string, (short, short)> indices, bool replace)
         {
             foreach (var h3Mode in h3Def.Modes)
             {
@@ -202,12 +244,20 @@ namespace TagTool.Commands.Porting
                             {
                                 if (edAction.GraphIndex == -1)
                                 {
-                                    edAction.Animation = indices[BlamCache.StringTable.GetString(h3Def.Animations[edAction.Animation].Name)].Item2;
+                                    edAction.Animation = indices[BlamCache.StringTable.GetString(h3Def.Animations[h3Action.Animation].Name)].Item2;
                                 }
                                 else
                                 {
                                     var inherited = h3Def.InheritanceList[edAction.GraphIndex].InheritedGraph;
-                                    edAction.Animation = MergedAnimationData[inherited.Name].Item1.Values.ToList().Find(x => x.Item1 == edAction.Animation).Item2;
+                                    edAction.Animation = MergedAnimationData[inherited.Name].Item1.Values.ToList().Find(x => x.Item1 == h3Action.Animation).Item2;
+                                }
+                            }
+                            else if (replace)
+                            {
+                                var newAnimationIndex = indices[BlamCache.StringTable.GetString(h3Def.Animations[h3Action.Animation].Name)].Item2;
+                                if (edAction.Animation != newAnimationIndex)
+                                {
+                                    edAction.Animation = newAnimationIndex;
                                 }
                             }
                         }
@@ -230,12 +280,20 @@ namespace TagTool.Commands.Porting
                             {
                                 if (edOverlay.GraphIndex == -1)
                                 {
-                                    edOverlay.Animation = indices[BlamCache.StringTable.GetString(h3Def.Animations[edOverlay.Animation].Name)].Item2;
+                                    edOverlay.Animation = indices[BlamCache.StringTable.GetString(h3Def.Animations[h3Overlay.Animation].Name)].Item2;
                                 }
                                 else
                                 {
                                     var inherited = h3Def.InheritanceList[edOverlay.GraphIndex].InheritedGraph;
-                                    edOverlay.Animation = MergedAnimationData[inherited.Name].Item1.Values.ToList().Find(x => x.Item1 == edOverlay.Animation).Item2;
+                                    edOverlay.Animation = MergedAnimationData[inherited.Name].Item1.Values.ToList().Find(x => x.Item1 == h3Overlay.Animation).Item2;
+                                }
+                            }
+                            else if (replace)
+                            {
+                                var newAnimationIndex = indices[BlamCache.StringTable.GetString(h3Def.Animations[h3Overlay.Animation].Name)].Item2;
+                                if (edOverlay.Animation != newAnimationIndex)
+                                {
+                                    edOverlay.Animation = newAnimationIndex;
                                 }
                             }
                         }
@@ -312,17 +370,10 @@ namespace TagTool.Commands.Porting
                                     edDestinationCreated = true;
                                 }
 
-                                if (edDestinationCreated || edTransitionCreated || edWeaponTypeCreated || edWeaponClassCreated || edModeCreated)
+                                var newAnimationIndex = indices[BlamCache.StringTable.GetString(h3Def.Animations[h3Destination.Animation].Name)].Item2;
+                                if (edDestinationCreated || (edDestination.Animation == -1 && replace) || (edDestination.Animation != newAnimationIndex && replace))
                                 {
-                                    if (edDestination.GraphIndex == -1)
-                                    {
-                                        edDestination.Animation = indices[BlamCache.StringTable.GetString(h3Def.Animations[edDestination.Animation].Name)].Item2;
-                                    }
-                                    else
-                                    {
-                                        var inherited = h3Def.InheritanceList[edDestination.GraphIndex].InheritedGraph;
-                                        edDestination.Animation = MergedAnimationData[inherited.Name].Item1.Values.ToList().Find(x => x.Item1 == edDestination.Animation).Item2;
-                                    }
+                                    edDestination.Animation = newAnimationIndex;
                                 }
                             }
                         }
@@ -356,7 +407,7 @@ namespace TagTool.Commands.Porting
             return edModes;
         }
 
-        private void MergeAnimationGraphs(CachedTag edTag, CachedTag h3Tag)
+        private void MergeAnimationGraphs(CachedTag edTag, CachedTag h3Tag, bool replace)
         {
             ModelAnimationGraph edDef = null;
             ModelAnimationGraph h3Def = null;
@@ -368,10 +419,10 @@ namespace TagTool.Commands.Porting
                 h3Def = BlamCache.Deserialize<ModelAnimationGraph>(stream, h3Tag);
 
             if (edDef.ParentAnimationGraph != null && h3Def.ParentAnimationGraph != null)
-                MergeAnimationGraphs(edDef.ParentAnimationGraph, h3Def.ParentAnimationGraph);
+                MergeAnimationGraphs(edDef.ParentAnimationGraph, h3Def.ParentAnimationGraph, replace);
 
             for (var i = 0; i < h3Def.InheritanceList.Count; i++)
-                MergeAnimationGraphs(edDef.InheritanceList[i].InheritedGraph, h3Def.InheritanceList[i].InheritedGraph);
+                MergeAnimationGraphs(edDef.InheritanceList[i].InheritedGraph, h3Def.InheritanceList[i].InheritedGraph, replace);
 
             MergeAnimationTagReferences(edDef.SoundReferences, h3Def.SoundReferences);
             MergeAnimationTagReferences(edDef.EffectReferences, h3Def.EffectReferences);
@@ -380,9 +431,9 @@ namespace TagTool.Commands.Porting
             BlamCacheStream = BlamCache.OpenCacheRead();
             ResourceStreams = new Dictionary<ResourceLocation, Stream>();
 
-            var animationIndices = MergeAnimations(h3Tag, h3Def, edDef.Animations);
+            var animationIndices = MergeAnimations(h3Tag, h3Def, edDef.Animations, replace);
 
-            edDef.Modes = MergeModes(h3Tag, h3Def, edDef.Modes, animationIndices);
+            edDef.Modes = MergeModes(h3Tag, h3Def, edDef.Modes, animationIndices, replace);
 
             //
             // Collect indices of missing resource groups

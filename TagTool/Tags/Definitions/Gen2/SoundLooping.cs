@@ -11,10 +11,8 @@ namespace TagTool.Tags.Definitions.Gen2
     public class SoundLooping : TagStructure
     {
         public FlagsValue Flags;
-        public float MartySMusicTime; //  seconds
-        public float Unknown;
-        [TagField(Length = 0x8, Flags = TagFieldFlags.Padding)]
-        public byte[] Padding;
+        public Bounds<float> MartySMusicTime; //  seconds
+        public Bounds<float> DistanceBounds;
         public CachedTag Unknown1;
         /// <summary>
         /// tracks play in parallel and loop continuously for the duration of the looping sound.
@@ -31,7 +29,7 @@ namespace TagTool.Tags.Definitions.Gen2
             /// <summary>
             /// when used as a background stereo track, causes nearby AIs to be unable to hear
             /// </summary>
-            DeafeningToAis = 1 << 0,
+            DeafeningToAIs = 1 << 0,
             /// <summary>
             /// this is a collection of permutations strung together that should play once then stop.
             /// </summary>
@@ -68,18 +66,18 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagField(ValidTags = new [] { "snd!" })]
             public CachedTag Out;
             [TagField(ValidTags = new [] { "snd!" })]
-            public CachedTag AltLoop;
+            public CachedTag AlternateLoop;
             [TagField(ValidTags = new [] { "snd!" })]
-            public CachedTag AltOut;
+            public CachedTag AlternateOut;
             public OutputEffectValue OutputEffect;
             [TagField(Length = 0x2, Flags = TagFieldFlags.Padding)]
             public byte[] Padding;
             [TagField(ValidTags = new [] { "snd!" })]
-            public CachedTag AltTransIn;
+            public CachedTag AlternateTransitionIn;
             [TagField(ValidTags = new [] { "snd!" })]
-            public CachedTag AltTransOut;
-            public float AltCrossfadeDuration; // seconds
-            public float AltFadeOutDuration; // seconds
+            public CachedTag AlternateTransitionOut;
+            public float AlternateCrossfadeDuration; // seconds
+            public float AlternateFadeOutDuration; // seconds
             
             [Flags]
             public enum FlagsValue : uint
@@ -95,9 +93,9 @@ namespace TagTool.Tags.Definitions.Gen2
                 /// <summary>
                 /// when the sound changes to the alternate version,  .
                 /// </summary>
-                CrossfadeAltLoop = 1 << 2,
+                CrossfadeAlternateLoop = 1 << 2,
                 MasterSurroundSoundTrack = 1 << 3,
-                FadeOutAtAltStop = 1 << 4
+                FadeOutAtAlternateStop = 1 << 4
             }
             
             public enum OutputEffectValue : short
@@ -119,7 +117,7 @@ namespace TagTool.Tags.Definitions.Gen2
             /// the time between successive playings of this sound will be randomly selected from this range.
             /// </summary>
             public Bounds<float> RandomPeriodBounds; // seconds
-            public float Unknown;
+            public float DetailGain;
             public FlagsValue Flags;
             /// <summary>
             /// if the sound specified above is not stereo it will be randomly spatialized according to the following constraints. if
@@ -144,8 +142,8 @@ namespace TagTool.Tags.Definitions.Gen2
             [Flags]
             public enum FlagsValue : uint
             {
-                DonTPlayWithAlternate = 1 << 0,
-                DonTPlayWithoutAlternate = 1 << 1,
+                DontPlayWithAlternate = 1 << 0,
+                DontPlayWithoutAlternate = 1 << 1,
                 StartImmediatelyWithLoop = 1 << 2
             }
         }

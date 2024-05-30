@@ -1,5 +1,6 @@
 using TagTool.Common;
 using System;
+using TagTool.Tags.Definitions;
 
 namespace TagTool.Cache
 {
@@ -70,6 +71,9 @@ namespace TagTool.Cache
         /// <returns>The string list index, or -1 if none.</returns>
         public int StringIDToIndex(StringId stringId)
         {
+            if (stringId.Value == uint.MaxValue)
+                return 0;
+
             var setMin = GetMinSetStringIndex();
             var setMax = GetMaxSetStringIndex();
             var setOffsets = GetSetOffsets();

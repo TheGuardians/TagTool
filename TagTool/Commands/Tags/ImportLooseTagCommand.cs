@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Cache.Monolithic;
@@ -12,6 +13,7 @@ using TagTool.Tags;
 using TagTool.Common;
 using TagTool.Geometry;
 using static TagTool.Tags.Definitions.PhysicsModel;
+using TagTool.Commands.ModelAnimationGraphs;
 
 namespace TagTool.Commands.Tags
 {
@@ -28,7 +30,7 @@ namespace TagTool.Commands.Tags
             "ImportLooseTag",
             "Import a loose tag from Halo 3 MCC",
 
-            "ImportLooseTag <Destination Tag> <Source Path>",
+            "ImportLooseTag [Flags] [Destination Tag] <Source Path>",
 
             "")
         {
@@ -40,13 +42,33 @@ namespace TagTool.Commands.Tags
 
         public override object Execute(List<string> args)
         {
-            if (args.Count != 2)
+            if (args.Count < 1 || args.Count > 3)
                 return new TagToolError(CommandError.ArgCount);
 
-            var path = args[1];
+            var path = args.LastOrDefault();
+            var newTagName = "";
+            var flags = "";
 
             if (!File.Exists(path))
                 return new TagToolError(CommandError.FileNotFound, $"\"{path}\"");
+
+            switch (args.Count)
+            {
+                case 1:
+                    {
+                        var split = path.Split(new string[] { "\\tags\\" }, StringSplitOptions.None).LastOrDefault();
+                        if(split != path)
+                            newTagName = split.Split('.').FirstOrDefault();
+                        break;
+                    }
+                case 2:
+                    newTagName = args[0];
+                    break;
+                case 3:
+                    newTagName = args[1];
+                    flags = args[0];
+                    break;
+            }
 
             byte[] tagData;
             using (var inStream = File.OpenRead(path))
@@ -88,7 +110,7 @@ namespace TagTool.Commands.Tags
             if (looseTagType == null)
                 return new TagToolError(CommandError.OperationFailed, $"Tag type {singleFileTagReader.Header.GroupTag.ToString()} not valid for gen3 cache!");
 
-            string tagname = args[0];
+            string tagname = newTagName;
             if (!tagname.Contains("."))
                 tagname += $".{singleFileTagReader.Header.GroupTag}";
 
@@ -106,7 +128,7 @@ namespace TagTool.Commands.Tags
             //fixup tags and resources
             FixupTag(result, FixupContext, layout, looseTagType);
 
-            var destTag = Cache.TagCache.AllocateTag(looseTagType, args[0].ToString());
+            var destTag = Cache.TagCache.AllocateTag(looseTagType, newTagName.ToString());
             using (var stream = Cache.OpenCacheReadWrite())
                 Cache.Serialize(stream, destTag, result);
             Cache.SaveStrings();
@@ -139,6 +161,7 @@ namespace TagTool.Commands.Tags
                         animationResource.GroupMembers.AddressType = CacheAddressType.Definition;
                         jmad.ResourceGroups[i].ResourceReference = Cache.ResourceCache.CreateModelAnimationGraphResource(animationResource);
                     }                 
+                    new SortModesCommand(Cache, (ModelAnimationGraph)tagDef).Execute(new List<string> { });
                     break;
                 case "Bitmap":
                     //bitmap resource

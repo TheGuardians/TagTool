@@ -2137,7 +2137,7 @@ namespace TagTool.Scripting.Compiler
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(startingProfileString.Value);
-                Array.Copy(BitConverter.GetBytes((short)startingProfileIndex), expr.Data, 2);
+                expr.Data = new byte[] { (byte)((startingProfileIndex & 0xFF)), (byte)(startingProfileIndex >> 8), 0xFF, 0xFF };
             }
 
             return handle;
@@ -2216,8 +2216,26 @@ namespace TagTool.Scripting.Compiler
         private DatumHandle CompileStyleExpression(ScriptString styleString) =>
             throw new NotImplementedException();
 
-        private DatumHandle CompileObjectListExpression(ScriptString objectListString) =>
-            throw new NotImplementedException();
+        private DatumHandle CompileObjectListExpression(ScriptString objectListString)
+        {
+            ushort? objectOpcode = objectListString.Value == "none" ? null : (ushort?)HsType.HaloOnlineValue.ObjectName;
+            var handle = AllocateExpression(HsType.HaloOnlineValue.ObjectList, HsSyntaxNodeFlags.Primitive | HsSyntaxNodeFlags.DoNotGC, objectOpcode, line: (short)objectListString.Line);
+
+            if (handle != DatumHandle.None)
+            {
+                var objectIndex = objectListString.Value == "none" ? -1 :
+                    Definition.ObjectNames.FindIndex(on => on.Name == objectListString.Value);
+
+                if (objectListString.Value != "none" && objectIndex == -1)
+                    throw new FormatException(objectListString.Value);
+
+                var expr = ScriptExpressions[handle.Index];
+                expr.StringAddress = CompileStringAddress(objectListString.Value);
+                Array.Copy(BitConverter.GetBytes((short)objectIndex), expr.Data, 2);
+            }
+
+            return handle;
+        }
 
         private DatumHandle CompileFolderExpression(ScriptString folderString)
         {
@@ -3138,7 +3156,7 @@ namespace TagTool.Scripting.Compiler
 
                 var expr = ScriptExpressions[handle.Index];
                 expr.StringAddress = CompileStringAddress(cinematicLightprobeSymbol.Value);
-                Array.Copy(BitConverter.GetBytes((short)cinematicLightprobeIndex), expr.Data, 2);
+                Array.Copy(BitConverter.GetBytes(cinematicLightprobeIndex), expr.Data, 4);
             }
 
             return handle;

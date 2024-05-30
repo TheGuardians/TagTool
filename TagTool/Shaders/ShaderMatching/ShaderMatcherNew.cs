@@ -184,6 +184,9 @@ namespace TagTool.Shaders.ShaderMatching
                 int score = 0;
                 for (int i = 0; i < sourceRmt2Desc.Options.Length; i++)
                 {
+                    if (i >= destRmt2Desc.Options.Length)
+                        continue;
+
                     if (sourceRmt2Desc.Options[i] == destRmt2Desc.Options[i])
                     {
                         score += 1 + weights[i];
@@ -321,7 +324,19 @@ namespace TagTool.Shaders.ShaderMatching
                 rmdf = BaseCache.Deserialize<RenderMethodDefinition>(BaseCacheStream, rmdfTag);
             }
 
-            var rmt2 = ShaderGenerator.ShaderGeneratorNew.GenerateTemplateSafe(BaseCache, BaseCacheStream, rmdf, tagName, out PixelShader pixl, out VertexShader vtsh);
+            RenderMethodTemplate rmt2;
+            PixelShader pixl;
+            VertexShader vtsh;
+
+            try
+            {
+                rmt2 = ShaderGenerator.ShaderGeneratorNew.GenerateTemplateSafe(BaseCache, BaseCacheStream, rmdf, tagName, out pixl, out vtsh);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Generation failed, finding best substitute");
+                return false;
+            }
 
             generatedRmt2 = BaseCache.TagCache.AllocateTag<RenderMethodTemplate>(tagName);
 
@@ -456,7 +471,6 @@ namespace TagTool.Shaders.ShaderMatching
                                 optionName = "per_vertex_ravi_order_0";
                                 break;
                             case @"depth_fade\low_res":
-                            case @"depth_fade\palette_shift":
                                 optionName = "on";
                                 break;
                             // MCC rmsh //

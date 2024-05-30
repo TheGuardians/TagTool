@@ -5,6 +5,7 @@ using TagTool.Cache;
 using TagTool.Commands.Common;
 using TagTool.Cache.HaloOnline;
 using TagTool.Cache.Monolithic;
+using System.Linq;
 
 namespace TagTool.Commands.Tags
 {
@@ -32,7 +33,12 @@ namespace TagTool.Commands.Tags
             if (!Cache.TagCache.TryGetTag(args[0], out var instance))
                 return new TagToolError(CommandError.TagInvalid);
 
-            var file = new FileInfo(args[1]);
+            var path = args[1];
+
+            if (Path.GetExtension(path) == "")
+                path = Path.Combine(path, instance.Name.Split('\\').Last() + "." + instance.Group);
+
+            var file = new FileInfo(path);
             if (!file.Directory.Exists)
                 file.Directory.Create();
 
@@ -46,15 +52,15 @@ namespace TagTool.Commands.Tags
                 using (var outStream = file.Create())
                 {
                     outStream.Write(data, 0, data.Length);
-                    Console.WriteLine("Wrote 0x{0:X} bytes to {1}.", outStream.Position, file);
+                    Console.WriteLine("Wrote 0x{0:X} bytes to \"{1}\".", outStream.Position, file);
                     Console.WriteLine("The tag's definition will be at offset 0x{0:X}.", instance.DefinitionOffset);
                 }
             }
-            else if (Cache is GameCacheMonolithic nonolithicCache)
+            else if (Cache is GameCacheMonolithic monolithicCache)
             {
                 byte[] data;
                 using (var stream = Cache.OpenCacheRead())
-                    data = nonolithicCache.Backend.ExtractTagRaw(instance.Index);
+                    data = monolithicCache.Backend.ExtractTagRaw(instance.Index);
 
                 using (var outStream = file.Create())
                 {

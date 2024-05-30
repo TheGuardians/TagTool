@@ -14,8 +14,10 @@ namespace TagTool.Tags.Definitions
     {
         [TagField(MaxVersion = CacheVersion.HaloOnline235640)]
         public ProjectileFlags Flags;
-        [TagField(MinVersion = CacheVersion.HaloOnline301003)]
+        [TagField(MinVersion = CacheVersion.HaloOnline301003, MaxVersion = CacheVersion.HaloOnline700123)]
         public ProjectileFlagsHO FlagsHO;
+        [TagField(MinVersion = CacheVersion.HaloReach)]
+        public ProjectileFlagsReach FlagsReach;
         public DetonationTimerModes DetonationTimerStarts;
         public AiSoundVolume ImpactVolumeForAi;
         public float CollisionRadius; // world units
@@ -63,10 +65,14 @@ namespace TagTool.Tags.Definitions
 
         public DamageReportingType DamageReportingType;
 
-        [TagField(Length = 3, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
-        [TagField(Length = 1, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
-        public byte[] Padding1;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public sbyte DamageReportingVariant; // weapon variant
 
+        [TagField(Length = 3, Flags = Padding, MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(Length = 1, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
+        [TagField(Length = 1, Flags = Padding, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public byte[] Padding1;
+       
         [TagField(MinVersion = CacheVersion.HaloReach)]
         public GameObjectType16 SuperDetonationObjectTypes;
         public CachedTag AttachedSuperDetonationDamage;
@@ -204,6 +210,44 @@ namespace TagTool.Tags.Definitions
             Bit31 = 1 << 31
         }
 
+        [Flags]
+        public enum ProjectileFlagsReach : int
+        {
+            None,
+            OrientedAlongVelocity = 1 << 0,
+            AiMustUseBallisticAiming = 1 << 1,
+            DetonationMaxTimeIfAttached = 1 << 2,
+            DamageScalesBasedOnDistance = 1 << 3,
+            SteeringAdjustsOrientation = 1 << 4,
+            DoNotNoiseUpSteering = 1 << 5,
+            CanTrackBehindItself = 1 << 6,
+            RobotronSteering = 1 << 7,
+            AffectedByPhantomVolumes = 1 << 8,
+            Bit9 = 1 << 9,
+            NotifiesTargetUnits = 1 << 10,
+            UseGroundDetonationWhenAttached = 1 << 11,
+            AIMinorTrackingThreat = 1 << 12,
+            DangerousWhenInactive = 1 << 13,
+            AIStimulusWhenAttached = 1 << 14,
+            OverPeneDetonation = 1 << 15,
+            NoImpactEffectsOnBounce = 1 << 16,
+            RC1OverpenetrationFixes = 1 << 17,
+            DisableInstantaneousFirstTick = 1 << 18,
+            ConstrainGravityToVelocityBounds = 1 << 19,
+            AllowDecelerationToBelowFinalVelocity = 1 << 20,
+            SupportsTethering = 1 << 21,
+            DamageNotPredictableByClients = 1 << 22,
+            CollidesWithPhysicsOnlySurfaces = 1 << 23,
+            DetonatesWhenAttachedToObjects = 1 << 24,
+            CannotBeDetachedByEquipment = 1 << 25,
+            Bit26 = 1 << 26,
+            Bit27 = 1 << 27,
+            Bit28 = 1 << 28,
+            Bit29 = 1 << 29,
+            Bit30 = 1 << 30,
+            Bit31 = 1 << 31
+        }
+
         public enum DetonationTimerModes : short
         {
             Immediately,
@@ -265,23 +309,6 @@ namespace TagTool.Tags.Definitions
                 CannotBeOverpenetrated = 1 << 0
             }
 
-            [Flags]
-            public enum MaterialPossibleResponseFlags : ushort
-			{
-				None,
-				OnlyAgainstUnits = 1 << 0,
-				NeverAgainstUnits = 1 << 1,
-				OnlyAgainstBipeds = 1 << 2,
-				OnlyAgainstVehicles = 1 << 3,
-				NeverAgainstWussPlayers = 1 << 4,
-				OnlyWhenTethered = 1 << 5,
-				OnlyWhenNotTethered = 1 << 6,
-				OnlyAgainstDeadBipeds = 1 << 7,
-				NeverAgainstDeadBipeds = 1 << 8,
-				OnlyAiProjectiles = 1 << 9,
-				NeverAiProjectiles = 1 << 10
-			}
-
             public enum MaterialResponseValue : short
             {
                 ImpactDetonate,
@@ -305,12 +332,13 @@ namespace TagTool.Tags.Definitions
         {
             [TagField(Flags = GlobalMaterial)]
             public StringId MaterialName;
+            [TagField(Flags = GlobalMaterial)]
             public short RuntimeMaterialIndex;
             public MaterialPossibleResponseFlags ResponseFlags;
             public float ChanceFraction; // [0,1]
-            public Bounds<Angle> Between; // degrees
-            public Bounds<float> And; // world units per second
-            public MaterialResponse Response;
+            public Bounds<Angle> BetweenAngle; // degrees
+            public Bounds<float> AndVelocity; // world units per second
+            public MaterialResponse PotentialResponse;
             public EffectScaleEnum ScaleEffectsBy;
             // the angle of incidence is randomly perturbed by at most this amount to simulate irregularity.
             public Angle AngularNoise; // degrees
@@ -323,32 +351,17 @@ namespace TagTool.Tags.Definitions
             // the fraction of the projectile's velocity perpendicular to the surface lost on impact
             public float PerpendicularFriction;
 
-            [Flags]
-            public enum MaterialPossibleResponseFlags : ushort
-            {
-                OnlyAgainstUnits = 1 << 0,
-                NeverAgainstUnits = 1 << 1,
-                OnlyAgainstBipeds = 1 << 2,
-                OnlyAgainstVehicles = 1 << 3,
-                NeverAgainstWussPlayers = 1 << 4,
-                OnlyWhenTethered = 1 << 5,
-                OnlyWhenNotTethered = 1 << 6,
-                OnlyAgainstDeadBipeds = 1 << 7,
-                NeverAgainstDeadBipeds = 1 << 8,
-                OnlyAiProjectiles = 1 << 9,
-                NeverAiProjectiles = 1 << 10
-            }
-
             public enum MaterialResponse : short
             {
-                Impact,
+                ImpactDetonate,
                 Fizzle,
                 Overpenetrate,
                 Attach,
                 Bounce,
-                Bounce1,
-                Fizzle1,
-                TurnPhysical
+                BounceDud,
+                FizzleRicochet,
+                TurnPhysical,
+                Airstrike
             }
 
             public enum EffectScaleEnum : short
@@ -356,6 +369,23 @@ namespace TagTool.Tags.Definitions
                 Damage,
                 Angle
             }
+        }
+
+        [Flags]
+        public enum MaterialPossibleResponseFlags : ushort
+        {
+            None,
+            OnlyAgainstUnits = 1 << 0,
+            NeverAgainstUnits = 1 << 1,
+            OnlyAgainstBipeds = 1 << 2,
+            OnlyAgainstVehicles = 1 << 3,
+            NeverAgainstWussPlayers = 1 << 4,
+            OnlyWhenTethered = 1 << 5,
+            OnlyWhenNotTethered = 1 << 6,
+            OnlyAgainstDeadBipeds = 1 << 7,
+            NeverAgainstDeadBipeds = 1 << 8,
+            OnlyAiProjectiles = 1 << 9,
+            NeverAiProjectiles = 1 << 10
         }
 
         [TagStructure(Size = 0x30)]

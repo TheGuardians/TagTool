@@ -242,6 +242,12 @@ namespace TagTool.Cache.HaloOnline
             if (resourceReference == null || resourceReference.HaloOnlinePageableResource == null)
                 return false;
             var page = resourceReference.HaloOnlinePageableResource.Page;
+            if(page != null)
+            {
+                var index = resourceReference.HaloOnlinePageableResource.Page.Index;
+                if (index == -1)
+                    return false;
+            }
             var resource = resourceReference.HaloOnlinePageableResource.Resource;
             if (page == null || resource == null)
                 return false;

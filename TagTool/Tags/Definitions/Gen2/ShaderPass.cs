@@ -779,14 +779,14 @@ namespace TagTool.Tags.Definitions.Gen2
             [TagStructure(Size = 0x14A)]
             public class ShaderPassPostprocessImplementationNewBlock : TagStructure
             {
-                public TagBlockIndexStructBlock Textures;
-                public TagBlockIndexStructBlock1 RenderStates;
-                public TagBlockIndexStructBlock2 TextureStates;
+                public TagBlockIndexGen2 Textures;
+                public TagBlockIndexGen2 RenderStates;
+                public TagBlockIndexGen2 TextureStates;
                 [TagField(Length = 0xF0)]
                 public byte[] Unknown;
-                public TagBlockIndexStructBlock3 PsFragments;
-                public TagBlockIndexStructBlock4 PsPermutations;
-                public TagBlockIndexStructBlock5 PsCombiners;
+                public TagBlockIndexGen2 PsFragments;
+                public TagBlockIndexGen2 PsPermutations;
+                public TagBlockIndexGen2 PsCombiners;
                 [TagField(ValidTags = new [] { "vrtx" })]
                 public CachedTag VertexShader;
                 [TagField(Length = 0x8)]
@@ -797,122 +797,20 @@ namespace TagTool.Tags.Definitions.Gen2
                 public byte[] Unknown3;
                 [TagField(Length = 0x4)]
                 public byte[] Unknown4;
-                public TagBlockIndexStructBlock6 DefaultRenderStates;
-                public TagBlockIndexStructBlock7 RenderStateExterns;
-                public TagBlockIndexStructBlock8 TextureStateExterns;
-                public TagBlockIndexStructBlock9 PixelConstantExterns;
-                public TagBlockIndexStructBlock10 VertexConstantExterns;
-                public TagBlockIndexStructBlock11 PsConstants;
-                public TagBlockIndexStructBlock12 VsConstants;
-                public TagBlockIndexStructBlock13 PixelConstantInfo;
-                public TagBlockIndexStructBlock14 VertexConstantInfo;
-                public TagBlockIndexStructBlock15 RenderStateInfo;
-                public TagBlockIndexStructBlock16 TextureStateInfo;
+                public TagBlockIndexGen2 DefaultRenderStates;
+                public TagBlockIndexGen2 RenderStateExterns;
+                public TagBlockIndexGen2 TextureStateExterns;
+                public TagBlockIndexGen2 PixelConstantExterns;
+                public TagBlockIndexGen2 VertexConstantExterns;
+                public TagBlockIndexGen2 PsConstants;
+                public TagBlockIndexGen2 VsConstants;
+                public TagBlockIndexGen2 PixelConstantInfo;
+                public TagBlockIndexGen2 VertexConstantInfo;
+                public TagBlockIndexGen2 RenderStateInfo;
+                public TagBlockIndexGen2 TextureStateInfo;
                 public List<ShaderPostprocessPixelShader> PixelShader;
                 public List<PixelShaderExternMapBlock> PixelShaderSwitchExternMap;
                 public List<PixelShaderIndexBlock> PixelShaderIndexBlock1;
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock1 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock2 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock3 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock4 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock5 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock6 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock7 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock8 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock9 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock10 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock11 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock12 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock13 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock14 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock15 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock16 : TagStructure
-                {
-                    public short BlockIndexData;
-                }
                 
                 [TagStructure(Size = 0x2C)]
                 public class ShaderPostprocessPixelShader : TagStructure
@@ -973,13 +871,7 @@ namespace TagTool.Tags.Definitions.Gen2
             public class PixelShaderFragmentBlock : TagStructure
             {
                 public sbyte SwitchParameterIndex;
-                public TagBlockIndexStructBlock PermutationsIndex;
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock : TagStructure
-                {
-                    public short BlockIndexData;
-                }
+                public TagBlockIndexGen2 PermutationsIndex;
             }
             
             [TagStructure(Size = 0x6)]
@@ -987,13 +879,7 @@ namespace TagTool.Tags.Definitions.Gen2
             {
                 public short EnumIndex;
                 public short Flags;
-                public TagBlockIndexStructBlock Combiners;
-                
-                [TagStructure(Size = 0x2)]
-                public class TagBlockIndexStructBlock : TagStructure
-                {
-                    public short BlockIndexData;
-                }
+                public TagBlockIndexGen2 Combiners;
             }
             
             [TagStructure(Size = 0x20)]
@@ -1146,163 +1032,37 @@ namespace TagTool.Tags.Definitions.Gen2
                 [TagStructure(Size = 0xE)]
                 public class ShaderGpuStateReferenceStructBlock : TagStructure
                 {
-                    public TagBlockIndexStructBlock RenderStates;
-                    public TagBlockIndexStructBlock1 TextureStageStates;
-                    public TagBlockIndexStructBlock2 RenderStateParameters;
-                    public TagBlockIndexStructBlock3 TextureStageParameters;
-                    public TagBlockIndexStructBlock4 Textures;
-                    public TagBlockIndexStructBlock5 VnConstants;
-                    public TagBlockIndexStructBlock6 CnConstants;
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock1 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock2 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock3 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock4 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock5 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock6 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
+                    public TagBlockIndexGen2 RenderStates;
+                    public TagBlockIndexGen2 TextureStageStates;
+                    public TagBlockIndexGen2 RenderStateParameters;
+                    public TagBlockIndexGen2 TextureStageParameters;
+                    public TagBlockIndexGen2 Textures;
+                    public TagBlockIndexGen2 VnConstants;
+                    public TagBlockIndexGen2 CnConstants;
                 }
                 
                 [TagStructure(Size = 0xE)]
                 public class ShaderGpuStateReferenceStructBlock1 : TagStructure
                 {
-                    public TagBlockIndexStructBlock RenderStates;
-                    public TagBlockIndexStructBlock1 TextureStageStates;
-                    public TagBlockIndexStructBlock2 RenderStateParameters;
-                    public TagBlockIndexStructBlock3 TextureStageParameters;
-                    public TagBlockIndexStructBlock4 Textures;
-                    public TagBlockIndexStructBlock5 VnConstants;
-                    public TagBlockIndexStructBlock6 CnConstants;
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock1 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock2 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock3 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock4 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock5 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock6 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
+                    public TagBlockIndexGen2 RenderStates;
+                    public TagBlockIndexGen2 TextureStageStates;
+                    public TagBlockIndexGen2 RenderStateParameters;
+                    public TagBlockIndexGen2 TextureStageParameters;
+                    public TagBlockIndexGen2 Textures;
+                    public TagBlockIndexGen2 VnConstants;
+                    public TagBlockIndexGen2 CnConstants;
                 }
                 
                 [TagStructure(Size = 0xE)]
                 public class ShaderGpuStateReferenceStructBlock2 : TagStructure
                 {
-                    public TagBlockIndexStructBlock RenderStates;
-                    public TagBlockIndexStructBlock1 TextureStageStates;
-                    public TagBlockIndexStructBlock2 RenderStateParameters;
-                    public TagBlockIndexStructBlock3 TextureStageParameters;
-                    public TagBlockIndexStructBlock4 Textures;
-                    public TagBlockIndexStructBlock5 VnConstants;
-                    public TagBlockIndexStructBlock6 CnConstants;
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock1 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock2 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock3 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock4 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock5 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock6 : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
+                    public TagBlockIndexGen2 RenderStates;
+                    public TagBlockIndexGen2 TextureStageStates;
+                    public TagBlockIndexGen2 RenderStateParameters;
+                    public TagBlockIndexGen2 TextureStageParameters;
+                    public TagBlockIndexGen2 Textures;
+                    public TagBlockIndexGen2 VnConstants;
+                    public TagBlockIndexGen2 CnConstants;
                 }
                 
                 [TagStructure(Size = 0x2)]
@@ -1330,13 +1090,7 @@ namespace TagTool.Tags.Definitions.Gen2
                 public class PixelShaderFragmentBlock : TagStructure
                 {
                     public sbyte SwitchParameterIndex;
-                    public TagBlockIndexStructBlock PermutationsIndex;
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
+                    public TagBlockIndexGen2 PermutationsIndex;
                 }
                 
                 [TagStructure(Size = 0x10)]
@@ -1344,8 +1098,8 @@ namespace TagTool.Tags.Definitions.Gen2
                 {
                     public short EnumIndex;
                     public FlagsValue Flags;
-                    public TagBlockIndexStructBlock Constants;
-                    public TagBlockIndexStructBlock1 Combiners;
+                    public TagBlockIndexGen2 Constants;
+                    public TagBlockIndexGen2 Combiners;
                     [TagField(Length = 0x4)]
                     public byte[] Unknown;
                     [TagField(Length = 0x4)]
@@ -1355,18 +1109,6 @@ namespace TagTool.Tags.Definitions.Gen2
                     public enum FlagsValue : ushort
                     {
                         HasFinalCombiner = 1 << 0
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock : TagStructure
-                    {
-                        public short BlockIndexData;
-                    }
-                    
-                    [TagStructure(Size = 0x2)]
-                    public class TagBlockIndexStructBlock1 : TagStructure
-                    {
-                        public short BlockIndexData;
                     }
                 }
                 

@@ -26,7 +26,7 @@ namespace TagTool.Audio
             };
         }
 
-        public static string GetFormtFileExtension(Compression format)
+        public static string GetFormatFileExtension(Compression format)
         {
             switch (format)
             {

@@ -68,7 +68,7 @@ namespace TagTool.Commands.Shaders
 
                 "Generates a shader template\n" +
                 "<shader type> - Specify shader type, EX. \"shader\" for \'rmsh\'.\n" +
-                "Use \"explicit\" for explicit shaders, and \"glvs\" or \"glps\" for global shaders.\n" +
+                "Use \"explicit\" for explicit shaders (ps+vs), \"chud\" for chud (ps+vs), and \"glvs\" or \"glps\" for global shaders.\n" +
                 "<options> - Specify the template\'s options as either integers or by names.\n" +
                 "For explicit shaders, you should specify the name or the rasg shader index.")
         {
@@ -240,6 +240,12 @@ namespace TagTool.Commands.Shaders
 
         private object GenerateChudShader(string shader)
         {
+            if (shader == "chud_overlay_blend")
+            {
+                new TagToolWarning("chud_overlay_blend is not a chud shader - compile as explicit");
+                return true;
+            }
+
             if (!Enum.TryParse(shader, out HaloShaderGenerator.Globals.ChudShader value))
             {
                 if (!int.TryParse(shader, out int intValue))
@@ -247,22 +253,17 @@ namespace TagTool.Commands.Shaders
                 value = (HaloShaderGenerator.Globals.ChudShader)intValue;
             }
 
-            // TODO: write register info to tag
-            // TODO: vtsh support
-            // TODO: entry point support
-            // TODO: failsafes
-
             using (var stream = Cache.OpenCacheReadWrite())
             {
-                var result = GenericPixelShaderGenerator.GeneratePixelShader(value.ToString(), HaloShaderGenerator.Globals.ShaderStage.Default.ToString().ToLower(), true);
+                var matg = Cache.Deserialize<Globals>(stream, Cache.TagCache.FindFirstInGroup("matg"));
+                var chgd = Cache.Deserialize<ChudGlobalsDefinition>(stream, matg.InterfaceTags[0].HudGlobals);
 
-                int pixelShaderIndex = 0; // TODO
+                CachedTag pixlTag = chgd.HudShaders[(int)value].PixelShader ?? Cache.TagCache.AllocateTag<PixelShader>($"rasterizer\\shaders\\{value}");
+                CachedTag vtshTag = chgd.HudShaders[(int)value].VertexShader ?? Cache.TagCache.AllocateTag<VertexShader>($"rasterizer\\shaders\\{value}");
 
-                CachedTag pixlTag = Cache.TagCache.GetTag($@"rasterizer\shaders\{value}.pixl");
-                var pixl = Cache.Deserialize<PixelShader>(stream, pixlTag);
+                ShaderGeneratorNew.GenerateChudShader(Cache, stream, value.ToString(), out PixelShader pixl, out VertexShader vtsh);
 
-                pixl.Shaders[pixelShaderIndex].PCShaderBytecode = result.Bytecode;
-
+                Cache.Serialize(stream, vtshTag, vtsh);
                 Cache.Serialize(stream, pixlTag, pixl);
             }
 

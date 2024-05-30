@@ -6,17 +6,19 @@ using static TagTool.Tags.TagFieldFlags;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "mod_globals", Tag = "modg", Size = 0x118)]
+    [TagStructure(Name = "mod_globals", Tag = "modg", Size = 0x11C)]
     public class ModGlobalsDefinition : TagStructure
     {
-        public List<PlayerCharacterSet> PlayerCharacterSets;
+        [TagField(Flags = Hidden)]
+        public int Version;
 
+        public List<PlayerCharacterSet> PlayerCharacterSets;
         public List<PlayerCharacterCustomization> PlayerCharacterCustomizations;
 
         [TagField(Flags = TagFieldFlags.Padding, Length = 0x100)]
         public byte[] Unused = new byte[0x100];
 
-        [TagStructure(Size = 0x34)]
+        [TagStructure(Size = 0x84)]
         public class PlayerCharacterSet : TagStructure
         {
             [TagField(Length = 32)]
@@ -24,6 +26,9 @@ namespace TagTool.Tags.Definitions
             public StringId Name;
             public float RandomChance;
             public List<PlayerCharacter> Characters;
+
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0x50)]
+            public byte[] Unused = new byte[0x50];
 
             [TagStructure(Size = 0x28)]
             public class PlayerCharacter : TagStructure
@@ -35,7 +40,7 @@ namespace TagTool.Tags.Definitions
             }
         }
 
-        [TagStructure(Size = 0xC4)]
+        [TagStructure(Size = 0x164)]
         public class PlayerCharacterCustomization : TagStructure
         {
             /// <summary>
@@ -68,10 +73,15 @@ namespace TagTool.Tags.Definitions
 
             public PlayerCharacterColors CharacterColors;
 
-            [TagStructure(Size = 0x6C)]
+            [TagField(Flags = TagFieldFlags.Padding, Length = 0x50)]
+            public byte[] Unused = new byte[0x50];
+
+            [TagStructure(Size = 0xBC)]
             public class PlayerCharacterRegionScript : TagStructure
             {
-                public int unused;
+                [TagField(Flags = Padding, Length = 0x4)]
+                public byte[] Padding0;
+
                 [TagField(Length = 32)]
                 public string RegionName;
                 [TagField(Length = 32)]
@@ -80,6 +90,9 @@ namespace TagTool.Tags.Definitions
                 public string ScriptNameStandard;
                 public float BipedRotation;
                 public float RotationDuration;
+
+                [TagField(Flags = TagFieldFlags.Padding, Length = 0x50)]
+                public byte[] Unused = new byte[0x50];
             };
 
             [TagStructure(Size = 0x40)]
@@ -87,7 +100,10 @@ namespace TagTool.Tags.Definitions
             {
                 public ChangeColorFlagsValue ValidColorFlags;
                 public ChangeColorFlagsValue TeamOverrideFlags;
-                public short Unused;
+
+                [TagField(Flags = Padding, Length = 0x2)]
+                public byte[] Padding0;
+
                 [TagField(Length = 5)]
                 public ChangeColorBlock[] Colors;
 
@@ -111,13 +127,13 @@ namespace TagTool.Tags.Definitions
                 }
             };
 
-            [TagStructure(Size = 0x3C)]
+            [TagStructure(Size = 0x8C)]
             public class CharacterPositionInfo : TagStructure
             {
                 /// <summary>
                 /// Character Flags
                 /// </summary>
-                public FlagsValue flags;
+                public FlagsValue Flags;
 
                 /// <summary>
                 /// Index to Object name in the mainmenu scenario
@@ -155,6 +171,9 @@ namespace TagTool.Tags.Definitions
                 /// float to point to the exact rotation of the biped with the relative flag not set
                 /// </summary>
                 public float BipedRotation;
+
+                [TagField(Flags = TagFieldFlags.Padding, Length = 0x50)]
+                public byte[] Unused = new byte[0x50];
 
                 [Flags]
                 public enum FlagsValue : int

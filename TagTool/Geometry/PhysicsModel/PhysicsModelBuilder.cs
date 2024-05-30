@@ -6,6 +6,12 @@ using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
+using TagTool.Geometry.Jms;
+using System.Linq;
+using Newtonsoft.Json;
+using TagTool.Cache;
+using static TagTool.Tags.Definitions.PhysicsModel;
 
 namespace TagTool.Geometry
 {
@@ -25,28 +31,182 @@ namespace TagTool.Geometry
                 RigidBodies = new List<PhysicsModel.RigidBody>(),
                 Nodes = new List<PhysicsModel.Node>()
             };
-
-            _phmo.Materials = new List<PhysicsModel.Material>();
-            var material = new PhysicsModel.Material
-            {
-                //the 'default' stringid
-                Name = new StringId(1),
-                // ??? material.Flags = -256;
-                PhantomType = -1
-            };
-
-            _phmo.Materials.Add(material);
         }
 
-        public bool ParseFromFile(string fname, bool mopps)
+        private double CalculateDistance(PhysicsModel.PolyhedronFourVector v1, PhysicsModel.PolyhedronFourVector v2)
+        {
+            double dx = v1.FourVectorsX.I - v2.FourVectorsX.I;
+            double dy = v1.FourVectorsY.I - v2.FourVectorsY.I;
+            double dz = v1.FourVectorsZ.I - v2.FourVectorsZ.I;
+            return Math.Sqrt(dx * dx + dy * dy + dz * dz);
+        }
+
+        public bool ConvertJmsToJson(JmsFormat jms, GameCacheHaloOnlineBase cache, Stream cacheStream)
+        {
+            var output = new List<object>();
+            var shapeToNodeIndexMap = new Dictionary<int, int>();
+
+            // Group triangles by their material index
+            var groups = jms.Triangles.GroupBy(tri => tri.MaterialIndex);
+
+            foreach (var group in groups)
+            {
+                var allVertices = new List<RealPoint3d>();
+
+                var firstTriangle = group.First();
+                var firstVertexIndex = firstTriangle.VertexIndices[0];
+                var firstNodeSet = jms.Vertices[firstVertexIndex].NodeSets.FirstOrDefault();
+                var nodeIndex = firstNodeSet != null ? firstNodeSet.NodeIndex : -1;
+                shapeToNodeIndexMap[output.Count] = nodeIndex;
+
+                // Collect all vertices from all triangles in the current group
+                foreach (var triangle in group)
+                {
+                    foreach (var vertexIndex in triangle.VertexIndices)
+                    {
+                        var vertex = jms.Vertices[vertexIndex].Position;
+
+                        // Apply node transformations
+                        var transformedVertex = ApplyInverseTranslation(vertex, jms.Nodes[nodeIndex].Position);
+                        transformedVertex = ApplyInverseRotation(transformedVertex, jms.Nodes[nodeIndex].Rotation);
+
+                        allVertices.Add(transformedVertex);
+                    }
+                }
+
+                // Remove duplicate vertices and scale down by 100
+                allVertices = allVertices.Distinct().Select(v => new RealPoint3d(v.X / 100, v.Y / 100, v.Z / 100)).ToList();
+
+                // Calculate planes, centroid, and extents for the entire polyhedron
+                // Adjust these methods to work with the aggregated vertices
+                var planes = allVertices.Select(v => CalculatePlane(allVertices)).Distinct().ToList();
+                var centroid = CalculateCentroid(allVertices);
+                var extents = CalculateExtents(allVertices);
+
+                // Create a single polyhedron for the current material group
+                var serializedPolyhedron = new
+                {
+                    Type = "Polyhedron",
+                    Data = new
+                    {
+                        Planes = planes.Select(p => new List<float> { p.Item1.I, p.Item1.J, p.Item1.K, p.Item2 }).ToList(),
+                        Vertices = allVertices.Select(v => new List<float> { v.X, v.Y, v.Z }).ToList(),
+                        Center = centroid,
+                        Extents = extents,
+                        Mass = 100, // Placeholder value
+                        Friction = 0.85f, // Placeholder value
+                        Restitution = 0.3f // Placeholder value
+                    }
+                };
+
+                output.Add(serializedPolyhedron);
+            }
+
+            // Convert the polyhedra list to a JSON string
+            string jsonString = JsonConvert.SerializeObject(output, Formatting.Indented);
+
+            // Assuming ParseFromFile has been adjusted to accept a JSON string
+            // Replace ParseFromFile with your method capable of processing JSON string
+            ParseFromFile(jsonString, false, jms, cache, cacheStream, shapeToNodeIndexMap);
+            return true;
+        }
+
+        public RealPoint3d ApplyInverseTranslation(RealPoint3d point, RealVector3d translation)
+        {
+            return new RealPoint3d(point.X - translation.I, point.Y - translation.J, point.Z - translation.K);
+        }
+
+        public RealPoint3d ApplyInverseRotation(RealPoint3d point, RealQuaternion rotation)
+        {
+            // Convert RealPoint3d to Vector3
+            var v = new Vector3(point.X, point.Y, point.Z);
+
+            // Convert RealQuaternion to Quaternion and then get its conjugate (inverse)
+            var q = new Quaternion(rotation.I, rotation.J, rotation.K, rotation.W);
+            var qConjugate = Quaternion.Conjugate(q);
+
+            // Apply the conjugate rotation to the vector
+            v = Vector3.Transform(v, qConjugate);
+
+            // Convert back to RealPoint3d
+            return new RealPoint3d(v.X, v.Y, v.Z);
+        }
+
+        private (RealVector3d, float) CalculatePlane(List<RealPoint3d> vertices)
+        {
+            if (vertices.Count < 3)
+                throw new ArgumentException("Need at least three vertices to calculate a plane.");
+
+            // Convert RealPoint3d to Vector3 for easier calculations
+            var p0 = new Vector3(vertices[0].X, vertices[0].Y, vertices[0].Z);
+            var p1 = new Vector3(vertices[1].X, vertices[1].Y, vertices[1].Z);
+            var p2 = new Vector3(vertices[2].X, vertices[2].Y, vertices[2].Z);
+
+            // Calculate vectors from the points
+            var v1 = Vector3.Subtract(p1, p0);
+            var v2 = Vector3.Subtract(p2, p0);
+
+            // Calculate the cross product of the vectors to get the normal to the plane
+            var normal = Vector3.Cross(v1, v2);
+            normal = Vector3.Normalize(normal);
+
+            // Calculate D (distance from origin to the plane along the normal)
+            // using the formula D = - (Nx * Px + Ny * Py + Nz * Pz)
+            var d = -(normal.X * p0.X + normal.Y * p0.Y + normal.Z * p0.Z);
+
+            // Convert back to RealVector3d for the normal
+            var normalRv3d = new RealVector3d(normal.X, normal.Y, normal.Z);
+
+            return (normalRv3d, d);
+        }
+
+        public List<float> CalculateCentroid(List<RealPoint3d> vertices)
+        {
+            var centroid = new RealPoint3d(
+                vertices.Average(vertex => vertex.X),
+                vertices.Average(vertex => vertex.Y),
+                vertices.Average(vertex => vertex.Z));
+
+            // Return as a list of floats
+            return new List<float> { centroid.X, centroid.Y, centroid.Z };
+        }
+
+        public List<float> CalculateExtents(List<RealPoint3d> vertices)
+        {
+            // Calculate AABB
+            float minX = vertices.Min(v => v.X);
+            float maxX = vertices.Max(v => v.X);
+            float minY = vertices.Min(v => v.Y);
+            float maxY = vertices.Max(v => v.Y);
+            float minZ = vertices.Min(v => v.Z);
+            float maxZ = vertices.Max(v => v.Z);
+
+            // Calculate half-extents
+            float halfExtentX = (maxX - minX) / 2.0f;
+            float halfExtentY = (maxY - minY) / 2.0f;
+            float halfExtentZ = (maxZ - minZ) / 2.0f;
+
+            // Return as a list of floats
+            return new List<float> { halfExtentX, halfExtentY, halfExtentZ };
+        }
+
+        public bool ParseFromFile(string fname, bool mopps, JmsFormat jms, GameCacheHaloOnlineBase cache, Stream cacheStream, Dictionary<int, int> shapeToNodeIndexMap)
         {
             BlenderPhmoReader reader = new BlenderPhmoReader(fname);
             fileStruct = reader.ReadFile();
             if (fileStruct == null)
             {
-                new TagToolError(CommandError.CustomError, "Could not parse file!");
-                return false;
+                fileStruct = reader.ReadString();
+                if (fileStruct == null)
+                {
+                    new TagToolError(CommandError.CustomError, "Could not parse file!");
+                    return false;
+                }
             }
+
+            // deserialize globals tag
+            cache.TagCacheGenHO.TryGetTag("globals\\globals.globals", out CachedTag globals);
+            Globals globalsInstance = cache.Deserialize<Globals>(cacheStream, globals);
 
             //create a rigidbody for the phmo
             var defaultRigidBody = new PhysicsModel.RigidBody
@@ -75,9 +235,62 @@ namespace TagTool.Geometry
 
                 int amountAdded = 0;
 
+                // parse the jms regions if it exists
+                Dictionary<string, int> regionNameToIndex = new Dictionary<string, int>();
+                Dictionary<string, int> permutationNameToIndex = new Dictionary<string, int>();
+
+                _phmo.Regions = new List<PhysicsModel.Region>();
+                _phmo.Materials = new List<PhysicsModel.Material>();
+
+                if (jms != null)
+                {
+                    // Step 1: Parse material names to extract region and permutation information
+                    foreach (var material in jms.Materials)
+                    {
+                        var parts = material.MaterialName.Split(' ');
+                        if (parts.Length >= 3)
+                        {
+                            var permutationName = parts[1];
+                            var regionName = parts[2];
+
+                            if (!regionNameToIndex.ContainsKey(regionName))
+                            {
+                                var region = new PhysicsModel.Region
+                                {
+                                    Name = cache.StringTable.GetStringId(regionName),
+                                    Permutations = new List<PhysicsModel.Region.Permutation>()
+                                };
+                                _phmo.Regions.Add(region);
+                                regionNameToIndex[regionName] = _phmo.Regions.Count - 1;
+                            }
+
+                            if (!permutationNameToIndex.ContainsKey(permutationName))
+                            {
+                                var permutation = new PhysicsModel.Region.Permutation
+                                {
+                                    Name = cache.StringTable.GetStringId(permutationName)
+                                };
+                                _phmo.Regions[regionNameToIndex[regionName]].Permutations.Add(permutation);
+                                permutationNameToIndex[permutationName] = _phmo.Regions[regionNameToIndex[regionName]].Permutations.Count - 1;
+                            }
+                        }
+                        _phmo.Materials = new List<PhysicsModel.Material>();
+                        var phmoMaterial = new PhysicsModel.Material
+                        {
+                            Name = cache.StringTable.GetStringId(material.Name),
+                            MaterialName = cache.StringTable.GetStringId(material.Name),
+                            PhantomType = -1
+                        };
+                        _phmo.Materials.Add(phmoMaterial);
+                    }
+                }
+
+                int listelemIndex = -1;
                 foreach (JSONNode listelem in shapedefs)
                 {
-                    BlamShapeType typeAdded = AddShape(_phmo, listelem);
+                    listelemIndex++;
+                    int nodeIndex = shapeToNodeIndexMap[listelemIndex];
+                    BlamShapeType typeAdded = AddShape(_phmo, listelem, globalsInstance, cache);
                     if (typeAdded == BlamShapeType.TriangleMesh)
                     {
                         new TagToolError(CommandError.CustomError, "Failed to load shape!");
@@ -87,7 +300,7 @@ namespace TagTool.Geometry
                     var shapeElem = new PhysicsModel.ListShape
                     {
                         //assumes the shape added should be at the end of the respected list.
-                        Shape = new HavokShapeReference(typeAdded, (short)(GetNumberOfShapes(_phmo, typeAdded) - 1))
+                        Shape = new Havok.HavokShapeReference(typeAdded, (short)(GetNumberOfShapes(_phmo, typeAdded) - 1))
                     };
 
                     _phmo.ListShapes.Add(shapeElem);
@@ -95,21 +308,100 @@ namespace TagTool.Geometry
                     if (!mopps)
                     {
                         var lastPoly = _phmo.Polyhedra[_phmo.Polyhedra.Count - 1];
+                        var materialName = jms.Materials[lastPoly.MaterialIndex].MaterialName;
+                        var parts = materialName.Split(' ');
+                        short regionIndex = -1, permutationIndex = -1;
+                        if (parts.Length >= 3)
+                        {
+                            var permutationName = parts[1];
+                            var regionName = parts[2];
+                            regionIndex = regionNameToIndex.ContainsKey(regionName) ? (short)regionNameToIndex[regionName] : (short)-1;
+                            permutationIndex = permutationNameToIndex.ContainsKey(permutationName) ? (short)permutationNameToIndex[permutationName] : (short)-1;
+                        }
                         var i = lastPoly.AabbCenter.I;
                         var j = lastPoly.AabbCenter.J;
                         var k = lastPoly.AabbCenter.K;
 
+                        double maxDistance = 0;
+                        for (int l = 0; l < _phmo.PolyhedronFourVectors.Count; l++)
+                        {
+                            for (int m = l + 1; m < _phmo.PolyhedronFourVectors.Count; m++)
+                            {
+                                double distance = CalculateDistance(_phmo.PolyhedronFourVectors[l], _phmo.PolyhedronFourVectors[m]);
+                                if (distance > maxDistance)
+                                {
+                                    maxDistance = distance;
+                                }
+                            }
+                        }
+
+                        // calculate inertia tensor based on aab half extents
+                        var hx = lastPoly.AabbHalfExtents.I;
+                        var hy = lastPoly.AabbHalfExtents.J;
+                        var hz = lastPoly.AabbHalfExtents.K;
+                        var cx = lastPoly.AabbCenter.I;
+                        var cy = lastPoly.AabbCenter.J;
+                        var cz = lastPoly.AabbCenter.K;
+                        float mass = lastPoly.Mass;
+
+                        // Calculate original inertia tensor at origin
+                        float Ixx = (1.0f / 12.0f) * mass * (hy * hy + hz * hz);
+                        float Iyy = (1.0f / 12.0f) * mass * (hx * hx + hz * hz);
+                        float Izz = (1.0f / 12.0f) * mass * (hx * hx + hy * hy);
+
+                        // Apply parallel axis theorem to shift inertia tensor to actual center of mass
+                        float IxxShifted = Ixx + mass * (cy * cy + cz * cz);
+                        float IyyShifted = Iyy + mass * (cx * cx + cz * cz);
+                        float IzzShifted = Izz + mass * (cx * cx + cy * cy);
+
+                        var shapeIndex = (short)(GetNumberOfShapes(_phmo, typeAdded) - 1);
+                        var polyMaterialIndex = _phmo.Polyhedra[shapeIndex].MaterialIndex;
+
+                        var (friction, restitution, density) = GetMaterialProperties(globalsInstance, materialName, cache);
+
                         PhysicsModel.RigidBody shapeRigidBody = new PhysicsModel.RigidBody
                         {
-                            Node = -1,  //this will have to be set manually.
+                            Node = (short)nodeIndex,
+                            Region = regionIndex,
+                            Permutation = permutationIndex,
                             Mass = lastPoly.Mass, //probably not important
                             CenterOfMass = new RealVector3d(i, j, k), //use center from corresponding polyhedron
                             ShapeType = typeAdded,
-                            ShapeIndex = (short)(GetNumberOfShapes(_phmo, typeAdded) - 1), //important
-                            MotionType = PhysicsModel.RigidBody.MotionTypeValue.Box // box by default.
+                            ShapeIndex = shapeIndex, //important
+                            MotionType = PhysicsModel.RigidBody.MotionTypeValue.Box, // box by default.
+                            BoundingSphereRadius = (float)(maxDistance / 2.0),
+                            NoPhantomPowerAltRigidBody = -1,
+                            InertiaTensorScale = 1,
+                            AngularDampening = 1 - restitution,
+                            InertiaTensorX = new RealVector3d(IxxShifted, 0, 0),
+                            InertiaTensorY = new RealVector3d(0, IyyShifted, 0),
+                            InertiaTensorZ = new RealVector3d(0, 0, IzzShifted),
                         };
-
                         _phmo.RigidBodies.Add(shapeRigidBody);
+                        int rigidBodyIndex = _phmo.RigidBodies.Count - 1; // Get the index of the newly added rigid body
+
+                        // Ensure the region and permutation exist
+                        if (regionIndex >= 0 && regionIndex < _phmo.Regions.Count)
+                        {
+                            var region = _phmo.Regions[regionIndex];
+                            if (permutationIndex >= 0 && permutationIndex < region.Permutations.Count)
+                            {
+                                var permutation = region.Permutations[permutationIndex];
+
+                                // Initialize the RigidBodies list if it's null
+                                if (permutation.RigidBodies == null)
+                                {
+                                    permutation.RigidBodies = new List<PhysicsModel.Region.Permutation.RigidBody>();
+                                }
+
+                                // Add a new RigidBodyReference to the permutation's list of rigid bodies
+                                var rigidBodyRef = new PhysicsModel.Region.Permutation.RigidBody
+                                {
+                                    RigidBodyIndex = (short)rigidBodyIndex
+                                };
+                                permutation.RigidBodies.Add(rigidBodyRef);
+                            }
+                        }
                     }
 
                     PhysicsModel.Node node = new PhysicsModel.Node
@@ -146,7 +438,7 @@ namespace TagTool.Geometry
                     {
                         ReferencedObject = new HkpReferencedObject { ReferenceCount = 0x80 },
                         Type = 27,
-                        Child = new HkpSingleShapeContainer { Shape = new HavokShapeReference { Type = BlamShapeType.List, Index = 0 } }
+                        Child = new HkpSingleShapeContainer { Shape = new Havok.HavokShapeReference { Type = BlamShapeType.List, Index = 0 } }
                     };
 
                     _phmo.MoppData = moppCodeBlockStream.ToArray();
@@ -164,8 +456,10 @@ namespace TagTool.Geometry
         /// </summary>
         /// <param name="phmo">the tag to add the shape to</param> 
         /// <param name="n">the json node from which to parse the shape description.</param>
+        /// <param name="globals">the globals tag from which we can calculate mass and stuff</param>
+        /// <param name="cache">the cache reference for deserializing the globals tag</param>
         /// <returns>shape type added, 'Unused0' is used to represent failure.</returns>
-        private BlamShapeType AddShape(PhysicsModel phmo, JSONNode n)
+        private BlamShapeType AddShape(PhysicsModel phmo, JSONNode n, Globals globals, GameCacheHaloOnlineBase cache)
         {
             if (n == null)
             {
@@ -177,7 +471,7 @@ namespace TagTool.Geometry
             switch (n["Type"])
             {
                 case "Polyhedron":
-                    return AddPolyhedron(phmo, n["Data"]) ? BlamShapeType.Polyhedron : BlamShapeType.TriangleMesh;
+                    return AddPolyhedron(phmo, n["Data"], globals, cache) ? BlamShapeType.Polyhedron : BlamShapeType.TriangleMesh;
                 default:
                     return BlamShapeType.TriangleMesh;
             }
@@ -211,7 +505,21 @@ namespace TagTool.Geometry
             }
         }
 
-        private bool AddPolyhedron(PhysicsModel phmo, JSONNode n)
+        public (float friction, float restitution, float density) GetMaterialProperties(Globals globals, string materialName, GameCacheHaloOnlineBase cache)
+        {
+            foreach (var material in globals.Materials)
+            {
+                if (cache.StringTable.GetString(material.Name).Equals(materialName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (material.Friction, material.Restitution, material.Density);
+                }
+            }
+
+            // Default values if not found
+            return (0.85f, 0.3f, 2500f);
+        }
+
+        private bool AddPolyhedron(PhysicsModel phmo, JSONNode n, Globals globals, GameCacheHaloOnlineBase cache)
         {
             if (n == null)
                 return false;
@@ -219,12 +527,12 @@ namespace TagTool.Geometry
             //In the control flow, it could have been possible to have
             // no polyhedra up to this point.
             if (phmo.Polyhedra == null)
-                phmo.Polyhedra = new List<PhysicsModel.Polyhedron>();
+                phmo.Polyhedra = new List<Polyhedron>();
 
             int index = phmo.Polyhedra.Count;
-            PhysicsModel.Polyhedron poly = new PhysicsModel.Polyhedron();
+            Polyhedron poly = new Polyhedron();
 
-            float friction, mass, restitution;
+            float friction, mass, restitution, density;
             int polyListOffset = phmo.Polyhedra.Count; //the index this polyhedron will be put into.
 
             bool fault = false;
@@ -237,16 +545,19 @@ namespace TagTool.Geometry
                     Console.WriteLine("Polyhedra {0} had no \"{1}\" attribute.", polyListOffset, attr);
                 }
             }
-
             if (fault)
                 return false;
 
-            friction = n["Friction"].AsFloat;
-            mass = n["Mass"].AsFloat;
-            restitution = n["Restitution"].AsFloat;
+            var materialIndex = poly.MaterialIndex;
+            var materialName = cache.StringTable.GetString(phmo.Materials[materialIndex].MaterialName);
+            (friction, restitution, density) = GetMaterialProperties(globals, materialName, cache);
 
             var center = n["Center"].AsArray;
             var extents = n["Extents"].AsArray;
+
+            float volume = 8 * extents[0].AsFloat * extents[1].AsFloat * extents[2].AsFloat;
+
+            mass = density * volume;
 
             int nPlanes = AddManyPlanes(phmo, n["Planes"]);
 
@@ -297,7 +608,7 @@ namespace TagTool.Geometry
             poly.PlaneEquationsCapacity = (uint)(0x80000000 + nPlanes); //
             poly.RuntimeMaterialType = 0;
             //A possible improvement could be to calculate this
-            poly.Volume = 0.1f;
+            poly.Volume = volume;
 
             phmo.Polyhedra.Add(poly);
 

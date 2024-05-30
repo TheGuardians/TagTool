@@ -27,7 +27,7 @@ namespace TagTool.Tags.Definitions
 		public float ReverbDelay; // [0-1] seconds
 		public float Diffusion;
 		public float Density;
-		public float HighFrequencyRefrence; // [20-20000] Hz
+		public float HighFrequencyReference; // [20-20000] Hz
 
 		[TagField(Length = 16, Flags = Padding, MaxVersion = CacheVersion.HaloOnline700123)]
 		public byte[] Padding2;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Commands.Common;
@@ -6,6 +7,8 @@ using TagTool.Common;
 using TagTool.Damage;
 using TagTool.Tags.Definitions;
 using static TagTool.Tags.Definitions.Model;
+using static TagTool.Tags.Definitions.Model.GlobalDamageInfoBlock;
+using static TagTool.Tags.Definitions.Model.GlobalDamageInfoBlock.DamageSection;
 
 namespace TagTool.Commands.Porting
 {
@@ -124,25 +127,25 @@ namespace TagTool.Commands.Porting
                 ShieldDamagedEffect = null,
                 ShieldDepletedEffect = null,
                 ShieldRechargingEffect = null,
-                DamageSections = new System.Collections.Generic.List<GlobalDamageInfoBlock.DamageSection>(),
-                Nodes = new System.Collections.Generic.List<GlobalDamageInfoBlock.Node>(),
+                DamageSections = new List<DamageSection>(),
+                Nodes = new List<GlobalDamageInfoBlock.Node>(),
                 GlobalShieldMaterialIndex = -1,
                 GlobalIndirectMaterialIndex = -1,
                 RuntimeShieldRechargeVelocity = 0.0f,
                 RuntimeOverchargeVelocity = 0.0f,
                 RuntimeHealthRechargeVelocity = 0.0f,
-                DamageSeats = new System.Collections.Generic.List<GlobalDamageInfoBlock.DamageSeat>(),
-                DamageConstraints = new System.Collections.Generic.List<GlobalDamageInfoBlock.DamageConstraint>()
+                DamageSeats = new List<DamageSeat>(),
+                DamageConstraints = new List<DamageConstraint>()
             };
 
             foreach(var section in damageInfo.DamageSections)
             {
-                var newSection = new GlobalDamageInfoBlock.DamageSection()
+                var newSection = new DamageSection()
                 {
                     Name = section.Name,
-                    Flags = section.Flags.ConvertLexical < GlobalDamageInfoBlock.DamageSection.FlagsValue>(),
+                    Flags = section.Flags.ConvertLexical<DamageSection.FlagsValue>(),
                     VitalityPercentage = section.VitalityPercentage,
-                    InstantResponses = new System.Collections.Generic.List<GlobalDamageInfoBlock.DamageSection.InstantResponse>(),
+                    InstantResponses = new List<InstantResponse>(),
                     StunTime = section.StunTime,
                     RechargeTime = section.RechargeTime,
                     RuntimeRechargeVelocity = section.RuntimeRechargeVelocity,
@@ -152,12 +155,12 @@ namespace TagTool.Commands.Porting
 
                 foreach(var instantResponse in section.InstantResponses)
                 {
-                    var newInstantResponse = new GlobalDamageInfoBlock.DamageSection.InstantResponse()
+                    var newInstantResponse = new InstantResponse()
                     {
-                        ResponseType = GlobalDamageInfoBlock.DamageSection.InstantResponse.ResponseTypeValue.RecievesAllDamage,
-                        ConstraintDamageType = GlobalDamageInfoBlock.DamageSection.InstantResponse.ConstraintDamageTypeValue.None,
-                        Trigger = StringId.Invalid,
-                        Flags = instantResponse.Flags.ConvertLexical<GlobalDamageInfoBlock.DamageSection.InstantResponse.FlagsValue>(),
+                        ResponseType = InstantResponse.ResponseTypeValue.RecievesAllDamage,
+                        ConstraintDamageType = InstantResponse.ConstraintDamageTypeValue.None,
+                        ConstraintGroupName = StringId.Invalid,
+                        Flags = instantResponse.Flags.ConvertLexical<InstantResponse.FlagsValue>(),
                         DamageThreshold = instantResponse.DamageThreshold,
                         BodyThresholdFlags = 0,
                         BodyDamageThreshold = instantResponse.DamageThreshold,
@@ -165,13 +168,13 @@ namespace TagTool.Commands.Porting
                         SecondaryTransitionEffect = instantResponse.SpecificTransitionEffect,
                         TransitionDamageEffect = instantResponse.TransitionDamageEffect,
                         Region = StringId.Invalid,
-                        NewState = GlobalDamageInfoBlock.DamageSection.InstantResponse.NewStateValue.Default,
+                        NewState = InstantResponse.NewStateValue.Default,
                         RuntimeRegionIndex = -1,
                         SecondaryRegion = StringId.Invalid,
-                        SecondaryNewState = GlobalDamageInfoBlock.DamageSection.InstantResponse.NewStateValue.Default,
+                        SecondaryNewState = InstantResponse.NewStateValue.Default,
                         SecondaryRuntimeRegionIndex = -1,
                         DestroyInstanceGroup = instantResponse.DestroyInstanceGroupIndex,
-                        CustomResponseBehavior = instantResponse.CustomResponseBehavior.ConvertLexical <GlobalDamageInfoBlock.DamageSection.InstantResponse .CustomResponseBehaviorValue>(),
+                        CustomResponseBehavior = instantResponse.CustomResponseBehavior.ConvertLexical <InstantResponse.CustomResponseBehaviorValue>(),
                         CustomResponseLabel = instantResponse.CustomResponseLabel,
                         EffectMarkerName = instantResponse.GenericEffectMarker,
                         DamageEffectMarkerName = instantResponse.DamageEffectMarkerName,
@@ -201,13 +204,13 @@ namespace TagTool.Commands.Porting
 
             foreach (var constraint in damageInfo.DamageConstraints)
             {
-                var newConstraint = new GlobalDamageInfoBlock.DamageConstraint()
+                var newConstraint = new DamageConstraint()
                 {
                     PhysicsModelConstraintName = constraint.PhysicsModelConstraintName,
                     DamageConstraintName = constraint.DamageConstraintName,
                     DamageConstraintGroupName = constraint.DamageConstraintGroupName,
                     GroupProbabilityScale = constraint.GroupProbabilityScale,
-                    Type = constraint.Type.ConvertLexical<GlobalDamageInfoBlock.DamageConstraint.TypeValue>(),
+                    Type = constraint.Type.ConvertLexical<DamageConstraint.TypeValue>(),
                     Index = constraint.Index
                 };
                 result.DamageConstraints.Add(newConstraint);

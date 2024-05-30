@@ -67,20 +67,27 @@ namespace TagTool.Commands.Sounds
             else
                 return new TagToolError(CommandError.ArgCount);
 
-            if (!Directory.Exists(outDirectory))
+            bool createDir = !Directory.Exists(outDirectory);
+            if (createDir && args.Count > 0)
             {
+                if (args.Count == 0)
+                    Directory.CreateDirectory(outDirectory);
+
                 Console.Write("Destination directory does not exist. Create it? [y/n] ");
                 var answer = Console.ReadLine().ToLower();
 
                 if (answer.Length == 0 || !(answer.StartsWith("y") || answer.StartsWith("n")))
                     return new TagToolError(CommandError.YesNoSyntax);
 
-                if (answer.StartsWith("y"))
-                    Directory.CreateDirectory(outDirectory);
-                else
+                if (!answer.StartsWith("y"))
+                {
+                    Console.WriteLine("Aborted.");
                     return true;
+                }
             }
 
+            if(createDir)
+                Directory.CreateDirectory(outDirectory);
 
             byte[] soundData = null;
             if (Cache.Platform != CachePlatform.MCC)
@@ -216,8 +223,8 @@ namespace TagTool.Commands.Sounds
 
         private string GetExportFileName(Compression targetFormat, int pitchRangeIndex, int permutationIndex)
         {
-            string extension = AudioUtils.GetFormtFileExtension(targetFormat);
-            return $"{Tag.ToString().Replace('\\', '_')}_{pitchRangeIndex}_{permutationIndex}.{extension}";
+            string extension = AudioUtils.GetFormatFileExtension(targetFormat);
+            return $"{Tag.Name.Replace('\\', '~')}%{pitchRangeIndex}_{permutationIndex}.{extension}";
         }
     }
 }

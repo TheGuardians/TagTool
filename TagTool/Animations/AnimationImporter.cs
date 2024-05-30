@@ -13,7 +13,8 @@ using TagTool.Tags.Resources;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
 using System.Numerics;
-using Assimp;
+using System.Text.RegularExpressions;
+using static TagTool.Animations.AnimationDefaultNodeHelper;
 
 namespace TagTool.Animations
 {
@@ -34,36 +35,6 @@ namespace TagTool.Animations
         private List<MovementDataDxDyDzDyaw> MovementData = new List<MovementDataDxDyDzDyaw>();
         public ModelAnimationTagResource.GroupMemberMovementDataType MovementDataType;
         public bool ScaleFix = false;
-
-        public bool AssimpImport(string fileName)
-        {
-            //import the mesh and get the vertices and indices
-            Scene model;
-            using (var importer = new AssimpContext())
-            {
-                using (var logStream = new LogStream((msg, userData) => Console.Write(msg)))
-                {
-                    logStream.Attach();
-                    model = importer.ImportFile(fileName);
-                    logStream.Detach();
-                }
-            }
-
-            if (model.HasAnimations && model.Animations[0].HasNodeAnimations)
-            {
-                foreach (var modelnode in model.Animations[0].NodeAnimationChannels)
-                {
-                    List<AnimationFrame> NodeFrames = new List<AnimationFrame>();
-                }
-            }
-            else
-            {
-                new TagToolError(CommandError.CustomError, "Model has no animations!");
-                return false;
-            }
-            return true;
-        }
-
         public bool Import(string fileName)
         {
             using (FileStream textStream = (FileStream)File.OpenRead(fileName))
@@ -226,8 +197,17 @@ namespace TagTool.Animations
             return true;
         }
 
-        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, ModelAnimationGraph.FrameType AnimationType, ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType)
+        public void ProcessNodeFrames(GameCacheHaloOnlineBase CacheContext, ModelAnimationGraph Animation, ModelAnimationGraph.FrameType AnimationType, ModelAnimationTagResource.GroupMemberMovementDataType FrameInfoType)
         {
+            List<Node> defaultNodes = GetNodeDefaultValues(CacheContext, Animation);
+            for (var i = 0; i < defaultNodes.Count; i++)
+            {
+                AnimationNodes[i].DefaultTranslation = defaultNodes[i].Translation;
+                System.Numerics.Quaternion d = defaultNodes[i].Rotation;
+                AnimationNodes[i].DefaultRotation = new RealQuaternion(d.X, d.Y, d.Z, d.W);
+                AnimationNodes[i].DefaultScale = defaultNodes[i].Scale;
+            }
+
             //if the animation is of the overlay type, remove the base frame and subtract it from all other frames
             if (AnimationType == ModelAnimationGraph.FrameType.Overlay)
                 SetBaseRemoveOverlay();
@@ -590,45 +570,91 @@ namespace TagTool.Animations
 
         public void HandleMovementData()
         {
-            switch (MovementDataType)
+            //extract data only from the first (root) node
+            //data collection starts at the end of the frames, moving backwards to the beginning
+            for (int frame_index = AnimationNodes[0].Frames.Count - 1; frame_index > 0; frame_index--)
             {
-                //TODO: add better handling for more complex movement data types
-                case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy:
-                case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
-                case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
-                    //extract data only from the first (root) node
-                    //data collection starts at the end of the frames, moving backwards to the beginning
-                    for (int frame_index = AnimationNodes[0].Frames.Count - 1; frame_index > 0; frame_index--)
+                AnimationFrame CurrentFrame = AnimationNodes[0].Frames[frame_index - 1];
+                AnimationFrame NextFrame = AnimationNodes[0].Frames[frame_index];
+                AnimationFrame FirstFrame = AnimationNodes[0].Frames[0];
+
+                RealQuaternion conjugate = new RealQuaternion(CurrentFrame.Rotation.IJK, CurrentFrame.Rotation.W * -1);
+                RealQuaternion diff = QuaternionCrossProduct(NextFrame.Rotation, conjugate);
+
+                MovementDataDxDyDzDyaw MovementFrame =
+                    new MovementDataDxDyDzDyaw
                     {
-                        AnimationFrame CurrentFrame = AnimationNodes[0].Frames[frame_index - 1];
-                        AnimationFrame NextFrame = AnimationNodes[0].Frames[frame_index];
-                        AnimationFrame FirstFrame = AnimationNodes[0].Frames[0];
+                        X = NextFrame.Translation.X - CurrentFrame.Translation.X,
+                        Y = NextFrame.Translation.Y - CurrentFrame.Translation.Y,
+                        Z = NextFrame.Translation.Z - CurrentFrame.Translation.Z,
+                        W = RealQuaternionToEuler(diff).YawValue
+                    };
 
-                        //don't include z axis for basic movement data
-                        MovementDataDxDyDzDyaw MovementFrame =
-                            new MovementDataDxDyDzDyaw
-                            {
-                                X = NextFrame.Translation.X - CurrentFrame.Translation.X,
-                                Y = NextFrame.Translation.Y - CurrentFrame.Translation.Y
-                            };
+                //set 'nextframe' data to be equivalent to that of the first frame
+                if(MovementDataType != ModelAnimationTagResource.GroupMemberMovementDataType.None)
+                {
+                    AnimationNodes[0].Frames[frame_index].Translation.X = FirstFrame.Translation.X;
+                    AnimationNodes[0].Frames[frame_index].Translation.Y = FirstFrame.Translation.Y;
+                    if (MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw)
+                        AnimationNodes[0].Frames[frame_index].Translation.Z = FirstFrame.Translation.Z;
+                    if (MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw ||
+                        MovementDataType == ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw)
+                        AnimationNodes[0].Frames[frame_index].Rotation = FirstFrame.Rotation;
+                }
 
-                        //set 'nextframe' translation to be equivalent to that of the first frame
-                        AnimationNodes[0].Frames[frame_index].Translation = FirstFrame.Translation;
-
-                        //since we are moving backwards, insert the movementframe at the beginning of the list
-                        MovementData.Insert(0, MovementFrame);
-                    }
-
-                    //add an extra frame for the transition from the resting position
-                    MovementData.Insert(0, new MovementDataDxDyDzDyaw
-                    {
-                        X = AnimationNodes[0].Frames[0].Translation.X - AnimationNodes[0].DefaultTranslation.X,
-                        Y = AnimationNodes[0].Frames[0].Translation.Y - AnimationNodes[0].DefaultTranslation.Y
-                    });
-                    return;
-                default:
-                    return;
+                //since we are moving backwards, insert the movementframe at the beginning of the list
+                MovementData.Insert(0, MovementFrame);
             }
+
+            //TODO: fix yaw value for first transitional frame and add it
+            //RealQuaternion restingconjugate = new RealQuaternion(AnimationNodes[0].DefaultRotation.IJK, AnimationNodes[0].DefaultRotation.W * -1);
+            //RealQuaternion restingdiff = QuaternionCrossProduct(AnimationNodes[0].Frames[0].Rotation, restingconjugate);
+
+            //add an extra frame for the transition from the resting position
+            MovementData.Insert(0, new MovementDataDxDyDzDyaw
+            {
+                X = AnimationNodes[0].Frames[0].Translation.X - AnimationNodes[0].DefaultTranslation.X,
+                Y = AnimationNodes[0].Frames[0].Translation.Y - AnimationNodes[0].DefaultTranslation.Y,
+                Z = AnimationNodes[0].Frames[0].Translation.Z - AnimationNodes[0].DefaultTranslation.Z,
+            });
+            return;
+        }
+
+        private RealQuaternion QuaternionCrossProduct(RealQuaternion quaternion_A, RealQuaternion quaternion_B)
+        {
+            float I = (((quaternion_A.I * quaternion_B.W) + (quaternion_A.W * quaternion_B.I))
+                                  + (quaternion_B.K * quaternion_A.J))
+                                 - (quaternion_B.J * quaternion_A.K);
+            float J = (((quaternion_A.W * quaternion_B.J) + (quaternion_A.J * quaternion_B.W))
+                                  + (quaternion_A.K * quaternion_B.I))
+                                 - (quaternion_B.K * quaternion_A.I);
+            float K = (((quaternion_A.W * quaternion_B.K) + (quaternion_A.K * quaternion_B.W))
+                                  + (quaternion_B.J * quaternion_A.I))
+                                 - (quaternion_A.J * quaternion_B.I);
+            float W = (((quaternion_A.W * quaternion_B.W) - (quaternion_A.I * quaternion_B.I))
+                                  - (quaternion_B.J * quaternion_A.J))
+                                 - (quaternion_B.K * quaternion_A.K);
+            return new RealQuaternion(I, J, K, W);
+        }
+
+        private RealEulerAngles3d RealQuaternionToEuler(RealQuaternion quat)
+        {
+            double Yaw = Math.Atan2(
+               ((quat.J * quat.I) + (quat.K * quat.W)) + ((quat.J * quat.I) + (quat.K * quat.W)),
+               ((quat.I * quat.I - (quat.J * quat.J)) - (quat.K * quat.K)) + (quat.W * quat.W));
+            double Pitch = Math.Atan2(
+                (quat.J * quat.K + quat.W * quat.I) + (quat.J * quat.K + quat.W * quat.I),
+                ((quat.K * quat.K) - (quat.J * quat.J + quat.I * quat.I)) + (quat.W * quat.W));
+            double Roll = 0.0;
+            double v10 = ((quat.J * quat.J + quat.I * quat.I) + (quat.K * quat.K)) + (quat.W * quat.W);
+            if (v10 != 0.0)
+            {
+                double v11 = Math.Max((((quat.I * quat.K) - (quat.J * quat.W)) * -2.0) / v10, -1.0);
+                if (v11 >= 1.0)
+                    v11 = 1.0;
+                Roll = Math.Asin(v11);
+            }
+            return new RealEulerAngles3d(Angle.FromRadians((float)Yaw), Angle.FromRadians((float)Pitch), Angle.FromRadians((float)Roll));
         }
 
         public int SerializeMovementData(GameCacheHaloOnlineBase CacheContext, DataSerializationContext dataContext, MemoryStream stream)
@@ -647,7 +673,7 @@ namespace TagTool.Animations
                     case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw:
                         dataContext.Writer.Write(movementframe.X);
                         dataContext.Writer.Write(movementframe.Y);
-                        dataContext.Writer.Write(movementframe.Z);
+                        dataContext.Writer.Write(movementframe.W);
                         break;
                     case ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw:
                         dataContext.Writer.Write(movementframe.X);
@@ -702,61 +728,6 @@ namespace TagTool.Animations
 
             return Flags;
         }
-
-        public void SetDefaultNodePositions(GameCacheHaloOnlineBase CacheContext, List<string> ModelList)
-        {
-            if (ModelList.Count == 0)
-            {
-                return;
-            }
-
-            //string tagname = @"objects\characters\masterchief\fp\fp";
-            List<string> NoMatchList = new List<string>();
-
-            using (var CacheStream = CacheContext.OpenCacheReadWrite())
-            {
-                for (var node_index = 0; node_index < AnimationNodes.Count; node_index++)
-                {
-                    var matching_index = -1;
-                    foreach (var tagname in ModelList)
-                    {
-                        var mode_tag_ref = CacheContext.TagCacheGenHO.GetTag<RenderModel>(tagname);
-                        var mode_tag = CacheContext.Deserialize<RenderModel>(CacheStream, mode_tag_ref);
-                        var mode_nodes = mode_tag.Nodes;
-
-                        for (var mode_node_index = 0; mode_node_index < mode_nodes.Count; mode_node_index++)
-                        {
-                            if (CacheContext.StringTable.GetString(mode_nodes[mode_node_index].Name) == AnimationNodes[node_index].Name)
-                            {
-                                matching_index = mode_node_index;
-                                AnimationNodes[node_index].DefaultRotation = mode_nodes[mode_node_index].DefaultRotation;
-                                AnimationNodes[node_index].DefaultTranslation = mode_nodes[mode_node_index].DefaultTranslation;
-                                AnimationNodes[node_index].DefaultScale = mode_nodes[mode_node_index].DefaultScale;
-                                break;
-                            }
-                        }
-                        if (matching_index != -1)
-                            break;
-                    }
-                    if (matching_index == -1)
-                        NoMatchList.Add(AnimationNodes[node_index].Name);
-                }
-            }
-            /*
-            if(NoMatchList.Count > 0)
-            {
-                Console.WriteLine("###WARNING: The following node(s) could not be found in the render models provided!");
-                Console.Write(">>>>> ");
-                foreach (var nomatchnode in NoMatchList)
-                {
-                    Console.Write(nomatchnode + ' ');
-                }
-                Console.WriteLine();
-            }
-            */
-
-        }
-
         public void FixupNodeTree(int Version)
         {
             //fixups for newer animation files with only the parent index present

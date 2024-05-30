@@ -6,11 +6,13 @@ using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
+using TagTool.Tags.Definitions.Common;
 using TagTool.IO;
 using TagTool.Serialization;
 using TagTool.Cache.Gen2;
 using System.IO;
 using TagTool.Commands.Common;
+using Gen2Eqip = TagTool.Tags.Definitions.Gen2.Equipment;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -35,7 +37,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Weapon newweapon = new Weapon();
                     AutoConverter.TranslateTagStructure(weapon, newweapon);
                     newweapon.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Weapon };
-                    return FixupWeapon(weapon, newweapon);
+                    return FixupWeapon(weapon, newweapon, cacheStream);
                 case TagTool.Tags.Definitions.Gen2.Vehicle vehicle:
                     Vehicle newvehicle = new Vehicle();
                     AutoConverter.TranslateTagStructure(vehicle, newvehicle);
@@ -59,7 +61,7 @@ namespace TagTool.Commands.Porting.Gen2
                     Equipment newequipment = new Equipment();
                     AutoConverter.TranslateTagStructure(equipment, newequipment);
                     newequipment.ObjectType = new GameObjectType16 { Halo3ODST = GameObjectTypeHalo3ODST.Equipment };
-                    return newequipment;
+                    return FixupEquipment(equipment, newequipment);
                 case TagTool.Tags.Definitions.Gen2.DeviceControl devicecontrol:
                     DeviceControl newdevicecontrol = new DeviceControl();
                     AutoConverter.TranslateTagStructure(devicecontrol, newdevicecontrol);
@@ -75,7 +77,54 @@ namespace TagTool.Commands.Porting.Gen2
             }
         }
 
-        public Weapon FixupWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag, Weapon newweapon)
+        private Equipment FixupEquipment(Gen2Eqip equipment, Equipment newequipment)
+        {
+            MultiplayerObjectType itemType = MultiplayerObjectType.Grenade;
+            short defaultSpawnTime = 15;
+            short defaultAbandonTime = 15;
+
+            switch (equipment.PowerupType)
+            {
+                case Gen2Eqip.PowerupTypeValue.ActiveCamouflage:
+                    {
+                        newequipment.MultiplayerPowerup = new List<Equipment.MultiplayerPowerupBlock>();
+                        newequipment.MultiplayerPowerup.Add(new Equipment.MultiplayerPowerupBlock
+                        {
+                            Flavor = Equipment.MultiplayerPowerupBlock.FlavorValue.BluePowerup
+                        });
+                        defaultSpawnTime = 30;
+                        defaultAbandonTime = 60;
+                        itemType = MultiplayerObjectType.Powerup;
+                    }
+                    newequipment.PickupSound = Cache.TagCache.GetTag<Sound>(@"sound\game_sfx\multiplayer\pickup_invis");
+                    break;
+                case Gen2Eqip.PowerupTypeValue.OverShield:
+                    {
+                        newequipment.MultiplayerPowerup = new List<Equipment.MultiplayerPowerupBlock>();
+                        newequipment.MultiplayerPowerup.Add(new Equipment.MultiplayerPowerupBlock
+                        {
+                            Flavor = Equipment.MultiplayerPowerupBlock.FlavorValue.RedPowerup
+                        });
+                        defaultSpawnTime = 30;
+                        defaultAbandonTime = 60;
+                        itemType = MultiplayerObjectType.Powerup;
+                    }
+                    newequipment.PickupSound = Cache.TagCache.GetTag<Sound>(@"sound\game_sfx\multiplayer\pickup_invis");
+                    break;
+            }
+
+            newequipment.MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>();
+            newequipment.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock
+            {
+                Type = itemType,
+                DefaultSpawnTime = defaultSpawnTime,
+                DefaultAbandonTime = defaultAbandonTime
+            });
+
+            return newequipment;
+        }
+
+        public Weapon FixupWeapon(TagTool.Tags.Definitions.Gen2.Weapon gen2Tag, Weapon newweapon, Stream cacheStream)
         {
             newweapon.FirstPerson = new List<Weapon.FirstPersonBlock>();
             foreach (var firstperson in gen2Tag.PlayerInterface.FirstPerson)
@@ -94,7 +143,25 @@ namespace TagTool.Commands.Porting.Gen2
             });
             newweapon.WeaponFlags = new WeaponFlags();
 
+            newweapon.CenteredFirstPersonWeaponOffset.X = (float)gen2Tag.FirstPersonWeaponOffset.I * 2;
+            newweapon.CenteredFirstPersonWeaponOffset.Y = (float)gen2Tag.FirstPersonWeaponOffset.J;
+            newweapon.CenteredFirstPersonWeaponOffset.Z = (float)gen2Tag.FirstPersonWeaponOffset.K;
+
+            newweapon.FirstPersonWeaponOffset.I = (float)gen2Tag.FirstPersonWeaponOffset.I * 2;
+            newweapon.FirstPersonWeaponOffset.J = (float)gen2Tag.FirstPersonWeaponOffset.J;
+            if (gen2Tag.FirstPersonWeaponOffset.K == 0) { newweapon.FirstPersonWeaponOffset.K = (float)0.02; }
+            if (gen2Tag.FirstPersonWeaponOffset.K != 0) { newweapon.FirstPersonWeaponOffset.K = ((float)gen2Tag.FirstPersonWeaponOffset.K * -2); }
+
+            if (gen2Tag.PlayerInterface.NewHudInterface != null) {
+                newweapon.HudInterface = Cache.TagCacheGenHO.GetTag(gen2Tag.PlayerInterface.NewHudInterface.ToString());
+            }
+
             AutoConverter.TranslateEnum(gen2Tag.WeaponFlags, out newweapon.WeaponFlags.NewFlags, newweapon.WeaponFlags.NewFlags.GetType());
+            AutoConverter.TranslateEnum(gen2Tag.Tracking, out newweapon.Tracking, newweapon.Tracking.GetType());
+            newweapon.SpecialHudVersion = Weapon.SpecialHudVersionValue.DefaultNoOutline2;
+
+            GeneratePhysicsFromCollision(newweapon, cacheStream);
+
             return newweapon;
         }
 
@@ -244,8 +311,8 @@ namespace TagTool.Commands.Porting.Gen2
                                 {
                                     Steering = new Vehicle.VehicleSteeringControl
                                     {
-                                        OverdampenCuspAngle = gen2Tag.OverdampenCuspAngle,
-                                        OverdampenExponent = gen2Tag.OverdampenExponent
+                                        OverdampenCuspAngle = Angle.FromRadians(1.0f),
+                                        OverdampenExponent = 1.0f
                                     },
                                     VelocityControl = new Vehicle.VehicleVelocityControl
                                     {
@@ -258,7 +325,8 @@ namespace TagTool.Commands.Porting.Gen2
                                         SlideAcceleration = gen2Tag.SlideAcceleration,
                                         SlideDeceleration = gen2Tag.SlideDeceleration,
                                     },
-                                    Flags = Vehicle.AlienScoutPhysics.AlienScoutFlags.None, // TODO
+                                    Flags = Vehicle.AlienScoutPhysics.AlienScoutFlags.None,
+                                    SpecificType = (Vehicle.AlienScoutPhysics.AlienScoutSpecificType)gen2Tag.SpecificType,
                                     DragCoefficient = 0.0f,
                                     ConstantDeceleration = 0.0f,
                                     TorqueScale = 1.0f,
@@ -349,29 +417,33 @@ namespace TagTool.Commands.Porting.Gen2
                             };
                     break;
             }
+
+            vehi.MultiplayerObject = new List<GameObject.MultiplayerObjectBlock>();
+            vehi.MultiplayerObject.Add(new GameObject.MultiplayerObjectBlock
+            {
+                Type = TagTool.Tags.Definitions.Common.MultiplayerObjectType.Weapon,
+                SpawnTimerType = TagTool.Tags.Definitions.Common.MultiplayerObjectSpawnTimerType.StartsOnDisturbance
+            });
             return vehi;
         }
 
         public Biped FixupBiped(TagTool.Tags.Definitions.Gen2.Biped gen2Tag, Biped newbiped)
         {
-
-            for (byte i = 0; i < newbiped.Functions.Count; i++)
-            {
-                newbiped.Functions[i].DefaultFunction.Data = gen2Tag.Functions[i].DefaultFunction.Data;
-            }
-
             newbiped.PreferredGunNode = gen2Tag.MoreDamnNodes.PreferredGunNode;
 
-            newbiped.HudInterfaces = new List<Unit.HudInterface>();
-            newbiped.HudInterfaces.Add(new Unit.HudInterface
-            {
-                UnitHudInterface = Cache.TagCache.GetTag(@"ui\chud\spartan.chdt")
-            });
+            if (gen2Tag.NewHudInterfaces.Count > 0 && gen2Tag.NewHudInterfaces[0].NewUnitHudInterface != null) {
+                newbiped.HudInterfaces = new List<Unit.HudInterface> {
+                    new Unit.HudInterface {
+                        UnitHudInterface = Cache.TagCache.GetTag(gen2Tag.NewHudInterfaces[0].NewUnitHudInterface.ToString())
+                    }
+                };
+            }
 
             newbiped.LockonDistance = gen2Tag.LockOnData.LockOnDistance;
             AutoConverter.TranslateEnum(gen2Tag.LockOnData.Flags, out newbiped.LockonFlags, newbiped.LockonFlags.GetType());
-
             newbiped.PhysicsFlags = gen2Tag.Physics.Flags;
+            AutoConverter.TranslateEnum(gen2Tag.Physics.Flags.Halo2, out newbiped.PhysicsFlags.Halo3ODST, newbiped.PhysicsFlags.Halo3ODST.GetType());
+
             newbiped.HeightStanding = gen2Tag.Physics.HeightStanding;
             newbiped.HeightCrouching = gen2Tag.Physics.HeightCrouching;
             newbiped.Radius = gen2Tag.Physics.Radius;
@@ -404,6 +476,25 @@ namespace TagTool.Commands.Porting.Gen2
             AutoConverter.TranslateTagStructure(gen2Tag.Physics.FlyingPhysics, newbiped.BipedFlyingPhysics);
 
             return newbiped;
+        }
+
+        public void GeneratePhysicsFromCollision(Weapon weapon, Stream cacheStream)
+        {
+            if (weapon.Model != null)
+            {
+                Cache.TagCacheGenHO.TryGetTag(weapon.Model.ToString(), out CachedTag weaponModel);
+                Model weaponModelInstance = Cache.Deserialize<Model>(cacheStream, weaponModel);
+                if (weaponModelInstance.CollisionModel != null && weaponModelInstance.PhysicsModel == null)
+                {
+                    Cache.TagCacheGenHO.TryGetTag(weaponModelInstance.CollisionModel.ToString(), out CachedTag weaponCollisionModel);
+                    CollisionModel weaponCollisionModelInstance = Cache.Deserialize<CollisionModel>(cacheStream, weaponCollisionModel);
+
+                    ObjConvexHullProcessor generator = new ObjConvexHullProcessor();
+                    weaponModelInstance.PhysicsModel = generator.ConvertCollisionModelToPhysics(weaponCollisionModelInstance, cacheStream, weaponCollisionModel, Cache);
+
+                    Cache.Serialize(cacheStream, weaponModel, weaponModelInstance);
+                }
+            }
         }
     }
 }

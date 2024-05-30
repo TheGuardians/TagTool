@@ -26,23 +26,23 @@ namespace TagTool.Tags.Definitions.Gen2
         /// <summary>
         /// intensity of the room effect above the reference high frequency
         /// </summary>
-        public float RoomIntensityHf; // dB
+        public float RoomIntensityHighFrequency; // dB
         /// <summary>
         /// how quickly the room effect rolls off, from 0.0 to 10.0
         /// </summary>
-        public float RoomRolloff0To10;
-        public float DecayTime1To20; // seconds
-        public float DecayHfRatio1To2;
+        public float RoomRolloff;
+        public float DecayTime; // seconds
+        public float DecayHighFrequencyRatio;
         public float ReflectionsIntensity; // dB[-100,10]
-        public float ReflectionsDelay0To3; // seconds
+        public float ReflectionsDelay; // seconds
         public float ReverbIntensity; // dB[-100,20]
-        public float ReverbDelay0To1; // seconds
+        public float ReverbDelay; // seconds
         public float Diffusion;
         public float Density;
         /// <summary>
         /// for hf values, what frequency defines hf, from 20 to 20,000
         /// </summary>
-        public float HfReference20To20000; // Hz
+        public float HighFrequencyReference; // Hz
         [TagField(Length = 0x10, Flags = TagFieldFlags.Padding)]
         public byte[] Padding2;
     }

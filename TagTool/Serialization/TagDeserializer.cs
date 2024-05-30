@@ -12,6 +12,8 @@ using BindingFlags = System.Reflection.BindingFlags;
 using System.IO;
 using System.Linq;
 using TagTool.Geometry.BspCollisionGeometry;
+using System.Runtime.ExceptionServices;
+using System.Diagnostics;
 
 namespace TagTool.Serialization
 {
@@ -22,6 +24,7 @@ namespace TagTool.Serialization
     {
         public CacheVersion Version { get; protected set; }
         public CachePlatform CachePlatform { get; protected set; }
+        public Stack<string> CurrentFieldPath { get; protected set; } = new Stack<string>();
 
         /// <summary>
         /// Constructs a tag deserializer for a specific engine version.
@@ -67,7 +70,26 @@ namespace TagTool.Serialization
 			var reader = context.BeginDeserialize(info);
             if (reader.Length == 0)
                 return null;
-            var result = DeserializeStruct(reader, context, info);
+            object result = null;
+            if (Debugger.IsAttached)
+            {
+                result = DeserializeStruct(reader, context, info);
+            }
+            //if no debugger then create a more user-friendly exception
+            else
+            {
+                try
+                {
+                    result = DeserializeStruct(reader, context, info);
+                }
+                catch (Exception ex)
+                {
+                    string outPath = string.Join(".", CurrentFieldPath.ToArray().Reverse());
+                    new TagToolError(CommandError.CustomError, $"Structure deserialization failed at path {outPath}");
+                    ExceptionDispatchInfo.Capture(ex).Throw();
+                }
+            }
+            
             context.EndDeserialize(info, result);
             return result;
         }
@@ -84,11 +106,15 @@ namespace TagTool.Serialization
         {
             var baseOffset = reader.BaseStream.Position;
             var instance = Activator.CreateInstance(info.Types[0]);
+            if(info.Structure.Name != null)
+                CurrentFieldPath.Push(info.Structure.Name);
 
 			foreach (var tagFieldInfo in TagStructure.GetTagFieldEnumerable(info.Types[0], info.Version, info.CachePlatform))
                 DeserializeProperty(reader, context, instance, tagFieldInfo, baseOffset);
-
-			if (info.TotalSize > 0)
+            
+            if (info.Structure.Name != null)
+                CurrentFieldPath.Pop();
+            if (info.TotalSize > 0)
                 reader.BaseStream.Position = baseOffset + info.TotalSize;
 
             return instance;
@@ -142,9 +168,15 @@ namespace TagTool.Serialization
             }
             else
             {
+                if (tagFieldInfo.FieldInfo.Name != null)
+                    CurrentFieldPath.Push(tagFieldInfo.FieldInfo.Name);
+
                 var value = DeserializeValue(reader, context, attr, tagFieldInfo.FieldType);
                 tagFieldInfo.SetValue(instance, value);
-            }
+
+                if (tagFieldInfo.FieldInfo.Name != null)
+                    CurrentFieldPath.Pop();
+            }            
         }
 
         /// <summary>

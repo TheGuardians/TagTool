@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -64,8 +65,18 @@ namespace TagTool.Commands.Common
                 case "exit":
                     if (ContextStack.IsBase())
                         Console.WriteLine("Cannot exit, already at base context! Use 'quit' to quit tagtool.");
+                    else if (ContextStack.IsModPackage())
+                        new TagToolWarning("Use 'exitmodpackage' to leave a mod package context.");
                     else
                         ContextStack.Pop();
+                    return;
+                case "exitmodpackage":
+                    {
+                        if (ContextStack.IsModPackage())
+                            ContextStack.Pop();
+                        else
+                            new TagToolWarning("Use 'exit' to leave standard contexts.");
+                    }
                     return;
                 case "cs" when !ExecuteCSharpCommand.OutputIsRedirectable(commandArgs.Skip(1).ToList()):
                     redirectFile = null;
@@ -144,23 +155,28 @@ namespace TagTool.Commands.Common
             for (int i = 0; i < commandAndArgs.Count; i++)
                 commandAndArgs[i] = ApplyUserVars(commandAndArgs[i], command.IgnoreArgumentVariables);
 
-#if !DEBUG
-            try
-            {
-#endif
-            CurrentCommandName = command.Name;
-            command.Execute(commandAndArgs);
-            CurrentCommandName = "";
-#if !DEBUG
-            }
-            catch (Exception e)
-            {
-                new TagToolError(CommandError.CustomError, e.Message);
-                Console.WriteLine("STACKTRACE: " + Environment.NewLine + e.StackTrace);
-                ConsoleHistory.Dump("hott_*_crash.log");
-            }
-#endif
 
+            if (Debugger.IsAttached)
+            {
+                CurrentCommandName = command.Name;
+                command.Execute(commandAndArgs);
+                CurrentCommandName = "";
+            }
+            else
+            {
+                try
+                {
+                    CurrentCommandName = command.Name;
+                    command.Execute(commandAndArgs);
+                    CurrentCommandName = "";
+                }
+                catch (Exception e)
+                {
+                    new TagToolError(CommandError.CustomError, e.Message);
+                    Console.WriteLine("STACKTRACE: " + Environment.NewLine + e.StackTrace);
+                    ConsoleHistory.Dump("hott_*_crash.log");
+                }
+            }
             return true;
         }
     }

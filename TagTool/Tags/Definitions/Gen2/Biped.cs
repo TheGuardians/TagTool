@@ -362,7 +362,7 @@ namespace TagTool.Tags.Definitions.Gen2
             /// function must exceed this value (after mapping) to be active 0. means do nothing
             /// </summary>
             public float MinValue;
-            public MappingFunctionBlock DefaultFunction;
+            public TagFunction DefaultFunction;
             public StringId ScaleBy;
 
             [Flags]

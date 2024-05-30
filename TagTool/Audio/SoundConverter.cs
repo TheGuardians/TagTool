@@ -45,7 +45,7 @@ namespace TagTool.Audio
 
             var basePermutationCacheName = Path.Combine(newPath, endName); //combine the last portion of the tag name with the new path
 
-            var extension = AudioUtils.GetFormtFileExtension(targetFormat);
+            var extension = AudioUtils.GetFormatFileExtension(targetFormat);
             return $"{basePermutationCacheName}_{pitch_range_index}_{permutation_index}.{extension}";
         }
 
@@ -183,7 +183,7 @@ namespace TagTool.Audio
         {
             var id = Guid.NewGuid();
             var baseFileName = $"{id}";
-            var targetFileExt = AudioUtils.GetFormtFileExtension(targetFormat);
+            var targetFileExt = AudioUtils.GetFormatFileExtension(targetFormat);
             var XMAFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.xma");
             var WAVFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.wav");
             var targetFileName = Path.Combine(IntermediateDirectory.FullName, $"{baseFileName}.{targetFileExt}");
@@ -266,7 +266,9 @@ namespace TagTool.Audio
                 }
                 else if (targetFormat == Compression.PCM)
                 {
-                    blamSound.UpdateFormat(Compression.PCM, PrepareWAVForFMOD(WAVFileName));
+                    // don't use UpdateFormat as it'll calculcate the wrong sample count
+                    blamSound.Compression = Compression.PCM;
+                    blamSound.Data = PrepareWAVForFMOD(WAVFileName);
                 }
                 else if (targetFormat == Compression.Tagtool_WAV)
                 {

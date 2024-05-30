@@ -92,11 +92,14 @@ namespace TagTool.Cache
 
         private void LoadSharedResourceCaches()
         {
-            var thisName = BaseMapFile.Header.GetName() + ".map";
+            var thisName = BaseMapFile.Header.GetName();
+            if (thisName == "")
+                thisName = CacheFile.Name;
+            else
+                thisName =  thisName + ".map";
 
             if (thisName == "shared.map" || thisName == "single_player_shared.map")
                 return;
-
 
             GameCacheGen2 mainmenuCache;
             if (thisName == "mainmenu.map")

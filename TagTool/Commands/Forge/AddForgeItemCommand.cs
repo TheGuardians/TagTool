@@ -37,7 +37,7 @@ namespace TagTool.Commands.Forge
 
         public override object Execute(List<string> args)
         {
-            using (var cacheStream = Cache.OpenCacheRead())
+            using (var cacheStream = Cache.OpenCacheReadWrite())
             {
                 if (args.Count > 4 || args.Count < 2)
                     return new TagToolError(CommandError.ArgCount);
@@ -55,6 +55,7 @@ namespace TagTool.Commands.Forge
                 switch (Item.Group.ToString().ToLower())
                 {
                     case "effect_scenery":
+                    case "sound_scenery":
                         itemType = ForgeGlobalsDefinition.PaletteItemType.Effects;
                         break;
                     case "equipment":

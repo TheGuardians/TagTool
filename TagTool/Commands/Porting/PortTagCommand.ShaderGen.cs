@@ -36,7 +36,7 @@ namespace TagTool.Commands.Porting
             shader_properties.TextureConstants = new List<RenderMethod.RenderMethodPostprocessBlock.TextureConstant>();
             shader_properties.RealConstants = new List<RenderMethod.RenderMethodPostprocessBlock.RealConstant>();
             shader_properties.IntegerConstants = new List<uint>();
-            shader_properties.EntryPoints = new List<RenderMethodTemplate.TagBlockIndex>();
+            shader_properties.EntryPoints = new List<TagBlockIndex>();
             shader_properties.Passes = new List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodPostprocessPassBlock>();
             shader_properties.RoutingInfo = new List<RenderMethod.RenderMethodPostprocessBlock.RenderMethodRoutingInfoBlock>();
             shader_properties.Functions = new List<RenderMethod.RenderMethodAnimatedParameterBlock>();

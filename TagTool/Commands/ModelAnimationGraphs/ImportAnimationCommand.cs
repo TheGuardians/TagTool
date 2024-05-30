@@ -107,11 +107,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         break;
                     case ".JMT":
                         FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw;
-                        new TagToolWarning("Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     case ".JMZ":
                         FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw;
-                        new TagToolWarning("Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     default:
                         new TagToolError(CommandError.CustomError, $"Filetype {file_extension.ToUpper()} not recognized!");
@@ -160,7 +158,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 }
 
                 //process node data in advance of serialization
-                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, AnimationType, FrameInfoType);
+                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, Animation, AnimationType, FrameInfoType);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
                 //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))

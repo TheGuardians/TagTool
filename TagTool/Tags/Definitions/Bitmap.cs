@@ -38,7 +38,7 @@ namespace TagTool.Tags.Definitions
         [TagField(MinVersion = CacheVersion.HaloOnlineED)]
         public short AtlasIndex; // Index into global atlas if the texture is missing its required resources and has been atlased
 
-        public BitmapUsageFormatShort ForceBitmapFormat; // Overrides the format defined by usage
+        public short ForceBitmapFormat; // Overrides the format defined by usage
 
         [TagField(Format = "[0,1]", MinVersion = CacheVersion.HaloReach)]
         public float TightBoundsThreshold; // This is the level cutoff for tight bounds. 0.0 is monochrome black, 1.0 is monochrome white
@@ -121,7 +121,7 @@ namespace TagTool.Tags.Definitions
             public BitmapUsageSwizzleDef SwizzleGreen;
             public BitmapUsageSwizzleDef SwizzleBlue;
             public BitmapUsageSwizzleDef SwizzleAlpha;
-            public BitmapUsageFormatInt BitmapFormat; // 0 means the usage above is used
+            public int BitmapFormat; // 0 means the usage above is used
 
             public enum BitmapCurveEnum : int
             {

@@ -237,7 +237,7 @@ namespace TagTool.Tags.Definitions.Gen2
             /// function must exceed this value (after mapping) to be active 0. means do nothing
             /// </summary>
             public float MinValue;
-            public MappingFunctionBlock DefaultFunction;
+            public TagFunction DefaultFunction;
             public StringId ScaleBy;
             
             [Flags]
@@ -260,17 +260,11 @@ namespace TagTool.Tags.Definitions.Gen2
                 /// </summary>
                 RandomTimeOffset = 1 << 3
             }
-            
+
             [TagStructure(Size = 0x8)]
             public class MappingFunctionBlock : TagStructure
             {
-                public List<ByteBlock> Data;
-                
-                [TagStructure(Size = 0x1)]
-                public class ByteBlock : TagStructure
-                {
-                    public sbyte Value;
-                }
+                public byte[] Data;
             }
         }
         

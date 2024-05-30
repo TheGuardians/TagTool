@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TagTool.BlamFile;
+using TagTool.Commands.Common;
 using TagTool.Common;
 using TagTool.IO;
 using TagTool.Serialization;
@@ -109,7 +110,7 @@ namespace TagTool.Cache.Gen2
                 {
                     var group = new TagGroupGen2(new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()), new Tag(reader.ReadInt32()));
                     if (!TagDefinitions.TagDefinitionExists(group))
-                        Debug.WriteLine($"Warning: tag definition for {group} does not exists!");
+                        new TagToolWarning($"Warning: tag definition for {group} does not exist!");
                 }
             }
 
@@ -131,7 +132,7 @@ namespace TagTool.Cache.Gen2
 
 
                     var streamPosition = reader.BaseStream.Position;
-                    reader.SeekTo(tagDataSectionOffset +  entry.TagNameAddress - tagCacheVirtualAddress);
+                    reader.SeekTo(tagDataSectionOffset + entry.TagNameAddress - tagCacheVirtualAddress);
                     name = reader.ReadNullTerminatedString();
                     reader.SeekTo(streamPosition);
                 }

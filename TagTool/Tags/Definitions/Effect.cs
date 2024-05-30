@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using static TagTool.Tags.TagFieldFlags;
 using TagTool.Damage;
 using static TagTool.Tags.Definitions.Gen4.BreakableSurface.ParticleSystemDefinitionBlockNew.ParticleSystemEmitterDefinitionBlock.GpuPropertyFunctionColorStruct;
+using System.Linq;
+using TagTool.Commands.Common;
+using static TagTool.Effects.EditableProperty;
 
 namespace TagTool.Tags.Definitions
 {
@@ -421,6 +424,7 @@ namespace TagTool.Tags.Definitions
                         UnweightedLine,
                         Plane,
                         Jetwash,
+                        // H4
                         PlanarOrbit,
                         SphereOrbit
                     }
@@ -529,7 +533,7 @@ namespace TagTool.Tags.Definitions
                         [TagStructure(Size = 0x18)]
                         public class Movement : TagStructure
                         {
-                            public TypeValue Tyoe;
+                            public TypeValue Type;
                             public FlagsValue Flags;
 
                             [TagField(Flags = Padding, Length = 1)]
@@ -612,6 +616,7 @@ namespace TagTool.Tags.Definitions
                             public InnardsZ MInnardsZ;
                             public InnardsW MInnardsW;
 
+                            // These types are bitfields casted to floats
                             [TagStructure(Size = 0x4)]
                             public class InnardsY : TagStructure
                             {
@@ -626,37 +631,34 @@ namespace TagTool.Tags.Definitions
 
                                 private byte GetFunctionIndexRed()
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
-                                    return (byte)(temp & 0x1F);
+                                    return (byte)(((int)FBitfield) & 0x1F);
                                 }
                                 private ParticlePropertyScalar.ParticleStates GetInputIndexRed()
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
-                                    return (ParticlePropertyScalar.ParticleStates)((temp >> 5) & 0x1F);
+                                    return (ParticlePropertyScalar.ParticleStates)(((int)FBitfield >> 5) & 0x1F);
                                 }
                                 private byte GetIsConstant()
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
-                                    return (byte)((temp >> 21) & 0x1);
+                                    return (byte)(((int)FBitfield >> 21) & 0x1);
                                 }
 
                                 private void SetFunctionIndexRed(byte value)
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    uint temp = (uint)FBitfield;
                                     temp = (temp & 0xFFFFFFE0) | (uint)(value & 0x1F);
-                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                    FBitfield = (float)temp;
                                 }
                                 private void SetInputIndexRed(ParticlePropertyScalar.ParticleStates value)
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    uint temp = (uint)FBitfield;
                                     temp = (temp & 0xFFFFFC1F) | (((uint)value & 0x1F) << 5);
-                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                    FBitfield = (float)temp;
                                 }
                                 private void SetIsConstant(byte value)
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    uint temp = (uint)FBitfield;
                                     temp = (temp & 0xFFDFFFFF) | ((uint)(value & 0x1) << 21);
-                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                    FBitfield = (float)temp;
                                 }
                             }
                             [TagStructure(Size = 0x4)]
@@ -673,37 +675,34 @@ namespace TagTool.Tags.Definitions
 
                                 private ParticlePropertyScalar.OutputModifierValue GetModifierIndex()
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
-                                    return (ParticlePropertyScalar.OutputModifierValue)(temp & 0x3);
+                                    return (ParticlePropertyScalar.OutputModifierValue)((int)FBitfield & 0x3);
                                 }
                                 private ParticlePropertyScalar.ParticleStates GetInputIndexModifier()
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
-                                    return (ParticlePropertyScalar.ParticleStates)((temp >> 2) & 0x1F);
+                                    return (ParticlePropertyScalar.ParticleStates)(((int)FBitfield >> 2) & 0x1F);
                                 }
                                 private byte GetFunctionIndexGreen()
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
-                                    return (byte)((temp >> 17) & 0x1F);
+                                    return (byte)(((int)FBitfield >> 17) & 0x1F);
                                 }
 
                                 private void SetModifierIndex(ParticlePropertyScalar.OutputModifierValue value)
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    uint temp = (uint)FBitfield;
                                     temp = (temp & 0xFFFFFFFD) | ((uint)value & 0x2);
-                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                    FBitfield = (float)temp;
                                 }
                                 private void SetInputIndexModifier(ParticlePropertyScalar.ParticleStates value)
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    uint temp = (uint)FBitfield;
                                     temp = (temp & 0xFFFFFF83) | (((uint)value & 0x1F) << 2);
-                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                    FBitfield = (float)temp;
                                 }
                                 private void SetFunctionIndexGreen(byte value)
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    uint temp = (uint)FBitfield;
                                     temp = (temp & 0xFFC1FFFF) | ((uint)(value & 0x1F) << 17);
-                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                    FBitfield = (float)temp;
                                 }
                             }
                             [TagStructure(Size = 0x4)]
@@ -720,37 +719,34 @@ namespace TagTool.Tags.Definitions
 
                                 private byte GetColorIndexLo()
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
-                                    return (byte)(temp & 0x7);
+                                    return (byte)(((int)FBitfield >> 0) & 0x7);
                                 }
                                 private byte GetColorIndexHi()
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
-                                    return (byte)((temp >> 3) & 0x7);
+                                    return (byte)(((int)FBitfield >> 3) & 0x7);
                                 }
                                 private ParticlePropertyScalar.ParticleStates GetInputIndexGreen()
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
-                                    return (ParticlePropertyScalar.ParticleStates)((temp >> 17) & 0x1F);
+                                    return (ParticlePropertyScalar.ParticleStates)((((int)FBitfield >> 17) >> 0) & 0x1F);
                                 }
 
                                 private void SetColorIndexLo(byte value)
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    uint temp = (uint)FBitfield;
                                     temp = (temp & 0xFFFFFFF8) | (uint)(value & 0x7);
-                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                    FBitfield = (float)temp;
                                 }
                                 private void SetColorIndexHi(byte value)
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    uint temp = (uint)FBitfield;
                                     temp = (temp & 0xFFFFFFC7) | ((uint)(value & 0x7) << 3);
-                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                    FBitfield = (float)temp;
                                 }
                                 private void SetInputIndexGreen(ParticlePropertyScalar.ParticleStates value)
                                 {
-                                    uint temp = BitConverter.ToUInt32(BitConverter.GetBytes(FBitfield), 0);
+                                    uint temp = (uint)FBitfield;
                                     temp = (temp & 0xFFC1FFFF) | (((uint)value & 0x1F) << 17);
-                                    FBitfield = BitConverter.ToSingle(BitConverter.GetBytes(temp), 0);
+                                    FBitfield = (float)temp;
                                 }
                             }
 
@@ -769,6 +765,13 @@ namespace TagTool.Tags.Definitions
                                 ParticleAspect,
                                 ParticleSelfAcceleration,
                                 ParticlePalette
+                            }
+
+                            public Property()
+                            {
+                                this.MInnardsY = new InnardsY();
+                                this.MInnardsZ = new InnardsZ();
+                                this.MInnardsW = new InnardsW();
                             }
                         }
 
@@ -793,6 +796,12 @@ namespace TagTool.Tags.Definitions
                                 public float FunctionType;
 
                                 public TagFunction.TagFunctionType Type { get => (TagFunction.TagFunctionType)FunctionType; set => FunctionType = (float)value; }
+                            }
+
+                            public Function()
+                            {
+                                FunctionType = new FunctionTypeReal();
+                                Innards = new float[8];
                             }
                         }
 
@@ -834,6 +843,131 @@ namespace TagTool.Tags.Definitions
                             public List<GpuColor> Colors;
 
                         }
+                    }
+
+                    public ParticlePropertyScalar.ParticleStatesFlags ValidateUsedStates()
+                    {
+                        ParticlePropertyScalar.ParticleStatesFlags usedStates = ParticlePropertyScalar.ParticleStatesFlags.None;
+                        
+                        usedStates |= ParticleEditablePropertyEvaluate(TranslationalOffset.Mapping, "TranslationalOffset",
+                            0xFE117B0A, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(RelativeDirection.Mapping, "RelativeDirection",
+                            0xFE117B0A, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(EmissionRadius, "EmissionRadius",
+                            0x7F17FFE, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(EmissionAngle, "EmissionAngle",
+                            0x7F17FFE, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(EmissionAxisAngle, "EmissionAxisAngle",
+                            0x7F17FFE, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleStartingCount, "ParticleStartingCount",
+                            0xFE117B0A, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleMaxCount, "ParticleMaxCount",
+                            0xFE117B0A, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleEmissionRate, "ParticleEmissionRate",
+                            0xFE117B0A, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleLifespan, "ParticleLifespan",
+                            0x7F17FFE, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleSelfAcceleration.Mapping, "ParticleSelfAcceleration",
+                            0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleInitialVelocity, "ParticleInitialVelocity",
+                            0x7F17FFE, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleRotation, "ParticleRotation",
+                            0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleInitialRotationRate, "ParticleInitialRotationRate",
+                            0x7F17FFE, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleSize, "ParticleSize",
+                            0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleScale, "ParticleScale",
+                            0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleTint, "ParticleTint",
+                            0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleAlpha, "ParticleAlpha",
+                            0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+                        usedStates |= ParticleEditablePropertyEvaluate(ParticleAlphaBlackPoint, "ParticleAlphaBlackPoint",
+                            0x7FFFFFF, ParticlePropertyScalar.ParticleStates.Velocity);
+
+                        return usedStates;
+                    }
+
+                    public void GetConstantStates(out RuntimeMGpuData.ParticleProperties cppStates, out RuntimeMGpuData.ParticleProperties cotStates)
+                    {
+                        cppStates = RuntimeMGpuData.ParticleProperties.None;
+
+                        if (this.TranslationalOffset.Mapping.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.TranslationOffset;
+                        if (this.RelativeDirection.Mapping.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.RelativeDirection;
+                        if (this.EmissionRadius.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.EmissionRadius;
+                        if (this.EmissionAngle.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.EmissionAngle;
+                        if (this.EmissionAxisAngle.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.EmissionAxisAngle;
+                        if (this.ParticleStartingCount.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleStartingCount;
+                        if (this.ParticleMaxCount.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleMaxCount;
+                        if (this.ParticleEmissionRate.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleEmissionRate;
+                        if (this.ParticleLifespan.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleLifespan;
+                        if (this.ParticleSelfAcceleration.Mapping.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleSelfAcceleration;
+                        if (this.ParticleInitialVelocity.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleInitialVelocity;
+                        if (this.ParticleRotation.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleRotation;
+                        if (this.ParticleInitialRotationRate.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleInitialRotationRate;
+                        if (this.ParticleSize.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleSize;
+                        if (this.ParticleScale.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleScale;
+                        if (this.ParticleTint.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleTint;
+                        if (this.ParticleAlpha.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleAlpha;
+                        if (this.ParticleAlphaBlackPoint.IsConstantPerParticle())
+                            cppStates |= RuntimeMGpuData.ParticleProperties.ParticleAlphaBlackPoint;
+
+                        cotStates = RuntimeMGpuData.ParticleProperties.None;
+
+                        if (this.TranslationalOffset.Mapping.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.TranslationOffset;
+                        if (this.RelativeDirection.Mapping.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.RelativeDirection;
+                        if (this.EmissionRadius.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.EmissionRadius;
+                        if (this.EmissionAngle.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.EmissionAngle;
+                        if (this.EmissionAxisAngle.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.EmissionAxisAngle;
+                        if (this.ParticleStartingCount.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleStartingCount;
+                        if (this.ParticleMaxCount.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleMaxCount;
+                        if (this.ParticleEmissionRate.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleEmissionRate;
+                        if (this.ParticleLifespan.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleLifespan;
+                        if (this.ParticleSelfAcceleration.Mapping.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleSelfAcceleration;
+                        if (this.ParticleInitialVelocity.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleInitialVelocity;
+                        if (this.ParticleRotation.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleRotation;
+                        if (this.ParticleInitialRotationRate.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleInitialRotationRate;
+                        if (this.ParticleSize.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleSize;
+                        if (this.ParticleScale.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleScale;
+                        if (this.ParticleTint.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleTint;
+                        if (this.ParticleAlpha.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleAlpha;
+                        if (this.ParticleAlphaBlackPoint.IsConstantOverTime())
+                            cotStates |= RuntimeMGpuData.ParticleProperties.ParticleAlphaBlackPoint;
                     }
                 }
             }

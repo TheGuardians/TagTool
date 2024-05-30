@@ -6,12 +6,13 @@ using System.Linq;
 using TagTool.Cache;
 using TagTool.Common;
 using TagTool.Commands.Common;
-using TagTool.Commands.Porting;
 using TagTool.IO;
 using TagTool.Tags;
 using TagTool.Tags.Definitions.Gen2;
 using TagTool.BlamFile;
 using TagTool.Commands.Porting;
+using TagTool.Commands.ScenarioStructureBSPs;
+using Gen3Globals = TagTool.Tags.Definitions.Globals;
 
 namespace TagTool.Commands.Porting.Gen2
 {
@@ -97,6 +98,7 @@ namespace TagTool.Commands.Porting.Gen2
             //use hardcoded list of supported tags to prevent unnecessary deserialization
             List<string> supportedTagGroups = new List<string>
             {
+                "ant!",
                 "coll",
                 "jmad",
                 "phmo",
@@ -117,11 +119,50 @@ namespace TagTool.Commands.Porting.Gen2
                 "ligh",
                 "eqip",
                 "ctrl",
-                "bipd"
+                "bipd",
+                "nhdt",
+                "pphy",
+                "prt3",
+                "effe",
+                "pmov",
             };
-            if (!supportedTagGroups.Contains(gen2Tag.Group.ToString()))
+            // don't print a warning for these
+            List<string> hiddenTagGroups = new List<string>
             {
-                new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null!");
+                "*cen",
+                "*ipd",
+                "*ehi",
+                "*qip",
+                "*eap",
+                "*sce",
+                "*igh",
+                "dgr*",
+                "dec*",
+                "cin*",
+                "trg*",
+                "clu*",
+                "/**/",
+                "*rea",
+                "sslt",
+                "dc*s",
+                "hsc*",
+                "DECR",
+                "fog ",
+                "itmc",
+                "ltmp",
+                "sky ",
+                "stem",
+                "spas",
+                "vehc",
+                "vrtx"
+            };
+
+            var group = gen2Tag.Group.ToString();
+            if (!supportedTagGroups.Contains(group))
+            {
+                if (!hiddenTagGroups.Contains(group))
+                    new TagToolWarning($"Porting tag group '{group}' not yet supported, returning null!");
+
                 return null;
             }
 
@@ -148,12 +189,17 @@ namespace TagTool.Commands.Porting.Gen2
                     destinationTag = instance;
             }
 
+            object origGen2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
             object gen2definition = Gen2Cache.Deserialize(gen2CacheStream, gen2Tag);
             gen2definition = ConvertData(cacheStream, gen2CacheStream, resourceStreams, gen2definition, gen2definition, gen2Tag);
             TagStructure definition;
 
             switch (gen2definition)
             {
+                case Antenna antenna:
+                case PointPhysics pointPhysics: // not a widget, but we can group it with widgets
+                    definition = ConvertWidget(gen2definition);
+                    break;
                 case CollisionModel collisionModel:
                     definition = ConvertCollisionModel(collisionModel);
                     break;
@@ -170,7 +216,7 @@ namespace TagTool.Commands.Porting.Gen2
                     definition = ConvertModel(model, cacheStream);
                     break;
                 case Bitmap bitmap:
-                    definition = ConvertBitmap(bitmap);
+                    definition = ConvertBitmap(bitmap, gen2Tag.Name);
                     break;
                 case Crate crate:
                 case Scenery scenery:
@@ -184,14 +230,16 @@ namespace TagTool.Commands.Porting.Gen2
                 case Biped biped:
                     definition = ConvertObject(gen2definition, cacheStream);
                     break;
+                case Effect effect:
+                case Particle particle:
+                case ParticlePhysics pmov:
                 case DamageEffect damage:
-                    definition = ConvertEffect(damage);
+                    definition = ConvertEffect(gen2definition, origGen2definition, cacheStream, gen2CacheStream);
                     break;
                 case Shader shader:
-                    //preserve a copy of unconverted data
-                    Shader oldshader = Gen2Cache.Deserialize<Shader>(gen2CacheStream, gen2Tag);
-                    definition = ConvertShader(shader, oldshader, cacheStream);
+                    definition = ConvertShader(shader, (Shader)origGen2definition, gen2Tag.Name, cacheStream, gen2CacheStream, gen2Tag);
                     break;
+                //return Cache.TagCache.GetTag(@"shaders\invalid.shader");
                 case ScenarioStructureBsp sbsp:
                     definition = ConvertStructureBSP(sbsp);
                     break;
@@ -202,8 +250,24 @@ namespace TagTool.Commands.Porting.Gen2
                 case Light light:
                     definition = ConvertLight(light);
                     break;
+                case Sound sound:
+                    definition = ConvertSound((Cache.Gen2.CachedTagGen2)gen2Tag, sound, gen2CacheStream, gen2Tag.Name);
+                    break;
+                case SoundLooping loop:
+                    definition = ConvertLoopingSound((Cache.Gen2.CachedTagGen2)gen2Tag, loop, cacheStream);
+                    break;
+                case SoundEnvironment snde:
+                    definition = ConvertSoundEnvironment(snde);
+                    break;
+                case NewHudDefinition nhdt:
+                    NewHudDefinition gen2Hud = Gen2Cache.Deserialize<NewHudDefinition>(gen2CacheStream, gen2Tag);
+                    definition = ConvertNewHudDefinition(nhdt, gen2Hud, cacheStream, gen2CacheStream, gen2Tag);
+                    break;
                 default:
-                    new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null");
+                    if (!hiddenTagGroups.Contains(gen2Tag.Group.ToString()))
+                    {
+                        new TagToolWarning($"Porting tag group '{gen2Tag.Group}' not yet supported, returning null!");
+                    }
                     return null;
             }
 
@@ -232,6 +296,18 @@ namespace TagTool.Commands.Porting.Gen2
                         cluster.InstancedGeometryPhysics.StructureBsp = destinationTag;
                     break;
                 case TagTool.Tags.Definitions.Scenario scnr:
+                    {
+                        foreach (var block in scnr.StructureBsps)
+                        {
+                            if (block.StructureBsp == null)
+                                continue;
+
+                            CachedTag sbspTag = block.StructureBsp;
+                            var sbsp = Cache.Deserialize<TagTool.Tags.Definitions.ScenarioStructureBsp>(cacheStream, sbspTag);
+                            new GenerateStructureSurfacesCommand(Cache, sbspTag, sbsp, cacheStream, scnr).Execute(new List<string> { });
+                            Cache.Serialize(cacheStream, sbspTag, sbsp);
+                        }
+                    }
                     GenerateMapFile(cacheStream, Cache, destinationTag, destinationTag.Name.Split('\\').ToList().Last(), "", "Bungie");
                     break;
                 default:
@@ -391,6 +467,23 @@ namespace TagTool.Commands.Porting.Gen2
             }
 
             return damageReportingType;
+        }
+
+        // wrote this for Gen2 but probably not necessary. create and move into scenario porting utils maybe
+        private short GetEquivalentGlobalMaterial(short globalMaterialIndexGen2, Globals globalsGen2, Gen3Globals globals)
+        {
+            var materialBlockGen2 = globalsGen2.Materials[globalMaterialIndexGen2];
+
+            StringId gen3Name = Cache.StringTable.GetStringId(Gen2Cache.StringTable.GetString(materialBlockGen2.Name));
+            if (gen3Name == StringId.Invalid)
+                gen3Name = Cache.StringTable.GetStringId(Gen2Cache.StringTable.GetString(materialBlockGen2.ParentName));
+
+            short newIndex = (short)globals.Materials.FindIndex(m => m.Name == gen3Name);
+
+            if (newIndex == -1)
+                return 0;   // default_material
+            else
+                return newIndex;
         }
 
         private List<CachedTag> ParseLegacyTag(string tagSpecifier)

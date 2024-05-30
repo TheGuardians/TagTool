@@ -187,7 +187,7 @@ namespace TagTool.Cache
 
             foreach (var instance in TagTable)
             {
-                if (instance is null)
+                if (instance is null || instance.Group == null)
                     continue;
 
                 if (instance.IsInGroup(groupTag) && instance.Name == tagName)

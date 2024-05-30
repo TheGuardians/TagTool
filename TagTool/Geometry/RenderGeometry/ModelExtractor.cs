@@ -109,7 +109,8 @@ namespace TagTool.Geometry
             Bitmaps = new HashSet<string>();
 
             // Prevent models with the same name overwriting during batch rip
-            var tmpExtractPath = exportFilePath.Split('.')[0];
+            var tmpExtractPath = Path.Combine(Path.GetDirectoryName(exportFilePath), Path.GetFileNameWithoutExtension(exportFilePath));
+
             for (int i = 0; File.Exists(exportFilePath); i++)
                 exportFilePath = $"{tmpExtractPath}({i}).{exportFileFormat}";
 
@@ -506,7 +507,7 @@ namespace TagTool.Geometry
                         var submatName = nullPath;
                         if (i < renderMethod.ShaderProperties[0].TextureConstants.Count())
                             submatName = (DecoratorBitmap != null && i == 0) ? DecoratorBitmap
-                                : renderMethod.ShaderProperties[0].TextureConstants[i].Bitmap.Name;
+                                : renderMethod.ShaderProperties[0].TextureConstants[i].Bitmap?.Name;
 
                         amfWriter.Write(NullTerminate(submatName));
                         if (submatName != nullPath)

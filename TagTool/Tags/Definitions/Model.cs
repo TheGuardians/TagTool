@@ -783,9 +783,6 @@ namespace TagTool.Tags.Definitions
             public DamageReportingType CollisionDamageReportingType;
             public DamageReportingType ResponseDamageReportingType;
 
-            [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
-            public short UnknownHO;
-
             [TagField(Length = 0x2, Flags = Padding, MaxVersion = CacheVersion.Halo3ODST)]
             [TagField(Length = 0x2, Flags = Padding, MinVersion = CacheVersion.HaloReach)]
             public byte[] MQ;
@@ -904,7 +901,7 @@ namespace TagTool.Tags.Definitions
                     public ResponseTypeValue ResponseType;
                     public ConstraintDamageTypeValue ConstraintDamageType;
                     
-                    public StringId Trigger;
+                    public StringId ConstraintGroupName;
 
                     public FlagsValue Flags;
                     public float DamageThreshold;
@@ -1265,7 +1262,9 @@ namespace TagTool.Tags.Definitions
             HasShieldImpactEffect = 1 << 2,
             ModelUseSkyLighting = 1 << 3,
             InconsequentialTarget = 1 << 4,
-            ModelUseAirprobeLighting = 1 << 5
+            ModelUseAirprobeLighting = 1 << 5,
+            Unknown6 = 1 << 6, // HO only (fabric_01_moving)
+            IsDyanmic = 1 << 7 // HO only (armor pieces)
         }
 
         [Flags]

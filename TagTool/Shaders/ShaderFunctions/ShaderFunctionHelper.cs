@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using TagTool.Cache;
 using TagTool.Tags.Definitions;
+using TagTool.Common;
 
 namespace TagTool.Shaders.ShaderFunctions
 {
@@ -184,7 +185,7 @@ namespace TagTool.Shaders.ShaderFunctions
             properties.RoutingInfo.Clear();
 
             for (int i = 0; i < template.EntryPoints.Count; i++)
-                properties.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
+                properties.EntryPoints.Add(new TagBlockIndex());
 
             for (int i = 0; i < properties.EntryPoints.Count; i++)
             {

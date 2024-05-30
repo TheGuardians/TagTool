@@ -351,9 +351,9 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public RealVector3d HeadingReach;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public float HeadingAngleReach;
+                public float AverageTranslationMagnitudeReach;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
-                public float TranslationMagnitudeReach; //???
+                public float AveragePivotYawReach;
 
                 public List<FrameEvent> FrameEvents;
                 public List<SoundEvent> SoundEvents;
@@ -381,9 +381,10 @@ namespace TagTool.Tags.Definitions
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
                 public RealVector3d Heading;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float HeadingAngle;
+                public float AverageTranslationMagnitude;
                 [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
-                public float TranslationMagnitude; //???
+                public float AveragePivotYaw;
+
             }
 
             [Flags]
@@ -469,6 +470,28 @@ namespace TagTool.Tags.Definitions
                 DropWeaponKeyframe
             }
 
+            public enum FrameEventTypeED : short
+            {
+                PrimaryKeyframe,
+                SecondaryKeyframe,
+                TertiaryKeyframe,
+                LeftFoot,
+                RightFoot,
+                AllowInterruption,
+                TransitionA,
+                TransitionB,
+                TransitionC,
+                TransitionD,
+                BothFeetShuffle,
+                BodyImpact,
+                LeftBackFoot,
+                RightBackFoot,
+                RagdollKeyframe,
+                DropWeaponKeyframe,
+                AssassinationA,
+                AssassinationB
+            }
+
             public enum FrameEventTypeReach : short
             {
                 None,
@@ -505,7 +528,9 @@ namespace TagTool.Tags.Definitions
 			{
                 [TagField(MaxVersion = CacheVersion.Halo3ODST)]
                 public FrameEventType Type;
-                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED)]
+                public FrameEventTypeED TypeED;
+                [TagField(MinVersion = CacheVersion.HaloOnline106708, MaxVersion = CacheVersion.HaloOnline700123)]
                 public FrameEventTypeHO TypeHO;
                 [TagField(MinVersion = CacheVersion.HaloReach)]
                 public FrameEventTypeReach ReachType;
@@ -531,7 +556,9 @@ namespace TagTool.Tags.Definitions
                 [TagField(MinVersion = CacheVersion.Halo3ODST)]
                 public DamageReportingType DamageEffectReportingType;
 
-                [TagField(MinVersion = CacheVersion.Halo3ODST, Flags = Padding, Length = 3)]
+                [TagField(MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.Halo3ODST, Flags = Padding, Length = 3)]
+                [TagField(MinVersion = CacheVersion.HaloReach, Flags = Padding, Length = 3)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123, Flags = Padding, Length = 2)]
                 public byte[] Padding3;
             }
 

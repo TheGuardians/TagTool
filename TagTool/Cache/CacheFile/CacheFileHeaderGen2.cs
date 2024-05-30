@@ -5,7 +5,7 @@ using TagTool.Tags;
 
 namespace TagTool.Cache
 {
-    [TagStructure(Size = 0x800, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Vista)]
+    [TagStructure(Size = 0x800, MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo2Vista)]
     public class CacheFileHeaderGen2 : CacheFileHeader
     {
         //
@@ -80,7 +80,7 @@ namespace TagTool.Cache
         [TagField(MinVersion = CacheVersion.Halo2Vista)]
         public uint MoppCodesChecksum;
 
-        [TagField(Length = 1320, MinVersion = CacheVersion.Halo2Beta, MaxVersion = CacheVersion.Halo2Xbox)]
+        [TagField(Length = 1320, MinVersion = CacheVersion.Halo2Alpha, MaxVersion = CacheVersion.Halo2Xbox)]
         public byte[] UnknownsH2X = new byte[1320];
 
         [TagField(Length = 1284, MinVersion = CacheVersion.Halo2Vista, MaxVersion = CacheVersion.Halo2Vista)]

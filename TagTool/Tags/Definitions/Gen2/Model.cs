@@ -307,20 +307,20 @@ namespace TagTool.Tags.Definitions.Gen2
             /// <summary>
             /// the default initial and maximum shield vitality of this object
             /// </summary>
-            public float MaximumShieldVitality;
+            public float MaxShieldVitality;
             public StringId GlobalShieldMaterialName;
             /// <summary>
             /// the minimum damage required to stun this object's shields
             /// </summary>
-            public float MinimumStunDamage1;
+            public float ShieldMinStunDamage;
             /// <summary>
             /// the length of time the shields stay stunned (do not recharge) after taking damage
             /// </summary>
-            public float StunTime1; // seconds
+            public float ShieldStunTime; // seconds
             /// <summary>
             /// the length of time it would take for the shields to fully recharge after being completely depleted
             /// </summary>
-            public float RechargeTime1; // seconds
+            public float ShieldRechargeTime; // seconds
             public float ShieldDamagedThreshold;
             [TagField(ValidTags = new [] { "effe" })]
             public CachedTag ShieldDamagedEffect;

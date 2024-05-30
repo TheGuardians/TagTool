@@ -49,7 +49,7 @@ namespace TagTool.Commands.Modding
                 path = path.Substring(0, path.Length - 4);
 
                 if (!args[0].Contains("/") && !args[0].Contains("\\"))
-                    path += "mods\\downloads\\" + args[0];
+                    path += "mods\\" + args[0];
                 else
                     path = args[0];
 

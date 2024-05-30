@@ -12,6 +12,7 @@ using TagTool.Tags.Definitions;
 using TagTool.Tags.Definitions.Common;
 using TagTool.Tags.Resources;
 using TagTool.Geometry;
+using TagTool.BlamFile;
 
 namespace TagTool.Commands.Porting
 {
@@ -553,12 +554,12 @@ namespace TagTool.Commands.Porting
                             var lightingElement = Lbsp.Geometry.InstancedGeometryPerPixelLighting[instanceIndex];
                             if (lightingElement.VertexBufferIndex != -1)
                             {
-                                sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = (short)newPerPixelLighting.Count;
+                                sbsp.InstancedGeometryInstances[instanceIndex].LightmapTexcoordBlockIndex = (short)newPerPixelLighting.Count;
                                 newPerPixelLighting.Add(lightingElement);
                             }
                             else
                             {
-                                sbsp.InstancedGeometryInstances[instanceIndex].LodDataIndex = -1;
+                                sbsp.InstancedGeometryInstances[instanceIndex].LightmapTexcoordBlockIndex = -1;
                             }
                         }
                         Lbsp.Geometry.InstancedGeometryPerPixelLighting = newPerPixelLighting;
@@ -998,8 +999,8 @@ namespace TagTool.Commands.Porting
                         newPaletteIndex = -1;
                         break;
                     default:
-                        if (!string.IsNullOrEmpty(mpProperties.MegaloLabel))
-                            new TagToolWarning($"unknown megalo label: {mpProperties.MegaloLabel}");
+                        //if (!string.IsNullOrEmpty(mpProperties.MegaloLabel))
+                        //    new TagToolWarning($"unknown megalo label: {mpProperties.MegaloLabel}");
                         break;
                 }
 
@@ -1849,7 +1850,7 @@ namespace TagTool.Commands.Porting
                         expr.Opcode = 0x4B2; // -> objectives_show
                         return true;
                     case 0x118: // unit_add_equipment
-                        expr.Opcode = 0x126; // ^
+                        expr.Opcode = 0x136; // -> unit_add_equipment
                         UpdateUnitAddEquipmentScript(cacheStream, scnr, expr);
                         return true;
 
@@ -1901,7 +1902,7 @@ namespace TagTool.Commands.Porting
                         }
 
                         profileExpr.ValueType.Halo3Retail = HsType.Halo3RetailValue.StartingProfile;
-                        Array.Copy(BitConverter.GetBytes((short)startingProfileIndex), expr.Data, 2);
+                        profileExpr.Data = new byte[] { (byte)((startingProfileIndex >> 8)), (byte)(startingProfileIndex & 0xFF), 0xFF, 0xFF };
                         return;
                     }
                 }

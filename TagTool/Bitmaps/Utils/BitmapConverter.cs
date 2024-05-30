@@ -236,7 +236,7 @@ namespace TagTool.Bitmaps.Utils
                 resultBitmap.Type = BitmapType.Texture3D;
         }
 
-        private static void TrimLowestMipmaps(BaseBitmap resultBitmap)
+        public static void TrimLowestMipmaps(BaseBitmap resultBitmap)
         {
             int dataSize = 0;
             int mipMapCount;

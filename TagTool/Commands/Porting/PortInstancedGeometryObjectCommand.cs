@@ -29,7 +29,7 @@ namespace TagTool.Commands.Porting
                 "PortInstancedGeometryObject",
                 "Converts one or more instanced geometry instances to objects.",
 
-                "PortInstancedGeometryObject [PortingFlags] [BspIndex] [nocenter] [forgepalette] [allunique] [<Instance index or name> [New Tagname]]",
+                "PortInstancedGeometryObject [PortingFlags] [BspIndex] [nocenter] [forge] [allunique] [<Instance index or name> [New Tagname]]",
                 "When porting multiple, provide each on a new line after arguments."
                 + "\nWhen the cache file scenario has only one BSP (most MP levels), providing a BspIndex is unnecessary."
                 + "\n\nUse \"forgepalette\" to add your ported instances to the forge palette."
@@ -45,11 +45,8 @@ namespace TagTool.Commands.Porting
         public override object Execute(List<string> args)
         {
             var argStack = new Stack<string>(args.AsEnumerable().Reverse());
-
-            if (argStack.Count < 1)
-                return new TagToolError(CommandError.ArgCount);
-
             var portingFlags = ParsePortingFlags(argStack);
+            var filter = "";
 
             using (var blamCacheStream = BlamCache.OpenCacheRead())
             using (var hoCacheStream = HoCache.OpenCacheReadWrite())
@@ -72,7 +69,9 @@ namespace TagTool.Commands.Porting
                 else if (argStack.Count > 0 && int.TryParse(argStack.Peek(), out var discard))
                     argStack.Pop();
 
-                var blamSbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamCacheStream, blamScnr.StructureBsps[sbspIndex].StructureBsp);
+                CachedTag sbspTag = blamScnr.StructureBsps[sbspIndex].StructureBsp;
+                var sbspName = sbspTag.Name.Split('\\').Last();
+                var blamSbsp = BlamCache.Deserialize<ScenarioStructureBsp>(blamCacheStream, sbspTag);
 
                 if (argStack.Count > 0 && argStack.Peek().ToLower() == "nocenter")
                 {
@@ -80,7 +79,7 @@ namespace TagTool.Commands.Porting
                     centergeometry = false;
                 }
                 // Get forge palette category for all instances, if provided
-                if (argStack.Count > 0 && argStack.Peek().ToLower().StartsWith("forgepalette"))
+                if (argStack.Count > 0 && argStack.Peek().ToLower().StartsWith("forge"))
                 {
                     var argParameters = argStack.Peek().Split(':');
                     if (argParameters.Count() == 1)
@@ -103,6 +102,12 @@ namespace TagTool.Commands.Porting
                 {
                     argStack.Pop();
                     allunique = true;
+
+                    if (argStack.Count > 0)
+                    {
+                        filter = argStack.Peek().ToLower();
+                        argStack.Pop();
+                    }
                 }
                 if (argStack.Count > 0)
                 {
@@ -145,11 +150,17 @@ namespace TagTool.Commands.Porting
                             var instance = blamSbsp.InstancedGeometryInstances[i];
                             var name = BlamCache.StringTable.GetString(instance.Name);
                             if (visitedNames.Add(name) && visitedDefinitions.Add(instance.DefinitionIndex))
-                                uniqueInstances.Add((i, name));
+                            {
+                                if(string.IsNullOrEmpty(filter) || name.ToLower().Contains(filter))
+                                    uniqueInstances.Add((i, name));
+                            }
                         }
                     }
 
-                    foreach(var (index, name) in uniqueInstances)
+                    globalcategory = true;
+                    newCategoryName = sbspName;
+
+                    foreach (var (index, name) in uniqueInstances)
                     {
                         if (BlamCache.Platform == CachePlatform.MCC && name.Contains("merged"))
                             break;
@@ -182,10 +193,12 @@ namespace TagTool.Commands.Porting
                         var categoryIndex = -1;
                         string paletteName = string.Empty;
                         string categoryName = string.Empty;
+                        var forge = false;
 
-                        if (parts.Count() > 1 && parts[1].StartsWith("forgepalette"))
+                        if (parts.Count() > 1 && parts[1].StartsWith("forge"))
                         {
                             forgeArgs = parts[1].Split(':');
+                            forge = true;
 
                             if (forgeArgs.Count() == 1)
                             {
@@ -211,23 +224,37 @@ namespace TagTool.Commands.Porting
                             index = FindBlockIndex(blamSbsp.InstancedGeometryInstances, identifier);
 
                         if (index == -1)
-                            return new TagToolError(CommandError.OperationFailed, $"Instance not found by identifier {identifier}!");
+                        {
+                            new TagToolError(CommandError.OperationFailed, $"Instance not found by identifier {identifier}!");
+                            continue;
+                        }
+                        if (desiredInstances.ContainsKey(index))
+                        {
+                            new TagToolError(CommandError.OperationFailed, $"Instance {identifier} already selected!");
+                            continue;
+                        }
 
                         desiredInstances.Add(index, tagname);
-                        forgeItems.Add(new ForgeGlobalsDefinition.PaletteItem()
+                        if (forge)
                         {
-                            Name = paletteName,
-                            Type = ForgeGlobalsDefinition.PaletteItemType.Prop,
-                            CategoryIndex = (short)categoryIndex,
-                            DescriptionIndex = -1,
-                            MaxAllowed = (ushort)index,
-                            Object = null
-                        });
+                            forgeItems.Add(new ForgeGlobalsDefinition.PaletteItem()
+                            {
+                                Name = paletteName,
+                                Type = ForgeGlobalsDefinition.PaletteItemType.Prop,
+                                CategoryIndex = (short)categoryIndex,
+                                DescriptionIndex = -1,
+                                MaxAllowed = (ushort)index,
+                                Object = null
+                            });
+                        }
                     }
                 }
 
                 if (desiredInstances.Count < 1)
+                {
+                    new TagToolWarning("No qualifying instances found!");
                     return true;
+                }
 
                 if (globalcategory && newCategoryName != null)
                 {

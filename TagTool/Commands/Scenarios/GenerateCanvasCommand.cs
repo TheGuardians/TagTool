@@ -62,7 +62,7 @@ namespace TagTool.Commands.Scenarios
                 MapAuthor = "ElDewrito",
                 MapId = 9001,
                 ScenarioPath = @"levels\eldewrito\canvas\canvas",
-                WorldBounds = new RealRectangle3d(-1000, 1000, -1000, 1000, -1000, 1000)
+                WorldBounds = new RealRectangle3d(-200, 200, -200, 200, -200, 200)
             };
 
             bool quick = false;
@@ -98,36 +98,39 @@ namespace TagTool.Commands.Scenarios
 
         private bool AskForParameterInput(GeneratorParameters parameters)
         {
-            Console.WriteLine("\nEnter desired scenario tagname (e.g. levels\\eldewrito\\canvas\\canvas):");
-            parameters.ScenarioPath = CommandRunner.ApplyUserVars(@Console.ReadLine().ToLower(), IgnoreArgumentVariables);
-            if (parameters.ScenarioPath.Length < 4)
+            if (!RequestBoundedInput("Enter desired scenario tagname (e.g. levels\\eldewrito\\canvas\\canvas):",
+                out parameters.ScenarioPath))
+                return false;
+
+            var fullName = $"{parameters.ScenarioPath}.scnr";
+            if (Cache.TagCache.TagExists(fullName))
             {
-                new TagToolError(CommandError.CustomError, "Provided tagname must be greater than 3 characters.");
+                new TagToolError(CommandError.CustomError, "A scenario tag with this name already exists.");
                 return false;
             }
-            Console.WriteLine("Enter the map display name (4-15 characters):");
-            parameters.MapName = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
-            if (parameters.MapName.Length > 15 || parameters.MapName.Length < 4)
+            else if (!Cache.TagCache.IsTagPathValid(fullName))
             {
-                new TagToolError(CommandError.CustomError, "Provided name must be between 4 and 15 characters.");
+                new TagToolError(CommandError.CustomError, $"Malformed target tag path '{parameters.ScenarioPath}'");
                 return false;
             }
-            Console.WriteLine("Enter the map description: (<128 characters)");
-            parameters.MapDescription = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
-            if (parameters.MapDescription.Length > 127)
-            {
-                new TagToolError(CommandError.CustomError, "Description exceeds 127 characters.");
+
+            if (!RequestBoundedInput("Enter the map display name (<16 characters):",
+                out parameters.MapName, 15))
                 return false;
-            }
-            Console.WriteLine("Enter the map author (4-15 characters):");
-            parameters.MapAuthor = CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables);
-            if (parameters.MapAuthor.Length > 15 || parameters.MapAuthor.Length < 4)
-            {
-                new TagToolError(CommandError.CustomError, "Author name must be between 4 and 15 characters.");
+
+            if (!RequestBoundedInput("Enter the map description: (<128 characters)",
+                out parameters.MapDescription, 127))
                 return false;
-            }
-            Console.WriteLine("Enter a mapID (integer) between 7000 and 65535:");
-            if (int.TryParse(CommandRunner.ApplyUserVars(Console.ReadLine(), IgnoreArgumentVariables), out int result))
+
+            if (!RequestBoundedInput("Enter the map author (<16 characters):",
+                out parameters.MapDescription, 15))
+                return false;
+
+            if (!RequestBoundedInput("Enter a mapID (integer) between 7000 and 65535:",
+                out string mapIdString, 5))
+                return false;
+
+            if (int.TryParse(mapIdString, out int result))
             {
                 parameters.MapId = result;
                 if (parameters.MapId < 7001 || parameters.MapId > 65534)
@@ -139,6 +142,46 @@ namespace TagTool.Commands.Scenarios
             else
             {
                 new TagToolError(CommandError.CustomError, "MapID must be an integer.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool RequestBoundedInput(string prompt, out string value, int upperBound = 0, int lowerBound = 0)
+        {
+            Console.WriteLine(prompt);
+            string input = CommandRunner.ApplyUserVars(@Console.ReadLine().ToLower(), IgnoreArgumentVariables);
+
+            if (InputIsValid(input, upperBound, lowerBound))
+            {
+                value = input;
+                return true;
+            }
+            else
+            {
+                value = null;
+                return false;
+            }
+        }
+
+        private bool InputIsValid(string input, int upperBound = 0, int lowerBound = 0)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                new TagToolError(CommandError.CustomError, $"Input is null or empty.");
+                return false;
+            }
+
+            if (upperBound > 0 && input.Length > upperBound)
+            {
+                new TagToolError(CommandError.CustomError, $"Input exceeds {upperBound} characters.");
+                return false;
+            }
+
+            if (input.Contains("|"))
+            {
+                new TagToolError(CommandError.CustomError, $"Input contains invalid characters.");
                 return false;
             }
 
@@ -175,11 +218,13 @@ namespace TagTool.Commands.Scenarios
             var sbspTag = Cache.TagCache.AllocateTag<ScenarioStructureBsp>($"{scenarioPath}_bsp_0");
             var lbspTag = Cache.TagCache.AllocateTag<ScenarioLightmapBspData>($"{scenarioPath}_faux_lightmap_bsp_data_0");
             var sldtTag = Cache.TagCache.AllocateTag<ScenarioLightmapBspData>($"{scenarioPath}_faux_lightmap");
+            var cfxsTag = Cache.TagCache.AllocateTag<CameraFxSettings>($"{scenarioPath}");
+
+            var cfxs = Cache.Deserialize<CameraFxSettings>(stream, Cache.TagCache.GetTag<CameraFxSettings>(@"globals\default"));
 
             Cache.TagCache.TryGetTag<Scenery>(@"levels\multi\riverworld\sky\riverworld", out var skySceneryTag);
             Cache.TagCache.TryGetTag<Wind>(@"levels\multi\riverworld\wind_riverworld", out var windTag);
             Cache.TagCache.TryGetTag<Bitmap>(@"levels\multi\riverworld\riverworld_riverworld_cubemaps", out var cubemapsTag);
-            Cache.TagCache.TryGetTag<CameraFxSettings>(@"levels\multi\riverworld\riverworld", out var cfxsTag);
             Cache.TagCache.TryGetTag<SkyAtmParameters>(@"levels\multi\riverworld\sky\riverworld", out var skyaTag);
             Cache.TagCache.TryGetTag<ChocolateMountainNew>(@"levels\multi\riverworld\riverworld", out var chmtTag);
             Cache.TagCache.TryGetTag<PerformanceThrottles>(@"levels\multi\riverworld\riverworld", out var perfTag);
@@ -199,7 +244,7 @@ namespace TagTool.Commands.Scenarios
                         StructureBsp = sbspTag,
                         Cubemap = cubemapsTag,
                         Wind = windTag,
-                        Flags = 32,
+                        Flags = (Scenario.StructureBspBlock.StructureBspFlags)32,
                         DefaultSkyIndex = -1
                     }
                 };
@@ -232,6 +277,7 @@ namespace TagTool.Commands.Scenarios
                 sbsp.CompatibilityFlags |= ScenarioStructureBsp.StructureBspCompatibilityValue.Reach;
             }
 
+            Cache.Serialize(stream, cfxsTag, cfxs);
             Cache.Serialize(stream, sbspTag, sbsp);
             Cache.Serialize(stream, lbspTag, lbsp);
             Cache.Serialize(stream, sldtTag, sldt);

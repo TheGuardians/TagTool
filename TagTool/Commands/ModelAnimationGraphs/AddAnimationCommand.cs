@@ -4,6 +4,7 @@ using System.Linq;
 using TagTool.Common;
 using System.IO;
 using TagTool.Cache;
+using TagTool.Cache.HaloOnline;
 using TagTool.IO;
 using TagTool.Tags.Definitions;
 using TagTool.Tags;
@@ -12,6 +13,8 @@ using TagTool.Animations;
 using TagTool.Tags.Resources;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Bson;
+using System.Reflection.Emit;
 
 namespace TagTool.Commands.ModelAnimationGraphs
 {
@@ -115,11 +118,9 @@ namespace TagTool.Commands.ModelAnimationGraphs
                         break;
                     case ".JMT":
                         FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dyaw;
-                        new TagToolWarning("Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     case ".JMZ":
                         FrameInfoType = ModelAnimationTagResource.GroupMemberMovementDataType.dx_dy_dz_dyaw;
-                        new TagToolWarning("Advanced Movement data not currently supported, animation may not display properly!");
                         break;
                     default:
                         new TagToolError(CommandError.CustomError, $"Filetype {file_extension.ToUpper()} not recognized!");
@@ -127,10 +128,19 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 }
 
                 //get or create stringid for animation block name
+                bool replacing = false;
                 string file_name = Path.GetFileNameWithoutExtension(filepath.FullName).Replace(' ', ':');
                 StringId animation_name = CacheContext.StringTable.GetStringId(file_name);
+
+                int existingIndex = -1;
                 if (animation_name == StringId.Invalid)
                     animation_name = CacheContext.StringTable.AddString(file_name);
+                else
+                {
+                    existingIndex = Animation.Animations.FindIndex(n => n.Name == animation_name);
+                    if(existingIndex != -1)
+                        replacing = true;
+                }                                
 
                 //create new importer class and import the source file
                 var importer = new AnimationImporter();
@@ -153,28 +163,11 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 AdjustImportedNodes(importer);
 
                 //process node data in advance of serialization
-                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, AnimationType, FrameInfoType);
+                importer.ProcessNodeFrames((GameCacheHaloOnlineBase)CacheContext, Animation, AnimationType, FrameInfoType);
 
                 //Check the nodes to verify that this animation can be imported to this jmad
                 //if (!importer.CompareNodes(Animation.SkeletonNodes, (GameCacheHaloOnlineBase)CacheContext))
                 //    return false;
-
-                //build a new resource 
-                ModelAnimationTagResource newResource = new ModelAnimationTagResource
-                {
-                    GroupMembers = new TagTool.Tags.TagBlock<ModelAnimationTagResource.GroupMember>()
-                };
-                newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext));
-                newResource.GroupMembers.AddressType = CacheAddressType.Definition;
-                //serialize the new resource into the cache
-                TagResourceReference resourceref = CacheContext.ResourceCache.CreateModelAnimationGraphResource(newResource);
-
-                //add resource reference to the animation tag
-                Animation.ResourceGroups.Add(new ModelAnimationGraph.ResourceGroup
-                {
-                    ResourceReference = resourceref,
-                    MemberCount = 1
-                });
 
                 //serialize animation block values
                 var AnimationBlock = new ModelAnimationGraph.Animation
@@ -203,8 +196,42 @@ namespace TagTool.Commands.ModelAnimationGraphs
                 if (isWorldRelative)
                     AnimationBlock.AnimationData.InternalFlags |= ModelAnimationGraph.Animation.InternalFlagsValue.WorldRelative;
 
-                Animation.Animations.Add(AnimationBlock);
-                Console.WriteLine($"Added {file_name} successfully!");
+                //build a new resource 
+                ModelAnimationTagResource newResource = new ModelAnimationTagResource
+                {
+                    GroupMembers = new TagTool.Tags.TagBlock<ModelAnimationTagResource.GroupMember>()
+                };
+                newResource.GroupMembers.Add(importer.SerializeAnimationData((GameCacheHaloOnlineBase)CacheContext));
+                newResource.GroupMembers.AddressType = CacheAddressType.Definition;
+                //serialize the new resource into the cache
+                TagResourceReference resourceref = CacheContext.ResourceCache.CreateModelAnimationGraphResource(newResource);
+
+                //add resource reference to the animation tag
+                Animation.ResourceGroups.Add(new ModelAnimationGraph.ResourceGroup
+                {
+                    ResourceReference = resourceref,
+                    MemberCount = 1
+                });
+
+                AnimationBlock.AnimationData.ResourceGroupIndex = (short)(Animation.ResourceGroups.Count - 1);
+                AnimationBlock.AnimationData.ResourceGroupMemberIndex = 0;
+
+                if (replacing)
+                {
+                    Animation.Animations[existingIndex] = AnimationBlock;
+                }
+                else
+                {
+                    Animation.Animations.Add(AnimationBlock);
+                    existingIndex = Animation.Animations.Count - 1;
+                }
+
+                AddModeEntries(file_name, existingIndex);
+                
+                if(replacing)
+                    Console.WriteLine($"Replaced {file_name} successfully!");
+                else
+                    Console.WriteLine($"Added {file_name} successfully!");
             }
             //save changes to the current tag
             CacheContext.SaveStrings();
@@ -217,6 +244,150 @@ namespace TagTool.Commands.ModelAnimationGraphs
             return true;
         }
 
+        public void AddModeEntries(string filename, int animationIndex)
+        {
+            List<string> tokens = filename.Split(':').ToList();
+            List<string> unsupportedTokens = 
+                new List<string> { "s_kill", "s_ping", "h_kill", "h_ping", "sync_actions", "suspension", "tread", "object", "2", "device"};
+            if(tokens.Any(t => unsupportedTokens.Contains(t)))
+            {
+                new TagToolWarning($"Unsupported string token found in filename {filename}. Manual mode addition is required.");
+                return;
+            }
+
+            //variants are all handled by the same mode entry
+            if(tokens.Last().StartsWith("var"))
+                tokens.RemoveAt(tokens.Count - 1);
+
+            //fixups for specific mode tokens
+            List<string> edgeCases = new List<string> { "vehicle", "first_person", "weapon"};
+            if (edgeCases.Contains(tokens[0]))
+                tokens[0] = "any";
+
+            string modeString = "";
+            string classString = "";
+            string typeString = "";
+            string actionString = "";
+
+            switch (tokens.Count)
+            {
+                case 1:
+                    modeString = "any";
+                    classString = "any";
+                    typeString = "any";
+                    actionString = tokens[0];
+                    break;
+                case 2:
+                    modeString = tokens[0];
+                    classString = "any";
+                    typeString = "any";
+                    actionString = tokens[1];
+                    break;
+                case 3:
+                    modeString = tokens[0];
+                    classString = tokens[1];
+                    typeString = "any";
+                    actionString = tokens[2];
+                    break;
+                case 4:
+                    modeString = tokens[0];
+                    classString = tokens[1];
+                    typeString = tokens[2];
+                    actionString = tokens[3];
+                    break;
+            }
+
+            int modeIndex = AddMode(modeString);
+            int classIndex = AddClass(modeIndex, classString);
+            int typeIndex = AddType(modeIndex, classIndex, typeString);
+            AddAction(modeIndex, classIndex, typeIndex, actionString, animationIndex);
+
+            Console.WriteLine($"Successfully added mode entries for '{modeString}:{classString}:{typeString}:{actionString}'!");
+        }
+
+        public int AddMode(string modeString)
+        {
+            StringId modeStringID = CacheContext.StringTable.GetStringId(modeString);
+            int modesIndex = Animation.Modes.FindIndex(m => m.Name == modeStringID);
+            if (modesIndex != -1)
+                return modesIndex;
+            else
+            {
+                Animation.Modes.Add(new ModelAnimationGraph.Mode
+                {
+                    Name = modeStringID,
+                    WeaponClass = new List<ModelAnimationGraph.Mode.WeaponClassBlock>()
+                });
+                return Animation.Modes.Count - 1;
+            }
+        }
+
+        public int AddClass(int modeIndex, string classString)
+        {
+            StringId classStringID = CacheContext.StringTable.GetStringId(classString);
+            int classIndex = Animation.Modes[modeIndex].WeaponClass.FindIndex(m => m.Label == classStringID);
+            if (classIndex != -1)
+                return classIndex;
+            else
+            {
+                Animation.Modes[modeIndex].WeaponClass.Add(new ModelAnimationGraph.Mode.WeaponClassBlock
+                {
+                    Label = classStringID,
+                    WeaponType = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock>()
+                });
+                return Animation.Modes[modeIndex].WeaponClass.Count - 1;
+            }
+        }
+
+        public int AddType(int modeIndex, int classIndex, string typeString)
+        {
+            StringId typeStringID = CacheContext.StringTable.GetStringId(typeString);
+            int typeIndex = Animation.Modes[modeIndex].WeaponClass[classIndex].WeaponType.
+                FindIndex(m => m.Label == typeStringID);
+            if (typeIndex != -1)
+                return typeIndex;
+            else
+            {
+                Animation.Modes[modeIndex].WeaponClass[classIndex].WeaponType.Add(new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock
+                {
+                    Label = typeStringID,
+                    Set = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.AnimationSet
+                    {
+                        Actions = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry>(),
+                        Overlays = new List<ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry>()
+                    }
+                });
+                return Animation.Modes[modeIndex].WeaponClass[classIndex].WeaponType.Count - 1;
+            }
+        }
+
+        public void AddAction(int modeIndex, int classIndex, int typeIndex, string actionString, int animationIndex)
+        {
+            StringId actionStringID = CacheContext.StringTable.GetStringId(actionString);
+            var set = Animation.Modes[modeIndex].WeaponClass[classIndex].WeaponType[typeIndex].Set;
+            var newAction = new ModelAnimationGraph.Mode.WeaponClassBlock.WeaponTypeBlock.Entry
+            {
+                Label = actionStringID,
+                GraphIndex = -1,
+                Animation = (short)animationIndex
+            };
+            if (AnimationType == ModelAnimationGraph.FrameType.Base) //for base actions
+            {
+                int actionIndex = set.Actions.FindIndex(m => m.Label == actionStringID);
+                if (actionIndex != -1)
+                    set.Actions[actionIndex] = newAction;
+                else
+                    set.Actions.Add(newAction);
+            }
+            else //handles overlays and replacements
+            {
+                int actionIndex = set.Overlays.FindIndex(m => m.Label == actionStringID);
+                if (actionIndex != -1)
+                    set.Overlays[actionIndex] = newAction;
+                else
+                    set.Overlays.Add(newAction);
+            }           
+        }
         public void AdjustImportedNodes(AnimationImporter importer)
         {
             //now order imported nodes according to jmad nodes

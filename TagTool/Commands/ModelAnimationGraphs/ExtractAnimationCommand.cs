@@ -11,6 +11,7 @@ using System.Numerics;
 using TagTool.Commands.Common;
 using TagTool.Animations;
 using TagTool.Animations.Data;
+using static TagTool.Animations.AnimationDefaultNodeHelper;
 using TagTool.Tags.Resources;
 using System.Text;
 using System.Threading.Tasks;
@@ -83,7 +84,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
 
             Console.WriteLine($"###Extracting {AnimationIndices.Count} animation(s)...");
 
-            List<Node> renderModelNodes = GetNodeDefaultValues();
+            List<Node> renderModelNodes = GetNodeDefaultValues(CacheContext, Animation);
 
             //shift reach data into h3 fields
             if (CacheContext.Version >= CacheVersion.HaloReach)
@@ -160,7 +161,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             var animatedflagssize = CacheContext.Version >= CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.AnimatedNodeFlags : resourcemember.PackedDataSizes.AnimatedNodeFlags;
             var staticdatasize = CacheContext.Version >= CacheVersion.HaloReach ? resourcemember.PackedDataSizesReach.StaticDataSize : resourcemember.PackedDataSizes.StaticDataSize;
             AnimationResourceData data = new AnimationResourceData(resourcemember.FrameCount, 
-                resourcemember.NodeCount, CalculateNodeListChecksum(Animation.SkeletonNodes, 0), 
+                resourcemember.NodeCount, CalculateNodeListChecksum(CacheContext, Animation.SkeletonNodes, 0), 
                 (FrameInfoType)resourcemember.MovementDataType, staticflagssize, animatedflagssize, staticdatasize);
             using(var stream = new MemoryStream(resourcemember.AnimationData.Data))
             using(var reader = new EndianReader(stream, CacheContext.Endianness))
@@ -170,94 +171,7 @@ namespace TagTool.Commands.ModelAnimationGraphs
             }
             return data;
         }
-
-        public List<Node> GetNodeDefaultValues()
-        {
-            List<Node> NodeList = new List<Node>();
-            List<RenderModel.Node> PrimaryRenderModelNodes = new List<RenderModel.Node>();
-            List<RenderModel.Node> SecondaryRenderModelNodes = new List<RenderModel.Node>();
-            if (Animation.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel)))
-            {
-                var primarynodes = Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel)).ToList();
-                PrimaryRenderModelNodes = GetRenderModelNodes(primarynodes, 
-                    CalculateNodeListChecksum(Animation.SkeletonNodes, 0, true));
-                if(PrimaryRenderModelNodes.Count < primarynodes.Count)
-                    new TagToolWarning($"Matching primary model not found! Animation may not appear properly.");
-            }
-            if (Animation.SkeletonNodes.Any(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel)))
-            {
-                var secondarynodes = Animation.SkeletonNodes.Where(n => n.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel)).ToList();
-                SecondaryRenderModelNodes = GetRenderModelNodes(secondarynodes,
-                    CalculateNodeListChecksum(Animation.SkeletonNodes, 0, false));
-                if (SecondaryRenderModelNodes.Count < secondarynodes.Count)
-                    new TagToolWarning($"Matching secondary model not found! Animation may not appear properly.");
-            }
-
-            foreach (var skellynode in Animation.SkeletonNodes)
-            {
-                RenderModel.Node matchingnode = new RenderModel.Node();
-                if (skellynode.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel))
-                {
-                    matchingnode = PrimaryRenderModelNodes.FirstOrDefault(n => n.Name == skellynode.Name);
-                }
-                else if (skellynode.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel))
-                {
-                    matchingnode = SecondaryRenderModelNodes.FirstOrDefault(n => n.Name == skellynode.Name);
-                }
-
-                if (matchingnode == null)
-                {
-                    matchingnode = new RenderModel.Node();
-                    new TagToolWarning($"No matching render model node found for {CacheContext.StringTable.GetString(skellynode.Name)}");
-                }
-
-                NodeList.Add(new Node
-                {
-                    Name = CacheContext.StringTable.GetString(skellynode.Name),
-                    ParentNode = skellynode.ParentNodeIndex,
-                    FirstChildNode = skellynode.FirstChildNodeIndex,
-                    NextSiblingNode = skellynode.NextSiblingNodeIndex,
-                    Translation = matchingnode.DefaultTranslation,
-                    Rotation = new Quaternion(matchingnode.DefaultRotation.I, matchingnode.DefaultRotation.J, matchingnode.DefaultRotation.K, matchingnode.DefaultRotation.W),
-                    Scale = matchingnode.DefaultScale
-                });
-            }
-                
-            return NodeList;
-        }
-
-        public List<RenderModel.Node> GetRenderModelNodes(List<ModelAnimationGraph.SkeletonNode> jmadnodes, int nodelistchecksum)
-        {
-            List<RenderModel.Node> Nodes = new List<RenderModel.Node>();
-            using (var stream = CacheContext.OpenCacheRead())
-            {
-                List<StringId> jmadnodenames = jmadnodes.Select(n => n.Name).ToList();
-                int bestmatchcount = 0;
-
-                foreach (CachedTag tag in CacheContext.TagCache.NonNull())
-                {
-                    if (!tag.IsInGroup(new Tag("mode")))
-                        continue;
-
-                    RenderModel modetag = CacheContext.Deserialize<RenderModel>(stream, tag);
-
-                    int currentmatchcount = 0;
-                    var currentNodes = modetag.Nodes.Where(n => jmadnodenames.Contains(n.Name)).ToList();
-                    currentmatchcount = currentNodes.Count;
-                    if (currentmatchcount >= bestmatchcount)
-                    {
-                        bestmatchcount = currentmatchcount;
-                        Nodes = currentNodes.DeepClone();
-                        if (currentmatchcount == jmadnodes.Count &&
-                            CalculateNodeListChecksum(modetag.Nodes, 0) == nodelistchecksum)
-                        {
-                            return Nodes;
-                        }
-                    }
-                }
-            }
-            return Nodes;
-        }
+        
         public ModelAnimationGraph.Animation GetBaseAnimation(string animationName)
         {
             var baseanims = Animation.Animations.Where(q => q.AnimationData != null && q.AnimationData.AnimationType == 0 && q.AnimationData.FrameInfoType == 0);
@@ -269,80 +183,6 @@ namespace TagTool.Commands.ModelAnimationGraphs
             else if (animationName.Count(c => c == separatorChar) > 1)
                 baseAnimationPrefix = strArray[0] + ":" + strArray[1];
             return baseanims.FirstOrDefault(q => CacheContext.StringTable.GetString(q.Name).StartsWith(baseAnimationPrefix) && CacheContext.StringTable.GetString(q.Name).Contains("idle"));
-        }
-
-        //this function generates a nodelist checksum identical to the official halo 1 blitzkrieg jma exporter
-        //later halo games also use this same format
-        public int CalculateNodeListChecksum(List<ModelAnimationGraph.SkeletonNode> Nodes, int nodeindex, bool isPrimary, int checksum = 0)
-        {
-            ModelAnimationGraph.SkeletonNode node = Nodes[nodeindex];
-
-            bool isValidNode = isPrimary ? node.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.PrimaryModel) :
-                node.ModelFlags.HasFlag(ModelAnimationGraph.SkeletonNode.SkeletonModelFlags.SecondaryModel);
-
-            if (isValidNode)
-            {
-                checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
-                checksum += CalculateSingleNodeChecksum(CacheContext.StringTable.GetString(node.Name));
-                checksum = (int)((checksum >> 30 | checksum << 2) & 0xFFFFFFFF);
-            }
-
-            int nextnodeindex = node.FirstChildNodeIndex;
-            while (nextnodeindex != -1)
-            {
-                checksum = CalculateNodeListChecksum(Nodes, nextnodeindex, isPrimary, checksum);
-                nextnodeindex = Nodes[nextnodeindex].NextSiblingNodeIndex;
-            }
-
-            if (isValidNode)
-                checksum = (int)((checksum << 30 | checksum >> 2) & 0xFFFFFFFF);
-            return checksum;
-        }
-        public int CalculateNodeListChecksum(List<ModelAnimationGraph.SkeletonNode> Nodes, int nodeindex, int checksum = 0)
-        {
-            ModelAnimationGraph.SkeletonNode node = Nodes[nodeindex];
-
-            checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
-            checksum += CalculateSingleNodeChecksum(CacheContext.StringTable.GetString(node.Name));
-            checksum = (int)((checksum >> 30 | checksum << 2) & 0xFFFFFFFF);
-
-            int nextnodeindex = node.FirstChildNodeIndex;
-            while (nextnodeindex != -1)
-            {
-                checksum = CalculateNodeListChecksum(Nodes, nextnodeindex, checksum);
-                nextnodeindex = Nodes[nextnodeindex].NextSiblingNodeIndex;
-            }
-
-            checksum = (int)((checksum << 30 | checksum >> 2) & 0xFFFFFFFF);
-            return checksum;
-        }
-        public int CalculateNodeListChecksum(List<RenderModel.Node> Nodes, int nodeindex, int checksum = 0)
-        {
-            RenderModel.Node node = Nodes[nodeindex];
-            checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
-            checksum += CalculateSingleNodeChecksum(CacheContext.StringTable.GetString(node.Name));
-            checksum = (int)((checksum >> 30 | checksum << 2) & 0xFFFFFFFF);
-
-            int nextnodeindex = node.FirstChildNode;
-            while (nextnodeindex != -1)
-            {
-                checksum = CalculateNodeListChecksum(Nodes, nextnodeindex, checksum);
-                nextnodeindex = Nodes[nextnodeindex].NextSiblingNode;
-            }
-
-            checksum = (int)((checksum << 30 | checksum >> 2) & 0xFFFFFFFF);
-            return checksum;
-        }
-        public int CalculateSingleNodeChecksum(string nodename)
-        {
-            int checksum = 0;
-            foreach (var chardata in nodename.ToArray())
-            {
-                checksum = (int)((checksum >> 31 | checksum << 1) & 0xFFFFFFFF);
-                checksum += (byte)chardata;
-            }
-            return (int)(checksum & 0xFFFFFFFF);
-        }
-
+        }   
     }
 }

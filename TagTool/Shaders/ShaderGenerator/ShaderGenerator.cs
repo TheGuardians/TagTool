@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using HaloShaderGenerator;
 using HaloShaderGenerator.Generator;
 using HaloShaderGenerator.Globals;
+using HaloShaderGenerator.Shader;
 using HaloShaderGenerator.Shared;
 using HaloShaderGenerator.TemplateGenerator;
 using TagTool.Cache;
@@ -378,7 +379,7 @@ namespace TagTool.Shaders.ShaderGenerator
         {
             if(mappings.Count > 0)
             {
-                table[usage] = new RenderMethodTemplate.TagBlockIndex
+                table[usage] = new TagBlockIndex
                 {
                     Offset = (ushort)rmt2.RoutingInfo.Count,
                     Count = (ushort)mappings.Count
@@ -476,16 +477,16 @@ namespace TagTool.Shaders.ShaderGenerator
 
             rmt2.RoutingInfo = new List<RenderMethodTemplate.RoutingInfoBlock>();
             rmt2.Passes = new List<RenderMethodTemplate.PassBlock>();
-            rmt2.EntryPoints = new List<RenderMethodTemplate.TagBlockIndex>();
+            rmt2.EntryPoints = new List<TagBlockIndex>();
 
             foreach (ShaderStage mode in Enum.GetValues(typeof(ShaderStage)))
             {
-                var entryPoint = new RenderMethodTemplate.TagBlockIndex();
+                var entryPoint = new TagBlockIndex();
 
                 if (generator.IsEntryPointSupported(mode))
                 {
                     while (rmt2.EntryPoints.Count < (int)mode)
-                        rmt2.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
+                        rmt2.EntryPoints.Add(new TagBlockIndex());
 
                     entryPoint.Offset = (ushort)rmt2.Passes.Count();
                     entryPoint.Count = 1;
@@ -494,7 +495,7 @@ namespace TagTool.Shaders.ShaderGenerator
                     var parameterTable = new RenderMethodTemplate.PassBlock();
 
                     for (int i = 0; i < parameterTable.Values.Length; i++)
-                        parameterTable.Values[i] = new RenderMethodTemplate.TagBlockIndex();
+                        parameterTable.Values[i] = new TagBlockIndex();
 
                     rmt2.Passes.Add(parameterTable);
 
@@ -1095,7 +1096,7 @@ namespace TagTool.Shaders.ShaderGenerator
             {
                 RoutingInfo = new List<RenderMethodTemplate.RoutingInfoBlock>(),
                 Passes = new List<RenderMethodTemplate.PassBlock>(),
-                EntryPoints = new List<RenderMethodTemplate.TagBlockIndex>(),
+                EntryPoints = new List<TagBlockIndex>(),
                 RealParameterNames = new List<RenderMethodTemplate.ShaderArgument>(),
                 IntegerParameterNames = new List<RenderMethodTemplate.ShaderArgument>(),
                 BooleanParameterNames = new List<RenderMethodTemplate.ShaderArgument>(),
@@ -1175,7 +1176,7 @@ namespace TagTool.Shaders.ShaderGenerator
             }
 
             for (int i = 0; i < Enum.GetValues(typeof(EntryPoint)).Length; i++)
-                rmt2.EntryPoints.Add(new RenderMethodTemplate.TagBlockIndex());
+                rmt2.EntryPoints.Add(new TagBlockIndex());
 
             foreach (var entryBlock in rmdf.EntryPoints)
             {
@@ -1190,7 +1191,7 @@ namespace TagTool.Shaders.ShaderGenerator
                 RenderMethodTemplate.PassBlock pass = new RenderMethodTemplate.PassBlock();
 
                 for (int j = 0; j < (int)ParameterUsage.Count; j++) // init
-                    pass.Values[j] = new RenderMethodTemplate.TagBlockIndex();
+                    pass.Values[j] = new TagBlockIndex();
 
                 // texture extern ps/vs //////////////////////////
 
@@ -1654,6 +1655,66 @@ namespace TagTool.Shaders.ShaderGenerator
                         vtsh.EntryPoints[(int)entry].SupportedVertexTypes.Add(new ShortOffsetCountBlock());
 
                     ShaderGeneratorResult vertexResult = generator.GenerateVertexShader(eExplicitShader, entry, vertex);
+
+                    vtsh.EntryPoints[(int)entry].SupportedVertexTypes[(int)vertex].Count = 1;
+                    vtsh.EntryPoints[(int)entry].SupportedVertexTypes[(int)vertex].Offset = (byte)vtsh.Shaders.Count;
+
+                    var vertexShaderBlock = new VertexShaderBlock
+                    {
+                        PCShaderBytecode = vertexResult.Bytecode,
+                        PCConstantTable = BuildConstantTable(cache, vertexResult, ShaderType.VertexShader)
+                    };
+
+                    vtsh.Shaders.Add(vertexShaderBlock);
+                }
+            }
+        }
+
+        public static void GenerateChudShader(GameCache cache, Stream stream, string chudShader, out PixelShader pixl, out VertexShader vtsh)
+        {
+            //ChudShader eChudShader = (ChudShader)Enum.Parse(typeof(ChudShader), chudShader, true);
+
+            List<ShaderStage> supportedEntries = new List<ShaderStage> { ShaderStage.Default };
+            if (chudShader == "chud_turbulence")
+            {
+                supportedEntries.Add(ShaderStage.Albedo);
+                supportedEntries.Add(ShaderStage.Dynamic_Light);
+            }
+
+            List<VertexType> supportedVertices = new List<VertexType> { (chudShader == "chud_sensor" ? VertexType.FancyChud : VertexType.SimpleChud) };
+
+            pixl = new PixelShader { EntryPointShaders = new List<ShortOffsetCountBlock>(), Shaders = new List<PixelShaderBlock>() };
+            vtsh = new VertexShader { EntryPoints = new List<VertexShader.VertexShaderEntryPoint>(), Shaders = new List<VertexShaderBlock>() };
+
+            for (int i = 0; i < Enum.GetValues(typeof(ShaderStage)).Length; i++)
+            {
+                pixl.EntryPointShaders.Add(new ShortOffsetCountBlock());
+                vtsh.EntryPoints.Add(new VertexShader.VertexShaderEntryPoint { SupportedVertexTypes = new List<ShortOffsetCountBlock>() });
+            }
+
+            foreach (var entry in supportedEntries)
+            {
+                // pixel shader
+                ShaderGeneratorResult pixelResult = GenericPixelShaderGenerator.GeneratePixelShader(chudShader, entry.ToString().ToLower(), true);
+
+                pixl.EntryPointShaders[(int)entry].Count = 1;
+                pixl.EntryPointShaders[(int)entry].Offset = (byte)pixl.Shaders.Count;
+
+                var pixelShaderBlock = new PixelShaderBlock
+                {
+                    PCShaderBytecode = pixelResult.Bytecode,
+                    PCConstantTable = BuildConstantTable(cache, pixelResult, ShaderType.PixelShader)
+                };
+
+                pixl.Shaders.Add(pixelShaderBlock);
+
+                // vertex shaders
+                foreach (var vertex in supportedVertices)
+                {
+                    for (int i = 0; vtsh.EntryPoints[(int)entry].SupportedVertexTypes.Count <= (int)vertex; i++)
+                        vtsh.EntryPoints[(int)entry].SupportedVertexTypes.Add(new ShortOffsetCountBlock());
+
+                    ShaderGeneratorResult vertexResult = GenericVertexShaderGenerator.GenerateVertexShader(chudShader, entry.ToString().ToLower(), vertex, true);
 
                     vtsh.EntryPoints[(int)entry].SupportedVertexTypes[(int)vertex].Count = 1;
                     vtsh.EntryPoints[(int)entry].SupportedVertexTypes[(int)vertex].Offset = (byte)vtsh.Shaders.Count;

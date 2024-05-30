@@ -23,45 +23,51 @@ namespace TagTool.Commands.Porting
             var blamDecoratorResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(sbsp.DecoratorGeometry.Resource);
             var blamGeometryResourceDefinition = BlamCache.ResourceCache.GetRenderGeometryApiResourceDefinition(sbsp.Geometry.Resource);
 
-            var decoratorGeometry = converter.Convert(sbsp.DecoratorGeometry, blamDecoratorResourceDefinition);
+            RenderGeometryApiResourceDefinition decoratorGeometry = null;
+            if(blamDecoratorResourceDefinition != null)
+                decoratorGeometry = converter.Convert(sbsp.DecoratorGeometry, blamDecoratorResourceDefinition);
+
             var geometry = converter.Convert(sbsp.Geometry, blamGeometryResourceDefinition);
 
             foreach (var cluster in sbsp.Clusters)
             {
-                List<ScenarioStructureBsp.Cluster.DecoratorGrid> newDecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
-
-                foreach (var grid in cluster.DecoratorGrids)
+                if (blamDecoratorResourceDefinition != null)
                 {
-                    VertexBufferDefinition buffer = null;
-                    if(CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
-                        buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.HaloOnlineInfo.VertexBufferIndex].Definition;
-                    else
-                        buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.Gen3Info.VertexBufferIndex].Definition;
+                    List<ScenarioStructureBsp.Cluster.DecoratorGrid> newDecoratorGrids = new List<ScenarioStructureBsp.Cluster.DecoratorGrid>();
+
+                    foreach (var grid in cluster.DecoratorGrids)
+                    {
+                        VertexBufferDefinition buffer = null;
+                        if(CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+                            buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.HaloOnlineInfo.VertexBufferIndex].Definition;
+                        else
+                            buffer = blamDecoratorResourceDefinition.VertexBuffers[grid.Gen3Info.VertexBufferIndex].Definition;
                         
-                    var offset = grid.VertexBufferOffset;
-                    grid.Vertices = new List<TinyPositionVertex>();
-                    using (var stream = new MemoryStream(buffer.Data.Data))
-                    {
-                        var vertexStream = VertexStreamFactory.Create(BlamCache.Version, BlamCache.Platform, stream);
-                        stream.Position = offset;
+                        var offset = grid.VertexBufferOffset;
+                        grid.Vertices = new List<TinyPositionVertex>();
+                        using (var stream = new MemoryStream(buffer.Data.Data))
+                        {
+                            var vertexStream = VertexStreamFactory.Create(BlamCache.Version, BlamCache.Platform, stream);
+                            stream.Position = offset;
 
-                        for (int i = 0; i < grid.Amount; i++)
-                            grid.Vertices.Add(vertexStream.ReadTinyPositionVertex());
+                            for (int i = 0; i < grid.Amount; i++)
+                                grid.Vertices.Add(vertexStream.ReadTinyPositionVertex());
+                        }
+
+                        if (grid.Amount == 0)
+                            newDecoratorGrids.Add(grid);
+                        else
+                        {
+                            // Get the new grids
+                            var newGrids = ConvertDecoratorGrid(grid.Vertices, grid);
+
+                            // Add all to list
+                            foreach (var newGrid in newGrids)
+                                newDecoratorGrids.Add(newGrid);
+                        }
                     }
-
-                    if (grid.Amount == 0)
-                        newDecoratorGrids.Add(grid);
-                    else
-                    {
-                        // Get the new grids
-                        var newGrids = ConvertDecoratorGrid(grid.Vertices, grid);
-
-                        // Add all to list
-                        foreach (var newGrid in newGrids)
-                            newDecoratorGrids.Add(newGrid);
-                    }
+                    cluster.DecoratorGrids = newDecoratorGrids;
                 }
-                cluster.DecoratorGrids = newDecoratorGrids;
                 
                 if(CacheContext.Version == CacheVersion.HaloOnlineED && BlamCache.Version < CacheVersion.HaloReach)
                 {
@@ -77,17 +83,20 @@ namespace TagTool.Commands.Porting
 
             // convert all the decorator vertex buffers
             // conversion already completed for halo online generation caches
-            if (!CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
+            if (blamDecoratorResourceDefinition != null)
             {
-                for (var bufferindex = 0; bufferindex < blamDecoratorResourceDefinition.VertexBuffers.Count; bufferindex++)
+                if (!CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, BlamCache.Version))
                 {
-                    var d3dBuffer = blamDecoratorResourceDefinition.VertexBuffers[bufferindex];
-                    VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, d3dBuffer.Definition);
-                    decoratorGeometry.VertexBuffers.Add(d3dBuffer);
+                    for (var bufferindex = 0; bufferindex < blamDecoratorResourceDefinition.VertexBuffers.Count; bufferindex++)
+                    {
+                        var d3dBuffer = blamDecoratorResourceDefinition.VertexBuffers[bufferindex];
+                        VertexBufferConverter.ConvertVertexBuffer(BlamCache.Version, BlamCache.Platform, CacheContext.Version, CacheContext.Platform, d3dBuffer.Definition);
+                        decoratorGeometry.VertexBuffers.Add(d3dBuffer);
+                    }
                 }
+
+                sbsp.DecoratorGeometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(decoratorGeometry);
             }
-                
-            sbsp.DecoratorGeometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(decoratorGeometry);
             sbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(geometry);
 
             sbsp.CollisionBspResource = ConvertStructureBspTagResources(sbsp, out StructureBspTagResources sbspTagResources);
@@ -118,6 +127,21 @@ namespace TagTool.Commands.Porting
 
                 ConvertInstanceBucketsReach(sbsp, sbspTagResources);
                 ConvertReachEnvironmentMopp(sbsp);
+
+                // Reach invalid shader is an inconspicuous gray material and was left on many maps
+                if (CacheContext.TagCache.TryGetCachedTag("levels\\shared\\shaders\\simple\\grey.shader", out CachedTag defaultGray))
+                {
+                    foreach (var material in sbsp.CollisionMaterials)
+                    {
+                        if (material.RenderMethod?.ToString() == "shaders\\invalid.shader")
+                            material.RenderMethod = defaultGray;
+                    }
+                    foreach (var material in sbsp.Materials)
+                    {
+                        if (material.RenderMethod?.ToString() == "shaders\\invalid.shader")
+                            material.RenderMethod = defaultGray;
+                    }
+                }
             }
 
             return sbsp;
@@ -162,7 +186,7 @@ namespace TagTool.Commands.Porting
             }
         }
 
-        public InstancedGeometryPhysics ConvertCollisionBspPhysicsReach(InstancedGeometryPhysicsReach bspPhysicsReach)
+        public InstancedGeometryPhysics ConvertInstancedGeometryPhysicsReach(InstancedGeometryPhysicsReach bspPhysicsReach)
         {
             var bspPhysics = new InstancedGeometryPhysics();
             bspPhysics.MoppBvTreeShape = new Havok.CMoppBvTreeShape()
@@ -182,6 +206,17 @@ namespace TagTool.Commands.Porting
                 bspPhysics.PoopShape = new TagTool.Tags.TagBlock<DecomposedPoopShape>() { poop };
             }
 
+            return bspPhysics;
+        }
+
+        public CollisionBspPhysicsDefinition ConvertCollisionBspPhysicsReach(CollisionBspPhysicsDefinition bspPhysics)
+        {
+            bspPhysics.MoppBvTreeShape = new Havok.CMoppBvTreeShape()
+            {
+                ReferencedObject = new Havok.HkpReferencedObject(),
+                Type = 27,
+                Scale = bspPhysics.MoppBvTreeShapeReach.MoppScale,
+            };
             return bspPhysics;
         }
 

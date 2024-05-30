@@ -367,7 +367,7 @@ namespace TagTool.Commands.Modding
             var currentForg = (ForgeGlobalsDefinition)BaseCache.Deserialize(CacheStream, currentForgTag);
 
             // hardcoded base indices:
-            int[] baseBlockCounts = new int[] { 0, 15, 173, 6, 81, 468, 9, 12 };
+            int[] baseBlockCounts = new int[] { 0, 20, 173, 6, 83, 498, 9, 12 };
 
             for (int i = baseBlockCounts[0]; i < forg.ReForgeMaterialTypes.Count; i++)
                 currentForg.ReForgeMaterialTypes.Add(forg.ReForgeMaterialTypes[i]);
@@ -397,9 +397,12 @@ namespace TagTool.Commands.Modding
             currentForg.InvisibleRenderMethod = forg.InvisibleRenderMethod;
             currentForg.DefaultRenderMethod = forg.DefaultRenderMethod;
             currentForg.PrematchCameraObject = forg.PrematchCameraObject;
+            currentForg.PostmatchObject = forg.PostmatchObject;
             currentForg.ModifierObject = forg.ModifierObject;
             currentForg.KillVolumeObject = forg.KillVolumeObject;
             currentForg.GarbageVolumeObject = forg.GarbageVolumeObject;
+            currentForg.FxObject = forg.FxObject;
+            currentForg.FxLight = forg.FxLight;
 
             return currentForg;
         }

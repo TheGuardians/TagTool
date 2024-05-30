@@ -58,7 +58,7 @@ namespace TagTool.Tags.Definitions
             DestroyedByExplosions = 1 << 1,
             UnaffectedByGravity = 1 << 2,
             CrateStyleCollisionFilter = 1 << 3,
-            Bit4 = 1 << 4,
+            CanBePickedUpInVehicle = 1 << 4,
             Bit5 = 1 << 5,
             Bit6 = 1 << 6,
             Bit7 = 1 << 7

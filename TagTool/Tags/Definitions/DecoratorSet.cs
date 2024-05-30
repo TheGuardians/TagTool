@@ -95,6 +95,11 @@ namespace TagTool.Tags.Definitions
             RenderTwoSided = 1 << 0, // takes twice as long to light
             DontSampleLightThroughGeometry = 1 << 1,
             EnabledViaPreferences = 1 << 2, // unchecked will render regardless of detail quality
+            Bit3 = 1 << 3,
+            Bit4 = 1 << 4,
+            Bit5 = 1 << 5,
+            Bit6 = 1 << 6,
+            Bit7 = 1 << 7
         }
 
         public enum DecoratorShader : sbyte

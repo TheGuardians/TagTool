@@ -829,7 +829,7 @@ namespace TagTool.Tags.Definitions.Gen4
         {
             public HavokShapeReferenceStruct ShapeReference;
             public int CollisionFilter;
-            public float ShapeSize;
+            public int ShapeSize;
             public int NumChildShapes;
             
             [TagStructure(Size = 0x4)]
