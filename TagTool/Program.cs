@@ -39,6 +39,21 @@ namespace TagTool.Commands
                 Console.WriteLine("https://github.com/TheGuardians-CI/TagTool/issues");
             }
 
+            // Provide user with warnings if there are missing assemblies
+            // HaloShaderGenerator.dll:
+            try
+            {
+                TestShaderGeneratorAssembly();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("ERROR: Could not load shader generator. Most shader related operations will fail");
+                Console.WriteLine("Please confirm \"HaloShaderGenerator.dll\" is up to date and present in the \"Tools\" folder of your TagTool directory");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
             start:
             // Get the file path from the first argument
             // If no argument is given, load tags.dat
@@ -234,6 +249,11 @@ namespace TagTool.Commands
             var secondsSince1970 = BitConverter.ToInt32(bytes, headerPos + linkerTimestampOffset);
             var dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return dt.AddSeconds(secondsSince1970);
+        }
+
+        private static void TestShaderGeneratorAssembly()
+        {
+            var hlslFloat = HaloShaderGenerator.Globals.HLSLType.Float;
         }
     }
 }
