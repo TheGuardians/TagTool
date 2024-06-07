@@ -1749,6 +1749,7 @@
     </Reference>
     <Reference Include="MIConvexHull">
       <HintPath>..\Tools\MIConvexHull.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
