@@ -163,6 +163,8 @@ namespace TagTool.Cache.Gen3
             { new TagGroupGen3("ssce", "obje", "sound_scenery"), typeof(SoundScenery) },
             { new TagGroupGen3("styl", "style"), typeof(Style) },
             { new TagGroupGen3("sus!", "sound_ui_sounds"), typeof(SoundUiSounds) },
+            { new TagGroupGen3("sweg", "swear_filter"), typeof(SwearFilter) },
+            { new TagGroupGen3("swel", "swear_filter_list"), typeof(SwearFilterList) },
             { new TagGroupGen3("term", "devi", "obje", "device_terminal"), typeof(Terminal) },
             //{ new TagGroupGen3("test", "test_blah"), typeof(TestDefinition) },
             { new TagGroupGen3("trak", "camera_track"), typeof(CameraTrack) },
