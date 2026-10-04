@@ -25,6 +25,12 @@ namespace TagTool.Cache.HaloOnline
             { ResourceLocation.Mods, "mods.dat" }
         };
 
+        /// <summary>
+        /// The stock game's file name for <see cref="ResourceLocation.ResourcesB"/> (shared file type "video", page flag bit 5).
+        /// ElDewrito renames it to resources_b.dat
+        /// </summary>
+        public const string VideoCacheName = "video.dat";
+
         private Dictionary<ResourceLocation, LoadedResourceCache> LoadedResourceCaches { get; } = new Dictionary<ResourceLocation, LoadedResourceCache>();
 
 
@@ -47,13 +53,30 @@ namespace TagTool.Cache.HaloOnline
             return LoadResourceCache(location).Cache;
         }
 
+        /// <summary>
+        /// Gets the file backing a resource location. <see cref="ResourceLocation.ResourcesB"/> is resources_b.dat in ElDewrito
+        /// and video.dat in stock Halo Online
+        /// </summary>
+        public FileInfo GetResourceCacheFile(ResourceLocation location)
+        {
+            var name = location == ResourceLocation.ResourcesB && !CacheVersionDetection.IsEldewrito(Cache.Version) ?
+                VideoCacheName : ResourceCacheNames[location];
+            return new FileInfo(Path.Combine(Directory.FullName, name));
+        }
+
+        /// <summary>
+        /// Use ResourcesB in ElDewrito, otherwise use Resources
+        /// </summary>
+        public static ResourceLocation GetOverflowResourceLocation(CacheVersion version) =>
+            CacheVersionDetection.IsEldewrito(version) ? ResourceLocation.ResourcesB : ResourceLocation.Resources;
+
         private LoadedResourceCache LoadResourceCache(ResourceLocation location)
         {
             if (!LoadedResourceCaches.TryGetValue(location, out LoadedResourceCache cache) && location != ResourceLocation.None)
             {
                 ResourceCacheHaloOnline resourceCache;
 
-                var file = new FileInfo(Path.Combine(Directory.FullName, ResourceCacheNames[location]));
+                var file = GetResourceCacheFile(location);
                 Stream stream;
 
                 try
@@ -64,7 +87,7 @@ namespace TagTool.Cache.HaloOnline
                 {
                     if (ex is IOException && ex.Message.EndsWith("used by another process."))
                     {
-                        Log.Warning($"Another process using {ResourceCacheNames[location]}: opening read-only stream");
+                        Log.Warning($"Another process using {file.Name}: opening read-only stream");
                         stream = file.OpenRead();
                     }
                     else

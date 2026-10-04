@@ -228,7 +228,7 @@ namespace TagTool.Commands.Tags
                                 else
                                 {
                                     scriptWriter.WriteLine($"SetField Resource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField Resource ResourcesB \"$TagFolderDirectory\\{tagName}.bink_resource\"");
+                                    scriptWriter.WriteLine($"SetField Resource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}.bink_resource\"");
                                 }
 
                                 scriptWriter.WriteLine("SaveTagChanges");
@@ -252,7 +252,7 @@ namespace TagTool.Commands.Tags
                                     }
 
                                     scriptWriter.WriteLine($"SetField HardwareTextures[{i}].HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField HardwareTextures[{i}].HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}{(bitm.HardwareTextures.Count > 1 ? $"_image_{i}" : "_image")}.bitmap_texture_interop_resource\"");
+                                    scriptWriter.WriteLine($"SetField HardwareTextures[{i}].HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}{(bitm.HardwareTextures.Count > 1 ? $"_image_{i}" : "_image")}.bitmap_texture_interop_resource\"");
                                 }
 
                                 scriptWriter.WriteLine("SaveTagChanges");
@@ -274,7 +274,7 @@ namespace TagTool.Commands.Tags
                                 else
                                 {
                                     scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}_geometry.render_geometry_api_resource_definition\"");
+                                    scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}_geometry.render_geometry_api_resource_definition\"");
                                 }
 
                                 scriptWriter.WriteLine("SaveTagChanges");
@@ -298,7 +298,7 @@ namespace TagTool.Commands.Tags
                                     }
 
                                     scriptWriter.WriteLine($"SetField ResourceGroups[{i}].ResourceReference.HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField ResourceGroups[{i}].ResourceReference.HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}{(jmad.ResourceGroups.Count > 1 ? $"_group_{i}" : "_group")}.model_animation_tag_resource\"");
+                                    scriptWriter.WriteLine($"SetField ResourceGroups[{i}].ResourceReference.HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}{(jmad.ResourceGroups.Count > 1 ? $"_group_{i}" : "_group")}.model_animation_tag_resource\"");
                                 }
 
                                 scriptWriter.WriteLine("SaveTagChanges");
@@ -320,7 +320,7 @@ namespace TagTool.Commands.Tags
                                 else
                                 {
                                     scriptWriter.WriteLine($"SetField DecoratorGeometry.Resource.HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField DecoratorGeometry.Resource.HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}_decorator_geometry.render_geometry_api_resource_definition\"");
+                                    scriptWriter.WriteLine($"SetField DecoratorGeometry.Resource.HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}_decorator_geometry.render_geometry_api_resource_definition\"");
                                 }
 
                                 resourceFile = ExportResource(sbsp.Geometry.Resource.HaloOnlinePageableResource, "render_geometry_api_resource_definition", "_bsp_geometry");
@@ -332,7 +332,7 @@ namespace TagTool.Commands.Tags
                                 else
                                 {
                                     scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}_bsp_geometry.render_geometry_api_resource_definition\"");
+                                    scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}_bsp_geometry.render_geometry_api_resource_definition\"");
                                 }
 
                                 resourceFile = ExportResource(sbsp.CollisionBspResource.HaloOnlinePageableResource, "structure_bsp_tag_resources", "_collision");
@@ -344,7 +344,7 @@ namespace TagTool.Commands.Tags
                                 else
                                 {
                                     scriptWriter.WriteLine($"SetField CollisionBspResource.HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField CollisionBspResource.HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}_collision.structure_bsp_tag_resources\"");
+                                    scriptWriter.WriteLine($"SetField CollisionBspResource.HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}_collision.structure_bsp_tag_resources\"");
                                 }
 
                                 resourceFile = ExportResource(sbsp.PathfindingResource.HaloOnlinePageableResource, "structure_bsp_cache_file_tag_resources", "_pathfinding");
@@ -356,7 +356,7 @@ namespace TagTool.Commands.Tags
                                 else
                                 {
                                     scriptWriter.WriteLine($"SetField PathfindingResource.HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField PathfindingResource.HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}_pathfinding.structure_bsp_cache_file_tag_resources\"");
+                                    scriptWriter.WriteLine($"SetField PathfindingResource.HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}_pathfinding.structure_bsp_cache_file_tag_resources\"");
                                 }
 
                                 scriptWriter.WriteLine("SaveTagChanges");
@@ -378,7 +378,7 @@ namespace TagTool.Commands.Tags
                                 else
                                 {
                                     scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}_lightmap_geometry.render_geometry_api_resource_definition\"");
+                                    scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}_lightmap_geometry.render_geometry_api_resource_definition\"");
                                 }
 
                                 scriptWriter.WriteLine("SaveTagChanges");
@@ -400,7 +400,7 @@ namespace TagTool.Commands.Tags
                                 else
                                 {
                                     scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}_particle_geometry.render_geometry_api_resource_definition\"");
+                                    scriptWriter.WriteLine($"SetField Geometry.Resource.HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}_particle_geometry.render_geometry_api_resource_definition\"");
                                 }
 
                                 scriptWriter.WriteLine("SaveTagChanges");
@@ -422,7 +422,7 @@ namespace TagTool.Commands.Tags
                                 else
                                 {
                                     scriptWriter.WriteLine($"SetField Resource.HaloOnlinePageableResource.Page.Index -1");
-                                    scriptWriter.WriteLine($"SetField Resource.HaloOnlinePageableResource ResourcesB \"$TagFolderDirectory\\{tagName}.sound_resource\"");
+                                    scriptWriter.WriteLine($"SetField Resource.HaloOnlinePageableResource {ResourceCachesHaloOnline.GetOverflowResourceLocation(Cache.Version)} \"$TagFolderDirectory\\{tagName}.sound_resource\"");
                                 }
 
                                 scriptWriter.WriteLine("SaveTagChanges");

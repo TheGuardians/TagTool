@@ -1,4 +1,5 @@
 using TagTool.Cache;
+using TagTool.Cache.HaloOnline;
 using TagTool.Common;
 using TagTool.Geometry;
 using TagTool.IO;
@@ -423,7 +424,10 @@ namespace TagTool.Commands.Porting
 
                 var resourceContext = new ResourceSerializationContext(CacheContext, edModeDefinition.Geometry.Resource.HaloOnlinePageableResource);
                 CacheContext.Serializer.Serialize(resourceContext, resourceDefinition);
-                edModeDefinition.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(ResourceLocation.ResourcesB);
+                // From ms25 (235640) on, render model geometry lives in render_models.dat
+                var geometryLocation = CacheVersionDetection.IsBetween(CacheContext.Version, CacheVersion.HaloOnline235640, CacheVersion.HaloOnline700123) ?
+                    ResourceLocation.RenderModels : ResourceCachesHaloOnline.GetOverflowResourceLocation(CacheContext.Version);
+                edModeDefinition.Geometry.Resource.HaloOnlinePageableResource.ChangeLocation(geometryLocation);
                 CacheContext.AddResource(edModeDefinition.Geometry.Resource.HaloOnlinePageableResource, edResourceStream);
 
                 Console.WriteLine("done.");

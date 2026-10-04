@@ -124,7 +124,7 @@ namespace TagTool.Commands.Editing
                     {
                         case FileInfo file:
                             if (!pageable.GetLocation(out newLocation))
-                                newLocation = ResourceLocation.ResourcesB;
+                                newLocation = ResourceCachesHaloOnline.GetOverflowResourceLocation(haloOnlineGameCache.Version);
                             resourceFile = file;
                             break;
 
@@ -505,7 +505,8 @@ namespace TagTool.Commands.Editing
                             resourceLocation = ResourceLocation.Audio;
                             break;
 
-                        case "resources_b":
+                        case "resources_b" when CacheVersionDetection.IsEldewrito(cache.Version):
+                        case "video" when !CacheVersionDetection.IsEldewrito(cache.Version):
                             resourceLocation = ResourceLocation.ResourcesB;
                             break;
 

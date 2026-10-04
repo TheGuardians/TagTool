@@ -60,7 +60,8 @@ namespace TagTool.Commands.Tags
                     location = ResourceLocation.Audio;
                     break;
 
-                case "resources_b":
+                case "resources_b" when CacheVersionDetection.IsEldewrito(Cache.Version):
+                case "video" when !CacheVersionDetection.IsEldewrito(Cache.Version):
                     location = ResourceLocation.ResourcesB;
                     break;
 

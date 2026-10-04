@@ -2,6 +2,7 @@
 using System.IO;
 using TagTool.Animations;
 using TagTool.Cache;
+using TagTool.Cache.HaloOnline;
 using TagTool.Common;
 using TagTool.Tags;
 using TagTool.Tags.Definitions;
@@ -90,7 +91,7 @@ namespace TagTool.Porting.HaloOnline
                 case TagResourceTypeGen3.Sound:
                     return ResourceLocation.Audio;
                 default:
-                    return ResourceLocation.ResourcesB;
+                    return ResourceCachesHaloOnline.GetOverflowResourceLocation(CacheContext.Version);
             }
         }
     }

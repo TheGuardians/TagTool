@@ -298,7 +298,7 @@ namespace TagTool.Common
         Audio,
 
         /// <summary>
-        /// The resource is in resources_b.dat.
+        /// The resource is in video.dat (stock Halo Online) or resources_b.dat (ElDewrito's name for the same file).
         /// </summary>
         ResourcesB,
 

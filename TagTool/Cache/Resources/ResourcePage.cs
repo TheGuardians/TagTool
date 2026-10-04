@@ -101,7 +101,7 @@ namespace TagTool.Cache.Resources
         InAudio = 1 << 4,
 
         /// <summary>
-        /// Indicates that the resource is in resources_b.dat.
+        /// Indicates that the resource is in video.dat (stock Halo Online) or resources_b.dat (ElDewrito's name for the same file).
         /// </summary>
         InResourcesB = 1 << 5,
 
@@ -155,7 +155,7 @@ namespace TagTool.Cache.Resources
         InAudio = 1 << 4,
 
         /// <summary>
-        /// Indicates that the resource is in resources_b.dat.
+        /// Indicates that the resource is in video.dat (stock Halo Online) or resources_b.dat (ElDewrito's name for the same file).
         /// </summary>
         InResourcesB = 1 << 5,
 
