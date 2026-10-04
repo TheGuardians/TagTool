@@ -295,7 +295,7 @@ namespace TagTool.Commands.Tags
                         }
                         
                     }
-                    mode.Geometry.Resource = Cache.ResourceCache.CreateRenderGeometryApiResource(modeResource);
+                    mode.Geometry.Resource = Cache.ResourceCache.CreateRenderModelGeometryResource(modeResource);
                     mode.Geometry.GeometryTagResources = null;
                     break;
                 case "PhysicsModel":

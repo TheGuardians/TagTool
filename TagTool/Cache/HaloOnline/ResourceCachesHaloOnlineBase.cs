@@ -410,6 +410,19 @@ namespace TagTool.Cache.HaloOnline
             return CreateResource(renderGeometryDefinition, ResourceLocation.Resources, TagResourceTypeGen3.RenderGeometry);
         }
 
+        // From ms25 (235640) on, HO keeps render model geometry in render_models.dat and lightmap geometry in lightmaps.dat (earlier builds use resources.dat)
+        private bool HasGeometryCaches => CacheVersionDetection.IsBetween(Cache.Version, CacheVersion.HaloOnline235640, CacheVersion.HaloOnline700123);
+
+        public override TagResourceReference CreateRenderModelGeometryResource(RenderGeometryApiResourceDefinition renderGeometryDefinition)
+        {
+            return CreateResource(renderGeometryDefinition, HasGeometryCaches ? ResourceLocation.RenderModels : ResourceLocation.Resources, TagResourceTypeGen3.RenderGeometry);
+        }
+
+        public override TagResourceReference CreateLightmapGeometryResource(RenderGeometryApiResourceDefinition renderGeometryDefinition)
+        {
+            return CreateResource(renderGeometryDefinition, HasGeometryCaches ? ResourceLocation.Lightmaps : ResourceLocation.Resources, TagResourceTypeGen3.RenderGeometry);
+        }
+
         public override TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResource modelAnimationGraphDefinition)
         {
             return CreateResource(modelAnimationGraphDefinition, ResourceLocation.Resources, TagResourceTypeGen3.Animation);

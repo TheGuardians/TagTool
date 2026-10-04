@@ -30,6 +30,8 @@ namespace TagTool.Cache.Resources
         public abstract Tags.Resources.Gen4.StructureBspTagResources GetStructureBspTagResourcesGen4(TagResourceReference resourceReference);
         public abstract TagResourceReference CreateBinkResource(BinkResource binkResourceDefinition);
         public abstract TagResourceReference CreateRenderGeometryApiResource(RenderGeometryApiResourceDefinition renderGeometryDefinition);
+        public virtual TagResourceReference CreateRenderModelGeometryResource(RenderGeometryApiResourceDefinition renderGeometryDefinition) => CreateRenderGeometryApiResource(renderGeometryDefinition);
+        public virtual TagResourceReference CreateLightmapGeometryResource(RenderGeometryApiResourceDefinition renderGeometryDefinition) => CreateRenderGeometryApiResource(renderGeometryDefinition);
         public abstract TagResourceReference CreateModelAnimationGraphResource(ModelAnimationTagResource modelAnimationGraphDefinition);
         public abstract TagResourceReference CreateSoundResource(SoundResourceDefinition soundResourceDefinition);
         public abstract TagResourceReference CreateBitmapResource(BitmapTextureInteropResource bitmapResourceDefinition);

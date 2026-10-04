@@ -379,7 +379,7 @@ namespace TagTool.Porting.Gen2
             lbsp.LightmapSHCoefficientsBitmap = SHBitmapTag;
             lbsp.LightmapDominantLightDirectionBitmap = intensityBitmapTag;
 
-            lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(resourceDef);
+            lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateLightmapGeometryResource(resourceDef);
 
             return lbsp;
         }

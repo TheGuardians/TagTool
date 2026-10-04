@@ -630,7 +630,7 @@ namespace TagTool.Geometry.Utils
                 renderGeometry.Compression = new List<RenderGeometryCompression>() { compressionInfo };
             }
 
-            renderGeometry.Resource = DestCache.ResourceCache.CreateRenderGeometryApiResource(resourceDefinition);
+            renderGeometry.Resource = DestCache.ResourceCache.CreateRenderModelGeometryResource(resourceDefinition);
 
             return renderGeometry;
         }

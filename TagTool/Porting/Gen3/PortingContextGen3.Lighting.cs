@@ -271,7 +271,7 @@ namespace TagTool.Porting.Gen3
                 }
             }
 
-            Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
+            Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateLightmapGeometryResource(newLightmapResourceDefinition);
 
             return Lbsp;
         }
@@ -417,7 +417,7 @@ namespace TagTool.Porting.Gen3
             }
             
 
-            Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newLightmapResourceDefinition);
+            Lbsp.Geometry.Resource = CacheContext.ResourceCache.CreateLightmapGeometryResource(newLightmapResourceDefinition);
 
             return Lbsp;
         }

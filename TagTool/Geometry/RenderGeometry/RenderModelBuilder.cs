@@ -506,7 +506,7 @@ namespace TagTool.Geometry
 
         private void SerializeDefinitionData(RenderGeometryApiResourceDefinition definition)
         {
-            _model.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(definition);
+            _model.Geometry.Resource = CacheContext.ResourceCache.CreateRenderModelGeometryResource(definition);
         }
 
         private int SerializeVertexBuffer(MeshData mesh, Stream outStream)

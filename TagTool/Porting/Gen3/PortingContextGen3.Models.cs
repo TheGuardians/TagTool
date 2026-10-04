@@ -40,7 +40,7 @@ namespace TagTool.Porting.Gen3
             }
 
             var newRenderModelGeometry = GeometryConverter.Convert(mode.Geometry, blamResourceDefinition);
-            mode.Geometry.Resource = CacheContext.ResourceCache.CreateRenderGeometryApiResource(newRenderModelGeometry);
+            mode.Geometry.Resource = CacheContext.ResourceCache.CreateRenderModelGeometryResource(newRenderModelGeometry);
 
             switch (blamTag.Name)
             {
