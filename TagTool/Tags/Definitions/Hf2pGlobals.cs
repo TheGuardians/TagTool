@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace TagTool.Tags.Definitions
 {
-    [TagStructure(Name = "hf2p_globals", Tag = "hf2p", Size = 0x10, MinVersion = CacheVersion.HaloOnline498295)]
+    [TagStructure(Name = "hf2p_globals", Tag = "hf2p", Size = 0xC, MinVersion = CacheVersion.HaloOnline498295)]
     public class Hf2pGlobals : TagStructure
 	{
         public List<Armor> RaceArmors;

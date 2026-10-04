@@ -199,6 +199,9 @@ namespace TagTool.Tags.Definitions
                 public Consumable ConsumableFlags;
                 [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public EnergyMeter EnergyMeterFlags;
+                // ms30 grows the state datum from 0x44 to 0x48, Assembly's ms30 plugin also has these 4 bytes as unknown
+                [TagField(Version = CacheVersion.HaloOnline700123)]
+                public uint UnknownMs30;
 
                 //REACH
                 
@@ -1795,7 +1798,7 @@ namespace TagTool.Tags.Definitions
                 [TagField(Version = CacheVersion.Halo3ODST)]
                 public WidgetBitmapFlagsODST FlagsODST;
 
-                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnlineED_END)]
+                [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
                 public WidgetBitmapFlagsHO Flags;
 
                 [TagField(MinVersion = CacheVersion.HaloReach)]

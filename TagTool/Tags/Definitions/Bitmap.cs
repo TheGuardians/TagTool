@@ -124,7 +124,13 @@ namespace TagTool.Tags.Definitions
             [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
             SignedNoise,
             [TagEnumMember(MinVersion = CacheVersion.HaloReach)]
-            RoughnessMapAuto
+            RoughnessMapAuto,
+
+            // Halo Online only, the Scaleform (GFx) UI textures listed by the gfx_textures_list (gfxt) tag
+            [TagEnumMember(Gen = CacheGeneration.HaloOnline)]
+            GfxTexture,                 // DXT1/DXT5, no mipmaps, any dimensions
+            [TagEnumMember(Gen = CacheGeneration.HaloOnline)]
+            GfxTextureUncompressed      // "*_nocompress_nopack" sources, A8R8G8B8, no mipmaps
         }
 
         [TagStructure(Size = 0x8)]

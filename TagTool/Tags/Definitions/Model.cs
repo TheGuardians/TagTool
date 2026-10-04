@@ -207,7 +207,10 @@ namespace TagTool.Tags.Definitions
 
             public int InstanceGroupIndex;
 
-            [TagField(Length = 0x8, Flags = Padding, Platform = CachePlatform.Original)]
+            // ms30 inserts SkinName & shrinks this padding by 4 bytes
+            [TagField(Length = 0x8, Flags = Padding, MaxVersion = CacheVersion.HaloOnline604673, Platform = CachePlatform.Original)]
+            [TagField(Length = 0x4, Flags = Padding, Version = CacheVersion.HaloOnline700123, Platform = CachePlatform.Original)]
+            [TagField(Length = 0x8, Flags = Padding, MinVersion = CacheVersion.HaloReach, Platform = CachePlatform.Original)]
             [TagField(Length = 0x8, Flags = Padding, Platform = CachePlatform.MCC, MinVersion = CacheVersion.HaloReach)]
             public byte[] Padding1;
 

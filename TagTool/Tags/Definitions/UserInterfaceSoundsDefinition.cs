@@ -6,7 +6,7 @@ namespace TagTool.Tags.Definitions
 {
     [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x140, MaxVersion = CacheVersion.Halo3Retail)]
     [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x14C, MinVersion = CacheVersion.Halo3ODST, MaxVersion = CacheVersion.HaloOnline700123)]
-    [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x570, MaxVersion = CacheVersion.HaloReach)]
+    [TagStructure(Name = "user_interface_sounds_definition", Tag = "uise", Size = 0x570, MinVersion = CacheVersion.HaloReach, MaxVersion = CacheVersion.HaloReach)]
     public class UserInterfaceSoundsDefinition : TagStructure
 	{
         [TagField(MaxVersion = CacheVersion.HaloOnline700123)]
