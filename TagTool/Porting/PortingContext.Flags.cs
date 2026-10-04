@@ -72,7 +72,7 @@ namespace TagTool.Porting
         /// <summary>
         /// Attempt to match shaders to existing tags.
         /// </summary>
-        [Description("Attempt to match shaders to existing tags.")]
+        [Description("Port render methods (shaders). Negate (\"noshaders\") to use the destination's default shader instead.")]
         MatchShaders = 1 << 10,
 
         /// <summary>

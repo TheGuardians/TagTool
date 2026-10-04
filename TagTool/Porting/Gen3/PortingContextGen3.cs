@@ -528,6 +528,13 @@ namespace TagTool.Porting.Gen3
             }
             else if (PortingConstants.RenderMethodGroups.Contains(blamTag.Group.Tag))
             {
+                // "noshaders" / "!MatchShaders": don't port render methods at all, use the destination's default shader
+                if (!FlagIsSet(PortingFlags.MatchShaders))
+                {
+                    resultTag = GetDefaultShader(blamTag);
+                    return false;
+                }
+
                 if (BlamCache.Version >= CacheVersion.HaloReach)
                 {
                     switch (blamTag.Group.Tag.ToString())
