@@ -85,6 +85,7 @@ namespace TagTool.Commands.Tags
                 context.AddCommand(new TagResourceCommand(hoCache));
                 context.AddCommand(new DeleteOrphanResourcesCommand(hoCache));
                 context.AddCommand(new ListUnusedTagsCommand(hoCache));
+                context.AddCommand(new GenerateZoneCommand(hoCache));
                 context.AddCommand(new ListDuplicateTagsCommand(hoCache));
                 context.AddCommand(new GetTagInfoCommand(hoCache));
                 context.AddCommand(new GetTagAddressCommand());
