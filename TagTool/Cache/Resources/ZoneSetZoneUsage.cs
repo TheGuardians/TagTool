@@ -4,23 +4,74 @@ using TagTool.Tags;
 
 namespace TagTool.Cache.Resources
 {
-    [TagStructure(Size = 0x24)]
+    // Same 0x24 size, but a different field layout per build family below - Halo Online never
+    // had the runtime-only ImportLoadedBsps/LoadedBsps/loaded-zoneset tracking fields Halo3/
+    // Reach use here, instead storing which zone bits a zone SET (not a live session) requires/
+    // expects/forbids - closer to a static tag-authored definition than Halo3/Reach's runtime
+    // bookkeeping block of the same name.
+    [TagStructure(Size = 0x24, MaxVersion = CacheVersion.Halo3ODST)]
+    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloReach)]
+    [TagStructure(Size = 0x24, MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
     public class ZoneSetZoneUsage : TagStructure
     {
         [TagField(Flags = TagFieldFlags.Label)]
         public StringId Name;
 
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public int BspGroupIndex;
 
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public BspFlagsValue ImportLoadedBsps;
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public BspFlagsValue LoadedBsps;
 
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public ZonesetFlagsValue LoadedDesignerZonesets;
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public ZonesetFlagsValue UnknownLoadedDesignerZonesets;
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public ZonesetFlagsValue UnloadedDesignerZonesets;
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public ZonesetFlagsValue LoadedCinematicZonesets;
 
+        [TagField(MaxVersion = CacheVersion.Halo3ODST)]
+        [TagField(MinVersion = CacheVersion.HaloReach)]
         public int BspAtlasIndex;
+
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public ScenarioZoneSetFlags Flags;
+
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public ZonesetFlagsValue RequiredBspZones;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public ZonesetFlagsValue ExpectedTouchedBspZones;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public ZonesetFlagsValue RequiredDesignerZones;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public ZonesetFlagsValue ExpectedDesignerZones;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public ZonesetFlagsValue ForbiddenDesignerZones;
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public ZonesetFlagsValue RequiredCinematicZones;
+
+        [TagField(MinVersion = CacheVersion.HaloOnlineED, MaxVersion = CacheVersion.HaloOnline700123)]
+        public int PreviousZoneSetIndex;
+
+        [Flags]
+        public enum ScenarioZoneSetFlags : int
+        {
+            None = 0,
+            BeginLoadingNextLevel = 1 << 0,
+            DebugPurposesOnly = 1 << 1,
+            InternalZoneSet = 1 << 2,
+        }
 
         [Flags]
         public enum BspFlagsValue : int
