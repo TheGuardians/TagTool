@@ -31,7 +31,7 @@ namespace TagTool.Geometry
         /// </summary>
         public RenderGeometryApiResourceDefinition Convert(RenderGeometry geometry, RenderGeometryApiResourceDefinition resourceDefinition)
         {
-            if(CacheVersionDetection.IsBetween(DestCache.Version, CacheVersion.HaloOnlineED, CacheVersion.HaloOnline106708))
+            if(CacheVersionDetection.IsInGen(CacheGeneration.HaloOnline, DestCache.Version))
             {
                 if (CacheVersionDetection.IsBetween(SourceCache.Version, CacheVersion.Halo3Beta, CacheVersion.Halo3ODST))
                 {
@@ -52,8 +52,8 @@ namespace TagTool.Geometry
 
         private RenderGeometryApiResourceDefinition ConvertHaloOnline(RenderGeometry geometry, RenderGeometryApiResourceDefinition resourceDefinition)
         {
-            // The format changed starting with version 235640
-            if (SourceCache.Version <= CacheVersion.HaloOnline106708)
+            // The format changed starting with version 235640, skip when both sides use the same format
+            if ((SourceCache.Version <= CacheVersion.HaloOnline106708) == (DestCache.Version <= CacheVersion.HaloOnline106708))
                 return resourceDefinition;
             foreach(var buffer in resourceDefinition.VertexBuffers)
             {

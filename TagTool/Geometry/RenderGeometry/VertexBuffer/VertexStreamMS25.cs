@@ -17,14 +17,17 @@ namespace TagTool.Geometry
 
         private float Sign(float x) => (x > 0 ? 1.0f : 0.0f) - (x < 0 ? 1.0f : 0.0f);
 
-        private static readonly RealVector3d WorldNormalConst = new RealVector3d(0.00390625f, 1.52587891e-005f, 5.96046448e-008f);
+        // From 235640 on, vertices don't store normals: the normal is packed into position.w (and the binormal is
+        // rebuilt as cross(tangent, normal)). World vertices use a 24-bit encoding in the float w, rigid/skinned
+        // vertices a 181x181 x/z grid in the short4N w with the sign giving y's sign.
+        private static readonly RealVector3d WorldNormalConst =new RealVector3d(0.00390625f, 1.52587891e-005f, 5.96046448e-008f);
         private static readonly RealVector2d NormalConst = new RealVector2d(0.00552486209f, 3.05240974e-005f);
         private static readonly RealVector2d NormalRangeConst = new RealVector2d(1.01117313f, 1.00555551f);
 
-        private RealVector3d ComputeMs30NormalWorld(float pos_w) => 
+        private RealVector3d DecodeNormalWorld(float pos_w) => 
             RealVector3d.Frac(pos_w * WorldNormalConst).ConvertRange();
 
-        private RealVector3d ComputeMs30Normal(float pos_w)
+        private RealVector3d DecodeNormal(float pos_w)
         {
             RealVector2d n_xz = NormalConst * System.Math.Abs(pos_w * 32767.0f);
             n_xz = (RealVector2d.Frac(n_xz) * 2.0f - 1.0f) * NormalRangeConst;
@@ -35,13 +38,83 @@ namespace TagTool.Geometry
             return new RealVector3d(n_xz.I, n_y * Sign(pos_w), n_xz.J);
         }
 
+        // Inverse of TransformTangent. UByte4N truncates, so add half a step to round to the nearest byte.
+        private RealQuaternion EncodeTangent(RealQuaternion tangent) => new RealQuaternion(tangent * 0.5f + (0.5f + 0.5f / 255.0f));
+
+        private static RealVector3d NormalizeOrUp(RealVector3d n)
+        {
+            float length = (float)System.Math.Sqrt(n.I * n.I + n.J * n.J + n.K * n.K);
+            return length > 1e-6f ? new RealVector3d(n.I / length, n.J / length, n.K / length) : new RealVector3d(0.0f, 0.0f, 1.0f);
+        }
+
+        private static int Quantize(float value, int max) =>
+            (int)System.Math.Max(0, System.Math.Min(max, System.Math.Round(value, System.MidpointRounding.AwayFromZero)));
+
+        /// <summary>
+        /// Inverse of DecodeNormalWorld: packs the normal into position.w as a 24-bit integer holding three 8-bit
+        /// components (x low, z high). The decoder doesn't mask off the lower bytes, so each byte compensates for the
+        /// fraction the bytes below it add.
+        /// </summary>
+        private static float EncodeNormalWorld(RealVector3d normal)
+        {
+            normal = NormalizeOrUp(normal);
+            int x = Quantize((normal.I * 0.5f + 0.5f) * 256.0f, 255);
+            int y = Quantize((normal.J * 0.5f + 0.5f) * 256.0f - x / 256.0f, 255);
+            int z = Quantize((normal.K * 0.5f + 0.5f) * 256.0f - (y * 256 + x) / 65536.0f, 255);
+            return (z << 16) | (y << 8) | x;
+        }
+
+        /// <summary>
+        /// Inverse of DecodeNormal: packs x and z into position.w as |w| * 32767 = z * 181 + x (181 levels each),
+        /// with the sign of w giving the sign of y (y itself is rebuilt from x and z).
+        /// </summary>
+        private float EncodeNormal(RealVector3d normal)
+        {
+            normal = NormalizeOrUp(normal);
+            int x = Quantize(((normal.I / NormalRangeConst.I) * 0.5f + 0.5f) * 181.0f, 180);
+            int z = Quantize(((normal.K / NormalRangeConst.J) * 0.5f + 0.5f) * 181.0f - x / 181.0f, 180);
+            float sign = normal.J < 0.0f ? -1.0f : 1.0f;
+
+            // y is rebuilt from x and z, so plain rounding is badly off near y = 0 (up to ~7 degrees).
+            // Try the neighbouring codes through the actual decoder and keep the closest one.
+            int best = z * 181 + x;
+            float bestDot = float.MinValue;
+            for (int dz = -2; dz <= 2; dz++)
+            {
+                for (int dx = -2; dx <= 2; dx++)
+                {
+                    int cx = x + dx, cz = z + dz;
+                    if (cx < 0 || cx > 180 || cz < 0 || cz > 180)
+                        continue;
+                    int code = cz * 181 + cx;
+                    // the decoded vector can be longer than 1 (x and z are scaled past [-1,1]), so compare directions
+                    var decoded = NormalizeOrUp(DecodeNormal(sign * code / 32767.0f));
+                    float dot = decoded.I * normal.I + decoded.J * normal.J + decoded.K * normal.K;
+                    if (dot > bestDot)
+                    {
+                        bestDot = dot;
+                        best = code;
+                    }
+                }
+            }
+
+            // NormalizeShort truncates, so add half a step to land on the exact integer
+            return sign * (best + 0.5f) / 32767.0f;
+        }
+
+        private static RealQuaternion PackNormalWorld(RealQuaternion position, RealVector3d normal) =>
+            new RealQuaternion(position.I, position.J, position.K, EncodeNormalWorld(normal));
+
+        private RealQuaternion PackNormal(RealQuaternion position, RealVector3d normal) =>
+            new RealQuaternion(position.I, position.J, position.K, EncodeNormal(normal));
+
         public WorldVertex ReadWorldVertex()
         {
             var position = _stream.ReadFloat4();
             var texcoord = _stream.ReadFloat2();
             var tangent = TransformTangent(_stream.ReadUByte4N());
 
-            var normal = ComputeMs30NormalWorld(position.W);
+            var normal = DecodeNormalWorld(position.W);
             var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
 
             return new WorldVertex
@@ -56,9 +129,9 @@ namespace TagTool.Geometry
 
         public void WriteWorldVertex(in WorldVertex v)
         {
-            _stream.WriteFloat4(v.Position);
+            _stream.WriteFloat4(PackNormalWorld(v.Position, v.Normal));
             _stream.WriteFloat2(v.Texcoord);
-            _stream.WriteUByte4N(v.Tangent);
+            _stream.WriteUByte4N(EncodeTangent(v.Tangent));
         }
 
         public RigidVertex ReadRigidVertex()
@@ -67,7 +140,7 @@ namespace TagTool.Geometry
             var texcoord = _stream.ReadShort2N();
             var tangent = TransformTangent(_stream.ReadUByte4N());
 
-            var normal = ComputeMs30Normal(position.W);
+            var normal = DecodeNormal(position.W);
             var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
 
             return new RigidVertex
@@ -82,9 +155,9 @@ namespace TagTool.Geometry
 
         public void WriteRigidVertex(in RigidVertex v)
         {
-            _stream.WriteShort4N(v.Position);
+            _stream.WriteShort4N(PackNormal(v.Position, v.Normal));
             _stream.WriteShort2N(v.Texcoord);
-            _stream.WriteUByte4N(v.Tangent);
+            _stream.WriteUByte4N(EncodeTangent(v.Tangent));
         }
 
         public SkinnedVertex ReadSkinnedVertex()
@@ -95,7 +168,7 @@ namespace TagTool.Geometry
             var blendIndices = _stream.ReadUByte4();
             var blendWeights = _stream.ReadUByte4N().ToArray();
 
-            var normal = ComputeMs30Normal(position.W);
+            var normal = DecodeNormal(position.W);
             var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
 
             return new SkinnedVertex
@@ -112,9 +185,9 @@ namespace TagTool.Geometry
 
         public void WriteSkinnedVertex(in SkinnedVertex v)
         {
-            _stream.WriteShort4N(v.Position);
+            _stream.WriteShort4N(PackNormal(v.Position, v.Normal));
             _stream.WriteShort2N(v.Texcoord);
-            _stream.WriteUByte4N(v.Tangent);
+            _stream.WriteUByte4N(EncodeTangent(v.Tangent));
             _stream.WriteUByte4(v.BlendIndices);
             _stream.WriteUByte4N(new RealQuaternion(v.BlendWeights));
         }
@@ -142,7 +215,7 @@ namespace TagTool.Geometry
             var texcoord = _stream.ReadFloat2();
             var tangent = TransformTangent(_stream.ReadUByte4N());
 
-            var normal = ComputeMs30NormalWorld(position.W);
+            var normal = DecodeNormalWorld(position.W);
             var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
 
             return new FlatWorldVertex
@@ -157,9 +230,9 @@ namespace TagTool.Geometry
 
         public void WriteFlatWorldVertex(in FlatWorldVertex v)
         {
-            _stream.WriteFloat4(v.Position);
+            _stream.WriteFloat4(PackNormalWorld(v.Position, v.Normal));
             _stream.WriteFloat2(v.Texcoord);
-            _stream.WriteUByte4N(v.Tangent);
+            _stream.WriteUByte4N(EncodeTangent(v.Tangent));
         }
 
         public FlatRigidVertex ReadFlatRigidVertex()
@@ -168,7 +241,7 @@ namespace TagTool.Geometry
             var texcoord = _stream.ReadShort2N();
             var tangent = TransformTangent(_stream.ReadUByte4N());
 
-            var normal = ComputeMs30Normal(position.W);
+            var normal = DecodeNormal(position.W);
             var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
 
             return new FlatRigidVertex
@@ -183,9 +256,9 @@ namespace TagTool.Geometry
 
         public void WriteFlatRigidVertex(in FlatRigidVertex v)
         {
-            _stream.WriteShort4N(v.Position);
+            _stream.WriteShort4N(PackNormal(v.Position, v.Normal));
             _stream.WriteShort2N(v.Texcoord);
-            _stream.WriteUByte4N(v.Tangent);
+            _stream.WriteUByte4N(EncodeTangent(v.Tangent));
         }
 
         public FlatSkinnedVertex ReadFlatSkinnedVertex()
@@ -194,7 +267,7 @@ namespace TagTool.Geometry
             var texcoord = _stream.ReadShort2N();
             var tangent = TransformTangent(_stream.ReadUByte4N());
 
-            var normal = ComputeMs30Normal(position.W);
+            var normal = DecodeNormal(position.W);
             var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
 
             return new FlatSkinnedVertex
@@ -211,9 +284,9 @@ namespace TagTool.Geometry
 
         public void WriteFlatSkinnedVertex(in FlatSkinnedVertex v)
         {
-            _stream.WriteShort4N(v.Position);
+            _stream.WriteShort4N(PackNormal(v.Position, v.Normal));
             _stream.WriteShort2N(v.Texcoord);
-            _stream.WriteUByte4N(v.Tangent);
+            _stream.WriteUByte4N(EncodeTangent(v.Tangent));
             _stream.WriteUByte4(v.BlendIndices);
             _stream.WriteUByte4N(new RealQuaternion(v.BlendWeights));
         }
@@ -525,7 +598,7 @@ namespace TagTool.Geometry
             var texcoord = _stream.ReadShort2N();
             var tangent = TransformTangent(_stream.ReadUByte4N());
 
-            var normal = ComputeMs30Normal(position.W);
+            var normal = DecodeNormal(position.W);
             var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
 
             return new DualQuatVertex
@@ -542,9 +615,9 @@ namespace TagTool.Geometry
 
         public void WriteDualQuatVertex(in DualQuatVertex v)
         {
-            _stream.WriteShort4N(v.Position);
+            _stream.WriteShort4N(PackNormal(v.Position, v.Normal));
             _stream.WriteShort2N(v.Texcoord);
-            _stream.WriteUByte4N(v.Tangent);
+            _stream.WriteUByte4N(EncodeTangent(v.Tangent));
             _stream.WriteUByte4(v.BlendIndices);
             _stream.WriteUByte4N(new RealQuaternion(v.BlendWeights));
         }
@@ -715,7 +788,7 @@ namespace TagTool.Geometry
             var texcoord = _stream.ReadFloat2();
             var tangent = TransformTangent(_stream.ReadUByte4N());
 
-            var normal = ComputeMs30NormalWorld(position.W);
+            var normal = DecodeNormalWorld(position.W);
             var binormal = RealVector3d.CrossProductNoNorm(tangent.IJK, normal);
 
             return new WorldWaterVertex
@@ -730,9 +803,9 @@ namespace TagTool.Geometry
 
         public void WriteWorldWaterVertex(in WorldWaterVertex v)
         {
-            _stream.WriteFloat4(v.Position);
+            _stream.WriteFloat4(PackNormalWorld(v.Position, v.Normal));
             _stream.WriteFloat2(v.Texcoord);
-            _stream.WriteUByte4N(v.Tangent);
+            _stream.WriteUByte4N(EncodeTangent(v.Tangent));
         }
 
         public int GetVertexSize(VertexBufferFormat type)
