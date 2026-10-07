@@ -260,7 +260,7 @@ namespace TagTool.Commands.Shaders
                         }
                         else
                         {
-                            string shaderName = explicitShader.PixelShader.Name.Split('\\')[2];
+                            string shaderName = explicitShader.PixelShader.Name != null ? explicitShader.PixelShader.Name.Split('\\')[2] : $"explicit_{i}";
                             Directory.CreateDirectory(cache.Version.ToString() + "\\explicit\\" + shaderName);
 
                             var pixl = cache.Deserialize<PixelShader>(stream, explicitShader.PixelShader);
@@ -290,7 +290,7 @@ namespace TagTool.Commands.Shaders
                         }
                         else
                         {
-                            string shaderName = explicitShader.VertexShader.Name.Split('\\')[2];
+                            string shaderName = explicitShader.VertexShader.Name != null ? explicitShader.VertexShader.Name.Split('\\')[2] : $"explicit_{i}";
 
                             var vtsh = cache.Deserialize<VertexShader>(stream, explicitShader.VertexShader);
                             foreach (var entry in Enum.GetValues(entryPointEnum))
@@ -339,7 +339,7 @@ namespace TagTool.Commands.Shaders
                             }
                             else
                             {
-                                string shaderName = hudShader.PixelShader.Name.Split('\\')[2];
+                                string shaderName = hudShader.PixelShader.Name != null ? hudShader.PixelShader.Name.Split('\\')[2] : $"chud_{i}";
                                 Directory.CreateDirectory(cache.Version.ToString() + "\\chud\\" + shaderName);
 
                                 var pixl = cache.Deserialize<PixelShader>(stream, hudShader.PixelShader);
@@ -369,7 +369,7 @@ namespace TagTool.Commands.Shaders
                             }
                             else
                             {
-                                string shaderName = hudShader.VertexShader.Name.Split('\\')[2];
+                                string shaderName = hudShader.VertexShader.Name != null ? hudShader.VertexShader.Name.Split('\\')[2] : $"chud_{i}";
 
                                 var vtsh = cache.Deserialize<VertexShader>(stream, hudShader.VertexShader);
                                 foreach (var entry in Enum.GetValues(entryPointEnum))
